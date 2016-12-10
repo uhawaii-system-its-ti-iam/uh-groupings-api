@@ -22,3 +22,22 @@ https://spaces.internet2.edu/display/Grouper/Grouper+Client
 Groupings is a similar tool that uses Grouper as its back end. 
 Groupings is meant to focus more on ease of use and less on 
 extra functions. 
+
+Methods:
+
+	MyGroups
+	GroupsIOwn
+	
+
+	AddGrouping
+	DeleteGrouping
+	
+	AssignOwner
+	GetOwners
+	AssignAttributes
+
+	AddMember
+	DeleteMember
+	GetMembers
+
+	
