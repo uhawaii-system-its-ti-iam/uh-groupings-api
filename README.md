@@ -25,8 +25,8 @@ extra functions.
 
 Methods:
 
-	MyGroups
-	GroupsIOwn
+	MyGroupings
+	GroupingsIOwn
 	
 
 	AddGrouping
