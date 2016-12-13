@@ -1,4 +1,4 @@
-package main.java.APICalls;
+package APICalls;
 
 public class GetGroups{
 

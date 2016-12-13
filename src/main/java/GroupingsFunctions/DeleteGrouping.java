@@ -1,5 +1,5 @@
-package main.java.GroupingsFunctions;
+package GroupingsFunctions;
 
-public class DeleteGroupings{
+public class DeleteGrouping {
 
 }

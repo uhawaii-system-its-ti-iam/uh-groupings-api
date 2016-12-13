@@ -1,4 +1,4 @@
-package main.java.GroupingsFunctions;
+package GroupingsFunctions;
 
 public class AddMember{
 

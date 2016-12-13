@@ -1,5 +1,5 @@
-package main.java.GroupingsFunctions;
+package GroupingsFunctions;
 
-public class GroupsIOwn{
+public class GroupingsIOwn {
 
 }
