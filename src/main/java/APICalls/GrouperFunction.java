@@ -7,10 +7,17 @@ public class GrouperFunction {
     String userName;
     String grouping;
 
-    GrouperFunction(String userName, String grouping){
+    public GrouperFunction(String userName, String grouping){
         this.userName = userName;
         this.grouping = grouping;
     }
 
+    public String getUserName(){
+        return userName;
+    }
+
+    public String getGrouping(){
+        return grouping;
+    }
 
 }

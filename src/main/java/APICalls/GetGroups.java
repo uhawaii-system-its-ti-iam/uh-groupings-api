@@ -1,7 +1,7 @@
 package APICalls;
 
 public class GetGroups extends GrouperFunction{
-    GetGroups(String userName, String grouping){
+    public GetGroups(String userName, String grouping){
         super(userName, grouping);
     }
 

@@ -2,8 +2,8 @@ package APICalls;
 
 public class AssignAttribute extends GrouperFunction{
 
-    AssignAttribute(String userName, String grouping){
-        super(userName, grouping);
+    public AssignAttribute(String userName, String grouping, String password){
+        super(userName, grouping, password);
     }
 
 }

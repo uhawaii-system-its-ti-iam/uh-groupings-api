@@ -8,14 +8,15 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 /**
  * Created by zac on 12/12/16.
  */
-public class AddMember extends GrouperFunction{
+public class AssignMembership extends GrouperFunction{
 
 
-    AddMember(String userName, String grouping) {
+    public AssignMembership(String userName, String grouping) {
         super(userName, grouping);
+        assignMembership();
     }
 
-    private void addTheMember() {
+    private void assignMembership() {
         WsAddMemberResults wsAddMemberResults = new GcAddMember().assignGroupName(grouping + ":include").addSubjectIdentifier(userName).execute();
         System.out.println(wsAddMemberResults.getResults()[0].getWsSubject().getName());
 
@@ -23,4 +24,6 @@ public class AddMember extends GrouperFunction{
         System.out.println(wsDeleteMemberResults.getResults()[0].getWsSubject().getName());
 
     }
+
+    //TODO change date time attribute
 }
