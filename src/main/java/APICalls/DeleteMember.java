@@ -8,21 +8,20 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 /**
  * Created by zac on 12/12/16.
  */
-public class DeleteMember {
-    private String identifier;
+public class DeleteMember extends GrouperFunction{
+    private String userName;
     private String grouping;
 
-    DeleteMember(String identifier, String grouping) {
-        this.identifier = identifier;
-        this.grouping = grouping;
+    DeleteMember(String userName, String grouping) {
+        super(userName, grouping);
         addTheMember();
     }
 
     private void addTheMember() {
-        WsAddMemberResults wsAddMemberResults = new GcAddMember().assignGroupName(grouping + ":exclude").addSubjectIdentifier(identifier).execute();
+        WsAddMemberResults wsAddMemberResults = new GcAddMember().assignGroupName(grouping + ":exclude").addSubjectIdentifier(userName).execute();
         System.out.println(wsAddMemberResults.getResults()[0].getWsSubject().getName());
 
-        WsDeleteMemberResults wsDeleteMemberResults = new GcDeleteMember().assignGroupName(grouping + ":include").addSubjectIdentifier(identifier).execute();
+        WsDeleteMemberResults wsDeleteMemberResults = new GcDeleteMember().assignGroupName(grouping + ":include").addSubjectIdentifier(userName).execute();
         System.out.println(wsDeleteMemberResults.getResults()[0].getWsSubject().getName());
 
     }

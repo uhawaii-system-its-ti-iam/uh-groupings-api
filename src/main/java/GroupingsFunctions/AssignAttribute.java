@@ -1,5 +1,5 @@
 package GroupingsFunctions;
 
-public class AssignAttributes{
+public class AssignAttribute {
 
 }

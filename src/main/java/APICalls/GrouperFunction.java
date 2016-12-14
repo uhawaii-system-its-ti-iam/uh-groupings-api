@@ -11,4 +11,6 @@ public class GrouperFunction {
         this.userName = userName;
         this.grouping = grouping;
     }
+
+
 }
