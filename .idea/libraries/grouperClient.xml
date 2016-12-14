@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="grouperClient">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/GrouperClient/grouperClient.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/GrouperClient/grouperClient.jar!/" />
+    </SOURCES>
+  </library>
+</component>

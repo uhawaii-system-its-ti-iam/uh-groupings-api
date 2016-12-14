@@ -1,5 +1,8 @@
-package main.java.APICalls
+package GroupingsFunctions;
 
-public class AddGroupings{
+public class AddGrouping{
 
+   public AddGrouping(String userName, String grouping, String groupingName){
+        //TODO
+    }
 }

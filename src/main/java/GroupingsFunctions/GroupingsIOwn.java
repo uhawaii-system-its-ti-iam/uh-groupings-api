@@ -1,5 +1,8 @@
-package main.java.GroupingsFunctions;
+package GroupingsFunctions;
 
-public class GroupsIOwn{
+public class GroupingsIOwn {
+    public GroupingsIOwn(String userName, String grouping){
+        //TODO
+    }
 
 }
