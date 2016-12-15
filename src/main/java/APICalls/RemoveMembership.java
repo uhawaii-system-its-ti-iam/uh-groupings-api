@@ -9,8 +9,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
  * Created by zac on 12/12/16.
  */
 public class RemoveMembership extends GrouperFunction{
-    private String userName;
-    private String grouping;
 
     public RemoveMembership(String userName, String grouping) {
         super(userName, grouping);
