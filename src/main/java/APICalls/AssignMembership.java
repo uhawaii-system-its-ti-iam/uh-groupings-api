@@ -10,7 +10,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
  */
 public class AssignMembership extends GrouperFunction{
 
-
     public AssignMembership(String userName, String grouping) {
         super(userName, grouping);
         assignMembership();
