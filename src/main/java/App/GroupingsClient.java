@@ -8,7 +8,7 @@ import GroupingsFunctions.*;
  */
 public class GroupingsClient extends GrouperFunction{
 
-    GroupingsClient(String userName, String grouping){
+    public GroupingsClient(String userName, String grouping){
         super(userName, grouping);
     }
 

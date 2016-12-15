@@ -25,5 +25,5 @@ public class RemoveMembership extends GrouperFunction{
         System.out.println(wsDeleteMemberResults.getResults()[0].getWsSubject().getName());
 
     }
-        //TODO change date time attribute
+      //TODO set last modified attribute
 }

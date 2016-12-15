@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0b7d2431-d253-4ae2-be2d-3eb50d40d225" name="Default" comment="">
 <<<<<<< HEAD
+<<<<<<< HEAD
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GrouperClient/grouperClientFailoverState.bin" afterPath="$PROJECT_DIR$/GrouperClient/grouperClientFailoverState.bin" />
 =======
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AssignOwnership.java" />
@@ -17,17 +18,10 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GrouperClient/grouperClientFailoverState.bin" afterPath="$PROJECT_DIR$/GrouperClient/grouperClientFailoverState.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddGrouping.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddGrouping.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java" />
+=======
+>>>>>>> test
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/APICalls/AssignAttribute.java" afterPath="$PROJECT_DIR$/src/main/java/APICalls/AssignAttribute.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteGrouping.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteGrouping.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/APICalls/GetGroups.java" afterPath="$PROJECT_DIR$/src/main/java/APICalls/GetGroups.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GetMembers.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GetMembers.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GetOwners.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GetOwners.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java" afterPath="$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/App/GroupingsClient.java" afterPath="$PROJECT_DIR$/src/main/java/App/GroupingsClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GroupingsIOwn.java" afterPath="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GroupingsIOwn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/MainTest/Main.java" afterPath="$PROJECT_DIR$/src/test/MainTest/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/UHGroupingsAPI.iml" afterPath="$PROJECT_DIR$/.idea/UHGroupingsAPI.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
 >>>>>>> test
     </list>
@@ -63,11 +57,18 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="9" column="59" selection-start-line="9" selection-start-column="59" selection-end-line="9" selection-end-column="59" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RemoveMembership.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/RemoveMembership.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
               <folding>
-                <element signature="e#300#301#0" expanded="true" />
-                <element signature="e#331#332#0" expanded="true" />
-                <element signature="e#365#366#0" expanded="true" />
-                <element signature="e#396#397#0" expanded="true" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -77,38 +78,12 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/App/GroupingsClient.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="31" column="95" selection-start-line="31" selection-start-column="95" selection-end-line="31" selection-end-column="95" />
+              <caret line="10" column="11" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1110#1111#0" expanded="true" />
-                <element signature="e#1194#1195#0" expanded="true" />
-                <element signature="e#1224#1225#0" expanded="true" />
-                <element signature="e#1305#1306#0" expanded="true" />
-                <element signature="e#1339#1340#0" expanded="true" />
-                <element signature="e#1432#1433#0" expanded="true" />
-                <element signature="e#1466#1467#0" expanded="true" />
-                <element signature="e#1559#1560#0" expanded="true" />
+                <element signature="e#231#232#0" expanded="true" />
+                <element signature="e#272#273#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DeleteMember.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GetMemberships.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GetMemberships.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -116,8 +91,8 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/test/MainTest/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.29508197">
-              <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+            <state vertical-scroll-proportion="0.19258203">
+              <caret line="9" column="47" selection-start-line="9" selection-start-column="47" selection-end-line="9" selection-end-column="47" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -125,6 +100,7 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file leaf-file-name="AddMember.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -136,6 +112,8 @@
           </provider>
         </entry>
       </file>
+=======
+>>>>>>> test
     </leaf>
 <<<<<<< HEAD
 =======
@@ -170,11 +148,7 @@
         <option value="$PROJECT_DIR$/src/main/java/APICalls/AssignPermissions.java" />
         <option value="$PROJECT_DIR$/src/main/java/APICalls/AddMember.java" />
         <option value="$PROJECT_DIR$/src/main/java/APICalls/DeleteMember.java" />
-        <option value="$PROJECT_DIR$/src/main/java/APICalls/GetGroups.java" />
         <option value="$PROJECT_DIR$/src/main/java/APICalls/GetMembers.java" />
-        <option value="$PROJECT_DIR$/src/main/java/APICalls/AssignMembership.java" />
-        <option value="$PROJECT_DIR$/src/main/java/APICalls/AssignAttribute.java" />
-        <option value="$PROJECT_DIR$/src/main/java/APICalls/RemoveMembership.java" />
         <option value="$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java" />
         <option value="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddGrouping.java" />
         <option value="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AssignOwnership.java" />
@@ -186,8 +160,13 @@
         <option value="$PROJECT_DIR$/src/main/java/GroupingsFunctions/GroupingsImIn.java" />
         <option value="$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java" />
         <option value="$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java" />
-        <option value="$PROJECT_DIR$/src/main/java/App/GroupingsClient.java" />
         <option value="$PROJECT_DIR$/src/test/MainTest/Main.java" />
+        <option value="$PROJECT_DIR$/src/main/java/App/GroupingsClient.java" />
+        <option value="$PROJECT_DIR$/src/main/java/APICalls/AssignMembership.java" />
+        <option value="$PROJECT_DIR$/src/main/java/APICalls/GetGroups.java" />
+        <option value="$PROJECT_DIR$/src/main/java/APICalls/GetMemberships.java" />
+        <option value="$PROJECT_DIR$/src/main/java/APICalls/RemoveMembership.java" />
+        <option value="$PROJECT_DIR$/src/main/java/APICalls/AssignAttribute.java" />
       </list>
     </option>
   </component>
@@ -228,10 +207,13 @@
     </navigator>
     <panes>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <pane id="Scratches" />
 =======
       <pane id="Scope" />
       <pane id="PackagesPane" />
+>>>>>>> test
+=======
 >>>>>>> test
       <pane id="ProjectPane">
         <subPane>
@@ -294,36 +276,6 @@
               <option name="myItemId" value="java" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GroupingsFunctions" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="UHGroupingsAPI" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="UHGroupingsAPI" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="App" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -354,26 +306,37 @@
         </subPane>
       </pane>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <pane id="PackagesPane" />
       <pane id="Scope" />
 =======
       <pane id="Scratches" />
+>>>>>>> test
+=======
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="Scope" />
 >>>>>>> test
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="aspect.path.notification.shown" value="true" />
 <<<<<<< HEAD
+<<<<<<< HEAD
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
 =======
     <property name="last_opened_file_path" value="$PROJECT_DIR$/GrouperClient/grouperClient.jar!/" />
 >>>>>>> test
+=======
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+>>>>>>> test
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.1108453" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="FullScreen" value="false" />
     <property name="recentsLimit" value="5" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RunManager" selected="Application.Main">
     <configuration default="false" name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
@@ -686,12 +649,19 @@
       <workItem from="1481591348718" duration="22000" />
 =======
       <workItem from="1481591515351" duration="3141000" />
+<<<<<<< HEAD
       <workItem from="1481750325269" duration="5526000" />
+>>>>>>> test
+=======
+      <workItem from="1481750325269" duration="6038000" />
+      <workItem from="1481826660004" duration="1402000" />
+      <workItem from="1481829304579" duration="954000" />
 >>>>>>> test
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
 <<<<<<< HEAD
     <option name="totallyTimeSpent" value="4342000" />
   </component>
@@ -711,6 +681,17 @@
 =======
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32948583" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
 >>>>>>> test
+=======
+    <option name="totallyTimeSpent" value="15855000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-1" y="0" width="1682" height="1050" extended-state="6" />
+    <editor active="false" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32890856" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+>>>>>>> test
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -728,12 +709,11 @@
 =======
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2339979" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948583" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -747,8 +727,12 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+<<<<<<< HEAD
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+=======
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948583" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+>>>>>>> test
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -776,13 +760,90 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="59" selection-start-line="9" selection-start-column="59" selection-end-line="9" selection-end-column="59" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/RemoveMembership.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#300#301#0" expanded="true" />
-            <element signature="e#331#332#0" expanded="true" />
-            <element signature="e#365#366#0" expanded="true" />
-            <element signature="e#396#397#0" expanded="true" />
+            <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/App/GroupingsClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="10" column="11" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#231#232#0" expanded="true" />
+            <element signature="e#272#273#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="59" selection-start-line="9" selection-start-column="59" selection-end-line="9" selection-end-column="59" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/App/GroupingsClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="31" column="95" selection-start-line="31" selection-start-column="95" selection-end-line="31" selection-end-column="95" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#231#232#0" expanded="true" />
+            <element signature="e#272#273#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GetMemberships.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/MainTest/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -812,7 +873,6 @@
         <state split_layout="FIRST">
           <first_editor vertical-scroll-proportion="0.0">
             <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding />
           </first_editor>
           <second_editor />
         </state>
@@ -826,6 +886,7 @@
           <caret line="0" column="13" selection-start-line="0" selection-start-column="13" selection-end-line="0" selection-end-column="13" />
 =======
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+<<<<<<< HEAD
           <folding />
 >>>>>>> test
         </state>
@@ -877,6 +938,8 @@
             <element signature="e#162#163#0" expanded="true" />
           </folding>
 >>>>>>> test
+=======
+>>>>>>> test
         </state>
       </provider>
     </entry>
@@ -908,7 +971,6 @@
 =======
         <state vertical-scroll-proportion="0.11363637">
           <caret line="7" column="1" selection-start-line="7" selection-start-column="1" selection-end-line="7" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -916,7 +978,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.048701297">
           <caret line="3" column="76" selection-start-line="3" selection-start-column="76" selection-end-line="3" selection-end-column="76" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -924,7 +985,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.064935066">
           <caret line="4" column="8" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
 >>>>>>> test
@@ -937,6 +997,7 @@
 =======
         <state vertical-scroll-proportion="0.097402595">
           <caret line="6" column="80" selection-start-line="6" selection-start-column="80" selection-end-line="6" selection-end-column="80" />
+<<<<<<< HEAD
           <folding />
 >>>>>>> test
         </state>
@@ -957,6 +1018,8 @@
             <element signature="e#396#397#0" expanded="true" />
           </folding>
 >>>>>>> test
+=======
+>>>>>>> test
         </state>
       </provider>
     </entry>
@@ -967,7 +1030,10 @@
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
 =======
           <caret line="3" column="54" selection-start-line="3" selection-start-column="54" selection-end-line="3" selection-end-column="54" />
+<<<<<<< HEAD
           <folding />
+>>>>>>> test
+=======
 >>>>>>> test
         </state>
       </provider>
@@ -980,7 +1046,10 @@
 =======
         <state vertical-scroll-proportion="0.064935066">
           <caret line="4" column="53" selection-start-line="4" selection-start-column="53" selection-end-line="4" selection-end-column="53" />
+<<<<<<< HEAD
           <folding />
+>>>>>>> test
+=======
 >>>>>>> test
         </state>
       </provider>
@@ -992,7 +1061,10 @@
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
 =======
           <caret line="3" column="57" selection-start-line="3" selection-start-column="57" selection-end-line="3" selection-end-column="57" />
+<<<<<<< HEAD
           <folding />
+>>>>>>> test
+=======
 >>>>>>> test
         </state>
       </provider>
@@ -1004,14 +1076,13 @@
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
 =======
           <caret line="3" column="57" selection-start-line="3" selection-start-column="57" selection-end-line="3" selection-end-column="57" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GetMemberships.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.11363637">
+          <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
           <folding />
 >>>>>>> test
         </state>
@@ -1020,6 +1091,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/AddMember.java">
       <provider selected="true" editor-type-id="text-editor">
 <<<<<<< HEAD
+<<<<<<< HEAD
         <state vertical-scroll-proportion="0.048701297">
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
 =======
@@ -1027,19 +1099,42 @@
           <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
           <folding />
 >>>>>>> test
+=======
+        <state vertical-scroll-proportion="0.11363637">
+          <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
+>>>>>>> test
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/GroupingsFunctions/DeleteMember.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/AssignMembership.java">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
 <<<<<<< HEAD
         <state vertical-scroll-proportion="0.064935066">
           <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
 =======
         <state vertical-scroll-proportion="0.0">
           <caret line="7" column="77" selection-start-line="7" selection-start-column="77" selection-end-line="7" selection-end-column="77" />
+=======
+        <state vertical-scroll-proportion="0.38961038">
+          <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="4" />
+>>>>>>> test
           <folding />
 >>>>>>> test
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GetGroups.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.097402595">
+          <caret line="6" column="33" selection-start-line="6" selection-start-column="33" selection-end-line="6" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GetMemberships.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.064935066">
+          <caret line="6" column="33" selection-start-line="6" selection-start-column="33" selection-end-line="6" selection-end-column="33" />
         </state>
       </provider>
     </entry>
@@ -1050,17 +1145,40 @@
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
 =======
         <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="95" selection-start-line="31" selection-start-column="95" selection-end-line="31" selection-end-column="95" />
+          <caret line="10" column="11" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1110#1111#0" expanded="true" />
-            <element signature="e#1194#1195#0" expanded="true" />
-            <element signature="e#1224#1225#0" expanded="true" />
-            <element signature="e#1305#1306#0" expanded="true" />
-            <element signature="e#1339#1340#0" expanded="true" />
-            <element signature="e#1432#1433#0" expanded="true" />
-            <element signature="e#1466#1467#0" expanded="true" />
-            <element signature="e#1559#1560#0" expanded="true" />
+            <element signature="e#231#232#0" expanded="true" />
+            <element signature="e#272#273#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/RemoveMembership.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/GrouperFunction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="59" selection-start-line="9" selection-start-column="59" selection-end-line="9" selection-end-column="59" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/APICalls/AssignAttribute.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.17605634">
+          <caret line="5" column="32" selection-start-line="5" selection-start-column="32" selection-end-line="5" selection-end-column="32" />
+          <folding>
+            <element signature="e#151#152#0" expanded="true" />
+            <element signature="e#192#193#0" expanded="true" />
           </folding>
 >>>>>>> test
         </state>
@@ -1068,6 +1186,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/MainTest/Main.java">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
 <<<<<<< HEAD
         <state vertical-scroll-proportion="0.048701297">
           <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
@@ -1082,6 +1201,10 @@
 =======
         <state vertical-scroll-proportion="0.29508197">
           <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+=======
+        <state vertical-scroll-proportion="0.19258203">
+          <caret line="9" column="47" selection-start-line="9" selection-start-column="47" selection-end-line="9" selection-end-column="47" />
+>>>>>>> test
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
