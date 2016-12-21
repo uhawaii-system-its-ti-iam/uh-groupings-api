@@ -10,6 +10,8 @@ public class Main{
         GroupingsClient groupingsClient = new GroupingsClient("_api_groupings", "hawaii.edu:custom:test:zknoebel:zknoebel-test");
 //        groupingsClient.deleteMember("zknoebel");
 //        groupingsClient.addMember("zknoebel");
-            groupingsClient.groupingsImIn();
+//            groupingsClient.groupingsImIn();
+//        groupingsClient.getMembers();
+        groupingsClient.getOwners();
     }
 }
