@@ -8,10 +8,10 @@ public class Main{
     public static void main(String[] args){
 
         GroupingsClient groupingsClient = new GroupingsClient("_api_groupings", "hawaii.edu:custom:test:zknoebel:zknoebel-test");
-//        groupingsClient.deleteMember("zknoebel");
-//        groupingsClient.addMember("zknoebel");
-//            groupingsClient.groupingsImIn();
+        groupingsClient.deleteMember("zknoebel");
+        groupingsClient.addMember("zknoebel");
+//        groupingsClient.groupingsImIn();
 //        groupingsClient.getMembers();
-        groupingsClient.getOwners();
+//        groupingsClient.getOwners();
     }
 }
