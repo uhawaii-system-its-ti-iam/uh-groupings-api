@@ -1,5 +1,6 @@
 /GrouperClient/grouper.client.properties
-/.idea/workspace.xml
+/.idea
 /GrouperClient/grouperClientFailoverState.bin
 /grouperClientFailoverState.bin
 /out
+/target
