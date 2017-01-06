@@ -10,7 +10,7 @@ public class GetGroupsController {
 
 
 
-    @RequestMapping("/groups")
+    @RequestMapping("/group")
     public edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults wsGetGroupsResults(){
 
         return new GcGetGroups().addSubjectIdentifier("zknoebel").execute();

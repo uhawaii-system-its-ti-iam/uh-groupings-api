@@ -57,5 +57,6 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm:5.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
     <orderEntry type="library" name="grouperClient" level="project" />
+    <orderEntry type="library" name="grouperClient" level="project" />
   </component>
 </module>
