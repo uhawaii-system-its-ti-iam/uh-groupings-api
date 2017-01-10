@@ -58,5 +58,6 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
     <orderEntry type="library" name="grouperClient" level="project" />
     <orderEntry type="library" name="grouperClient" level="project" />
+    <orderEntry type="library" name="grouperClient" level="project" />
   </component>
 </module>

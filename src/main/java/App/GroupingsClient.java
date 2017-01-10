@@ -2,53 +2,59 @@ package App;
 
 import APICalls.GrouperFunction;
 import GroupingsFunctions.*;
+import edu.internet2.middleware.grouperClient.ws.beans.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by zac on 12/12/16.
  */
-public class GroupingsClient extends GrouperFunction{
+
+@RestController
+public class GroupingsClient{
 
     public GroupingsClient(String userName, String grouping){
-        super(userName, grouping);
     }
 
-    public void addGrouping(String newGrouping){
-        AddGrouping addGrouping = new AddGrouping(getUserName(), getGrouping(), newGrouping);
+    @RequestMapping("/addGrouping")
+    public WsGroupSaveResults addGrouping(String newGrouping){
     }
 
-    public void addMember(String userToAdd){
-        AddMember addMember = new AddMember(getUserName(), getGrouping(), userToAdd);
+    @RequestMapping("/addMember")
+    public WsAddMemberResults addMember(String userToAdd){
     }
 
-    public void assignOwnership(String newOwner){
-        AssignOwnership assignOwnership = new AssignOwnership(getUserName(), getGrouping(), newOwner);
+    @RequestMapping("/assignOwnership")
+    public WsAssignGrouperPrivilegesResults assignOwnership(String newOwner){
     }
 
-    public void deleteGrouping(){
-
+    @RequestMapping("/deleteGrouping")
+    public WsGroupDeleteResults deleteGrouping(){
     }
 
-    public void deleteMember(String userToDelete){
-        DeleteMember deleteMember = new DeleteMember(getUserName(), getGrouping(), userToDelete);
+    @RequestMapping("/deleteMember")
+    public WsDeleteMemberResults deleteMember(String userToDelete){
     }
 
-    public void removeOwnership(String userToRemove){
-        RemoveOwnership removeOwnership = new RemoveOwnership(getUserName(), getGrouping(), userToRemove);
+    @RequestMapping("/removeOwnership")
+    public WsAssignGrouperPrivilegesResults removeOwnership(String userToRemove){
     }
 
-    public void getMembers(){
-        GetMembers getMembers = new GetMembers(getUserName(), getGrouping());
+    @RequestMapping("/getMembers")
+    public WsGetMembersResults getMembers(){
     }
 
-    public void getOwners(){
-        GetOwners getOwners = new GetOwners(getUserName(), getGrouping());
+    @RequestMapping("/getOwners")
+    public WsGetPermissionAssignmentsResults getOwners(){
+        //have to check if this is the right Type to return
     }
 
-    public void groupingsImIn(){
-        GroupingsImIn groupingsImIn = new GroupingsImIn(getUserName(), getGrouping());
+    @RequestMapping("/groupingsImIn")
+    public WsGetGroupsResults groupingsImIn(){
     }
 
-    public void groupingsIOwn(){
-        GroupingsIOwn groupingsIOwn = new GroupingsIOwn(getUserName(), getGrouping());
+    @RequestMapping("/groupingsIOwn")
+    public WsGetPermissionAssignmentsResults groupingsIOwn(){
+        //have to check if this is the right Type to return
     }
 }
