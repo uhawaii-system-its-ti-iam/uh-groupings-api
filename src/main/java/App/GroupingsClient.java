@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GroupingsClient{
 
-    public GroupingsClient(String userName, String grouping){
+    public GroupingsClient(){
     }
 
     /**
@@ -23,7 +23,7 @@ public class GroupingsClient{
      *
      * @param grouping: String containing the path of the parent Grouping
      * @param newGrouping: String containing the name of the Grouping to be created
-     * @return
+     * @return information about the new Grouping and its success
      */
     @RequestMapping("/addGrouping")
     public WsGroupSaveResults addGrouping(@RequestParam String grouping, @RequestParam String newGrouping){
@@ -36,8 +36,8 @@ public class GroupingsClient{
     /**
      * adds a member to a Grouping that the user owns
      * @param grouping: String containing the path of the Grouping
-     * @param userToAdd
-     * @return
+     * @param userToAdd: username of the member to be added
+     * @return information about the new member and its success
      */
     @RequestMapping("/addMember")
     public WsAddMemberResults addMember(@RequestParam String grouping, @RequestParam String userToAdd){
@@ -48,17 +48,25 @@ public class GroupingsClient{
     /**
      * gives the user read, update and view privileges for the Grouping
      * @param newOwner: String containing the username of the new owner
-     * @return
+     * @return information about the new owner and its success
      */
     @RequestMapping("/assignOwnership")
-    public WsAssignGrouperPrivilegesResults assignOwnership(String newOwner){
-        //TODO
-        return null;
+    public WsAssignGrouperPrivilegesResults assignOwnership(@RequestParam String grouping,
+                                                            @RequestParam String newOwner){
+        WsGroupLookup wsGroupLookup = new WsGroupLookup();
+        wsGroupLookup.setGroupName(grouping);
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        wsSubjectLookup.setSubjectIdentifier(newOwner);
+
+        return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("view").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(true).execute();
+        //TODO check if WsSubjectLookup needs more than a Subject parameter to work
+        //TODO check if WsGroupLookup needs more than a Group parameter to work
     }
 
     /**
      * removes a Grouping
-     * @return
+     * @return information about the deleted Grouping and its success
      */
     @RequestMapping("/deleteGrouping")
     public WsGroupDeleteResults deleteGrouping(){
@@ -70,7 +78,7 @@ public class GroupingsClient{
      * removes a member from a Grouping that the user is an owner of
      * @param grouping: String containing the path of the Grouping
      * @param userToDelete: String containing the username of the user to be removed from the Grouping
-     * @return
+     * @return information about the deleted member and its success
      */
     @RequestMapping("/deleteMember")
     public WsDeleteMemberResults deleteMember(@RequestParam String grouping, @RequestParam String userToDelete){
@@ -80,19 +88,27 @@ public class GroupingsClient{
 
     /**
      * removes ownership privileges from the user specified
-     * @param userToRemove: String containing the name of the user who's privileges will be removed
-     * @return
+     * @param ownerToRemove: String containing the name of the user who's privileges will be removed
+     * @return information about the member who's ownership privileges have been removed and its success
      */
     @RequestMapping("/removeOwnership")
-    public WsAssignGrouperPrivilegesResults removeOwnership(String userToRemove){
-        //TODO
-        return null;
+    public WsAssignGrouperPrivilegesResults removeOwnership(@RequestParam String grouping,
+                                                            @RequestParam String ownerToRemove){
+        WsGroupLookup wsGroupLookup = new WsGroupLookup();
+        wsGroupLookup.setGroupName(grouping);
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        wsSubjectLookup.setSubjectIdentifier(ownerToRemove);
+
+        return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("admin").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(false).execute();
+        //TODO check if WsSubjectLookup needs more than a Subject parameter to work
+        //TODO check if WsGroupLookup needs more than a Group parameter to work
     }
 
     /**
      * finds all the members of a group
      * @param grouping: String containing the path of the Grouping to be searched
-     * @return
+     * @return information for all of the members
      */
     @RequestMapping("/getMembers")
     public WsGetMembersResults getMembers(@RequestParam String grouping){
@@ -101,7 +117,7 @@ public class GroupingsClient{
 
     /**
      * finds all of the owners of a group
-     * @return
+     * @return information for all of the owners
      */
     @RequestMapping("/getOwners")
     public WsGetPermissionAssignmentsResults getOwners(){
@@ -113,7 +129,7 @@ public class GroupingsClient{
     /**
      * finds the different Groupings that the user is in and allowed to view
      * @param username: String containing the username to be searched for
-     * @return
+     * @return information about all of the Groupings the user is in
      */
     @RequestMapping("/groupingsImIn")
     public WsGetGroupsResults groupingsImIn(@RequestParam String username){
@@ -122,10 +138,11 @@ public class GroupingsClient{
 
     /**
      * finds the different Groupings that the user has owner privileges for
-     * @return
+     * @return information about all of the Groupings that the user owns
      */
     @RequestMapping("/groupingsIOwn")
-    public WsGetPermissionAssignmentsResults groupingsIOwn(){
+    public WsFindGroupsResults groupingsIOwn(){
+        //return new GcFindGroups().
         //Todo
         //have to check if this is the right Type to return
         return null;
