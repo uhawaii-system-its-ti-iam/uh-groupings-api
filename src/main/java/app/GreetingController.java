@@ -1,4 +1,4 @@
-package App;
+package app;
 
 import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;

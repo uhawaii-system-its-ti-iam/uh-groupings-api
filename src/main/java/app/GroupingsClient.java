@@ -1,4 +1,4 @@
-package App;
+package app;
 
 import edu.internet2.middleware.grouperClient.api.*;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
@@ -27,6 +27,7 @@ public class GroupingsClient {
      */
     @RequestMapping("/addGrouping")
     public WsGroupSaveResults addGrouping(@RequestParam String grouping, @RequestParam String newGrouping) {
+        //return new GcGroupSave().addGroupToSave(grouping + newGrouping).execute();
         //TODO
         //currently this method is not to be implemented because responsibility to create a new
         //grouping is still going to go through the UH Grouper staff
@@ -75,9 +76,11 @@ public class GroupingsClient {
      * @return information about the deleted Grouping and its success
      */
     @RequestMapping("/deleteGrouping")
-    public WsGroupDeleteResults deleteGrouping() {
-        //TODO
-        return null;
+    public WsGroupDeleteResults deleteGrouping(@RequestParam String grouping) {
+//        WsGroupLookup wsGroupLookup = new WsGroupLookup();
+//        wsGroupLookup.setGroupName(grouping);
+//        new GcGroupDelete().addGroupLookup(wsGroupLookup).execute();
+        //TODO check if WsGroupLookup needs more than a Group parameter to work
     }
 
     /**
