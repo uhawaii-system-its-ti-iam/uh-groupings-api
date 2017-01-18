@@ -60,14 +60,12 @@ public class GroupingsClient {
     public WsAssignGrouperPrivilegesResults assignOwnership(@RequestParam String grouping,
                                                             @RequestParam String newOwner) {
         WsGroupLookup wsGroupLookup = new WsGroupLookup();
-        wsGroupLookup.setGroupName(grouping);
+        wsGroupLookup.setGroupName(grouping + ":include");
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
         wsSubjectLookup.setSubjectIdentifier(newOwner);
 
         return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
                 .addPrivilegeName("view").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(true).execute();
-        //TODO check if WsSubjectLookup needs more than a Subject parameter to work
-        //TODO check if WsGroupLookup needs more than a Group parameter to work
     }
 
     /**
@@ -81,6 +79,7 @@ public class GroupingsClient {
 //        wsGroupLookup.setGroupName(grouping);
 //        new GcGroupDelete().addGroupLookup(wsGroupLookup).execute();
         //TODO check if WsGroupLookup needs more than a Group parameter to work
+        return null;
     }
 
     /**
@@ -109,14 +108,12 @@ public class GroupingsClient {
     public WsAssignGrouperPrivilegesResults removeOwnership(@RequestParam String grouping,
                                                             @RequestParam String ownerToRemove) {
         WsGroupLookup wsGroupLookup = new WsGroupLookup();
-        wsGroupLookup.setGroupName(grouping);
+        wsGroupLookup.setGroupName(grouping + ":include");
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
         wsSubjectLookup.setSubjectIdentifier(ownerToRemove);
 
         return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
                 .addPrivilegeName("admin").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(false).execute();
-        //TODO check if WsSubjectLookup needs more than a Subject parameter to work
-        //TODO check if WsGroupLookup needs more than a Group parameter to work
     }
 
     /**
