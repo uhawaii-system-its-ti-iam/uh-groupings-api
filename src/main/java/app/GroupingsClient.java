@@ -27,10 +27,11 @@ public class GroupingsClient {
      */
     @RequestMapping("/addGrouping")
     public WsGroupSaveResults addGrouping(@RequestParam String grouping, @RequestParam String newGrouping) {
-        //return new GcGroupSave().addGroupToSave(grouping + newGrouping).execute();
+        //return new GcGroupSave().addGroupToSave(grouping + ":" + newGrouping).execute();
         //TODO
         //currently this method is not to be implemented because responsibility to create a new
-        //grouping is still going to go through the UH Grouper staff
+        //grouping is still going to go through the UH Grouper staff, so the individual should be sent to this address
+        //https://www.hawaii.edu/bwiki/display/UHIAM/UH+Groupings+Request+Form
         return null;
     }
 
@@ -64,8 +65,22 @@ public class GroupingsClient {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
         wsSubjectLookup.setSubjectIdentifier(newOwner);
 
+        WsGroupLookup wsGroupLookup1 = new WsGroupLookup();
+        wsGroupLookup1.setGroupName(grouping + ":basis+include");
+
+        WsGroupLookup wsGroupLookup2 = new WsGroupLookup();
+        wsGroupLookup2.setGroupName(grouping + ":exclude");
+
+        new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup1).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("view").addPrivilegeName("read").assignAllowed(true).execute();
+
+        new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup2).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("view").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(true).execute();
+
         return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
                 .addPrivilegeName("view").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(true).execute();
+
+        //TODO figure out how to return all three as a batch
     }
 
     /**
@@ -78,7 +93,8 @@ public class GroupingsClient {
 //        WsGroupLookup wsGroupLookup = new WsGroupLookup();
 //        wsGroupLookup.setGroupName(grouping);
 //        new GcGroupDelete().addGroupLookup(wsGroupLookup).execute();
-        //TODO check if WsGroupLookup needs more than a Group parameter to work
+        //not currently implemented
+        //instead email its-iam-help@hawaii.edu for help
         return null;
     }
 
@@ -112,8 +128,23 @@ public class GroupingsClient {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
         wsSubjectLookup.setSubjectIdentifier(ownerToRemove);
 
+        WsGroupLookup wsGroupLookup1 = new WsGroupLookup();
+        wsGroupLookup1.setGroupName(grouping + ":basis+include");
+
+        WsGroupLookup wsGroupLookup2 = new WsGroupLookup();
+        wsGroupLookup2.setGroupName(grouping + ":exclude");
+
+
+        new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup1).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("admin").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(false).execute();
+
+        new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup2).addSubjectLookup(wsSubjectLookup)
+                .addPrivilegeName("admin").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(false).execute();
+
         return new GcAssignGrouperPrivileges().assignGroupLookup(wsGroupLookup).addSubjectLookup(wsSubjectLookup)
                 .addPrivilegeName("admin").addPrivilegeName("update").addPrivilegeName("read").assignAllowed(false).execute();
+
+        //TODO figure out how to return all three as a batch
     }
 
     /**
@@ -124,7 +155,7 @@ public class GroupingsClient {
      */
     @RequestMapping("/getMembers")
     public WsGetMembersResults getMembers(@RequestParam String grouping) {
-        return new GcGetMembers().addGroupName(grouping + ":include").execute();
+        return new GcGetMembers().addGroupName(grouping + ":basis+include").assignIncludeSubjectDetail(true).execute();
     }
 
     /**
