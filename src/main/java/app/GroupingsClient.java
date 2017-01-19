@@ -118,6 +118,7 @@ public class GroupingsClient {
      * removes ownership privileges from the user specified
      *
      * @param ownerToRemove: String containing the name of the user who's privileges will be removed
+     * @param grouping: String containing the path of the Grouping
      * @return information about the member who's ownership privileges have been removed and its success
      */
     @RequestMapping("/removeOwnership")
@@ -164,10 +165,9 @@ public class GroupingsClient {
      * @return information for all of the owners
      */
     @RequestMapping("/getOwners")
-    public WsGetPermissionAssignmentsResults getOwners() {
+    public WsGetGrouperPrivilegesLiteResult getOwners(@RequestParam String grouping) {
+        return new GcGetGrouperPrivilegesLite().assignGroupName(grouping + ":include").assignPrivilegeName("update").execute();
         //TODO
-        //have to check if this is the right Type to return
-        return null;
     }
 
     /**
@@ -186,11 +186,14 @@ public class GroupingsClient {
      *
      * @return information about all of the Groupings that the user owns
      */
-    @RequestMapping("/groupingsOwned")
-    public WsFindGroupsResults groupingsOwned() {
-        //return new GcFindGroups().
-        //Todo
-        //have to check if this is the right Type to return
-        return null;
-    }
+//    @RequestMapping("/groupingsOwned")
+//    public WsFindGroupsResults groupingsOwned(@RequestParam String username) {
+//
+//       new GcGetGrouperPrivilegesLite().assignPrivilegeName("update").assignStemName("hawaii.edu").assignSubjectLookup()
+//        WsQueryFilter wsQueryFilter = new WsQueryFilter();
+//        wsQueryFilter.setStemName("hawaii.edu");
+//        return new GcFindGroups().assignQueryFilter(wsQueryFilter).execute();
+//
+////        Todo
+//    }
 }
