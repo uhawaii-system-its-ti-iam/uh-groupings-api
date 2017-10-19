@@ -1,7 +1,5 @@
-*/grouper.client.properties
-src/main/resources/grouper.client.properties
-/.idea
-/GrouperClient/grouperClientFailoverState.bin
-/grouperClientFailoverState.bin
-/out
-/target
+.idea
+target
+grouperClientFailoverState.bin
+*.iml
+
