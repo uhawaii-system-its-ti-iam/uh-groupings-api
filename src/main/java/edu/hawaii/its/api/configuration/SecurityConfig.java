@@ -123,13 +123,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         SimpleUrlAuthenticationFailureHandler authenticationFailureHandler =
                 new SimpleUrlAuthenticationFailureHandler();
-        authenticationFailureHandler.setDefaultFailureUrl("/home");
+        authenticationFailureHandler.setDefaultFailureUrl("/");
         filter.setAuthenticationFailureHandler(authenticationFailureHandler);
 
         SavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler =
                 new SavedRequestAwareAuthenticationSuccessHandler();
         authenticationSuccessHandler.setAlwaysUseDefaultTargetUrl(false);
-        authenticationSuccessHandler.setDefaultTargetUrl("/home");
+        authenticationSuccessHandler.setDefaultTargetUrl("/");
         filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 
         ServiceAuthenticationDetailsSource authenticationDetailsSource =
@@ -151,18 +151,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/api/**").hasRole("UH")
-                .antMatchers("/fonts/**").permitAll()
-                .antMatchers("/javascript/**").permitAll()
-                .antMatchers("/home").permitAll()
-                .antMatchers("/faq").permitAll()
-                .antMatchers("/campus").hasRole("UH")
-                .antMatchers("/campuses").hasRole("UH")
                 .antMatchers("/denied").permitAll()
-                .antMatchers("/404").permitAll()
                 .antMatchers("/login").hasRole("UH")
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/groupings/**").hasAnyRole("ADMIN", "OWNER")
-                .antMatchers("/memberships/**").hasRole("UH")
+                .antMatchers("/404").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .csrf()

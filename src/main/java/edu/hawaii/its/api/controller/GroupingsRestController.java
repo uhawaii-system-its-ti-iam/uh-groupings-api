@@ -23,7 +23,6 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/groupings")
 public class GroupingsRestController {
 
     private static final Log logger = LogFactory.getLog(GroupingsRestController.class);

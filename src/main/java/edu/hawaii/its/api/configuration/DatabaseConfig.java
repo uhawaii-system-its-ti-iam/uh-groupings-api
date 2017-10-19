@@ -73,9 +73,9 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
-        em.setPersistenceUnitName("holidayPersistenceUnit");
+        em.setPersistenceUnitName("myiamPersistenceUnit");
         em.setPersistenceProviderClass(HibernatePersistenceProvider.class);
-        em.setPackagesToScan("edu.hawaii.its.holiday.type", "edu.hawaii.its.groupings.type", "edu.hawaii.its.api.type");
+        em.setPackagesToScan("edu.hawaii.its.api.type");
 
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaProperties(jpaProperties());
