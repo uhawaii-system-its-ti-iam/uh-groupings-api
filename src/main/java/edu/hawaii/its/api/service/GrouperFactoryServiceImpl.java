@@ -4,11 +4,13 @@ import edu.internet2.middleware.grouperClient.api.*;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service("GrouperFactoryService")
+@Profile(value = {"localhost", "test", "integrationTest"})
 public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public GrouperFactoryServiceImpl() {
         //empty
