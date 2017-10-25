@@ -256,17 +256,20 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, List<String> newMembers) {
-        //TODO
-//        GcAddMember addMember = new GcAddMember();
-//        addMember.assignActAsSubject(lookup);
-//        addMember.assignGroupName(group);
-//
-//        for (String name : newMembers) {
-//            addMember.addSubjectIdentifier(name);
-//        }
-//
-//        return addMember.execute();
-        throw new NotImplementedException();
+        WsAddMemberResults wsAddMemberResults = new WsAddMemberResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        for(String username : newMembers) {
+           WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
+            if (wsResultMetaData.getResultCode().equals(FAILURE)) {
+                wsResultMeta = wsResultMetaData;
+            }
+        }
+
+        wsAddMemberResults.setResultMetadata(wsResultMeta);
+
+        return wsAddMemberResults;
     }
 
     @Override
