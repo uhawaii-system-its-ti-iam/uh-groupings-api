@@ -221,32 +221,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, String newMember) {
-        //TODO
         WsAddMemberResults wsAddMemberResults = new WsAddMemberResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
 
 
         Grouping ownedGrouping = groupingRepository.findByOwnersPath(group);
         Person owner = personRepository.findByUsername(lookup.getSubjectIdentifier());
-        Person newGroupMember = personRepository.findByUsername(newMember);
 
         if (ownedGrouping.getOwners().getMembers().contains(owner)) {
-            wsResultMeta.setResultCode(SUCCESS);
-
-            if (group.endsWith(EXCLUDE)) {
-                ownedGrouping.getInclude().getMembers().remove(newGroupMember);
-
-                if (ownedGrouping.getBasis().getMembers().contains(newGroupMember)) {
-                    ownedGrouping.getExclude().getMembers().add(newGroupMember);
-
-                }
-            } else if (group.endsWith(INCLUDE)) {
-                ownedGrouping.getExclude().getMembers().remove(newGroupMember);
-
-                if (!(ownedGrouping.getInclude().getMembers().contains(newGroupMember) || ownedGrouping.getBasis().getMembers().contains(newGroupMember))) {
-                    ownedGrouping.getInclude().getMembers().add(newGroupMember);
-                }
-            }
+            makeWsAddMemberResults(group, newMember);
         } else {
             wsResultMeta.setResultCode(FAILURE);
         }
@@ -260,8 +243,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
 
-        for(String username : newMembers) {
-           WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
+        for (String username : newMembers) {
+            WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
                 wsResultMeta = wsResultMetaData;
             }
@@ -274,12 +257,30 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, String newMember) {
-        //TODO
-//        return new GcAddMember()
-//                .addSubjectIdentifier(newMember)
-//                .assignGroupName(group)
-//                .execute();
-        throw new NotImplementedException();
+        WsAddMemberResults wsAddMemberResults = new WsAddMemberResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+
+        Grouping ownedGrouping = groupingRepository.findByOwnersPath(group);
+        Person newGroupMember = personRepository.findByUsername(newMember);
+
+        wsResultMeta.setResultCode(SUCCESS);
+
+        if (group.endsWith(EXCLUDE)) {
+            ownedGrouping.getInclude().getMembers().remove(newGroupMember);
+
+            if (ownedGrouping.getBasis().getMembers().contains(newGroupMember)) {
+                ownedGrouping.getExclude().getMembers().add(newGroupMember);
+
+            }
+        } else if (group.endsWith(INCLUDE)) {
+            ownedGrouping.getExclude().getMembers().remove(newGroupMember);
+
+            if (!(ownedGrouping.getInclude().getMembers().contains(newGroupMember) || ownedGrouping.getBasis().getMembers().contains(newGroupMember))) {
+                ownedGrouping.getInclude().getMembers().add(newGroupMember);
+            }
+        }
+
+        return wsAddMemberResults;
     }
 
     @Override
