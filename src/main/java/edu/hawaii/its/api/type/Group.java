@@ -84,11 +84,13 @@ public class Group implements Comparable<Group>{
         return "Group [members=" + members + "]";
     }
 
+    @Transient
     @Override
     public boolean equals(Object o){
         return (o instanceof Group) && (compareTo((Group) o) == 0);
     }
 
+    @Transient
     @Override
     public int compareTo(Group group) {
         int pathComp = getPath().compareTo(group.getPath());

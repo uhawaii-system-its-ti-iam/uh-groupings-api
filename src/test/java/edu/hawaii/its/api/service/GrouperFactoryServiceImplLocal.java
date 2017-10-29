@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import com.sun.xml.internal.fastinfoset.tools.FI_DOM_Or_XML_DOM_SAX_SAXEvent;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import edu.hawaii.its.api.type.Group;

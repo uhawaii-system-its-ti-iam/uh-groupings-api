@@ -4,17 +4,16 @@ import javax.persistence.*;
 
 @Entity
 public class Membership implements Comparable<Membership> {
+
     @Id
     @GeneratedValue
     @Column
     private Long id;
 
-    @Column
-    @OneToMany
+    @ManyToOne
     private Person person;
 
-    @Column
-    @OneToMany
+    @ManyToOne
     private Group group;
 
     public Membership() {
@@ -36,6 +35,10 @@ public class Membership implements Comparable<Membership> {
 
     public Group getGroup() {
         return group;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setPerson(Person person) {

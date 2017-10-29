@@ -1602,7 +1602,7 @@ public class GroupingsServiceMockTest {
     }
 
     private WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForTrios() {
-        //todo change other methods to get trios for grouptings owned
+        //todo change other methods to get trios for groupings owned
         WsGetAttributeAssignmentsResults getAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
 
         WsAttributeDefName attributeDefName = new WsAttributeDefName();

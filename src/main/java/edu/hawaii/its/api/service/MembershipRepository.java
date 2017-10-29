@@ -10,6 +10,8 @@ import java.util.List;
 public interface MembershipRepository extends CrudRepository<Membership, Long> {
     List<Membership> findByPerson(Person person);
 
+    List<Membership> findByPersonUsername(String username);
+
     List<Membership> findByGroup(Group group);
 
     Membership findById(Long id);
