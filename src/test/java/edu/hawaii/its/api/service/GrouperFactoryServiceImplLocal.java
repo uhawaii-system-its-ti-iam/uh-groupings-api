@@ -148,6 +148,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     private GroupRepository groupRepository;
 
     @Autowired
+    private MembershipRepository membershipRepository;
+
+    @Autowired
     private PersonRepository personRepository;
 
     public GrouperFactoryServiceImplLocal() {
