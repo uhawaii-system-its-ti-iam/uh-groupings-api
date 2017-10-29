@@ -157,15 +157,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
 
-            Group newGroup = new Group(path);
-            groupRepository.save(newGroup);
+        Group newGroup = new Group(path);
+        groupRepository.save(newGroup);
 
-            WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
-            WsResultMeta wsResultMeta = new WsResultMeta();
-            wsResultMeta.setResultCode(SUCCESS);
-            wsGroupSaveResults.setResultMetadata(wsResultMeta);
+        WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+        wsGroupSaveResults.setResultMetadata(wsResultMeta);
 
-            return wsGroupSaveResults;
+        return wsGroupSaveResults;
     }
 
     /**
@@ -240,8 +240,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
 
-        for(String username : newMembers) {
-           WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
+        for (String username : newMembers) {
+            WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
                 wsResultMeta = wsResultMetaData;
             }
@@ -292,10 +292,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Person personToDelete = personRepository.findByUsername(memberToDelete);
 
         if (group.endsWith(EXCLUDE)) {
-                grouping.getExclude().getMembers().remove(personToDelete);
+            grouping.getExclude().getMembers().remove(personToDelete);
 
         } else if (group.endsWith(INCLUDE)) {
-                grouping.getInclude().getMembers().remove(personToDelete);
+            grouping.getInclude().getMembers().remove(personToDelete);
         }
 
         groupingRepository.save(grouping);
@@ -326,7 +326,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
 
-        for(String username : membersToDelete) {
+        for (String username : membersToDelete) {
             WsResultMeta wsResultMetaData = makeWsDeleteMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
                 wsResultMeta = wsResultMetaData;
@@ -436,13 +436,22 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
-        //TODO
+        WsHasMemberResults wsHasMemberResults = new WsHasMemberResults();
+        WsHasMemberResult wsHasMemberResult = new WsHasMemberResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsHasMemberResult.setResultMetadata(wsResultMeta);
+        wsHasMemberResults.setResults(new WsHasMemberResult[]{wsHasMemberResult});
 
-//        return new GcHasMember()
-//                .assignGroupName(group)
-//                .addSubjectIdentifier(username)
-//                .execute();
-        throw new NotImplementedException();
+        Group groupToCheck = groupRepository.findByPath(group);
+        Person person = personRepository.findByUsername(username);
+
+        if (groupToCheck.getMembers().contains(person)) {
+            wsResultMeta.setResultCode(IS_MEMBER);
+        } else {
+            wsResultMeta.setResultCode("not member");
+        }
+
+        return wsHasMemberResults;
     }
 
     @Override
@@ -558,36 +567,60 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
-                                                       //TODO
                                                        WsSubjectLookup lookup,
                                                        String groupName) {
 
-//        return new GcGetMembers()
-//                .addSubjectAttributeName(subjectAttributeName)
-//                .assignActAsSubject(lookup)
-//                .addGroupName(groupName)
-//                .assignIncludeSubjectDetail(true)
-//                .execute();
-        throw new NotImplementedException();
+        WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
+        WsGetMembersResult wsGetMembersResult = new WsGetMembersResult();
+        WsSubject[] subjects;
+
+        Group group = groupRepository.findByPath(groupName);
+        List<Person> members = group.getMembers();
+        List<WsSubject> subjectList = new ArrayList<>();
+
+        for(Person person : members) {
+            WsSubject subject = new WsSubject();
+            subject.setId(person.getUsername());
+
+            subjectList.add(subject);
+        }
+
+        subjects = subjectList.toArray(new WsSubject[subjectList.size()]);
+
+        wsGetMembersResult.setWsSubjects(subjects);
+        wsGetMembersResults.setResults(new WsGetMembersResult[] {wsGetMembersResult});
+
+        return wsGetMembersResults;
     }
 
     @Override
     public WsGetGroupsResults makeWsGetGroupsResults(String username,
-                                                     //TODO
                                                      WsStemLookup stemLookup,
                                                      StemScope stemScope) {
 
-//        return new GcGetGroups()
-//                .addSubjectIdentifier(username)
-//                .assignWsStemLookup(stemLookup)
-//                .assignStemScope(stemScope)
-//                .execute();
-        throw new NotImplementedException();
+        WsGetGroupsResults wsGetGroupsResults = new WsGetGroupsResults();
+        WsGetGroupsResult wsGetGroupsResult = new WsGetGroupsResult();
+        WsGroup[] groups;
+
+        List<WsGroup> wsGroupList = new ArrayList<>();
+        List<Group> groupList = groupRepository.findByMembersUsername(username);
+
+        for(Group group : groupList) {
+            WsGroup g = new WsGroup();
+            g.setName(group.getPath());
+            wsGroupList.add(g);
+        }
+
+        groups = wsGroupList.toArray(new WsGroup[wsGroupList.size()]);
+
+        wsGetGroupsResult.setWsGroups(groups);
+        wsGetGroupsResults.setResults(new WsGetGroupsResult[]{wsGetGroupsResult});
+
+        return wsGetGroupsResults;
     }
 
     @Override
     public WsAttributeAssign[] makeEmptyWsAttributeAssignArray() {
-        //TODO
         return new WsAttributeAssign[0];
     }
 
@@ -595,7 +628,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     ////////////////////////////////////////////////////////////////////////////////
     // Helper methods
     ////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////
 
     private Group buildComposite(Group include, Group exclude, Group basis, String path) {
         Group basisPlusInclude = addIncludedMembers(include, basis);
