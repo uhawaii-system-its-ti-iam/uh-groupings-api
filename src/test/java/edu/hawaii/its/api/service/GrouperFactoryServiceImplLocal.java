@@ -305,28 +305,37 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, String memberToDelete) {
-        //TODO
-//        return new GcDeleteMember()
-//                .assignActAsSubject(lookup)
-//                .addSubjectIdentifier(memberToDelete)
-//                .assignGroupName(group)
-//                .execute();
-        throw new NotImplementedException();
+        WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
+
+        Grouping ownedGrouping = groupingRepository.findByOwnersPath(group);
+        Person owner = personRepository.findByUsername(lookup.getSubjectIdentifier());
+
+        if (ownedGrouping.getOwners().getMembers().contains(owner)) {
+            wsDeleteMemberResults = makeWsDeleteMemberResults(group, memberToDelete);
+        } else {
+            WsResultMeta wsResultMeta = new WsResultMeta();
+            wsResultMeta.setResultCode(FAILURE);
+        }
+
+        return wsDeleteMemberResults;
     }
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, List<String> membersToDelete) {
-        //TODO
-//        GcDeleteMember deleteMember = new GcDeleteMember();
-//        deleteMember.assignActAsSubject(lookup);
-//        deleteMember.assignGroupName(group);
-//
-//        for (String name : membersToDelete) {
-//            deleteMember.addSubjectIdentifier(name);
-//        }
-//
-//        return deleteMember.execute();
-        throw new NotImplementedException();
+        WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        for(String username : membersToDelete) {
+            WsResultMeta wsResultMetaData = makeWsDeleteMemberResults(group, lookup, username).getResultMetadata();
+            if (wsResultMetaData.getResultCode().equals(FAILURE)) {
+                wsResultMeta = wsResultMetaData;
+            }
+        }
+
+        wsDeleteMemberResults.setResultMetadata(wsResultMeta);
+
+        return wsDeleteMemberResults;
     }
 
 
