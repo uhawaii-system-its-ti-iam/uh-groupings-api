@@ -199,14 +199,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath) {
-        //TODO
-//        WsStemToSave stemToSave = new WsStemToSave();
-//        WsStem stem = new WsStem();
-//        stem.setName(stemPath);
-//        stemToSave.setWsStem(stem);
-//        WsSubjectLookup subject = makeWsSubjectLookup(username);
-//        return new GcStemSave().addStemToSave(stemToSave).assignActAsSubject(subject).execute();
-        throw new NotImplementedException();
+        WsStemSaveResults wsStemSaveResults = new WsStemSaveResults();
+        WsStemSaveResult wsStemSaveResult = new WsStemSaveResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+        wsStemSaveResult.setResultMetadata(wsResultMeta);
+        wsStemSaveResults.setResultMetadata(wsResultMeta);
+        wsStemSaveResults.setResults(new WsStemSaveResult[] {wsStemSaveResult});
+
+        return wsStemSaveResults;
     }
 
     @Override
