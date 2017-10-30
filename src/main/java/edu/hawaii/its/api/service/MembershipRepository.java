@@ -15,4 +15,6 @@ public interface MembershipRepository extends CrudRepository<Membership, Long> {
     List<Membership> findByGroup(Group group);
 
     Membership findById(Long id);
+
+    Membership findByPersonAndGroup(Person person, Group group);
 }
