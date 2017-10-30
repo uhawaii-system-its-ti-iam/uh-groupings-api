@@ -61,17 +61,24 @@ public class Person implements Comparable<Person> {
 
     @Override
     public boolean equals(Object o) {
-        return compareTo((Person)o) == 0;
+        return (o instanceof Person) && (compareTo((Person)o) == 0);
     }
 
     @Override
     public int compareTo(Person person) {
+        int usernameComp = getUsername().compareTo(person.getUsername());
+        int nameComp = getName().compareTo(person.getName());
+        int uuidComp = getUuid().compareTo(person.getUuid());
 
-        if (this.getName().compareTo(person.getName()) == 0
-                && this.getUsername().compareTo(person.getUsername()) == 0
-                && this.getName().compareTo(person.getName()) == 0) {
-            return 0;
+        if(usernameComp != 0){
+            return usernameComp;
         }
-        return this.getUsername().compareTo(person.getUsername());
+        if(nameComp != 0){
+            return nameComp;
+        }
+        if(uuidComp != 0){
+            return uuidComp;
+        }
+        return 0;
     }
 }

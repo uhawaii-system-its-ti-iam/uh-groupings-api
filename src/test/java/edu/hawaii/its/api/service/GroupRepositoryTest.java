@@ -9,6 +9,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -22,9 +23,7 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
-//todo adding dirties context breaks one of the tests in CampusServiceTest
-//todo Make new database to fix this?
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext()
 public class GroupRepositoryTest {
     Person[] persons = new Person[10];
     Group[] groups = new Group[5];
