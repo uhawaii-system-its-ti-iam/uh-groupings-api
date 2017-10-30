@@ -207,7 +207,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsResultMeta.setResultCode(SUCCESS);
         wsStemSaveResult.setResultMetadata(wsResultMeta);
         wsStemSaveResults.setResultMetadata(wsResultMeta);
-        wsStemSaveResults.setResults(new WsStemSaveResult[] {wsStemSaveResult});
+        wsStemSaveResults.setResults(new WsStemSaveResult[]{wsStemSaveResult});
 
         return wsStemSaveResults;
     }
@@ -415,13 +415,36 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
-                                                                                         //TODO
                                                                                          String group) {
-//        return new GcGetAttributeAssignments()
-//                .addOwnerGroupName(group)
-//                .assignAttributeAssignType(assignType)
-//                .execute();
-        throw new NotImplementedException();
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
+        List<WsAttributeDefName> wsAttributeDefNames = new ArrayList<>();
+
+        Grouping grouping = groupingRepository.findByPath(group);
+        if (grouping.isListservOn()) {
+            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
+            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
+            wsAttributeDefName.setName(LISTSERV);
+            wsAttributeAssign.setAttributeDefNameName(LISTSERV);
+            wsAttributeDefNames.add(wsAttributeDefName);
+        }
+        if (grouping.isOptInOn()) {
+            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
+            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
+            wsAttributeDefName.setName(OPT_IN);
+            wsAttributeAssign.setAttributeDefNameName(OPT_IN);
+            wsAttributeDefNames.add(wsAttributeDefName);
+        }
+        if (grouping.isOptOutOn()) {
+            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
+            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
+            wsAttributeDefName.setName(OPT_OUT);
+            wsAttributeAssign.setAttributeDefNameName(OPT_OUT);
+            wsAttributeDefNames.add(wsAttributeDefName);
+        }
+
+        wsGetAttributeAssignmentsResults.setWsAttributeDefNames(wsAttributeDefNames.toArray(new WsAttributeDefName[wsAttributeDefNames.size()]));
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
@@ -429,12 +452,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                                                                                          //TODO
                                                                                          String attributeDefNameName,
                                                                                          String group) {
-//        return new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .addOwnerGroupName(group)
-//                .assignAttributeAssignType(assignType)
-//                .execute();
-        throw new NotImplementedException();
+        return makeWsGetAttributeAssignmentsResultsForGroup(assignType, group);
     }
 
     @Override
@@ -581,7 +599,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         List<Person> members = group.getMembers();
         List<WsSubject> subjectList = new ArrayList<>();
 
-        for(Person person : members) {
+        for (Person person : members) {
             WsSubject subject = new WsSubject();
             subject.setId(person.getUsername());
 
@@ -591,7 +609,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         subjects = subjectList.toArray(new WsSubject[subjectList.size()]);
 
         wsGetMembersResult.setWsSubjects(subjects);
-        wsGetMembersResults.setResults(new WsGetMembersResult[] {wsGetMembersResult});
+        wsGetMembersResults.setResults(new WsGetMembersResult[]{wsGetMembersResult});
 
         return wsGetMembersResults;
     }
@@ -608,7 +626,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         List<WsGroup> wsGroupList = new ArrayList<>();
         List<Group> groupList = groupRepository.findByMembersUsername(username);
 
-        for(Group group : groupList) {
+        for (Group group : groupList) {
             WsGroup g = new WsGroup();
             g.setName(group.getPath());
             wsGroupList.add(g);

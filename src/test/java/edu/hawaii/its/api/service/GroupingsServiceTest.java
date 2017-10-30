@@ -13,6 +13,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 public class GroupingsServiceTest {
     @Value("${groupings.api.settings}")

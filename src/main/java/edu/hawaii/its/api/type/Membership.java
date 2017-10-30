@@ -16,6 +16,9 @@ public class Membership implements Comparable<Membership> {
     @ManyToOne
     private Group group;
 
+    @Column
+    private boolean selfOpted = false;
+
     public Membership() {
 
     }
@@ -27,6 +30,10 @@ public class Membership implements Comparable<Membership> {
 
     public Long getId() {
         return id;
+    }
+
+    public boolean getSelfOpted() {
+        return selfOpted;
     }
 
     public Person getPerson() {
@@ -47,6 +54,10 @@ public class Membership implements Comparable<Membership> {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public void setSelfOpted(boolean selfOpted) {
+        this.selfOpted = selfOpted;
     }
 
     @Override

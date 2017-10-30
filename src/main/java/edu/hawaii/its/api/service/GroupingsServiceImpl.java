@@ -1412,14 +1412,16 @@ public class GroupingsServiceImpl implements GroupingsService {
         );
 
         WsAttributeDefName[] attributeDefNames = wsGetAttributeAssignmentsResults.getWsAttributeDefNames();
-        for (WsAttributeDefName defName : attributeDefNames) {
-            String name = defName.getName();
-            if (name.equals(LISTSERV)) {
-                listservOn = true;
-            } else if (name.equals(OPT_IN)) {
-                optInOn = true;
-            } else if (name.equals(OPT_OUT)) {
-                optOutOn = true;
+        if (attributeDefNames != null && attributeDefNames.length > 0) {
+            for (WsAttributeDefName defName : attributeDefNames) {
+                String name = defName.getName();
+                if (name.equals(LISTSERV)) {
+                    listservOn = true;
+                } else if (name.equals(OPT_IN)) {
+                    optInOn = true;
+                } else if (name.equals(OPT_OUT)) {
+                    optOutOn = true;
+                }
             }
         }
 
