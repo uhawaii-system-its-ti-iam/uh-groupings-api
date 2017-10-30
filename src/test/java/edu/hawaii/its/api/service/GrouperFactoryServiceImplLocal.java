@@ -283,12 +283,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                 membershipRepository.delete(membership);
             }
         } else if (group.endsWith(INCLUDE)) {
-            if(inExclude){
+            if (inExclude) {
                 membership = membershipRepository.findByPersonAndGroup(newGroupMember, grouping.getExclude());
                 grouping.getExclude().getMembers().remove(newGroupMember);
                 membershipRepository.delete(membership);
-            }
-            else if(!inBasis){
+            } else if (!inBasis) {
                 //TODO make addMember and deleteMember methods
                 grouping.getInclude().getMembers().add(newGroupMember);
                 membership = new Membership(newGroupMember, grouping.getInclude());
@@ -424,15 +423,26 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForMembership(String assignType,
-                                                                                              //TODO
                                                                                               String attributeDefNameName,
                                                                                               String membershipId) {
-//        return new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .addOwnerMembershipId(membershipId)
-//                .assignAttributeAssignType(assignType)
-//                .execute();
-        throw new NotImplementedException();
+        Membership membership = membershipRepository.findById(membershipId);
+
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
+
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        WsAttributeAssign[] wsAttributeAssigns = new WsAttributeAssign[1];
+        WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
+        if (membership.getSelfOpted()) {
+            wsAttributeAssign.setAttributeDefNameName(SELF_OPTED);
+        }
+
+        wsAttributeAssigns[0] = wsAttributeAssign;
+        wsGetAttributeAssignmentsResults.setResultMetadata(wsResultMeta);
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssigns);
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
@@ -518,18 +528,26 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForMembership(String attributeAssignType,
-                                                                                //TODO
                                                                                 String attributeAssignOperation,
                                                                                 String attributeDefNameName,
                                                                                 String ownerMembershipId) {
 
-//        return new GcAssignAttributes()
-//                .assignAttributeAssignType(attributeAssignType)
-//                .assignAttributeAssignOperation(attributeAssignOperation)
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .addOwnerMembershipId(ownerMembershipId)
-//                .execute();
-        throw new NotImplementedException();
+        WsAssignAttributesResults wsAssignAttributesResults = new WsAssignAttributesResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+        wsAssignAttributesResults.setResultMetadata(wsResultMeta);
+
+        Membership membership = membershipRepository.findById(ownerMembershipId);
+
+        if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
+            membership.setSelfOpted(true);
+        } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
+            membership.setSelfOpted(false);
+        }
+
+        membershipRepository.save(membership);
+
+        return wsAssignAttributesResults;
     }
 
 
@@ -544,8 +562,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
-        if (setGroupingAttribute(grouping, attributeDefNameName, true)) {
-            wsResultMeta.setResultCode(SUCCESS);
+        if(attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)){
+            if (setGroupingAttribute(grouping, attributeDefNameName, true)) {
+                wsResultMeta.setResultCode(SUCCESS);
+            }
+        }
+        else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
+            if (setGroupingAttribute(grouping, attributeDefNameName, false)) {
+                wsResultMeta.setResultCode(SUCCESS);
+            }
         }
 
         wsAssignAttributesResults.setResultMetadata(wsResultMeta);
@@ -609,14 +634,27 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetMembershipsResults makeWsGetMembershipsResults(String groupName,
-                                                               //TODO
                                                                WsSubjectLookup lookup) {
 
-//        return new GcGetMemberships()
-//                .addGroupName(groupName)
-//                .addWsSubjectLookup(lookup)
-//                .execute();
-        throw new NotImplementedException();
+        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupName);
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        WsGetMembershipsResults wsGetMembershipsResults = new WsGetMembershipsResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(FAILURE);
+        WsMembership[] wsMemberships = new WsMembership[1];
+        WsMembership wsMembership = new WsMembership();
+
+        if (membership != null) {
+            wsMembership.setMembershipId(membership.getId());
+            wsResultMeta.setResultCode(SUCCESS);
+        }
+
+        wsMemberships[0] = wsMembership;
+        wsGetMembershipsResults.setWsMemberships(wsMemberships);
+
+        return wsGetMembershipsResults;
     }
 
     @Override

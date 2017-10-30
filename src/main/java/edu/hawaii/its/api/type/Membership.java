@@ -8,7 +8,7 @@ public class Membership implements Comparable<Membership> {
     @Id
     @GeneratedValue
     @Column
-    private Long id;
+    private String id;
 
     @ManyToOne
     private Person person;
@@ -28,7 +28,7 @@ public class Membership implements Comparable<Membership> {
         this.group = group;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -44,7 +44,7 @@ public class Membership implements Comparable<Membership> {
         return group;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
