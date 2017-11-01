@@ -265,7 +265,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(group, group, group, group);
         Person newGroupMember = personRepository.findByUsername(newMember);
-        Membership membership;
 
         boolean inBasis = grouping.getBasis().getMembers().contains(newGroupMember);
         boolean inExclude = grouping.getExclude().getMembers().contains(newGroupMember);
@@ -274,33 +273,21 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (group.endsWith(EXCLUDE)) {
             if (inBasis) {
-                grouping.getExclude().getMembers().add(newGroupMember);
-                membership = new Membership(newGroupMember, grouping.getExclude());
-                membershipRepository.save(membership);
+                addMember(grouping.getExclude(), newGroupMember);
             } else if (inInclude) {
-                membership = membershipRepository.findByPersonAndGroup(newGroupMember, grouping.getInclude());
-                grouping.getInclude().getMembers().remove(newGroupMember);
-                membershipRepository.delete(membership);
+                deleteMember(grouping.getInclude(), newGroupMember);
             }
         } else if (group.endsWith(INCLUDE)) {
             if (inExclude) {
-                membership = membershipRepository.findByPersonAndGroup(newGroupMember, grouping.getExclude());
-                grouping.getExclude().getMembers().remove(newGroupMember);
-                membershipRepository.delete(membership);
+                deleteMember(grouping.getExclude(), newGroupMember);
             } else if (!inBasis) {
-                //TODO make addMember method
-                grouping.getInclude().getMembers().add(newGroupMember);
-                membership = new Membership(newGroupMember, grouping.getInclude());
-                membershipRepository.save(membership);
+                addMember(grouping.getInclude(), newGroupMember);
             }
         }
-
-        groupingRepository.save(grouping);
 
         return wsAddMemberResults;
     }
 
-    //TODO make deleteMember method
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
         WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
@@ -310,17 +297,12 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(group, group, group, group);
         Person personToDelete = personRepository.findByUsername(memberToDelete);
-        Membership membership;
 
         if (group.endsWith(EXCLUDE)) {
-            membership = membershipRepository.findByPersonAndGroup(personToDelete, grouping.getExclude());
-            grouping.getExclude().getMembers().remove(personToDelete);
-            membershipRepository.delete(membership);
+            deleteMember(grouping.getExclude(), personToDelete);
 
         } else if (group.endsWith(INCLUDE)) {
-            membership = membershipRepository.findByPersonAndGroup(personToDelete, grouping.getInclude());
-            grouping.getInclude().getMembers().remove(personToDelete);
-            membershipRepository.delete(membership);
+            deleteMember(grouping.getInclude(), personToDelete);
         }
 
         groupingRepository.save(grouping);
@@ -791,5 +773,21 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     // Helper methods
     ///////////////////////////////////////////////////////////////////////////
 
+    private void addMember(Group group, Person person) {
+        group.getMembers().add(person);
+        Membership membership = new Membership(person, group);
+
+        groupRepository.save(group);
+        membershipRepository.save(membership);
+    }
+
+    private void deleteMember(Group group, Person person) {
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+        group.getMembers().remove(person);
+
+        groupRepository.save(group);
+        membershipRepository.delete(membership);
+
+    }
 
 }
