@@ -8,8 +8,8 @@ import java.util.List;
 @Table(name = "groups")
 public class Group implements Comparable<Group>{
     private List<Person> members = new ArrayList<>();
-
     private String path = "";
+    private boolean isTrio = false;
 
     public Group() {
         //empty
@@ -49,6 +49,15 @@ public class Group implements Comparable<Group>{
 
     public void addMember(Person person) {
         members.add(person);
+    }
+
+    @Column(name = "trio")
+    public boolean trio() {
+        return isTrio;
+    }
+
+    public void setTrio(boolean trio) {
+        isTrio = trio;
     }
 
     @Transient

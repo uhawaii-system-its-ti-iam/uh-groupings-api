@@ -288,7 +288,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                 grouping.getExclude().getMembers().remove(newGroupMember);
                 membershipRepository.delete(membership);
             } else if (!inBasis) {
-                //TODO make addMember and deleteMember methods
+                //TODO make addMember method
                 grouping.getInclude().getMembers().add(newGroupMember);
                 membership = new Membership(newGroupMember, grouping.getInclude());
                 membershipRepository.save(membership);
@@ -300,6 +300,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsAddMemberResults;
     }
 
+    //TODO make deleteMember method
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
         WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
@@ -364,14 +365,29 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 //TODO
-                                                                                 String attributeDefNameName) {
-//        return new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .assignAttributeAssignType(assignType)
-//                .execute();
-        throw new NotImplementedException();
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName) {
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+        wsGetAttributeAssignmentsResults.setResultMetadata(wsResultMeta);
+
+        Iterable<Group> groups = groupRepository.findAll();
+        List<WsGroup> groupList = new ArrayList<>();
+
+        for (Group group : groups) {
+            if(group.trio()){
+                WsGroup g = new WsGroup();
+                g.setName(group.getPath());
+                groupList.add(g);
+            }
+        }
+
+        WsGroup[] wsGroups = groupList.toArray(new WsGroup[groupList.size()]);
+
+        wsGetAttributeAssignmentsResults.setWsGroups(wsGroups);
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
@@ -770,4 +786,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return true;
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Helper methods
+    ///////////////////////////////////////////////////////////////////////////
+
+
 }

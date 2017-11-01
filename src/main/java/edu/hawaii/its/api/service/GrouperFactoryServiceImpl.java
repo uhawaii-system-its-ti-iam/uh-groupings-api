@@ -138,8 +138,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName) {
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName) {
         return new GcGetAttributeAssignments()
                 .addAttributeDefNameName(attributeDefNameName)
                 .assignAttributeAssignType(assignType)

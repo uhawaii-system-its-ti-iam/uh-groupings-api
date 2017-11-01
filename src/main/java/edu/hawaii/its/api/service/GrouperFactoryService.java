@@ -31,8 +31,8 @@ public interface GrouperFactoryService {
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, List<String> membersToDelete);
 
 
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName);
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName);
 
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
                                                                                  String attributeDefNameName0,

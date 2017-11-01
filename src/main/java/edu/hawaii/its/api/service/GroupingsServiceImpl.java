@@ -193,7 +193,6 @@ public class GroupingsServiceImpl implements GroupingsService {
 //                addGroupingResults.add(addMemberAs(username, path + entry.getKey(), entry.getValue()));
 //                addGroupingResults.add(updateLastModified(path + entry.getKey()));
 //            }
-//            //todo add isTrio to Grouping
 //
 //            addGroupingResults.add(addMemberAs(username, GROUPING_OWNERS, memberLists.get(OWNERS)));
 //            addGroupingResults.add(updateLastModified(GROUPING_OWNERS));
@@ -686,7 +685,7 @@ public class GroupingsServiceImpl implements GroupingsService {
         if (isSuperuser(username)) {
             List<String> groupPaths = new ArrayList<>();
 
-            WsGetAttributeAssignmentsResults attributeAssignmentsResults = gf.makeWsGetAttributeAssignmentsResults(
+            WsGetAttributeAssignmentsResults attributeAssignmentsResults = gf.makeWsGetAttributeAssignmentsResultsTrio(
                     ASSIGN_TYPE_GROUP,
                     TRIO);
 
@@ -715,7 +714,8 @@ public class GroupingsServiceImpl implements GroupingsService {
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
 
-        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResults(ASSIGN_TYPE_GROUP,
+        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResults(
+                ASSIGN_TYPE_GROUP,
                 TRIO,
                 OPT_OUT,
                 groupPaths);

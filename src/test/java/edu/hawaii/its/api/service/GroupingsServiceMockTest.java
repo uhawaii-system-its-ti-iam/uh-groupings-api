@@ -408,10 +408,10 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, ADMIN_USER)).willReturn(isMemberResults());
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING_4_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(null));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(null));
 //
 //        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, OPT_IN, GROUPING_0_PATH))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -513,10 +513,10 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, ADMIN_USER)).willReturn(isMemberResults());
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_OUT, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_OUT, GROUPING_4_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(null));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(null));
 //
 //        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, OPT_OUT, GROUPING_0_PATH))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -768,7 +768,7 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername())).willReturn(isMemberResults());
 //        given(gf.makeWsGetMembershipsResults(GROUPING_0_INCLUDE_PATH, lookups.get(1))).willReturn(makeWsGetMembershipsResults());
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, OPERATION_ASSIGN_ATTRIBUTE, SELF_OPTED, "1234"))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -853,7 +853,7 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_0_EXCLUDE_PATH, users.get(1).getUsername())).willReturn(isMemberResults());
 //        given(gf.makeWsGetMembershipsResults(GROUPING_0_EXCLUDE_PATH, lookups.get(1))).willReturn(makeWsGetMembershipsResults());
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, OPERATION_ASSIGN_ATTRIBUTE, SELF_OPTED, "1234"))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -890,7 +890,7 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername())).willReturn(isMemberResults());
 //        given(gf.makeWsGetMembershipsResults(GROUPING_0_INCLUDE_PATH, lookups.get(1))).willReturn(makeWsGetMembershipsResults());
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, OPERATION_ASSIGN_ATTRIBUTE, SELF_OPTED, "1234"))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -904,7 +904,7 @@ public class GroupingsServiceMockTest {
 //        attributes.add(SELF_OPTED);
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsDeleteMemberResults(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername()))
 //                .willReturn(deleteMemberResultsSuccess(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername()));
@@ -953,7 +953,7 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsHasMemberResults(GROUPING_0_EXCLUDE_PATH, users.get(1).getUsername())).willReturn(isMemberResults());
 //        given(gf.makeWsGetMembershipsResults(GROUPING_0_EXCLUDE_PATH, lookups.get(1))).willReturn(makeWsGetMembershipsResults());
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, OPERATION_ASSIGN_ATTRIBUTE, SELF_OPTED, "1234"))
 //                .willReturn(makeWsAssignAttributesResults(SUCCESS));
@@ -967,7 +967,7 @@ public class GroupingsServiceMockTest {
 //        attributes.add(SELF_OPTED);
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        given(gf.makeWsDeleteMemberResults(GROUPING_0_EXCLUDE_PATH, users.get(1).getUsername())).willReturn(deleteMemberResultsSuccess(GROUPING_0_EXCLUDE_PATH, users.get(1).getUsername()));
 //
@@ -1007,7 +1007,7 @@ public class GroupingsServiceMockTest {
 //        List<String> attributes = new ArrayList<>();
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_OUT, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        boolean permission = groupingsService.optOutPermission(GROUPING_0_PATH);
 //
@@ -1016,7 +1016,7 @@ public class GroupingsServiceMockTest {
 //        attributes.add(OPT_OUT);
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_OUT, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        permission = groupingsService.optOutPermission(GROUPING_0_PATH);
 //
@@ -1030,7 +1030,7 @@ public class GroupingsServiceMockTest {
 //        List<String> attributes = new ArrayList<>();
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        boolean permission = groupingsService.optInPermission(GROUPING_0_PATH);
 //
@@ -1039,7 +1039,7 @@ public class GroupingsServiceMockTest {
 //        attributes.add(OPT_IN);
 //
 //        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        permission = groupingsService.optInPermission(GROUPING_0_PATH);
 //
@@ -1169,7 +1169,7 @@ public class GroupingsServiceMockTest {
         given(gf.makeWsHasMemberResults(GROUPING_APPS, ADMIN_USER)).willReturn(hasMemberResults(GROUPING_APPS, ADMIN_USER));
         given(gf.makeWsHasMemberResults(GROUPING_APPS, users.get(1).getUsername())).willReturn(hasMemberResults(GROUPING_APPS, users.get(1).getUsername()));
 
-        given(gf.makeWsGetAttributeAssignmentsResults(ASSIGN_TYPE_GROUP, TRIO))
+        given(gf.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO))
                 .willReturn(makeWsGetAttributeAssignmentsResultsForTrios());
 
         given(gf.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, ADMIN_LOOKUP, GROUPING_ADMINS))
@@ -1225,7 +1225,7 @@ public class GroupingsServiceMockTest {
 //        given(gf.makeWsSubjectLookup(users.get(1).getUsername())).willReturn(lookups.get(1));
 //        given(gf.makeWsGetMembershipsResults(GROUPING_0_INCLUDE_PATH, lookups.get(1))).willReturn(makeWsGetMembershipsResults());
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        selfOpted = groupingsService.checkSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername());
 //        assertFalse(selfOpted);
@@ -1233,7 +1233,7 @@ public class GroupingsServiceMockTest {
 //        //user has self opted
 //        attributes.add(SELF_OPTED);
 //        given(gf.makeWsGetAttributeAssignmentsResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, "1234"))
-//                .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
+//                .willReturn(makeWsGetAttributeAssignmentsResultsTrio(attributes));
 //
 //        selfOpted = groupingsService.checkSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername());
 //        assertTrue(selfOpted);
