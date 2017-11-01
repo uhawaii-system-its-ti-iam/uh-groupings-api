@@ -447,32 +447,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
                                                                                          String group) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
-        List<WsAttributeDefName> wsAttributeDefNames = new ArrayList<>();
 
         Grouping grouping = groupingRepository.findByPath(group);
         if (grouping.isListservOn()) {
-            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
-            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
-            wsAttributeDefName.setName(LISTSERV);
-            wsAttributeAssign.setAttributeDefNameName(LISTSERV);
-            wsAttributeDefNames.add(wsAttributeDefName);
+            wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, LISTSERV);
         }
         if (grouping.isOptInOn()) {
-            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
-            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
-            wsAttributeDefName.setName(OPT_IN);
-            wsAttributeAssign.setAttributeDefNameName(OPT_IN);
-            wsAttributeDefNames.add(wsAttributeDefName);
+            wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, OPT_IN);
         }
         if (grouping.isOptOutOn()) {
-            WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
-            WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
-            wsAttributeDefName.setName(OPT_OUT);
-            wsAttributeAssign.setAttributeDefNameName(OPT_OUT);
-            wsAttributeDefNames.add(wsAttributeDefName);
+            wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, OPT_OUT);
         }
-
-        wsGetAttributeAssignmentsResults.setWsAttributeDefNames(wsAttributeDefNames.toArray(new WsAttributeDefName[wsAttributeDefNames.size()]));
 
         return wsGetAttributeAssignmentsResults;
     }
@@ -769,10 +754,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Helper methods
-    ///////////////////////////////////////////////////////////////////////////
-
     private void addMember(Group group, Person person) {
         group.getMembers().add(person);
         Membership membership = new Membership(person, group);
@@ -787,6 +768,29 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         groupRepository.save(group);
         membershipRepository.delete(membership);
+
+    }
+
+    private WsGetAttributeAssignmentsResults addAssignmentResults(
+            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults,
+            String attributeName) {
+
+        List<WsAttributeDefName> wsAttributeDefNames = new ArrayList<>();
+        List<WsAttributeAssign> wsAttributeAssigns = new ArrayList<>();
+
+        WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
+        WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();
+
+        wsAttributeDefName.setName(attributeName);
+        wsAttributeAssign.setAttributeDefNameName(attributeName);
+
+        wsAttributeAssigns.add(wsAttributeAssign);
+        wsAttributeDefNames.add(wsAttributeDefName);
+
+        wsGetAttributeAssignmentsResults.setWsAttributeDefNames(wsAttributeDefNames.toArray(new WsAttributeDefName[wsAttributeDefNames.size()]));
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssigns.toArray(new WsAttributeAssign[wsAttributeAssigns.size()]));
+
+        return wsGetAttributeAssignmentsResults;
 
     }
 
