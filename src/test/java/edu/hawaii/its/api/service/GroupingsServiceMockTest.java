@@ -1081,7 +1081,7 @@ public class GroupingsServiceMockTest {
             groupPaths.add(group.getPath());
         }
 
-        given(gf.makeWsGetAttributeAssignmentsResults(ASSIGN_TYPE_GROUP, TRIO, groupPaths))
+        given(gf.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO, groupPaths))
                 .willReturn(makeWsGetAttributeAssignmentsResultsForTrios());
 
         List<Grouping> groupingsIn = groupingsService.groupingsIn(groupPaths);
@@ -1125,7 +1125,7 @@ public class GroupingsServiceMockTest {
                 .map(groupPath -> groupPath.substring(0, groupPath.length() - OWNERS.length()))
                 .collect(Collectors.toList());
 
-        given(gf.makeWsGetAttributeAssignmentsResults(ASSIGN_TYPE_GROUP, TRIO, ownerGroups))
+        given(gf.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO, ownerGroups))
                 .willReturn(makeWsGetAttributeAssignmentsResultsForTrios());
 
         for (String groups : ownerGroups) {
