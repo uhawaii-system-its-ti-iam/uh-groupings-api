@@ -356,67 +356,74 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Iterable<Group> groups = groupRepository.findAll();
         List<WsGroup> groupList = new ArrayList<>();
+        List<WsAttributeAssign> attributeAssignList = new ArrayList<>();
 
         for (Group group : groups) {
-            if(group.trio()){
+            //todo check to see if it returns null when there is no match
+            if (groupingRepository.findByPath(group.getPath()) != null) {
                 WsGroup g = new WsGroup();
+                WsAttributeAssign attributeAssign = new WsAttributeAssign();
+
                 g.setName(group.getPath());
+                attributeAssign.setOwnerGroupName(group.getPath());
+
+                attributeAssignList.add(attributeAssign);
                 groupList.add(g);
             }
         }
 
         WsGroup[] wsGroups = groupList.toArray(new WsGroup[groupList.size()]);
+        WsAttributeAssign[] wsAttributeAssigns = attributeAssignList.toArray(new WsAttributeAssign[attributeAssignList.size()]);
 
         wsGetAttributeAssignmentsResults.setWsGroups(wsGroups);
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssigns);
 
         return wsGetAttributeAssignmentsResults;
     }
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName0,
-                                                                                 String attributeDefNameName1) {
-        //TODO
-//        return new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName0)
-//                .addAttributeDefNameName(attributeDefNameName1)
-//                .assignAttributeAssignType(assignType)
-//                .execute();
-        throw new NotImplementedException();
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName0,
+                                                                                     String attributeDefNameName1) {
+
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0);
+
+        if (attributeDefNameName1.equals(OPT_IN)) {
+            wsGetAttributeAssignmentsResults = removeGroupsWithoutOptIn(wsGetAttributeAssignmentsResults);
+        } else if (attributeDefNameName1.equals(OPT_IN)) {
+            wsGetAttributeAssignmentsResults = removeGroupsWithoutOptOut(wsGetAttributeAssignmentsResults);
+        }
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
                                                                                      String attributeDefNameName,
                                                                                      List<String> ownerGroupNames) {
-        //TODO
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(
+                assignType,
+                attributeDefNameName);
 
-//        GcGetAttributeAssignments getAttributeAssignments = new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .assignAttributeAssignType(assignType);
-//
-//        ownerGroupNames.forEach(getAttributeAssignments::addOwnerGroupName);
-//
-//        return getAttributeAssignments.execute();
-        throw new NotImplementedException();
+        wsGetAttributeAssignmentsResults = removeGroupsNotInList(wsGetAttributeAssignmentsResults, ownerGroupNames);
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName0,
-                                                                                 String attributeDefNameName1,
-                                                                                 List<String> ownerGroupNames) {
-        //TODO
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName0,
+                                                                                     String attributeDefNameName1,
+                                                                                     List<String> ownerGroupNames) {
 
-//        GcGetAttributeAssignments getAttributeAssignments = new GcGetAttributeAssignments()
-//                .addAttributeDefNameName(attributeDefNameName0)
-//                .addAttributeDefNameName(attributeDefNameName1)
-//                .assignAttributeAssignType(assignType);
-//
-//        ownerGroupNames.forEach(getAttributeAssignments::addOwnerGroupName);
-//
-//        return getAttributeAssignments.execute();
-        throw new NotImplementedException();
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(
+                assignType,
+                attributeDefNameName0,
+                attributeDefNameName1);
+
+        wsGetAttributeAssignmentsResults = removeGroupsNotInList(wsGetAttributeAssignmentsResults, ownerGroupNames);
+
+        return wsGetAttributeAssignmentsResults;
     }
 
     @Override
@@ -545,12 +552,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
-        if(attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)){
+        if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
             if (setGroupingAttribute(grouping, attributeDefNameName, true)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
-        }
-        else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
+        } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
             if (setGroupingAttribute(grouping, attributeDefNameName, false)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
@@ -792,6 +798,86 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         return wsGetAttributeAssignmentsResults;
 
+    }
+
+    private WsGetAttributeAssignmentsResults removeGroupsWithoutOptIn(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
+
+        List<WsGroup> wsGroupList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsGroups());
+        List<WsAttributeAssign> wsAttributeAssignList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+
+        for (WsGroup wsGroup : wsGroupList) {
+            Grouping grouping = groupingRepository.findByPath(wsGroup.getName());
+
+            if (!grouping.isOptInOn()) {
+                wsGroupList.remove(wsGroup);
+            }
+        }
+
+        for (WsAttributeAssign wsAttributeAssign : wsAttributeAssignList) {
+            Grouping grouping = groupingRepository.findByPath(wsAttributeAssign.getOwnerGroupName());
+
+            if (!grouping.isOptInOn()) {
+                wsAttributeAssignList.remove(wsAttributeAssign);
+            }
+        }
+
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignList.toArray(new WsAttributeAssign[wsAttributeAssignList.size()]));
+        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupList.toArray(new WsGroup[wsGroupList.size()]));
+
+        return wsGetAttributeAssignmentsResults;
+
+    }
+
+    private WsGetAttributeAssignmentsResults removeGroupsWithoutOptOut(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
+
+        List<WsGroup> wsGroupList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsGroups());
+        List<WsAttributeAssign> wsAttributeAssignList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+
+        for (WsGroup wsGroup : wsGroupList) {
+            Grouping grouping = groupingRepository.findByPath(wsGroup.getName());
+
+            if (!grouping.isOptOutOn()) {
+                wsGroupList.remove(wsGroup);
+            }
+        }
+
+        for (WsAttributeAssign wsAttributeAssign : wsAttributeAssignList) {
+            Grouping grouping = groupingRepository.findByPath(wsAttributeAssign.getOwnerGroupName());
+
+            if (!grouping.isOptOutOn()) {
+                wsAttributeAssignList.remove(wsAttributeAssign);
+            }
+        }
+
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignList.toArray(new WsAttributeAssign[wsAttributeAssignList.size()]));
+        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupList.toArray(new WsGroup[wsGroupList.size()]));
+
+        return wsGetAttributeAssignmentsResults;
+
+    }
+
+    private WsGetAttributeAssignmentsResults removeGroupsNotInList(
+            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults,
+            List<String> ownerGroupNames) {
+
+        List<WsGroup> wsGroupList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsGroups());
+        List<WsAttributeAssign> wsAttributeAssignList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+
+        for (WsGroup group : wsGroupList) {
+            if (!ownerGroupNames.contains(group.getName())) {
+                wsGroupList.remove(group);
+            }
+        }
+        for (WsAttributeAssign attributeAssign : wsAttributeAssignList) {
+            if (!ownerGroupNames.contains(attributeAssign.getOwnerGroupName())) {
+                wsAttributeAssignList.remove(attributeAssign);
+            }
+        }
+
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignList.toArray(new WsAttributeAssign[wsAttributeAssignList.size()]));
+        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupList.toArray(new WsGroup[wsGroupList.size()]));
+
+        return wsGetAttributeAssignmentsResults;
     }
 
 }

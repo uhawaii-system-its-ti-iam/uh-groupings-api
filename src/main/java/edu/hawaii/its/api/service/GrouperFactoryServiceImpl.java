@@ -147,9 +147,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName0,
-                                                                                 String attributeDefNameName1) {
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName0,
+                                                                                     String attributeDefNameName1) {
         return new GcGetAttributeAssignments()
                 .addAttributeDefNameName(attributeDefNameName0)
                 .addAttributeDefNameName(attributeDefNameName1)
@@ -172,10 +172,10 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(String assignType,
-                                                                                 String attributeDefNameName0,
-                                                                                 String attributeDefNameName1,
-                                                                                 List<String> ownerGroupNames) {
+    public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
+                                                                                     String attributeDefNameName0,
+                                                                                     String attributeDefNameName1,
+                                                                                     List<String> ownerGroupNames) {
 
         GcGetAttributeAssignments getAttributeAssignments = new GcGetAttributeAssignments()
                 .addAttributeDefNameName(attributeDefNameName0)

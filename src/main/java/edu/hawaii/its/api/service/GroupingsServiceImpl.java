@@ -664,6 +664,7 @@ public class GroupingsServiceImpl implements GroupingsService {
                     TRIO,
                     groupsOpted);
 
+            //todo check if it is better to use getWsGroups or getWsAttributeAssigns
             WsGroup[] trios = attributeAssignmentsResults.getWsGroups();
 
             for (WsGroup group : trios) {
@@ -714,7 +715,7 @@ public class GroupingsServiceImpl implements GroupingsService {
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
 
-        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResults(
+        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResultsTrio(
                 ASSIGN_TYPE_GROUP,
                 TRIO,
                 OPT_OUT,
@@ -750,7 +751,7 @@ public class GroupingsServiceImpl implements GroupingsService {
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
 
-        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResults(
+        WsGetAttributeAssignmentsResults assignmentsResults = gf.makeWsGetAttributeAssignmentsResultsTrio(
                 ASSIGN_TYPE_GROUP,
                 TRIO,
                 OPT_IN);
