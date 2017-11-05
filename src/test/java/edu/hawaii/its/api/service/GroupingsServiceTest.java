@@ -11,6 +11,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -332,5 +333,289 @@ public class GroupingsServiceTest {
         }
 
         assertEquals(noDuplicates.size(), 15);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Tests using database
+    //////////////////////////////////////////////////////////////////////////////
+
+
+    @Test
+    public void databaseTest() {
+//todo
+    }
+
+    @Test
+    public void assignOwnershipTest() {
+//todo
+
+    }
+
+
+    @Test
+    public void changeListservStatusTest() {
+//todo
+    }
+
+    @Test
+    public void changeOptInStatusTest() {
+//todo
+    }
+
+    @Test
+    public void changeOptOutStatusTest() {
+//todo
+    }
+
+    @Test
+    public void removeOwnershipTest() {
+//todo
+    }
+
+    @Test
+    public void getGroupingTest() {
+//todo
+    }
+
+    @Test
+    public void getMyGroupingsTest() {
+
+        //todo
+    }
+
+    @Test
+    public void optInTest() {
+//todo
+    }
+
+    @Test
+    public void optOutTest() {
+//todo
+    }
+
+    @Test
+    public void cancelOptInTest() {
+//todo
+    }
+
+    @Test
+    public void cancelOptOutTest() {
+//todo
+    }
+
+    @Test
+    public void optOutPermissionTest() {
+//todo
+    }
+
+    @Test
+    public void optInPermissionTest() {
+//todo
+    }
+
+    @Test
+    public void groupHasAttributeTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsInTest() {
+//todo
+    }
+
+    @Test
+    public void hasListservTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsOwnedTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsOptedIntoTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsOptedOutOfTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsOptedTest() {
+//todo
+    }
+
+    @Test
+    public void adminListsTest() {
+//todo
+    }
+
+    @Test
+    public void groupingsToOptOutOfTest() {
+
+//todo
+    }
+
+    @Test
+    public void groupingsToOptIntoTest() {
+//todo
+    }
+
+    @Test
+    public void addSelfOptedTest() {
+//todo
+    }
+
+    @Test
+    public void checkSelfOptedTest() {
+//todo
+    }
+
+    @Test
+    public void inGroupTest() {
+//todo
+    }
+
+    @Test
+    public void isOwnerTest() {
+//todo
+    }
+
+    @Test
+    public void isAdminTest() {
+        //todo
+    }
+
+    @Test
+    public void removeSelfOptedTest() {
+
+//todo
+    }
+
+    @Test
+    public void groupOptOutPermissionTest() {
+
+//todo
+    }
+
+    @Test
+    public void groupOptInPermissionTest() {
+
+//todo
+    }
+
+    @Test
+    public void updateLastModifiedTest() {
+
+//todo
+    }
+
+    @Test
+    public void assignMembershipAttributesTest() {
+
+//todo
+    }
+
+    @Test
+    public void getMembershipAttributesTest() {
+
+//todo
+    }
+
+    @Test
+    public void assignGroupAttributesTest() {
+
+//todo
+    }
+
+    @Test
+    public void attributeAssignmentsResultsTest() {
+
+//todo
+    }
+
+    @Test
+    public void getGrouperPrivilegeTest() {
+
+//todo
+    }
+
+    @Test
+    public void assignGrouperPrivilegeTest() {
+
+//todo
+    }
+
+    @Test
+    public void membershipsResultsTest() {
+
+//todo
+    }
+
+    @Test
+    public void addMemberAsTest() {
+//todo
+    }
+
+    @Test
+    public void deleteMemberAsTest() {
+
+//todo
+    }
+
+    @Test
+    public void deleteMemberTest() {
+
+//todo
+    }
+
+    @Test
+    public void getMembersTest() {
+
+//todo
+    }
+
+    @Test
+    public void extractGroupingsTest() {
+
+//todo
+    }
+
+    @Test
+    public void getGroupPathsTest() {
+
+//todo
+    }
+
+    @Test
+    public void setGroupingAttributesTest() {
+
+//todo
+    }
+
+    @Test
+    public void parentGroupingPathTest() {
+
+//todo
+    }
+
+    @Test
+    public void extractGroupPathsTest() {
+
+//todo
+    }
+
+    @Test
+    public void changeGroupAttributeStatusTest() {
+
+//todo
+    }
+
+    @Test
+    public void checkProfilesAreWorking() {
+        assertNotNull(gs.getGroupPaths("path:to:grouping0"));
     }
 }
