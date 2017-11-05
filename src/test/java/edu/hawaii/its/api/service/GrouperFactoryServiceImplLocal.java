@@ -498,22 +498,38 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResults(String attributeAssignType,
-                                                                   //TODO
                                                                    String attributeAssignOperation,
                                                                    String ownerGroupName,
                                                                    String attributeDefNameName,
                                                                    String attributeAssignValueOperation,
                                                                    WsAttributeAssignValue value) {
 
-//        return new GcAssignAttributes()
-//                .assignAttributeAssignType(attributeAssignType)
-//                .assignAttributeAssignOperation(attributeAssignOperation)
-//                .addOwnerGroupName(ownerGroupName)
-//                .addAttributeDefNameName(attributeDefNameName)
-//                .assignAttributeAssignValueOperation(attributeAssignValueOperation)
-//                .addValue(value)
-//                .execute();
-        throw new NotImplementedException();
+        WsAssignAttributesResults wsAssignAttributesResults = new WsAssignAttributesResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+        wsAssignAttributesResults.setResultMetadata(wsResultMeta);
+
+        Grouping grouping = groupingRepository.findByPath(ownerGroupName);
+
+        Boolean onOrrOff = null;
+
+        if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
+            onOrrOff = true;
+        } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
+            onOrrOff = false;
+        }
+
+        if (attributeDefNameName.equals(LISTSERV)) {
+            grouping.setListservOn(onOrrOff);
+
+        } else if (attributeDefNameName.equals(OPT_IN)) {
+            grouping.setOptInOn(onOrrOff);
+
+        } else if (attributeDefNameName.equals(OPT_OUT)) {
+            grouping.setOptOutOn(onOrrOff);
+        }
+
+        return wsAssignAttributesResults;
     }
 
     @Override
