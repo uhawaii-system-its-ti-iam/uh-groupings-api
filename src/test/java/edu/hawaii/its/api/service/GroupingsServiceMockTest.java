@@ -1760,4 +1760,9 @@ public class GroupingsServiceMockTest {
         return membershipsResults;
 
     }
+
+    @Test
+    public void checkProfilesAreWorking() {
+        assertNotNull(groupingsService.getGrouping("path:to:grouping0", "username0"));
+    }
 }

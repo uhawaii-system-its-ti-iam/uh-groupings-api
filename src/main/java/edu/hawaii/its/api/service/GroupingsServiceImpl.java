@@ -9,6 +9,8 @@ import edu.hawaii.its.api.util.Dates;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @Service("groupingsService")
 public class GroupingsServiceImpl implements GroupingsService {
     public static final Log logger = LogFactory.getLog(GroupingsServiceImpl.class);
+    private WsStemLookup STEM_LOOKUP;
 
     @Value("${groupings.api.settings}")
     private String SETTINGS;
@@ -134,16 +137,18 @@ public class GroupingsServiceImpl implements GroupingsService {
     @Value("$groupings.api.stem}")
     private String STEM;
 
-    private GrouperFactoryService gf = new GrouperFactoryServiceImpl();
+//    private GrouperFactoryService gf = new GrouperFactoryServiceImpl();
+    @Autowired
+    private GrouperFactoryService gf;
 
     public GroupingsServiceImpl() {
+        STEM_LOOKUP = gf.makeWsStemLookup(STEM, null);
     }
 
     public GroupingsServiceImpl(GrouperFactoryService grouperFactory) {
         gf = grouperFactory;
     }
 
-    private WsStemLookup STEM_LOOKUP = gf.makeWsStemLookup(STEM, null);
 
     @Override
     public List<GroupingsServiceResult> addGrouping(String username, String path, List<String> basis, List<String> include, List<String> exclude, List<String> owners) {

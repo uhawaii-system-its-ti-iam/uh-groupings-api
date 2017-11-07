@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("GrouperFactoryService")
+@Service("grouperFactoryService")
 @Profile(value = {"localhost", "test", "integrationTest"})
 public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public GrouperFactoryServiceImpl() {

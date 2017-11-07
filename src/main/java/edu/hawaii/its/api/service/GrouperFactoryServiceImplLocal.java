@@ -15,10 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Member;
 import java.util.*;
 
-@Service("GrouperFactoryService")
+@Service("grouperFactoryService")
 @Profile(value = {"default", "dev", "localTest"})
 public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 

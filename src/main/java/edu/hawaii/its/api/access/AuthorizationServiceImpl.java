@@ -3,7 +3,6 @@ package edu.hawaii.its.api.access;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.controller.GroupingsRestController;
-import edu.hawaii.its.api.service.GroupingsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +26,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private List<String> users;
 
     private Map<String, List<Role>> userMap = new HashMap<>();
-
-    @Autowired
-    private GroupingsService gs;
 
     @Autowired
     private GroupingsRestController gc;
@@ -116,7 +112,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     public boolean fetchAdmin(String username) {
         System.out.println("//////////////////////////////");
         try {
-            if (!gs.adminLists(username).getAllGroupings().isEmpty()) {
+
+            if (gc.adminLists(username).getBody().getAllGroupings().isEmpty()) {
                 System.out.println("this person is an admin");
                 return true;
             } else {
