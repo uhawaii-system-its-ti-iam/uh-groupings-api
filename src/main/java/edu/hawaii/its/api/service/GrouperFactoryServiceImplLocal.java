@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Member;
 import java.util.*;
 
 @Service("GrouperFactoryService")
@@ -609,32 +610,73 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
-                                                                                       //TODO
                                                                                        String privilegeName,
                                                                                        WsSubjectLookup lookup,
                                                                                        boolean allowed) {
 
-//        return new GcAssignGrouperPrivilegesLite()
-//                .assignGroupName(groupName)
-//                .assignPrivilegeName(privilegeName)
-//                .assignSubjectLookup(lookup)
-//                .assignAllowed(allowed)
-//                .execute();
-        throw new NotImplementedException();
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult = new WsAssignGrouperPrivilegesLiteResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupName);
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        if(privilegeName.equals(PRIVILEGE_OPT_IN)){
+
+            membership.setOptInEnabled(allowed);
+        }
+
+        else if(privilegeName.equals(PRIVILEGE_OPT_OUT)){
+
+            membership.setOptOutEnabled(allowed);
+        }
+        else {
+            throw new IllegalArgumentException("Privilege Name not acceptable");
+        }
+
+        return wsAssignGrouperPrivilegsLiteResult;
     }
 
     @Override
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
-                                                                                 //TODO
                                                                                  String privilegeName,
                                                                                  WsSubjectLookup lookup) {
 
-//        return new GcGetGrouperPrivilegesLite()
-//                .assignGroupName(groupName)
-//                .assignPrivilegeName(privilegeName)
-//                .assignSubjectLookup(lookup)
-//                .execute();
-        throw new NotImplementedException();
+        WsGetGrouperPrivilegesLiteResult wsGetGrouperPrivilegesLiteResult = new WsGetGrouperPrivilegesLiteResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(FAILURE);
+
+        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupName);
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        boolean enabled = false;
+
+        if(privilegeName.equals(PRIVILEGE_OPT_IN)){
+
+            if(membership.isOptInEnabled()) {
+                enabled = true;
+            }
+        }
+
+        else if(privilegeName.equals(PRIVILEGE_OPT_OUT)){
+
+            if(membership.isOptOutEnabled()) {
+                enabled = true;
+            }
+        }
+        else {
+            throw new IllegalArgumentException("Privilege Name not acceptable");
+        }
+
+        if(enabled) {
+            wsResultMeta.setResultCode(SUCCESS_ALLOWED);
+        }
+
+        wsGetGrouperPrivilegesLiteResult.setResultMetadata(wsResultMeta);
+
+        return wsGetGrouperPrivilegesLiteResult;
     }
 
     @Override
