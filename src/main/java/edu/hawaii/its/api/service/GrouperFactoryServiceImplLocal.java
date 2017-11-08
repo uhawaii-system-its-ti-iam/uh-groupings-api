@@ -271,7 +271,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         boolean inInclude = grouping.getInclude().getMembers().contains(newGroupMember);
 
 
-        if (group.endsWith(EXCLUDE)) {
+        if (group.endsWith(OWNERS)) {
+            addMember(grouping.getOwners(), newGroupMember);
+        } else if (group.endsWith(EXCLUDE)) {
             if (inBasis) {
                 addMember(grouping.getExclude(), newGroupMember);
             } else if (inInclude) {
@@ -298,7 +300,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(group, group, group, group);
         Person personToDelete = personRepository.findByUsername(memberToDelete);
 
-        if (group.endsWith(EXCLUDE)) {
+        if (group.endsWith(OWNERS)) {
+            deleteMember(grouping.getOwners(), personToDelete);
+        }
+        else if (group.endsWith(EXCLUDE)) {
             deleteMember(grouping.getExclude(), personToDelete);
 
         } else if (group.endsWith(INCLUDE)) {
@@ -621,16 +626,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Group group = groupRepository.findByPath(groupName);
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
-        if(privilegeName.equals(PRIVILEGE_OPT_IN)){
+        if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
             membership.setOptInEnabled(allowed);
-        }
-
-        else if(privilegeName.equals(PRIVILEGE_OPT_OUT)){
+        } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
             membership.setOptOutEnabled(allowed);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
@@ -652,24 +654,21 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         boolean enabled = false;
 
-        if(privilegeName.equals(PRIVILEGE_OPT_IN)){
+        if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
-            if(membership.isOptInEnabled()) {
+            if (membership.isOptInEnabled()) {
                 enabled = true;
             }
-        }
+        } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
-        else if(privilegeName.equals(PRIVILEGE_OPT_OUT)){
-
-            if(membership.isOptOutEnabled()) {
+            if (membership.isOptOutEnabled()) {
                 enabled = true;
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
-        if(enabled) {
+        if (enabled) {
             wsResultMeta.setResultCode(SUCCESS_ALLOWED);
         }
 

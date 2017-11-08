@@ -5,6 +5,7 @@ import javax.persistence.*;
 @Entity
 public class Membership implements Comparable<Membership> {
 
+    //todo get generated value to work
     @Id
     @GeneratedValue
     @Column
