@@ -9,6 +9,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

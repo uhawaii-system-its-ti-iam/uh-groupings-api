@@ -142,6 +142,9 @@ public class GroupingsServiceTest {
     @Autowired
     GroupingsServiceImpl gs;
 
+    @Autowired
+    private GrouperFactoryService gfs;
+
     @Test
     public void groupingParentPath() {
         String[] groups = new String[]
@@ -162,7 +165,7 @@ public class GroupingsServiceTest {
     @Test
     public void extractGroupPaths() {
         List<WsGroup> groups = new ArrayList<>();
-        List<String> groupNames = gs.extractGroupPaths(groups);
+        List<String> groupNames;
 
         for (int i = 0; i < 3; i++) {
             groups.add(new WsGroup());

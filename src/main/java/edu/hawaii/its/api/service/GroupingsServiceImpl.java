@@ -10,7 +10,6 @@ import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -142,7 +141,6 @@ public class GroupingsServiceImpl implements GroupingsService {
     private GrouperFactoryService gf;
 
     public GroupingsServiceImpl() {
-        STEM_LOOKUP = gf.makeWsStemLookup(STEM, null);
     }
 
     public GroupingsServiceImpl(GrouperFactoryService grouperFactory) {
@@ -1393,6 +1391,7 @@ public class GroupingsServiceImpl implements GroupingsService {
      */
     List<String> getGroupPaths(String username) {
         logger.info("getGroupPaths; username: " + username + ";");
+        STEM_LOOKUP = gf.makeWsStemLookup(STEM, null);
 
         WsGetGroupsResults wsGetGroupsResults = gf.makeWsGetGroupsResults(
                 username,

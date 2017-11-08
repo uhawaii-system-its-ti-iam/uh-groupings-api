@@ -3,12 +3,15 @@ package edu.hawaii.its.api.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.service.GrouperFactoryService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,6 +119,7 @@ public class TestGroupingsRestController {
 
         gc.removeOwnership(GROUPING, tst[0], tst[5]);
     }
+
 
     @Test
     public void testConstruction() {
