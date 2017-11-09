@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 
 @Entity
@@ -7,7 +9,8 @@ public class Membership implements Comparable<Membership> {
 
     //todo get generated value to work
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
     @Column
     private String id;
 

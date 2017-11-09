@@ -296,7 +296,7 @@ public class GroupingsServiceMockTest {
         GroupingsServiceResult adminAdds = groupingsService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, randomUser.getUsername());
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
-        assertEquals(adminAdds.getResultCode(), SUCCESS);
+        assertEquals(SUCCESS, adminAdds.getResultCode());
     }
 
 

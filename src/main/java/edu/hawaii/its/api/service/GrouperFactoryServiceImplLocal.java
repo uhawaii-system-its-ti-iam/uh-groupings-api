@@ -270,6 +270,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         boolean inExclude = grouping.getExclude().getMembers().contains(newGroupMember);
         boolean inInclude = grouping.getInclude().getMembers().contains(newGroupMember);
 
+        //todo find where WsResultMeta is not getting added
 
         if (group.endsWith(OWNERS)) {
             addMember(grouping.getOwners(), newGroupMember);
