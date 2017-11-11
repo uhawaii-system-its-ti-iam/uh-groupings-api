@@ -223,19 +223,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, String newMember) {
-        WsAddMemberResults wsAddMemberResults = new WsAddMemberResults();
 
-        Grouping ownedGrouping = groupingRepository.findByOwnersPath(group);
-        Person owner = personRepository.findByUsername(lookup.getSubjectIdentifier());
-
-        if (ownedGrouping.getOwners().getMembers().contains(owner)) {
-            wsAddMemberResults = makeWsAddMemberResults(group, newMember);
-        } else {
-            WsResultMeta wsResultMeta = new WsResultMeta();
-            wsResultMeta.setResultCode(FAILURE);
-        }
-
-        return wsAddMemberResults;
+        return makeWsAddMemberResults(group, newMember);
     }
 
     @Override

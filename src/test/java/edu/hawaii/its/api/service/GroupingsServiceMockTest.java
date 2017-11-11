@@ -264,20 +264,6 @@ public class GroupingsServiceMockTest {
     @Test
     public void assignOwnershipTest() {
 
-//        given(gf.makeWsSubjectLookup(users.get(1).getUsername())).willReturn(lookups.get(1));
-//        given(gf.makeWsSubjectLookup(users.get(0).getUsername())).willReturn(lookups.get(0));
-//        given(gf.makeWsSubjectLookup(ADMIN_USER)).willReturn(ADMIN_LOOKUP);
-//
-//        when(gf.makeWsHasMemberResults(GROUPING_0_OWNERS_PATH, users.get(1).getUsername())).thenReturn(hasMemberResults(GROUPING_0_OWNERS_PATH, users.get(1).getUsername()));
-//        when(gf.makeWsHasMemberResults(GROUPING_ADMINS, users.get(1).getUsername())).thenReturn(hasMemberResults(GROUPING_ADMINS, users.get(1).getUsername()));
-//
-//        when(gf.makeWsAddMemberResults(GROUPING_0_OWNERS_PATH, ADMIN_LOOKUP, users.get(1).getUsername())).thenReturn(addMemberResults(GROUPING_0_OWNERS_PATH, users.get(1).getUsername()));
-//        when(gf.makeWsHasMemberResults(GROUPING_0_OWNERS_PATH, ADMIN_USER)).thenReturn(hasMemberResults(GROUPING_0_OWNERS_PATH, ADMIN_USER));
-//        when(gf.makeWsHasMemberResults(GROUPING_ADMINS, ADMIN_USER)).thenReturn(hasMemberResults(GROUPING_ADMINS, ADMIN_USER));
-//
-//        when(gf.makeWsAddMemberResults(GROUPING_0_OWNERS_PATH, lookups.get(0), users.get(1).getUsername())).thenReturn(addMemberResults(GROUPING_0_OWNERS_PATH, users.get(1).getUsername()));
-//        when(gf.makeWsHasMemberResults(GROUPING_0_OWNERS_PATH, users.get(0).getUsername())).thenReturn(hasMemberResults(GROUPING_0_OWNERS_PATH, users.get(0).getUsername()));
-//        when(gf.makeWsHasMemberResults(GROUPING_ADMINS, users.get(0).getUsername())).thenReturn(hasMemberResults(GROUPING_ADMINS, users.get(0).getUsername()));
         Person randomUser = personRepository.findByUsername(users.get(1).getUsername());
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
@@ -303,19 +289,6 @@ public class GroupingsServiceMockTest {
     @Test
     //todo
     public void changeListservStatusTest() {
-        List<String> attributes = new ArrayList<>();
-        attributes.add(LISTSERV);
-
-//        given(gf.makeWsHasMemberResults(GROUPING_4_OWNERS_PATH, users.get(1).getUsername())).willReturn(hasMemberResults(GROUPING_4_OWNERS_PATH, users.get(1).getUsername()));
-//        given(gf.makeWsHasMemberResults(GROUPING_4_OWNERS_PATH, users.get(0).getUsername())).willReturn(hasMemberResults(GROUPING_4_OWNERS_PATH, users.get(0).getUsername()));
-//        given(gf.makeWsHasMemberResults(GROUPING_4_OWNERS_PATH, ADMIN_USER)).willReturn(hasMemberResults(GROUPING_4_OWNERS_PATH, ADMIN_USER));
-//
-//        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, users.get(1).getUsername())).willReturn(hasMemberResults(GROUPING_ADMINS, users.get(1).getUsername()));
-//        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, users.get(0).getUsername())).willReturn(hasMemberResults(GROUPING_ADMINS, users.get(0).getUsername()));
-//        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, ADMIN_USER)).willReturn(hasMemberResults(GROUPING_ADMINS, ADMIN_USER));
-//
-//        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResultsForGrouping(GROUPING_4_PATH));
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
@@ -323,8 +296,7 @@ public class GroupingsServiceMockTest {
         GroupingsServiceResult turnOnWhenOffRandom = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(1).getUsername(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, true));
+
         GroupingsServiceResult turnOnWhenOffOwner = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(0).getUsername(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
@@ -332,13 +304,11 @@ public class GroupingsServiceMockTest {
         GroupingsServiceResult turnOnWhenOnRandom = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(1).getUsername(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, true));
+
         GroupingsServiceResult turnOnWhenOnOwner = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(0).getUsername(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, true));
+
         GroupingsServiceResult turnOnWhenOnAdmin = groupingsService.changeListservStatus(GROUPING_4_PATH, ADMIN_USER, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
@@ -346,19 +316,15 @@ public class GroupingsServiceMockTest {
         GroupingsServiceResult turnOffWhenOnRandom = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(1).getUsername(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_REMOVE_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, false));
+
         GroupingsServiceResult turnOffWhenOnOwner = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(0).getUsername(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
 
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, true));
         GroupingsServiceResult turnOnWhenOffAdmin = groupingsService.changeListservStatus(GROUPING_4_PATH, ADMIN_USER, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_REMOVE_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, false));
+
         GroupingsServiceResult turnOffWhenOnAdmin = groupingsService.changeListservStatus(GROUPING_4_PATH, ADMIN_USER, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
@@ -366,13 +332,11 @@ public class GroupingsServiceMockTest {
         GroupingsServiceResult turnOffWhenOffRandom = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(1).getUsername(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_REMOVE_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, false));
+
         GroupingsServiceResult turnOffWhenOffOwner = groupingsService.changeListservStatus(GROUPING_4_PATH, users.get(0).getUsername(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
-//        given(gf.makeWsAssignAttributesResultsForGroup(ASSIGN_TYPE_GROUP, OPERATION_REMOVE_ATTRIBUTE, LISTSERV, GROUPING_4_PATH))
-//                .willReturn(makeWsAssignAttributesResultsForGrouping(GROUPING_4_PATH, LISTSERV, false));
+
         GroupingsServiceResult turnOffWhenOffAdmin = groupingsService.changeListservStatus(GROUPING_4_PATH, ADMIN_USER, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isListservOn());
@@ -398,8 +362,6 @@ public class GroupingsServiceMockTest {
         @Test
         //todo
     public void changeOptInStatusTest() {
-        List<String> attributes = new ArrayList<>();
-        attributes.add(OPT_IN);
 
 //        given(gf.makeWsHasMemberResults(GROUPING_0_OWNERS_PATH, users.get(1).getUsername())).willReturn(notMemberResults());
 //        given(gf.makeWsHasMemberResults(GROUPING_0_OWNERS_PATH, users.get(0).getUsername())).willReturn(isMemberResults());
