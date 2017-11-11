@@ -218,10 +218,13 @@ public class GroupingsServiceMockTest {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private MembershipRepository membershipRepository;
+
     @Before
     public void setup() throws Exception {
 
-        databaseSetup = new DatabaseSetup(personRepository, groupRepository, groupingRepository);
+        databaseSetup = new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
 
         admins.add(ADMIN_PERSON);
         adminGroup = new Group(GROUPING_ADMINS, admins);
@@ -287,7 +290,6 @@ public class GroupingsServiceMockTest {
 
 
     @Test
-    //todo
     public void changeListservStatusTest() {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_4_PATH);
@@ -1071,22 +1073,15 @@ public class GroupingsServiceMockTest {
     }
 
     @Test
-    //todo
     public void hasListservTest() {
-
-//        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, LISTSERV, GROUPING_0_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResultsForGrouping(GROUPING_0_PATH));
 
         boolean groupingHasListserv = groupingsService.hasListserv(GROUPING_0_PATH);
 
-        assertEquals(groupingHasListserv, false);
-
-//        given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, LISTSERV, GROUPING_3_PATH))
-//                .willReturn(makeWsGetAttributeAssignmentsResultsForGrouping(GROUPING_3_PATH));
+        assertEquals(false, groupingHasListserv);
 
         groupingHasListserv = groupingsService.hasListserv(GROUPING_3_PATH);
 
-        assertEquals(groupingHasListserv, true);
+        assertEquals(true, groupingHasListserv);
     }
 
     @Test

@@ -2,8 +2,10 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
@@ -22,15 +24,17 @@ public class DatabaseSetup {
     private PersonRepository personRepository;
     private GroupRepository groupRepository;
     private GroupingRepository groupingRepository;
+    private MembershipRepository membershipRepository;
 
     private List<Person> persons = new ArrayList<>();
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
 
-    public DatabaseSetup(PersonRepository personRepository, GroupRepository groupRepository, GroupingRepository groupingRepository) {
+    public DatabaseSetup(PersonRepository personRepository, GroupRepository groupRepository, GroupingRepository groupingRepository, MembershipRepository membershipRepository) {
         this.personRepository = personRepository;
         this.groupRepository = groupRepository;
         this.groupingRepository = groupingRepository;
+        this.membershipRepository = membershipRepository;
 
         fillDatabase();
     }
@@ -42,6 +46,7 @@ public class DatabaseSetup {
         fillGroupRepository();
         fillGroupingRepository();
 
+        setUpMemberships();
     }
 
     private void fillPersonRepository() {
@@ -245,6 +250,26 @@ public class DatabaseSetup {
         makeGrouping(pathRoot + 2, groups.get(8), groups.get(9), groups.get(10), groups.get(11), true, false, false);
         makeGrouping(pathRoot + 3, groups.get(12), groups.get(13), groups.get(14), groups.get(15), true, true, true);
         makeGrouping(pathRoot + 4, groups.get(16), groups.get(17), groups.get(18), groups.get(19), false, false, false);
+    }
+
+    private void setUpMemberships() {
+        Person grouperAll = new Person();
+        grouperAll.setUsername("GrouperAll");
+        personRepository.save(grouperAll);
+
+        Iterable<Group> groupList = groupRepository.findAll();
+
+        for(Group group : groupList) {
+            group.addMember(grouperAll);
+            groupRepository.save(group);
+        }
+
+        for(Group group : groupList) {
+            for(Person person : group.getMembers()) {
+                Membership membership = new Membership(person, group);
+                membershipRepository.save(membership);
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////

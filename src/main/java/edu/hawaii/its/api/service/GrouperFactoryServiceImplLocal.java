@@ -292,8 +292,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (group.endsWith(OWNERS)) {
             deleteMember(grouping.getOwners(), personToDelete);
-        }
-        else if (group.endsWith(EXCLUDE)) {
+        } else if (group.endsWith(EXCLUDE)) {
             deleteMember(grouping.getExclude(), personToDelete);
 
         } else if (group.endsWith(INCLUDE)) {
@@ -614,6 +613,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
         Group group = groupRepository.findByPath(groupName);
+
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
@@ -829,6 +829,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         List<WsAttributeDefName> wsAttributeDefNames = new ArrayList<>();
         List<WsAttributeAssign> wsAttributeAssigns = new ArrayList<>();
+
+        if (wsGetAttributeAssignmentsResults.getWsAttributeAssigns() != null) {
+            Collections.addAll(wsAttributeAssigns, wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+        }
+
+        if (wsGetAttributeAssignmentsResults.getWsAttributeDefNames() != null) {
+            Collections.addAll(wsAttributeDefNames, wsGetAttributeAssignmentsResults.getWsAttributeDefNames());
+        }
 
         WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
         WsAttributeDefName wsAttributeDefName = new WsAttributeDefName();

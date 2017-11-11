@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface MembershipRepository extends CrudRepository<Membership, Long> {
+public interface MembershipRepository extends CrudRepository<Membership, String> {
     List<Membership> findByPerson(Person person);
 
     List<Membership> findByPersonUsername(String username);
