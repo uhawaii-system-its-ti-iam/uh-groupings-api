@@ -626,6 +626,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
+        wsAssignGrouperPrivilegsLiteResult.setResultMetadata(wsResultMeta);
         return wsAssignGrouperPrivilegsLiteResult;
     }
 

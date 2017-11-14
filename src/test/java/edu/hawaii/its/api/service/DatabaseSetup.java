@@ -257,17 +257,37 @@ public class DatabaseSetup {
         grouperAll.setUsername("GrouperAll");
         personRepository.save(grouperAll);
 
-        Iterable<Group> groupList = groupRepository.findAll();
+        Iterable<Group> groups = groupRepository.findAll();
 
-        for(Group group : groupList) {
+        for(Group group : groups) {
             group.addMember(grouperAll);
             groupRepository.save(group);
         }
 
-        for(Group group : groupList) {
+        for(Group group : groups) {
             for(Person person : group.getMembers()) {
                 Membership membership = new Membership(person, group);
                 membershipRepository.save(membership);
+            }
+        }
+
+        Iterable<Grouping> groupings = groupingRepository.findAll();
+
+        for(Grouping grouping : groupings) {
+            Membership allExclude = membershipRepository.findByPersonAndGroup(grouperAll, grouping.getExclude());
+            Membership allInclude = membershipRepository.findByPersonAndGroup(grouperAll, grouping.getInclude());
+            Membership allComposite = membershipRepository.findByPersonAndGroup(grouperAll, grouping.getComposite());
+            if(grouping.isOptOutOn()){
+                allComposite.setOptOutEnabled(true);
+                allExclude.setOptInEnabled(true);
+                allExclude.setOptOutEnabled(true);
+
+            }
+            if(grouping.isOptInOn()){
+                allComposite.setOptInEnabled(true);
+                allInclude.setOptInEnabled(true);
+                allInclude.setOptOutEnabled(true);
+
             }
         }
     }
