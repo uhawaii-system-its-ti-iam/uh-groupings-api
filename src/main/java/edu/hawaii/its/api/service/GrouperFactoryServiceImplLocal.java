@@ -259,8 +259,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         boolean inExclude = grouping.getExclude().getMembers().contains(newGroupMember);
         boolean inInclude = grouping.getInclude().getMembers().contains(newGroupMember);
 
-        //todo find where WsResultMeta is not getting added
-
         if (group.endsWith(OWNERS)) {
             addMember(grouping.getOwners(), newGroupMember);
         } else if (group.endsWith(EXCLUDE)) {
@@ -299,24 +297,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             deleteMember(grouping.getInclude(), personToDelete);
         }
 
-        groupingRepository.save(grouping);
-
         return wsDeleteMemberResults;
     }
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, String memberToDelete) {
-        WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
 
-        Grouping ownedGrouping = groupingRepository.findByOwnersPath(group);
-        Person owner = personRepository.findByUsername(lookup.getSubjectIdentifier());
-
-        if (ownedGrouping.getOwners().getMembers().contains(owner)) {
-            wsDeleteMemberResults = makeWsDeleteMemberResults(group, memberToDelete);
-        } else {
-            WsResultMeta wsResultMeta = new WsResultMeta();
-            wsResultMeta.setResultCode(FAILURE);
-        }
+        WsDeleteMemberResults wsDeleteMemberResults = makeWsDeleteMemberResults(group, memberToDelete);
 
         return wsDeleteMemberResults;
     }
@@ -827,11 +814,12 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     private void deleteMember(Group group, Person person) {
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
-        group.getMembers().remove(person);
+        if (membership != null) {
+            group.getMembers().remove(person);
 
-        groupRepository.save(group);
-        membershipRepository.delete(membership);
-
+            groupRepository.save(group);
+            membershipRepository.delete(membership);
+        }
     }
 
     private WsGetAttributeAssignmentsResults addAssignmentResults(
