@@ -62,7 +62,7 @@ public class Person implements Comparable<Person> {
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof Person) && (compareTo((Person)o) == 0);
+        return (o instanceof Person) && (compareTo((Person) o) == 0);
     }
 
 
@@ -74,13 +74,13 @@ public class Person implements Comparable<Person> {
         int nameComp = nullSafeComparator.compare(getName(), person.getName());
         int uuidComp = nullSafeComparator.compare(getUuid(), person.getUuid());
 
-        if(usernameComp != 0){
+        if (usernameComp != 0) {
             return usernameComp;
         }
-        if(nameComp != 0){
+        if (nameComp != 0) {
             return nameComp;
         }
-        if(uuidComp != 0){
+        if (uuidComp != 0) {
             return uuidComp;
         }
         return 0;

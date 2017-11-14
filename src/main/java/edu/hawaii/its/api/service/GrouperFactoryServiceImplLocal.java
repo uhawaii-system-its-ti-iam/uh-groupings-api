@@ -320,9 +320,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, String memberToDelete) {
 
-        WsDeleteMemberResults wsDeleteMemberResults = makeWsDeleteMemberResults(group, memberToDelete);
-
-        return wsDeleteMemberResults;
+        return makeWsDeleteMemberResults(group, memberToDelete);
     }
 
     @Override
@@ -798,9 +796,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         ArrayList<Person> newBasisPlusInclude = new ArrayList<>();
         newBasisPlusInclude.addAll(basisPlusInclude.getMembers());
 
-        for (Person person : exclude.getMembers()) {
-            newBasisPlusInclude.remove(person);
-        }
+        newBasisPlusInclude.removeAll(exclude.getMembers());
         basisPlusIncludeMinusExcludeGroup.setMembers(newBasisPlusInclude);
 
         return basisPlusIncludeMinusExcludeGroup;

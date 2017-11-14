@@ -542,11 +542,8 @@ public class GroupingsServiceMockTest {
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
         //opt in Permission for include group true
-        WsAttributeAssignValue dateTime = makeWsAttributeAssignValueTime();
 
-        List<String> attributes = new ArrayList<>();
-
-//        //in include group not self opted
+        //in include group not self opted
         optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
 
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
@@ -575,10 +572,6 @@ public class GroupingsServiceMockTest {
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
         //opt in Permission for include group true
-        WsAttributeAssignValue dateTime = makeWsAttributeAssignValueTime();
-
-        List<String> attributes = new ArrayList<>();
-
         optInResults = groupingsService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
 
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
@@ -684,10 +677,9 @@ public class GroupingsServiceMockTest {
     }
 
     @Test
-    //todo
     public void groupingsInTest() {
-        String username = "username2";
-        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(username);
+
+        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(3).getUsername());
         List<String> groupPaths = new ArrayList<>();
 
         for (Group group : groupsIn) {
@@ -696,8 +688,9 @@ public class GroupingsServiceMockTest {
 
         List<Grouping> groupingsIn = groupingsService.groupingsIn(groupPaths);
 
-        for (int i = 0; i < groupingsIn.size(); i++) {
-            assertTrue(groupingsIn.get(i).getPath().equals(PATH_ROOT + i));
+        for(Grouping grouping : groupingsIn) {
+            assertTrue(grouping.getComposite().getUsernames().contains(users.get(3).getUsername()));
+            //todo check for trio
         }
     }
 
@@ -717,26 +710,11 @@ public class GroupingsServiceMockTest {
     //todo
     public void groupingsOwnedTest() {
         Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(0).getUsername());
-        List<String> attributes = new ArrayList<>();
         List<String> groupPaths = new ArrayList<>();
 
         for (Group group : groupsIn) {
             groupPaths.add(group.getPath());
         }
-
-        List<String> ownerGroups = groupPaths
-                .stream()
-                .filter(groupPath -> groupPath.endsWith(OWNERS))
-                .map(groupPath -> groupPath.substring(0, groupPath.length() - OWNERS.length()))
-                .collect(Collectors.toList());
-
-//        given(gf.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO, ownerGroups))
-//                .willReturn(makeWsGetAttributeAssignmentsResultsForTrios());
-//
-//        for (String groups : ownerGroups) {
-//            given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, groups))
-//                    .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
-//        }
 
         List<Grouping> groupingsOwned = groupingsService.groupingsOwned(groupPaths);
 
@@ -762,32 +740,11 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void adminListsTest() {
-        //todo
         Iterable<Grouping> groupings = groupingRepository.findAll();
         List<String> groupingPaths = new ArrayList<>();
         for (Grouping grouping : groupings) {
             groupingPaths.add(grouping.getPath());
         }
-        List<String> attributes = new ArrayList<>();
-
-//        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, ADMIN_USER)).willReturn(hasMemberResults(GROUPING_ADMINS, ADMIN_USER));
-//        given(gf.makeWsHasMemberResults(GROUPING_ADMINS, users.get(1).getUsername())).willReturn(hasMemberResults(GROUPING_ADMINS, users.get(1).getUsername()));
-//        given(gf.makeWsHasMemberResults(GROUPING_APPS, ADMIN_USER)).willReturn(hasMemberResults(GROUPING_APPS, ADMIN_USER));
-//        given(gf.makeWsHasMemberResults(GROUPING_APPS, users.get(1).getUsername())).willReturn(hasMemberResults(GROUPING_APPS, users.get(1).getUsername()));
-//
-//        given(gf.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO))
-//                .willReturn(makeWsGetAttributeAssignmentsResultsForTrios());
-//
-//        given(gf.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, ADMIN_LOOKUP, GROUPING_ADMINS))
-//                .willReturn(makeWsGetMembersResultsDB(GROUPING_ADMINS));
-//
-//        given(gf.makeWsSubjectLookup(ADMIN_USER)).willReturn(ADMIN_LOOKUP);
-//
-//        for (String groupingPath : groupingPaths) {
-//            given(gf.makeWsGetAttributeAssignmentsResultsForGroup(ASSIGN_TYPE_GROUP, groupingPath))
-//                    .willReturn(makeWsGetAttributeAssignmentsResults(attributes));
-//        }
-
         AdminListsHolder adminListsHolder = groupingsService.adminLists(ADMIN_USER);
         AdminListsHolder emptyAdminListHolder = groupingsService.adminLists(users.get(1).getUsername());
 
@@ -817,7 +774,6 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void checkSelfOptedTest() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
         //user is not in group
         boolean selfOpted = groupingsService.checkSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(2).getUsername());
@@ -925,7 +881,6 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void addMemberAsTest() {
-        //todo make database automatically update composite group
         Grouping grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
 
@@ -987,343 +942,4 @@ public class GroupingsServiceMockTest {
 
 //todo
     }
-
-    /////////////////////////////////////////////////////
-    //factory methods
-    //////////////////////////////////////////////////////////
-
-
-    private WsHasMemberResults hasMemberResults(String groupPath, String username) {
-        WsHasMemberResults isMemberResults = new WsHasMemberResults();
-        WsHasMemberResult isMemberResult = new WsHasMemberResult();
-        WsResultMeta isMemberMeta = new WsResultMeta();
-
-        Group group = groupRepository.findByPath(groupPath);
-
-        if (group.getUsernames().contains(username)) {
-            isMemberMeta.setResultCode(IS_MEMBER);
-        } else {
-            isMemberMeta.setResultCode("not member");
-        }
-
-        isMemberResult.setResultMetadata(isMemberMeta);
-        isMemberResults.setResults(new WsHasMemberResult[]{isMemberResult});
-
-        return isMemberResults;
-
-    }
-
-    private WsHasMemberResults isMemberResults() {
-        WsHasMemberResults isMemberResults = new WsHasMemberResults();
-        WsHasMemberResult isMemberResult = new WsHasMemberResult();
-        WsResultMeta isMemberMeta = new WsResultMeta();
-        isMemberMeta.setResultCode(IS_MEMBER);
-        isMemberResult.setResultMetadata(isMemberMeta);
-        isMemberResults.setResults(new WsHasMemberResult[]{isMemberResult});
-
-        return isMemberResults;
-    }
-
-    private WsHasMemberResults notMemberResults() {
-        WsHasMemberResults notMemberResults = new WsHasMemberResults();
-        WsHasMemberResult notMemberResult = new WsHasMemberResult();
-        WsResultMeta notMemberMeta = new WsResultMeta();
-        notMemberMeta.setResultCode("not member");
-        notMemberResult.setResultMetadata(notMemberMeta);
-        notMemberResults.setResults(new WsHasMemberResult[]{notMemberResult});
-
-        return notMemberResults;
-    }
-
-    private WsAddMemberResults addMemberResults(String groupPath, String username) {
-        WsAddMemberResults addMemberResults = new WsAddMemberResults();
-        WsResultMeta resultMeta = new WsResultMeta();
-
-        try {
-            Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(groupPath, groupPath, groupPath, groupPath);
-
-            Person person = personRepository.findByUsername(username);
-
-            Group group = groupRepository.findByPath(groupPath);
-
-            if (!group.getMembers().contains(person)) {
-                group.getMembers().add(person);
-
-                groupRepository.save(group);
-
-                Grouping newGrouping = databaseSetup.makeGrouping(
-                        grouping.getPath(),
-                        grouping.getBasis(),
-                        grouping.getExclude(),
-                        grouping.getInclude(),
-                        grouping.getOwners(),
-                        grouping.isListservOn(),
-                        grouping.isOptInOn(),
-                        grouping.isOptOutOn());
-
-                groupingRepository.save(newGrouping);
-            }
-
-            resultMeta.setResultCode(SUCCESS);
-        } catch (Exception e) {
-
-            resultMeta.setResultCode(FAILURE);
-        }
-
-        addMemberResults.setResultMetadata(resultMeta);
-
-        return addMemberResults;
-    }
-
-    private WsDeleteMemberResults deleteMemberResultsSuccess(String groupPath, String username) {
-        WsDeleteMemberResults deleteMemberResults = new WsDeleteMemberResults();
-        WsResultMeta resultMeta = new WsResultMeta();
-        resultMeta.setResultCode(SUCCESS);
-        deleteMemberResults.setResultMetadata(resultMeta);
-
-        Person person = personRepository.findByUsername(username);
-
-        Group group = groupRepository.findByPath(groupPath);
-        group.getMembers().remove(person);
-
-        groupRepository.save(group);
-
-        Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(groupPath, groupPath, groupPath, groupPath);
-
-        //makes sure composite is updated
-        Grouping newGrouping = databaseSetup.makeGrouping(
-                grouping.getPath(),
-                grouping.getBasis(),
-                grouping.getExclude(),
-                grouping.getInclude(),
-                grouping.getOwners(),
-                grouping.isListservOn(),
-                grouping.isOptInOn(),
-                grouping.isOptOutOn());
-
-        groupingRepository.save(newGrouping);
-
-        return deleteMemberResults;
-    }
-
-    private WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGrouping(String groupingPath) {
-        WsGetAttributeAssignmentsResults getAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
-        List<WsAttributeDefName> attributeDefNames = new ArrayList<>();
-        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-        List<String> attributes = new ArrayList<>();
-
-        Grouping grouping = groupingRepository.findByPath(groupingPath);
-
-        if (grouping.isListservOn()) {
-            attributes.add(LISTSERV);
-        }
-        if (grouping.isOptInOn()) {
-            attributes.add(OPT_IN);
-        }
-        if (grouping.isOptOutOn()) {
-            attributes.add(OPT_OUT);
-        }
-
-        if (attributes.size() > 0) {
-            for (String attribute : attributes) {
-                WsAttributeDefName attributeDefName = new WsAttributeDefName();
-                attributeDefName.setName(attribute);
-                attributeDefNames.add(attributeDefName);
-
-                WsAttributeAssign attributeAssign = new WsAttributeAssign();
-                attributeAssign.setAttributeDefNameName(attribute);
-                attributeAssigns.add(attributeAssign);
-            }
-            getAttributeAssignmentsResults.setWsAttributeDefNames(attributeDefNames.toArray(new WsAttributeDefName[attributeDefNames.size()]));
-            getAttributeAssignmentsResults.setWsAttributeAssigns(attributeAssigns.toArray(new WsAttributeAssign[attributeDefNames.size()]));
-
-        }
-        return getAttributeAssignmentsResults;
-
-    }
-
-    private WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResults(List<String> attributes) {
-        //todo update for database
-        WsGetAttributeAssignmentsResults getAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
-        List<WsAttributeDefName> attributeDefNames = new ArrayList<>();
-        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-
-        if (attributes != null) {
-            for (String attribute : attributes) {
-                WsAttributeDefName attributeDefName = new WsAttributeDefName();
-                attributeDefName.setName(attribute);
-                attributeDefNames.add(attributeDefName);
-
-                WsAttributeAssign attributeAssign = new WsAttributeAssign();
-                attributeAssign.setAttributeDefNameName(attribute);
-                attributeAssigns.add(attributeAssign);
-            }
-            getAttributeAssignmentsResults.setWsAttributeDefNames(attributeDefNames.toArray(new WsAttributeDefName[attributeDefNames.size()]));
-            getAttributeAssignmentsResults.setWsAttributeAssigns(attributeAssigns.toArray(new WsAttributeAssign[attributeDefNames.size()]));
-
-        }
-        return getAttributeAssignmentsResults;
-
-    }
-
-    private WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForTrios() {
-        //todo change other methods to get trios for groupings owned
-        WsGetAttributeAssignmentsResults getAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
-
-        WsAttributeDefName attributeDefName = new WsAttributeDefName();
-        attributeDefName.setName(TRIO);
-
-        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-
-        Iterable<Grouping> groupings = groupingRepository.findAll();
-        List<String> groupingPaths = new ArrayList<>();
-        for (Grouping grouping : groupings) {
-            groupingPaths.add(grouping.getPath());
-        }
-        List<WsGroup> groupsList = new ArrayList<>();
-        for (String groupPath : groupingPaths) {
-            WsGroup group = new WsGroup();
-            group.setName(groupPath);
-            groupsList.add(group);
-        }
-
-        WsGroup[] groups = groupsList.toArray(new WsGroup[groupsList.size()]);
-
-        for (String group : groupingPaths) {
-
-            WsAttributeAssign attributeAssign = new WsAttributeAssign();
-            attributeAssign.setAttributeDefNameName(TRIO);
-            attributeAssign.setOwnerGroupName(group);
-            attributeAssigns.add(attributeAssign);
-        }
-        getAttributeAssignmentsResults.setWsAttributeDefNames(new WsAttributeDefName[]{attributeDefName});
-        getAttributeAssignmentsResults.setWsAttributeAssigns(attributeAssigns.toArray(new WsAttributeAssign[attributeAssigns.size()]));
-        getAttributeAssignmentsResults.setWsGroups(groups);
-
-        return getAttributeAssignmentsResults;
-    }
-
-    private WsAssignAttributesResults makeWsAssignAttributesResults(String resultCode) {
-        WsAssignAttributesResults assignAttributesResults = new WsAssignAttributesResults();
-        WsResultMeta resultMeta = new WsResultMeta();
-        resultMeta.setResultCode(resultCode);
-        assignAttributesResults.setResultMetadata(resultMeta);
-
-        return assignAttributesResults;
-    }
-
-    private WsAssignAttributesResults makeWsAssignAttributesResultsForGrouping(String groupingPath, String attribute, boolean isOn) {
-        WsAssignAttributesResults assignAttributesResults = new WsAssignAttributesResults();
-        WsResultMeta resultMeta = new WsResultMeta();
-        resultMeta.setResultCode(SUCCESS);
-        assignAttributesResults.setResultMetadata(resultMeta);
-
-        Grouping grouping = groupingRepository.findByPath(groupingPath);
-
-        if (attribute.equals(LISTSERV)) {
-            grouping.setListservOn(isOn);
-        } else if (attribute.equals(OPT_IN)) {
-            grouping.setOptInOn(isOn);
-        } else if (attribute.equals(OPT_OUT)) {
-            grouping.setOptOutOn(isOn);
-        }
-
-        groupingRepository.save(grouping);
-
-        return assignAttributesResults;
-    }
-
-
-    private WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String resultCode) {
-        //todo update for database
-        WsAssignGrouperPrivilegesLiteResult agplr = new WsAssignGrouperPrivilegesLiteResult();
-        WsResultMeta resultMeta = new WsResultMeta();
-        resultMeta.setResultCode(resultCode);
-        agplr.setResultMetadata(resultMeta);
-
-        return agplr;
-    }
-
-    private WsGetMembersResults makeWsGetMembersResults(String groupPath) {
-        //todo update for database
-        List<WsSubject> subjects = new ArrayList<>();
-        List<Person> persons = groupRepository.findByPath(groupPath).getMembers();
-        for (Person person : persons) {
-            WsSubject subject = new WsSubject();
-            subject.setName(person.getName());
-            subject.setId(person.getUuid());
-            subject.setAttributeValues(new String[]{person.getUsername()});
-
-            subjects.add(subject);
-
-        }
-
-        WsGetMembersResults getMembersResults = new WsGetMembersResults();
-        WsGetMembersResult getMembersResult = new WsGetMembersResult();
-        getMembersResult.setWsSubjects(subjects.toArray(new WsSubject[subjects.size()]));
-
-        WsGetMembersResult[] membersResults = new WsGetMembersResult[]{getMembersResult};
-        getMembersResults.setResults(membersResults);
-
-
-        return getMembersResults;
-    }
-
-    private WsGetMembersResults makeWsGetMembersResultsDB(String groupPath) {
-        List<WsSubject> subjects = new ArrayList<>();
-        Group group = groupRepository.findByPath(groupPath);
-
-        List<Person> members = group.getMembers();
-        for (Person member : members) {
-            WsSubject subject = new WsSubject();
-            subject.setName(member.getName());
-            subject.setId(member.getUuid());
-            subject.setAttributeValues(new String[]{member.getUsername()});
-
-            subjects.add(subject);
-        }
-
-        WsGetMembersResults getMembersResults = new WsGetMembersResults();
-        WsGetMembersResult getMembersResult = new WsGetMembersResult();
-        getMembersResult.setWsSubjects(subjects.toArray(new WsSubject[subjects.size()]));
-
-        WsGetMembersResult[] membersResults = new WsGetMembersResult[]{getMembersResult};
-        getMembersResults.setResults(membersResults);
-
-        return getMembersResults;
-    }
-
-    private WsAttributeAssignValue makeWsAttributeAssignValueTime() {
-        WsAttributeAssignValue attributeAssignValue = new WsAttributeAssignValue();
-        attributeAssignValue.setValueSystem("time");
-        return attributeAssignValue;
-    }
-
-    private WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(boolean success) {
-        //todo update for database
-
-        WsGetGrouperPrivilegesLiteResult gplr = new WsGetGrouperPrivilegesLiteResult();
-        WsResultMeta resultMetadata = new WsResultMeta();
-        if (success) {
-            resultMetadata.setResultCode(SUCCESS_ALLOWED);
-        } else {
-            resultMetadata.setResultCode(FAILURE);
-        }
-        gplr.setResultMetadata(resultMetadata);
-
-        return gplr;
-    }
-
-    private WsGetMembershipsResults makeWsGetMembershipsResults() {
-        //todo update for database
-        WsGetMembershipsResults membershipsResults = new WsGetMembershipsResults();
-        WsMembership membership = new WsMembership();
-        membership.setMembershipId("1234");
-        WsMembership[] memberships = new WsMembership[]{membership};
-        membershipsResults.setWsMemberships(memberships);
-
-        return membershipsResults;
-
-    }
-
 }
