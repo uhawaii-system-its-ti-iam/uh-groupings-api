@@ -275,6 +275,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             }
         }
 
+        grouping = groupingRepository.findByPath(grouping.getPath());
+        Group composite = buildComposite(
+                grouping.getInclude(),
+                grouping.getExclude(),
+                grouping.getBasis(),
+                grouping.getPath());
+
+        groupRepository.save(composite);
         return wsAddMemberResults;
     }
 
@@ -297,6 +305,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             deleteMember(grouping.getInclude(), personToDelete);
         }
 
+        grouping = groupingRepository.findByPath(grouping.getPath());
+        grouping = groupingRepository.findByPath(grouping.getPath());
+        Group composite = buildComposite(
+                grouping.getInclude(),
+                grouping.getExclude(),
+                grouping.getBasis(),
+                grouping.getPath());
+
+        groupRepository.save(composite);
         return wsDeleteMemberResults;
     }
 
