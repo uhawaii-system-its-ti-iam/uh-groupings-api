@@ -136,7 +136,7 @@ public class GroupingsServiceImpl implements GroupingsService {
     @Value("$groupings.api.stem}")
     private String STEM;
 
-//    private GrouperFactoryService gf = new GrouperFactoryServiceImpl();
+    //    private GrouperFactoryService gf = new GrouperFactoryServiceImpl();
     @Autowired
     private GrouperFactoryService gf;
 
@@ -830,8 +830,10 @@ public class GroupingsServiceImpl implements GroupingsService {
                     , membershipID);
 
             for (WsAttributeAssign att : wsAttributes) {
-                if (att.getAttributeDefNameName().equals(SELF_OPTED)) {
-                    return true;
+                if (att.getAttributeDefNameName() != null) {
+                    if (att.getAttributeDefNameName().equals(SELF_OPTED)) {
+                        return true;
+                    }
                 }
             }
         }

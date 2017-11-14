@@ -513,14 +513,22 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             onOrrOff = false;
         }
 
-        if (attributeDefNameName.equals(LISTSERV)) {
-            grouping.setListservOn(onOrrOff);
+        if (onOrrOff != null) {
+            if (attributeDefNameName.equals(LISTSERV))
 
-        } else if (attributeDefNameName.equals(OPT_IN)) {
-            grouping.setOptInOn(onOrrOff);
+            {
+                grouping.setListservOn(onOrrOff);
 
-        } else if (attributeDefNameName.equals(OPT_OUT)) {
-            grouping.setOptOutOn(onOrrOff);
+            } else if (attributeDefNameName.equals(OPT_IN))
+
+            {
+                grouping.setOptInOn(onOrrOff);
+
+            } else if (attributeDefNameName.equals(OPT_OUT))
+
+            {
+                grouping.setOptOutOn(onOrrOff);
+            }
         }
 
         return wsAssignAttributesResults;
@@ -708,7 +716,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         for (Person person : members) {
             WsSubject subject = new WsSubject();
-            subject.setId(person.getUsername());
+            subject.setId(person.getUuid());
+            subject.setName(person.getName());
+            subject.setAttributeValues(new String[]{person.getUsername()});
 
             subjectList.add(subject);
         }
