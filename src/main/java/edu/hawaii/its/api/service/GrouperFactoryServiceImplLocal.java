@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("grouperFactoryService")
 @Profile(value = {"default", "dev", "localTest"})
@@ -927,21 +928,21 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             List<String> ownerGroupNames) {
 
         List<WsGroup> wsGroupList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsGroups());
+        List<WsGroup> groupList = new ArrayList<>();
         List<WsAttributeAssign> wsAttributeAssignList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+        List<WsAttributeAssign> attributeAssignList = new ArrayList<>();
 
-        for (WsGroup group : wsGroupList) {
-            if (!ownerGroupNames.contains(group.getName())) {
-                wsGroupList.remove(group);
-            }
-        }
-        for (WsAttributeAssign attributeAssign : wsAttributeAssignList) {
-            if (!ownerGroupNames.contains(attributeAssign.getOwnerGroupName())) {
-                wsAttributeAssignList.remove(attributeAssign);
-            }
-        }
+        groupList.addAll(wsGroupList
+                .stream()
+                .filter(group -> ownerGroupNames.contains(group.getName()))
+                .collect(Collectors.toList()));
+        attributeAssignList.addAll(wsAttributeAssignList
+                .stream()
+                .filter(attributeAssign -> ownerGroupNames.contains(attributeAssign.getOwnerGroupName()))
+                .collect(Collectors.toList()));
 
-        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignList.toArray(new WsAttributeAssign[wsAttributeAssignList.size()]));
-        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupList.toArray(new WsGroup[wsGroupList.size()]));
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(attributeAssignList.toArray(new WsAttributeAssign[attributeAssignList.size()]));
+        wsGetAttributeAssignmentsResults.setWsGroups(groupList.toArray(new WsGroup[groupList.size()]));
 
         return wsGetAttributeAssignmentsResults;
     }

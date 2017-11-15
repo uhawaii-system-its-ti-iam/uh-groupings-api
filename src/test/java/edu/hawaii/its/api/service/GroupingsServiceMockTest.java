@@ -679,18 +679,30 @@ public class GroupingsServiceMockTest {
     @Test
     public void groupingsInTest() {
 
-        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(3).getUsername());
+        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(6).getUsername());
         List<String> groupPaths = new ArrayList<>();
+        List<String> supposedGroupings = new ArrayList<>();
 
         for (Group group : groupsIn) {
             groupPaths.add(group.getPath());
         }
+        for(String groupPath : groupPaths) {
+            if(groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*")) {
+                supposedGroupings.add(groupPath);
+            }
+        }
 
         List<Grouping> groupingsIn = groupingsService.groupingsIn(groupPaths);
-
+        List<String> groupingPaths = new ArrayList<>();
         for(Grouping grouping : groupingsIn) {
-            assertTrue(grouping.getComposite().getUsernames().contains(users.get(3).getUsername()));
-            //todo check for trio
+            groupingPaths.add(grouping.getPath());
+        }
+
+        for(String path : supposedGroupings) {
+            assertTrue(groupingPaths.contains(path));
+        }
+        for(Grouping grouping : groupingsIn) {
+            assertTrue(supposedGroupings.contains(grouping.getPath()));
         }
     }
 
