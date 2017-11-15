@@ -650,7 +650,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(FAILURE);
 
-        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Person person = personRepository.findByUsername(EVERY_ENTITY);
         Group group = groupRepository.findByPath(groupName);
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
