@@ -536,31 +536,29 @@ public class GroupingsServiceMockTest {
     @Test
     public void optInTest() {
 
-        //opt in Permission for include group false
-        List<GroupingsServiceResult> optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
+        Iterable<Grouping> groupings = groupingRepository.findAll();
 
+        //opt in Permission for include group false
+        List<GroupingsServiceResult> optInResults = groupingsService.optIn(users.get(2).getUsername(), GROUPING_2_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //opt in Permission for include group true
+        //opt in Permission for include group true and not in group, but in basis
+        optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_1_PATH);
+        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(2).getResultCode().startsWith(FAILURE));
 
-        //in include group not self opted
+        //opt in Permission for include group true but already in group, not self opted
         optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
-
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //TODO make a mock database
-        //not in include group
-//        given(gf.makeWsHasMemberResults(GROUPING_0_INCLUDE_PATH, users.get(1).getUsername())).willReturn(notMemberResults());
-//
-//        optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
-//
-//        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-//        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-//        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
-
-
+        //opt in Permission for include group true but already self opted
+        optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
+        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
     }
 
     @Test
@@ -578,15 +576,7 @@ public class GroupingsServiceMockTest {
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //TODO make a mock database
-
-        //not in include group
-        optInResults = groupingsService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
-
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
-
+        //todo add more tests
     }
 
     @Test
@@ -679,18 +669,30 @@ public class GroupingsServiceMockTest {
     @Test
     public void groupingsInTest() {
 
-        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(3).getUsername());
+        Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(6).getUsername());
         List<String> groupPaths = new ArrayList<>();
+        List<String> supposedGroupings = new ArrayList<>();
 
         for (Group group : groupsIn) {
             groupPaths.add(group.getPath());
         }
+        for(String groupPath : groupPaths) {
+            if(groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*")) {
+                supposedGroupings.add(groupPath);
+            }
+        }
 
         List<Grouping> groupingsIn = groupingsService.groupingsIn(groupPaths);
-
+        List<String> groupingPaths = new ArrayList<>();
         for(Grouping grouping : groupingsIn) {
-            assertTrue(grouping.getComposite().getUsernames().contains(users.get(3).getUsername()));
-            //todo check for trio
+            groupingPaths.add(grouping.getPath());
+        }
+
+        for(String path : supposedGroupings) {
+            assertTrue(groupingPaths.contains(path));
+        }
+        for(Grouping grouping : groupingsIn) {
+            assertTrue(supposedGroupings.contains(grouping.getPath()));
         }
     }
 

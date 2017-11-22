@@ -262,9 +262,6 @@ public class DatabaseSetup {
         for(Group group : groups) {
             group.addMember(grouperAll);
             groupRepository.save(group);
-        }
-
-        for(Group group : groups) {
             for(Person person : group.getMembers()) {
                 Membership membership = new Membership(person, group);
                 membershipRepository.save(membership);
@@ -289,6 +286,10 @@ public class DatabaseSetup {
                 allInclude.setOptOutEnabled(true);
 
             }
+
+            membershipRepository.save(allComposite);
+            membershipRepository.save(allExclude);
+            membershipRepository.save(allInclude);
         }
     }
 
