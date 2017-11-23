@@ -363,6 +363,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
                 g.setName(group.getPath());
                 attributeAssign.setOwnerGroupName(group.getPath());
+                attributeAssign.setAttributeDefNameName(attributeDefNameName);
 
                 attributeAssignList.add(attributeAssign);
                 groupList.add(g);
@@ -382,8 +383,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
                                                                                      String attributeDefNameName0,
                                                                                      String attributeDefNameName1) {
-
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0);
+
+        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
+        attributeAssigns.addAll(Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns()));
+        attributeAssigns.addAll(attributeAssignsOptIn());
+        attributeAssigns.addAll(attributeAssignsOptOut());
+
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(attributeAssigns.toArray(new WsAttributeAssign[attributeAssigns.size()]));
 
         if (attributeDefNameName1.equals(OPT_IN)) {
             wsGetAttributeAssignmentsResults = removeGroupsWithoutOptIn(wsGetAttributeAssignmentsResults);
@@ -392,6 +399,43 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         }
 
         return wsGetAttributeAssignmentsResults;
+    }
+
+    private List<WsAttributeAssign> attributeAssignsOptIn(){
+        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
+
+        Iterable<Grouping> groupings = groupingRepository.findAll();
+
+        for(Grouping grouping: groupings) {
+            if(grouping.isOptInOn()) {
+                WsAttributeAssign attributeAssign = new WsAttributeAssign();
+                attributeAssign.setAttributeDefNameName(OPT_IN);
+                attributeAssign.setOwnerGroupName(grouping.getPath());
+
+                attributeAssigns.add(attributeAssign);
+            }
+        }
+
+        return attributeAssigns;
+    }
+
+    private List<WsAttributeAssign> attributeAssignsOptOut(){
+        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
+
+        Iterable<Grouping> groupings = groupingRepository.findAll();
+
+        for(Grouping grouping: groupings) {
+            if(grouping.isOptOutOn()) {
+                WsAttributeAssign attributeAssign = new WsAttributeAssign();
+                attributeAssign.setAttributeDefNameName(OPT_OUT);
+                attributeAssign.setOwnerGroupName(grouping.getPath());
+
+                attributeAssigns.add(attributeAssign);
+            }
+        }
+
+        return attributeAssigns;
+
     }
 
     @Override

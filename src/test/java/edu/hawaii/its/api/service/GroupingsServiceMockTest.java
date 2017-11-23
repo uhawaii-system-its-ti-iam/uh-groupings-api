@@ -527,16 +527,14 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void getMyGroupingsTest() {
-        Iterable<Grouping> groupings = groupingRepository.findAll();
-
         GroupingAssignment myGroupings = groupingsService.getGroupingAssignment(users.get(1).getUsername());
 
         assertEquals(0, myGroupings.getGroupingsOwned().size());
         assertEquals(5, myGroupings.getGroupingsIn().size());
         assertEquals(0, myGroupings.getGroupingsOptedInTo().size());
         assertEquals(0, myGroupings.getGroupingsOptedOutOf().size());
-        assertEquals(3, myGroupings.getGroupingsToOptInTo().size());
-        assertEquals(0, myGroupings.getGroupingsToOptOutOf().size());
+        assertEquals(0, myGroupings.getGroupingsToOptInTo().size());
+        assertEquals(2, myGroupings.getGroupingsToOptOutOf().size());
     }
 
     @Test
@@ -791,17 +789,6 @@ public class GroupingsServiceMockTest {
 
         assertEquals(emptyAdminListHolder.getAllGroupings().size(), 0);
         assertEquals(emptyAdminListHolder.getAdminGroup().getMembers().size(), 0);
-    }
-
-    @Test
-    public void groupingsToOptOutOfTest() {
-
-//todo
-    }
-
-    @Test
-    public void groupingsToOptIntoTest() {
-//todo
     }
 
     @Test
