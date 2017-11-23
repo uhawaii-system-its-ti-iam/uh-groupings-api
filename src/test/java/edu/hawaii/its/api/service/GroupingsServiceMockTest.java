@@ -498,8 +498,6 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void getGroupingTest() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-
         Grouping groupingRandom = groupingsService.getGrouping(GROUPING_0_PATH, users.get(1).getUsername());
         Grouping groupingOwner = groupingsService.getGrouping(GROUPING_0_PATH, users.get(0).getUsername());
         Grouping groupingAdmin = groupingsService.getGrouping(GROUPING_0_PATH, ADMIN_USER);
@@ -529,15 +527,20 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void getMyGroupingsTest() {
+        Iterable<Grouping> groupings = groupingRepository.findAll();
 
-        //todo
+        GroupingAssignment myGroupings = groupingsService.getGroupingAssignment(users.get(1).getUsername());
+
+        assertEquals(0, myGroupings.getGroupingsOwned().size());
+        assertEquals(5, myGroupings.getGroupingsIn().size());
+        assertEquals(0, myGroupings.getGroupingsOptedInTo().size());
+        assertEquals(0, myGroupings.getGroupingsOptedOutOf().size());
+        assertEquals(3, myGroupings.getGroupingsToOptInTo().size());
+        assertEquals(0, myGroupings.getGroupingsToOptOutOf().size());
     }
 
     @Test
     public void optInTest() {
-
-        Iterable<Grouping> groupings = groupingRepository.findAll();
-
         //opt in Permission for include group false
         List<GroupingsServiceResult> optInResults = groupingsService.optIn(users.get(2).getUsername(), GROUPING_2_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
@@ -549,13 +552,13 @@ public class GroupingsServiceMockTest {
         assertTrue(optInResults.get(2).getResultCode().startsWith(FAILURE));
 
         //opt in Permission for include group true but already in group, not self opted
-        optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
+        optInResults = groupingsService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //opt in Permission for include group true but already self opted
-        optInResults = groupingsService.optIn(users.get(1).getUsername(), GROUPING_0_PATH);
+        //opt in Permission for include group true, but already self-opted
+        optInResults = groupingsService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
@@ -564,25 +567,32 @@ public class GroupingsServiceMockTest {
     @Test
     public void optOutTest() {
 
-        //opt in Permission for include group false
+        //opt in Permission for exclude group false
         List<GroupingsServiceResult> optInResults = groupingsService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
-
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //opt in Permission for include group true
-        optInResults = groupingsService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
-
+        //opt in Permission for exclude group true
+        optInResults = groupingsService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //todo add more tests
+        //opt in Permission for exclude group true, but already in the exclude group
+        optInResults = groupingsService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
+        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
+
+        //opt in Permission for exclude group true, but already self-opted
+        optInResults = groupingsService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
+        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
+
     }
 
     @Test
     public void cancelOptInTest() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-
         //not in group
         List<GroupingsServiceResult> cancelOptInResults = groupingsService.cancelOptIn(GROUPING_0_PATH, users.get(2).getUsername());
         assertTrue(cancelOptInResults.get(0).getResultCode().startsWith(SUCCESS));
@@ -709,7 +719,6 @@ public class GroupingsServiceMockTest {
     }
 
     @Test
-    //todo
     public void groupingsOwnedTest() {
         Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(0).getUsername());
         List<String> groupPaths = new ArrayList<>();
@@ -727,7 +736,38 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void groupingsOptedIntoTest() {
-//todo
+        String user5 = users.get(5).getUsername();
+
+        Iterable<Group> groups = groupRepository.findByMembersUsername(user5);
+        List<String> groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+
+        List<Grouping> groupingsOptedInto = groupingsService.groupingsOptedInto(user5, groupPaths);
+
+        //starts with no groupings opted into
+        assertEquals(0, groupingsOptedInto.size());
+
+        //opt into a grouping
+        groupingsService.optIn(user5, GROUPING_1_PATH);
+        groupingsOptedInto = groupingsService.groupingsOptedInto(user5, groupPaths);
+        assertEquals(1, groupingsOptedInto.size());
+
+        //opt into another grouping
+        groupingsService.optIn(user5, GROUPING_3_PATH);
+        groupingsOptedInto = groupingsService.groupingsOptedInto(user5, groupPaths);
+        assertEquals(2, groupingsOptedInto.size());
+
+        //opt out of a grouping
+        groupingsService.optOut(user5, GROUPING_3_PATH);
+        groupingsOptedInto = groupingsService.groupingsOptedInto(user5, groupPaths);
+        assertEquals(1, groupingsOptedInto.size());
+
+        //opt out of another grouping
+        groupingsService.optOut(user5, GROUPING_1_PATH);
+        groupingsOptedInto = groupingsService.groupingsOptedInto(user5, groupPaths);
+        assertEquals(0, groupingsOptedInto.size());
     }
 
     @Test
@@ -742,11 +782,6 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void adminListsTest() {
-        Iterable<Grouping> groupings = groupingRepository.findAll();
-        List<String> groupingPaths = new ArrayList<>();
-        for (Grouping grouping : groupings) {
-            groupingPaths.add(grouping.getPath());
-        }
         AdminListsHolder adminListsHolder = groupingsService.adminLists(ADMIN_USER);
         AdminListsHolder emptyAdminListHolder = groupingsService.adminLists(users.get(1).getUsername());
 

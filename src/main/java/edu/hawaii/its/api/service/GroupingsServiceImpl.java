@@ -726,11 +726,12 @@ public class GroupingsServiceImpl implements GroupingsService {
 
         if (assignmentsResults.getWsAttributeAssigns() != null) {
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
-                if (assign.getAttributeDefNameName().equals(TRIO)) {
-                    trios.add(assign.getOwnerGroupName());
-                }
-                if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
-                    opts.add(assign.getOwnerGroupName());
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
+                        opts.add(assign.getOwnerGroupName());
+                    }
                 }
             }
 
@@ -761,10 +762,12 @@ public class GroupingsServiceImpl implements GroupingsService {
 
         if (assignmentsResults.getWsAttributeAssigns() != null) {
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
-                if (assign.getAttributeDefNameName().equals(TRIO)) {
-                    trios.add(assign.getOwnerGroupName());
-                } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
-                    opts.add(assign.getOwnerGroupName());
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
+                        opts.add(assign.getOwnerGroupName());
+                    }
                 }
             }
 

@@ -819,11 +819,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     private void addMember(Group group, Person person) {
-        group.getMembers().add(person);
-        Membership membership = new Membership(person, group);
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
-        groupRepository.save(group);
-        membershipRepository.save(membership);
+        if (membership == null) {
+            group.getMembers().add(person);
+            membership = new Membership(person, group);
+
+            groupRepository.save(group);
+            membershipRepository.save(membership);
+        }
     }
 
     private void deleteMember(Group group, Person person) {
@@ -870,29 +874,30 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     private WsGetAttributeAssignmentsResults removeGroupsWithoutOptIn(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
 
         List<WsGroup> wsGroupList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsGroups());
+        List<WsGroup> wsGroupsWithOptIn = new ArrayList<>();
         List<WsAttributeAssign> wsAttributeAssignList = Arrays.asList(wsGetAttributeAssignmentsResults.getWsAttributeAssigns());
+        List<WsAttributeAssign> wsAttributeAssignsWithOptIn = new ArrayList<>();
 
         for (WsGroup wsGroup : wsGroupList) {
             Grouping grouping = groupingRepository.findByPath(wsGroup.getName());
 
-            if (!grouping.isOptInOn()) {
-                wsGroupList.remove(wsGroup);
+            if(grouping.isOptInOn()) {
+                wsGroupsWithOptIn.add(wsGroup);
             }
         }
 
         for (WsAttributeAssign wsAttributeAssign : wsAttributeAssignList) {
             Grouping grouping = groupingRepository.findByPath(wsAttributeAssign.getOwnerGroupName());
 
-            if (!grouping.isOptInOn()) {
-                wsAttributeAssignList.remove(wsAttributeAssign);
+            if(grouping.isOptInOn()) {
+                wsAttributeAssignsWithOptIn.add(wsAttributeAssign);
             }
         }
 
-        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignList.toArray(new WsAttributeAssign[wsAttributeAssignList.size()]));
-        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupList.toArray(new WsGroup[wsGroupList.size()]));
+        wsGetAttributeAssignmentsResults.setWsAttributeAssigns(wsAttributeAssignsWithOptIn.toArray(new WsAttributeAssign[wsAttributeAssignsWithOptIn.size()]));
+        wsGetAttributeAssignmentsResults.setWsGroups(wsGroupsWithOptIn.toArray(new WsGroup[wsGroupsWithOptIn.size()]));
 
         return wsGetAttributeAssignmentsResults;
-
     }
 
     private WsGetAttributeAssignmentsResults removeGroupsWithoutOptOut(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
