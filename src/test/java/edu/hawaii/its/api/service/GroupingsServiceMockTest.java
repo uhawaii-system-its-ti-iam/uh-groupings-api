@@ -770,12 +770,58 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void groupingsOptedOutOfTest() {
-//todo
-    }
+        String user1 = users.get(1).getUsername();
 
-    @Test
-    public void groupingsOptedTest() {
-//todo
+        Iterable<Group> groups = groupRepository.findByMembersUsername(user1);
+        List<String> groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+
+        List<Grouping> groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
+
+        //starts with no groupings out of
+        assertEquals(0, groupingsOptedOutOf.size());
+
+        //opt out of a grouping
+        groupingsService.optOut(user1, GROUPING_1_PATH);
+        groups = groupRepository.findByMembersUsername(user1);
+        groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+        groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
+        assertEquals(1, groupingsOptedOutOf.size());
+
+        //opt out of another grouping
+        groupingsService.optOut(user1, GROUPING_3_PATH);
+        groups = groupRepository.findByMembersUsername(user1);
+        groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+        groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
+        assertEquals(2, groupingsOptedOutOf.size());
+
+        //opt into a grouping
+        groupingsService.optIn(user1, GROUPING_3_PATH);
+        groups = groupRepository.findByMembersUsername(user1);
+        groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+        groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
+        assertEquals(1, groupingsOptedOutOf.size());
+
+        //opt into another grouping
+        groupingsService.optIn(user1, GROUPING_1_PATH);
+        groups = groupRepository.findByMembersUsername(user1);
+        groupPaths = new ArrayList<>();
+        for(Group group : groups) {
+            groupPaths.add(group.getPath());
+        }
+        groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
+        assertEquals(0, groupingsOptedOutOf.size());
     }
 
     @Test
@@ -793,7 +839,9 @@ public class GroupingsServiceMockTest {
 
     @Test
     public void addSelfOptedTest() {
-//todo
+        assertFalse(groupingsService.checkSelfOpted(GROUPING_2_EXCLUDE_PATH, users.get(4).getUsername()));
+        groupingsService.addSelfOpted(GROUPING_2_EXCLUDE_PATH, users.get(4).getUsername());
+        assertTrue(groupingsService.checkSelfOpted(GROUPING_2_EXCLUDE_PATH, users.get(4).getUsername()));
     }
 
     @Test
