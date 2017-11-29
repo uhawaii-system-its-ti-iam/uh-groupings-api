@@ -136,7 +136,6 @@ public class GroupingsServiceImpl implements GroupingsService {
     @Value("$groupings.api.stem}")
     private String STEM;
 
-    //    private GrouperFactoryService gf = new GrouperFactoryServiceImpl();
     @Autowired
     private GrouperFactoryService gf;
 
