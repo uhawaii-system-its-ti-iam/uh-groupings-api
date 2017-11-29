@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.*;
 
@@ -677,22 +678,22 @@ public class GroupingsServiceLocalTest {
         for (Group group : groupsIn) {
             groupPaths.add(group.getPath());
         }
-        for(String groupPath : groupPaths) {
-            if(groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*")) {
+        for (String groupPath : groupPaths) {
+            if (groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*")) {
                 supposedGroupings.add(groupPath);
             }
         }
 
         List<Grouping> groupingsIn = groupingsService.groupingsIn(groupPaths);
         List<String> groupingPaths = new ArrayList<>();
-        for(Grouping grouping : groupingsIn) {
+        for (Grouping grouping : groupingsIn) {
             groupingPaths.add(grouping.getPath());
         }
 
-        for(String path : supposedGroupings) {
+        for (String path : supposedGroupings) {
             assertTrue(groupingPaths.contains(path));
         }
-        for(Grouping grouping : groupingsIn) {
+        for (Grouping grouping : groupingsIn) {
             assertTrue(supposedGroupings.contains(grouping.getPath()));
         }
     }
@@ -731,7 +732,7 @@ public class GroupingsServiceLocalTest {
 
         Iterable<Group> groups = groupRepository.findByMembersUsername(user5);
         List<String> groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
 
@@ -767,7 +768,7 @@ public class GroupingsServiceLocalTest {
 
         Iterable<Group> groups = groupRepository.findByMembersUsername(user1);
         List<String> groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
 
@@ -780,7 +781,7 @@ public class GroupingsServiceLocalTest {
         groupingsService.optOut(user1, GROUPING_1_PATH);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
         groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
@@ -790,7 +791,7 @@ public class GroupingsServiceLocalTest {
         groupingsService.optOut(user1, GROUPING_3_PATH);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
         groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
@@ -800,7 +801,7 @@ public class GroupingsServiceLocalTest {
         groupingsService.optIn(user1, GROUPING_3_PATH);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
         groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
@@ -810,7 +811,7 @@ public class GroupingsServiceLocalTest {
         groupingsService.optIn(user1, GROUPING_1_PATH);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
-        for(Group group : groups) {
+        for (Group group : groups) {
             groupPaths.add(group.getPath());
         }
         groupingsOptedOutOf = groupingsService.groupingsOptedOutOf(user1, groupPaths);
@@ -880,14 +881,34 @@ public class GroupingsServiceLocalTest {
 
     @Test
     public void removeSelfOptedTest() {
+        Group group = groupRepository.findByPath(GROUPING_4_EXCLUDE_PATH);
 
-//todo
+        //member is not in group
+        GroupingsServiceResult gsr = groupingsService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(5).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(FAILURE));
+
+        //member is not self-opted
+        gsr = groupingsService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(4).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(FAILURE));
+
+        //make member self-opted
+        Membership membership = membershipRepository.findByPersonAndGroup(users.get(4), group);
+        membership.setSelfOpted(true);
+        membershipRepository.save(membership);
+
+        //member is self-opted
+        gsr = groupingsService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(4).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
     }
 
     @Test
     public void groupOptOutPermissionTest() {
 
-//todo
+        boolean oop = groupingsService.groupOptOutPermission(users.get(1).getUsername(), GROUPING_2_EXCLUDE_PATH);
+        assertEquals(false, oop);
+
+       oop = groupingsService.groupOptOutPermission(users.get(1).getUsername(), GROUPING_1_EXCLUDE_PATH);
+        assertEquals(true, oop);
     }
 
     @Test
@@ -1006,5 +1027,25 @@ public class GroupingsServiceLocalTest {
     public void changeGroupAttributeStatusTest() {
 
 //todo
+    }
+
+    @Test(expected = NotImplementedException.class)
+    public void deleteGroupingTest() {
+        groupingsService.deleteGrouping(users.get(0).getUsername(), GROUPING_4_PATH);
+    }
+
+    @Test(expected = NotImplementedException.class)
+    public void addGrouping() {
+        List<String> basis = new ArrayList<>();
+        List<String> exclude = new ArrayList<>();
+        List<String> include = new ArrayList<>();
+        List<String> owners = new ArrayList<>();
+        groupingsService.addGrouping(
+                users.get(0).getUsername(),
+                "newGroupingPath",
+                basis,
+                include,
+                exclude,
+                owners);
     }
 }
