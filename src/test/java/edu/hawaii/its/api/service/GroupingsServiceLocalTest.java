@@ -936,12 +936,6 @@ public class GroupingsServiceLocalTest {
     }
 
     @Test
-    public void assignGroupAttributesTest() {
-
-//todo
-    }
-
-    @Test
     public void attributeAssignmentsResultsTest() {
 
 //todo
@@ -963,6 +957,29 @@ public class GroupingsServiceLocalTest {
     public void membershipsResultsTest() {
 
 //todo
+    }
+
+    @Test
+    public void addAdminTest() {
+        //user is not super user
+        GroupingsServiceResult gsr = groupingsService.addAdmin(users.get(9).getUsername(), users.get(9).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(FAILURE));
+
+        //user is super user
+        gsr = groupingsService.addAdmin(ADMIN_USER, users.get(9).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
+    }
+
+    @Test
+    public void deleteAdminTest() {
+        //user is not super user
+        GroupingsServiceResult gsr = groupingsService.deleteAdmin(users.get(9).getUsername(), users.get(9).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(FAILURE));
+
+        //user is super user
+        gsr = groupingsService.addAdmin(ADMIN_USER, users.get(9).getUsername());
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
+
     }
 
     @Test

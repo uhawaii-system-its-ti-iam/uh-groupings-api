@@ -1078,34 +1078,6 @@ public class GroupingsServiceImpl implements GroupingsService {
     }
 
     /**
-     * @param attributeName:      name of attribute to be assigned
-     * @param attributeOperation: operation to be done with the attribute to the group
-     * @param group:              path to the group to have the attribute acted upon
-     * @param username:           username of user assigning attribute
-     */
-    private GroupingsServiceResult assignGroupAttributes(String username, String attributeName, String attributeOperation, String group) {
-        logger.info("assignGroupAttributes; "
-                + "; username: "
-                + username
-                + "; attributeName: "
-                + attributeName
-                + "; attributeOperation: "
-                + attributeOperation
-                + "; group: "
-                + group
-                + ";");
-
-        WsAssignAttributesResults attributesResults = gf.makeWsAssignAttributesResultsForGroup(
-                gf.makeWsSubjectLookup(username),
-                ASSIGN_TYPE_GROUP,
-                attributeOperation,
-                attributeName,
-                group);
-
-        return makeGroupingsServiceResult(attributesResults, "assign " + attributeName + " attribute to " + group);
-    }
-
-    /**
      * @param assignType: assign type of the attribute
      * @param group:      path to the group to have attributes searched
      * @param nameName:   name of the attribute to be looked up

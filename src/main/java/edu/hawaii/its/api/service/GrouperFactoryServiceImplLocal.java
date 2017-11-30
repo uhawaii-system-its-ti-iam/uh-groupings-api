@@ -256,34 +256,41 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Grouping grouping = groupingRepository.findByIncludePathOrExcludePathOrCompositePathOrOwnersPath(group, group, group, group);
         Person newGroupMember = personRepository.findByUsername(newMember);
 
-        boolean inBasis = grouping.getBasis().getMembers().contains(newGroupMember);
-        boolean inExclude = grouping.getExclude().getMembers().contains(newGroupMember);
-        boolean inInclude = grouping.getInclude().getMembers().contains(newGroupMember);
-
-        if (group.endsWith(OWNERS)) {
-            addMember(grouping.getOwners(), newGroupMember);
-        } else if (group.endsWith(EXCLUDE)) {
-            if (inBasis) {
-                addMember(grouping.getExclude(), newGroupMember);
-            } else if (inInclude) {
-                deleteMember(grouping.getInclude(), newGroupMember);
-            }
-        } else if (group.endsWith(INCLUDE)) {
-            if (inExclude) {
-                deleteMember(grouping.getExclude(), newGroupMember);
-            } else if (!inBasis) {
-                addMember(grouping.getInclude(), newGroupMember);
-            }
+        if(grouping == null) {
+            Group groupToAddTo = groupRepository.findByPath(group);
+            addMember(groupToAddTo, newGroupMember);
         }
+        else {
 
-        grouping = groupingRepository.findByPath(grouping.getPath());
-        Group composite = buildComposite(
-                grouping.getInclude(),
-                grouping.getExclude(),
-                grouping.getBasis(),
-                grouping.getPath());
+            boolean inBasis = grouping.getBasis().getMembers().contains(newGroupMember);
+            boolean inExclude = grouping.getExclude().getMembers().contains(newGroupMember);
+            boolean inInclude = grouping.getInclude().getMembers().contains(newGroupMember);
 
-        groupRepository.save(composite);
+            if (group.endsWith(OWNERS)) {
+                addMember(grouping.getOwners(), newGroupMember);
+            } else if (group.endsWith(EXCLUDE)) {
+                if (inBasis) {
+                    addMember(grouping.getExclude(), newGroupMember);
+                } else if (inInclude) {
+                    deleteMember(grouping.getInclude(), newGroupMember);
+                }
+            } else if (group.endsWith(INCLUDE)) {
+                if (inExclude) {
+                    deleteMember(grouping.getExclude(), newGroupMember);
+                } else if (!inBasis) {
+                    addMember(grouping.getInclude(), newGroupMember);
+                }
+            }
+
+            grouping = groupingRepository.findByPath(grouping.getPath());
+            Group composite = buildComposite(
+                    grouping.getInclude(),
+                    grouping.getExclude(),
+                    grouping.getBasis(),
+                    grouping.getPath());
+
+            groupRepository.save(composite);
+        }
         return wsAddMemberResults;
     }
 
