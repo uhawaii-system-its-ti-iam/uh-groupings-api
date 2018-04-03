@@ -1,16 +1,21 @@
 package edu.hawaii.its.api.access;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UhCasAttributes implements UhAttributes {
 
-    private Map<String, List<String>> uhAttributeMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> uhAttributeMap = new HashMap<>();
     private final String username; // CAS login username.
     private final Map<?, ?> map; // Original CAS results.
 
     // Constructor.
     public UhCasAttributes() {
-        this(new HashMap<Object, Object>());
+        this(new HashMap<>());
     }
 
     // Constructor.
@@ -31,7 +36,7 @@ public class UhCasAttributes implements UhAttributes {
                         if (v instanceof String) {
                             uhAttributeMap.put(k, Arrays.asList((String) v));
                         } else if (v instanceof List) {
-                            List<String> lst = new ArrayList<String>();
+                            List<String> lst = new ArrayList<>();
                             for (Object o : (List<?>) v) {
                                 if (o != null && o instanceof String) {
                                     lst.add((String) o);
@@ -72,7 +77,7 @@ public class UhCasAttributes implements UhAttributes {
                     }
                 }
 
-                // Couldn't match up username with uid, 
+                // Couldn't match up username with uid,
                 // so just return first value.
                 return values.get(0); // We are done.
             }

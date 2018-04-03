@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.access;
 
+import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
 
 public class User extends org.springframework.security.core.userdetails.User {
 
@@ -54,6 +54,7 @@ public class User extends org.springframework.security.core.userdetails.User {
         return getAuthorities().contains(new SimpleGrantedAuthority(role.longName()));
     }
 
+    @Override
     public String toString() {
         return "User [uid=" + getUid()
                 + ", uhuuid=" + getUhuuid()

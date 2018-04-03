@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.access;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.util.Strings;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import edu.hawaii.its.api.util.Strings;
 
 @Service
 public final class UserBuilder {
@@ -16,7 +16,7 @@ public final class UserBuilder {
     private static final Log logger = LogFactory.getLog(UserBuilder.class);
 
     @Autowired
-    private AuthorizationService authorizationService;    
+    private AuthorizationService authorizationService;
 
     public final User make(Map<String, ?> map) {
         return make(new UhCasAttributes(map));
@@ -33,7 +33,7 @@ public final class UserBuilder {
         logger.debug("Adding roles start.");
         String uhuuid = attributes.getUhUuid();
         String username = attributes.getUid();
-        RoleHolder roleHolder = authorizationService.fetchRoles(uhuuid,username);
+        RoleHolder roleHolder = authorizationService.fetchRoles(uhuuid, username);
 
         logger.info("Adding roles. uid: " + uid + "; roles: " + roleHolder.getAuthorites());
         User user = new User(uid, roleHolder.getAuthorites());

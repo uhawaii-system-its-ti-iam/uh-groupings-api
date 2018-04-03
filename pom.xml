@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.4.3.RELEASE</version>
+        <version>1.5.10.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,6 +22,7 @@
         <java.version>1.8</java.version>
         <junit.version>4.12</junit.version>
         <commons-dbcp-version>2.1.1</commons-dbcp-version>
+        <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
         <hibernate.version>5.2.3.Final</hibernate.version>
         <h2.version>1.4.192</h2.version>
         <org.jasig.cas.client-version>3.4.1</org.jasig.cas.client-version>
@@ -53,6 +54,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!-- hot swapping, disable cache for template, enable live reload -->
@@ -92,7 +98,7 @@
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <version>1.0.0.Final</version>
+            <version>${hibernate-jpa.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -145,25 +151,63 @@
         <!-- Webjars -->
         <dependency>
             <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>${bootstrap-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lesscss</groupId>
+            <artifactId>lesscss-maven-plugin</artifactId>
+            <version>1.7.0.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
             <version>${jquery-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>angularjs</artifactId>
+            <version>${angularjs-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>underscore</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>font-awesome</artifactId>
+            <version>4.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular-ui-grid</artifactId>
+            <version>4.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>angular-ui-bootstrap</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd</artifactId>
+            <version>5.8.1</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular-mocks</artifactId>
+            <version>${angular-mocks-version}</version>
         </dependency>
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
             <artifactId>grouperClient</artifactId>
             <version>2.3.0</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <testSourceDirectory>${basedir}/src/main/java/</testSourceDirectory>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -185,46 +229,34 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-            </plugin>
-            <plugin>
                 <groupId>com.github.searls</groupId>
                 <artifactId>jasmine-maven-plugin</artifactId>
                 <version>2.2</version>
-
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                    <maxmem>256m</maxmem>
-                    <instrumentation>
-                        <excludes>
-                            <exclude>edu/hawaii/its/api/configuration/SpringBootWebApplication.class</exclude>
-                        </excludes>
-                    </instrumentation>
-                    <!-- aggregated reports for multi-module projects -->
-                    <aggregate>true</aggregate>
+                    <preloadSources>
+                        <source>classpath/META-INF/resources/webjars/angularjs/${angularjs-version}/angular.min.js"></source>
+                        <source>classpath/META-INF/resources/webjars/jquery/${jquery-version}/jquery.min.js</source>
+                        <source>classpath/META-INF/resources/webjars/bootstrap/${bootstrap-version}/js/bootstrap.min.js</source>
+                        <source>classpath/META-INF/resources/webjars/angular-ui-bootstrap/2.2.0/ui-bootstrap.min.js</source>
+                        <source>classpath/META-INF/resources/webjars/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js</source>
+                        <source>classpath/META-INF/resources/webjars/angular-mocks/${angular-mocks-version}/angular-mocks.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.app.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.controller.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.service.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.app.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.controller.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.service.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.app.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.controller.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.service.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.app.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.controller.js</source>
+                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.service.js</source>
+                    </preloadSources>
+                    <specIncludes>
+                        <include>**/**.test.js</include>
+                    </specIncludes>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                        <version>1.1.8</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-core</artifactId>
-                        <version>1.1.8</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -243,22 +275,48 @@
                                 <echo>$ mvn clean test -Dspring.profiles.active=test -Dtest=Test* </echo>
                                 <echo>$ mvn clean package</echo>
                                 <echo>$ mvn -Dmaven.test.skip=true clean package</echo>
+                                <echo>$ mvn jasmine:test</echo>
+                                <echo>$ mvn clean test jacoco:report</echo>
+                                <echo></echo>
+                                <echo>To run the integrations tests with your Grouper server:</echo>
+                                <echo>$ mvn -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestGroupingFactoryService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController test</echo>
+                                <echo></echo>
+                                <echo>To run UH Groupings locally:</echo>
                                 <echo>$ mvn clean spring-boot:run</echo>
-                                <echo>$ mvn clean test cobertura:cobertura</echo>
                             </tasks>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
-    <reporting>
-        <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>edu/hawaii/its/groupings/configuration/SpringBootWebApplication.class</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
-    </reporting>
+    </build>
 </project>

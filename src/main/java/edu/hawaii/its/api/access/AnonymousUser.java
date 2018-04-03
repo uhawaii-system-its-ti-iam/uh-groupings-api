@@ -17,7 +17,7 @@ public class AnonymousUser extends User {
     }
 
     private static Collection<GrantedAuthority> authorities() {
-        Set<GrantedAuthority> authorities = new LinkedHashSet<GrantedAuthority>();
+        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
         authorities.add(new SimpleGrantedAuthority(Role.ANONYMOUS.longName()));
         return authorities;
     }

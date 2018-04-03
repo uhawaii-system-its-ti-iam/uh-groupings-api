@@ -34,6 +34,7 @@ public class UserContextServiceImpl implements UserContextService {
         return user != null ? user.getUhuuid() : Long.valueOf(0);
     }
 
+    @Override
     public void setCurrentUhuuid(Long uhuuid) {
         User user = getCurrentUser();
         if (user != null) {
@@ -43,6 +44,7 @@ public class UserContextServiceImpl implements UserContextService {
         }
     }
 
+    @Override
     public String toString() {
         return "UserContextServiceImpl [context=" + SecurityContextHolder.getContext() + "]";
     }

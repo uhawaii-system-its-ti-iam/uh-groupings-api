@@ -1,12 +1,16 @@
 package edu.hawaii.its.api.configuration;
 
+import java.util.Properties;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -14,14 +18,10 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.Properties;
-
 @Configuration
-@Profile(value = {"default", "dev", "localTest"})
-@EnableJpaRepositories(basePackages = {"edu.hawaii.its.api.service"})
+@EnableJpaRepositories(basePackages = {
+        "edu.hawaii.its.api.repository", "edu.hawaii.its.groupings.repository"
+})
 @EnableTransactionManagement
 public class DatabaseConfig {
 
@@ -75,7 +75,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
-        em.setPersistenceUnitName("uhgroupingsPersistenceUnit");
+        em.setPersistenceUnitName("holidayPersistenceUnit");
         em.setPersistenceProviderClass(HibernatePersistenceProvider.class);
         em.setPackagesToScan("edu.hawaii.its.api.type");
 

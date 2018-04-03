@@ -6,7 +6,7 @@ public class Strings {
 
     // Private constructor; prevent instantiation.
     private Strings() {
-        // Emtpy.        
+        // Emtpy.
     }
 
     public static String fill(final char ch, final int size) {

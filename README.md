@@ -1,7 +1,13 @@
-A web application to display groupings used by UH.
+#### The web API for UH Groupings.
 
-[![Build Status](https://travis-ci.org/uhawaii-system-its-ti-iam/uhgroupings.png?branch=master)](https://travis-ci.org/uhawaii-system-its-ti-iam/uhgroupings)
-[![Coverage Status](https://coveralls.io/repos/github/uhawaii-system-its-ti-iam/uhgroupings/badge.svg?branch=master)](https://coveralls.io/github/uhawaii-system-its-ti-iam/uhgroupings?branch=master)
+Manage your groupings in one place, use them in many.
+
+A "grouping" is a collection of members. UH Groupings allows you to create groupings, manage grouping memberships, control members' self-service options, designate grouping integrations, and more.
+
+Groupings can be integrated with one or more of the following: email LISTSERV lists, permissions and privilege assignments for access control via CAS, etc, and this list will continue to grow.  Additionally, UH Groupings allows you to leverage existing membership collections, which can substantially reduce the manual overhead of membership management.
+
+UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise access management system designed for the highly distributed management environment and heterogeneous information technology environment common to universities.
+
 ##### Build Tool
 First, you need to download and install maven (version 3.2.1+).
 
@@ -13,7 +19,7 @@ You'll need a Java JDK to build and run the project (version 1.8).
 The files for the project are kept in a code repository,
 available from here:
 
-https://github.com/uhawaii-system-its-ti-iam/uhgroupings
+https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api
 
 ##### Building
 Install the necessary project dependencies:

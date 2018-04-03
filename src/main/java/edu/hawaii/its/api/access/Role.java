@@ -11,6 +11,7 @@ public enum Role {
         return "ROLE_" + name();
     }
 
+    @Override
     public String toString() {
         return longName();
     }

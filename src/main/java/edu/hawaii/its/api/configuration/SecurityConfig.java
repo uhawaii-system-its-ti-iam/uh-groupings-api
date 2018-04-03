@@ -1,12 +1,11 @@
 package edu.hawaii.its.api.configuration;
 
+import javax.annotation.PostConstruct;
+
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorage;
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.validation.Saml11TicketValidator;
-import edu.hawaii.its.api.access.UserBuilder;
-import edu.hawaii.its.api.access.UserDetailsServiceImpl;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -30,7 +29,8 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
+import edu.hawaii.its.api.access.UserBuilder;
+import edu.hawaii.its.api.access.UserDetailsServiceImpl;
 
 @ComponentScan(basePackages = "edu.hawaii.its")
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
@@ -123,13 +123,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         SimpleUrlAuthenticationFailureHandler authenticationFailureHandler =
                 new SimpleUrlAuthenticationFailureHandler();
-        authenticationFailureHandler.setDefaultFailureUrl("/");
+        authenticationFailureHandler.setDefaultFailureUrl("/home");
         filter.setAuthenticationFailureHandler(authenticationFailureHandler);
 
         SavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler =
                 new SavedRequestAwareAuthenticationSuccessHandler();
         authenticationSuccessHandler.setAlwaysUseDefaultTargetUrl(false);
-        authenticationSuccessHandler.setDefaultTargetUrl("/");
+        authenticationSuccessHandler.setDefaultTargetUrl("/home");
         filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 
         ServiceAuthenticationDetailsSource authenticationDetailsSource =
@@ -151,9 +151,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/api/**").hasRole("UH")
+                .antMatchers("/css/**").permitAll()
+                .antMatchers("/fonts/**").permitAll()
+                .antMatchers("/images/**").permitAll()
+                .antMatchers("/javascript/**").permitAll()
+                .antMatchers("/webjars/**").permitAll()
+                .antMatchers("/home").permitAll()
+                .antMatchers("/info").permitAll()
+                .antMatchers("/feedback").hasRole("UH")
+                .antMatchers("/campus").hasRole("UH")
+                .antMatchers("/campuses").hasRole("UH")
                 .antMatchers("/denied").permitAll()
-                .antMatchers("/login").hasRole("UH")
                 .antMatchers("/404").permitAll()
+                .antMatchers("/login").hasRole("UH")
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/groupings/**").hasAnyRole("ADMIN", "OWNER")
+                .antMatchers("/memberships/**").hasRole("UH")
                 .anyRequest().authenticated()
                 .and()
                 .csrf()

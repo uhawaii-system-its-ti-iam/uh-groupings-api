@@ -2,7 +2,8 @@ package edu.hawaii.its.api.access;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.controller.GroupingsRestController;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.MemberAttributeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +29,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private Map<String, List<Role>> userMap = new HashMap<>();
 
     @Autowired
-    private GroupingsRestController gc;
+    private MemberAttributeService memberAttributeService;
 
-    private static final Log logger = LogFactory.getLog(UserBuilder.class);
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
+
+    private static final Log logger = LogFactory.getLog(AuthorizationServiceImpl.class);
 
     @PostConstruct
     public void init() {
@@ -58,6 +62,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @param username : The username of the person to find the user.
      * @return : Returns an array list of roles assigned to the user.
      */
+    @Override
     public RoleHolder fetchRoles(String uhuuid, String username) {
         RoleHolder roleHolder = new RoleHolder();
         roleHolder.add(Role.ANONYMOUS);
@@ -90,12 +95,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      */
     public boolean fetchOwner(String username) {
         try {
-            System.out.println("//////////////////////////////");
-            if (!gc.groupingAssignment(username).getBody().getGroupingsOwned().isEmpty()) {
-                System.out.println("This person is an owner");
+            logger.info("//////////////////////////////");
+            if (!groupingAssignmentService.getGroupingAssignment(username).getGroupingsOwned().isEmpty()) {
+                logger.info("This person is an owner");
                 return true;
             } else {
-                System.out.println("This person is not owner");
+                logger.info("This person is not owner");
             }
         } catch (Exception e) {
             logger.info("The grouping for this person is " + e.getMessage());
@@ -110,19 +115,18 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @return true if the person gets pass the grouping admins check by checking if they can get all the groupings.
      */
     public boolean fetchAdmin(String username) {
-        System.out.println("//////////////////////////////");
+        logger.info("//////////////////////////////");
         try {
-
-            if (gc.adminLists(username).getBody().getAllGroupings().isEmpty()) {
-                System.out.println("this person is an admin");
+            if (memberAttributeService.isAdmin(username)) {
+                logger.info("this person is an admin");
                 return true;
             } else {
-                System.out.println("this person is not an admin");
+                logger.info("this person is not an admin");
             }
         } catch (Exception e) {
             logger.info("Error in getting admin info. Error message: " + e.getMessage());
         }
-        System.out.println("//////////////////////////////");
+        logger.info("//////////////////////////////");
         return false;
     }
 }
