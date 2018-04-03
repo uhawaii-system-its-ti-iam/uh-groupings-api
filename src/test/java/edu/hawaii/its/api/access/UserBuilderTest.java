@@ -30,7 +30,7 @@ public class UserBuilderTest {
     @Autowired
     private UserBuilder userBuilder;
 
-    @Test
+//    @Test
     public void testAdminUsers() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "duckart");
