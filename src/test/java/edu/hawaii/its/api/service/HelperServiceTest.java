@@ -168,6 +168,13 @@ public class HelperServiceTest {
     /////////////////////////////////////////////////////
 
     @Test
+    public void toStringTest() {
+        String helperString = helperService.toString();
+        System.out.println(helperString);
+        assertEquals(helperString, "HelperServiceImpl [SETTINGS=uh-settings]");
+    }
+
+    @Test
     public void groupingParentPath() {
         String grouping = "grouping";
 
