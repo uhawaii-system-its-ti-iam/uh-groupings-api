@@ -64,6 +64,7 @@ public class MembershipServiceTest {
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
     private static final String EXCLUDE = ":exclude";
+    private static final String OWNERS = ":owners";
 
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
@@ -73,6 +74,7 @@ public class MembershipServiceTest {
 
     private static final String GROUPING_1_INCLUDE_PATH = GROUPING_1_PATH + INCLUDE;
     private static final String GROUPING_1_EXCLUDE_PATH = GROUPING_1_PATH + EXCLUDE;
+    private static final String GROUPING_1_OWNERS_PATH = GROUPING_1_PATH + OWNERS;
 
     private static final String GROUPING_2_EXCLUDE_PATH = GROUPING_2_PATH + EXCLUDE;
 
@@ -467,6 +469,12 @@ public class MembershipServiceTest {
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
         //todo Cases (inBasis && inInclude) and (!inComposite && !inBasis) not reachable w/ current DB
+
+        //add existing Owner
+        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH,
+                users.get(0).getUsername());
+        grouping = groupingRepository.findByPath(GROUPING_1_PATH);
+        assertTrue(grouping.getComposite().getMembers().contains(users.get(0)));
     }
 
     @Test
