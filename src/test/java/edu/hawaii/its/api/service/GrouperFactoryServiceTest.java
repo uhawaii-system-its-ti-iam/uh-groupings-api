@@ -48,6 +48,12 @@ public class GrouperFactoryServiceTest {
     @Value("${groupings.api.opt_out}")
     private String OPT_OUT;
 
+    @Value("${groupings.api.privilege_opt_out}")
+    private String PRIVILEGE_OPT_OUT;
+
+    @Value("${groupings.api.privilege_opt_in}")
+    private String PRIVILEGE_OPT_IN;
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -70,6 +76,7 @@ public class GrouperFactoryServiceTest {
     private static final String GROUPING_2_PATH = PATH_ROOT + 2;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
     private static final String GROUPING_4_PATH = PATH_ROOT + 4;
+
 
     private static final String GROUPING_0_INCLUDE_PATH = GROUPING_0_PATH + ":include";
     private static final String GROUPING_0_OWNERS_PATH = GROUPING_0_PATH + ":owners";
@@ -252,21 +259,25 @@ public class GrouperFactoryServiceTest {
         assertTrue(results.getResultMetadata().getResultCode().startsWith("FAILURE"));
     }
 
-/*    @Test
+    @Test
     public void makeWsAssignGrouperPrivilegesLiteResultTest() {
         WsAssignGrouperPrivilegesLiteResult result;
 
         WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
 
-        String privilegeName = "placeholder";
+        String privilegeNameIn = PRIVILEGE_OPT_IN;
+        String privilegeNameOut = PRIVILEGE_OPT_OUT;
         String groupName = GROUPING_3_PATH;
+        Boolean allowed = true;
+        //Boolean notAllowed = false;
 
 
 
-        result = makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeName, lookup, TRUE);
+
+        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, allowed);
+        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, allowed);
 
 
-        return result;
     }
-*/
+
 }
