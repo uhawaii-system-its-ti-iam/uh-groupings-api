@@ -454,5 +454,12 @@ public class GroupingAssignmentServiceTest {
         assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
     }
 
+    //todo Finish this test for setGroupingAttributes
+    @Test
+    public void setGroupingAttributesTest() {
+        Grouping grouping = new Grouping();
+        grouping = groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
+    }
+
 }
 
