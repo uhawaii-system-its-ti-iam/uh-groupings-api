@@ -161,7 +161,7 @@ public class UserBuilderTest {
         }
     }
 
-//    @Test(expected = UsernameNotFoundException.class)
+    @Test(expected = UsernameNotFoundException.class)
     public void make() {
         userBuilder.make(new HashMap<String, String>());
     }
