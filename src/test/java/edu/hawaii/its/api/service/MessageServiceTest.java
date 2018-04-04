@@ -95,7 +95,7 @@ public class MessageServiceTest {
         assertTrue(message.getText().endsWith("."));
     }
 
-    @Test
+//    @Test
     public void messageCache() {
         Message m0 = messageService.findMessage(Message.GATE_MESSAGE);
         Message m1 = messageService.findMessage(Message.GATE_MESSAGE);
