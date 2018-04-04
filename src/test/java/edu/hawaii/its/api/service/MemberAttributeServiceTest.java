@@ -113,7 +113,7 @@ public class MemberAttributeServiceTest {
         personRepository.save(ADMIN_PERSON);
         groupRepository.save(adminGroup);
 
-        admins.add(APP_PERSON);
+        apps.add(APP_PERSON);
         Group appGroup = new Group(GROUPING_APPS, apps);
         personRepository.save(APP_PERSON);
         groupRepository.save(appGroup);
@@ -270,8 +270,7 @@ public class MemberAttributeServiceTest {
     public void isAppTest() {
         assertFalse(memberAttributeService.isApp(users.get(2).getUsername()));
 
-        //todo Should return TRUE but returns FALSE don't know why
-//        assertTrue(memberAttributeService.isApp(APP_USER));
+        assertTrue(memberAttributeService.isApp(APP_USER));
     }
 
     @Test
@@ -279,8 +278,7 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isSuperuser(users.get(2).getUsername()));
         assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
 
-        //todo Should return TRUE but returns FALSE don't know why
-//       assertTrue(memberAttributeService.isSuperuser(APP_USER));
+       assertTrue(memberAttributeService.isSuperuser(APP_USER));
     }
 
 }
