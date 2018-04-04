@@ -14,6 +14,10 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +150,42 @@ public class GrouperFactoryServiceTest {
             lookups.add(lookup);
         }
     }
+
+    @Test
+    public void addEmptyGroupTest() {
+        WsGroupSaveResults results = gfsl.addEmptyGroup("username", GROUPING_3_PATH);
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    //todo This tests a non-implemented function that returns null. Should adjust once function is implemented.
+    @Test
+    public void makeWsAddMemberResultsGroupTest() {
+        WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+        String groupUID = "";
+
+        WsAddMemberResults results = gfsl.makeWsAddMemberResultsGroup("groupPath", lookup, groupUID);
+        assertTrue(results == null);
+    }
+
+    //todo This tests a non-implemented function that returns null. Should adjust once function is implemented.
+    @Test
+    public void makeWsFindGroupResultsTest() {
+        WsFindGroupsResults results = gfsl.makeWsFindGroupsResults("groupPath");
+        assertTrue(results == null);
+    }
+
+    @Test
+    public void makeWsGroupLookupTest() {
+        WsGroupLookup lookup = gfsl.makeWsGroupLookup("groupName");
+        assertTrue(lookup.getGroupName().equals("groupName"));
+    }
+
+    @Test
+    public void makeWsStemSaveResultsTest() {
+        WsStemSaveResults results = gfsl.makeWsStemSaveResults("username", "stemPath");
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
 
     @Test
     public void makeWsAddMemberResultsTest() {
