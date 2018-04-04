@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,12 +26,13 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserBuilderTest {
 
     @Autowired
     private UserBuilder userBuilder;
 
-//    @Test
+    @Test
     public void testAdminUsers() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "duckart");
