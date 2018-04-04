@@ -5,28 +5,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import edu.hawaii.its.api.service.EmailService;
-import edu.hawaii.its.api.type.Feedback;
 
 @Controller
 public class HomeController {
 
     private static final Log logger = LogFactory.getLog(HomeController.class);
-
-    @Autowired
-    private EmailService emailService;
 
     // Mapping to home.
     @RequestMapping(value = {"/", "/home"}, method = {RequestMethod.GET})
@@ -35,109 +22,23 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping(value = {"/campus", "/campuses"})
-    public String campus() {
-        logger.debug("User at campus.");
-        return "campus";
-    }
-
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public String info(Locale locale, Model model) {
         logger.info("User at info.");
         return "info";
     }
 
-    @RequestMapping(value = "/404", method = RequestMethod.GET)
-    public String invalid() {
-        return "redirect:/";
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @RequestMapping(value = "/admin", method = RequestMethod.GET)
+//    public String admin(Locale locale, Model model) {
+//        logger.info("User at admin.");
+//        return "admin";
+//    }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/admin", method = RequestMethod.GET)
-    public String admin(Locale locale, Model model) {
-        logger.info("User at admin.");
-        return "admin";
-    }
-
-    @PreAuthorize("hasRole('UH')")
-    @RequestMapping(value = "/memberships", method = RequestMethod.GET)
-    public String memberships(Locale locale, Model model) {
-        logger.info("User at memberships.");
-        return "memberships";
-    }
-
-    @PreAuthorize("hasRole('ADMIN') || hasRole('OWNER')")
-    @RequestMapping(value = "/groupings", method = RequestMethod.GET)
-    public String groupings(Locale locale, Model model) {
-        logger.info("User at groupings.");
-        return "groupings";
-    }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Locale locale, Model model) {
         logger.info("User has logged in.");
         return "redirect:home";
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/feedback/{error}")
-    public String feedbackError(RedirectAttributes redirectAttributes, @PathVariable String error) {
-        Feedback feedback = new Feedback(error);
-        redirectAttributes.addFlashAttribute("feedback", feedback);
-        return "redirect:/feedback";
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/feedback")
-    public String feedbackForm(Model model) {
-        model.addAttribute("feedback", new Feedback());
-        return "feedback";
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/feedback")
-    public String feedbackSubmit(@ModelAttribute Feedback feedback) {
-        logger.debug("feedback: " + feedback);
-        emailService.send(feedback);
-        return "feedback";
-    }
-
-
-    /**
-     * Modal Pages
-     */
-    @RequestMapping(value = "/modal/infoModal", method = RequestMethod.GET)
-    public String infoModal(Locale locale, Model model) {
-        return "modal/infoModal";
-    }
-
-    @RequestMapping(value = "/modal/apiError", method = RequestMethod.GET)
-    public String apiError(Locale locale, Model model) {
-        return "modal/apiError";
-    }
-
-    @RequestMapping(value = "/modal/preferenceErrorModal", method = RequestMethod.GET)
-    public String preferenceErrorModal(Locale locale, Model model) {
-        return "modal/preferenceErrorModal";
-    }
-
-    @RequestMapping(value = "/modal/addModal", method = RequestMethod.GET)
-    public String addModal(Locale locale, Model model) {
-        return "modal/addModal";
-    }
-
-    @RequestMapping(value = "/modal/feedbackModal", method = RequestMethod.GET)
-    public String feedbackModal(Locale locale, Model model) {
-        return "modal/feedbackModal";
-    }
-
-    @RequestMapping(value = "/modal/removeModal", method = RequestMethod.GET)
-    public String removeModal(Locale locale, Model model) {
-        return "modal/removeModal";
-    }
-
-    @RequestMapping(value = "/modal/optModal", method = RequestMethod.GET)
-    public String optModal(Locale locale, Model model) {
-        return "modal/optModal";
     }
 }
