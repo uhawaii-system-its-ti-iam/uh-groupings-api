@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.internet2.middleware.grouperClient.ws.beans.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,15 +11,6 @@ import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -259,4 +251,22 @@ public class GrouperFactoryServiceTest {
         results = gfsl.makeWsAssignAttributesResultsForGroup(lookup2, assignType, assignOperation, defName, groupName);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("FAILURE"));
     }
+
+/*    @Test
+    public void makeWsAssignGrouperPrivilegesLiteResultTest() {
+        WsAssignGrouperPrivilegesLiteResult result;
+
+        WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+
+        String privilegeName = "placeholder";
+        String groupName = GROUPING_3_PATH;
+
+
+
+        result = makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeName, lookup, TRUE);
+
+
+        return result;
+    }
+*/
 }
