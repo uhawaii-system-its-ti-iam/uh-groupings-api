@@ -37,5 +37,5 @@ public interface GroupingAssignmentService {
 
     public List<String> getGroupPaths(String username);
 
-    Group getMembers(String owenrUsername, String groupPath);
+    Group getMembers(String ownerUsername, String groupPath);
 }
