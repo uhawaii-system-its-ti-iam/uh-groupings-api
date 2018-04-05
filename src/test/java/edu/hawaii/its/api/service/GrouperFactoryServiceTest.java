@@ -212,7 +212,23 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
+    public void makeWsAddMemberResultsNewMemberTest() {
+        WsAddMemberResults results;
+
+        results = gfsl.makeWsAddMemberResults(GROUPING_3_PATH, users.get(0).getUsername());
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Test
     public void makeWsDeleteMemberResultsTest() {
+        WsDeleteMemberResults results;
+
+        results = gfsl.makeWsDeleteMemberResults(GROUPING_3_PATH, users.get(5).getUsername());
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Test
+    public void makeWsDeleteMemberResultsLookupTest() {
         WsDeleteMemberResults results;
         List<String> members = new ArrayList<>();
         members.add(users.get(5).getUsername());
@@ -235,7 +251,7 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void makeWsGetAttributeAssignmentsResultsTrioTwoAttr() {
+    public void makeWsGetAttributeAssignmentsResultsTrioTwoAttrTest() {
         WsGetAttributeAssignmentsResults results;
 
         String assignType = "placeholder";
@@ -249,7 +265,7 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void makeWsGetAttributeAssignmentsResultsTrioTestOwnerGroupName() {
+    public void makeWsGetAttributeAssignmentsResultsTrioOwnerGroupNameTest() {
         List<WsGetAttributeAssignmentsResults> results;
 
         List<String> ownerGroupNames = new ArrayList<>();
@@ -262,7 +278,7 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void makeWsGetAttributeAssignmentsResultsTrioTestOwnerTwoAttrGroupName() {
+    public void makeWsGetAttributeAssignmentsResultsTrioOwnerTwoAttrGroupNameTest() {
         List<WsGetAttributeAssignmentsResults> results;
 
         List<String> ownerGroupNames = new ArrayList<>();
