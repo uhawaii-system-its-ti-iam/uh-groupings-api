@@ -180,6 +180,20 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
+    public void makeWsStemLookupTest() {
+        WsStemLookup result;
+
+        result = gfsl.makeWsStemLookup("pre");
+    }
+
+    @Test
+    public void makeWsAttributeAsignValueTest() {
+        WsAttributeAssignValue result;
+
+        result = gfsl.makeWsAttributeAssignValue("10:30AM");
+    }
+
+    @Test
     public void makeWsStemSaveResultsTest() {
         WsStemSaveResults results = gfsl.makeWsStemSaveResults("username", "stemPath");
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
@@ -232,6 +246,28 @@ public class GrouperFactoryServiceTest {
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0, attributeDefNameName1In);
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0, attributeDefNameName1Out);
 
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsTrioTestOwnerGroupName() {
+        List<WsGetAttributeAssignmentsResults> results;
+
+        List<String> ownerGroupNames = new ArrayList<>();
+        String attributeDefNameName0 = "palceholder";
+        String attributeDefNameName1In = OPT_IN;
+        String attributeDefNameName1Out = OPT_OUT;
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0, attributeDefNameName1In, ownerGroupNames);
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0, attributeDefNameName1Out, ownerGroupNames);
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsTrioTestOwnerTwoAttrGroupName() {
+        List<WsGetAttributeAssignmentsResults> results;
+
+        List<String> ownerGroupNames = new ArrayList<>();
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", "attributeDefNamName", ownerGroupNames);
     }
 
     // This test also takes care of setGroupingAttribute(grouping, attributeName, on)
