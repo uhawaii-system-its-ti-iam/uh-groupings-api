@@ -28,7 +28,6 @@
         <org.jasig.cas.client-version>3.4.1</org.jasig.cas.client-version>
 
         <jquery-version>3.2.0</jquery-version>
-        <bootstrap-version>3.3.7</bootstrap-version>
     </properties>
 
     <dependencies>
@@ -139,32 +138,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Webjars -->
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>bootstrap</artifactId>
-            <version>${bootstrap-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.lesscss</groupId>
-            <artifactId>lesscss-maven-plugin</artifactId>
-            <version>1.7.0.1.1</version>
-        </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
             <version>${jquery-version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>underscore</artifactId>
-            <version>1.8.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>font-awesome</artifactId>
-            <version>4.7.0</version>
-        </dependency>
+
         <dependency>
             <groupId>net.sourceforge.pmd</groupId>
             <artifactId>pmd</artifactId>
@@ -266,7 +245,3 @@
     <!--jquery-->
     <!--thymeleaf-->
     <!--spring-boot-starter-mail-->
-    <!--bootstrap-->
-    <!--lesscss-->
-    <!--underscore-->
-    <!--fontawesome-->
