@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.hawaii.its.ti.iam</groupId>
-    <artifactId>uhgroupings</artifactId>
-    <name>uhgroupings</name>
+    <artifactId>uhgroupingsapi</artifactId>
+    <name>uhgroupingsapi</name>
     <description>ITS Grouper Application</description>
     <packaging>war</packaging>
     <version>0.0.9</version>
@@ -28,9 +28,6 @@
         <org.jasig.cas.client-version>3.4.1</org.jasig.cas.client-version>
 
         <jquery-version>3.2.0</jquery-version>
-        <angular-mocks-version>1.5.8</angular-mocks-version>
-        <angular-ui-bootstrap-version>2.2.0</angular-ui-bootstrap-version>
-        <angularjs-version>1.5.8</angularjs-version>
         <bootstrap-version>3.3.7</bootstrap-version>
     </properties>
 
@@ -141,12 +138,6 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jasmine</artifactId>
-            <version>2.2.0</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- Webjars -->
         <dependency>
@@ -165,11 +156,6 @@
             <version>${jquery-version}</version>
         </dependency>
         <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>angularjs</artifactId>
-            <version>${angularjs-version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.webjars.npm</groupId>
             <artifactId>underscore</artifactId>
             <version>1.8.3</version>
@@ -180,25 +166,10 @@
             <version>4.7.0</version>
         </dependency>
         <dependency>
-            <groupId>org.webjars.bower</groupId>
-            <artifactId>angular-ui-grid</artifactId>
-            <version>4.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>angular-ui-bootstrap</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-        <dependency>
             <groupId>net.sourceforge.pmd</groupId>
             <artifactId>pmd</artifactId>
             <version>5.8.1</version>
             <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bower</groupId>
-            <artifactId>angular-mocks</artifactId>
-            <version>${angular-mocks-version}</version>
         </dependency>
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
@@ -229,36 +200,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.github.searls</groupId>
-                <artifactId>jasmine-maven-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <preloadSources>
-                        <source>classpath/META-INF/resources/webjars/angularjs/${angularjs-version}/angular.min.js"></source>
-                        <source>classpath/META-INF/resources/webjars/jquery/${jquery-version}/jquery.min.js</source>
-                        <source>classpath/META-INF/resources/webjars/bootstrap/${bootstrap-version}/js/bootstrap.min.js</source>
-                        <source>classpath/META-INF/resources/webjars/angular-ui-bootstrap/2.2.0/ui-bootstrap.min.js</source>
-                        <source>classpath/META-INF/resources/webjars/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js</source>
-                        <source>classpath/META-INF/resources/webjars/angular-mocks/${angular-mocks-version}/angular-mocks.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.app.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.controller.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/campus/campus.service.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.app.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.controller.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/admin/admin.service.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.app.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.controller.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/membership/membership.service.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.app.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.controller.js</source>
-                        <source>${basedir}/src/main/resources/static/javascript/owner/owner.service.js</source>
-                    </preloadSources>
-                    <specIncludes>
-                        <include>**/**.test.js</include>
-                    </specIncludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -275,7 +216,6 @@
                                 <echo>$ mvn clean test -Dspring.profiles.active=test -Dtest=Test* </echo>
                                 <echo>$ mvn clean package</echo>
                                 <echo>$ mvn -Dmaven.test.skip=true clean package</echo>
-                                <echo>$ mvn jasmine:test</echo>
                                 <echo>$ mvn clean test jacoco:report</echo>
                                 <echo></echo>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
@@ -320,3 +260,13 @@
         </plugins>
     </build>
 </project>
+
+
+<!--get rid of -->
+    <!--jquery-->
+    <!--thymeleaf-->
+    <!--spring-boot-starter-mail-->
+    <!--bootstrap-->
+    <!--lesscss-->
+    <!--underscore-->
+    <!--fontawesome-->
