@@ -208,6 +208,32 @@ public class GrouperFactoryServiceTest {
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
     }
 
+    //Unsure as to what the function does but it is covered
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsTrioTest() {
+        WsGetAttributeAssignmentsResults results;
+
+        String assignType = "placeholder";
+        String attributeDefNameName = "palceholder";
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName);
+
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsTrioTwoAttr() {
+        WsGetAttributeAssignmentsResults results;
+
+        String assignType = "placeholder";
+        String attributeDefNameName0 = "palceholder";
+        String attributeDefNameName1In = OPT_IN;
+        String attributeDefNameName1Out = OPT_OUT;
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0, attributeDefNameName1In);
+        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0, attributeDefNameName1Out);
+
+    }
+
     // This test also takes care of setGroupingAttribute(grouping, attributeName, on)
     @Test
     public void makeWsAssignAttributesResultsForGroupTest() {
@@ -269,14 +295,9 @@ public class GrouperFactoryServiceTest {
         String privilegeNameOut = PRIVILEGE_OPT_OUT;
         String groupName = GROUPING_3_PATH;
         Boolean allowed = true;
-        //Boolean notAllowed = false;
-
-
-
 
         result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, allowed);
         result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, allowed);
-
 
     }
 
