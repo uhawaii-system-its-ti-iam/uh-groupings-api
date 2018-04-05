@@ -27,7 +27,6 @@
         <h2.version>1.4.192</h2.version>
         <org.jasig.cas.client-version>3.4.1</org.jasig.cas.client-version>
 
-        <jquery-version>3.2.0</jquery-version>
     </properties>
 
     <dependencies>
@@ -50,11 +49,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!-- hot swapping, disable cache for template, enable live reload -->
@@ -136,12 +130,6 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>${jquery-version}</version>
         </dependency>
 
         <dependency>
@@ -239,9 +227,3 @@
         </plugins>
     </build>
 </project>
-
-
-<!--get rid of -->
-    <!--jquery-->
-    <!--thymeleaf-->
-    <!--spring-boot-starter-mail-->
