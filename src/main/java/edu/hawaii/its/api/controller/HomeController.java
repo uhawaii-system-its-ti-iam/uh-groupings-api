@@ -19,7 +19,7 @@ public class HomeController {
     @RequestMapping(value = {"/", "/home"}, method = {RequestMethod.GET})
     public String home(Map<String, Object> model, Locale locale) {
         logger.info("User at home. The client locale is " + locale);
-        return "/api/groupings/";
+        return "home";
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)

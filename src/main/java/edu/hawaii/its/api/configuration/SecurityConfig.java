@@ -150,7 +150,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(casProcessingFilterEntryPoint());
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
-                .antMatchers("/api/**").hasRole("UH")
+                .antMatchers("/api/groupings/**").hasRole("UH")
                 .antMatchers("/home").permitAll()
                 .antMatchers("/denied").permitAll()
                 .antMatchers("/404").permitAll()
