@@ -17,6 +17,7 @@ import org.junit.Test;
 public class PersonTest {
 
     private Person person;
+    private Person person2;
 
     @Before
     public void setUp() {
@@ -34,6 +35,13 @@ public class PersonTest {
         assertThat(person.getName(), equalTo("a"));
         assertThat(person.getUuid(), equalTo("b"));
         assertThat(person.getUsername(), equalTo("c"));
+
+        person2 = new Person("a", "b", "c", "d", "e");
+        assertThat(person2.getName(), equalTo("a"));
+        assertThat(person2.getUuid(), equalTo("b"));
+        assertThat(person2.getUsername(), equalTo("c"));
+        assertThat(person2.getFirstName(), equalTo("d"));
+        assertThat(person2.getLastName(), equalTo("e"));
     }
 
     @Test
@@ -212,5 +220,18 @@ public class PersonTest {
         assertThat(persons.get(1).getUsername(), equalTo("2"));
         assertThat(persons.get(2).getUsername(), equalTo("3"));
         assertThat(persons.get(3).getUsername(), equalTo("4"));
+    }
+
+    @Test
+    public void getAttributeTest() {
+        String username = person.getAttribute("username");
+        assertThat(person.getUsername(), equalTo(username));
+    }
+
+    @Test
+    public void setAttributeTest() {
+        assertFalse(person.getUsername() == "a");
+        person.setAttribute("username", "a");
+        assertTrue(person.getAttribute("username") == "a");
     }
 }
