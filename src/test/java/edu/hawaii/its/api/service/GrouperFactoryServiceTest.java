@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Grouping;
 import edu.internet2.middleware.grouperClient.ws.beans.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,9 @@ public class GrouperFactoryServiceTest {
 
     @Value("${groupings.api.opt_out}")
     private String OPT_OUT;
+
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
 
     @Value("${groupings.api.privilege_opt_out}")
     private String PRIVILEGE_OPT_OUT;
@@ -284,6 +288,57 @@ public class GrouperFactoryServiceTest {
         List<String> ownerGroupNames = new ArrayList<>();
 
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", "attributeDefNamName", ownerGroupNames);
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsForMembershipTest(){
+        String assignType = "assignType";
+        String attributeDefNameName = "work";
+        String memebershipId = users.get(5).getUsername();
+
+        users.get(5);
+
+        WsGetAttributeAssignmentsResults results;
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsForMembership(assignType, attributeDefNameName, memebershipId);
+
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+
+
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsForGroupTest() {
+        WsGetAttributeAssignmentsResults results;
+
+        String assignType = "assignType";
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, GROUPING_3_PATH);
+    }
+
+    @Test
+    public void makeWsGetAttributeAssignmentsResultsForGroupDefNameTest(){
+        WsGetAttributeAssignmentsResults results;
+
+        String assignType = "assignType";
+        String attributeDefNameName = "attributeDefNameName";
+
+        results = gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, attributeDefNameName, GROUPING_3_PATH);
+    }
+
+
+    @Test
+    public void makeWsHasMemberResultsTest(){
+        WsHasMemberResults results;
+
+        results = gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
+    }
+
+    @Test
+    public void makeWsHasMemberResultsPersonTest(){
+        WsHasMemberResults results;
+
+        results = gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
     }
 
     // This test also takes care of setGroupingAttribute(grouping, attributeName, on)

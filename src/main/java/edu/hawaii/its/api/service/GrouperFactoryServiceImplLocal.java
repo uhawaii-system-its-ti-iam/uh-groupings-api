@@ -586,7 +586,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         WsAttributeAssign[] wsAttributeAssigns = new WsAttributeAssign[1];
         WsAttributeAssign wsAttributeAssign = new WsAttributeAssign();
-        if (membership.isSelfOpted()) {
+        if (membership != null && membership.isSelfOpted()) {
             wsAttributeAssign.setAttributeDefNameName(SELF_OPTED);
         }
 
