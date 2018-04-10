@@ -245,7 +245,7 @@ public class HelperServiceImpl implements HelperService {
         return groupingsServiceResult;
     }
 
-    //makes a list of groupings each with a path fro the list
+    //makes a list of groupings each with a path from the list
     @Override
     public List<Grouping> makeGroupings(List<String> groupingPaths) {
         logger.info("makeGroupings; groupingPaths: " + groupingPaths + ";");
