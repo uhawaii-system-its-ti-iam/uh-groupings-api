@@ -22,6 +22,9 @@ public class ErrorControllerAdvice {
     //  Do we need to use @ResponseBody for the methods or is this already being handled?
     //  Do we need to use @ResponseStatus for the methods or is the HTTP status already being added?
     //  Should we use VndErrors() type and get rid of the Groupings specific error types?
+    // Looking into it, not sure if HATEOAS is doable/necessary for Exception Handling
+
+    //todo Do we need seperate exceptions for unauthorized operations?
 
     private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
 
@@ -59,6 +62,7 @@ public class ErrorControllerAdvice {
     }
 
     //todo this is for the HolidayRestControllerTest test (should we really have this behavior?)
+    // Is HolidayRestControllerTest even a thing anymore? Couldn't find reference to it in codebase
     @ExceptionHandler(TypeMismatchException.class)
     public String handleTypeMismatchException(Exception ex) {
         String username = null;
