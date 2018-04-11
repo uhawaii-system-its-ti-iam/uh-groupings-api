@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +28,21 @@ public class ErrorControllerAdvice {
     @Autowired
     private UserContextService userContextService;
 
+    //todo Possibly could return 400 (bad request) instead
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<GroupingsHTTPException> handelIllegalArgumentException(IllegalArgumentException iae, WebRequest request) {
+    public ResponseEntity<GroupingsHTTPException> handleIllegalArgumentException(IllegalArgumentException iae,
+            WebRequest request) {
         return exceptionResponse("Resource not available", iae, 404);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<GroupingsHTTPException> handelRuntimeException(RuntimeException re) {
+    public ResponseEntity<GroupingsHTTPException> handleRuntimeException(RuntimeException re) {
         return exceptionResponse("runtime exception", re, 500);
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<GroupingsHTTPException> handleUnsupportedOperationException(UnsupportedOperationException nie) {
+    public ResponseEntity<GroupingsHTTPException> handleUnsupportedOperationException(
+            UnsupportedOperationException nie) {
         return exceptionResponse("Method not implemented", nie, 501);
     }
 
@@ -48,7 +52,8 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(GroupingsServiceResultException.class)
-    public ResponseEntity<GroupingsHTTPException> handelGroupingsServiceResultException(GroupingsServiceResultException gsre) {
+    public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
+            GroupingsServiceResultException gsre) {
         ResponseEntity re = exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
         return re;
     }
