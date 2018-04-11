@@ -175,12 +175,22 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Autowired
+    private GroupAttributeService groupAttributeService;
+
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
 
-        return helperService.makeGroupings(groupingsIn);
+        List<Grouping> groupings =  helperService.makeGroupings(groupingsIn);
+        //todo this can be optimized by getting opt attributes from grouper when getting the group list
+        //rather than making individual calls to grouper, which is much slower
+        for(Grouping grouping : groupings) {
+            grouping.setOptOutOn(groupAttributeService.optOutPermission(grouping.getPath()));
+        }
+
+        return groupings;
     }
 
     //returns a list of groupings that corresponds to all of the owner groups in groupPaths
@@ -251,6 +261,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         groupingAssignment.setGroupingsToOptOutOf(groupingsToOptOutOf(username, groupPaths));
         groupingAssignment.setGroupingsOptedOutOf(groupingsOptedOutOf(username, groupPaths));
         groupingAssignment.setGroupingsOptedInTo(groupingsOptedInto(username, groupPaths));
+
 
         return groupingAssignment;
     }
