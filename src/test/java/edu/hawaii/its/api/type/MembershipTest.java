@@ -78,10 +78,25 @@ public class MembershipTest {
 
     @Test
     public void equalsTest() {
+        Membership membershipNull = null;
+        membership.equals(membershipNull);
+
         Membership membershipCopy = membership;
         assertTrue(membership.equals(membershipCopy));
 
         Membership differentMembership = new Membership();
         assertFalse(membership.equals(differentMembership));
+
+        Membership diffPersonMember = new Membership();
+        diffPersonMember.setId(membership.getId());
+        diffPersonMember.setPerson(new Person());
+        diffPersonMember.setGroup(membership.getGroup());
+        assertFalse(membership.equals(diffPersonMember));
+
+        Membership diffGroupMember = new Membership();
+        diffGroupMember.setId(membership.getId());
+        diffGroupMember.setPerson(membership.getPerson());
+        diffGroupMember.setGroup(new Group());
+        assertFalse(membership.equals(diffGroupMember));
     }
 }
