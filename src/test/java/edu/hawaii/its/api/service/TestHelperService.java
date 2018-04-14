@@ -168,6 +168,39 @@ public class TestHelperService {
 
     @Test
     public void extractGroupingsTest() {
-        //todo
+
+        List<String> groupPaths = new ArrayList<>();
+
+        // Empty list
+        List<String> groupings = helperService.extractGroupings(groupPaths);
+        assertTrue(groupings.size() == 0);
+
+        // Extract Groups that exist
+        groupPaths.add(GROUPING);
+        groupPaths.add(GROUPING_STORE_EMPTY);
+        groupPaths.add(GROUPING_TRUE_EMPTY);
+        groupings = helperService.extractGroupings(groupPaths);
+        assertTrue(groupings.size() == 3);
+
+        //Extract group that doesn't exist
+        try {
+            List<String> groupPathsDontExist = new ArrayList<>();
+            groupPathsDontExist.add("someGroup");
+            groupings = helperService.extractGroupings(groupPathsDontExist);
+            assertTrue(groupings.size() == 0);
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        //Extract null group
+        try {
+            List<String> groupPathsNull = new ArrayList<>();
+            groupPathsNull.add(null);
+            groupings = helperService.extractGroupings(groupPathsNull);
+            assertTrue(groupings.size() == 0);
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
     }
 }
