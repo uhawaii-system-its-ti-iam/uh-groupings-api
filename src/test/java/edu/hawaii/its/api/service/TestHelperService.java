@@ -6,6 +6,9 @@ import org.junit.runner.RunWith;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
+import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +18,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -114,12 +119,55 @@ public class TestHelperService {
     }
 
     @Test
-    public void membershipResultsTest(){
-        //todo
+    public void membershipResultsTest() {
+
+        // username is in group
+        WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING);
+        assertFalse(results.getWsMemberships().equals(null));
+
+        // username is not in group
+        try {
+            results = helperService.membershipsResults(username[3], GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // username doesn't exist
+        try {
+            results = helperService.membershipsResults("someName", GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // username is null
+        try {
+            results = helperService.membershipsResults(null, GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // group doesn't exist
+        try {
+            results = helperService.membershipsResults(username[1], "someGroup");
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // group is null
+        try {
+            results = helperService.membershipsResults(username[1], null);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
-    public void extractGroupingsTest(){
+    public void extractGroupingsTest() {
         //todo
     }
 }
