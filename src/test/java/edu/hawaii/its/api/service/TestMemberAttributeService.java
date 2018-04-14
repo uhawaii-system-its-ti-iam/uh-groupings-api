@@ -3,9 +3,14 @@ package edu.hawaii.its.api.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +47,12 @@ public class TestMemberAttributeService {
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
+
+    //@Value("${grouping.api.test.uuids")
+    //private String[] uuid;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
@@ -87,7 +99,7 @@ public class TestMemberAttributeService {
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
-        
+
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
     }
@@ -151,32 +163,131 @@ public class TestMemberAttributeService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
 
-        //todo
+        //todo NPE The person is required to have either a username or UUID
         //test isMember with Person
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, new Person(username[1])));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, new Person(username[3])));
+
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, new Person(username[3])));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, new Person(username[1])));
     }
 
     @Test
     public void isSelfOptedTest() {
-        //todo
+        //todo How to change/know if user is SelfOpted/Admin/Appuser etc.
+
+        // User is not self opted
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING, username[1]));
+
+        // User is self opted
+        //WsAttributeAssign att = new WsAttributeAssign();
+        //att.setAttributeDefName(SELF_OPTED);
+        //membershipService.addSelfOpted(GROUPING, username[1]);
+        Membership membership = new Membership();
+        //membership = membershipService.addSelfOpted(GROUPING, username[1]);
+        membership.setSelfOpted(true);
+
+        assertTrue(memberAttributeService.isSelfOpted(GROUPING, username[1]));
+
+        // User does not exist
+        try {
+            assertFalse(memberAttributeService.isSelfOpted(GROUPING, "someName"));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // User is null
+        try {
+            assertFalse(memberAttributeService.isSelfOpted(GROUPING, null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // Group does not exist
+
+        // Group path is null
+
     }
 
     @Test
     public void isAppTest() {
         //todo
+
+        // User is not app user
+        assertFalse(memberAttributeService.isApp(username[1]));
+
+        // User is app user
+        //assertTrue(memberAttributeService.isApp(username[1]));
+
+        // User does not exist
+        try {
+            assertFalse(memberAttributeService.isApp("someName"));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // User is null
+        try {
+            assertFalse(memberAttributeService.isApp(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
     public void isSuperUserTest() {
         //todo
+
+        // User is not super user
+        assertFalse(memberAttributeService.isSuperuser(username[1]));
+
+        // User is super user
+        //assertTrue(memberAttributeService.isSuperuser(username[1]));
+
+        // User does not exist
+        try {
+            assertFalse(memberAttributeService.isSuperuser("someName"));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // User is null
+        try {
+            assertFalse(memberAttributeService.isSuperuser(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
-    public void isAmdinTest() {
+    public void isAdminTest() {
         //todo
+
+        // User is not admin
+        assertFalse(memberAttributeService.isAdmin(username[1]));
+
+        // User is admin
+        //assertTrue(memberAttributeService.isSuperuser(username[1]));
+
+        // User does not exist
+        try {
+            assertFalse(memberAttributeService.isAdmin("someName"));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // User is null
+        try {
+            assertFalse(memberAttributeService.isAdmin(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
     public void getMembershipAttributesTest() {
         //todo
+        WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
+
     }
 }
