@@ -87,7 +87,7 @@ public class Membership implements Comparable<Membership> {
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof Membership) && (compareTo((Membership) o) == 0);
+        return ((compareTo((Membership) o) == 0 && o instanceof Membership));
     }
 
     @Override

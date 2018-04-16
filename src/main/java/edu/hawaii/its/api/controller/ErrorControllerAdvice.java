@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,24 +22,30 @@ public class ErrorControllerAdvice {
     //  Do we need to use @ResponseBody for the methods or is this already being handled?
     //  Do we need to use @ResponseStatus for the methods or is the HTTP status already being added?
     //  Should we use VndErrors() type and get rid of the Groupings specific error types?
+    // Looking into it, not sure if HATEOAS is doable/necessary for Exception Handling
+
+    //todo Do we need seperate exceptions for unauthorized operations?
 
     private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
 
     @Autowired
     private UserContextService userContextService;
 
+    //todo Possibly could return 400 (bad request) instead
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<GroupingsHTTPException> handelIllegalArgumentException(IllegalArgumentException iae, WebRequest request) {
+    public ResponseEntity<GroupingsHTTPException> handleIllegalArgumentException(IllegalArgumentException iae,
+            WebRequest request) {
         return exceptionResponse("Resource not available", iae, 404);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<GroupingsHTTPException> handelRuntimeException(RuntimeException re) {
+    public ResponseEntity<GroupingsHTTPException> handleRuntimeException(RuntimeException re) {
         return exceptionResponse("runtime exception", re, 500);
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<GroupingsHTTPException> handleUnsupportedOperationException(UnsupportedOperationException nie) {
+    public ResponseEntity<GroupingsHTTPException> handleUnsupportedOperationException(
+            UnsupportedOperationException nie) {
         return exceptionResponse("Method not implemented", nie, 501);
     }
 
@@ -48,12 +55,14 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(GroupingsServiceResultException.class)
-    public ResponseEntity<GroupingsHTTPException> handelGroupingsServiceResultException(GroupingsServiceResultException gsre) {
+    public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
+            GroupingsServiceResultException gsre) {
         ResponseEntity re = exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
         return re;
     }
 
     //todo this is for the HolidayRestControllerTest test (should we really have this behavior?)
+    // Is HolidayRestControllerTest even a thing anymore? Couldn't find reference to it in codebase
     @ExceptionHandler(TypeMismatchException.class)
     public String handleTypeMismatchException(Exception ex) {
         String username = null;
