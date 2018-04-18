@@ -1,9 +1,34 @@
 openapi: 3.0.0
 info:
-  version: '2.0'
+  version: '2.1'
   title: 'UH Groupings API'
 paths:
-  '/{adminToAdd}/addAdmin':
+  '/adminsGroupings':
+      get:
+        description: Returns all admins and all groupings
+        parameters:
+          - name: adminToAdd
+            in: path
+            description: username of the user becoming an admin
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: >-
+              Successful response, an admin Person object is added to the Admin
+              group
+            content:
+              '*/*':
+                schema:
+                  $ref: '#/components/schemas/Person'
+          '403':
+            description: >-
+              User with username  does not exist or does not have
+              permission to add admins
+          '404':
+            description: User with username  does not exist
+  '/admins/':
     post:
       description: Adds a member to the admin group
       parameters:
