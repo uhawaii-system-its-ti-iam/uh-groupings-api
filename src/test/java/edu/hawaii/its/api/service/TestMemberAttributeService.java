@@ -56,6 +56,7 @@ public class TestMemberAttributeService {
     private String[] username;
 
     @Value("${groupings.api.test.app_users}")
+    private String app_user;
 
     @Value("${groupings.api.test.admin_users}")
     private String admin_user;
