@@ -6,6 +6,9 @@ import org.junit.runner.RunWith;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
+import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +18,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -114,12 +119,88 @@ public class TestHelperService {
     }
 
     @Test
-    public void membershipResultsTest(){
-        //todo
+    public void membershipResultsTest() {
+
+        // username is in group
+        WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING);
+        assertFalse(results.getWsMemberships().equals(null));
+
+        // username is not in group
+        try {
+            results = helperService.membershipsResults(username[3], GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // username doesn't exist
+        try {
+            results = helperService.membershipsResults("someName", GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // username is null
+        try {
+            results = helperService.membershipsResults(null, GROUPING);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // group doesn't exist
+        try {
+            results = helperService.membershipsResults(username[1], "someGroup");
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // group is null
+        try {
+            results = helperService.membershipsResults(username[1], null);
+            assertTrue(results.getWsMemberships().equals(null));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
-    public void extractGroupingsTest(){
-        //todo
+    public void extractGroupingsTest() {
+
+        List<String> groupPaths = new ArrayList<>();
+
+        // Empty list
+        List<String> groupings = helperService.extractGroupings(groupPaths);
+        assertTrue(groupings.size() == 0);
+
+        // Extract Groups that exist
+        groupPaths.add(GROUPING);
+        groupPaths.add(GROUPING_STORE_EMPTY);
+        groupPaths.add(GROUPING_TRUE_EMPTY);
+        groupings = helperService.extractGroupings(groupPaths);
+        assertTrue(groupings.size() == 3);
+
+        //Extract group that doesn't exist
+        try {
+            List<String> groupPathsDontExist = new ArrayList<>();
+            groupPathsDontExist.add("someGroup");
+            groupings = helperService.extractGroupings(groupPathsDontExist);
+            assertTrue(groupings.size() == 0);
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        //Extract null group
+        try {
+            List<String> groupPathsNull = new ArrayList<>();
+            groupPathsNull.add(null);
+            groupings = helperService.extractGroupings(groupPathsNull);
+            assertTrue(groupings.size() == 0);
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
     }
 }
