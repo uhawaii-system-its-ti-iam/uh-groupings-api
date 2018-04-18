@@ -42,17 +42,23 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
+    // @Value("${groupings.api.test.grouping_many_apps}")
+    // private String GROUPING_APPS;
+    //groupings.api.test.grouping_many_apps = ${groupings.api.test.grouping_many}${groupings.api.apps}
+    // @Value("${groupings.api.test.grouping_many_admins}")
+    // private String GROUPING_ADMINS;
+    //groupings.api.test.grouping_many_admins = ${groupings.api.test.grouping_many}${groupings.api.admins}
+
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
-    @Value("${groupings.api.self_opted}")
-    private String SELF_OPTED;
+    @Value("${groupings.api.test.app_users}")
 
-    //@Value("${grouping.api.test.uuids")
-    //private String[] uuid;
+    @Value("${groupings.api.test.admin_users}")
+    private String admin_user;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
@@ -163,61 +169,124 @@ public class TestMemberAttributeService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
 
-        //todo NPE The person is required to have either a username or UUID
         //test isMember with Person
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, new Person(username[1])));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, new Person(username[3])));
+        Person testPersonInclude = new Person("tst01name", "iamtst01", username[1]);
+        Person testPersonExclude = new Person("tst03name", "iamtst03", username[3]);
+        Person testPersonNull = null;
 
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, new Person(username[3])));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, new Person(username[1])));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, testPersonInclude));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testPersonExclude));
+
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, testPersonExclude));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testPersonInclude));
+
+        // Test if username does not exist
+        try {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, "someName"));
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // Test if username/person is NULL
+        try {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testPersonNull));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        String nullString = null;
+        try {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, nullString));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // Test if grouping does not exist
+        try {
+            assertFalse(memberAttributeService.isMember("someGroup", username[1]));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        try {
+            assertFalse(memberAttributeService.isMember("someGroup", testPersonExclude));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        // Test if grouping is NULL
+        try {
+            assertFalse(memberAttributeService.isSelfOpted(null, username[1]));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+
+        try {
+            assertFalse(memberAttributeService.isMember(null, testPersonExclude));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
     public void isSelfOptedTest() {
         //todo How to change/know if user is SelfOpted/Admin/Appuser etc.
 
-        // User is not self opted
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING, username[1]));
+        // User is not self opted because user is not in group
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4]));
+        membershipService.addGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[4]);
 
-        // User is self opted
-        //WsAttributeAssign att = new WsAttributeAssign();
-        //att.setAttributeDefName(SELF_OPTED);
-        //membershipService.addSelfOpted(GROUPING, username[1]);
-        Membership membership = new Membership();
-        //membership = membershipService.addSelfOpted(GROUPING, username[1]);
-        membership.setSelfOpted(true);
+        // User is not self opted b/c added by owner
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4]));
 
-        assertTrue(memberAttributeService.isSelfOpted(GROUPING, username[1]));
+        membershipService.addSelfOpted(GROUPING_EXCLUDE, username[4]);
+
+        // Alternate implementation
+        //membershipService.deleteGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[4]);
+        //membershipService.optOut(username[4], GROUPING);
+
+        // User is self opted b/c added himself
+        assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4]));
 
         // User does not exist
         try {
-            assertFalse(memberAttributeService.isSelfOpted(GROUPING, "someName"));
+            assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, "someName"));
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
 
         // User is null
         try {
-            assertFalse(memberAttributeService.isSelfOpted(GROUPING, null));
+            assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, null));
         } catch (RuntimeException re) {
             re.printStackTrace();
         }
 
         // Group does not exist
+        try {
+            assertFalse(memberAttributeService.isSelfOpted("someGroup", username[4]));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
 
         // Group path is null
-
+        try {
+            assertFalse(memberAttributeService.isSelfOpted(null, username[4]));
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 
     @Test
     public void isAppTest() {
-        //todo
+        //todo Write in overrides file who the App User is (not directly for security reasons)
+        //todo I need permissions so I know who App User and Admin User are on Grouper Test Server
 
         // User is not app user
         assertFalse(memberAttributeService.isApp(username[1]));
 
         // User is app user
-        //assertTrue(memberAttributeService.isApp(username[1]));
+        //assertTrue(memberAttributeService.isApp(app_user));
 
         // User does not exist
         try {
@@ -242,7 +311,8 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isSuperuser(username[1]));
 
         // User is super user
-        //assertTrue(memberAttributeService.isSuperuser(username[1]));
+        //assertTrue(memberAttributeService.isSuperuser(app_user));
+        //assertTrue(memberAttributeService.isSuperuser(admin_user));
 
         // User does not exist
         try {
@@ -267,7 +337,7 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isAdmin(username[1]));
 
         // User is admin
-        //assertTrue(memberAttributeService.isSuperuser(username[1]));
+        //assertTrue(memberAttributeService.isAdmin(admin_user));
 
         // User does not exist
         try {
@@ -286,8 +356,13 @@ public class TestMemberAttributeService {
 
     @Test
     public void getMembershipAttributesTest() {
-        //todo
+        //todo I don't know what to put as arguments
+        // Ternary Operator (for reference)
+        // if(!null) return wsAttributes
+        // else return grouperFS.makeEmptyWSAttributeAssignArray
+
         WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
+        assertTrue(assigns.length == 3);
 
     }
 }
