@@ -4,124 +4,61 @@ info:
   title: 'UH Groupings API'
 paths:
   '/adminsGroupings':
-      get:
-        description: Returns all admins and all groupings
-        parameters:
-          - name: adminToAdd
-            in: path
-            description: username of the user becoming an admin
-            required: true
-            schema:
-              type: string
-        responses:
-          '200':
-            description: >-
-              Successful response, an admin Person object is added to the Admin
-              group
-            content:
-              '*/*':
-                schema:
-                  $ref: '#/components/schemas/Person'
-          '403':
-            description: >-
-              User with username  does not exist or does not have
-              permission to add admins
-          '404':
-            description: User with username  does not exist
-  '/admins/':
-    post:
-      description: Adds a member to the admin group
+    get:
+      description: Returns list of admins and groups
+  '/admins':
+    get:
+      description: Returns list of admins
+  '/admins/{user}':
+    get:
+      description: Returns user based on the 'user' parameter
       parameters:
-        - name: adminToAdd
+        - name: user
           in: path
-          description: username of the user becoming an admin
+          description: username or UH ID of user being added
           required: true
           schema:
             type: string
       responses:
-        '200':
-          description: >-
-            Successful response, an admin Person object is added to the Admin
-            group
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Person'
-        '403':
-          description: >-
-            User with username  does not exist or does not have
-            permission to add admins
-        '404':
-          description: User with username  does not exist
-  '/{adminToDelete}/deleteAdmin':
     post:
-      description: Deletes a member from the group of admins
+      description: Adds user to list of admins
       parameters:
-        - name: adminToDelete
-          in: path
-          description: username of the user being deleted from the admin list
-          required: true
-          schema:
-            type: string
+        - name: user
+        in: path
+        description: username or UH ID of user being added
+        requried: true
+        schema:
+          type: string
       responses:
-        '200':
-          description: Successful deleteion
-        '403':
-          description: >-
-            User with username  does not exist or does not have
-            permission to delete admins
-        '404':
-          description: User with username  is not in the list of admins
-  '/{grouping}/{userToAdd}/addGroupingMemberByUsername':
+    delete:
+      description: Deletes user from list of admins
+      parameters:
+        - name: user
+        in: path
+        description: username or UH ID of user being added
+        required: true
+        schema:
+          type: string
+      responses:
+  '/members/{grouping}/{user}':
+    get:
+      description: Returns user 
     post:
-      description: Adds a member to a grouping via username
+      description: Adds a member to a grouping via username or UH ID
       parameters:
         - name: grouping
           in: path
-          description: path to the Grouping
+          description: path to the grouping
           required: true
           schema:
             type: string
-        - name: userToAdd
+        - name: user
           in: path
-          description: username of the use who is being added
+          description: user who is being added
           required: true
           schema:
             type: string
       responses:
-        '200':
-          description: Successful addition
-        '403':
-          description: >-
-            User with username  does not exist or user adding to group does not have
-            permission to add users
-        '404':
-          description: User with username does not exist
-  '/{grouping}/{userToAdd}/addGroupingMemberByUuid':
-      post:
-        description: Adds a member to a grouping via Uid
-        parameters:
-          - name: grouping
-            in: path
-            description: path to the Grouping
-            required: true
-            schema:
-              type: string
-          - name: userToAdd
-            in: path
-            description: Uuid of the user to be added
-            required: true
-            schema:
-              type: string
-        responses:
-          '200':
-            description: Successful addition
-          '403':
-            description: >-
-              User with Uuid  does not exist or user adding to group does not have
-              permission to add users
-          '404':
-            description: User with Uuid does not exist
   '/{grouping}/{userToAdd}/addMemberToIncludeGroup':
     post:
       description: Adds a member to the include group of a grouping
