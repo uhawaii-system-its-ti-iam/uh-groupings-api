@@ -40,7 +40,7 @@ paths:
         schema:
           type: string
       responses:
-  '/members/{grouping}/{user}':
+  '/members/{user}/groupings/{path}':
     get:
       description: Returns user 
     post:
