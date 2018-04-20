@@ -305,7 +305,31 @@ public class TestMembershipService {
 
     @Test
     public void addGroupingMemberByUuidTest(){
-        //todo
+
+        List<GroupingsServiceResult> results;
+        String ownerUsername = "owner";
+        String uid = "";
+
+        //username[3] is in the composite
+        assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
+
+        //add member already in the group
+        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
+
+        membershipService.addGroupingMemberByUuid(ownerUsername,GROUPING_BASIS, username[1]);
+
+        //username[] in both the include and basis
+        assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        //assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
+        //assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
+
+        //add member in both the
+
     }
 
     @Test
