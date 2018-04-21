@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +13,8 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +27,7 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Null;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -41,10 +46,19 @@ public class TestMemberAttributeService {
     private String GROUPING_EXCLUDE;
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
+    @Value("${groupings.api.assign_type_immediate_membership}")
+    private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
+
+    public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
 
     // @Value("${groupings.api.test.grouping_many_apps}")
     // private String GROUPING_APPS;
     //groupings.api.test.grouping_many_apps = ${groupings.api.test.grouping_many}${groupings.api.apps}
+    //
     // @Value("${groupings.api.test.grouping_many_admins}")
     // private String GROUPING_ADMINS;
     //groupings.api.test.grouping_many_admins = ${groupings.api.test.grouping_many}${groupings.api.admins}
@@ -55,11 +69,11 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
-    @Value("${groupings.api.test.app_users}")
-    private String app_user;
+    @Value("${grouperClient.webService.login}")
+    private String APP_USER;
 
-    @Value("${groupings.api.test.admin_users}")
-    private String admin_user;
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN_USER;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
@@ -75,6 +89,9 @@ public class TestMemberAttributeService {
 
     @Autowired
     private MembershipService membershipService;
+
+    @Autowired
+    private HelperService helperService;
 
     @Autowired
     public Environment env; // Just for the settings check.
@@ -109,6 +126,8 @@ public class TestMemberAttributeService {
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
+
+        membershipService.removeSelfOpted(GROUPING_INCLUDE, username[1]);
     }
 
     @Test
@@ -287,7 +306,7 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isApp(username[1]));
 
         // User is app user
-        //assertTrue(memberAttributeService.isApp(app_user));
+        assertTrue(memberAttributeService.isApp(APP_USER));
 
         // User does not exist
         try {
@@ -312,8 +331,8 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isSuperuser(username[1]));
 
         // User is super user
-        //assertTrue(memberAttributeService.isSuperuser(app_user));
-        //assertTrue(memberAttributeService.isSuperuser(admin_user));
+        assertTrue(memberAttributeService.isSuperuser(APP_USER));
+        assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
 
         // User does not exist
         try {
@@ -338,7 +357,7 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isAdmin(username[1]));
 
         // User is admin
-        //assertTrue(memberAttributeService.isAdmin(admin_user));
+        assertTrue(memberAttributeService.isAdmin(ADMIN_USER));
 
         // User does not exist
         try {
@@ -357,22 +376,45 @@ public class TestMemberAttributeService {
 
     @Test
     public void getMembershipAttributesTest() {
-        //todo I don't know what to put as arguments
+        //todo I don't know what to put as arguments (particularly membershipid)
         // Ternary Operator (for reference)
         // if(!null) return wsAttributes
         // else return grouperFS.makeEmptyWSAttributeAssignArray
 
-        //WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
-        //assertTrue(assigns.length == 3);
+        String type = ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
+        String uuid = SELF_OPTED;
+
+        WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING_INCLUDE);
+        String membershipID = helperService.extractFirstMembershipID(results);
+        assertEquals(0, memberAttributeService.getMembershipAttributes(type, uuid, membershipID).length);
+
+        membershipService.addSelfOpted(GROUPING_INCLUDE, username[1]);
+
+        //WsMembership membership = new WsMembership();
+        //membershipID = membership.getMembershipId();
+        //uuid = membership.getOwnerNameOfAttributeDef();
+        //membership.setOwnerStemId(OPT_IN);
+        //membership.setMembershipId(membershipID);
+
+        WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes(type, uuid, membershipID);
+        //logger.info("Assigns length is " + assigns.length + ";");
+        assertTrue(assigns.length == 1);
 
 
         // Test with invalid fields
         try {
-            WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
+            assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
             assertTrue(assigns.length == 0);
         } catch (RuntimeException re) {
             re.printStackTrace();
         }
 
+        // Test with null fields
+        try {
+            assigns = memberAttributeService.getMembershipAttributes(null, null, null);
+            assertTrue(assigns.length == 0);
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
     }
 }
