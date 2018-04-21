@@ -127,7 +127,12 @@ public class TestMemberAttributeService {
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
 
+        // Remove from Exclude
+        membershipService.addGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[4]);
+
+        // Turn off Self-Opted flags
         membershipService.removeSelfOpted(GROUPING_INCLUDE, username[1]);
+        membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[4]);
     }
 
     @Test
