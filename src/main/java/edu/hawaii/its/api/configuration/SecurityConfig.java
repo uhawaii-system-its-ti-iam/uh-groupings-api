@@ -1,39 +1,18 @@
 package edu.hawaii.its.api.configuration;
 
-import javax.annotation.PostConstruct;
-
-import org.jasig.cas.client.proxy.ProxyGrantingTicketStorage;
-import org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl;
-import org.jasig.cas.client.session.SingleSignOutFilter;
-import org.jasig.cas.client.validation.Saml11TicketValidator;
+import edu.hawaii.its.api.access.UserBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.cas.ServiceProperties;
-import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
-import org.springframework.security.cas.authentication.CasAuthenticationProvider;
-import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
-import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.cas.web.authentication.ServiceAuthenticationDetailsSource;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.util.Assert;
 
-import edu.hawaii.its.api.access.UserBuilder;
-import edu.hawaii.its.api.access.UserDetailsServiceImpl;
+import javax.annotation.PostConstruct;
 
 @ComponentScan(basePackages = "edu.hawaii.its")
-@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+@Order(SecurityProperties.)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${url.base}")
@@ -64,110 +43,110 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Assert.hasLength(casLogoutUrl, "property 'casLogoutUrl' is required");
     }
 
-    @Bean
-    public ProxyGrantingTicketStorage proxyGrantingTicketStorage() {
-        return new ProxyGrantingTicketStorageImpl();
-    }
-
-    @Bean
-    public SingleSignOutFilter singleLogoutFilter() {
-        return new SingleSignOutFilter();
-    }
-
-    @Bean
-    public ServiceProperties serviceProperties() {
-        ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService(urlBase + "/login/cas");
-        serviceProperties.setSendRenew(casSendRenew);
-        serviceProperties.setAuthenticateAllArtifacts(true);
-
-        return serviceProperties;
-    }
-
-    @Bean
-    public CasAuthenticationEntryPoint casProcessingFilterEntryPoint() {
-        CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
-        entryPoint.setLoginUrl(casLoginUrl);
-        entryPoint.setServiceProperties(serviceProperties());
-        return entryPoint;
-    }
-
-    @Bean
-    public LogoutFilter logoutFilter() {
-        return new LogoutFilter(casLogoutUrl, new SecurityContextLogoutHandler());
-    }
-
-    @Bean
-    public CasAuthenticationProvider casAuthenticationProvider() {
-        CasAuthenticationProvider provider = new CasAuthenticationProvider();
-        provider.setKey("an_id_for_this_auth_provider_only");
-        provider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
-        provider.setServiceProperties(serviceProperties());
-
-        Saml11TicketValidator ticketValidator = new Saml11TicketValidator(casMainUrl);
-        ticketValidator.setTolerance(casSamlTolerance);
-        provider.setTicketValidator(ticketValidator);
-
-        return provider;
-    }
-
-    @Bean
-    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
-        return new UserDetailsServiceImpl(userBuilder);
-    }
-
-    @Bean
-    public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-        CasAuthenticationFilter filter = new CasAuthenticationFilter();
-        filter.setAuthenticationManager(authenticationManager());
-
-        SimpleUrlAuthenticationFailureHandler authenticationFailureHandler =
-                new SimpleUrlAuthenticationFailureHandler();
-        authenticationFailureHandler.setDefaultFailureUrl("/home");
-        filter.setAuthenticationFailureHandler(authenticationFailureHandler);
-
-        SavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler =
-                new SavedRequestAwareAuthenticationSuccessHandler();
-        authenticationSuccessHandler.setAlwaysUseDefaultTargetUrl(false);
-        authenticationSuccessHandler.setDefaultTargetUrl("/home");
-        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
-
-        ServiceAuthenticationDetailsSource authenticationDetailsSource =
-                new ServiceAuthenticationDetailsSource(serviceProperties());
-        filter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-        filter.setProxyGrantingTicketStorage(proxyGrantingTicketStorage());
-        filter.setProxyReceptorUrl("/receptor");
-        filter.setServiceProperties(serviceProperties());
-
-        return filter;
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.addFilter(casAuthenticationFilter());
-        http.exceptionHandling()
-                .authenticationEntryPoint(casProcessingFilterEntryPoint());
-        http.authorizeRequests()
-                .antMatchers("/").permitAll()
-                .antMatchers("/api/groupings/**").hasRole("UH")
-                .antMatchers("/home").permitAll()
-                .antMatchers("/denied").permitAll()
-                .antMatchers("/404").permitAll()
-                .antMatchers("/login").hasRole("UH")
-                .anyRequest().authenticated()
-                .and()
-                .csrf()
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/");
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(casAuthenticationProvider());
-    }
+//    @Bean
+//    public ProxyGrantingTicketStorage proxyGrantingTicketStorage() {
+//        return new ProxyGrantingTicketStorageImpl();
+//    }
+//
+//    @Bean
+//    public SingleSignOutFilter singleLogoutFilter() {
+//        return new SingleSignOutFilter();
+//    }
+//
+//    @Bean
+//    public ServiceProperties serviceProperties() {
+//        ServiceProperties serviceProperties = new ServiceProperties();
+//        serviceProperties.setService(urlBase + "/login/cas");
+//        serviceProperties.setSendRenew(casSendRenew);
+//        serviceProperties.setAuthenticateAllArtifacts(true);
+//
+//        return serviceProperties;
+//    }
+//
+//    @Bean
+//    public CasAuthenticationEntryPoint casProcessingFilterEntryPoint() {
+//        CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+//        entryPoint.setLoginUrl(casLoginUrl);
+//        entryPoint.setServiceProperties(serviceProperties());
+//        return entryPoint;
+//    }
+//
+//    @Bean
+//    public LogoutFilter logoutFilter() {
+//        return new LogoutFilter(casLogoutUrl, new SecurityContextLogoutHandler());
+//    }
+//
+//    @Bean
+//    public CasAuthenticationProvider casAuthenticationProvider() {
+//        CasAuthenticationProvider provider = new CasAuthenticationProvider();
+//        provider.setKey("an_id_for_this_auth_provider_only");
+//        provider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
+//        provider.setServiceProperties(serviceProperties());
+//
+//        Saml11TicketValidator ticketValidator = new Saml11TicketValidator(casMainUrl);
+//        ticketValidator.setTolerance(casSamlTolerance);
+//        provider.setTicketValidator(ticketValidator);
+//
+//        return provider;
+//    }
+//
+//    @Bean
+//    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
+//        return new UserDetailsServiceImpl(userBuilder);
+//    }
+//
+//    @Bean
+//    public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
+//        CasAuthenticationFilter filter = new CasAuthenticationFilter();
+//        filter.setAuthenticationManager(authenticationManager());
+//
+//        SimpleUrlAuthenticationFailureHandler authenticationFailureHandler =
+//                new SimpleUrlAuthenticationFailureHandler();
+//        authenticationFailureHandler.setDefaultFailureUrl("/home");
+//        filter.setAuthenticationFailureHandler(authenticationFailureHandler);
+//
+//        SavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler =
+//                new SavedRequestAwareAuthenticationSuccessHandler();
+//        authenticationSuccessHandler.setAlwaysUseDefaultTargetUrl(false);
+//        authenticationSuccessHandler.setDefaultTargetUrl("/home");
+//        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+//
+//        ServiceAuthenticationDetailsSource authenticationDetailsSource =
+//                new ServiceAuthenticationDetailsSource(serviceProperties());
+//        filter.setAuthenticationDetailsSource(authenticationDetailsSource);
+//
+//        filter.setProxyGrantingTicketStorage(proxyGrantingTicketStorage());
+//        filter.setProxyReceptorUrl("/receptor");
+//        filter.setServiceProperties(serviceProperties());
+//
+//        return filter;
+//    }
+//
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.addFilter(casAuthenticationFilter());
+//        http.exceptionHandling()
+//                .authenticationEntryPoint(casProcessingFilterEntryPoint());
+//        http.authorizeRequests()
+//                .antMatchers("/").permitAll()
+//                .antMatchers("/api/groupings/**").hasRole("UH")
+//                .antMatchers("/home").permitAll()
+//                .antMatchers("/denied").permitAll()
+//                .antMatchers("/404").permitAll()
+//                .antMatchers("/login").hasRole("UH")
+//                .anyRequest().authenticated()
+//                .and()
+//                .csrf()
+//                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//                .and()
+//                .logout()
+//                .logoutUrl("/logout")
+//                .logoutSuccessUrl("/");
+//    }
+//
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(casAuthenticationProvider());
+//    }
 
 }
