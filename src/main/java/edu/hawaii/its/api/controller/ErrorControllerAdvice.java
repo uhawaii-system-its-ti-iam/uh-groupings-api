@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.firewall.RequestRejectedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -30,6 +32,18 @@ public class ErrorControllerAdvice {
 
     @Autowired
     private UserContextService userContextService;
+
+    @ExceptionHandler(RequestRejectedException.class)
+    public ResponseEntity<GroupingsHTTPException> handleRequestRejectedException(RequestRejectedException rre,
+            WebRequest request) {
+        return exceptionResponse(rre.getMessage(), rre, 400);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<GroupingsHTTPException> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException hrmnse) {
+        return exceptionResponse(hrmnse.getMessage(), hrmnse, 405);
+    }
 
     //todo Possibly could return 400 (bad request) instead
     @ExceptionHandler(IllegalArgumentException.class)
