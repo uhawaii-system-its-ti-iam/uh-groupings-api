@@ -12,7 +12,8 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 
 @ComponentScan(basePackages = "edu.hawaii.its")
-@Order(SecurityProperties.)
+//todo used to be access_override_order and I just switched it so it will compile. Still need to check what should be used
+@Order(SecurityProperties.BASIC_AUTH_ORDER)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${url.base}")
