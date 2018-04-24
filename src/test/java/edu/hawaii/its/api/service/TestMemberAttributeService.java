@@ -132,7 +132,9 @@ public class TestMemberAttributeService {
 
         // Turn off Self-Opted flags
         membershipService.removeSelfOpted(GROUPING_INCLUDE, username[1]);
-        membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[4]);
+        if(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4])) {
+            membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[4]);
+        }
     }
 
     @Test
