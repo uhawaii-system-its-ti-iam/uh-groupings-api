@@ -131,8 +131,9 @@ public class TestMemberAttributeService {
         membershipService.addGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[4]);
 
         // Turn off Self-Opted flags
+        //todo Tests run properly without doing a isSelfOpted check on GROUPING_INCLUDE and username[1] for unknown reason
         membershipService.removeSelfOpted(GROUPING_INCLUDE, username[1]);
-        if(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4])) {
+        if (memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[4])) {
             membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[4]);
         }
     }
@@ -406,7 +407,6 @@ public class TestMemberAttributeService {
         WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes(type, uuid, membershipID);
         //logger.info("Assigns length is " + assigns.length + ";");
         assertTrue(assigns.length == 1);
-
 
         // Test with invalid fields
         try {
