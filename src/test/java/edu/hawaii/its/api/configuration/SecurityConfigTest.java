@@ -14,14 +14,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class SecurityConfigTest {
 
-//    @Autowired
-//    private SecurityConfig securityConfig;
+    @Autowired
+    private SecurityConfig securityConfig;
 
     @Test
     public void construction() {
-//        assertNotNull(securityConfig);
-//        assertNotNull(securityConfig.singleLogoutFilter());
-//        assertNotNull(securityConfig.logoutFilter());
+        assertNotNull(securityConfig);
+        assertNotNull(securityConfig.singleLogoutFilter());
+        assertNotNull(securityConfig.logoutFilter());
     }
 
 }
