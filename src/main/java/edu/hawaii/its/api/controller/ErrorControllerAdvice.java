@@ -33,9 +33,9 @@ public class ErrorControllerAdvice {
     @Autowired
     private UserContextService userContextService;
 
+    //todo Handler for .../{Empty fields}/{Method} doesn't work still returns 500 should return 400
     @ExceptionHandler(RequestRejectedException.class)
-    public ResponseEntity<GroupingsHTTPException> handleRequestRejectedException(RequestRejectedException rre,
-            WebRequest request) {
+    public ResponseEntity<GroupingsHTTPException> handleRequestRejectedException(RequestRejectedException rre) {
         return exceptionResponse(rre.getMessage(), rre, 400);
     }
 
