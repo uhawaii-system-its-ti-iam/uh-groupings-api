@@ -307,10 +307,10 @@ public class TestMembershipService {
     public void addGroupingMemberByUuidTest(){
 
         List<GroupingsServiceResult> results;
-        String ownerUsername = "owner";
+        String ownerUsername = username[0];
         String uid = "";
 
-        //username[3] is in the composite
+        //username[1] is in the composite
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
@@ -320,9 +320,29 @@ public class TestMembershipService {
         results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        membershipService.addGroupMemberByUsername(username[0],GROUPING_BASIS, username[1]);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
+        //username[3] is not in the composite(in the exclude)
+        assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
+
+        //add member not in the composite but in the basis
+        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[3]);
+        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
+
+        setUp();
+
+        //membershipService.addGroupMemberByUsername(ownerUsername, GROUPING_BASIS, username[1]);
+
+        //username[1] is not in the composite(in the exclude
+        assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
+
+        //add member not in the composite but in the basis
+     //   results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[3]);
+       // assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
         //username[] in both the include and basis
         //assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
