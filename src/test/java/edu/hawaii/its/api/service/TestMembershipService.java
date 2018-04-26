@@ -320,11 +320,13 @@ public class TestMembershipService {
         results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        membershipService.addGroupingMemberByUuid(ownerUsername,GROUPING_BASIS, username[1]);
+        membershipService.addGroupMemberByUsername(username[0],GROUPING_BASIS, username[1]);
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
 
         //username[] in both the include and basis
-        assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        //assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
+        //assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         //assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         //assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
