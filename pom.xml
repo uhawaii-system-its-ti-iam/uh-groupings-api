@@ -25,6 +25,7 @@
         <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
         <hibernate.version>5.2.3.Final</hibernate.version>
         <h2.version>1.4.192</h2.version>
+        <org.jasig.cas.client-version>3.5.0</org.jasig.cas.client-version>
 
     </properties>
 
@@ -135,15 +136,24 @@
             <version>5.8.1</version>
             <type>pom</type>
         </dependency>
+
+        <!-- Grouper -->
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
             <artifactId>grouperClient</artifactId>
             <version>2.3.0</version>
         </dependency>
+
+        <!-- cas -->
+        <dependency>
+            <groupId>org.jasig.cas.client</groupId>
+            <artifactId>cas-client-core</artifactId>
+            <version>${org.jasig.cas.client-version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-support-saml</artifactId>
-            <version>3.4.1</version>
+            <version>${org.jasig.cas.client-version}</version>
         </dependency>
     </dependencies>
     <build>
