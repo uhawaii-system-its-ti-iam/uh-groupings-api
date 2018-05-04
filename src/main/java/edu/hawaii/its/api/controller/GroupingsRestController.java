@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import edu.hawaii.its.api.service.GroupAttributeService;
@@ -72,12 +69,10 @@ public class GroupingsRestController {
     }
 
     @RequestMapping(value = "/",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> hello() {
-        return ResponseEntity
-                .ok()
-                .body("University of Hawaii Groupings API");
+            method = RequestMethod.GET)
+    @ResponseBody
+    public String hello() {
+                return "University of Hawaii Groupings API";
     }
 
     /**
