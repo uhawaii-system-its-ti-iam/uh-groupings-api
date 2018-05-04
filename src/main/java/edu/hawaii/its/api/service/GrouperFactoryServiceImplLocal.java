@@ -577,7 +577,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForMembership(String assignType,
             String attributeDefNameName,
             String membershipId) {
-        Membership membership = membershipRepository.findById(membershipId);
+        Membership membership = membershipRepository.findByIdentifier(membershipId);
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
 
@@ -718,7 +718,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsResultMeta.setResultCode(SUCCESS);
         wsAssignAttributesResults.setResultMetadata(wsResultMeta);
 
-        Membership membership = membershipRepository.findById(ownerMembershipId);
+        Membership membership = membershipRepository.findByIdentifier(ownerMembershipId);
 
         if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
             membership.setSelfOpted(true);
@@ -864,7 +864,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsMembership wsMembership = new WsMembership();
 
         if (membership != null) {
-            wsMembership.setMembershipId(membership.getId());
+            wsMembership.setMembershipId(membership.getIdentifier());
             wsResultMeta.setResultCode(SUCCESS);
         }
 

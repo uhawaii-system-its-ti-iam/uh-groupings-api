@@ -305,7 +305,7 @@ public class TestMembershipService {
 
     @Test
     public void addGroupingMemberByUuidTest(){
-        //todo
+
     }
 
     @Test

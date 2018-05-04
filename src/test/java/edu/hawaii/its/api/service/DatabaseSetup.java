@@ -51,19 +51,19 @@ class DatabaseSetup {
     private void fillPersonRepository() {
         setUpPersons();
 
-        personRepository.save(persons);
+        personRepository.saveAll(persons);
     }
 
     private void fillGroupRepository() {
         setUpGroups();
 
-        groupRepository.save(groups);
+        groupRepository.saveAll(groups);
     }
 
     private void fillGroupingRepository() {
         setUpGroupings();
 
-        groupingRepository.save(groupings);
+        groupingRepository.saveAll(groupings);
     }
 
     /////////////////////////////////////////////////////

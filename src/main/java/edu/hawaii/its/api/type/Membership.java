@@ -11,7 +11,7 @@ public class Membership implements Comparable<Membership> {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     @Column
-    private String id;
+    private String identifier;
 
     @ManyToOne
     private Person person;
@@ -37,8 +37,8 @@ public class Membership implements Comparable<Membership> {
         this.group = group;
     }
 
-    public String getId() {
-        return id;
+    public String getIdentifier() {
+        return identifier;
     }
 
     public Person getPerson() {
@@ -61,8 +61,8 @@ public class Membership implements Comparable<Membership> {
         return optOutEnabled;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public void setPerson(Person person) {
@@ -93,7 +93,7 @@ public class Membership implements Comparable<Membership> {
     @Override
     public int compareTo(Membership membership) {
         if(membership != null) {
-            int idComp = membership.getId() != null ? getId().compareTo(membership.getId()) : -1;
+            int idComp = membership.getIdentifier() != null ? getIdentifier().compareTo(membership.getIdentifier()) : -1;
             int personComp = membership.getPerson() != null ? getPerson().compareTo(membership.getPerson()) : -1;
             int groupComp = membership.getGroup() != null ? getGroup().compareTo(membership.getGroup()) : -1;
 

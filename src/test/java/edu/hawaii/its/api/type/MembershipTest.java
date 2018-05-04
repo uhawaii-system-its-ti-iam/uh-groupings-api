@@ -31,13 +31,13 @@ public class MembershipTest {
         group = new Group("path:to:group", members);
 
         membership = new Membership(members.get(0), group);
-        membership.setId(id);
+        membership.setIdentifier(id);
     }
 
     @Test
     public void idTest(){
-        membership.setId(newId);
-        assertEquals(newId, membership.getId());
+        membership.setIdentifier(newId);
+        assertEquals(newId, membership.getIdentifier());
     }
 
     @Test
@@ -88,13 +88,13 @@ public class MembershipTest {
         assertFalse(membership.equals(differentMembership));
 
         Membership diffPersonMember = new Membership();
-        diffPersonMember.setId(membership.getId());
+        diffPersonMember.setIdentifier(membership.getIdentifier());
         diffPersonMember.setPerson(new Person());
         diffPersonMember.setGroup(membership.getGroup());
         assertFalse(membership.equals(diffPersonMember));
 
         Membership diffGroupMember = new Membership();
-        diffGroupMember.setId(membership.getId());
+        diffGroupMember.setIdentifier(membership.getIdentifier());
         diffGroupMember.setPerson(membership.getPerson());
         diffGroupMember.setGroup(new Group());
         assertFalse(membership.equals(diffGroupMember));
