@@ -281,7 +281,7 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isSuperuser(users.get(2).getUsername()));
         assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
 
-       assertTrue(memberAttributeService.isSuperuser(APP_USER));
+        assertTrue(memberAttributeService.isSuperuser(APP_USER));
     }
 
 }
