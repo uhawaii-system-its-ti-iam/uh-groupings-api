@@ -151,8 +151,10 @@ public class MemberAttributeServiceTest {
         try {
             randomUserAdds = memberAttributeService
                     .assignOwnership(GROUPING_0_PATH, randomUser.getUsername(), randomUser.getUsername());
+            assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
             randomUserAdds = gsre.getGsr();
+            assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
         }
 
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
@@ -174,6 +176,7 @@ public class MemberAttributeServiceTest {
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
         assertEquals(SUCCESS, adminAdds.getResultCode());
+
     }
 
     @Test
