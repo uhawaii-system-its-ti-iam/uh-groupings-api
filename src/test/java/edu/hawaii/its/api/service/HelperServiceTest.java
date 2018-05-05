@@ -10,6 +10,7 @@ import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
@@ -225,7 +226,7 @@ public class HelperServiceTest {
     }
 
     @Test
-    public void makeGroupingsServiceResult() {
+    public void makeGroupingsServiceResultTest() {
         String action = "add a member";
         String resultCode = "successfully added member";
         WsAddMemberResults gr = new WsAddMemberResults();
@@ -234,9 +235,20 @@ public class HelperServiceTest {
         gr.setResultMetadata(resultMeta);
 
         GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(gr, action);
-
         assertEquals(action, gsr.getAction());
         assertEquals(resultCode, gsr.getResultCode());
+
+        resultMeta.setResultCode(FAILURE);
+        gr.setResultMetadata(resultMeta);
+
+        try {
+            gsr = helperService.makeGroupingsServiceResult(gr, action);
+            assertEquals(action, gsr.getAction());
+            assertEquals(resultCode, gsr.getResultCode());
+        } catch (GroupingsServiceResultException gsre) {
+            gsre.printStackTrace();
+        }
+
     }
 
     @Test
