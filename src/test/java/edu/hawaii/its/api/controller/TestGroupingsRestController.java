@@ -160,6 +160,8 @@ public class TestGroupingsRestController {
 
         groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
+
+        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
     }
 
     @Test

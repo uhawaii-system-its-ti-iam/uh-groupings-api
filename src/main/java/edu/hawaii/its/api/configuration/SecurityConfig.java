@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.configuration;
 
-import javax.annotation.PostConstruct;
-
+import edu.hawaii.its.api.access.UserBuilder;
+import edu.hawaii.its.api.access.UserDetailsServiceImpl;
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorage;
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl;
 import org.jasig.cas.client.session.SingleSignOutFilter;
@@ -29,11 +29,11 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.util.Assert;
 
-import edu.hawaii.its.api.access.UserBuilder;
-import edu.hawaii.its.api.access.UserDetailsServiceImpl;
+import javax.annotation.PostConstruct;
 
 @ComponentScan(basePackages = "edu.hawaii.its")
-@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+//todo used to be access_override_order and I just switched it so it will compile. Still need to check what should be used
+@Order(SecurityProperties.BASIC_AUTH_ORDER)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${url.base}")
@@ -103,6 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         provider.setKey("an_id_for_this_auth_provider_only");
         provider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
         provider.setServiceProperties(serviceProperties());
+
 
         Saml11TicketValidator ticketValidator = new Saml11TicketValidator(casMainUrl);
         ticketValidator.setTolerance(casSamlTolerance);

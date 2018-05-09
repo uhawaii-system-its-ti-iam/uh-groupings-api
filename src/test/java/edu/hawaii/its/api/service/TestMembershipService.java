@@ -351,7 +351,6 @@ public class TestMembershipService {
         //assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //add member in both the
-
     }
 
     @Test

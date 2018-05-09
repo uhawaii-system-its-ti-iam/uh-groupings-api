@@ -16,6 +16,7 @@ public class JsonData<E> {
         this("data", data);
     }
 
+
     @JsonIgnore
     public String getKey() {
         return key;
