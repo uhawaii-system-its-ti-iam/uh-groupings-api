@@ -393,7 +393,7 @@ public class TestMembershipService {
 //        //resets
 //        //setUp();
 //
-//        //username[3] is in the composite, basis but not the exclude and include
+//        //username[4] is in the composite, basis but not the exclude and include
 //        assertTrue(memberAttributeService.isMember(GROUPING, username[4]));
 //        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
 //        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
@@ -412,7 +412,23 @@ public class TestMembershipService {
 
         //resets
         setUp();
-        
+
+        //checks to see where username 4 is
+        assertTrue(memberAttributeService.isMember(GROUPING, username[4]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
+        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
+
+        //removes 
+        membershipService.deleteGroupingMemberByUsername(ownerUsername, GROUPING, username[4]);
+
+        assertFalse(memberAttributeService.isMember(GROUPING, username[4]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
+        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
+
+        results = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[4]);
+        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
     }
 
     @Test
