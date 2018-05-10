@@ -419,7 +419,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
-        //removes 
+        //removes
         membershipService.deleteGroupingMemberByUsername(ownerUsername, GROUPING, username[4]);
 
         assertFalse(memberAttributeService.isMember(GROUPING, username[4]));
