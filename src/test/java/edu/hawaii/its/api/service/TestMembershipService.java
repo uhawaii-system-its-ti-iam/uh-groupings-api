@@ -101,6 +101,11 @@ public class TestMembershipService {
     }
 
     @Test
+    public void addGroupingMemberTest(){
+
+    }
+
+    @Test
     public void groupOptInPermissionTest() {
         assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_EXCLUDE));

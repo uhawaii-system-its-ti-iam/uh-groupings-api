@@ -165,6 +165,21 @@ public class MembershipServiceImpl implements MembershipService {
 
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
+    @Override
+    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd) {
+        List<GroupingsServiceResult> gsrs;
+
+        try{
+            Integer.parseInt(userToAdd);
+            gsrs = addGroupingMemberByUuid(ownerUsername, groupingPath, userToAdd);
+        } catch(Exception NumberFormatException) {
+            gsrs = addGroupingMemberByUsername(ownerUsername, groupingPath, userToAdd);
+        }
+
+        return gsrs;
+    }
+
+
     //finds a user by a username and adds them to a grouping
     @Override
     public List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
