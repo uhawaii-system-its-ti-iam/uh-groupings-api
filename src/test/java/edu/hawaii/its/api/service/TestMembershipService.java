@@ -355,7 +355,27 @@ public class TestMembershipService {
 
     @Test
     public void deleteGroupingMemberByUuidTest(){
-        //todo
+        List<GroupingsServiceResult> results;
+        String ownerUsername = username[0];
+
+        //username[1] is in the composite
+        assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
+
+        membershipService.deleteGroupMemberByUuid(ownerUsername, GROUPING_INCLUDE, username[1]);
+        
+//        //delete member from grouping
+//        results = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+//        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
+
+        //Checks to see if username[1] is in the grouping
+        assertFalse(memberAttributeService.isMember(GROUPING, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
+
     }
 
     @Test
