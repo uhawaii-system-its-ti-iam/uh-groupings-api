@@ -472,6 +472,13 @@ public class TestMembershipService {
         //checks to make sure that username[3] is an admin
         assertTrue(memberAttributeService.isSuperuser(username[3]));
 
+        //tries to make an already admin an admin
+        results = membershipService.addAdmin(ADMIN, username[3]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks to make sure that username[3] is an admin
+        assertTrue(memberAttributeService.isSuperuser(username[3]));
+
         //removes username[3] as an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
@@ -479,7 +486,38 @@ public class TestMembershipService {
         //checks to see that username[3] is NOT an admin
         assertFalse(memberAttributeService.isSuperuser(username[3]));
 
-        //checks to see that username[4] is NOT an admin
+        //tries to remove an person that is not an admin
+        results = membershipService.deleteAdmin(ADMIN, username[3]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
 
+        //checks to see that username[3] is NOT an admin
+        assertFalse(memberAttributeService.isSuperuser(username[3]));
+
+        //checks to see that username[4] is NOT an admin
+        assertFalse(memberAttributeService.isSuperuser(username[4]));
+
+        //tries to make username[4] an admin but fails due to username[3] not being an admin
+        try {
+
+            results = membershipService.addAdmin(username[3], username[4]);
+
+        } catch (GroupingsServiceResultException e) {
+            results = e.getGsr();
+            assertTrue(results.getResultCode().startsWith(FAILURE));
+
+        }
+
+        //checks to see that username[4] is NOT an admin
+        assertFalse(memberAttributeService.isSuperuser(username[4]));
+
+        //tries to delete username[4] as an admin but fails due to username[3] not being an admin
+        try {
+            results = membershipService.deleteAdmin(username[3], username[4]);
+
+        } catch (GroupingsServiceResultException e) {
+            results = e.getGsr();
+            assertTrue(results.getResultCode().startsWith(FAILURE));
+
+        }
     }
 }
