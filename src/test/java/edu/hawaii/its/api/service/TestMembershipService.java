@@ -456,19 +456,30 @@ public class TestMembershipService {
         //todo
     }
 
+    //Add admin and delete admin in one test
     @Test
-    public void addAdminTest(){
-        //todo
-    }
+    public void adminTest(){
 
-    @Test
-    public void deleteAdminTest(){
-//        GroupingsServiceResult results;
-//
-//        //results =
-//        membershipService.deleteAdmin(username[0], username[5]);
-//        //assertTrue(results.getResultCode().startsWith(FAILURE));
+        GroupingsServiceResult results;
 
+        //checks to see that username[3] is NOT an admin
+        assertFalse(memberAttributeService.isSuperuser(username[3]));
+
+        //makes username[3] an admin
+        results = membershipService.addAdmin(ADMIN, username[3]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks to make sure that username[3] is an admin
+        assertTrue(memberAttributeService.isSuperuser(username[3]));
+
+        //removes username[3] as an admin
+        results = membershipService.deleteAdmin(ADMIN, username[3]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks to see that username[3] is NOT an admin
+        assertFalse(memberAttributeService.isSuperuser(username[3]));
+
+        //checks to see that username[4] is NOT an admin
 
     }
 }
