@@ -359,6 +359,36 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
+    @Override
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd) {
+        List<GroupingsServiceResult> gsrs;
+
+        try{
+            Integer.parseInt(userToAdd);
+            gsrs = addGroupMemberByUuid(ownerUsername, groupingPath, userToAdd);
+        } catch(Exception NumberFormatException) {
+            gsrs = addGroupMemberByUsername(ownerUsername, groupingPath, userToAdd);
+        }
+
+        return gsrs;
+    }
+
+    @Override
+    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
+        List<GroupingsServiceResult> gsrs = new ArrayList<>();
+
+        for(String userToAdd : usersToAdd) {
+            try {
+                Integer.parseInt(userToAdd);
+                gsrs.addAll(addGroupMemberByUuid(ownerUsername, groupPath, userToAdd));
+            } catch (Exception NumberFormatException) {
+                gsrs.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
+            }
+        }
+
+        return gsrs;
+    }
+
     //finds a user by a username and adds that user to the group
     @Override
     public List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,

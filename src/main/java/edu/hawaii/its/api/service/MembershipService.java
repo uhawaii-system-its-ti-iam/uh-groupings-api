@@ -14,13 +14,17 @@ public interface MembershipService {
     public List<GroupingsServiceResult> addGroupingMemberByUuid(String ownerUsername, String groupingPath,
             String userToAddUuid);
 
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
+
     public List<GroupingsServiceResult> addGroupMemberByUsername(String ownersername, String groupPath,
             String userToAddUsername);
 
+    public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String group, String userToAddUuid);
+
+    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+
     public List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
             List<String> usersToAddUsername);
-
-    public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String group, String userToAddUuid);
 
     public List<GroupingsServiceResult> addGroupMembersByUuid(String ownerUsername, String group,
             List<String> usersToAddUuid);
