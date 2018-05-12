@@ -533,7 +533,79 @@ public class TestMembershipService {
 
     @Test
     public void deleteGroupMemberByUuidTest(){
-        //todo
+        GroupingsServiceResult results;
+        String ownerUsername = username[0];
+
+        //Makes sure user isn't owner or superuser
+        assertFalse(memberAttributeService.isOwner(GROUPING, username[4]));
+        assertFalse(memberAttributeService.isSuperuser(username[4]));
+
+        //has non owner/superuser try to delete
+        try {
+            results = membershipService.deleteGroupMemberByUuid(username[4], GROUPING_EXCLUDE, username[3]);
+
+        } catch (GroupingsServiceResultException e) {
+            results = e.getGsr();
+            assertTrue(results.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure username[3] is still a part of the exclude
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+
+        //checks that owner is owner
+        assertTrue(memberAttributeService.isOwner(GROUPING, ownerUsername));
+
+        //tries to delete user from basis group
+        try {
+            results = membershipService.deleteGroupMemberByUuid(ownerUsername, GROUPING_BASIS, username[3]);
+        } catch (GroupingsServiceResultException e) {
+            results = e.getGsr();
+            assertTrue(results.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure username[3] is still a part of the basis
+        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
+
+        //checks to see that username[2] is NOT a part of the exclude
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[2]));
+
+        //tries to delete member from exclude group that isn't in the exclude
+        try {
+            results = membershipService.deleteGroupMemberByUuid(ownerUsername, GROUPING_EXCLUDE, username[2]);
+        } catch (GroupingsServiceResultException e) {
+            results = e.getGsr();
+            assertTrue(results.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure username[3] is still not a part of the exclude
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[2]));
+
+        //checks to make sure that username[3] is part of the exclude
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+
+        //deletes user from exclude group
+        results = membershipService.deleteGroupMemberByUuid(ownerUsername, GROUPING_EXCLUDE, username[3]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks to see if username[3] is apart of the group and not in the exclude
+        assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+
+        //tests if a superuser can remove and that a person from owners can removed
+        //results = membershipService.deleteGroupMemberByUuid(ADMIN, GROUPING_OWNERS, ownerUsername);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks to see if ownerUsername is still and owner
+        //assertFalse(memberAttributeService.isOwner(GROUPING, ownerUsername));
+
+        //tests removing from include
+        results = membershipService.deleteGroupMemberByUuid(ADMIN, GROUPING_INCLUDE, username[2]);
+        assertTrue(results.getResultCode().startsWith(SUCCESS));
+
+        //checks if username[2] is still in include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
+
+
     }
 
     //Add admin and delete admin in one test
