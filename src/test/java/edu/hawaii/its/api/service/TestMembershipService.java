@@ -592,11 +592,14 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
         //tests if a superuser can remove and that a person from owners can removed
-        //results = membershipService.deleteGroupMemberByUuid(ADMIN, GROUPING_OWNERS, ownerUsername);
+        results = membershipService.deleteGroupMemberByUuid(ADMIN, GROUPING_OWNERS, ownerUsername);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //checks to see if ownerUsername is still and owner
-        //assertFalse(memberAttributeService.isOwner(GROUPING, ownerUsername));
+        assertFalse(memberAttributeService.isOwner(GROUPING, ownerUsername));
+
+        //adds owner back into owner group
+        membershipService.addGroupMemberByUsername(ADMIN, GROUPING_OWNERS, ownerUsername);
 
         //tests removing from include
         results = membershipService.deleteGroupMemberByUuid(ADMIN, GROUPING_INCLUDE, username[2]);
