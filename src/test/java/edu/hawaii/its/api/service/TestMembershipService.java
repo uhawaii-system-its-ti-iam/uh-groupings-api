@@ -526,70 +526,70 @@ public class TestMembershipService {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult result;
         String ownerUsername = username[0];
-//
-//        //Checks to see that user is NOT in basis
-//        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[2]));
-//
-//        //tries to add a member to a group not allowed, i.e basis
-//        try {
-//            lResults = membershipService.addGroupMemberByUuid(ownerUsername, GROUPING_BASIS, username[2]);
-//            assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
-//        } catch (GroupingsServiceResultException e) {
-//            result = e.getGsr();
-//            assertTrue(result.getResultCode().startsWith(FAILURE));
-//        }
-//
-//        //checks to make sure that user is NOT in basis
-//        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[2]));
-//
-//        //checks if user is an owner
-//        assertFalse(memberAttributeService.isOwner(GROUPING, username[2]));
-//
-//        //chceks to make sure user is not part of include
-//        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-//
-//        //checks to see if a non superuser/owner can add a person
-//        try {
-//            lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
-//            assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-//        } catch (GroupingsServiceResultException e) {
-//            result = e.getGsr();
-//            assertTrue(result.getResultCode().startsWith(FAILURE));
-//        }
-//
-//        //checks to make sure user is not in include
-//        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-//
-//        //checks if user is a superuser
-//        assertFalse(memberAttributeService.isSuperuser(username[2]));
-//
-//        //chceks to make sure user is not part of include
-//        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-//
-//        //checks to see if a non superuser/owner can add a person
-//        try {
-//            lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
-//            assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-//        } catch (GroupingsServiceResultException e) {
-//            result = e.getGsr();
-//            assertTrue(result.getResultCode().startsWith(FAILURE));
-//        }
-//
-//        //checks to make sure user is not in include
-//        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-//
-//        //checks to make sure user is in exclude
-//        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-//
-//        //adds user who was in exlcude to include
-//        lResults = membershipService.addGroupMemberByUuid(ownerUsername, GROUPING_INCLUDE, username[3]);
-//        assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
-//
-//        //checks to make sure user is in include
-//        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-//
-//        //checks to make sure user is NOT in exclude
-//        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+
+        //Checks to see that user is NOT in basis
+        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[2]));
+
+        //tries to add a member to a group not allowed, i.e basis
+        try {
+            lResults = membershipService.addGroupMemberByUuid(ownerUsername, GROUPING_BASIS, username[2]);
+            assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
+        } catch (GroupingsServiceResultException e) {
+            result = e.getGsr();
+            assertTrue(result.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure that user is NOT in basis
+        assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[2]));
+
+        //checks if user is an owner
+        assertFalse(memberAttributeService.isOwner(GROUPING, username[2]));
+
+        //chceks to make sure user is not part of include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+
+        //checks to see if a non superuser/owner can add a person
+        try {
+            lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
+            assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
+        } catch (GroupingsServiceResultException e) {
+            result = e.getGsr();
+            assertTrue(result.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure user is not in include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+
+        //checks if user is a superuser
+        assertFalse(memberAttributeService.isSuperuser(username[2]));
+
+        //chceks to make sure user is not part of include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+
+        //checks to see if a non superuser/owner can add a person
+        try {
+            lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
+            assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
+        } catch (GroupingsServiceResultException e) {
+            result = e.getGsr();
+            assertTrue(result.getResultCode().startsWith(FAILURE));
+        }
+
+        //checks to make sure user is not in include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+
+        //checks to make sure user is in exclude
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+
+        //adds user who was in exlcude to include
+        lResults = membershipService.addGroupMemberByUuid(ownerUsername, GROUPING_INCLUDE, username[3]);
+        assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
+
+        //checks to make sure user is in include
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
+
+        //checks to make sure user is NOT in exclude
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
         //checks to make sure user is in the group but not in exclude or include
         assertTrue(memberAttributeService.isMember(GROUPING, username[5]));
