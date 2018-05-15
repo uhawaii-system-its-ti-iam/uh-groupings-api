@@ -103,7 +103,7 @@ public class TestMembershipService {
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
     }
-    
+
     @Test
     public void groupOptInPermissionTest() {
         assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_INCLUDE));
