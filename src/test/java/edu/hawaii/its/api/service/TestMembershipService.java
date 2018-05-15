@@ -103,14 +103,7 @@ public class TestMembershipService {
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
     }
-
-    @Test
-    public void addGroupingMemberTest(){
-
-    }
-
-
-
+    
     @Test
     public void groupOptInPermissionTest() {
         assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_INCLUDE));
@@ -518,7 +511,21 @@ public class TestMembershipService {
 
     @Test
     public void addGroupMembersByUsernameTest(){
-        //todo
+
+        String ownerUsername = username[0];
+
+        List<GroupingsServiceResult> results;
+        List<String> usernames = new ArrayList<>();
+
+        for(int i = 0; i < 6; i++) {
+            usernames.add(username[i]);
+        }
+
+        results = membershipService.addGroupMembersByUsername(ownerUsername, GROUPING_INCLUDE, usernames);
+
+        for (GroupingsServiceResult result : results) {
+            assertTrue(result.getResultCode().startsWith(SUCCESS));
+        }
     }
 
     @Test
@@ -656,7 +663,20 @@ public class TestMembershipService {
 
     @Test
     public void addGroupMembersByUuidTest(){
-        //todo
+        String ownerUsername = username[0];
+
+        List<GroupingsServiceResult> results;
+        List<String> usernames = new ArrayList<>();
+
+        for(int i = 0; i < 6; i++) {
+            usernames.add(username[i]);
+        }
+
+        results = membershipService.addGroupMembersByUuid(ownerUsername, GROUPING_INCLUDE, usernames);
+
+        for (GroupingsServiceResult result : results) {
+            assertTrue(result.getResultCode().startsWith(SUCCESS));
+        }
     }
 
     @Test
