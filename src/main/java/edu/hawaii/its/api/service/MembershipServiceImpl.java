@@ -692,8 +692,8 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         String action = "add users to " + groupPath;
 
-        if (mas.isOwner(hs.parentGroupingPath(groupPath), username) || mas.isSuperuser(username) || personToAdd
-                .getUsername().equals(username)) {
+        if (mas.isOwner(hs.parentGroupingPath(groupPath), username) || mas.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
+                .getUsername().equals(username))) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = hs.parentGroupingPath(groupPath);
             String exclude = composite + EXCLUDE;
