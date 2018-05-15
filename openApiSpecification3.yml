@@ -1,102 +1,88 @@
 openapi: 3.0.0
 info:
-  version: '2.0'
+  version: '2.1'
   title: 'UH Groupings API'
 paths:
-  '/{adminToAdd}/addAdmin':
-    post:
-      description: Adds a member to the admin group
+  '/adminsGroupings':
+    get:
+      description: Returns list of admins and groups
+  '/admins':
+    get:
+      description: Returns list of admins
+  '/admins/{user}':
+    get:
+      description: Returns user based on the 'user' parameter
       parameters:
-        - name: adminToAdd
+        - name: user
           in: path
-          description: username of the user becoming an admin
+          description: username or UH ID of user being added
           required: true
           schema:
             type: string
       responses:
-        '200':
-          description: >-
-            Successful response, an admin Person object is added to the Admin
-            group
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Person'
-        '403':
-          description: >-
-            User with username  does not exist or does not have
-            permission to add admins
-        '404':
-          description: User with username  does not exist
-  '/{adminToDelete}/deleteAdmin':
     post:
-      description: Deletes a member from the group of admins
+      description: Adds user to list of admins
       parameters:
-        - name: adminToDelete
-          in: path
-          description: username of the user being deleted from the admin list
-          required: true
-          schema:
-            type: string
+        - name: user
+        in: path
+        description: username or UH ID of user being added
+        requried: true
+        schema:
+          type: string
       responses:
-        '200':
-          description: Successful deleteion
-        '403':
-          description: >-
-            User with username  does not exist or does not have
-            permission to delete admins
-        '404':
-          description: User with username  is not in the list of admins
-  '/{grouping}/{userToAdd}/addGroupingMemberByUsername':
+    delete:
+      description: Deletes user from list of admins
+      parameters:
+        - name: user
+        in: path
+        description: username or UH ID of user being added
+        required: true
+        schema:
+          type: string
+      responses:
+  '/members':
+    get:
+      description: Returns list of all pets
+  '/members/{user}/groupings':
+    get:
+      description: Returns user's grouping assingment
+      responses:
+  '/groupings':
+      get:
+        description: Returns all groupings
+  '/groupings/{path}':
+    get:
+      description: Returns a specific grouping
     post:
-      description: Adds a member to a grouping via username
-      parameters:
-        - name: grouping
-          in: path
-          description: path to the Grouping
-          required: true
-          schema:
-            type: string
-        - name: userToAdd
-          in: path
-          description: username of the use who is being added
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful addition
-        '403':
-          description: >-
-            User with username  does not exist or user adding to group does not have
-            permission to add users
-        '404':
-          description: User with username does not exist
-  '/{grouping}/{userToAdd}/addGroupingMemberByUuid':
-      post:
-        description: Adds a member to a grouping via Uid
-        parameters:
-          - name: grouping
-            in: path
-            description: path to the Grouping
-            required: true
-            schema:
-              type: string
-          - name: userToAdd
-            in: path
-            description: Uuid of the user to be added
-            required: true
-            schema:
-              type: string
-        responses:
-          '200':
-            description: Successful addition
-          '403':
-            description: >-
-              User with Uuid  does not exist or user adding to group does not have
-              permission to add users
-          '404':
-            description: User with Uuid does not exist
+      description: Creates a new grouping
+  '/groupings/{path}/owners/{user}':
+    put:
+      description: Updates the grouping with new owner
+  '/groupings/{path}/managers/{user}':
+      put:
+        description: Updates the grouping with new membership manager
+  '/groupings/{path}/reviewers/{user}':
+      put:
+        description: Updates the grouping with new membership reviewer
+  '/groupings/{path}/includeMembers/{user}':
+      put:
+        description: Updates the grouping with new include member
+  '/groupings/{path}/includeMembers/{user}/cancel':
+        put:
+          description: Updates the grouping by canceling membership of include member
+  '/groupings/{path}/excludeMembers/{user}':
+      put:
+        description: Updates the grouping with new exclude member
+  '/groupings/{path}/excludeMembers/{user}/cancel':
+        put:
+          description: Updates the grouping by canceling membership of an exclude member
+  '/groupings/{path}/preferences/{preferenceId}/enable':
+      put:
+        description: Updates the grouping changing specified preference setting
+  '/groupings/{path}/preferences/{preferenceId}/disable':
+      put:
+        description: Updates the grouping changing specified perfernece setting
+
   '/{grouping}/{userToAdd}/addMemberToIncludeGroup':
     post:
       description: Adds a member to the include group of a grouping
@@ -205,56 +191,6 @@ paths:
             permission
         '404':
           description: User with username does not exist
-  '/{grouping}/{userToDelete}/deleteMemberFromIncludeGroup':
-    post:
-      description: removes a member from the include group of a Grouping
-      parameters:
-        - name: grouping
-          in: path
-          description: path to the Grouping
-          required: true
-          schema:
-            type: string
-        - name: userToDelete
-          in: path
-          description: username of the user who is being deleted
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful deletion
-        '403':
-          description: >-
-            user with the username  does not exist or does not have
-            permission to delete users from that Grouping
-        '404':
-          description: user with the username  is not in the include group
-  '/{grouping}/{userToDelete}/deleteMemberFromExcludeGroup':
-    post:
-      description: removes a member from the exclude group of a Grouping
-      parameters:
-        - name: grouping
-          in: path
-          description: path to the Grouping
-          required: true
-          schema:
-            type: string
-        - name: userToDelete
-          in: path
-          description: username of the user who is being deleted
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful deletion
-        '403':
-          description: >-
-            user with the username  does not exist or does not have
-            permission to delete users from that Grouping
-        '404':
-          description: user with the username  is not in the include group
   '/{grouping}/{newOwner}/assignOwnership':
     post:
       description: >-
@@ -514,11 +450,11 @@ paths:
           description: >-
             user is not allowed to create a Grouping or a Grouping with that
             path already exist
-  '/{grouping}/deleteGrouping':
+  '/groupings/{path}':
     delete:
       description: removes a Grouping
       parameters:
-        - name: grouping
+        - name: path
           in: path
           description: path to the Grouping
           required: true

@@ -117,6 +117,27 @@ public class GroupingsRestController {
      * for the first case, the member will be added to the include group
      * for the second case, the member will be removed from the exclude group
      */
+    @RequestMapping(value = "/{grouping}/{userToAdd}/addGroupingMember",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMember(Principal principal, @PathVariable String grouping,
+                                                                          @PathVariable String userToAdd) {
+        logger.info("Entered REST addGroupingMember...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMember(principal.getName(), grouping, userToAdd));
+    }
+
+    /**
+     * adds a member to a Grouping
+     *
+     * a member will not be in a Grouping for one of two reasons
+     * - The member is not in the basis or include group
+     * - The member is in the basis group, but also in the exclude group
+     *
+     * for the first case, the member will be added to the include group
+     * for the second case, the member will be removed from the exclude group
+     */
     @RequestMapping(value = "/{grouping}/{userToAdd}/addGroupingMemberByUsername",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -166,7 +187,7 @@ public class GroupingsRestController {
         logger.info("Entered REST addMemberToIncludeGroup...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberByUsername(principal.getName(), grouping + INCLUDE, userToAdd));
+                .body(membershipService.addGroupMember(principal.getName(), grouping + INCLUDE, userToAdd));
     }
 
     /**
@@ -185,7 +206,7 @@ public class GroupingsRestController {
         logger.info("Entered REST addMemberToExcludeGroup...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberByUsername(principal.getName(), grouping + EXCLUDE, userToAdd));
+                .body(membershipService.addGroupMember(principal.getName(), grouping + EXCLUDE, userToAdd));
     }
 
     /**

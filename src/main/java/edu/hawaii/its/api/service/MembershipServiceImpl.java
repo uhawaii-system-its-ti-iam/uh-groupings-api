@@ -165,6 +165,21 @@ public class MembershipServiceImpl implements MembershipService {
 
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
+    @Override
+    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd) {
+        List<GroupingsServiceResult> gsrs;
+
+        try{
+            Integer.parseInt(userToAdd);
+            gsrs = addGroupingMemberByUuid(ownerUsername, groupingPath, userToAdd);
+        } catch(Exception NumberFormatException) {
+            gsrs = addGroupingMemberByUsername(ownerUsername, groupingPath, userToAdd);
+        }
+
+        return gsrs;
+    }
+
+
     //finds a user by a username and adds them to a grouping
     @Override
     public List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
@@ -342,6 +357,36 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         return gsrList;
+    }
+
+    @Override
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd) {
+        List<GroupingsServiceResult> gsrs;
+
+        try{
+            Integer.parseInt(userToAdd);
+            gsrs = addGroupMemberByUuid(ownerUsername, groupingPath, userToAdd);
+        } catch(Exception NumberFormatException) {
+            gsrs = addGroupMemberByUsername(ownerUsername, groupingPath, userToAdd);
+        }
+
+        return gsrs;
+    }
+
+    @Override
+    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
+        List<GroupingsServiceResult> gsrs = new ArrayList<>();
+
+        for(String userToAdd : usersToAdd) {
+            try {
+                Integer.parseInt(userToAdd);
+                gsrs.addAll(addGroupMemberByUuid(ownerUsername, groupPath, userToAdd));
+            } catch (Exception NumberFormatException) {
+                gsrs.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
+            }
+        }
+
+        return gsrs;
     }
 
     //finds a user by a username and adds that user to the group
@@ -647,8 +692,8 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         String action = "add users to " + groupPath;
 
-        if (mas.isOwner(hs.parentGroupingPath(groupPath), username) || mas.isSuperuser(username) || personToAdd
-                .getUsername().equals(username)) {
+        if (mas.isOwner(hs.parentGroupingPath(groupPath), username) || mas.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
+                .getUsername().equals(username))) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = hs.parentGroupingPath(groupPath);
             String exclude = composite + EXCLUDE;
