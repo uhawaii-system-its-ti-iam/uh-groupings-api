@@ -354,6 +354,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : newMembers) {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
+                //todo Shouldn't be reached, and is not rachable anyway due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }
@@ -434,6 +435,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : membersToDelete) {
             WsResultMeta wsResultMetaData = makeWsDeleteMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
+                //todo Not reachable due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }

@@ -181,6 +181,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             GroupingsServiceResult failure = hs.makeGroupingsServiceResult(
                     FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
                     "change opt in status for " + groupingPath + " to " + optInOn);
+            //todo Same issue as MemberAttributeService, not sure if code is reachable by test
             results.add(failure);
         }
         return results;
@@ -200,7 +201,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             GroupingsServiceResult failure = hs.makeGroupingsServiceResult(
                     FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
                     "change opt out status for " + groupingPath + " to " + optOutOn);
-
+            //todo Same issue as MemberAttributeService, not sure if code is reachable by test
             results.add(failure);
         }
         return results;
