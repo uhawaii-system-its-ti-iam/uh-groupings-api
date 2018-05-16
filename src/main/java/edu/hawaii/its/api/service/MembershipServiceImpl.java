@@ -166,13 +166,16 @@ public class MembershipServiceImpl implements MembershipService {
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     @Override
-    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd, Boolean username) {
+    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd) {
         List<GroupingsServiceResult> gsrs;
 
-        if (username != true) {
+        try {
+            Integer.parseInt(userToAdd);
             gsrs = addGroupingMemberByUuid(ownerUsername, groupingPath, userToAdd);
-        } else {
+
+        } catch(Exception NumberFormatException) {
             gsrs = addGroupingMemberByUsername(ownerUsername, groupingPath, userToAdd);
+
         }
 
         return gsrs;
@@ -359,27 +362,33 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd, Boolean username) {
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd) {
         List<GroupingsServiceResult> gsrs;
 
-        if (username != true) {
+        try {
+            Integer.parseInt(userToAdd);
             gsrs = addGroupMemberByUuid(ownerUsername, groupingPath, userToAdd);
-        } else {
+
+        } catch(Exception NumberFormatException) {
             gsrs = addGroupMemberByUsername(ownerUsername, groupingPath, userToAdd);
+
         }
 
         return gsrs;
     }
 
     @Override
-    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd, Boolean username) {
+    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
 
         for(String userToAdd : usersToAdd) {
-            if (username != true) {
-                gsrs.addAll(addGroupMemberByUuid(ownerUsername, groupPath, userToAdd));
-            } else {
-                gsrs.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
+            try {
+                Integer.parseInt(userToAdd);
+                gsrs = addGroupMemberByUuid(ownerUsername, groupPath, userToAdd);
+
+            } catch(Exception NumberFormatException) {
+                gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
+
             }
         }
 
