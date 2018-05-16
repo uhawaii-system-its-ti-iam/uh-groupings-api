@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd);
+    public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd, Boolean username);
 
     public List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
             String userToAddUsername);
@@ -14,14 +14,14 @@ public interface MembershipService {
     public List<GroupingsServiceResult> addGroupingMemberByUuid(String ownerUsername, String groupingPath,
             String userToAddUuid);
 
-    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd, Boolean username);
 
-    public List<GroupingsServiceResult> addGroupMemberByUsername(String ownersername, String groupPath,
+    public List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
             String userToAddUsername);
 
     public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String group, String userToAddUuid);
 
-    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd, Boolean username);
 
     public List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
             List<String> usersToAddUsername);
