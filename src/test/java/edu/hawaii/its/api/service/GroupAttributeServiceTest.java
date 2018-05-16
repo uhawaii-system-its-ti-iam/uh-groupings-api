@@ -257,6 +257,7 @@ public class GroupAttributeServiceTest {
         try {
             turnOffWhenOnRandom =
                     groupingsService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
+//            assertTrue(turnOffWhenOnRandom.get(0).getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
             turnOffWhenOnRandom = new ArrayList<>();
             turnOffWhenOnRandom.add(gsre.getGsr());
@@ -281,6 +282,7 @@ public class GroupAttributeServiceTest {
         } catch (GroupingsServiceResultException gsre) {
             turnOnWhenOffRandom = new ArrayList<>();
             turnOnWhenOffRandom.add(gsre.getGsr());
+//            assertTrue(turnOnWhenOffRandom.get(0).getResultCode().startsWith(FAILURE));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupingsService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
