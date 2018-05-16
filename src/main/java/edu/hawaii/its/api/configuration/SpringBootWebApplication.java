@@ -7,6 +7,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @SpringBootApplication
 public class SpringBootWebApplication extends SpringBootServletInitializer {
@@ -28,4 +30,11 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
     public WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
         return new SecurityConfig();
     }
+
+//    @Bean
+//    public StrictHttpFirewall allowUrlEncodedSlashHttpFirewall() {
+//        StrictHttpFirewall firewall = new StrictHttpFirewall();
+//        firewall.setAllowUrlEncodedSlash(true);
+//        return firewall;
+//    }
 }

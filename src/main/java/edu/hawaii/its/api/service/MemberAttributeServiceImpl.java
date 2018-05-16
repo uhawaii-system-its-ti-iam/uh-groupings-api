@@ -206,6 +206,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         ownershipResult = hs.makeGroupingsServiceResult(
                 FAILURE + ", " + ownerUsername + " does not own " + groupingPath, action);
+
+        //todo Is this even reachable?
         return ownershipResult;
     }
 
@@ -237,6 +239,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         ownershipResults = hs.makeGroupingsServiceResult(
                 FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
                 action);
+
+        //todo Is this even reachable?
         return ownershipResults;
     }
 

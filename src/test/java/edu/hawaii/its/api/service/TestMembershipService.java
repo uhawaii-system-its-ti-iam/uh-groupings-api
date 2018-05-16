@@ -102,6 +102,12 @@ public class TestMembershipService {
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
+
+//        try {
+//            membershipService.deleteAdmin(ADMIN, username[3]);
+//        } catch (GroupingsServiceResultException gsre) {
+//            gsre.printStackTrace();
+//        }
     }
 
     @Test

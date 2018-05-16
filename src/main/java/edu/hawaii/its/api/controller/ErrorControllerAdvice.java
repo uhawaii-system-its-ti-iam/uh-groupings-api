@@ -34,6 +34,7 @@ public class ErrorControllerAdvice {
     private UserContextService userContextService;
 
     //todo Handler for .../{Empty fields}/{Method} doesn't work still returns 500 should return 400
+    //todo Implementing StrictHttpFirewall override, not sure if this is the right thing to do security-wise
     @ExceptionHandler(RequestRejectedException.class)
     public ResponseEntity<GroupingsHTTPException> handleRequestRejectedException(RequestRejectedException rre) {
         return exceptionResponse(rre.getMessage(), rre, 400);
