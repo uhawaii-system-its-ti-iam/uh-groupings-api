@@ -458,6 +458,25 @@ public class GrouperFactoryServiceTest {
         result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, allowed);
         result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, allowed);
 
+        try {
+            result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, "illegal", lookup, allowed);
+        } catch (IllegalArgumentException iae) {
+            iae.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void makeWsGetGrouperPrivilegesLiteResultExceptionTest() {
+        WsGetGrouperPrivilegesLiteResult result;
+        WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+
+        try {
+            result = gfsl.makeWsGetGrouperPrivilegesLiteResult(GROUPING_3_PATH, "illegal", lookup);
+        } catch (IllegalArgumentException iae) {
+            iae.printStackTrace();
+        }
+
     }
 
     @Test
@@ -487,9 +506,5 @@ public class GrouperFactoryServiceTest {
         testArray = gfsl.makeEmptyWsAttributeAssignArray();
         assertTrue(testArray.length == 0);
     }
-
-    //    public WsAttributeAssign[] makeEmptyWsAttributeAssignArray() {
-    //        return new WsAttributeAssign[0];
-    //    }
 
 }
