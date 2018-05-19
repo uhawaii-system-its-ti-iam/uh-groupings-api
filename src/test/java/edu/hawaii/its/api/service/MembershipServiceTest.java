@@ -150,6 +150,23 @@ public class MembershipServiceTest {
         assertNotNull(membershipService);
     }
 
+    @Test
+    public void addGroupingMemberTest() {
+
+        List<GroupingsServiceResult> listGsr;
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupingPath = GROUPING_3_PATH;
+        String userToAdd = users.get(5).getUsername();
+        String uuidToAdd = users.get(5).getUuid();
+
+        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, userToAdd, true);
+        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+
+        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, uuidToAdd, false);
+        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    }
+
     // Debug statement to look at contents of database
     // Delete user from include group to remove them
     // Use user number not slot in array
@@ -330,6 +347,51 @@ public class MembershipServiceTest {
             gsr = gsre.getGsr();
         }
 
+    }
+
+    @Test
+    public void addGroupMemberTest() {
+
+        List<GroupingsServiceResult> listGsr;
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupPath = GROUPING_3_INCLUDE_PATH;
+        String userToAdd = users.get(2).getUsername();
+        String uuidToAdd = users.get(2).getUuid();
+
+        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, userToAdd, true);
+        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+
+        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, uuidToAdd, false);
+        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+
+    }
+
+    @Test
+    public void addGroupMembersTest() {
+
+        List<GroupingsServiceResult> listGsr;
+        List<String> usersToAdd = new ArrayList<String>();
+        List<String> uuidsToAdd = new ArrayList<String>();
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupPath = GROUPING_3_INCLUDE_PATH;
+
+        usersToAdd.add(users.get(2).getUsername());
+        usersToAdd.add(users.get(3).getUsername());
+
+        uuidsToAdd.add(users.get(2).getUuid());
+        uuidsToAdd.add(users.get(3).getUuid());
+
+        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, usersToAdd, true);
+        for (int i = 0; i < listGsr.size(); i++) {
+            assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+        }
+
+        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd, false);
+        for (int i = 0; i < listGsr.size(); i++) {
+            assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+        }
     }
 
     @Test
@@ -521,7 +583,8 @@ public class MembershipServiceTest {
 
         //add member already in group
         listGsr = membershipService
-                .addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(5).getUsername());
+                .addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
+                        users.get(5).getUsername());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         //member that is adding is not an owner (not allowed)
