@@ -291,7 +291,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return info;
     }
 
-    //returns a list of groupings corresponding to the include group orr exclude group (includeOrrExclude) in groupPaths that
+    //returns a list of groupings corresponding to the include group or exclude group (includeOrrExclude) in groupPaths that
     //have the self-opted attribute set in the membership
     public List<Grouping> groupingsOpted(String includeOrrExclude, String username, List<String> groupPaths) {
         logger.info("groupingsOpted; includeOrrExclude: " + includeOrrExclude + "; username: " + username + ";");

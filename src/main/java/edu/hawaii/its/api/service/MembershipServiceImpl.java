@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Grouping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -156,6 +158,9 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Autowired
     private GrouperFactoryService grouperFS;
+
+    @Autowired
+    GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private HelperService hs;
