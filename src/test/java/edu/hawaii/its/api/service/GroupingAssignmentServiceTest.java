@@ -186,7 +186,6 @@ public class GroupingAssignmentServiceTest {
     @Test
     public void groupingsToOptTest() {
         GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
-
         //todo finish
 
     }

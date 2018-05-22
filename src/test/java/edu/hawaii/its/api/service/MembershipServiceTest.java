@@ -116,6 +116,9 @@ public class MembershipServiceTest {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
+
     @Before
     public void setup() {
 
@@ -151,6 +154,14 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void listOwnedTest() {
+        System.out.println(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()));
+        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH, users.get(1).getUsername());
+        System.out.println(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()));
+
+    }
+
+    @Test
     public void addGroupingMemberTest() {
 
         List<GroupingsServiceResult> listGsr;
@@ -160,10 +171,10 @@ public class MembershipServiceTest {
         String userToAdd = users.get(5).getUsername();
         String uuidToAdd = users.get(5).getUuid();
 
-        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, userToAdd, true);
+        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, userToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, uuidToAdd, false);
+        listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, uuidToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
     }
 
@@ -359,10 +370,10 @@ public class MembershipServiceTest {
         String userToAdd = users.get(2).getUsername();
         String uuidToAdd = users.get(2).getUuid();
 
-        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, userToAdd, true);
+        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, userToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, uuidToAdd, false);
+        listGsr = membershipService.addGroupMember(ownerUsername, groupPath, uuidToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
     }
@@ -383,12 +394,12 @@ public class MembershipServiceTest {
         uuidsToAdd.add(users.get(2).getUuid());
         uuidsToAdd.add(users.get(3).getUuid());
 
-        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, usersToAdd, true);
+        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, usersToAdd);
         for (int i = 0; i < listGsr.size(); i++) {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
         }
 
-        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd, false);
+        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd);
         for (int i = 0; i < listGsr.size(); i++) {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
         }
