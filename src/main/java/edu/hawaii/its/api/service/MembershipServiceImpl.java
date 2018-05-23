@@ -385,14 +385,13 @@ public class MembershipServiceImpl implements MembershipService {
     //returns a list of groups the user is an owner of
     @Override
     public List<String> listOwned(String admin, String user) {
-        List<String> groups;
         List<String> groupsOwned = new ArrayList<>();
 
         if(mas.isSuperuser(admin)) {
-            groups = groupingAssignmentService.getGroupPaths(user);
+            List<String> groups = groupingAssignmentService.getGroupPaths(user);
 
             for(String group: groups) {
-                group = group.replace(":exlcude", "");
+                group = group.replace(":exclude", "");
                 group = group.replace(":basis", "");
                 group = group.replace(":include", "");
                 group = group.replace(":owners", "");
