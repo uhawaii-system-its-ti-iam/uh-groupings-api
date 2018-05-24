@@ -181,8 +181,9 @@ public class TestMembershipService {
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them
     @Test
     public void listOwnedTest(){
-        membershipService.listOwned(ADMIN, username[0]);
 
+        System.out.println(membershipService.listOwned(ADMIN, username[0]));
+        System.out.println(GROUPING);
     }
 
     @Test

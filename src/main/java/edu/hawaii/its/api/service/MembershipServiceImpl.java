@@ -382,28 +382,24 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrs;
     }
 
-    //returns a list of groups the user is an owner of
+
+    // Takes an admin and user and returns list of groups that a user may own. An empty list will be returned if no
+    // groups are owned.
     @Override
     public List<String> listOwned(String admin, String user) {
         List<String> groupsOwned = new ArrayList<>();
 
         if(mas.isSuperuser(admin)) {
-            List<String> groups = groupingAssignmentService.getGroupPaths(user);
+            List<Grouping> groups = groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(user));
 
-            for(String group: groups) {
-                group = group.replace(":exclude", "");
-                group = group.replace(":basis", "");
-                group = group.replace(":include", "");
-                group = group.replace(":owners", "");
-
-                if(mas.isOwner(group, user) && !groupsOwned.contains(group)) {
-                    groupsOwned.add(group);
-                }
+            for(Grouping group : groups) {
+                groupsOwned.add(group.getPath());
             }
         }
 
         return groupsOwned;
     }
+    
 
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
