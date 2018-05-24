@@ -182,8 +182,17 @@ public class TestMembershipService {
     @Test
     public void listOwnedTest(){
 
-        System.out.println(membershipService.listOwned(ADMIN, username[0]));
-        System.out.println(GROUPING);
+        // Tests that when there is no groups owned, the list is empty
+        assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
+
+        // Adds user to owners of GROUPING 1
+        membershipService.addGroupMember(username[0], GROUPING_OWNERS, username[1]);
+
+        // Tests that the list now contains the path to GROUPING 1 since user is now an owner
+        assertTrue(membershipService.listOwned(ADMIN, username[1]).get(0).equals(GROUPING));
+
+        // Tests if a non admin can access users groups owned
+        assertTrue(membershipService.listOwned(username[0], username[1]).isEmpty());
     }
 
     @Test

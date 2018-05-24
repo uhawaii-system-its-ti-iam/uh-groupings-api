@@ -116,8 +116,6 @@ public class MembershipServiceTest {
     @Autowired
     private MembershipRepository membershipRepository;
 
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
 
     @Before
     public void setup() {
@@ -155,9 +153,18 @@ public class MembershipServiceTest {
 
     @Test
     public void listOwnedTest() {
-        System.out.println(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()));
+
+        // Tests that when there is no groups owned, the list is empty
+        assertTrue(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()).isEmpty());
+
+        // Adds user to owners of GROUPING 1
         membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH, users.get(1).getUsername());
-        System.out.println(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()));
+
+        // Tests that the list now contains the path to GROUPING 1 since user is now an owner
+        assertTrue(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()).get(0).equals(GROUPING_1_PATH));
+
+        // Tests if a non admin can access users groups owned
+        assertTrue(membershipService.listOwned(users.get(0).getUsername(), users.get(1).getUsername()).isEmpty());
 
     }
 

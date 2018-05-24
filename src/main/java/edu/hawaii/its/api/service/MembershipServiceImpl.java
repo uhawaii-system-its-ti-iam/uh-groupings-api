@@ -399,7 +399,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         return groupsOwned;
     }
-    
+
 
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
