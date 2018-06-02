@@ -183,10 +183,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public List<Grouping> groupingsIn(List<String> groupPaths) {
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
 
-        List<Grouping> groupings =  helperService.makeGroupings(groupingsIn);
+        List<Grouping> groupings = helperService.makeGroupings(groupingsIn);
         //todo this can be optimized by getting opt attributes from grouper when getting the group list
         //rather than making individual calls to grouper, which is much slower
-        for(Grouping grouping : groupings) {
+        for (Grouping grouping : groupings) {
             grouping.setOptOutOn(groupAttributeService.optOutPermission(grouping.getPath()));
         }
 
@@ -228,7 +228,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         Grouping compositeGrouping = new Grouping();
 
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
+        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
             Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
@@ -261,7 +262,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         groupingAssignment.setGroupingsToOptOutOf(groupingsToOptOutOf(username, groupPaths));
         groupingAssignment.setGroupingsOptedOutOf(groupingsOptedOutOf(username, groupPaths));
         groupingAssignment.setGroupingsOptedInTo(groupingsOptedInto(username, groupPaths));
-
 
         return groupingAssignment;
     }
@@ -299,7 +299,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsOpted = new ArrayList<>();
 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
-                && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath).collect(Collectors.toList());
+                && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
+                .collect(Collectors.toList());
 
         if (groupsOpted.size() > 0) {
 
@@ -347,7 +348,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
-                    if (subject != null) {
+                    if (!subject.getSourceId().equals("g:gsa") && subject != null) {
                         group.addMember(makePerson(subject, attributeNames));
                     }
                 }

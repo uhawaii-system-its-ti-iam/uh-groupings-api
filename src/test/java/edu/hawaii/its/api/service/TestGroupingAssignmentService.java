@@ -170,6 +170,9 @@ public class TestGroupingAssignmentService {
 
         assertEquals(grouping.getPath(), GROUPING);
 
+        // Testing for garbage uuid basis bug fix
+        // List<String> list = grouping.getBasis().getUuids();
+
         assertTrue(grouping.getBasis().getUsernames().contains(username[3]));
         assertTrue(grouping.getBasis().getUsernames().contains(username[4]));
         assertTrue(grouping.getBasis().getUsernames().contains(username[5]));
@@ -267,6 +270,10 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getMembersTest() {
+
+        // Testing for garbage uuid basis bug fix
+        // Group testGroup = groupingAssignmentService.getMembers(username[0], GROUPING_BASIS);
+
         Group group = groupingAssignmentService.getMembers(username[0], GROUPING);
         List<String> usernames = group.getUsernames();
 
