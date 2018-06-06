@@ -7,6 +7,7 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
@@ -34,6 +35,8 @@ public interface GroupingAssignmentService {
     public List<String> extractGroupPaths(List<WsGroup> groups);
 
     public Group makeGroup(WsGetMembersResults membersResults);
+
+    public Group makeBasisGroup(WsGetMembersResults membersResults);
 
     public List<String> getGroupPaths(String username);
 

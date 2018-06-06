@@ -332,7 +332,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         //todo should we use EmptyGroup?
         Group groupMembers = new Group();
-        if (members.getResults() != null) {
+        if (members.getResults() != null && groupPath.contains(BASIS)) {
+            groupMembers = makeBasisGroup(members);
+        } else if (members.getResults() != null) {
             groupMembers = makeGroup(members);
         }
         return groupMembers;
@@ -348,8 +350,32 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
-                    if (!subject.getSourceId().equals("g:gsa") && subject != null) {
+                    if (subject != null) {
                         group.addMember(makePerson(subject, attributeNames));
+                    }
+                }
+            }
+        } catch (NullPointerException npe) {
+            return new Group();
+        }
+
+        return group;
+    }
+
+    public Group makeBasisGroup(WsGetMembersResults membersResults) {
+        Group group = new Group();
+        try {
+            WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
+            String[] attributeNames = membersResults.getSubjectAttributeNames();
+
+            if (subjects.length > 0) {
+                for (WsSubject subject : subjects) {
+                    if (subject != null){
+                        if(subject.getSourceId() == null) {
+                            group.addMember(makePerson(subject, attributeNames));
+                        } else if(!subject.getSourceId().equals("g:gsa")) {
+                            group.addMember(makePerson(subject, attributeNames));
+                        }
                     }
                 }
             }
