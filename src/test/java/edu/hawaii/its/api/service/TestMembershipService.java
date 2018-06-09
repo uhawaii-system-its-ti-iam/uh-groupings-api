@@ -103,11 +103,16 @@ public class TestMembershipService {
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
 
-//        try {
-//            membershipService.deleteAdmin(ADMIN, username[3]);
-//        } catch (GroupingsServiceResultException gsre) {
-//            gsre.printStackTrace();
-//        }
+        //        // Remove from include
+        //        for(int i = 0; i < 6; i++) {
+        //            membershipService.deleteGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[i]);
+        //        }
+
+        //        try {
+        //            membershipService.deleteAdmin(ADMIN, username[3]);
+        //        } catch (GroupingsServiceResultException gsre) {
+        //            gsre.printStackTrace();
+        //        }
     }
 
     @Test
@@ -177,10 +182,9 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
     }
 
-
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them
     @Test
-    public void listOwnedTest(){
+    public void listOwnedTest() {
 
         // Tests that when there is no groups owned, the list is empty
         assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
@@ -193,6 +197,9 @@ public class TestMembershipService {
 
         // Tests if a non admin can access users groups owned
         assertTrue(membershipService.listOwned(username[0], username[1]).isEmpty());
+
+        //Reset ownership
+        membershipService.deleteGroupMemberByUsername(username[0], GROUPING_OWNERS, username[1]);
     }
 
     @Test
@@ -279,7 +286,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void listGroupsTest(){
+    public void listGroupsTest() {
         //todo
     }
 
@@ -337,7 +344,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupingMemberByUuidTest(){
+    public void addGroupingMemberByUuidTest() {
 
         List<GroupingsServiceResult> results;
         GroupingsServiceResult sResults;
@@ -359,7 +366,6 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
-
 
         //username[3] is not in the composite(in the exclude)
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
@@ -435,11 +441,10 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, ownerUsername));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, ownerUsername));
 
-
     }
 
     @Test
-    public void deleteGroupingMemberByUuidTest(){
+    public void deleteGroupingMemberByUuidTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult results;
         String ownerUsername = username[0];
@@ -504,12 +509,10 @@ public class TestMembershipService {
         lResults = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[4]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
-
         assertFalse(memberAttributeService.isMember(GROUPING, username[4]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
-
 
         //resets
         setUp();
@@ -534,19 +537,17 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, ownerUsername));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, ownerUsername));
 
-
-
     }
 
     @Test
-    public void addGroupMembersByUsernameTest(){
+    public void addGroupMembersByUsernameTest() {
 
         String ownerUsername = username[0];
 
         List<GroupingsServiceResult> results;
         List<String> usernames = new ArrayList<>();
 
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             usernames.add(username[i]);
         }
 
@@ -558,7 +559,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupingMemberTest(){
+    public void addGroupingMemberTest() {
         List<GroupingsServiceResult> results;
         GroupingsServiceResult sResults;
         String ownerUsername = username[0];
@@ -579,7 +580,6 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
-
 
         //username[3] is not in the composite(in the exclude)
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
@@ -657,7 +657,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupMemberTest(){
+    public void addGroupMemberTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult result;
         String ownerUsername = username[0];
@@ -788,7 +788,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupMemberByUuidTest(){
+    public void addGroupMemberByUuidTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult result;
         String ownerUsername = username[0];
@@ -917,17 +917,16 @@ public class TestMembershipService {
 
         membershipService.deleteGroupMemberByUuid(ownerUsername, GROUPING_OWNERS, username[2]);
 
-
     }
 
     @Test
-    public void addGroupMembersByUuidTest(){
+    public void addGroupMembersByUuidTest() {
         String ownerUsername = username[0];
 
         List<GroupingsServiceResult> results;
         List<String> usernames = new ArrayList<>();
 
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             usernames.add(username[i]);
         }
 
@@ -936,16 +935,17 @@ public class TestMembershipService {
         for (GroupingsServiceResult result : results) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
         }
+
     }
 
     @Test
-    public void addGroupMembersTest(){
+    public void addGroupMembersTest() {
         String ownerUsername = username[0];
 
         List<GroupingsServiceResult> results;
         List<String> usernames = new ArrayList<>();
 
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             usernames.add(username[i]);
         }
 
@@ -954,10 +954,14 @@ public class TestMembershipService {
         for (GroupingsServiceResult result : results) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
         }
+
+//        for (int i = 0; i < 6; i++) {
+//            membershipService.deleteGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[i]);
+//        }
     }
 
     @Test
-    public void deleteGroupMemberByUuidTest(){
+    public void deleteGroupMemberByUuidTest() {
         GroupingsServiceResult results;
         String ownerUsername = username[0];
 
@@ -1033,12 +1037,11 @@ public class TestMembershipService {
         //checks if username[2] is still in include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
 
-
     }
 
     //Add admin and delete admin in one test
     @Test
-    public void adminTest(){
+    public void adminTest() {
 
         GroupingsServiceResult results;
 

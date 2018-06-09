@@ -519,7 +519,7 @@ public class TestGroupingsRestController {
         Grouping storeEmpty = mapGrouping(GROUPING_STORE_EMPTY);
         Grouping trueEmpty = mapGrouping(GROUPING_TRUE_EMPTY);
 
-        assertTrue(storeEmpty.getBasis().getMembers().size() == 1);
+        assertTrue(storeEmpty.getBasis().getMembers().size() == 0);
         assertTrue(storeEmpty.getComposite().getMembers().size() == 0);
         assertTrue(storeEmpty.getExclude().getMembers().size() == 0);
         assertTrue(storeEmpty.getInclude().getMembers().size() == 0);
