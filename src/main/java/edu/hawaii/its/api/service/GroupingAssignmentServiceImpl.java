@@ -370,10 +370,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
-                    if (subject != null){
-                        if(subject.getSourceId() == null) {
+                    if (subject != null) {
+                        if (subject.getSourceId() == null) {
                             group.addMember(makePerson(subject, attributeNames));
-                        } else if(!subject.getSourceId().equals("g:gsa")) {
+                        } else if (!subject.getSourceId().equals("g:gsa")) {
                             group.addMember(makePerson(subject, attributeNames));
                         }
                     }
