@@ -355,6 +355,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     }
                 }
             }
+            // Return empty group if for any unforeseen results
         } catch (NullPointerException npe) {
             return new Group();
         }
@@ -362,6 +363,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return group;
     }
 
+    // Make group specifically for basis group only
     public Group makeBasisGroup(WsGetMembersResults membersResults) {
         Group group = new Group();
         try {
@@ -371,14 +373,17 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
                     if (subject != null) {
+                        // Add null source id users (some valid users have null source id)
                         if (subject.getSourceId() == null) {
                             group.addMember(makePerson(subject, attributeNames));
+                            // Add user to basis if not in intermediate group
                         } else if (!subject.getSourceId().equals("g:gsa")) {
                             group.addMember(makePerson(subject, attributeNames));
                         }
                     }
                 }
             }
+            // Return empty group if for any unforeseen results
         } catch (NullPointerException npe) {
             return new Group();
         }
