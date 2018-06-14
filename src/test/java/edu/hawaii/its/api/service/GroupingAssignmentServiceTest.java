@@ -460,5 +460,11 @@ public class GroupingAssignmentServiceTest {
         grouping = groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
     }
 
+    //todo
+    @Test
+    public void makeBasisGroupTest() {
+
+    }
+
 }
 
