@@ -75,9 +75,13 @@ public class GroupingAssignmentServiceTest {
 
     private static final String PATH_ROOT = "path:to:grouping";
 
+    private static final String BASIS = ":basis";
+
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
+    private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
+
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
@@ -106,6 +110,9 @@ public class GroupingAssignmentServiceTest {
 
     @Autowired
     private MembershipService membershipService;
+
+    @Autowired
+    private GrouperFactoryService grouperFS;
 
     @Before
     public void setup() {
@@ -463,7 +470,17 @@ public class GroupingAssignmentServiceTest {
     //todo
     @Test
     public void makeBasisGroupTest() {
+        //groupingAssignmentService.getMembers(users.get(0).getUsername(), GROUPING_3_BASIS_PATH);
 
+//        WsSubject garbageSubject = new WsSubject();
+//        garbageSubject.setSourceId("g:gsa");
+//        String id = garbageSubject.getId();
+//        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(garbageSubject.getName());
+//        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_3_BASIS_PATH, garbageSubject.getName());
+//
+//        WsGetMembersResults results = grouperFS.makeWsGetMembersResults(id, lookup, GROUPING_3_BASIS_PATH);
+//        Group members = groupingAssignmentService.makeBasisGroup(results);
+//        assertTrue(members.getMembers().size() == 0);
     }
 
 }
