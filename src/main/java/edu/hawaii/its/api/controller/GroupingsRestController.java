@@ -76,6 +76,14 @@ public class GroupingsRestController {
     }
 
     /**
+     * Get all admins and groupings
+     *
+     * @return List of all admins and all groupings
+     */
+
+
+
+    /**
      * adds a member to the admin group
      *
      * @param adminToAdd: username of the new admin to add
