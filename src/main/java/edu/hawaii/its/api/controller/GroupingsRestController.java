@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -80,8 +81,20 @@ public class GroupingsRestController {
      *
      * @return List of all admins and all groupings
      */
+    @RequestMapping(value = "/adminsGroupings",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<AdminListsHolder> adminsGroupings(Principal principal){
+        logger.info("Entered REST adminsGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.adminLists(principal.getName()));
+    }
 
 
+    //////////////////////////////////////////
+    // OLD API FUNCTIONS (2.0)
+    /////////////////////////////////////////
 
     /**
      * adds a member to the admin group
