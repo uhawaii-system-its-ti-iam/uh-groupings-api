@@ -1,10 +1,12 @@
 package edu.hawaii.its.api.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,6 +47,15 @@ public class GroupingsRestController {
 
     @Value("${groupings.api.include}")
     private String INCLUDE;
+
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
+
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
+
+    @Value("${groupings.api.listserv}")
+    private String LISTSERV;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -144,14 +155,16 @@ public class GroupingsRestController {
                 .body(groupingAssignmentService.getGrouping(path, principal.getName()));
     }
 
-    //todo Need to find way to test any non-GET methods
+    //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
+    // Basically this means any functions after this line have not been tested yet
+
     /**
      * Create a new admin
      *
      * @param uid: uid of admin to add
      * @return Information about results of the operation
      */
-    @RequestMapping (value = "admins/{uid}",
+    @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> addAdmin(Principal principal, @PathVariable String uid) {
@@ -162,12 +175,162 @@ public class GroupingsRestController {
     }
 
     /**
+     * Create a new grouping
+     * Not implemented yet, even REST API controller function might not be doable at this stage
+     *
+     * @param path: String containing the path of grouping
+     * @return Information about results of operation
+     */
+    //    @RequestMapping(value = "/groupings/{path}",
+    //            method = RequestMethod.POST,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+    //    public ResponseEntity<GroupingsServiceResult> addGrouping(Principal principal, @PathVariable String path) {
+    //        logger.info("Entered REST addGrouping");
+    //        return ResponseEntity
+    //                .ok()
+    //                .body(groupingFactoryService.addGrouping())
+    //    }
+
+    /**
+     * Update grouping to add a new owner
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of new owner to add
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/owners/{uid}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> addOwner(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST addOwner...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.assignOwnership(path, principal.getName(), uid));
+    }
+
+    //    /**
+    //     * Update grouping to add new membership reviewer
+    //     * todo Not sure what a reviewer is, will come back to this one (is this supposed to be 2.2?)
+    //     *
+    //     * @param path: path of grouping to update
+    //     * @param uid: uid of membership reviewer
+    //     */
+    //    @RequestMapping(value = "groupings/{path}/reviewers/{uid}",
+    //            method = RequestMethod.PUT,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+
+    /**
+     * Update grouping to add new include member
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of member to add to include
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "groupings/{path}/includeMembers/{uid}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST includeMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMember(principal.getName(), path, uid));
+    }
+
+    /**
+     * Update grouping to add new exclude member
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of member to add to exclude
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "groupings/{path}/excludeMembers/{uid}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST excludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMember(principal.getName(), path, uid));
+    }
+
+    /**
+     * Update grouping to enable given preference
+     *
+     * @param path:         path of grouping to update
+     * @param preferenceId: id of preference to update
+     * @return Information about result of operation
+     */
+    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
+            @PathVariable String preferenceId) {
+        logger.info("Entered REST enablePreference");
+        if (preferenceId.equals(OPT_IN)) {
+            return ResponseEntity
+                    .ok()
+                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
+        } else if (preferenceId.equals(OPT_OUT)) {
+            return ResponseEntity
+                    .ok()
+                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
+        } else if (preferenceId.equals(LISTSERV)) {
+            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
+            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+            listResult.add(result);
+            return ResponseEntity
+                    .ok()
+                    .body(listResult);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Update grouping to disable given preference
+     *
+     * @param path:         path of grouping to update
+     * @param preferenceId: id of preference to update
+     * @return Information about result of operation
+     */
+    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+            @PathVariable String path,
+            @PathVariable String preferenceId) {
+        logger.info("Entered REST disablePreference");
+        if (preferenceId.equals(OPT_IN)) {
+            return ResponseEntity
+                    .ok()
+                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
+        } else if (preferenceId.equals(OPT_OUT)) {
+            return ResponseEntity
+                    .ok()
+                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
+        } else if (preferenceId.equals(LISTSERV)) {
+            GroupingsServiceResult result =
+                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
+            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+            listResult.add(result);
+            return ResponseEntity
+                    .ok()
+                    .body(listResult);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Delete an admin
      *
      * @param uid: uid of admin to delete
      * @return Information about results of the operation
      */
-    @RequestMapping (value = "admins/{uid}",
+    @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteAdmin(Principal principal, @PathVariable String uid) {
@@ -199,12 +362,89 @@ public class GroupingsRestController {
     }
 
     /**
-     * Create a new grouping
+     * Demote an owner to manager
      *
-     * @param path: Path of the grouping to create
-     * @return Information about results of the operation
+     * @param path: path of grouping to update
+     * @param uid:  uid of new owner to add
+     * @return Information about results of operation
      */
-//    @RequestMapping(value = "")
+    @RequestMapping(value = "groupings/{path}/owners/{uid}/demote",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView demoteOwner(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST demoteOwner...");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
+
+    /**
+     * Add a new manager
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of manager to add
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/managers/{uid}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView addManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+        logger.info("Entered REST addManager");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
+
+    /**
+     * Enable a manager permission
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of manager to change permissions
+     * @param id:   id of permission to enable
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/managers/{uid}/permissions/{id}/enable",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView enableManagerPermission(Principal principal, @PathVariable String path,
+            @PathVariable String uid, @PathVariable String id) {
+        logger.info("Entered REST enableManagerPermission");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
+
+    /**
+     * Disable a manager permissions
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of manager to change permissions
+     * @param id:   id of permission to disable
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/managers/{uid}/permissions/{id}/disable",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView disableManagerPermission(Principal principal, @PathVariable String path,
+            @PathVariable String uid, @PathVariable String id) {
+        logger.info("Entered REST disableManagerPermission");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
+
+    /**
+     * Promote a manager to an owner
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of manager to promote
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/managers/{uid}/promote",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView promoteManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+        logger.info("Entered REST promoteManager");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
 
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
