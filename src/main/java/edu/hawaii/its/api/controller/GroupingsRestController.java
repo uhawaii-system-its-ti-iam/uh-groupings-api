@@ -174,6 +174,7 @@ public class GroupingsRestController {
                 .body(membershipService.addAdmin(principal.getName(), uid));
     }
 
+    //todo Implement method and come back to fix REST controller method
     /**
      * Create a new grouping
      * Not implemented yet, even REST API controller function might not be doable at this stage
@@ -340,6 +341,45 @@ public class GroupingsRestController {
                 .body(membershipService.deleteAdmin(principal.getName(), uid));
     }
 
+    //todo Implement method and fix REST controller method
+    /**
+     * Delete a grouping
+     * Not implemented yet, even REST API controller function might not be doable at this stage
+     *
+     * @param path: path of grouping to delete
+     * @return Information about results of operation
+     */
+    //    @RequestMapping (value = "/grouping/{path}",
+    //            method = RequestMethod.DELETE,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+    //   public ResponseEntity<GroupingsServiceResult> deleteGrouping(Principal principal, @PathVariable String path) {
+    //        logger.info("Entered REST deleteGrouping");
+    //        return ResponseEntity
+    //                .ok()
+    //                .body(groupingFactoryService.deleteGrouping());
+    //    }
+
+    /**
+     * Delete a grouping owner
+     *
+     * @param path: path of grouping to modify
+     * @param uid: uid of owner to delete
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/grouping/{path}/owners/{uid}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteOwner(Principal principal, @PathVariable String path, @PathVariable String uid) {
+        logger.info("Entered REST deleteOwner");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.removeOwnership(path, principal.getName(), uid));
+    }
+
+    /**
+     *
+     */
+
     //todo Implement when manager feature is implemented in v2.2
     // Should all return HTTP code 405
     //////////////////////////////////////////
@@ -445,6 +485,24 @@ public class GroupingsRestController {
         throw new UnsupportedOperationException();
         //todo Implement method
     }
+
+    /**
+     * Remove a manager
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid of manager to remove
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/managers/{uid}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView deleteManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+        logger.info("Entered REST deleteManager");
+        throw new UnsupportedOperationException();
+        //todo Implement method
+    }
+
+
 
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
