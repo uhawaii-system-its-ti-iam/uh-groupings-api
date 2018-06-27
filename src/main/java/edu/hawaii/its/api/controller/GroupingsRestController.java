@@ -503,10 +503,6 @@ public class GroupingsRestController {
         //todo Implement method
     }
 
-    /**
-     * 
-     */
-
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
     /////////////////////////////////////////
