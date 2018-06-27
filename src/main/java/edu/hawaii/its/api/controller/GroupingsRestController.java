@@ -363,13 +363,14 @@ public class GroupingsRestController {
      * Delete a grouping owner
      *
      * @param path: path of grouping to modify
-     * @param uid: uid of owner to delete
+     * @param uid:  uid of owner to delete
      * @return Information about results of operation
      */
     @RequestMapping(value = "/grouping/{path}/owners/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteOwner(Principal principal, @PathVariable String path, @PathVariable String uid) {
+    public ResponseEntity<GroupingsServiceResult> deleteOwner(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
         logger.info("Entered REST deleteOwner");
         return ResponseEntity
                 .ok()
@@ -501,8 +502,6 @@ public class GroupingsRestController {
         throw new UnsupportedOperationException();
         //todo Implement method
     }
-
-
 
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
