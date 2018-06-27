@@ -167,8 +167,8 @@ public class GroupingsRestController {
     @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addAdmin(Principal principal, @PathVariable String uid) {
-        logger.info("Entered REST addAdmin...");
+    public ResponseEntity<GroupingsServiceResult> addNewAdmin(Principal principal, @PathVariable String uid) {
+        logger.info("Entered REST addNewAdmin...");
         return ResponseEntity
                 .ok()
                 .body(membershipService.addAdmin(principal.getName(), uid));
@@ -185,8 +185,8 @@ public class GroupingsRestController {
     //    @RequestMapping(value = "/groupings/{path}",
     //            method = RequestMethod.POST,
     //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<GroupingsServiceResult> addGrouping(Principal principal, @PathVariable String path) {
-    //        logger.info("Entered REST addGrouping");
+    //    public ResponseEntity<GroupingsServiceResult> addNewGrouping(Principal principal, @PathVariable String path) {
+    //        logger.info("Entered REST addNewGrouping");
     //        return ResponseEntity
     //                .ok()
     //                .body(groupingFactoryService.addGrouping())
@@ -323,8 +323,8 @@ public class GroupingsRestController {
     @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteAdmin(Principal principal, @PathVariable String uid) {
-        logger.info("Entered REST deleteAdmin...");
+    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(Principal principal, @PathVariable String uid) {
+        logger.info("Entered REST deleteNewAdmin...");
         return ResponseEntity
                 .ok()
                 .body(membershipService.deleteAdmin(principal.getName(), uid));
@@ -341,8 +341,8 @@ public class GroupingsRestController {
     //    @RequestMapping (value = "/grouping/{path}",
     //            method = RequestMethod.DELETE,
     //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //   public ResponseEntity<GroupingsServiceResult> deleteGrouping(Principal principal, @PathVariable String path) {
-    //        logger.info("Entered REST deleteGrouping");
+    //   public ResponseEntity<GroupingsServiceResult> deleteNewGrouping(Principal principal, @PathVariable String path) {
+    //        logger.info("Entered REST deleteNewGrouping");
     //        return ResponseEntity
     //                .ok()
     //                .body(groupingFactoryService.deleteGrouping());
@@ -527,7 +527,7 @@ public class GroupingsRestController {
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
     /////////////////////////////////////////
-    // todo These will get moved out over time as the new 2.1 API is integrated into UhGroupings
+    // todo These will get moved out over time as the new 2.1 API is integrated into UHGroupings
 
     /**
      * adds a member to the admin group
