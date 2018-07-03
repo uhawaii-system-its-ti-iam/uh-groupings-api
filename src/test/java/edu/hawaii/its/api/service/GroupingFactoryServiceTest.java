@@ -8,6 +8,7 @@ import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -50,6 +51,17 @@ public class GroupingFactoryServiceTest {
     private String UUID;
 
     private static final String PATH_ROOT = "path:to:grouping";
+    private static final String INCLUDE = ":include";
+    private static final String EXCLUDE = ":exclude";
+    private static final String OWNERS = ":owners";
+    private static final String BASIS = ":basis";
+
+    private static final String GROUPING_3_PATH = PATH_ROOT + 3;
+
+    private static final String GROUPING_3_INCLUDE_PATH = GROUPING_3_PATH + INCLUDE;
+    private static final String GROUPING_3_EXCLUDE_PATH = GROUPING_3_PATH + EXCLUDE;
+    private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
+    private static final String GROUPING_3_OWNERS_PATH = GROUPING_3_PATH + OWNERS;
 
     private static final String GROUPING_4_PATH = PATH_ROOT + 4;
 
@@ -80,6 +92,9 @@ public class GroupingFactoryServiceTest {
 
     @Autowired
     private MembershipRepository membershipRepository;
+
+    @Autowired
+    private GroupingFactoryService gfs;
 
     @Before
     public void setup() {
@@ -121,8 +136,18 @@ public class GroupingFactoryServiceTest {
     }
 
     //todo fill this in after changes to addGrouping method
+    // Basic test to check functionality
     @Test
     public void addGrouping() {
+
+        List<GroupingsServiceResult> results;
+        List<String> basis;
+        List<String> include;
+        List<String> exclude;
+        List<String> owners;
+
+//        results = gfs.addGrouping(ADMIN_USER, GROUPING_3_PATH, basis, include, exclude, owners);
+
     }
 }
 

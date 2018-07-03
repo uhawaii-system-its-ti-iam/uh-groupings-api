@@ -72,7 +72,7 @@ public class ErrorControllerAdvice {
     @ExceptionHandler(GroupingsServiceResultException.class)
     public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
             GroupingsServiceResultException gsre) {
-        ResponseEntity re = exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
+        ResponseEntity<GroupingsHTTPException> re = exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
         return re;
     }
 
