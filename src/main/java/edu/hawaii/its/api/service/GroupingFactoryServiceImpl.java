@@ -173,6 +173,12 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     private MembershipService membershipService;
 
     @Override
+    public void addGrouping(String admin, String groupPath){
+
+    }
+
+
+    @Override
     //todo change basis to a String
     public List<GroupingsServiceResult> addGrouping(
             String adminUsername,
@@ -204,7 +210,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         Map<String, List<String>> memberLists = new HashMap<>();
         memberLists.put("", new ArrayList<>());
         memberLists.put(BASIS_PLUS_INCLUDE, new ArrayList<>());
-        memberLists.put(BASIS, new ArrayList<>());
+        memberLists.put(BASIS, basis);
         memberLists.put(INCLUDE, include);
         memberLists.put(EXCLUDE, exclude);
         memberLists.put(OWNERS, owners);
@@ -230,6 +236,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
             if(groupingPath.equals(groupPath)) {
                 //todo create is-trio attribute
+
             }
 
             //todo this needs to be created not updated

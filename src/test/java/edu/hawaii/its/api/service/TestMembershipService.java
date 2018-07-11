@@ -186,6 +186,7 @@ public class TestMembershipService {
     @Test
     public void listOwnedTest() {
 
+
         // Tests that when there is no groups owned, the list is empty
         assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
 

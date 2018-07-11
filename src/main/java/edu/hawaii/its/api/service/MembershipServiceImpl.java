@@ -394,13 +394,15 @@ public class MembershipServiceImpl implements MembershipService {
 
             for(Grouping group : groups) {
                 groupsOwned.add(group.getPath());
+
             }
         }
 
         return groupsOwned;
     }
 
-
+    //Takes the owner of the group, the path to the group, and a list of users to add. Goes through the list and adds
+    //each user to the specified group
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath, List<String> usersToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
