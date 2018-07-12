@@ -31,6 +31,9 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 @RestController
+//todo Possibly tack on version number to Base RequestMapping?
+// Will have to consider this for test code as well
+// Possibly split legacy code into seperate classes? Not sure how dangerous this is
 @RequestMapping("/api/groupings")
 public class GroupingsRestController {
 
