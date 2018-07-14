@@ -5,6 +5,8 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
+import java.util.Map;
+
 public interface MemberAttributeService {
     public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
 
@@ -25,4 +27,9 @@ public interface MemberAttributeService {
     public boolean isSelfOpted(String groupPath, String username);
 
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
+
+    public Map<String, String> getUserAttributes(String username);
+
+//    public Map<String, String> getUserAttributes(Person person);
+
 }

@@ -27,7 +27,12 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.sn;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -283,5 +288,37 @@ public class MemberAttributeServiceTest {
 
         assertTrue(memberAttributeService.isSuperuser(APP_USER));
     }
+
+    @Test
+    public void getUserAttributesTest() {
+
+        String cname = "testname";
+        String uuid = "testuuid";
+        String username = "testuser";
+        String firstName = "test";
+        String lastName = "name";
+        Person person = new Person(cname, uuid, username, firstName, lastName);
+
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(username);
+    }
+
+//    @Test
+//    public void getUserAttributesPersonTest() {
+//        //        Map<String, String> attributes = memberAttributeService.getUserAttributes(users.get(2).getUsername());
+//        String cname = "testname";
+//        String uuid = "testuuid";
+//        String username = "testuser";
+//        String firstName = "test";
+//        String lastName = "name";
+//        Person person = new Person(cname, uuid, username, firstName, lastName);
+//
+//        Map<String, String> attributes = memberAttributeService.getUserAttributes(person);
+//
+//        assertTrue(attributes.get("uid").equals("testuser"));
+//        assertTrue(attributes.get("cn").equals("testname"));
+//        assertTrue(attributes.get("givenName").equals("test"));
+//        assertTrue(attributes.get("sn").equals("name"));
+//        assertTrue(attributes.get("uuid").equals("testuuid"));
+//    }
 
 }

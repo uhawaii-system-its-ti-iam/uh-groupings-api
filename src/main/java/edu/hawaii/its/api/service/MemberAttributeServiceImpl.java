@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
 
@@ -325,5 +327,26 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
+
+    // Returns a user's attributes (FirstName, LastName, etc.) based on the username
+    // Need name and uuid?
+
+    // Implementation using username (might not be possible to do reverse lookup of Person
+    public Map<String, String > getUserAttributes(String username) {
+
+        Map<String, String> attributes;
+
+        return attributes;
+    }
+
+    // Implementation using Person object
+    // Is there a point to this? Can just call person.getAttributes directly
+//    public Map<String, String> getUserAttributes(Person person) {
+//
+//        // Use Person to find attributes using getX functions
+//        Map<String, String> userAttributes = person.getAttributes();
+//
+//        return userAttributes;
+//    }
 
 }
