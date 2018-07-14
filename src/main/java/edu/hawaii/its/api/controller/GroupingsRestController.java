@@ -1,8 +1,10 @@
 package edu.hawaii.its.api.controller;
 
+import java.awt.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -29,6 +31,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
 
 @RestController
 //todo Possibly tack on version number to Base RequestMapping?
@@ -105,6 +108,24 @@ public class GroupingsRestController {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.adminLists(principal.getName()));
+    }
+
+    //todo Implement getUserAttributes function
+    /**
+     * Get a member's attributes based off username
+     *
+     * @param uid: Username of user to obtain attributes about
+     * @return Map of user attributes
+     */
+    @RequestMapping(value = "/members/{uid}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> memberAttributes(@PathVariable String uid) {
+        logger.info("Entered REST memberAttributes...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getUserAttributes(uid));
     }
 
     /**
