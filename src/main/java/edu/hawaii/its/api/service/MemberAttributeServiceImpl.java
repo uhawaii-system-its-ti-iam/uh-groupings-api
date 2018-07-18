@@ -2,22 +2,28 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
+import edu.internet2.middleware.grouperClient.ws.beans.WsMembershipLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service("memberAttributeService")
@@ -153,10 +159,16 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private String COMPOSITE_NAME;
 
     @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
     private GrouperFactoryService grouperFS;
 
     @Autowired
     private HelperService hs;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
 
@@ -329,24 +341,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
-    // Need name and uuid?
+    public Map<String, String> getUserAttributes(String username) {
 
-    // Implementation using username (might not be possible to do reverse lookup of Person
-    public Map<String, String > getUserAttributes(String username) {
-
-        Map<String, String> attributes;
-
-        return attributes;
+        Person personToGet = personRepository.findByUsername(username);
+        return personToGet.getAttributes();
     }
-
-    // Implementation using Person object
-    // Is there a point to this? Can just call person.getAttributes directly
-//    public Map<String, String> getUserAttributes(Person person) {
-//
-//        // Use Person to find attributes using getX functions
-//        Map<String, String> userAttributes = person.getAttributes();
-//
-//        return userAttributes;
-//    }
-
 }

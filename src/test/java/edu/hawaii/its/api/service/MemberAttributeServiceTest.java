@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
@@ -292,33 +293,43 @@ public class MemberAttributeServiceTest {
     @Test
     public void getUserAttributesTest() {
 
-        String cname = "testname";
-        String uuid = "testuuid";
-        String username = "testuser";
-        String firstName = "test";
-        String lastName = "name";
-        Person person = new Person(cname, uuid, username, firstName, lastName);
+        String username = users.get(5).getUsername();
+        Person personFive = personRepository.findByUsername(users.get(5).getUsername());
 
         Map<String, String> attributes = memberAttributeService.getUserAttributes(username);
+
+        assertTrue(attributes.get("uid").equals(personFive.getUsername()));
+        assertTrue(attributes.get("cn").equals(personFive.getName()));
+        assertTrue(attributes.get("uuid").equals(personFive.getUuid()));
+
+        //        assertTrue(attributes.get("givenName").equals(personFive.getFirstName()));
+        //        assertTrue(attributes.get("sn").equals(personFive.getLastName()));
+
+        // FirstName and LastName in mock database is null
+        assertNull(attributes.get("givenName"));
+        assertNull(personFive.getFirstName());
+
+        assertNull(attributes.get("sn"));
+        assertNull(personFive.getLastName());
     }
 
-//    @Test
-//    public void getUserAttributesPersonTest() {
-//        //        Map<String, String> attributes = memberAttributeService.getUserAttributes(users.get(2).getUsername());
-//        String cname = "testname";
-//        String uuid = "testuuid";
-//        String username = "testuser";
-//        String firstName = "test";
-//        String lastName = "name";
-//        Person person = new Person(cname, uuid, username, firstName, lastName);
-//
-//        Map<String, String> attributes = memberAttributeService.getUserAttributes(person);
-//
-//        assertTrue(attributes.get("uid").equals("testuser"));
-//        assertTrue(attributes.get("cn").equals("testname"));
-//        assertTrue(attributes.get("givenName").equals("test"));
-//        assertTrue(attributes.get("sn").equals("name"));
-//        assertTrue(attributes.get("uuid").equals("testuuid"));
-//    }
+    //    @Test
+    //    public void getUserAttributesPersonTest() {
+    //        //        Map<String, String> attributes = memberAttributeService.getUserAttributes(users.get(2).getUsername());
+    //        String cname = "testname";
+    //        String uuid = "testuuid";
+    //        String username = "testuser";
+    //        String firstName = "test";
+    //        String lastName = "name";
+    //        Person person = new Person(cname, uuid, username, firstName, lastName);
+    //
+    //        Map<String, String> attributes = memberAttributeService.getUserAttributes(person);
+    //
+    //        assertTrue(attributes.get("uid").equals("testuser"));
+    //        assertTrue(attributes.get("cn").equals("testname"));
+    //        assertTrue(attributes.get("givenName").equals("test"));
+    //        assertTrue(attributes.get("sn").equals("name"));
+    //        assertTrue(attributes.get("uuid").equals("testuuid"));
+    //    }
 
 }

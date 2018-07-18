@@ -27,6 +27,8 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Null;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -424,4 +426,14 @@ public class TestMemberAttributeService {
             re.printStackTrace();
         }
     }
+
+    //todo
+    @Test
+    public void getUserAttributesTest(){
+
+        String useruid = username[1];
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(useruid);
+        assertTrue(attributes.get("uid").equals("watarub"));
+    }
+
 }
