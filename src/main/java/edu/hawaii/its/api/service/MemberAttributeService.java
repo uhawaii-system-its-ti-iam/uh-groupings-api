@@ -28,7 +28,7 @@ public interface MemberAttributeService {
 
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    public Map<String, String> getUserAttributes(String username);
+    public Map<String, String> getUserAttributes(String adminUsername, String username);
 
 //    public Map<String, String> getUserAttributes(Person person);
 

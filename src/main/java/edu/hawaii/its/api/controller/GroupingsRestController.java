@@ -121,11 +121,11 @@ public class GroupingsRestController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Map<String, String>> memberAttributes(@PathVariable String uid) {
+    public ResponseEntity<Map<String, String>> memberAttributes(Principal principal, @PathVariable String uid) {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getUserAttributes(uid));
+                .body(memberAttributeService.getUserAttributes(principal.getName(), uid));
     }
 
     /**

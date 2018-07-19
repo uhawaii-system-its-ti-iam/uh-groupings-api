@@ -432,7 +432,7 @@ public class TestMemberAttributeService {
     public void getUserAttributesTest(){
 
         String useruid = username[1];
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(useruid);
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, useruid);
         assertTrue(attributes.get("uid").equals("watarub"));
     }
 

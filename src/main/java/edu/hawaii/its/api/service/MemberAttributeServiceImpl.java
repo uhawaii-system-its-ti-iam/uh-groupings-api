@@ -3,7 +3,10 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -341,9 +344,38 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
-    public Map<String, String> getUserAttributes(String username) {
+    //todo Fix for internet connectivity
+    // As of now this will only work locally, need to find repo of all users on Internet database
+    public Map<String, String> getUserAttributes(String adminUsername, String username) {
 
-        Person personToGet = personRepository.findByUsername(username);
-        return personToGet.getAttributes();
+        // Not sure if this will even return Person objects in the Grouping
+        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(adminUsername);
+        List<Grouping> lists = adminListsHolder.getAllGroupings();
+        Person personToGet = new Person();
+
+        //todo NO actual members in groups for some reason
+        for (Grouping myGrouping : lists) {
+
+            Group basis = myGrouping.getBasis();
+            Group include = myGrouping.getInclude();
+            Group exclude = myGrouping.getExclude();
+
+            List<Person> allMembers = basis.getMembers();
+            allMembers.addAll(include.getMembers());
+            allMembers.addAll(exclude.getMembers());
+
+            for (Person person : allMembers) {
+                if (person.getUsername().equals(username)) {
+                    return person.getAttributes();
+                }
+            }
+
+        }
+
+        //todo Another approach
+        //        Person personToGet = personRepository.findByUsername(username);
+        //        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+
+        return null;
     }
 }
