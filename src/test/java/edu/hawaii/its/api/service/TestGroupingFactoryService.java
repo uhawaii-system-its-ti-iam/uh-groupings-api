@@ -13,6 +13,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 @ActiveProfiles("integrationTest")
@@ -101,7 +105,7 @@ public class TestGroupingFactoryService {
     public void addGroupingTest() {
 
         //this needs to be an admin account to work
-//        groupingFactoryService.addGrouping(username[0], GROUPING_NEW, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     @Test

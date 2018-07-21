@@ -172,11 +172,6 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Autowired
     private MembershipService membershipService;
 
-    @Override
-    public void addGrouping(String admin, String groupPath){
-
-    }
-
 
     @Override
     //todo change basis to a String
@@ -356,6 +351,8 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     private boolean pathIsEmpty(String adminUsername, String groupingPath) {
 
         WsFindGroupsResults wsFindGroupsResults = grouperFactoryService.makeWsFindGroupsResults(groupingPath);
+
+        System.out.println(wsFindGroupsResults.getGroupResults());
 
         return wsFindGroupsResults.getGroupResults() == null;
     }
