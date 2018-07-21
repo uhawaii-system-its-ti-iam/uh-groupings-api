@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
@@ -341,45 +342,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
-    //todo Fix for internet connectivity
-    // As of now this will only work locally, need to find repo of all users on Internet database
-    public Map<String, String> getUserAttributes(String adminUsername, String username) {
+    public Map<String, String> getUserAttributes(String username) {
 
-        // Not sure if this will even return Person objects in the Grouping
-        // Doesn't work, adminListsHolder groupings don't contain any actual people
-//        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(adminUsername);
-//        List<Grouping> lists = adminListsHolder.getAllGroupings();
-//        Person personToGet = new Person();
-//
-//        for (Grouping myGrouping : lists) {
-//
-//            Group basis = myGrouping.getBasis();
-//            Group include = myGrouping.getInclude();
-//            Group exclude = myGrouping.getExclude();
-//
-//            List<Person> allMembers = basis.getMembers();
-//            allMembers.addAll(include.getMembers());
-//            allMembers.addAll(exclude.getMembers());
-//
-//            for (Person person : allMembers) {
-//                if (person.getUsername().equals(username)) {
-//                    return person.getAttributes();
-//                }
-//            }
-//
-//        }
-
-        //todo Try again, might be close
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
-//        WsSubjectLookup[] lookups = new WsSubjectLookup[1];
-//        lookups[0] = lookup;
-//        String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
 
-//        WsRestGetSubjectsRequest wsRestGetSubjectsRequest = new WsRestGetSubjectsRequest();
-//        wsRestGetSubjectsRequest.setSubjectAttributeNames(subjectAttributeNames);
-//        wsRestGetSubjectsRequest.setWsSubjectLookups(lookups);
-
-        //todo GFS function most likely
+        //todo Seperate GFS function most likely
         WsGetSubjectsResults results = new GcGetSubjects()
                 .addSubjectAttributeName("uid")
                 .addSubjectAttributeName("cn")
@@ -390,18 +357,27 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 .execute();
 
         WsSubject[] subjects = results.getWsSubjects();
-        String[] attributeValues = subjects[0].getAttributeValues();
-        Map<String, String> mapping = new HashMap<String, String>();
 
-        String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
-        for(int i=0; i<attributeValues.length; i++) {
-            mapping.put(subjectAttributeNames[i], attributeValues[i]);
+        if (subjects[0].getSuccess().equals("F")) {
+            return null;
+        } else {
+
+            String[] attributeValues = subjects[0].getAttributeValues();
+            Map<String, String> mapping = new HashMap<String, String>();
+
+            String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+            for (int i = 0; i < attributeValues.length; i++) {
+                mapping.put(subjectAttributeNames[i], attributeValues[i]);
+            }
+
+            return mapping;
+
         }
+    }
 
-        return mapping;
-        //todo Local approach
-        //        Person personToGet = personRepository.findByUsername(username);
-        //        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
-
+    //todo Local approach to implement separately
+    public Map<String, String> getUserAttributesLocal(String username) {
+        Person personToGet = personRepository.findByUsername(username);
+        return personToGet.getAttributes();
     }
 }
