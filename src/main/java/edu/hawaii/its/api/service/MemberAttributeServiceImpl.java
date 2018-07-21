@@ -346,16 +346,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
 
-        //todo Seperate GFS function most likely
-        WsGetSubjectsResults results = new GcGetSubjects()
-                .addSubjectAttributeName("uid")
-                .addSubjectAttributeName("cn")
-                .addSubjectAttributeName("sn")
-                .addSubjectAttributeName("givenName")
-                .addSubjectAttributeName("uhuuid")
-                .addWsSubjectLookup(lookup)
-                .execute();
-
+        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
         WsSubject[] subjects = results.getWsSubjects();
 
         if (subjects[0].getSuccess().equals("F")) {

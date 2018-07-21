@@ -302,6 +302,7 @@ public class MemberAttributeServiceTest {
         assertTrue(attributes.get("cn").equals(personFive.getName()));
         assertTrue(attributes.get("uuid").equals(personFive.getUuid()));
 
+        //todo Possible code for non-null data, if ever implemented
         //        assertTrue(attributes.get("givenName").equals(personFive.getFirstName()));
         //        assertTrue(attributes.get("sn").equals(personFive.getLastName()));
 
@@ -312,24 +313,5 @@ public class MemberAttributeServiceTest {
         assertNull(attributes.get("sn"));
         assertNull(personFive.getLastName());
     }
-
-    //    @Test
-    //    public void getUserAttributesPersonTest() {
-    //        //        Map<String, String> attributes = memberAttributeService.getUserAttributes(users.get(2).getUsername());
-    //        String cname = "testname";
-    //        String uuid = "testuuid";
-    //        String username = "testuser";
-    //        String firstName = "test";
-    //        String lastName = "name";
-    //        Person person = new Person(cname, uuid, username, firstName, lastName);
-    //
-    //        Map<String, String> attributes = memberAttributeService.getUserAttributes(person);
-    //
-    //        assertTrue(attributes.get("uid").equals("testuser"));
-    //        assertTrue(attributes.get("cn").equals("testname"));
-    //        assertTrue(attributes.get("givenName").equals("test"));
-    //        assertTrue(attributes.get("sn").equals("name"));
-    //        assertTrue(attributes.get("uuid").equals("testuuid"));
-    //    }
 
 }

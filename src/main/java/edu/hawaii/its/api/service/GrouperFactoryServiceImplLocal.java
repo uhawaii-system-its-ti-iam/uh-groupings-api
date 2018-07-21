@@ -22,6 +22,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -38,6 +39,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
@@ -354,7 +356,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : newMembers) {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
-                //todo Shouldn't be reached, and is not rachable anyway due to exception
+                //todo Shouldn't be reached, and is not reachable anyway due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }
@@ -1144,6 +1146,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public String toString() {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
+    }
+
+    public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
+        //todo Not needed for getUserAttributes function, will implement if necessary
+        return null;
     }
 
     @Override public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
