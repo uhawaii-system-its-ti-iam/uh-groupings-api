@@ -3,30 +3,27 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
-import edu.internet2.middleware.grouperClient.ws.beans.WsMembershipLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsRestGetSubjectsRequest;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service("memberAttributeService")
@@ -349,33 +346,62 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public Map<String, String> getUserAttributes(String adminUsername, String username) {
 
         // Not sure if this will even return Person objects in the Grouping
-        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(adminUsername);
-        List<Grouping> lists = adminListsHolder.getAllGroupings();
-        Person personToGet = new Person();
+        // Doesn't work, adminListsHolder groupings don't contain any actual people
+//        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(adminUsername);
+//        List<Grouping> lists = adminListsHolder.getAllGroupings();
+//        Person personToGet = new Person();
+//
+//        for (Grouping myGrouping : lists) {
+//
+//            Group basis = myGrouping.getBasis();
+//            Group include = myGrouping.getInclude();
+//            Group exclude = myGrouping.getExclude();
+//
+//            List<Person> allMembers = basis.getMembers();
+//            allMembers.addAll(include.getMembers());
+//            allMembers.addAll(exclude.getMembers());
+//
+//            for (Person person : allMembers) {
+//                if (person.getUsername().equals(username)) {
+//                    return person.getAttributes();
+//                }
+//            }
+//
+//        }
 
-        //todo NO actual members in groups for some reason
-        for (Grouping myGrouping : lists) {
+        //todo Try again, might be close
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+//        WsSubjectLookup[] lookups = new WsSubjectLookup[1];
+//        lookups[0] = lookup;
+//        String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
 
-            Group basis = myGrouping.getBasis();
-            Group include = myGrouping.getInclude();
-            Group exclude = myGrouping.getExclude();
+//        WsRestGetSubjectsRequest wsRestGetSubjectsRequest = new WsRestGetSubjectsRequest();
+//        wsRestGetSubjectsRequest.setSubjectAttributeNames(subjectAttributeNames);
+//        wsRestGetSubjectsRequest.setWsSubjectLookups(lookups);
 
-            List<Person> allMembers = basis.getMembers();
-            allMembers.addAll(include.getMembers());
-            allMembers.addAll(exclude.getMembers());
+        //todo GFS function most likely
+        WsGetSubjectsResults results = new GcGetSubjects()
+                .addSubjectAttributeName("uid")
+                .addSubjectAttributeName("cn")
+                .addSubjectAttributeName("sn")
+                .addSubjectAttributeName("givenName")
+                .addSubjectAttributeName("uhuuid")
+                .addWsSubjectLookup(lookup)
+                .execute();
 
-            for (Person person : allMembers) {
-                if (person.getUsername().equals(username)) {
-                    return person.getAttributes();
-                }
-            }
+        WsSubject[] subjects = results.getWsSubjects();
+        String[] attributeValues = subjects[0].getAttributeValues();
+        Map<String, String> mapping = new HashMap<String, String>();
 
+        String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
+        for(int i=0; i<attributeValues.length; i++) {
+            mapping.put(subjectAttributeNames[i], attributeValues[i]);
         }
 
-        //todo Another approach
+        return mapping;
+        //todo Local approach
         //        Person personToGet = personRepository.findByUsername(username);
         //        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
 
-        return null;
     }
 }
