@@ -110,7 +110,6 @@ public class GroupingsRestController {
                 .body(groupingAssignmentService.adminLists(principal.getName()));
     }
 
-    //todo Implement getUserAttributes function
     /**
      * Get a member's attributes based off username
      *
