@@ -43,8 +43,15 @@ public class TestGroupingFactoryService {
     @Value("${groupings.api.test.grouping_new_owners}")
     private String GROUPING_NEW_OWNERS;
 
+    @Value("${groupings.api.test.grouping_kahlin}")
+    private String KAHLIN_TEST;
+
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Autowired
     GroupAttributeService groupAttributeService;
