@@ -229,14 +229,14 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             addGroupingResults.addAll(membershipService.addGroupMembersByUsername(adminUsername,
                     groupPath, entry.getValue()));
 
-            if(groupingPath.equals(groupPath)) {
-                //todo create is-trio attribute
-
-            }
+//            if(groupingPath.equals(groupPath)) {
+//                //todo create is-trio attribute
+//
+//            }
 
             //todo this needs to be created not updated
             //update the last modified values of those groups
-            addGroupingResults.add(membershipService.updateLastModified(groupPath));
+//            addGroupingResults.add(membershipService.updateLastModified(groupPath));
         }
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
