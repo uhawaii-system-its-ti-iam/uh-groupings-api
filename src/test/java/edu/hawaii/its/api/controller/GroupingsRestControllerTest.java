@@ -39,6 +39,8 @@ import edu.hawaii.its.api.service.GroupingFactoryService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.EmptyGroup;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
@@ -115,6 +117,56 @@ public class GroupingsRestControllerTest {
         return grouping;
     }
 
+    // Test data.
+    private Grouping groupingTwo() {
+        Grouping grouping = new Grouping("test:ing:me:kim");
+
+        Group basisGroup = new Group();
+        basisGroup.addMember(new Person("b4-name", "b4-uuid", "b4-username"));
+        basisGroup.addMember(new Person("b5-name", "b5-uuid", "b5-username"));
+        basisGroup.addMember(new Person("b6-name", "b6-uuid", "b6-username"));
+        grouping.setBasis(basisGroup);
+
+        Group exclude = new Group();
+        exclude.addMember(new Person("e4-name", "e4-uuid", "e4-username"));
+        grouping.setExclude(exclude);
+
+        Group include = new Group();
+        include.addMember(new Person("i4-name", "i4-uuid", "i4-username"));
+        include.addMember(new Person("i5-name", "i5-uuid", "i5-username"));
+        grouping.setInclude(include);
+
+        Group owners = new Group();
+        owners.addMember(new Person("o4-name", "o4-uuid", "o4-username"));
+        owners.addMember(new Person("o5-name", "o5-uuid", "o5-username"));
+        owners.addMember(new Person("o6-name", "o6-uuid", "o6-username"));
+        owners.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
+        grouping.setOwners(owners);
+
+        grouping.setListservOn(true);
+
+        return grouping;
+    }
+
+    // Test data.
+    private AdminListsHolder mockAdminListsHolder() {
+        AdminListsHolder holder = new AdminListsHolder();
+        List<Grouping> mockAllGroupings = new ArrayList<>();
+        Group mockAdminGroup = new Group();
+
+        mockAllGroupings.add(grouping());
+        mockAllGroupings.add(groupingTwo());
+        holder.setAllGroupings(mockAllGroupings);
+
+        mockAdminGroup.addMember(new Person("o4-name", "o4-uuid", "o4-username"));
+        mockAdminGroup.addMember(new Person("o5-name", "o5-uuid", "o5-username"));
+        mockAdminGroup.addMember(new Person("o6-name", "o6-uuid", "o6-username"));
+        mockAdminGroup.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
+        holder.setAdminGroup(mockAdminGroup);
+
+        return holder;
+    }
+
     //Test data.
     private GroupingAssignment myGroupings() {
         GroupingAssignment mg = new GroupingAssignment();
@@ -135,6 +187,42 @@ public class GroupingsRestControllerTest {
         return mg;
     }
 
+    //HiSTART!!!.
+    //Hi.
+    //Hi.
+    //Hi.
+/*
+@RequestMapping(value = "/adminsGroupings",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<AdminListsHolder> adminsGroupings(Principal principal) {
+        logger.info("Entered REST adminsGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.adminLists(principal.getName()));  }
+ */
+    @Test
+    @WithMockUhUser
+    public void adminsGroupingsTest() throws Exception {
+        final String admin = "admin";
+
+        given(groupingAssignmentService.adminLists(admin)).willReturn(mockAdminListsHolder());
+
+        mockMvc.perform(get("/api/groupings/adminsGroupings"))
+                .andExpect(status().isOk())        // NOTE: This will work if the urlTemplate above is valid.
+                //.andExpect(jsonPath("allGroupings[0].name").value("bob"))
+                .andExpect(jsonPath("adminGroup.members[0].name").value("o4-name"))
+                //.andExpect(jsonPath("name").value("bob"))
+                //.andExpect(jsonPath("basis.members[0].name").value("b0-name"))
+        ;
+    }
+
+    //Hi.
+    //Hi.
+    //Hi.
+    //HiEND!!!.
+
     @Test
     @WithMockUhUser
     public void rootTest() throws Exception {
@@ -145,6 +233,17 @@ public class GroupingsRestControllerTest {
         assertEquals("University of Hawaii Groupings API", result.getResponse().getContentAsString());
     }
 
+    /*
+    @RequestMapping(value = "/groupings/{path}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Grouping> getGrouping(Principal principal, @PathVariable String path) {
+        logger.info("Entered REST getGrouping...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getGrouping(path, principal.getName()));  }
+     */
     @Test
     @WithMockUhUser
     public void getGrouping() throws Exception {
@@ -196,7 +295,6 @@ public class GroupingsRestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("action").value("add admin"));
-
     }
 
     @Test

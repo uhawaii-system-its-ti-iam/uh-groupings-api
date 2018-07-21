@@ -102,6 +102,7 @@ public class GroupingsRestController {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.adminLists(principal.getName()));
+        //      .body(groupingAssignmentService.getGrouping(path, principal.getName()));
     }
 
     /**
