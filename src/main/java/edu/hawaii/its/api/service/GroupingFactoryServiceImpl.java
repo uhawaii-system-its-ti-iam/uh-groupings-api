@@ -263,7 +263,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                         "add " + groupingPath + BASIS_PLUS_INCLUDE + " to " + groupingPath));
         //todo do a complement
 
-        //add the isTrio attribute to the grouping
+        //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                 lookup,
                 ASSIGN_TYPE_GROUP,
@@ -303,7 +303,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             return list1 != null ? list1 : new ArrayList<>();
         }
 
-        //remove duplicates
+        //remove duplicatesspo
         Set<String> treeSet = new TreeSet<>(list0);
         treeSet.addAll(list1);
 
