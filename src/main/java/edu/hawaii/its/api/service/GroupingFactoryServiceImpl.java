@@ -203,7 +203,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
         Map<String, List<String>> memberLists = new HashMap<>();
-        memberLists.put("", new ArrayList<>());
+        //memberLists.put("", new ArrayList<>());
         memberLists.put(BASIS_PLUS_INCLUDE, new ArrayList<>());
         memberLists.put(BASIS, basis);
         memberLists.put(INCLUDE, include);
@@ -257,11 +257,16 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                         "add " + groupingPath + INCLUDE + " to " + groupingPath + BASIS_PLUS_INCLUDE));
 
         //add members for the composite (basisPlusInclude group complement exclude group)
+//        addGroupingResults.add(
+//                helperService.makeGroupingsServiceResult(
+//                        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath, lookup, basisPlusIncludeUid),
+//                        "add " + groupingPath + BASIS_PLUS_INCLUDE + " to " + groupingPath));
+        //todo do a complement
         addGroupingResults.add(
                 helperService.makeGroupingsServiceResult(
-                        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath, lookup, basisPlusIncludeUid),
-                        "add " + groupingPath + BASIS_PLUS_INCLUDE + " to " + groupingPath));
-        //todo do a complement
+                        grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
+                                groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE),
+                "add complement to " + groupingPath + "which is the composite"));
 
         //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
@@ -351,8 +356,6 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     private boolean pathIsEmpty(String adminUsername, String groupingPath) {
 
         WsFindGroupsResults wsFindGroupsResults = grouperFactoryService.makeWsFindGroupsResults(groupingPath);
-
-        System.out.println(wsFindGroupsResults.getGroupResults());
 
         return wsFindGroupsResults.getGroupResults() == null;
     }

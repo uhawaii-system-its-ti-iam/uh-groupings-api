@@ -83,23 +83,23 @@ public class TestGroupingFactoryService {
     }
 
     @Before
-    public void setUp() {
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-
-        //put in include
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
-
-        //remove from exclude
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
-
-        //add to exclude
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
-    }
+//    public void setUp() {
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+//        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
+//        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
+//
+//        //put in include
+//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
+//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
+//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
+//
+//        //remove from exclude
+//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
+//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
+//
+//        //add to exclude
+//        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
+//    }
 
     @Test
     public void addGroupingTest() {
