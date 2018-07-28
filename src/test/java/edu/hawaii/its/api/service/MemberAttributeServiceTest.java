@@ -27,11 +27,17 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.sn;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
@@ -282,6 +288,30 @@ public class MemberAttributeServiceTest {
         assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
 
         assertTrue(memberAttributeService.isSuperuser(APP_USER));
+    }
+
+    @Test
+    public void getUserAttributesLocalTest() {
+
+        String username = users.get(5).getUsername();
+        Person personFive = personRepository.findByUsername(users.get(5).getUsername());
+
+        Map<String, String> attributes = memberAttributeService.getUserAttributesLocal(username);
+
+        assertTrue(attributes.get("uid").equals(personFive.getUsername()));
+        assertTrue(attributes.get("cn").equals(personFive.getName()));
+        assertTrue(attributes.get("uuid").equals(personFive.getUuid()));
+
+        //todo Possible code for non-null data, if ever implemented
+        //        assertTrue(attributes.get("givenName").equals(personFive.getFirstName()));
+        //        assertTrue(attributes.get("sn").equals(personFive.getLastName()));
+
+        // FirstName and LastName in mock database is null
+        assertNull(attributes.get("givenName"));
+        assertNull(personFive.getFirstName());
+
+        assertNull(attributes.get("sn"));
+        assertNull(personFive.getLastName());
     }
 
 }

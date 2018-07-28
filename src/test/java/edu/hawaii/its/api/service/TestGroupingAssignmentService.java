@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -75,6 +76,9 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
@@ -134,6 +138,9 @@ public class TestGroupingAssignmentService {
         assertEquals(info.getAdminGroup().getNames().size(), 0);
         assertEquals(info.getAdminGroup().getUuids().size(), 0);
 
+        //todo What about with admin???
+        AdminListsHolder infoAdmin = groupingAssignmentService.adminLists(ADMIN);
+        assertNotNull(infoAdmin);
     }
 
     @Test
