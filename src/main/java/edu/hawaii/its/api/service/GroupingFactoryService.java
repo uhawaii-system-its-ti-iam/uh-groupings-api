@@ -14,5 +14,13 @@ public interface GroupingFactoryService {
             List<String> exclude,
             List<String> owners);
 
+    public void addGroupingVoid(
+            String username,
+            String groupingPath,
+            List<String> basis,
+            List<String> include,
+            List<String> exclude,
+            List<String> owners);
+
     public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 }

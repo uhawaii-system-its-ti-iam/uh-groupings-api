@@ -104,8 +104,21 @@ public class TestGroupingFactoryService {
     @Test
     public void addGroupingTest() {
 
+        List<String>  basis = new ArrayList<>();
+        List<String>  include = new ArrayList<>();
+        List<String>  exclude = new ArrayList<>();
+        List<String>  owners = new ArrayList<>();
+
+        include.add("zknoebel");
+        owners.add("kahlin");
+        basis.add("jiaqil");
+        exclude.add("clintmor");
+
+
         //this needs to be an admin account to work
-        groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        //groupingFactoryService.addGroupingVoid(ADMIN, KAHLIN_TEST + "void_members", basis, include, exclude, owners);
+
+        membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "kahlin");
     }
 
     @Test
