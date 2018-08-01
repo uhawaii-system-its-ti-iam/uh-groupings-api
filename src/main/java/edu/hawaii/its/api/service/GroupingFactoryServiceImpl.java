@@ -181,6 +181,8 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             List<String> exclude,
             List<String> owners) {
 
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isAdmin(adminUsername)) {
 
@@ -214,6 +216,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
             //make the groups in grouper
             grouperFactoryService.addEmptyGroup(adminUsername, groupPath);
+            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "attributeupdate", lookup, true);
 
         }
 
@@ -229,7 +232,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
 
 
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+
         WsStemLookup stemLookup = grouperFactoryService.makeWsStemLookup(STEM);
         String basisUid = getGroupId(groupingPath + BASIS);
         String includeUid = getGroupId(groupingPath + INCLUDE);

@@ -109,16 +109,16 @@ public class TestGroupingFactoryService {
         List<String>  exclude = new ArrayList<>();
         List<String>  owners = new ArrayList<>();
 
-        include.add("zknoebel");
-        owners.add("kahlin");
-        basis.add("jiaqil");
-        exclude.add("clintmor");
+//        include.add("zknoebel");
+//        owners.add("kahlin");
+//        basis.add("jiaqil");
+//        exclude.add("clintmor");
 
 
         //this needs to be an admin account to work
-        //groupingFactoryService.addGroupingVoid(ADMIN, KAHLIN_TEST + "void_members", basis, include, exclude, owners);
+        groupingFactoryService.addGroupingVoid("kahlin", KAHLIN_TEST + "ldap", basis, include, exclude, owners);
 
-        membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "kahlin");
+        //membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "watarub");
     }
 
     @Test
