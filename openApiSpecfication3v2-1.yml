@@ -281,9 +281,9 @@ paths:
           required: true
           schema:
             type: string
-        responses:
-          '405':
-            description: Functionality has not been implemented
+      responses:
+        '405':
+          description: Functionality has not been implemented
   '/groupings/{path}/managers/{uid}/permissions/{id}/disable':
     put:
       description: Disables the given permision for the given grouping's manager
@@ -303,26 +303,26 @@ paths:
           required: true
           schema:
             type: string
-        responses:
-          '405':
-            description: Functionality has not been implemented
-    '/groupings/{path}/managers/{uid}/promote':
-      put:
-        description: Promotes a given manager to an owner of the grouping
-        parameters:
-          - name: path
-            in: path
-            required: true
-            schema:
-              type: string
-          - name: uid
-            in: path
-            required: true
-            schema:
-              type: string
-          responses:
-            '405':
-              description: Functionality has not been implemented
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}/managers/{uid}/promote':
+    put:
+      description: Promotes a given manager to an owner of the grouping
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
   '/groupings/{path}/includeMembers/{uid}':
     put:
       description: Updates the grouping with new include member
