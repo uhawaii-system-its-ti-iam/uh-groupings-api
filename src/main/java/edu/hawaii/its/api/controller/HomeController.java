@@ -15,6 +15,7 @@ public class HomeController {
 
     private static final Log logger = LogFactory.getLog(HomeController.class);
 
+    //todo Covered by Integration Tests
     // Mapping to home.
     @RequestMapping(value = {"/", "/home"}, method = {RequestMethod.GET})
     public String home(Map<String, Object> model, Locale locale) {
@@ -22,6 +23,7 @@ public class HomeController {
         return "home";
     }
 
+    //todo Covered by Integration Tests
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Locale locale, Model model) {
         logger.info("User has logged in.");

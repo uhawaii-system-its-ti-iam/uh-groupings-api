@@ -341,6 +341,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
+    // Covered by Integration Tests
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     public Map<String, String> getUserAttributes(String username) {
 
@@ -366,7 +367,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
-    //todo Local approach to implement separately
+    // Local approach to implement separately
     public Map<String, String> getUserAttributesLocal(String username) {
         Person personToGet = personRepository.findByUsername(username);
         return personToGet.getAttributes();

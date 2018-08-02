@@ -33,6 +33,7 @@ public class ErrorControllerAdvice {
     @Autowired
     private UserContextService userContextService;
 
+    //todo Not tested
     //todo Handler for .../{Empty fields}/{Method} doesn't work still returns 500 should return 400
     //todo Implementing StrictHttpFirewall override, not sure if this is the right thing to do security-wise
     @ExceptionHandler(RequestRejectedException.class)
@@ -40,12 +41,14 @@ public class ErrorControllerAdvice {
         return exceptionResponse(rre.getMessage(), rre, 400);
     }
 
+    //todo Not tested
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<GroupingsHTTPException> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException hrmnse) {
         return exceptionResponse(hrmnse.getMessage(), hrmnse, 405);
     }
 
+    //todo Not tested
     //todo Possibly could return 400 (bad request) instead
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<GroupingsHTTPException> handleIllegalArgumentException(IllegalArgumentException iae,
@@ -53,22 +56,26 @@ public class ErrorControllerAdvice {
         return exceptionResponse("Resource not available", iae, 404);
     }
 
+    //todo Not tested
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<GroupingsHTTPException> handleRuntimeException(RuntimeException re) {
         return exceptionResponse("runtime exception", re, 500);
     }
 
+    //todo Not tested
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<GroupingsHTTPException> handleUnsupportedOperationException(
             UnsupportedOperationException nie) {
         return exceptionResponse("Method not implemented", nie, 501);
     }
 
+    //todo Not tested
     @ExceptionHandler(Exception.class)
     public ResponseEntity<GroupingsHTTPException> handleException(Exception exception) {
         return exceptionResponse("Exception", exception, 500);
     }
 
+    //todo Not tested
     @ExceptionHandler(GroupingsServiceResultException.class)
     public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
             GroupingsServiceResultException gsre) {
@@ -76,6 +83,7 @@ public class ErrorControllerAdvice {
         return re;
     }
 
+    //todo Not tested
     //todo this is for the HolidayRestControllerTest test (should we really have this behavior?)
     // Is HolidayRestControllerTest even a thing anymore? Couldn't find reference to it in codebase
     @ExceptionHandler(TypeMismatchException.class)
