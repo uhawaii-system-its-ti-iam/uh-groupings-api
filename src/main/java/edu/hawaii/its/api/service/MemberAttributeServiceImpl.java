@@ -343,6 +343,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // Covered by Integration Tests
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
+    // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
     public Map<String, String> getUserAttributes(String username) {
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
@@ -367,7 +368,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
-    // Local approach to implement separately
+    //Local approach to implement seperately
     public Map<String, String> getUserAttributesLocal(String username) {
         Person personToGet = personRepository.findByUsername(username);
         return personToGet.getAttributes();

@@ -291,7 +291,7 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getUserAttributesTest() {
+    public void getUserAttributesLocalTest() {
 
         String username = users.get(5).getUsername();
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
