@@ -3,7 +3,10 @@ package edu.hawaii.its.api.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,6 +21,7 @@ import javax.annotation.PostConstruct;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,8 +55,8 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingsRestController {
 
-    @Value("${groupings.api.test.student_test_username}")
-    private String STUDENT_TEST_USERNAME;
+    @Value("${groupings.api.test.admin_username}")
+    private String ADMIN_USERNAME;
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
@@ -175,6 +180,52 @@ public class TestGroupingsRestController {
         assertNotNull(gc);
     }
 
+    // iamtst01 does not have permissions, so this should fail
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void adminsGroupingsFailTest() throws Exception {
+
+        //        Grouping grouping = mapGrouping(GROUPING);
+        AdminListsHolder listHolderFail = mapAdminListsHolder();
+
+        assertThat(listHolderFail.getAdminGroup().getMembers().size(), equalTo(0));
+        assertThat(listHolderFail.getAllGroupings().size(), equalTo(0));
+
+    }
+
+    // app user has permissions to obtain this data
+    @Test
+    @WithMockUhUser(username = "_groupings_api_2")
+    public void adminsGroupingsPassTest() throws Exception {
+
+        AdminListsHolder listHolderPass = mapAdminListsHolder();
+
+        // ADMIN_USERNAME can be replaced with any account that has admin access
+        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(ADMIN_USERNAME));
+
+    }
+
+    //        @Test
+    //        @WithMockUhUser(username = "iamtst01")
+    //        public void adminListsFailTest() throws Exception {
+    //            AdminListsHolder infoFail = mapAdminListsHolder();
+    //
+    //            assertEquals(infoFail.getAdminGroup().getMembers().size(), 0);
+    //            assertEquals(infoFail.getAllGroupings().size(), 0);
+    //        }
+    //
+    //        @Test
+    //        @WithMockUhUser(username = "_groupings_api_2")
+    //        public void adminListsPassTest() throws Exception {
+    //            AdminListsHolder infoSuccess = mapAdminListsHolder();
+    //
+    //            //STUDENT_TEST_USERNAME can be replaced with any account that has admin access
+    //            assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(STUDENT_TEST_USERNAME));
+    //        }
+
+    ///////////////////////////////////
+    //    OLD 2.0 REST API TESTS     //
+    ///////////////////////////////////
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void assignAndRemoveOwnershipTest() throws Exception {
@@ -307,7 +358,7 @@ public class TestGroupingsRestController {
 
         assertEquals(groupings.getGroupingsIn().size(), groupings.getGroupingsToOptOutOf().size());
 
-        for(Grouping grouping : groupings.getGroupingsIn()) {
+        for (Grouping grouping : groupings.getGroupingsIn()) {
             mapGSRs("/api/groupings/" + grouping.getPath() + "/optOut");
         }
 
@@ -547,8 +598,8 @@ public class TestGroupingsRestController {
     public void adminListsPassTest() throws Exception {
         AdminListsHolder infoSuccess = mapAdminListsHolder();
 
-        //STUDENT_TEST_USERNAME can be replaced with any account that has admin access
-        assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(STUDENT_TEST_USERNAME));
+        //ADMIN_USERNAME can be replaced with any account that has admin access
+        assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(ADMIN_USERNAME));
     }
 
     @Test
