@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -15,9 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.sun.org.apache.xpath.internal.operations.NotEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -186,7 +189,7 @@ public class TestGroupingsRestController {
     public void adminsGroupingsFailTest() throws Exception {
 
         //        Grouping grouping = mapGrouping(GROUPING);
-        AdminListsHolder listHolderFail = mapAdminListsHolder();
+        AdminListsHolder listHolderFail = mapNewAdminListsHolder();
 
         assertThat(listHolderFail.getAdminGroup().getMembers().size(), equalTo(0));
         assertThat(listHolderFail.getAllGroupings().size(), equalTo(0));
@@ -202,26 +205,85 @@ public class TestGroupingsRestController {
 
         // ADMIN_USERNAME can be replaced with any account that has admin access
         assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(ADMIN_USERNAME));
+        assertThat(listHolderPass.getAllGroupings().size(), not(0));
 
     }
 
-    //        @Test
-    //        @WithMockUhUser(username = "iamtst01")
-    //        public void adminListsFailTest() throws Exception {
-    //            AdminListsHolder infoFail = mapAdminListsHolder();
-    //
-    //            assertEquals(infoFail.getAdminGroup().getMembers().size(), 0);
-    //            assertEquals(infoFail.getAllGroupings().size(), 0);
-    //        }
-    //
-    //        @Test
-    //        @WithMockUhUser(username = "_groupings_api_2")
-    //        public void adminListsPassTest() throws Exception {
-    //            AdminListsHolder infoSuccess = mapAdminListsHolder();
-    //
-    //            //STUDENT_TEST_USERNAME can be replaced with any account that has admin access
-    //            assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(STUDENT_TEST_USERNAME));
-    //        }
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void memberAttributesTest() throws Exception {
+
+        Map attributes = mapGetUserAttributes("iamtst01");
+
+        assertThat(attributes.get("uid"), equalTo("iamtst01"));
+        assertThat(attributes.get("givenName"), equalTo("tst01name"));
+        assertThat(attributes.get("uhuuid"), equalTo("iamtst01"));
+        assertThat(attributes.get("cn"), equalTo("tst01name"));
+        assertThat(attributes.get("sn"), equalTo("tst01name"));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void memberGroupingsTest() throws Exception {
+
+        List listMemberships = mapMemberGroupings("iamtst01");
+        assertThat(listMemberships.size(), not(0));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void ownerGroupingsTest() throws Exception {
+
+        List listGroupings = mapOwnerGroupings("iamtst01");
+        assertThat(listGroupings.size(), not(0));
+
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void getGroupingTest() throws Exception {
+
+        Grouping grouping = mapNewGrouping(GROUPING);
+        Group basis = grouping.getBasis();
+        Group composite = grouping.getComposite();
+        Group exclude = grouping.getExclude();
+        Group include = grouping.getInclude();
+
+        //basis
+        assertTrue(basis.getUsernames().contains(tst[3]));
+        assertTrue(basis.getUsernames().contains(tst[4]));
+        assertTrue(basis.getUsernames().contains(tst[5]));
+        assertTrue(basis.getNames().contains(tstName[3]));
+        assertTrue(basis.getNames().contains(tstName[4]));
+        assertTrue(basis.getNames().contains(tstName[5]));
+
+        //composite
+        assertTrue(composite.getUsernames().contains(tst[0]));
+        assertTrue(composite.getUsernames().contains(tst[1]));
+        assertTrue(composite.getUsernames().contains(tst[2]));
+        assertTrue(composite.getUsernames().contains(tst[4]));
+        assertTrue(composite.getUsernames().contains(tst[5]));
+        assertTrue(composite.getNames().contains(tstName[0]));
+        assertTrue(composite.getNames().contains(tstName[1]));
+        assertTrue(composite.getNames().contains(tstName[2]));
+        assertTrue(composite.getNames().contains(tstName[4]));
+        assertTrue(composite.getNames().contains(tstName[5]));
+
+        //exclude
+        assertTrue(exclude.getUsernames().contains(tst[3]));
+        assertTrue(exclude.getNames().contains(tstName[3]));
+
+        //include
+        assertTrue(include.getUsernames().contains(tst[0]));
+        assertTrue(include.getUsernames().contains(tst[1]));
+        assertTrue(include.getUsernames().contains(tst[2]));
+        assertTrue(include.getNames().contains(tstName[0]));
+        assertTrue(include.getNames().contains(tstName[1]));
+        assertTrue(include.getNames().contains(tstName[2]));
+
+        assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
+
+    }
 
     ///////////////////////////////////
     //    OLD 2.0 REST API TESTS     //
@@ -301,7 +363,7 @@ public class TestGroupingsRestController {
 
     @Test
     @WithMockUhUser(username = "iamtst01")
-    public void getGroupingTest() throws Exception {
+    public void getGroupingTestOld() throws Exception {
         Grouping grouping = mapGrouping(GROUPING);
         Group basis = grouping.getBasis();
         Group composite = grouping.getComposite();
@@ -631,6 +693,68 @@ public class TestGroupingsRestController {
     ///////////////////////////////////////////////////////////////////////
     // MVC mapping
     //////////////////////////////////////////////////////////////////////
+    //todo Refactor as new default methods
+
+    private Map mapGetUserAttributes(String username) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
+    }
+
+    private List mapMemberGroupings(String username) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username + "/groupings"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+
+    }
+
+    private List mapOwnerGroupings(String username) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/api/groupings/owners/" + username + "/groupings"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+
+    }
+
+    private AdminListsHolder mapNewAdminListsHolder() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/api/groupings/adminsGroupings")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), AdminListsHolder.class);
+    }
+
+    private Grouping mapNewGrouping(String groupingPath) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get("/api/groupings/groupings/" + groupingPath))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
+    }
+
+    //////////////////////////////////////
+    //    OLD 2.0 REST API Mappings     //
+    //////////////////////////////////////
+    //todo Refactor old methods
 
     private Grouping mapGrouping(String groupingPath) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -656,7 +780,7 @@ public class TestGroupingsRestController {
         }
     }
 
-    private List<GroupingsServiceResult> mapGSRs(String uri) throws Exception {
+    private List mapGSRs(String uri) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(post(uri)
