@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -555,11 +556,20 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-        return new GcGetGroups()
-                .addSubjectIdentifier(username)
-                .assignWsStemLookup(stemLookup)
-                .assignStemScope(stemScope)
-                .execute();
+//        try {
+//            return new GcGetGroups()
+//                    .addSubjectIdentifier(username)
+//                    .assignWsStemLookup(stemLookup)
+//                    .assignStemScope(stemScope)
+//                    .execute();
+//        } catch (Exception e){
+//            return new WsGetGroupsResults();
+//        }
+                    return new GcGetGroups()
+                            .addSubjectIdentifier(username)
+                            .assignWsStemLookup(stemLookup)
+                            .assignStemScope(stemScope)
+                            .execute();
     }
 
     // Covered by Integration Tests

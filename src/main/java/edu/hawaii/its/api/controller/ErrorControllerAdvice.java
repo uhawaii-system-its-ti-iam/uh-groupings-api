@@ -17,6 +17,8 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.access.UserContextService;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+
 @ControllerAdvice
 public class ErrorControllerAdvice {
 
@@ -32,6 +34,12 @@ public class ErrorControllerAdvice {
 
     @Autowired
     private UserContextService userContextService;
+
+    @ExceptionHandler (GcWebServiceError.class)
+    public ResponseEntity<GroupingsHTTPException>
+    handleGcWebServiceError(GcWebServiceError gce) {
+        return exceptionResponse(gce.getMessage(), gce, 404);
+    }
 
     //todo Not tested
     //todo Handler for .../{Empty fields}/{Method} doesn't work still returns 500 should return 400

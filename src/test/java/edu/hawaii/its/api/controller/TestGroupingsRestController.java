@@ -220,6 +220,8 @@ public class TestGroupingsRestController {
         assertThat(attributes.get("uhuuid"), equalTo("iamtst01"));
         assertThat(attributes.get("cn"), equalTo("tst01name"));
         assertThat(attributes.get("sn"), equalTo("tst01name"));
+
+//        attributes = mapGetUserAttributes("bobjones");
     }
 
     @Test
@@ -282,6 +284,12 @@ public class TestGroupingsRestController {
         assertTrue(include.getNames().contains(tstName[2]));
 
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
+
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addAdminTest() {
 
     }
 
