@@ -8,6 +8,7 @@ import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -182,6 +183,8 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             List<String> owners) {
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
+        WsSubjectLookup clint = grouperFactoryService.makeWsSubjectLookup("clintmor");
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isAdmin(adminUsername)) {
@@ -216,7 +219,8 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
             //make the groups in grouper
             grouperFactoryService.addEmptyGroup(adminUsername, groupPath);
-            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "attributeupdate", lookup, true);
+//            membershipService.addGroupingMemberByUsername(adminUsername, groupPath, "_groupings_api_2");
+            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupPath, "attributeupdate", api, true);
 
         }
 

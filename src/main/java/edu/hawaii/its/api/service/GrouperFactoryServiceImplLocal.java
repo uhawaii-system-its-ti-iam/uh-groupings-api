@@ -816,6 +816,37 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
+    public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
+            String privilegeName,
+            WsSubjectLookup lookup,
+            WsSubjectLookup admin,
+            boolean allowed) {
+
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
+                new WsAssignGrouperPrivilegesLiteResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupName);
+
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
+
+            membership.setOptInEnabled(allowed);
+        } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
+
+            membership.setOptOutEnabled(allowed);
+        } else {
+            throw new IllegalArgumentException("Privilege Name not acceptable");
+        }
+
+        wsAssignGrouperPrivilegsLiteResult.setResultMetadata(wsResultMeta);
+        return wsAssignGrouperPrivilegsLiteResult;
+    }
+
+    @Override
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup) {

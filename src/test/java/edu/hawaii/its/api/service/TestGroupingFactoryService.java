@@ -5,6 +5,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,12 +15,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
+import static org.junit.Assert.assertTrue;
 
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.AssertTrue;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -50,6 +55,8 @@ public class TestGroupingFactoryService {
     @Value("${groupings.api.test.grouping_kahlin}")
     private String KAHLIN_TEST;
 
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
@@ -62,6 +69,9 @@ public class TestGroupingFactoryService {
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private GroupingFactoryService groupingFactoryService;
@@ -116,9 +126,18 @@ public class TestGroupingFactoryService {
 
 
         //this needs to be an admin account to work
-        groupingFactoryService.addGroupingVoid("kahlin", KAHLIN_TEST + "ldap", basis, include, exclude, owners);
+//        groupingFactoryService.addGroupingVoid("kahlin", KAHLIN_TEST + "kahlin-test", basis, include, exclude, owners);
 
-        //membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "watarub");
+//        membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "watarub");
+
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup("watarub");
+
+
+
+        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult("hawaii.edu:custom:test:kahlin:kahlin-test:include", "groupAttrUpdate", lookup, admin, true);
+
+        membershipService.addGroupMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test:include", "watarub");
     }
 
     @Test
