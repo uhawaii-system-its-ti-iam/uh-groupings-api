@@ -2,6 +2,13 @@ openapi: 3.0.0
 info:
   version: '2.1'
   title: UH Groupings API
+servers:
+  - url: http://localhost:8081/uhgroupings/api/groupings/
+    description: Localhost for UH Groupings API
+  - url: http://test.hawaii.edu/uhgroupings/api/groupings/
+    description: UH Groupings test server
+security:
+  - cas: []
 paths:
   '/adminsGroupings':
     get:
@@ -544,3 +551,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Grouping'
+  securitySchemes:
+    cas:
+      type: http
+      scheme: basic
