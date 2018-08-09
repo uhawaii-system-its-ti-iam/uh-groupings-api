@@ -378,7 +378,7 @@ public class GroupingsRestController {
      * @param uid:  uid of owner to delete
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/grouping/{path}/owners/{uid}",
+    @RequestMapping(value = "/groupings/{path}/owners/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteOwner(Principal principal, @PathVariable String path,
@@ -396,7 +396,7 @@ public class GroupingsRestController {
      * @param uid:  uid of grouping include member to remove
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/grouping/{path}/includeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteInclude(Principal principal, @PathVariable String path,
@@ -414,7 +414,7 @@ public class GroupingsRestController {
      * @param uid:  uid of grouping exclude member to remove
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/grouping/{path}/excludeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteExclude(Principal principal, @PathVariable String path,

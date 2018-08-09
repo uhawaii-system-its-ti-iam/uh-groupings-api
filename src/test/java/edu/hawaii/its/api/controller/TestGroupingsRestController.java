@@ -10,8 +10,10 @@ import static org.hamcrest.CoreMatchers.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -52,6 +54,8 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -221,7 +225,19 @@ public class TestGroupingsRestController {
         assertThat(attributes.get("cn"), equalTo("tst01name"));
         assertThat(attributes.get("sn"), equalTo("tst01name"));
 
-//        attributes = mapGetUserAttributes("bobjones");
+        // Test with username not in database
+        try {
+            mapGetUserAttributes("bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            mapGetUserAttributes(null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     @Test
@@ -230,6 +246,20 @@ public class TestGroupingsRestController {
 
         List listMemberships = mapMemberGroupings("iamtst01");
         assertThat(listMemberships.size(), not(0));
+
+        // Test with username not in database
+        try {
+            mapMemberGroupings("bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            mapMemberGroupings(null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     @Test
@@ -239,6 +269,19 @@ public class TestGroupingsRestController {
         List listGroupings = mapOwnerGroupings("iamtst01");
         assertThat(listGroupings.size(), not(0));
 
+        // Test with username not in database
+        try {
+            mapOwnerGroupings("bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            mapOwnerGroupings(null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     @Test
@@ -285,12 +328,148 @@ public class TestGroupingsRestController {
 
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
 
+        // Test with a grouping that does not exist in database
+        try {
+            mapNewGrouping("thisIsNotARealGrouping");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            mapNewGrouping(null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     @Test
-    @WithMockUhUser
-    public void addAdminTest() {
+    @WithMockUhUser(username = "_groupings_api_2")
+    public void addDeleteAdminPassTest() throws Exception {
 
+        // Make sure "iamtst01" isn't an admin
+        AdminListsHolder listHolderPass = mapAdminListsHolder();
+        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+
+        // Add "iamtst01" to admin list and check if it worked
+        GroupingsServiceResult addAdminResult = mapGSRPost("/api/groupings/admins/" + tst[0]);
+        listHolderPass = mapAdminListsHolder();
+        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+
+        // Delete "iamtst01" from admin list and check if it worked
+        GroupingsServiceResult deleteAdminResult = mapGSRDelete("/api/groupings/admins/" + tst[0]);
+        listHolderPass = mapAdminListsHolder();
+        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+
+        // Test addAdmin with a name not in database
+        try {
+            mapGSRPost("/api/groupings/admins/bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test addAdmin with null field
+        try {
+            mapGSRPost("/api/groupings/admins/" + null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test deleteAdmin with a name not in database
+        try {
+            mapGSRDelete("/api/groupings/admins/bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test deleteAdmin with null field
+        try {
+            mapGSRDelete("/api/groupings/admins/" + null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void addDeleteAdminFailTest() throws Exception {
+
+        // Nothing in this test should go through since "iamtst01" is not an admin
+        // Try addAdmin without proper permissions
+        try {
+            mapGSRPost("/api/groupings/admins/" + tst[1]);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Try deleteAdmin without proper permissions
+        try {
+            mapGSRDelete("/api/groupings/admins/kahlin");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void addDeleteOwnerPassTest() throws Exception {
+
+        Grouping grouping = mapNewGrouping(GROUPING);
+        assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
+
+        mapGSRPut("/api/groupings/groupings/" + GROUPING + "/owners/" + tst[1]);
+
+        grouping = mapNewGrouping(GROUPING);
+        assertTrue(grouping.getOwners().getUsernames().contains(tst[1]));
+
+        mapGSRDelete("/api/groupings/groupings/" + GROUPING + "/owners/" + tst[1]);
+
+        grouping = mapGrouping(GROUPING);
+        assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
+
+        // Test with information not in database
+        try {
+            mapGSRPut("/api/groupings/groupings/someGrouping/owners/bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        try {
+            mapGSRDelete("/api/groupings/groupings/someGrouping/owners/bobjones");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        // Test with null fields
+        try {
+            mapGSRPut("/api/groupings/groupings/" + null + "/owners/" + null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        try {
+            mapGSRDelete("/api/groupings/groupings/" + null + "/owners/" + null);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst02")
+    public void addDeleteOwnerFailTest() throws Exception {
+
+        // This shouldn't go through because "iamtst02" is not an owner
+        try {
+            mapGSRPut("/api/groupings/groupings/" + GROUPING + "/owners/" + tst[2]);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        try {
+            mapGSRDelete("/api/groupings/groupings/" + GROUPING + "/owners/" + tst[0]);
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     ///////////////////////////////////
@@ -674,7 +853,7 @@ public class TestGroupingsRestController {
 
     @Test
     @WithMockUhUser(username = "iamtst01")
-    public void addDeleteAdminTest() throws Exception {
+    public void addDeleteAdminTestOld() throws Exception {
         GroupingsServiceResult addAdminResults;
         GroupingsServiceResult deleteAdminResults;
 
@@ -707,35 +886,44 @@ public class TestGroupingsRestController {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username)
+                .with(csrf()))
                 .andReturn();
 
-        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
     }
 
     private List mapMemberGroupings(String username) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username + "/groupings"))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(get("/api/groupings/members/" + username + "/groupings")
+                .with(csrf()))
                 .andReturn();
 
-        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
-
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
     }
 
     private List mapOwnerGroupings(String username) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/owners/" + username + "/groupings"))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(get("/api/groupings/owners/" + username + "/groupings")
+                .with(csrf()))
                 .andReturn();
-
-        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
-
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
     }
 
     private AdminListsHolder mapNewAdminListsHolder() throws Exception {
@@ -752,17 +940,63 @@ public class TestGroupingsRestController {
     private Grouping mapNewGrouping(String groupingPath) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/groupings/" + groupingPath))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(get("/api/groupings/groupings/" + groupingPath)
+                .with(csrf()))
+                .andReturn();
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
+    }
+
+    private GroupingsServiceResult mapGSRPost(String uri) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(post(uri)
+                .with(csrf()))
                 .andReturn();
 
-        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
+    }
+
+    private GroupingsServiceResult mapGSRPut(String uri) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(put(uri)
+                .with(csrf()))
+                .andReturn();
+
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
+    }
+
+    private GroupingsServiceResult mapGSRDelete(String uri) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(delete(uri)
+                .with(csrf()))
+                .andReturn();
+
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
+        } else {
+            throw new GroupingsHTTPException();
+        }
     }
 
     //////////////////////////////////////
     //    OLD 2.0 REST API Mappings     //
     //////////////////////////////////////
     //todo Refactor old methods
+    //todo Some methods can probably be consolidated
 
     private Grouping mapGrouping(String groupingPath) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
