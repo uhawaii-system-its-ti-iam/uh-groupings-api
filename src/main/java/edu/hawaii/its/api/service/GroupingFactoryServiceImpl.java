@@ -182,9 +182,10 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             List<String> exclude,
             List<String> owners) {
 
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
         WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
-        WsSubjectLookup clint = grouperFactoryService.makeWsSubjectLookup("clintmor");
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isAdmin(adminUsername)) {
@@ -199,7 +200,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
 
-        //Use hash map in order to easily create and add members by using key and entry values
+        //Use hash map in order to easily create and add members by using key and entry values, not including composite
         Map<String, List<String>> memberLists = new HashMap<>();
         memberLists.put(BASIS_PLUS_INCLUDE, new ArrayList<>());
         memberLists.put(BASIS, basis);
@@ -214,15 +215,23 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         //create basis stem to contain groups or users that make up the basis
         grouperFactoryService.makeWsStemSaveResults(adminUsername, groupingPath + BASIS);
 
+
+        //Creates groups and assigns the grouper api privileges
         for (Map.Entry<String, List<String>> entry : memberLists.entrySet()) {
             String groupPath = groupingPath + entry.getKey();
 
             //make the groups in grouper
             grouperFactoryService.addEmptyGroup(adminUsername, groupPath);
-//            membershipService.addGroupingMemberByUsername(adminUsername, groupPath, "_groupings_api_2");
-            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupPath, "attributeupdate", api, true);
+            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupPath, "groupAttrUpdate", api, admin,true);
 
         }
+
+        // Creates the composite and make complement of basis+include minus exclude
+        grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
+                groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE);
+
+        //Assigns grouper api privilege to composite
+        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate", api, admin,true);
 
 
         for (Map.Entry<String, List<String>> entry : memberLists.entrySet()) {
@@ -244,18 +253,16 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         String basisPlusIncludeUid = getGroupId(groupingPath + BASIS_PLUS_INCLUDE);
 
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
-        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, lookup, basisUid);
+        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, admin, basisUid);
 
-        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, lookup, includeUid);
+        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, admin, includeUid);
 
 
-        // Creates the composite and make complement of basis+include minus exclude
-        grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
-                groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE);
+
 
         //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
-                lookup,
+                admin,
                 ASSIGN_TYPE_GROUP,
                 OPERATION_ASSIGN_ATTRIBUTE,
                 TRIO,

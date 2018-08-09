@@ -82,7 +82,10 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         WsSubjectLookup subjectLookup = makeWsSubjectLookup(username);
 
-        return new GcGroupSave().addGroupToSave(groupToSave).assignActAsSubject(subjectLookup).execute();
+        return new GcGroupSave()
+                .addGroupToSave(groupToSave)
+                .assignActAsSubject(subjectLookup)
+                .execute();
     }
 
     @Override

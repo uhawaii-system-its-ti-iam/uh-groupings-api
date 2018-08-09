@@ -119,25 +119,17 @@ public class TestGroupingFactoryService {
         List<String>  exclude = new ArrayList<>();
         List<String>  owners = new ArrayList<>();
 
-//        include.add("zknoebel");
-//        owners.add("kahlin");
-//        basis.add("jiaqil");
-//        exclude.add("clintmor");
+        include.add("zknoebel");
+        owners.add("kahlin");
+        //basis.add("jiaqil");
+        exclude.add("clintmor");
 
 
         //this needs to be an admin account to work
-//        groupingFactoryService.addGroupingVoid("kahlin", KAHLIN_TEST + "kahlin-test", basis, include, exclude, owners);
+        groupingFactoryService.addGroupingVoid(ADMIN, KAHLIN_TEST + ":kahlin-test", basis, include, exclude, owners);
 
-//        membershipService.addGroupingMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test", "watarub");
+//        membershipService.addGroupMember(ADMIN, KAHLIN_TEST + ":kahlin-test:owners", "watarub");
 
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
-        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup("watarub");
-
-
-
-        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult("hawaii.edu:custom:test:kahlin:kahlin-test:include", "groupAttrUpdate", lookup, admin, true);
-
-        membershipService.addGroupMemberByUsername(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test:include", "watarub");
     }
 
     @Test
