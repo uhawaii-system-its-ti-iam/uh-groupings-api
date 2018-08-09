@@ -472,6 +472,42 @@ public class TestGroupingsRestController {
         }
     }
 
+    //todo Method returns list of GSRs, not single GSR (need to fix)
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void addDeleteMemberPassTest() throws Exception{
+
+        // Check that "iamtst04" is not in include
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
+
+        mapGSRPut("/api/groupings/groupings/" + GROUPING + "/includeMembers/" + tst[3]);
+
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
+
+        mapGSRDelete("/api/groupings/groupings/" + GROUPING + "/includeMembers/" + tst[3]);
+
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
+
+        // Check that "iamtst03" is not in exclude
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
+
+        mapGSRPut("/api/groupings/groupings/" + GROUPING + "/excludeMembers/" + tst[2]);
+
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
+
+        mapGSRDelete("/api/groupings/groupings/" + GROUPING + "/excludeMembers/" + tst[2]);
+
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst02")
+    public void addDeleteMemberFailTest() throws Exception{
+        //todo
+    }
+
+
+
     ///////////////////////////////////
     //    OLD 2.0 REST API TESTS     //
     ///////////////////////////////////
@@ -881,6 +917,7 @@ public class TestGroupingsRestController {
     // MVC mapping
     //////////////////////////////////////////////////////////////////////
     //todo Refactor as new default methods
+    //todo Can probably condense into fewer methods if necessary
 
     private Map mapGetUserAttributes(String username) throws Exception {
 
