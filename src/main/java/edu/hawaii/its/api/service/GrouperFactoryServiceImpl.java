@@ -22,6 +22,7 @@ import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
+import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -39,6 +40,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDetail;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
@@ -86,6 +88,16 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addGroupToSave(groupToSave)
                 .assignActAsSubject(subjectLookup)
                 .execute();
+    }
+
+    @Override
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+
+        return new GcGroupDelete()
+                .addGroupLookup(path)
+                .assignActAsSubject(username)
+                .execute();
+
     }
 
     @Override

@@ -375,6 +375,16 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return addGroupingResults;
     }
 
+    @Override
+    public void deleteGroupingVoid(String adminUsername, String groupingPath) {
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsGroupLookup group = grouperFactoryService.makeWsGroupLookup(groupingPath);
+
+        grouperFactoryService.deleteGroup(admin, group);
+
+    }
+
     @Override public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath) {
 
         //Todo implement this once we have the ability to make groupings

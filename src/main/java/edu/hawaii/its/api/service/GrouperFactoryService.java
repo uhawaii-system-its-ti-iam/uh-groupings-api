@@ -20,6 +20,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
@@ -27,6 +28,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public interface GrouperFactoryService {
     public WsGroupSaveResults addEmptyGroup(String username, String path);
+
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path);
 
     public WsSubjectLookup makeWsSubjectLookup(String username);
 

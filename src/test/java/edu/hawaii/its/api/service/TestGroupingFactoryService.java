@@ -135,6 +135,7 @@ public class TestGroupingFactoryService {
     @Test
     public void deleteGroupingTest() {
 
-        //todo
+        groupingFactoryService.deleteGroupingVoid(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test:owners");
+
     }
 }
