@@ -455,8 +455,6 @@ public class TestMemberAttributeService {
             gce.printStackTrace();
         }
 
-//        assertNull(attributes);
-
         // Test with null field
         try {
             attributes = memberAttributeService.getUserAttributes(null);

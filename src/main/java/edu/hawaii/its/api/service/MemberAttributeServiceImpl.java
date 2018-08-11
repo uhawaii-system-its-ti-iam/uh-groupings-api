@@ -353,10 +353,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
         WsSubject[] subjects = results.getWsSubjects();
 
-//        if (subjects[0].getSuccess().equals("F")) {
-////            return
-////            return null;
-//        } else {
+        //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
         try {
             String[] attributeValues = subjects[0].getAttributeValues();
             Map<String, String> mapping = new HashMap<String, String>();
