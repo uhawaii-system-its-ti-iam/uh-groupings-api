@@ -378,10 +378,47 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Override
     public void deleteGroupingVoid(String adminUsername, String groupingPath) {
 
-        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsGroupLookup group = grouperFactoryService.makeWsGroupLookup(groupingPath);
+        //make sure that adminUsername is actually an admin
+        if (!memberAttributeService.isAdmin(adminUsername)) {
 
-        grouperFactoryService.deleteGroup(admin, group);
+            return;
+        }
+
+
+        if (pathIsEmpty(adminUsername, groupingPath)) {
+
+            return;
+        }
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsGroupLookup grouping = grouperFactoryService.makeWsGroupLookup(groupingPath);
+        WsStemLookup mainStem = grouperFactoryService.makeWsStemLookup(groupingPath);
+        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
+
+
+        grouperFactoryService.deleteGroup(admin, grouping);
+
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(":basis");
+        memberLists.add(":basis+include");
+        memberLists.add(":exclude");
+        memberLists.add(":include");
+        memberLists.add(":owners");
+
+        for (String group: memberLists) {
+
+            if (pathIsEmpty(adminUsername, groupingPath + group)) {
+
+            }
+            else {
+                WsGroupLookup groupLookup = grouperFactoryService.makeWsGroupLookup(groupingPath + group);
+
+                grouperFactoryService.deleteGroup(admin, groupLookup);
+            }
+        }
+
+        grouperFactoryService.deleteStem(admin, basisStem);
+        grouperFactoryService.deleteStem(admin, mainStem);
 
     }
 

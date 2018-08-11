@@ -92,25 +92,6 @@ public class TestGroupingFactoryService {
                 "property 'grouperClient.webService.password' is required");
     }
 
-    @Before
-//    public void setUp() {
-//        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
-//        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-//        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-//
-//        //put in include
-//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
-//
-//        //remove from exclude
-//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-//        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
-//
-//        //add to exclude
-//        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
-//    }
-
     @Test
     public void addGroupingTest() {
 
@@ -121,21 +102,19 @@ public class TestGroupingFactoryService {
 
         include.add("zknoebel");
         owners.add("kahlin");
-        //basis.add("jiaqil");
         exclude.add("clintmor");
 
 
         //this needs to be an admin account to work
         groupingFactoryService.addGroupingVoid(ADMIN, KAHLIN_TEST + ":kahlin-test", basis, include, exclude, owners);
 
-//        membershipService.addGroupMember(ADMIN, KAHLIN_TEST + ":kahlin-test:owners", "watarub");
 
     }
 
     @Test
     public void deleteGroupingTest() {
 
-        groupingFactoryService.deleteGroupingVoid(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test:owners");
+        groupingFactoryService.deleteGroupingVoid(ADMIN, "hawaii.edu:custom:test:kahlin:kahlin-test");
 
     }
 }

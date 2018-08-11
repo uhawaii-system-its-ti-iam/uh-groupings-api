@@ -23,6 +23,8 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
+import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
+import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -41,12 +43,14 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
 import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
@@ -216,6 +220,25 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsGroupSaveResults.setResultMetadata(wsResultMeta);
 
         return wsGroupSaveResults;
+    }
+
+    @Override
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+
+        return new GcGroupDelete()
+                .addGroupLookup(path)
+                .assignActAsSubject(username)
+                .execute();
+
+    }
+
+    @Override
+    public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
+
+        return new GcStemDelete()
+                .addGroupLookup(stem)
+                .assignActAsSubject(admin)
+                .execute();
     }
 
     /**

@@ -24,6 +24,7 @@ import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
+import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -47,8 +48,10 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStem;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -181,6 +184,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         WsSubjectLookup subject = makeWsSubjectLookup(username);
         return new GcStemSave().addStemToSave(stemToSave).assignActAsSubject(subject).execute();
+    }
+
+    @Override
+    public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
+
+        return new GcStemDelete()
+                .addGroupLookup(stem)
+                .assignActAsSubject(admin)
+                .execute();
     }
 
     @Override
