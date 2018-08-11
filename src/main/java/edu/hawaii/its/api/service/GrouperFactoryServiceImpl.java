@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +77,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Empty.
     }
 
+    //todo Not tested
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
         WsGroupToSave groupToSave = new WsGroupToSave();
@@ -103,6 +105,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     }
 
+    //todo Not tested
     @Override
     public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
             String leftGroupPath, String rightGroupPath) {
@@ -165,6 +168,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return new WsStemLookup(stemName, stemUuid);
     }
 
+    //todo Not tested
     @Override
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath) {
         String[] splitString = stemPath.split(":");
@@ -204,6 +208,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return dateTimeValue;
     }
 
+    //todo Not tested
     @Override
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
         return new GcFindGroups()
@@ -211,6 +216,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Not tested
     @Override
     public WsAddMemberResults makeWsAddMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid) {
         return new GcAddMember()
@@ -220,6 +226,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, String newMember) {
         return new GcAddMember()
@@ -229,6 +236,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Need to test null uuid
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, Person personToAdd) {
         if (personToAdd.getUsername() != null) {
@@ -246,6 +254,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Not tested
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, List<String> newMembers) {
         GcAddMember addMember = new GcAddMember();
@@ -257,6 +266,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return addMember.execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, String newMember) {
         return new GcAddMember()
@@ -265,6 +275,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Not tested
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
         return new GcDeleteMember()
@@ -273,6 +284,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             String memberToDelete) {
@@ -283,6 +295,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Need to test null uuid
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             Person personToDelete) {
@@ -301,6 +314,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Not tested
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             List<String> membersToDelete) {
@@ -313,6 +327,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return deleteMember.execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
             String attributeDefNameName) {
@@ -322,6 +337,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
             String attributeDefNameName0,
@@ -333,6 +349,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
             String attributeDefNameName,
@@ -359,6 +376,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return attributeAssignmentsResultList;
     }
 
+    //todo Need to test break
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
             String attributeDefNameName0,
@@ -386,6 +404,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return attributeAssignmentsResultList;
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForMembership(String assignType,
             String attributeDefNameName,
@@ -397,6 +416,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
             String group) {
@@ -406,6 +426,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
             String attributeDefNameName,
@@ -417,6 +438,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
 
@@ -426,6 +448,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Need to test if cases
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, Person person) {
         if (person.getUsername() != null) {
@@ -442,6 +465,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResults(String attributeAssignType,
             String attributeAssignOperation,
@@ -460,6 +484,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForMembership(String attributeAssignType,
             String attributeAssignOperation,
@@ -474,6 +499,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(String attributeAssingType,
             String attributeAssignOperation,
@@ -487,6 +513,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    //todo Not tested
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(WsSubjectLookup lookup,
             String attributeAssingType,
@@ -532,6 +559,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
@@ -544,6 +572,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetMembershipsResults makeWsGetMembershipsResults(String groupName,
             WsSubjectLookup lookup) {
@@ -554,6 +583,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
@@ -567,18 +597,29 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // Covered by Integration Tests
     @Override
     public WsGetGroupsResults makeWsGetGroupsResults(String username,
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-        return new GcGetGroups()
-                .addSubjectIdentifier(username)
-                .assignWsStemLookup(stemLookup)
-                .assignStemScope(stemScope)
-                .execute();
+//        try {
+//            return new GcGetGroups()
+//                    .addSubjectIdentifier(username)
+//                    .assignWsStemLookup(stemLookup)
+//                    .assignStemScope(stemScope)
+//                    .execute();
+//        } catch (Exception e){
+//            return new WsGetGroupsResults();
+//        }
+                    return new GcGetGroups()
+                            .addSubjectIdentifier(username)
+                            .assignWsStemLookup(stemLookup)
+                            .assignStemScope(stemScope)
+                            .execute();
     }
 
+    // Covered by Integration Tests
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
 
         return new GcGetSubjects()
