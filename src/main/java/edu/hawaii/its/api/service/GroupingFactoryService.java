@@ -8,19 +8,8 @@ public interface GroupingFactoryService {
 
     public List<GroupingsServiceResult> addGrouping(
             String username,
-            String groupingPath,
-            List<String> basis,
-            List<String> include,
-            List<String> exclude,
-            List<String> owners);
+            String groupingPath);
 
-    public void addGroupingVoid(
-            String username,
-            String groupingPath,
-            List<String> basis,
-            List<String> include,
-            List<String> exclude,
-            List<String> owners);
 
     public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 

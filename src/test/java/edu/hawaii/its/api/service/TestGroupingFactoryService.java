@@ -95,18 +95,8 @@ public class TestGroupingFactoryService {
     @Test
     public void addGroupingTest() {
 
-        List<String>  basis = new ArrayList<>();
-        List<String>  include = new ArrayList<>();
-        List<String>  exclude = new ArrayList<>();
-        List<String>  owners = new ArrayList<>();
-
-        include.add("zknoebel");
-        owners.add("kahlin");
-        exclude.add("clintmor");
-
-
         //this needs to be an admin account to work
-        groupingFactoryService.addGroupingVoid(ADMIN, KAHLIN_TEST + ":kahlin-test", basis, include, exclude, owners);
+        groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST + ":kahlin-test");
 
 
     }
