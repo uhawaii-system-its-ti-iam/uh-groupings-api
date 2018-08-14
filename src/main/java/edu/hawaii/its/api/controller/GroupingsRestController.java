@@ -133,7 +133,7 @@ public class GroupingsRestController {
      * @param uid: Username of member to get list of grouping memberships
      * @return List of members grouping memberships
      */
-    @RequestMapping(value = "/members/{uid}/groupings",
+    @RequestMapping(value = "=/members/{uid}/groupings",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

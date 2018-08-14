@@ -13,5 +13,4 @@ public interface GroupingFactoryService {
 
     public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 
-    public void deleteGroupingVoid(String adminUsername, String groupingPath);
 }

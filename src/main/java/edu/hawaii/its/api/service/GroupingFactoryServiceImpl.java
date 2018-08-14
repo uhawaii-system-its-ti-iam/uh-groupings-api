@@ -277,18 +277,34 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
 
     @Override
-    public void deleteGroupingVoid(String adminUsername, String groupingPath) {
+    public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath) {
+
+
+        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
+        String action = adminUsername + " is deleting a Grouping: " + groupingPath;
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isAdmin(adminUsername)) {
 
-            return;
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
         }
 
 
         if (pathIsEmpty(adminUsername, groupingPath)) {
 
-            return;
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
         }
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
@@ -297,7 +313,8 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
 
 
-        grouperFactoryService.deleteGroup(admin, grouping);
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteGroup(admin,
+                grouping), "Delete composite group"));
 
         List<String> memberLists = new ArrayList<String>();
         memberLists.add(":basis");
@@ -314,34 +331,18 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             else {
                 WsGroupLookup groupLookup = grouperFactoryService.makeWsGroupLookup(groupingPath + group);
 
-                grouperFactoryService.deleteGroup(admin, groupLookup);
+                deleteGroupingResults.add(helperService.makeGroupingsServiceResult(
+                        grouperFactoryService.deleteGroup(admin, groupLookup), "Delete " + group + "group"));
             }
         }
 
-        grouperFactoryService.deleteStem(admin, basisStem);
-        grouperFactoryService.deleteStem(admin, mainStem);
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteStem(admin,
+                basisStem), "Delete basis stem"));
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteStem(admin,
+                mainStem), "Delete " + groupingPath + " stem"));;
 
-    }
 
-    @Override public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath) {
-
-        //Todo implement this once we have the ability to make groupings
-        //we don't want to delete stuff that we can't bring back
-
-        //        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
-        //        if (isAdmin(username)) {
-        //            deleteGroupingResults.add(assignGroupAttributes(username, PURGE_GROUPING, OPERATION_ASSIGN_ATTRIBUTE, groupingPath));
-        //            deleteGroupingResults.add(assignGroupAttributes(username, TRIO, OPERATION_REMOVE_ATTRIBUTE, groupingPath));
-        //        } else if (isApp(username)) {
-        //            deleteGroupingResults.add(assignGroupAttributes(PURGE_GROUPING, OPERATION_ASSIGN_ATTRIBUTE, groupingPath));
-        //            deleteGroupingResults.add(assignGroupAttributes(TRIO, OPERATION_REMOVE_ATTRIBUTE, groupingPath));
-        //        } else {
-        //            GroupingsServiceResult failureResult = makeGroupingsServiceResult(FAILURE, "delete grouping" + groupingPath);
-        //
-        //            deleteGroupingResults.add(failureResult);
-        //        }
-        //        return deleteGroupingResults;
-        throw new UnsupportedOperationException();
+        return deleteGroupingResults;
     }
 
     //set of elements in list0 or list1
