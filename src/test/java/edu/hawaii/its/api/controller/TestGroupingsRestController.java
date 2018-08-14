@@ -481,7 +481,6 @@ public class TestGroupingsRestController {
         }
     }
 
-    //todo Method returns list of GSRs, not single GSR (need to fix)
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void addDeleteMemberPassTest() throws Exception {
