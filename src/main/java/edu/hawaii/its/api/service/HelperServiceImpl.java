@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service("helperService")
 public class HelperServiceImpl implements HelperService {
 
@@ -210,6 +212,37 @@ public class HelperServiceImpl implements HelperService {
             }
         }
         return groupings;
+    }
+
+    public List<Grouping> extractGroupingsNew(List<String> groupPaths) {
+        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
+
+        List<String> groupings = new ArrayList<>();
+        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
+        List<Grouping> groupingsTwo = new ArrayList<>();
+
+        if (groupPaths.size() > 0) {
+
+            List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
+                    grouperFS.makeWsGetAttributeAssignmentsResultsTrioNew(
+                            ASSIGN_TYPE_GROUP,
+                            TRIO,
+                            groupPaths);
+
+            attributeAssignmentsResults
+                    .stream()
+                    .filter(results -> results.getWsAttributeAssigns() != null)
+                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
+
+            if (attributeAssigns.size() > 0) {
+                groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
+                        .collect(toList()));
+            }
+
+            groupingsTwo = makeGroupings(groupings);
+
+        }
+        return groupingsTwo;
     }
 
     @Override

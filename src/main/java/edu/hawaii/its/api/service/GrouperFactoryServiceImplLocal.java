@@ -1212,4 +1212,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         //todo
         return null;
     }
+
+    @Override
+    public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
+            String attributeDefNameName,
+            List<String> ownerGroupNames){
+        return null;
+    }
 }

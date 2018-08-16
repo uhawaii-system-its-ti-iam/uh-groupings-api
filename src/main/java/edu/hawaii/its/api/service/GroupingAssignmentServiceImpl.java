@@ -182,6 +182,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
+        List<Grouping> groupingsinTwo = helperService.extractGroupingsNew(groupPaths);
 
         List<Grouping> groupings = helperService.makeGroupings(groupingsIn);
         //todo this can be optimized by getting opt attributes from grouper when getting the group list
