@@ -12,6 +12,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
@@ -27,8 +28,14 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Null;
 
+import java.util.Map;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -424,4 +431,36 @@ public class TestMemberAttributeService {
             re.printStackTrace();
         }
     }
+
+    @Test
+    public void getUserAttributesTest() {
+
+        // Base test
+        String useruid = username[1];
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(useruid);
+        assertTrue(attributes.get("uid").equals("iamtst02"));
+        assertTrue(attributes.get("cn").equals("tst02name"));
+        assertTrue(attributes.get("sn").equals("tst02name"));
+        assertTrue(attributes.get("givenName").equals("tst02name"));
+        assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+
+        //todo Implement assertThat over assertTrue/assertEquals/etc.
+//        assertEquals("iamtst02", attributes.get("uhuuid"));
+//        assertThat(attributes.get("uhuuid"), equalTo("iamtst02"));
+
+        // Test with invalid username
+        try {
+            attributes = memberAttributeService.getUserAttributes("notarealperson");
+        } catch (GcWebServiceError gce) {
+            gce.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            attributes = memberAttributeService.getUserAttributes(null);
+        } catch (GcWebServiceError gce) {
+            gce.printStackTrace();
+        }
+    }
+
 }

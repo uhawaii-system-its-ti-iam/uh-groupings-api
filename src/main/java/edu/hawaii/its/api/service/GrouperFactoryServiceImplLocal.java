@@ -22,6 +22,9 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
+import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
+import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -38,13 +41,16 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
 import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
@@ -216,6 +222,25 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGroupSaveResults;
     }
 
+    @Override
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+
+        return new GcGroupDelete()
+                .addGroupLookup(path)
+                .assignActAsSubject(username)
+                .execute();
+
+    }
+
+    @Override
+    public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
+
+        return new GcStemDelete()
+                .addGroupLookup(stem)
+                .assignActAsSubject(admin)
+                .execute();
+    }
+
     /**
      * @param username: username of user to be looked up
      * @return a WsSubjectLookup with username as the subject identifier
@@ -354,7 +379,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : newMembers) {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
-                //todo Shouldn't be reached, and is not rachable anyway due to exception
+                //todo Shouldn't be reached, and is not reachable anyway due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }
@@ -814,6 +839,37 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
+    public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
+            String privilegeName,
+            WsSubjectLookup lookup,
+            WsSubjectLookup admin,
+            boolean allowed) {
+
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
+                new WsAssignGrouperPrivilegesLiteResult();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(SUCCESS);
+
+        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupName);
+
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
+
+            membership.setOptInEnabled(allowed);
+        } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
+
+            membership.setOptOutEnabled(allowed);
+        } else {
+            throw new IllegalArgumentException("Privilege Name not acceptable");
+        }
+
+        wsAssignGrouperPrivilegsLiteResult.setResultMetadata(wsResultMeta);
+        return wsAssignGrouperPrivilegsLiteResult;
+    }
+
+    @Override
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup) {
@@ -1144,6 +1200,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public String toString() {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
+    }
+
+    public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
+        //todo Not needed for getUserAttributes function, will implement if necessary
+        return null;
     }
 
     @Override public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,

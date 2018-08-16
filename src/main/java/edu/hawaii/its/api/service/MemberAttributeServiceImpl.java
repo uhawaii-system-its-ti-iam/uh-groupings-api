@@ -2,21 +2,32 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsRestGetSubjectsRequest;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.validation.constraints.Null;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
@@ -151,10 +162,16 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private String COMPOSITE_NAME;
 
     @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
     private GrouperFactoryService grouperFS;
 
     @Autowired
     private HelperService hs;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
 
@@ -326,4 +343,36 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
+    // Covered by Integration Tests
+    // Returns a user's attributes (FirstName, LastName, etc.) based on the username
+    // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
+    public Map<String, String> getUserAttributes(String username) throws GcWebServiceError {
+
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+
+        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+        WsSubject[] subjects = results.getWsSubjects();
+
+        //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
+        try {
+            String[] attributeValues = subjects[0].getAttributeValues();
+            Map<String, String> mapping = new HashMap<String, String>();
+
+            String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+            for (int i = 0; i < attributeValues.length; i++) {
+                mapping.put(subjectAttributeNames[i], attributeValues[i]);
+            }
+
+            return mapping;
+
+        } catch (NullPointerException npe) {
+            throw new GcWebServiceError("Error 404 Not Found");
+        }
+    }
+
+    //Local approach implemented separately
+    public Map<String, String> getUserAttributesLocal(String username) {
+        Person personToGet = personRepository.findByUsername(username);
+        return personToGet.getAttributes();
+    }
 }

@@ -4,6 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +18,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import org.hamcrest.Matchers;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.AssertTrue;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -43,14 +59,32 @@ public class TestGroupingFactoryService {
     @Value("${groupings.api.test.grouping_new_owners}")
     private String GROUPING_NEW_OWNERS;
 
+    @Value("${groupings.api.test.grouping_kahlin}")
+    private String KAHLIN_TEST;
+
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
+    @Value("${groupings.api.failure}")
+    private String FAILURE;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Autowired
     GroupAttributeService groupAttributeService;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
+    @Autowired
+    private MemberAttributeService memberAttributeService;
 
     @Autowired
     private GroupingFactoryService groupingFactoryService;
@@ -71,35 +105,93 @@ public class TestGroupingFactoryService {
                 "property 'grouperClient.webService.password' is required");
     }
 
-    @Before
-    public void setUp() {
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-
-        //put in include
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
-
-        //remove from exclude
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
-
-        //add to exclude
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
-    }
-
     @Test
     public void addGroupingTest() {
 
-        //this needs to be an admin account to work
-//        groupingFactoryService.addGrouping(username[0], GROUPING_NEW, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-    }
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        GroupingsServiceResult sResults;
 
+
+
+        //Works correctly
+        assertThat(memberAttributeService.isAdmin(ADMIN), equalTo(true));
+
+        results = groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST);
+
+        assertThat(groupingFactoryService.pathIsEmpty(ADMIN, KAHLIN_TEST),
+                equalTo(false));
+
+
+        //Fails when the grouping already exists
+        try {
+            results = groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST);
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
+        //delete the grouping
+        groupingFactoryService.deleteGrouping(ADMIN, KAHLIN_TEST);
+
+
+
+        //Fails when user trying to add grouping is not admin
+        try {
+
+            results = groupingFactoryService.addGrouping("sbraun", KAHLIN_TEST + ":kahlin-test");
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
+
+
+
+
+    }
     @Test
     public void deleteGroupingTest() {
 
-        //todo
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        GroupingsServiceResult sResults;
+
+        //add the grouping
+        groupingFactoryService.addGrouping(ADMIN, KAHLIN_TEST);
+
+        //Works correctly
+        assertThat(memberAttributeService.isAdmin(ADMIN), equalTo(true));
+
+        results = groupingFactoryService.deleteGrouping(ADMIN, KAHLIN_TEST);
+
+        assertThat(groupingFactoryService.pathIsEmpty(ADMIN, KAHLIN_TEST),
+                equalTo(true));
+
+
+        //Fails when the grouping doesn't exists
+        try {
+            results = groupingFactoryService.deleteGrouping(ADMIN, KAHLIN_TEST);
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
+
+
+        //Fails when user trying to delete grouping is not admin
+        try {
+
+            results = groupingFactoryService.deleteGrouping("sbraun", KAHLIN_TEST + ":kahlin-test");
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
     }
 }

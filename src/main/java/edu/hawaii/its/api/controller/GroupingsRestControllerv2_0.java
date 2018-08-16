@@ -1,24 +1,7 @@
 package edu.hawaii.its.api.controller;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
-
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingFactoryService;
@@ -30,11 +13,32 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
-@RestController
-@RequestMapping("/api/groupings")
-public class GroupingsRestController {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
-    private static final Log logger = LogFactory.getLog(GroupingsRestController.class);
+import javax.annotation.PostConstruct;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+//todo Possibly tack on version number to Base RequestMapping?
+// Will have to consider this for test code as well
+// Possibly split legacy code into separate classes? Not sure how dangerous this is
+@RequestMapping("/api/groupings/v2.0")
+public class GroupingsRestControllerv2_0 {
+
+    private static final Log logger = LogFactory.getLog(GroupingsRestControllerv2_0.class);
 
     @Value("${app.groupings.controller.uuid}")
     private String uuid;
@@ -88,6 +92,7 @@ public class GroupingsRestController {
         return "University of Hawaii Groupings API";
     }
 
+//<<<<<<< HEAD:src/main/java/edu/hawaii/its/api/controller/GroupingsRestController.java
     /**
      * Get all admins and groupings
      *
@@ -528,6 +533,8 @@ public class GroupingsRestController {
     //////////////////////////////////////////
     // OLD API FUNCTIONS (2.0)
     /////////////////////////////////////////
+//=======
+//>>>>>>> master:src/main/java/edu/hawaii/its/api/controller/GroupingsRestControllerv2_0.java
     // todo These will get moved out over time as the new 2.1 API is integrated into UHGroupings
 
     /**

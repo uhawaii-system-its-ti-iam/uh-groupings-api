@@ -1,0 +1,557 @@
+openapi: 3.0.0
+info:
+  version: '2.1'
+  title: UH Groupings API
+servers:
+  - url: http://localhost:8081/uhgroupings/api/groupings/
+    description: Localhost for UH Groupings API
+  - url: http://test.hawaii.edu/uhgroupings/api/groupings/
+    description: UH Groupings test server
+security:
+  - cas: []
+paths:
+  '/adminsGroupings':
+    get:
+      description: Returns list of admins and groups
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Requestee does not have permission to retrieve this information
+        '404':
+          description: Information not found
+  '/members/{uid}':
+    get:
+      description: Returns user's attributes
+      parameters:
+        - name: uid
+          in: path
+          description: Username of UH ID of user to get attributes from
+          required: true
+          schema:
+            type: string
+      responses:
+         '200':
+           description: Successful operation
+         '403':
+           description: Requestee does not have permission to retrieve user's attributes
+         '404':
+           description: User does not exist
+  '/members/{uid}/groupings':
+    get:
+      description: Returns list of a user's grouping memberships
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get memberships from
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+           description: Successful operation
+        '403':
+           description: Requestee does not have permission to retrieve user's memberships
+        '404':
+          description: User does not exist
+  '/owners/{uid}/groupings':
+    get:
+      description: Returns list of a user's owned groupings
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get owned groupings from
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+           description: Successful operation
+        '403':
+           description: Requestee does not have permission to retrieve user's owned groupings
+        '404':
+          description: User does not exist
+  '/managers/{uid}/groupings':
+    get:
+      description: Returns list of a user's groupings that they manage
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get managed groupings from
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}':
+    get:
+      description: Returns a specific grouping
+      parameters:
+        - name: path
+          in: path
+          description: Name of the grouping to get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Operation successful
+        '403':
+          description: Requestee does not have permission to access this resource
+        '404':
+          description: Grouping not found
+    post:
+      description: Creates a new grouping
+      parameters:
+        - name: path
+          in: path
+          description: Name of the grouping to be created
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Operation sucessful
+        '403':
+          description: Requestee does not have permission to create a group
+    delete:
+      description: removes a Grouping
+      parameters:
+        - name: path
+          in: path
+          description: path to the Grouping
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successfully deleted the Grouping
+        '403':
+          description: Requestee does not have the permission to delete the Grouping
+        '404':
+          description: Grouping does not exist
+  '/admins/{uid}':
+    post:
+      description: Adds user to list of admins
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user being added
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful addition
+        '403':
+          description: Requestee does not have permission to modify this resource
+        '404':
+          description: User does not exist
+    delete:
+      description: Deletes user from list of admins
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user being deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User successfully deleted
+        '403':
+          description: Requestee does not have permission to modify this resource
+        '404':
+          description: User does not exist
+  '/groupings/{path}/owners/{uid}':
+    put:
+      description: Updates the grouping with new owner
+      parameters:
+        - name: path
+          in: path
+          description: Name of the grouping to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '403':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+    delete:
+      description: Deletes an owner from the grouping
+      parameters:
+        - name: path
+          in: path
+          description: Name of the owner to be deleted
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of user to be removed
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Owner successfully deleted
+        '403':
+          description: Requestee does not have privileges to delete owner
+        '404':
+          description: Grouping or user not found
+  '/groupings/{path}/owners/{uid}/demote':
+    put:
+      description: Demotes an owner to a manager
+      parameters:
+        - name: path
+          in: path
+          description: Name of the grouping to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}/managers/{uid}':
+    put:
+      description: Updates the grouping with new membership manager
+      parameters:
+        - name: path
+          in: path
+          description: Name of the grouping to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+    delete:
+      description: Deletes an manager from the grouping
+      parameters:
+        - name: path
+          in: path
+          description: Path of grouping to modify
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Username or UH ID of user to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Requestee does not have permission to delete manager
+        '404':
+          description: User does not exist
+  '/groupings/{path}/managers/{uid}/permissions/{id}/enable':
+    put:
+      description: Enables the given permision for the given grouping's manager
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}/managers/{uid}/permissions/{id}/disable':
+    put:
+      description: Disables the given permision for the given grouping's manager
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}/managers/{uid}/promote':
+    put:
+      description: Promotes a given manager to an owner of the grouping
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/groupings/{path}/includeMembers/{uid}':
+    put:
+      description: Updates the grouping with new include member
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user being moved into include
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+    delete:
+      description: Deletes an include member
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user being removed from include
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+  '/groupings/{path}/excludeMembers/{uid}':
+    put:
+      description: Updates the grouping with new exclude member
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group being updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Username of the user being moved into exclude group
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+    delete:
+      description: Deletes an exclude member
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group to be updated
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          description: Name of the user being removed from exclude
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+  '/groupings/{path}/preferences/{preferenceId}/enable':
+    put:
+      description: Updates the grouping changing specified preference setting
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group being updated
+          required: true
+          schema:
+            type: string
+        - name: preferenceId
+          in: path
+          description: ID of the preference being updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privileges to update the group
+        '404':
+          description: Group or user not found
+  '/groupings/{path}/preferences/{preferenceId}/disable':
+    put:
+      description: Updates the grouping changing specified perfernece setting
+      parameters:
+        - name: path
+          in: path
+          description: Name of the group being updated
+          required: true
+          schema:
+            type: string
+        - name: preferenceId
+          in: path
+          description: ID of the preference being updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group successfully updated
+        '401':
+          description: Requestee does not have the privaleges to update the group
+        '404':
+          description: Group or user not found
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+          format: name
+        uuid:
+          type: string
+          format: uuid
+        username:
+          type: string
+          format: name
+    Group:
+      type: object
+      properties:
+        path:
+          type: string
+          format: path
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        usernames:
+          type: array
+          items:
+            type: string
+    Grouping:
+      type: object
+      properties:
+        path:
+          type: string
+          format: path
+        name:
+          type: string
+          format: name
+        listServOn:
+          type: boolean
+        optInOn:
+          type: boolean
+        optOutOn:
+          type: boolean
+        basis:
+          $ref: '#/components/schemas/Group'
+        exclude:
+          $ref: '#/components/schemas/Group'
+        include:
+          $ref: '#/components/schemas/Group'
+        composite:
+          $ref: '#/components/schemas/Group'
+        owners:
+          $ref: '#/components/schemas/Group'
+    GroupingAssignment:
+      type: object
+      properties:
+        groupingsIn:
+          $ref: '#/components/schemas/Grouping'
+        groupingsOwned:
+          $ref: '#/components/schemas/Grouping'
+        groupingsOptedOutOf:
+          $ref: '#/components/schemas/Grouping'
+        groupingsOptedInTo:
+          $ref: '#/components/schemas/Grouping'
+        groupingsToOptOutOf:
+          $ref: '#/components/schemas/Grouping'
+        groupingsToOptInTo:
+          $ref: '#/components/schemas/Grouping'
+    GroupingServiceResult:
+      type: object
+      properties:
+        action:
+          type: string
+        resultCode:
+          type: string
+          format: response
+    AdminListsHolder:
+      type: object
+      properties:
+        adminGroup:
+          $ref: '#/components/schemas/Group'
+        allGroupings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grouping'
+  securitySchemes:
+    cas:
+      type: http
+      scheme: basic
