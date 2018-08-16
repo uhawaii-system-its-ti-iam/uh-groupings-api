@@ -186,7 +186,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
 
         //make sure that adminUsername is actually an admin
-        if (!memberAttributeService.isAdmin(adminUsername)) {
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + adminUsername + " does not have permission to add this grouping", action
@@ -284,7 +284,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         String action = adminUsername + " is deleting a Grouping: " + groupingPath;
 
         //make sure that adminUsername is actually an admin
-        if (!memberAttributeService.isAdmin(adminUsername)) {
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action

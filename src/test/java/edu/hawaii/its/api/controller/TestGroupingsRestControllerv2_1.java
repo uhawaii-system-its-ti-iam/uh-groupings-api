@@ -248,19 +248,19 @@ public class TestGroupingsRestControllerv2_1 {
     @WithMockUhUser(username = "iamtst01")
     public void memberGroupingsTest() throws Exception {
 
-        List listMemberships = mapList("/api/groupings/v2.1/members/iamtst01/groupings");
+        List listMemberships = mapList("/api/groupings/v2.1/members/iamtst01/groupings", "get");
         assertThat(listMemberships.size(), not(0));
 
         // Test with username not in database
         try {
-            mapList("/api/groupings/v2.1/members/bobjones/groupings");
+            mapList("/api/groupings/v2.1/members/bobjones/groupings", "get");
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
 
         // Test with null field
         try {
-            mapList("/api/groupings/v2.1/members/" + null + "/groupings");
+            mapList("/api/groupings/v2.1/members/" + null + "/groupings", "get");
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
@@ -271,19 +271,19 @@ public class TestGroupingsRestControllerv2_1 {
     public void ownerGroupingsTest() throws Exception {
 
         //        List listGroupings = mapOwnerGroupings("iamtst01");
-        List listGroupings = mapList("/api/groupings/v2.1/owners/iamtst01/groupings");
+        List listGroupings = mapList("/api/groupings/v2.1/owners/iamtst01/groupings", "get");
         assertThat(listGroupings.size(), not(0));
 
         // Test with username not in database
         try {
-            mapList("/api/groupings/v2.1/owners/bobjones/groupings");
+            mapList("/api/groupings/v2.1/owners/bobjones/groupings", "get");
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
 
         // Test with null field
         try {
-            mapList("/api/groupings/v2.1/owners/" + null + "/groupings");
+            mapList("/api/groupings/v2.1/owners/" + null + "/groupings", "get");
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
@@ -669,13 +669,45 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteGroupingPassTest() throws Exception {
-        //todo
+        //Can choose any grouping path we want here
+        String newGrouping = "hawaii.edu:custom:test:ksanidad:ks-test";
+
+        // Check if grouping already exists (it shouldn't)
+        try{
+            mapGrouping(newGrouping);
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), not(200));
+        }
+
+        mapList("/api/groupings/v2.1/groupings/" + newGrouping, "post");
+        mapGrouping(newGrouping);
+
+        mapList("/api/groupings/v2.1/groupings/" + newGrouping, "delete");
+
+        try{
+            mapGrouping(newGrouping);
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), not(200));
+        }
+
     }
 
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void addDeleteGroupingFailTest() throws Exception {
-        //todo
+
+        // This should fail, "iamtst01" doesn't have proper permissions
+        try{
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
+
+        try{
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ksanidad-test", "delete");
+        } catch (GroupingsHTTPException ghe) {
+            ghe.printStackTrace();
+        }
     }
 
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
@@ -701,13 +733,10 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    private List mapList(String uri) throws Exception {
+    private List mapList(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-
-        MvcResult result = mockMvc.perform(get(uri)
-                .with(csrf()))
-                .andReturn();
+        MvcResult result = mapHelper(uri, httpCall);
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
@@ -745,7 +774,7 @@ public class TestGroupingsRestControllerv2_1 {
     private GroupingsServiceResult mapGSR(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = mapGSRHelper(uri, httpCall);
+        MvcResult result = mapHelper(uri, httpCall);
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
@@ -757,7 +786,7 @@ public class TestGroupingsRestControllerv2_1 {
     private List mapGSRs(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = mapGSRHelper(uri, httpCall);
+        MvcResult result = mapHelper(uri, httpCall);
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
@@ -766,7 +795,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    private MvcResult mapGSRHelper(String uri, String httpCall) throws Exception {
+    private MvcResult mapHelper(String uri, String httpCall) throws Exception {
 
         MvcResult result;
 
