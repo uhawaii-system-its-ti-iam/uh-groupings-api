@@ -49,7 +49,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class GroupingsRestControllerTestv2_0 {
+public class GroupingsRestControllerv2_0Test {
 
     @Value("${app.iam.request.form}")
     private String requestForm;
