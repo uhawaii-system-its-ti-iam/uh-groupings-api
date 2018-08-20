@@ -124,6 +124,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a member's attributes based off user id (uuid)
+     *
+     * @param uuid: UH User ID # to obtain attributes about
+     * @return Map of user attributes
+     */
+    @RequestMapping(value = "/members/idnum/{uuid}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Map<String,String>> uuidMemberAttributes(Principal principal, @PathVariable String uuid) {
+        logger.info("Entered REST uuidMemberAttributes...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getUserAttributesUuid(uuid));
+    }
+
+    /**
      * Get a list of a member's grouping memberships
      *
      * @param uid: Username of member to get list of grouping memberships

@@ -370,6 +370,29 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
+    // Used to find user attributes with uuid
+    public Map<String,String> getUserAttributesUuid(String idNum) throws GcWebServiceError {
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(idNum);
+
+        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+        WsSubject[] subjects = results.getWsSubjects();
+
+        try {
+            String[] attributeValues = subjects[0].getAttributeValues();
+            Map<String, String> mapping = new HashMap<String, String>();
+
+            String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+            for (int i = 0; i < attributeValues.length; i++) {
+                mapping.put(subjectAttributeNames[i], attributeValues[i]);
+            }
+
+            return mapping;
+
+        } catch (NullPointerException npe) {
+            throw new GcWebServiceError("Error 404 Not Found");
+        }
+    }
+
     //Local approach implemented separately
     public Map<String, String> getUserAttributesLocal(String username) {
         Person personToGet = personRepository.findByUsername(username);

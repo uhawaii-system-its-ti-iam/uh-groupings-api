@@ -31,6 +31,8 @@ public interface MemberAttributeService {
 
     public Map<String, String> getUserAttributes(String username) throws GcWebServiceError;
 
+    public Map<String, String> getUserAttributesUuid(String uuid) throws GcWebServiceError;
+
     public Map<String, String> getUserAttributesLocal(String username);
 
 }
