@@ -372,7 +372,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // Used to find user attributes with uuid
     public Map<String,String> getUserAttributesUuid(String idNum) throws GcWebServiceError {
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(idNum);
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookupUuid(idNum);
 
         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
         WsSubject[] subjects = results.getWsSubjects();

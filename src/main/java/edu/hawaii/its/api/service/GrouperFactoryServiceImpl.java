@@ -146,6 +146,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return wsSubjectLookup;
     }
 
+    @Override
+    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        wsSubjectLookup.setSubjectId(idNum);
+
+        return wsSubjectLookup;
+    }
+
     /**
      * @param group: group to be looked up
      * @return a WsGroupLookup with group as the group name

@@ -34,6 +34,8 @@ public interface GrouperFactoryService {
 
     public WsSubjectLookup makeWsSubjectLookup(String username);
 
+    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum);
+
     public WsGroupLookup makeWsGroupLookup(String group);
 
     public WsStemLookup makeWsStemLookup(String stemName);

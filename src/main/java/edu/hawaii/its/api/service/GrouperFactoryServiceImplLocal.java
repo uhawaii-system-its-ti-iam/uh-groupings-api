@@ -254,6 +254,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
+    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        wsSubjectLookup.setSubjectIdentifier(idNum);
+
+        return wsSubjectLookup;
+    }
+
+    @Override
     //todo
     public WsAddMemberResults makeWsAddMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid) {
         return null;
