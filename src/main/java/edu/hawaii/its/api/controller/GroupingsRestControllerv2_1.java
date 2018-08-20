@@ -137,7 +137,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)));
+                    .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)));
     }
 
     /**
