@@ -8,6 +8,7 @@ import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -172,98 +173,98 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Autowired
     private MembershipService membershipService;
 
+
     @Override
-    //todo change basis to a String
-    public List<GroupingsServiceResult> addGrouping(
-            String adminUsername,
-            String groupingPath,
-            List<String> basis,
-            List<String> include,
-            List<String> exclude,
-            List<String> owners) {
+    public List<GroupingsServiceResult> addGrouping(String adminUsername, String groupingPath) {
+
 
         List<GroupingsServiceResult> addGroupingResults = new ArrayList<>();
         String action = adminUsername + " is adding a Grouping: " + groupingPath;
 
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
+
         //make sure that adminUsername is actually an admin
-        if (!memberAttributeService.isAdmin(adminUsername)) {
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
+
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to add this grouping", action);
+                    FAILURE + ": " + adminUsername + " does not have permission to add this grouping", action
+            );
+
             addGroupingResults.add(gsr);
+
             return addGroupingResults;
         }
 
         //make sure that there is not already a group there
         if (!pathIsEmpty(adminUsername, groupingPath)) {
+
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": a group already exists at " + groupingPath, action);
+
             addGroupingResults.add(gsr);
+
             return addGroupingResults;
         }
 
+
+        //Use hash map in order to easily create and add members by using key and entry values, not including composite
         Map<String, List<String>> memberLists = new HashMap<>();
-        memberLists.put("", new ArrayList<>());
         memberLists.put(BASIS_PLUS_INCLUDE, new ArrayList<>());
         memberLists.put(BASIS, new ArrayList<>());
-        memberLists.put(INCLUDE, include);
-        memberLists.put(EXCLUDE, exclude);
-        memberLists.put(OWNERS, owners);
+        memberLists.put(INCLUDE, new ArrayList<>());
+        memberLists.put(EXCLUDE, new ArrayList<>());
+        memberLists.put(OWNERS, new ArrayList<>());
 
         // a stem the same as a folder
-        //create main stem
+        //create main stem to contain groups that build into the main group
         grouperFactoryService.makeWsStemSaveResults(adminUsername, groupingPath);
 
-        //create basis stem
+        //create basis stem to contain groups or users that make up the basis
         grouperFactoryService.makeWsStemSaveResults(adminUsername, groupingPath + BASIS);
 
+
+        //Creates groups and assigns the grouper api privileges
         for (Map.Entry<String, List<String>> entry : memberLists.entrySet()) {
             String groupPath = groupingPath + entry.getKey();
 
             //make the groups in grouper
             addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                    grouperFactoryService.addEmptyGroup(adminUsername, groupPath),
-                    action));
+                    grouperFactoryService.addEmptyGroup(adminUsername, groupPath), action));
+            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupPath, "groupAttrUpdate",
+                    api, admin,true);
 
-            //add members to the groups
-            addGroupingResults.addAll(membershipService.addGroupMembersByUsername(adminUsername,
-                    groupPath, entry.getValue()));
-
-            if(groupingPath.equals(groupPath)) {
-                //todo create is-trio attribute
-            }
-
-            //todo this needs to be created not updated
-            //update the last modified values of those groups
-            addGroupingResults.add(membershipService.updateLastModified(groupPath));
         }
 
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsStemLookup stemLookup = grouperFactoryService.makeWsStemLookup(STEM);
+        // Creates the composite and make complement of basis+include minus exclude
+        addGroupingResults.add(helperService.makeGroupingsServiceResult(
+                grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
+                groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE),
+                "create " + groupingPath + " and complement of " + EXCLUDE));
+
+        //Assigns grouper api privilege to composite
+        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
+                api, admin,true);
+
+
         String basisUid = getGroupId(groupingPath + BASIS);
         String includeUid = getGroupId(groupingPath + INCLUDE);
-        String excludeUid = getGroupId(groupingPath + EXCLUDE);
-        String basisPlusIncludeUid = getGroupId(groupingPath + BASIS_PLUS_INCLUDE);
 
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
-        addGroupingResults.add(
-                helperService.makeGroupingsServiceResult(
-                        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, lookup, basisUid),
-                        "add " + groupingPath + BASIS + " to " + groupingPath + BASIS_PLUS_INCLUDE));
-        addGroupingResults.add(
-                helperService.makeGroupingsServiceResult(
-                        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE, lookup, includeUid),
-                        "add " + groupingPath + INCLUDE + " to " + groupingPath + BASIS_PLUS_INCLUDE));
+        addGroupingResults.add(helperService.makeGroupingsServiceResult(
+                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
+                        admin, basisUid), "add " + groupingPath + BASIS + " to " + groupingPath
+                        + BASIS_PLUS_INCLUDE));
 
-        //add members for the composite (basisPlusInclude group complement exclude group)
-        addGroupingResults.add(
-                helperService.makeGroupingsServiceResult(
-                        grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath, lookup, basisPlusIncludeUid),
-                        "add " + groupingPath + BASIS_PLUS_INCLUDE + " to " + groupingPath));
-        //todo do a complement
+        addGroupingResults.add(helperService.makeGroupingsServiceResult(
+                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
+                        admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
+                        + BASIS_PLUS_INCLUDE));
 
-        //add the isTrio attribute to the grouping
+        //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
-                lookup,
+                admin,
                 ASSIGN_TYPE_GROUP,
                 OPERATION_ASSIGN_ATTRIBUTE,
                 TRIO,
@@ -273,25 +274,75 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return addGroupingResults;
     }
 
-    @Override public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath) {
 
-        //Todo implement this once we have the ability to make groupings
-        //we don't want to delete stuff that we can't bring back
 
-        //        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
-        //        if (isAdmin(username)) {
-        //            deleteGroupingResults.add(assignGroupAttributes(username, PURGE_GROUPING, OPERATION_ASSIGN_ATTRIBUTE, groupingPath));
-        //            deleteGroupingResults.add(assignGroupAttributes(username, TRIO, OPERATION_REMOVE_ATTRIBUTE, groupingPath));
-        //        } else if (isApp(username)) {
-        //            deleteGroupingResults.add(assignGroupAttributes(PURGE_GROUPING, OPERATION_ASSIGN_ATTRIBUTE, groupingPath));
-        //            deleteGroupingResults.add(assignGroupAttributes(TRIO, OPERATION_REMOVE_ATTRIBUTE, groupingPath));
-        //        } else {
-        //            GroupingsServiceResult failureResult = makeGroupingsServiceResult(FAILURE, "delete grouping" + groupingPath);
-        //
-        //            deleteGroupingResults.add(failureResult);
-        //        }
-        //        return deleteGroupingResults;
-        throw new UnsupportedOperationException();
+    @Override
+    public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath) {
+
+
+        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
+        String action = adminUsername + " is deleting a Grouping: " + groupingPath;
+
+        //make sure that adminUsername is actually an admin
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
+        }
+
+
+        if (pathIsEmpty(adminUsername, groupingPath)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
+        }
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsGroupLookup grouping = grouperFactoryService.makeWsGroupLookup(groupingPath);
+        WsStemLookup mainStem = grouperFactoryService.makeWsStemLookup(groupingPath);
+        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
+
+
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteGroup(admin,
+                grouping), "Delete composite group"));
+
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(":basis");
+        memberLists.add(":basis+include");
+        memberLists.add(":exclude");
+        memberLists.add(":include");
+        memberLists.add(":owners");
+
+        for (String group: memberLists) {
+
+            if (pathIsEmpty(adminUsername, groupingPath + group)) {
+
+            }
+            else {
+                WsGroupLookup groupLookup = grouperFactoryService.makeWsGroupLookup(groupingPath + group);
+
+                deleteGroupingResults.add(helperService.makeGroupingsServiceResult(
+                        grouperFactoryService.deleteGroup(admin, groupLookup), "Delete " + group + "group"));
+            }
+        }
+
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteStem(admin,
+                basisStem), "Delete basis stem"));
+        deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteStem(admin,
+                mainStem), "Delete " + groupingPath + " stem"));;
+
+
+        return deleteGroupingResults;
     }
 
     //set of elements in list0 or list1
@@ -301,7 +352,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             return list1 != null ? list1 : new ArrayList<>();
         }
 
-        //remove duplicates
+        //remove duplicatesspo
         Set<String> treeSet = new TreeSet<>(list0);
         treeSet.addAll(list1);
 
@@ -346,7 +397,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     }
 
     //returns true if there is not a group at groupingPath
-    private boolean pathIsEmpty(String adminUsername, String groupingPath) {
+    public boolean pathIsEmpty(String adminUsername, String groupingPath) {
 
         WsFindGroupsResults wsFindGroupsResults = grouperFactoryService.makeWsFindGroupsResults(groupingPath);
 

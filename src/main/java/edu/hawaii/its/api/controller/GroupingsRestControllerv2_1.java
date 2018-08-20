@@ -218,15 +218,15 @@ public class GroupingsRestControllerv2_1 {
      * @param path: String containing the path of grouping
      * @return Information about results of operation
      */
-    //    @RequestMapping(value = "/groupings/{path}",
-    //            method = RequestMethod.POST,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<GroupingsServiceResult> addNewGrouping(Principal principal, @PathVariable String path) {
-    //        logger.info("Entered REST addNewGrouping");
-    //        return ResponseEntity
-    //                .ok()
-    //                .body(groupingFactoryService.addGrouping())
-    //    }
+        @RequestMapping(value = "/groupings/{path}",
+                method = RequestMethod.POST,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+        public ResponseEntity<List<GroupingsServiceResult>> addNewGrouping(Principal principal, @PathVariable String path) {
+            logger.info("Entered REST addNewGrouping");
+            return ResponseEntity
+                    .ok()
+                    .body(groupingFactoryService.addGrouping(principal.getName(), path));
+        }
 
     /**
      * Update grouping to add a new owner
@@ -374,15 +374,15 @@ public class GroupingsRestControllerv2_1 {
      * @param path: path of grouping to delete
      * @return Information about results of operation
      */
-    //    @RequestMapping (value = "/grouping/{path}",
-    //            method = RequestMethod.DELETE,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //   public ResponseEntity<GroupingsServiceResult> deleteNewGrouping(Principal principal, @PathVariable String path) {
-    //        logger.info("Entered REST deleteNewGrouping");
-    //        return ResponseEntity
-    //                .ok()
-    //                .body(groupingFactoryService.deleteGrouping());
-    //    }
+        @RequestMapping (value = "/groupings/{path}",
+                method = RequestMethod.DELETE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+       public ResponseEntity<List<GroupingsServiceResult>> deleteNewGrouping(Principal principal, @PathVariable String path) {
+            logger.info("Entered REST deleteNewGrouping");
+            return ResponseEntity
+                    .ok()
+                    .body(groupingFactoryService.deleteGrouping(principal.getName(), path));
+        }
 
     /**
      * Delete a grouping owner

@@ -23,7 +23,9 @@ import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
+import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
+import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -40,14 +42,17 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDetail;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStem;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -84,7 +89,20 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         WsSubjectLookup subjectLookup = makeWsSubjectLookup(username);
 
-        return new GcGroupSave().addGroupToSave(groupToSave).assignActAsSubject(subjectLookup).execute();
+        return new GcGroupSave()
+                .addGroupToSave(groupToSave)
+                .assignActAsSubject(subjectLookup)
+                .execute();
+    }
+
+    @Override
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+
+        return new GcGroupDelete()
+                .addGroupLookup(path)
+                .assignActAsSubject(username)
+                .execute();
+
     }
 
     //todo Not tested
@@ -92,6 +110,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
             String leftGroupPath, String rightGroupPath) {
         WsGroupToSave groupToSave = new WsGroupToSave();
+        WsGroupLookup groupLookup = makeWsGroupLookup(parentGroupPath);
         WsGroup group = new WsGroup();
         WsGroupDetail wsGroupDetail = new WsGroupDetail();
 
@@ -100,12 +119,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         WsGroup rightGroup = makeWsFindGroupsResults(rightGroupPath).getGroupResults()[0];
 
         wsGroupDetail.setCompositeType(compositeType);
+        wsGroupDetail.setHasComposite("true");
         wsGroupDetail.setLeftGroup(leftGroup);
         wsGroupDetail.setRightGroup(rightGroup);
 
         group.setName(parentGroupPath);
-        group.setDetail(wsGroupDetail);
         groupToSave.setWsGroup(group);
+        groupToSave.setWsGroupLookup(groupLookup);
+        group.setDetail(wsGroupDetail);
+
 
         WsSubjectLookup lookup = makeWsSubjectLookup(username);
 
@@ -166,6 +188,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         WsSubjectLookup subject = makeWsSubjectLookup(username);
         return new GcStemSave().addStemToSave(stemToSave).assignActAsSubject(subject).execute();
+    }
+
+    @Override
+    public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
+
+        return new GcStemDelete()
+                .addGroupLookup(stem)
+                .assignActAsSubject(admin)
+                .execute();
     }
 
     @Override
@@ -495,6 +526,22 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .assignAttributeAssignOperation(attributeAssignOperation)
                 .addAttributeDefNameName(attributeDefNameName)
                 .addOwnerGroupName(ownerGroupName)
+                .execute();
+    }
+
+    @Override
+    public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
+            String privilegeName,
+            WsSubjectLookup lookup,
+            WsSubjectLookup admin,
+            boolean allowed) {
+
+        return new GcAssignGrouperPrivilegesLite()
+                .assignGroupName(groupName)
+                .assignPrivilegeName(privilegeName)
+                .assignSubjectLookup(lookup)
+                .assignActAsSubject(admin)
+                .assignAllowed(allowed)
                 .execute();
     }
 
