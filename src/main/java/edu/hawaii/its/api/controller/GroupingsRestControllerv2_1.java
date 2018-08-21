@@ -158,6 +158,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a list of a member's grouping memberships via their UH id number
+     *
+     * @param uuid: UH id number of member to get list of grouping memberships
+     * @return List of members grouping memberships
+     */
+    @RequestMapping(value = "/members/idnum/{uuid}/groupings",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<List<String>> memberGroupingsUuid(@PathVariable String uuid) {
+        logger.info("Entered REST memberGroupingsUuid...");
+        return ResponseEntity
+                .ok()
+                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPathsUuid(uuid)));
+    }
+
+    /**
      * Get an owner's owned groupings
      *
      * @param uid: Username of owner to get list of groupings they own

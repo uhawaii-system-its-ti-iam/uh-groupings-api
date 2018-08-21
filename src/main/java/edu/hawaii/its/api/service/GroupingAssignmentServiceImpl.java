@@ -442,7 +442,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return grouping;
     }
 
-    //returns the list of groups that the user is in
+    //returns the list of groups that the user is in, searching by username
     @Override
     public List<String> getGroupPaths(String username) {
         logger.info("getGroupPaths; username: " + username + ";");
@@ -455,6 +455,24 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
 
+        List<WsGroup> groups = new ArrayList<>();
+
+        if (groupResults.getWsGroups() != null) {
+            groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
+        }
+
+        return extractGroupPaths(groups);
+    }
+
+    // returns list of groups user is in, searching by uuid
+    public List<String> getGroupPathsUuid(String idNum) {
+        logger.info("getGroupPaths; uuid: " + idNum + ";");
+        WsStemLookup sLookup = grouperFS.makeWsStemLookup(STEM);
+
+        WsGetGroupsResults wsGetGroupsResults = grouperFS.makeWsGetGroupsResultsUuid(
+                idNum, sLookup, StemScope.ALL_IN_SUBTREE);
+
+        WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
         List<WsGroup> groups = new ArrayList<>();
 
         if (groupResults.getWsGroups() != null) {

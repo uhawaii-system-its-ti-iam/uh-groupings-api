@@ -145,6 +145,8 @@ public interface GrouperFactoryService {
 
     public WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
 
+    public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope);
+
     public WsAttributeAssign[] makeEmptyWsAttributeAssignArray();
 
     public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,

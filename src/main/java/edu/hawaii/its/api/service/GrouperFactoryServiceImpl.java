@@ -627,6 +627,16 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                             .execute();
     }
 
+    // gets group results by UH id number
+    @Override
+    public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope) {
+        return new GcGetGroups()
+                .addSubjectId(idnum)
+                .assignWsStemLookup(stemLookup)
+                .assignStemScope(stemScope)
+                .execute();
+    }
+
     // Covered by Integration Tests
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
 
