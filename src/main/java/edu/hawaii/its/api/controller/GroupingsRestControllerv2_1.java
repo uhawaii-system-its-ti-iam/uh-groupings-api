@@ -175,7 +175,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings
+     * Get an owner's owned groupings by username
      *
      * @param uid: Username of owner to get list of groupings they own
      * @return List of owner's owned groupings
@@ -189,6 +189,23 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid)));
+    }
+
+    /**
+     * Get an owner's owned groupings by UH id number.
+     *
+     * @param uuid: Id number of owner to get list of groupings they own
+     * @return List of owner's owned groupings
+     */
+    @RequestMapping(value = "/owners/idnum/{uuid}/groupings",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<List<Grouping>> ownerGroupingsUuid(@PathVariable String uuid) {
+        logger.info("Entered REST ownerGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPathsUuid(uuid)));
     }
 
     /**
@@ -209,7 +226,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
-    // Basically this means any functions after this line have not been tested yet
+    // Basically this means any functions after this line have not been tested yet 
 
     /**
      * Create a new admin
