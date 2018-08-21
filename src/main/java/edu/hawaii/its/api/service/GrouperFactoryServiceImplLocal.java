@@ -1002,7 +1002,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGetGroupsResults;
     }
 
-    // WIP WIP WIP WIP WIP WIP
     // gets group results by UH id number
     @Override
     public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope) {
