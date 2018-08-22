@@ -17,9 +17,13 @@ public interface MemberAttributeService {
 
     public boolean isMember(String groupPath, Person person);
 
+    public boolean isMemberUuid(String groupPath, String idnum);
+
     public boolean isOwner(String groupingPath, String username);
 
     public boolean isAdmin(String username);
+
+    public boolean isAdminUuid(String idnum);
 
     public boolean isApp(String username);
 
@@ -30,8 +34,6 @@ public interface MemberAttributeService {
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
     public Map<String, String> getUserAttributes(String username) throws GcWebServiceError;
-
-    public Map<String, String> getUserAttributesUuid(String uuid) throws GcWebServiceError;
 
     public Map<String, String> getUserAttributesLocal(String username);
 

@@ -442,37 +442,30 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return grouping;
     }
 
-    //returns the list of groups that the user is in, searching by username
+    //returns the list of groups that the user is in, searching by username or uuid
     @Override
     public List<String> getGroupPaths(String username) {
         logger.info("getGroupPaths; username: " + username + ";");
         WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
+        WsGetGroupsResults wsGetGroupsResults;
 
-        WsGetGroupsResults wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
-                username,
-                stemLookup,
-                StemScope.ALL_IN_SUBTREE);
+        try {
+            Integer.parseInt(username);
 
-        WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
+            wsGetGroupsResults = grouperFS.makeWsGetGroupsResultsUuid(
+                    username,
+                    stemLookup,
+                    StemScope.ALL_IN_SUBTREE);
 
-        List<WsGroup> groups = new ArrayList<>();
-
-        if (groupResults.getWsGroups() != null) {
-            groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
+        } catch (Exception NumberFormatException) {
+            wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
+                    username,
+                    stemLookup,
+                    StemScope.ALL_IN_SUBTREE);
         }
 
-        return extractGroupPaths(groups);
-    }
-
-    // returns list of groups user is in, searching by uuid
-    public List<String> getGroupPathsUuid(String idNum) {
-        logger.info("getGroupPaths; uuid: " + idNum + ";");
-        WsStemLookup sLookup = grouperFS.makeWsStemLookup(STEM);
-
-        WsGetGroupsResults wsGetGroupsResults = grouperFS.makeWsGetGroupsResultsUuid(
-                idNum, sLookup, StemScope.ALL_IN_SUBTREE);
-
         WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
+
         List<WsGroup> groups = new ArrayList<>();
 
         if (groupResults.getWsGroups() != null) {

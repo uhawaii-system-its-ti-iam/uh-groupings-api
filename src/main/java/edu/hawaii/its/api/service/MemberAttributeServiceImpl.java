@@ -298,6 +298,22 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
+    // returns true if the person is a member of the group
+    public boolean isMemberUuid(String groupPath, String idnum) {
+        logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
+
+        WsHasMemberResults memberResults = null /*= grouperFS.makeWsHasMemberResultsUuid(groupPath, idnum)*/;
+
+        WsHasMemberResult[] memberResultArray = memberResults.getResults();
+
+        for (WsHasMemberResult hasMember : memberResultArray) {
+            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //returns true if the user is in the owner group of the grouping
     @Override
     public boolean isOwner(String groupingPath, String username) {
@@ -309,6 +325,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isAdmin(String username) {
         return isMember(GROUPING_ADMINS, username);
     }
+
+    // returns true if user is in the owner group of the grouping
+    public boolean isAdminUuid(String idnum) { return isMemberUuid(GROUPING_ADMINS, idnum); }
 
     //returns true if the user is in the apps group
     @Override
@@ -347,36 +366,26 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
     public Map<String, String> getUserAttributes(String username) throws GcWebServiceError {
+        WsSubject[] subjects;
 
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+        try {
+            Integer.parseInt(username);
+            // username = uuid
 
-        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-        WsSubject[] subjects = results.getWsSubjects();
+            WsSubjectLookup lookup = grouperFS.makeWsSubjectLookupUuid(username);
+
+            WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+            subjects = results.getWsSubjects();
+        } catch (Exception NumberFormatException) {
+            // username = uid
+
+            WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+
+            WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+            subjects = results.getWsSubjects();
+        }
 
         //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
-        try {
-            String[] attributeValues = subjects[0].getAttributeValues();
-            Map<String, String> mapping = new HashMap<String, String>();
-
-            String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
-            for (int i = 0; i < attributeValues.length; i++) {
-                mapping.put(subjectAttributeNames[i], attributeValues[i]);
-            }
-
-            return mapping;
-
-        } catch (NullPointerException npe) {
-            throw new GcWebServiceError("Error 404 Not Found");
-        }
-    }
-
-    // Used to find user attributes with uuid
-    public Map<String,String> getUserAttributesUuid(String idNum) throws GcWebServiceError {
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookupUuid(idNum);
-
-        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-        WsSubject[] subjects = results.getWsSubjects();
-
         try {
             String[] attributeValues = subjects[0].getAttributeValues();
             Map<String, String> mapping = new HashMap<String, String>();

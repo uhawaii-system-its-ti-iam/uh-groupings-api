@@ -40,7 +40,5 @@ public interface GroupingAssignmentService {
 
     public List<String> getGroupPaths(String username);
 
-    public List<String> getGroupPathsUuid(String idNum);
-
     Group getMembers(String ownerUsername, String groupPath);
 }

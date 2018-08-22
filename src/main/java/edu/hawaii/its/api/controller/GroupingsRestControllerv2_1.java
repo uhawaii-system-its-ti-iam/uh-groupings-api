@@ -107,9 +107,9 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off username
+     * Get a member's attributes based off username or id number
      *
-     * @param uid: Username of user to obtain attributes about
+     * @param uid: Username or id number of user to obtain attributes about
      * @return Map of user attributes
      */
     @RequestMapping(value = "/members/{uid}",
@@ -124,26 +124,9 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off user id (uuid)
-     *
-     * @param uuid: UH User ID # to obtain attributes about
-     * @return Map of user attributes
-     */
-    @RequestMapping(value = "/members/idnum/{uuid}",
-        method = RequestMethod.GET,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Map<String,String>> uuidMemberAttributes(Principal principal, @PathVariable String uuid) {
-        logger.info("Entered REST uuidMemberAttributes...");
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.getUserAttributesUuid(uuid));
-    }
-
-    /**
      * Get a list of a member's grouping memberships
      *
-     * @param uid: Username of member to get list of grouping memberships
+     * @param uid: Username or id number of member to get list of grouping memberships
      * @return List of members grouping memberships
      */
     @RequestMapping(value = "/members/{uid}/groupings",
@@ -157,23 +140,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)));
     }
 
-    /**
-     * Get a list of a member's grouping memberships via their UH id number
-     *
-     * @param uuid: UH id number of member to get list of grouping memberships
-     * @return List of members grouping memberships
-     */
-    @RequestMapping(value = "/members/idnum/{uuid}/groupings",
-        method = RequestMethod.GET,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<List<String>> memberGroupingsUuid(@PathVariable String uuid) {
-        logger.info("Entered REST memberGroupingsUuid...");
-        return ResponseEntity
-                .ok()
-                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPathsUuid(uuid)));
-    }
-
+    // WIP
     /**
      * Get an owner's owned groupings by username
      *
@@ -191,22 +158,22 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid)));
     }
 
-    /**
-     * Get an owner's owned groupings by UH id number.
-     *
-     * @param uuid: Id number of owner to get list of groupings they own
-     * @return List of owner's owned groupings
-     */
-    @RequestMapping(value = "/owners/idnum/{uuid}/groupings",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<List<Grouping>> ownerGroupingsUuid(@PathVariable String uuid) {
-        logger.info("Entered REST ownerGroupings...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPathsUuid(uuid)));
-    }
+//    /**
+//     * Get an owner's owned groupings by UH id number.
+//     *
+//     * @param uuid: Id number of owner to get list of groupings they own
+//     * @return List of owner's owned groupings
+//     */
+//    @RequestMapping(value = "/owners/idnum/{uuid}/groupings",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<List<Grouping>> ownerGroupingsUuid(@PathVariable String uuid) {
+//        logger.info("Entered REST ownerGroupings...");
+//        return ResponseEntity
+//                .ok()
+//                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPathsUuid(uuid)));
+//    }
 
     /**
      * Get a specific grouping
@@ -226,7 +193,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
-    // Basically this means any functions after this line have not been tested yet 
+    // Basically this means any functions after this line have not been tested yet
 
     /**
      * Create a new admin
@@ -243,6 +210,24 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.addAdmin(principal.getName(), uid));
     }
+
+    // WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
+    /**
+     * Create a new admin by using UH Id number
+     *
+     * @param uuid: User id number of admin to add
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "admins/{uuid}",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> addNewAdminUuid(Principal principal, @PathVariable String uuid) {
+        logger.info("Entered REST addNewAdmin...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addAdmin(principal.getName(), uuid));
+    }
+    // WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
 
     //todo Implement method and come back to fix REST controller method
     /**
@@ -278,6 +263,24 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.assignOwnership(path, principal.getName(), uid));
+    }
+
+    /**
+     * Update grouping to add a new owner by UH id number
+     *
+     * @param path: path of grouping to update
+     * @param uuid:  uuid of new owner to add
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "groupings/{path}/owners/{uuid}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> addOwnerUuid(Principal principal, @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST addOwner...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.assignOwnership(path, principal.getName(), uuid));
     }
 
     /**

@@ -456,6 +456,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // todo Test
+    public WsHasMemberResults makeWsHasMemberResultsUuid(String group, String idnum) {
+        return new GcHasMember()
+                .assignGroupName(group)
+                .addSubjectId(idnum)
+                .execute();
+    }
+
     //todo Need to test if cases
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, Person person) {
