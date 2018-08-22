@@ -60,6 +60,9 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
+    @Value("${groupings.api.ldap}")
+    private String LDAP;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -175,9 +178,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAssignmentService.getGrouping(path, principal.getName()));
     }
 
-    //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
-    // Basically this means any functions after this line have not been tested yet
-
     /**
      * Create a new admin
      *
@@ -193,8 +193,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.addAdmin(principal.getName(), uid));
     }
-
-    //todo Implement method and come back to fix REST controller method
 
     /**
      * Create a new grouping
@@ -282,18 +280,25 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST enablePreference");
-        ResponseEntity<List<GroupingsServiceResult>> responseEntity = null;
+        List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) || !OPT_OUT.equals(preferenceId) || !LISTSERV.equals(preferenceId) || !LDAP
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId) && !LDAP
                 .equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
-                responseEntity.ok().body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
+                results = groupAttributeService.changeOptInStatus(path, principal.getName(), true);
+            } else if (OPT_OUT.equals(preferenceId)) {
+                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), true);
+            } else if (LISTSERV.equals(preferenceId)) {
+                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), true));
+            } else {
+                results.add(groupAttributeService.changeLdapStatus(path, principal.getName(), true));
             }
-            //todo Add the rest of the possiblities in, but responseEntity def works
         }
-        return responseEntity;
+        return ResponseEntity
+                .ok()
+                .body(results);
     }
     //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
     //            method = RequestMethod.PUT,
@@ -330,29 +335,55 @@ public class GroupingsRestControllerv2_1 {
     @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
-            @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal, @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST disablePreference");
-        if (preferenceId.equals(OPT_IN)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
-        } else if (preferenceId.equals(OPT_OUT)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
-        } else if (preferenceId.equals(LISTSERV)) {
-            GroupingsServiceResult result =
-                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
-            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-            listResult.add(result);
-            return ResponseEntity
-                    .ok()
-                    .body(listResult);
+        List<GroupingsServiceResult> results = new ArrayList<>();
+
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId) && !LDAP
+                .equals(preferenceId)) {
+            throw new UnsupportedOperationException();
+        } else {
+            if (OPT_IN.equals(preferenceId)) {
+                results = groupAttributeService.changeOptInStatus(path, principal.getName(), false);
+            } else if (OPT_OUT.equals(preferenceId)) {
+                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), false);
+            } else if (LISTSERV.equals(preferenceId)) {
+                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), false));
+            } else {
+                results.add(groupAttributeService.changeLdapStatus(path, principal.getName(), false));
+            }
         }
-        throw new UnsupportedOperationException();
+        return ResponseEntity
+                .ok()
+                .body(results);
     }
+//    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
+//            method = RequestMethod.PUT,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+//            @PathVariable String path,
+//            @PathVariable String preferenceId) {
+//        logger.info("Entered REST disablePreference");
+//        if (preferenceId.equals(OPT_IN)) {
+//            return ResponseEntity
+//                    .ok()
+//                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
+//        } else if (preferenceId.equals(OPT_OUT)) {
+//            return ResponseEntity
+//                    .ok()
+//                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
+//        } else if (preferenceId.equals(LISTSERV)) {
+//            GroupingsServiceResult result =
+//                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
+//            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+//            listResult.add(result);
+//            return ResponseEntity
+//                    .ok()
+//                    .body(listResult);
+//        }
+//        throw new UnsupportedOperationException();
+//    }
 
     /**
      * Delete an admin
@@ -369,8 +400,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.deleteAdmin(principal.getName(), uid));
     }
-
-    //todo Implement method and fix REST controller method
 
     /**
      * Delete a grouping
