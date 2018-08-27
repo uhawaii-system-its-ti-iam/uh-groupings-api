@@ -23,8 +23,6 @@ public interface MemberAttributeService {
 
     public boolean isAdmin(String username);
 
-    public boolean isAdminUuid(String idnum);
-
     public boolean isApp(String username);
 
     public boolean isSuperuser(String username);

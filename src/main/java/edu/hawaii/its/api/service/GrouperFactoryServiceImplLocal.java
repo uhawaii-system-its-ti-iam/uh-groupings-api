@@ -254,14 +254,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum) {
-        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        wsSubjectLookup.setSubjectIdentifier(idNum);
-
-        return wsSubjectLookup;
-    }
-
-    @Override
     //todo
     public WsAddMemberResults makeWsAddMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid) {
         return null;
@@ -1001,30 +993,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         return wsGetGroupsResults;
     }
-
-    // gets group results by UH id number
-    @Override
-    public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope) {
-        WsGetGroupsResults wsGetGroupsResults = new WsGetGroupsResults();
-        WsGetGroupsResult wsGetGroupsResult = new WsGetGroupsResult();
-        WsGroup[] groups;
-
-        List<WsGroup> wsGroupList = new ArrayList<>();
-        List<Group> groupList = groupRepository.findByMembersUuid(idnum);
-
-        for (Group group : groupList) {
-            WsGroup wsGroup = new WsGroup();
-            wsGroup.setName(group.getPath());
-            wsGroupList.add(wsGroup);
-        }
-
-        groups = wsGroupList.toArray(new WsGroup[wsGroupList.size()]);
-        wsGetGroupsResult.setWsGroups(groups);
-        wsGetGroupsResults.setResults(new WsGetGroupsResult[] { wsGetGroupsResult });
-
-        return wsGetGroupsResults;
-    }
-
 
     @Override
     public WsAttributeAssign[] makeEmptyWsAttributeAssignArray() {

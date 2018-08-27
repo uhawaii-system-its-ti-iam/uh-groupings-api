@@ -77,6 +77,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Empty.
     }
 
+    public boolean isUuid(String username) { return username.matches("\\d+"); }
+
     //todo Not tested
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
@@ -141,15 +143,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsSubjectLookup makeWsSubjectLookup(String username) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        wsSubjectLookup.setSubjectIdentifier(username);
 
-        return wsSubjectLookup;
-    }
-
-    @Override
-    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum) {
-        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        wsSubjectLookup.setSubjectId(idNum);
+        if(isUuid(username)) {
+            wsSubjectLookup.setSubjectId(username);
+        }
+        else {
+            wsSubjectLookup.setSubjectIdentifier(username);
+        }
 
         return wsSubjectLookup;
     }
@@ -237,6 +237,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, String newMember) {
+        if (isUuid(newMember)) {
+            return new GcAddMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectId(newMember)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcAddMember()
                 .assignActAsSubject(lookup)
                 .addSubjectIdentifier(newMember)
@@ -286,6 +293,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     //todo Not tested
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
+        if (isUuid(memberToDelete)) {
+            return new GcDeleteMember()
+                    .addSubjectId(memberToDelete)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcDeleteMember()
                 .addSubjectIdentifier(memberToDelete)
                 .assignGroupName(group)
@@ -296,6 +309,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             String memberToDelete) {
+        if (isUuid(memberToDelete)) {
+            return new GcDeleteMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectId(memberToDelete)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcDeleteMember()
                 .assignActAsSubject(lookup)
                 .addSubjectIdentifier(memberToDelete)
@@ -449,18 +469,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
-
+        if (isUuid(username)) {
+            return new GcHasMember()
+                    .assignGroupName(group)
+                    .addSubjectId(username)
+                    .execute();
+        }
         return new GcHasMember()
                 .assignGroupName(group)
                 .addSubjectIdentifier(username)
-                .execute();
-    }
-
-    // todo Test
-    public WsHasMemberResults makeWsHasMemberResultsUuid(String group, String idnum) {
-        return new GcHasMember()
-                .assignGroupName(group)
-                .addSubjectId(idnum)
                 .execute();
     }
 
@@ -619,30 +636,19 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-//        try {
-//            return new GcGetGroups()
-//                    .addSubjectIdentifier(username)
-//                    .assignWsStemLookup(stemLookup)
-//                    .assignStemScope(stemScope)
-//                    .execute();
-//        } catch (Exception e){
-//            return new WsGetGroupsResults();
-//        }
-                    return new GcGetGroups()
-                            .addSubjectIdentifier(username)
-                            .assignWsStemLookup(stemLookup)
-                            .assignStemScope(stemScope)
-                            .execute();
-    }
+        if (isUuid(username)) {
+            return new GcGetGroups()
+                    .addSubjectId(username)
+                    .assignWsStemLookup(stemLookup)
+                    .assignStemScope(stemScope)
+                    .execute();
+        }
 
-    // gets group results by UH id number
-    @Override
-    public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope) {
         return new GcGetGroups()
-                .addSubjectId(idnum)
-                .assignWsStemLookup(stemLookup)
-                .assignStemScope(stemScope)
-                .execute();
+            .addSubjectIdentifier(username)
+            .assignWsStemLookup(stemLookup)
+            .assignStemScope(stemScope)
+            .execute();
     }
 
     // Covered by Integration Tests

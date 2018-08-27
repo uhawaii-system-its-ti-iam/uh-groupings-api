@@ -34,8 +34,6 @@ public interface GrouperFactoryService {
 
     public WsSubjectLookup makeWsSubjectLookup(String username);
 
-    public WsSubjectLookup makeWsSubjectLookupUuid(String idNum);
-
     public WsGroupLookup makeWsGroupLookup(String group);
 
     public WsStemLookup makeWsStemLookup(String stemName);
@@ -146,8 +144,6 @@ public interface GrouperFactoryService {
             String groupName);
 
     public WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
-
-    public WsGetGroupsResults makeWsGetGroupsResultsUuid(String idnum, WsStemLookup stemLookup, StemScope stemScope);
 
     public WsAttributeAssign[] makeEmptyWsAttributeAssignArray();
 
