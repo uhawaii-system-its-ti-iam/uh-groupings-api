@@ -212,34 +212,6 @@ public class HelperServiceImpl implements HelperService {
         return groupings;
     }
 
-//    public List<Grouping> extractGroupings(List<String> groupPaths) {
-//        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
-//
-//        List<Grouping> groupings = new ArrayList<>();
-//        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-//
-//        if (groupPaths.size() > 0) {
-//
-//            List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
-//                    grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
-//                            ASSIGN_TYPE_GROUP,
-//                            TRIO,
-//                            groupPaths);
-//
-//            attributeAssignmentsResults
-//                    .stream()
-//                    .filter(results -> results.getWsAttributeAssigns() != null)
-//                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
-//
-//            if (attributeAssigns.size() > 0) {
-//                groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
-//                        .collect(Collectors.toList()));
-//            }
-//        }
-//        return groupings;
-
-
-//    }
 
     @Override
     public String toString() {

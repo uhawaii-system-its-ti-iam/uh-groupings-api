@@ -72,6 +72,10 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Value("${groupings.api.composite_type.union}")
     private String UNION;
 
+    @Value("${groupings.api.trio}")
+    private String isTrio;
+
+
     // Constructor.
     public GrouperFactoryServiceImpl() {
         // Empty.
@@ -616,6 +620,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                             .addSubjectIdentifier(username)
                             .assignWsStemLookup(stemLookup)
                             .assignStemScope(stemScope)
+                            .assignIncludeGroupDetail(true)
                             .execute();
     }
 
