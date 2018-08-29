@@ -140,7 +140,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)));
     }
 
-    // WIP
     /**
      * Get an owner's owned groupings by username or UH id number
      *
@@ -401,7 +400,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteInclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMemberByUsername(principal.getName(), path + INCLUDE, uid));
+                .body(membershipService.deleteGroupMember(principal.getName(), path + INCLUDE, uid));
     }
 
     /**

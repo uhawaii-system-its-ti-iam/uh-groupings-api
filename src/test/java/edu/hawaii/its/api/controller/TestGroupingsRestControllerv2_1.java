@@ -118,6 +118,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
+    @Value("${groupings.api.test.uhuuids}")
+    private String[] tstUuid;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -201,7 +204,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         assertThat(listHolderFail.getAdminGroup().getMembers().size(), equalTo(0));
         assertThat(listHolderFail.getAllGroupings().size(), equalTo(0));
-
     }
 
     // app user has permissions to obtain this data
@@ -475,6 +477,34 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
+    }
+
+    // WIP
+    @Test
+    @WithMockUhUser(username = "iamtst05") // Is this the user being added or the user executing these functions?
+    // If a make a call to add, which grouping is it adding to
+    public void addDeleteMemberUuidPassTest() throws Exception {
+        // adds tstUuid[0] to GROUPING's include
+        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tstUuid[0], "put");
+
+/*
+        // tests tstUuid[0] is in include but not exclude
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[0]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tstUuid[0]));
+*/
+/*
+        // confirm tstUuid[0] deleted
+        mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[0]));
+
+        // tests tstUuid[1] is in exclude
+        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tstUuid[1], "put");
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[1]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tstUuid[1]));
+
+        mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
+*/
     }
 
     @Test

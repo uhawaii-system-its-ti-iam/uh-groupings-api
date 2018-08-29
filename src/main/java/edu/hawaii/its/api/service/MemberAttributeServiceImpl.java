@@ -209,9 +209,16 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 + "; newOwnerUsername: "
                 + newOwnerUsername
                 + ";");
-
-        String action = "give " + newOwnerUsername + " ownership of " + groupingPath;
+        String action;
         GroupingsServiceResult ownershipResult;
+
+        if (isUuid(newOwnerUsername)) {
+            action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
+        }
+        else {
+            action = "give " + newOwnerUsername + " ownership of " + groupingPath;
+        }
+
 
         if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);

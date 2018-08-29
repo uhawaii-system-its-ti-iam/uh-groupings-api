@@ -426,12 +426,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + userToAddUsername + ";");
         Person personToAdd;
 
-        if (isUuid(userToAddUsername)) {
-            personToAdd = new Person(null, userToAddUsername, null);
-        }
-        else {
-            personToAdd = new Person(null, null, userToAddUsername);
-        }
+        personToAdd = new Person(null, null, userToAddUsername);
 
         return addMemberHelper(ownerUsername, groupPath, personToAdd);
     }
@@ -471,6 +466,16 @@ public class MembershipServiceImpl implements MembershipService {
             gsrList.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
         }
         return gsrList;
+    }
+
+    @Override
+    public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
+            String userToDelete) {
+        if (isUuid(userToDelete)) {
+            // Given a uuid
+            return deleteGroupMemberByUuid(ownerUsername, groupPath, userToDelete);
+        }
+        return deleteGroupMemberByUsername(ownerUsername, groupPath, userToDelete);
     }
 
     //find a user by a username and remove them from a group
@@ -727,7 +732,7 @@ public class MembershipServiceImpl implements MembershipService {
         String action = "add users to " + groupPath;
 
         if (mas.isOwner(hs.parentGroupingPath(groupPath), username) || mas.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
-                .getUsername().equals(username))) {
+                .getUsername().equals(username)) /* DELETE AFTER TESTING */ || mas.isAdmin(username)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = hs.parentGroupingPath(groupPath);
             String exclude = composite + EXCLUDE;

@@ -255,7 +255,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, Person personToAdd) {
         if (personToAdd.getUsername() != null) {
-            return makeWsAddMemberResults(group, lookup, personToAdd.getUsername());
+            // return makeWsAddMemberResults(group, lookup, personToAdd.getUsername());
+            return new GcAddMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectIdentifier(personToAdd.getUsername())
+                    .assignGroupName(group)
+                    .execute();
         }
 
         if (personToAdd.getUuid() == null) {
@@ -273,6 +278,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, List<String> newMembers) {
         GcAddMember addMember = new GcAddMember();
+
         addMember.assignActAsSubject(lookup);
         addMember.assignGroupName(group);
 

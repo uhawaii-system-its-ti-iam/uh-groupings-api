@@ -45,6 +45,9 @@ public interface MembershipService {
     //todo deleteGroupMembersByUuid
     //todo deleteGroupMembersByUsername
 
+    public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
+            String userToDelete);
+
     public List<String> listOwned(String adminUsername, String username);
 
     public GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
