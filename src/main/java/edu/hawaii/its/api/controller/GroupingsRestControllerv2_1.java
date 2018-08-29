@@ -60,8 +60,8 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
-    @Value("${groupings.api.ldap}")
-    private String LDAP;
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -282,8 +282,8 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST enablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId) && !LDAP
-                .equals(preferenceId)) {
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
+                && !RELEASED_GROUPING.equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
@@ -293,7 +293,7 @@ public class GroupingsRestControllerv2_1 {
             } else if (LISTSERV.equals(preferenceId)) {
                 results.add(groupAttributeService.changeListservStatus(path, principal.getName(), true));
             } else {
-                results.add(groupAttributeService.changeLdapStatus(path, principal.getName(), true));
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), true));
             }
         }
         return ResponseEntity
@@ -335,13 +335,14 @@ public class GroupingsRestControllerv2_1 {
     @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+            @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST disablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId) && !LDAP
-                .equals(preferenceId)) {
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
+                && !RELEASED_GROUPING.equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
@@ -351,39 +352,39 @@ public class GroupingsRestControllerv2_1 {
             } else if (LISTSERV.equals(preferenceId)) {
                 results.add(groupAttributeService.changeListservStatus(path, principal.getName(), false));
             } else {
-                results.add(groupAttributeService.changeLdapStatus(path, principal.getName(), false));
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), false));
             }
         }
         return ResponseEntity
                 .ok()
                 .body(results);
     }
-//    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
-//            method = RequestMethod.PUT,
-//            produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
-//            @PathVariable String path,
-//            @PathVariable String preferenceId) {
-//        logger.info("Entered REST disablePreference");
-//        if (preferenceId.equals(OPT_IN)) {
-//            return ResponseEntity
-//                    .ok()
-//                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
-//        } else if (preferenceId.equals(OPT_OUT)) {
-//            return ResponseEntity
-//                    .ok()
-//                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
-//        } else if (preferenceId.equals(LISTSERV)) {
-//            GroupingsServiceResult result =
-//                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
-//            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-//            listResult.add(result);
-//            return ResponseEntity
-//                    .ok()
-//                    .body(listResult);
-//        }
-//        throw new UnsupportedOperationException();
-//    }
+    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
+    //            method = RequestMethod.PUT,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+    //    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+    //            @PathVariable String path,
+    //            @PathVariable String preferenceId) {
+    //        logger.info("Entered REST disablePreference");
+    //        if (preferenceId.equals(OPT_IN)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
+    //        } else if (preferenceId.equals(OPT_OUT)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
+    //        } else if (preferenceId.equals(LISTSERV)) {
+    //            GroupingsServiceResult result =
+    //                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
+    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+    //            listResult.add(result);
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(listResult);
+    //        }
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      * Delete an admin

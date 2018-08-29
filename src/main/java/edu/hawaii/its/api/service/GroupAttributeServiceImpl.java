@@ -61,8 +61,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
-    @Value("${groupings.api.ldap}")
-    private String LDAP;
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
 
     @Value("${groupings.api.trio}")
     private String TRIO;
@@ -173,8 +173,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     //turn the LDAP for a grouping on or off
     @Override
-    public GroupingsServiceResult changeLdapStatus(String groupingPath, String ownerUsername, boolean ldapOn) {
-        return changeGroupAttributeStatus(groupingPath, ownerUsername, LDAP, ldapOn);
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean releasedGroupingOn) {
+        return changeGroupAttributeStatus(groupingPath, ownerUsername, RELEASED_GROUPING, releasedGroupingOn);
     }
 
     //turn the ability for users to opt-in to a grouping on or off
@@ -224,8 +224,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     //returns true if the grouping has LDAP, false otherwise
     @Override
-    public boolean hasLdap(String groupingPath) {
-        return groupHasAttribute(groupingPath, LDAP);
+    public boolean hasReleasedGrouping(String groupingPath) {
+        return groupHasAttribute(groupingPath, RELEASED_GROUPING);
     }
 
     //returns true if the grouping allows the user to opt out, false otherwise

@@ -115,6 +115,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.opt_out}")
     private String OPT_OUT;
 
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
     @Value("${groupings.api.basis}")
     private String BASIS;
 
@@ -638,6 +641,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         }
         if (grouping.isOptOutOn()) {
             wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, OPT_OUT);
+        }
+        if (grouping.isReleasedGroupingOn()) {
+            wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, RELEASED_GROUPING);
         }
 
         return wsGetAttributeAssignmentsResults;

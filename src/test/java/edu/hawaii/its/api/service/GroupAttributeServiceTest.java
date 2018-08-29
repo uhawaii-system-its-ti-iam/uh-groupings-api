@@ -30,6 +30,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
@@ -236,6 +237,28 @@ public class GroupAttributeServiceTest {
     }
 
     @Test
+    public void changeReleasedGroupingStatusTest() {
+        //todo
+        //starts ON
+        List<GroupingsServiceResult> results;
+        String owner = users.get(1).getUsername(); //username1
+        String user = users.get(0).getUsername();
+        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        // Should fail owner is username0
+        try {
+            groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+        } catch (GroupingsServiceResultException gsre) {
+            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        }
+
+        results = groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
+
+    }
+
+    @Test
     public void changeOptInStatusTest() {
         //expect actions done by "Random" to fail
         List<GroupingsServiceResult> turnOnWhenOnRandom;
@@ -257,7 +280,7 @@ public class GroupAttributeServiceTest {
         try {
             turnOffWhenOnRandom =
                     groupingsService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
-//            assertTrue(turnOffWhenOnRandom.get(0).getResultCode().startsWith(FAILURE));
+            //            assertTrue(turnOffWhenOnRandom.get(0).getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
             turnOffWhenOnRandom = new ArrayList<>();
             turnOffWhenOnRandom.add(gsre.getGsr());
@@ -282,7 +305,7 @@ public class GroupAttributeServiceTest {
         } catch (GroupingsServiceResultException gsre) {
             turnOnWhenOffRandom = new ArrayList<>();
             turnOnWhenOffRandom.add(gsre.getGsr());
-//            assertTrue(turnOnWhenOffRandom.get(0).getResultCode().startsWith(FAILURE));
+            //            assertTrue(turnOnWhenOffRandom.get(0).getResultCode().startsWith(FAILURE));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupingsService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
@@ -453,6 +476,16 @@ public class GroupAttributeServiceTest {
         groupingHasListserv = groupingsService.hasListserv(GROUPING_3_PATH);
 
         assertEquals(true, groupingHasListserv);
+    }
+
+    @Test
+    public void hasReleasedGroupingTest() {
+
+        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        boolean hasReleasedGrouping = groupingsService.hasReleasedGrouping(GROUPING_0_PATH);
+        assertTrue(hasReleasedGrouping);
+
     }
 }
 

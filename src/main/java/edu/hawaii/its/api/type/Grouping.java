@@ -41,6 +41,9 @@ public class Grouping {
     @Column
     private boolean optOutOn = false;
 
+    @Column
+    private boolean releasedGroupingOn = false;
+
     // Constructor.
     public Grouping() {
         this("");
@@ -137,6 +140,10 @@ public class Grouping {
     public void setOptOutOn(boolean optOutOn) {
         this.optOutOn = optOutOn;
     }
+
+    public boolean isReleasedGroupingOn() { return releasedGroupingOn; }
+
+    public void setReleasedGroupingOn(boolean releasedGroupingOn) { this.releasedGroupingOn = releasedGroupingOn; }
 
     @Override
     public String toString() {
