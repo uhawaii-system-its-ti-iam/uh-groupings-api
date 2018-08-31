@@ -32,6 +32,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -239,23 +240,61 @@ public class GroupAttributeServiceTest {
     @Test
     public void changeReleasedGroupingStatusTest() {
         //todo
-        //starts ON
-        List<GroupingsServiceResult> results;
-        String owner = users.get(1).getUsername(); //username1
-        String user = users.get(0).getUsername();
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        String user = users.get(1).getUsername(); // username1
+        String owner = users.get(0).getUsername(); // username0
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        // Should fail owner is username0
+        //starts ON
+        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+
+        // ON to ON
         try {
             groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+            fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
             assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
         }
-
-        results = groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+        results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
 
+        //ON to OFF
+        try {
+            groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, false);
+            fail("Shouldn't be here");
+        } catch (GroupingsServiceResultException gsre) {
+            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        }
+        results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
+        assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
+        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+
+        // OFF to OFF
+        try {
+            groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, false);
+            fail("Shouldn't be here");
+        } catch (GroupingsServiceResultException gsre) {
+            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        }
+        results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
+        assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
+        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+
+        // OFF to ON
+        try {
+            groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+            fail("Shouldn't be here");
+        } catch (GroupingsServiceResultException gsre) {
+            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        }
+        results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
+        assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
+        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
     }
 
     @Test
@@ -485,6 +524,10 @@ public class GroupAttributeServiceTest {
 
         boolean hasReleasedGrouping = groupingsService.hasReleasedGrouping(GROUPING_0_PATH);
         assertTrue(hasReleasedGrouping);
+
+        grouping = groupingRepository.findByPath(GROUPING_1_PATH);
+        hasReleasedGrouping = groupingsService.hasReleasedGrouping(GROUPING_1_PATH);
+        assertFalse(hasReleasedGrouping);
 
     }
 }

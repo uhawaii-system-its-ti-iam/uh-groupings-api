@@ -226,7 +226,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path) {
 
         return new GcGroupDelete()
                 .addGroupLookup(path)
@@ -643,7 +643,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, OPT_OUT);
         }
         if (grouping.isReleasedGroupingOn()) {
-            wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, RELEASED_GROUPING);
+            wsGetAttributeAssignmentsResults =
+                    addAssignmentResults(wsGetAttributeAssignmentsResults, RELEASED_GROUPING);
         }
 
         return wsGetAttributeAssignmentsResults;
@@ -720,20 +721,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         }
 
         if (onOrrOff != null) {
-            if (attributeDefNameName.equals(LISTSERV))
-
-            {
+            if (attributeDefNameName.equals(LISTSERV)) {
                 grouping.setListservOn(onOrrOff);
-
-            } else if (attributeDefNameName.equals(OPT_IN))
-
-            {
+            } else if (attributeDefNameName.equals(OPT_IN)) {
                 grouping.setOptInOn(onOrrOff);
-
-            } else if (attributeDefNameName.equals(OPT_OUT))
-
-            {
+            } else if (attributeDefNameName.equals(OPT_OUT)) {
                 grouping.setOptOutOn(onOrrOff);
+            } else if (attributeDefNameName.equals(RELEASED_GROUPING)) {
+                grouping.setReleasedGroupingOn(onOrrOff);
             }
         }
 
@@ -1049,6 +1044,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             grouping.setOptInOn(on);
         } else if (attributeName.equals(OPT_OUT)) {
             grouping.setOptOutOn(on);
+        } else if (attributeName.equals(RELEASED_GROUPING)) {
+            grouping.setReleasedGroupingOn(on);
         } else {
             return false;
         }
@@ -1222,7 +1219,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
             String attributeDefNameName,
-            List<String> ownerGroupNames){
+            List<String> ownerGroupNames) {
         return null;
     }
 }
