@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -203,6 +204,8 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(gc);
     }
 
+    //todo Try all functions with anonymous user. Should return not-200
+
     // iamtst01 does not have permissions, so this should fail
     @Test
     @WithMockUhUser(username = "iamtst01")
@@ -262,7 +265,6 @@ public class TestGroupingsRestControllerv2_1 {
     public void memberGroupingsTest() throws Exception {
 
         List listMemberships = mapList("/api/groupings/v2.1/members/iamtst01/groupings", "get");
-
         assertThat(listMemberships.size(), not(0));
 
         // Test with username not in database
@@ -287,7 +289,6 @@ public class TestGroupingsRestControllerv2_1 {
     public void ownerGroupingsTest() throws Exception {
 
         List listGroupings = mapList("/api/groupings/v2.1/owners/iamtst01/groupings", "get");
-
         assertThat(listGroupings.size(), not(0));
 
         // Test with username not in database
@@ -373,12 +374,12 @@ public class TestGroupingsRestControllerv2_1 {
     public void getGroupingFailTest() throws Exception {
 
         // Nothing in this test should go through since "iamtst02" is not an owner/superuser
-        try {
-            mapGrouping(GROUPING);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
-        }
+        // In this case, the call succeeds, but the result will be an empty grouping
+        Grouping grouping = mapGrouping(GROUPING);
+        assertThat(grouping.getBasis().getUsernames().size(), equalTo(0));
+        assertThat(grouping.getInclude().getUsernames().size(), equalTo(0));
+        assertThat(grouping.getExclude().getUsernames().size(), equalTo(0));
+        assertThat(grouping.getComposite().getUsernames().size(), equalTo(0));
     }
 
     @Test
@@ -518,7 +519,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteOwnerFailTest() throws Exception {
 
         // This shouldn't go through because "iamtst02" is not an owner
-        // Can only printStackTrace, can't pull up owner list without being an owner
+        // Can't pull up owner list without being an owner
         try {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/" + tst[2], "put");
             fail("Shouldn't be here.");
@@ -534,7 +535,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    //todo
+
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void addDeleteMemberPassTest() throws Exception {
@@ -573,55 +574,62 @@ public class TestGroupingsRestControllerv2_1 {
         // Garbage data tests
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/includeMembers/bobjones", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/includeMembers/bobjones", "delete");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/excludeMembers/bobjones", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/excludeMembers/bobjones", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
-        // Null fields tests
+        // Empty fields tests
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/includeMembers/" + null, "put");
+            mapGSRs("/api/groupings/v2.1/groupings//includeMembers//", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
-        }
-
-        try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/includeMembers/" + null, "delete");
-        } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/excludeMembers/" + null, "put");
+            mapGSRs("/api/groupings/v2.1/groupings//includeMembers//", "delete");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/excludeMembers/" + null, "delete");
+            mapGSRs("/api/groupings/v2.1/groupings//excludeMembers//", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
+        }
+
+        try {
+            mapGSRs("/api/groupings/v2.1/groupings//excludeMembers//", "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), not(200));
         }
     }
 
-    //todo
     @Test
     @WithMockUhUser(username = "iamtst02")
     public void addDeleteMemberFailTest() throws Exception {
@@ -630,33 +638,36 @@ public class TestGroupingsRestControllerv2_1 {
         // Try add member to include without proper permissions
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tst[3], "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         // Try delete member from include without proper permissions
         try {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tst[2], "delete");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         // Try add member to exclude without proper permissions
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tst[2], "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         // Try delete member from exclude without proper permissions
         try {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tst[3], "delete");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
     }
 
-    //todo
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void enableDisablePreferencesPassTest() throws Exception {
@@ -689,31 +700,34 @@ public class TestGroupingsRestControllerv2_1 {
         // Try with bad data
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/disable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/disable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         // Try with null fields
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + null + "/preferences/" + null + "/enable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + null + "/preferences/" + null + "/disable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
     }
 
-    //todo
     @Test
     @WithMockUhUser(username = "iamtst02")
     public void enableDisablePreferencesFailTest() throws Exception {
@@ -721,18 +735,19 @@ public class TestGroupingsRestControllerv2_1 {
         // This should fail because "iamtst02" is not an owner
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
     }
 
-    //todo
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteGroupingPassTest() throws Exception {
@@ -759,7 +774,6 @@ public class TestGroupingsRestControllerv2_1 {
 
     }
 
-    //todo
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void addDeleteGroupingFailTest() throws Exception {
@@ -768,13 +782,13 @@ public class TestGroupingsRestControllerv2_1 {
         try {
             mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
 
         try {
             mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ksanidad-test", "delete");
         } catch (GroupingsHTTPException ghe) {
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), not(200));
         }
     }
 
@@ -783,6 +797,7 @@ public class TestGroupingsRestControllerv2_1 {
     ///////////////////////////////////////////////////////////////////////
     // MVC mapping
     //////////////////////////////////////////////////////////////////////
+    //todo Comment this properly
 
     private Map mapGetUserAttributes(String username) throws Exception {
 
