@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -58,6 +59,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -174,9 +178,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAssignmentService.getGrouping(path, principal.getName()));
     }
 
-    //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
-    // Basically this means any functions after this line have not been tested yet
-
     /**
      * Create a new admin
      *
@@ -193,7 +194,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(principal.getName(), uid));
     }
 
-    //todo Implement method and come back to fix REST controller method
     /**
      * Create a new grouping
      * Not implemented yet, even REST API controller function might not be doable at this stage
@@ -201,15 +201,15 @@ public class GroupingsRestControllerv2_1 {
      * @param path: String containing the path of grouping
      * @return Information about results of operation
      */
-        @RequestMapping(value = "/groupings/{path}",
-                method = RequestMethod.POST,
-                produces = MediaType.APPLICATION_JSON_VALUE)
-        public ResponseEntity<List<GroupingsServiceResult>> addNewGrouping(Principal principal, @PathVariable String path) {
-            logger.info("Entered REST addNewGrouping");
-            return ResponseEntity
-                    .ok()
-                    .body(groupingFactoryService.addGrouping(principal.getName(), path));
-        }
+    @RequestMapping(value = "/groupings/{path}",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> addNewGrouping(Principal principal, @PathVariable String path) {
+        logger.info("Entered REST addNewGrouping");
+        return ResponseEntity
+                .ok()
+                .body(groupingFactoryService.addGrouping(principal.getName(), path));
+    }
 
     /**
      * Update grouping to add a new owner
@@ -280,24 +280,50 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST enablePreference");
-        if (preferenceId.equals(OPT_IN)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
-        } else if (preferenceId.equals(OPT_OUT)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
-        } else if (preferenceId.equals(LISTSERV)) {
-            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
-            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-            listResult.add(result);
-            return ResponseEntity
-                    .ok()
-                    .body(listResult);
+        List<GroupingsServiceResult> results = new ArrayList<>();
+
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
+                && !RELEASED_GROUPING.equals(preferenceId)) {
+            throw new UnsupportedOperationException();
+        } else {
+            if (OPT_IN.equals(preferenceId)) {
+                results = groupAttributeService.changeOptInStatus(path, principal.getName(), true);
+            } else if (OPT_OUT.equals(preferenceId)) {
+                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), true);
+            } else if (LISTSERV.equals(preferenceId)) {
+                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), true));
+            } else {
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), true));
+            }
         }
-        throw new UnsupportedOperationException();
+        return ResponseEntity
+                .ok()
+                .body(results);
     }
+    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
+    //            method = RequestMethod.PUT,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+    //    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
+    //            @PathVariable String preferenceId) {
+    //        logger.info("Entered REST enablePreference");
+    //        if (preferenceId.equals(OPT_IN)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
+    //        } else if (preferenceId.equals(OPT_OUT)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
+    //        } else if (preferenceId.equals(LISTSERV)) {
+    //            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
+    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+    //            listResult.add(result);
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(listResult);
+    //        }
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      * Update grouping to disable given preference
@@ -313,25 +339,52 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST disablePreference");
-        if (preferenceId.equals(OPT_IN)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
-        } else if (preferenceId.equals(OPT_OUT)) {
-            return ResponseEntity
-                    .ok()
-                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
-        } else if (preferenceId.equals(LISTSERV)) {
-            GroupingsServiceResult result =
-                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
-            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-            listResult.add(result);
-            return ResponseEntity
-                    .ok()
-                    .body(listResult);
+        List<GroupingsServiceResult> results = new ArrayList<>();
+
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
+                && !RELEASED_GROUPING.equals(preferenceId)) {
+            throw new UnsupportedOperationException();
+        } else {
+            if (OPT_IN.equals(preferenceId)) {
+                results = groupAttributeService.changeOptInStatus(path, principal.getName(), false);
+            } else if (OPT_OUT.equals(preferenceId)) {
+                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), false);
+            } else if (LISTSERV.equals(preferenceId)) {
+                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), false));
+            } else {
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), false));
+            }
         }
-        throw new UnsupportedOperationException();
+        return ResponseEntity
+                .ok()
+                .body(results);
     }
+    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
+    //            method = RequestMethod.PUT,
+    //            produces = MediaType.APPLICATION_JSON_VALUE)
+    //    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+    //            @PathVariable String path,
+    //            @PathVariable String preferenceId) {
+    //        logger.info("Entered REST disablePreference");
+    //        if (preferenceId.equals(OPT_IN)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
+    //        } else if (preferenceId.equals(OPT_OUT)) {
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
+    //        } else if (preferenceId.equals(LISTSERV)) {
+    //            GroupingsServiceResult result =
+    //                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
+    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
+    //            listResult.add(result);
+    //            return ResponseEntity
+    //                    .ok()
+    //                    .body(listResult);
+    //        }
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      * Delete an admin
@@ -349,7 +402,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteAdmin(principal.getName(), uid));
     }
 
-    //todo Implement method and fix REST controller method
     /**
      * Delete a grouping
      * Not implemented yet, even REST API controller function might not be doable at this stage
@@ -357,15 +409,16 @@ public class GroupingsRestControllerv2_1 {
      * @param path: path of grouping to delete
      * @return Information about results of operation
      */
-        @RequestMapping (value = "/groupings/{path}",
-                method = RequestMethod.DELETE,
-                produces = MediaType.APPLICATION_JSON_VALUE)
-       public ResponseEntity<List<GroupingsServiceResult>> deleteNewGrouping(Principal principal, @PathVariable String path) {
-            logger.info("Entered REST deleteNewGrouping");
-            return ResponseEntity
-                    .ok()
-                    .body(groupingFactoryService.deleteGrouping(principal.getName(), path));
-        }
+    @RequestMapping(value = "/groupings/{path}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> deleteNewGrouping(Principal principal,
+            @PathVariable String path) {
+        logger.info("Entered REST deleteNewGrouping");
+        return ResponseEntity
+                .ok()
+                .body(groupingFactoryService.deleteGrouping(principal.getName(), path));
+    }
 
     /**
      * Delete a grouping owner
