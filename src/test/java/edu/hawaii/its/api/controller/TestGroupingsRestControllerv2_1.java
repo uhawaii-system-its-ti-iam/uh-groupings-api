@@ -61,6 +61,15 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.admin_username}")
     private String ADMIN_USERNAME;
 
+    @Value("${groupings.api.test.grouping_awy}")
+    private String AWY_GROUPING;
+
+    @Value("${groupings.api.test.grouping_awy_include}")
+    private String AWY_INCLUDE;
+
+    @Value("${groupings.api.test.grouping_awy_exclude}")
+    private String AWY_EXCLUDE;
+
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
@@ -182,6 +191,10 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
 
         memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+
+        tstUuid[0] = "10976564";
+        tstUuid[1] = "11077773";
+        tstUuid[2] = "11077784";
     }
 
     @Test
@@ -481,30 +494,30 @@ public class TestGroupingsRestControllerv2_1 {
 
     // WIP
     @Test
-    @WithMockUhUser(username = "iamtst05") // Is this the user being added or the user executing these functions?
+    @WithMockUhUser(username = "awy")
     // If a make a call to add, which grouping is it adding to
     public void addDeleteMemberUuidPassTest() throws Exception {
         // adds tstUuid[0] to GROUPING's include
-        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tstUuid[0], "put");
+        List testList = mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
 
-/*
+
         // tests tstUuid[0] is in include but not exclude
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[0]));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tstUuid[0]));
-*/
-/*
+        assertTrue(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
+
+
         // confirm tstUuid[0] deleted
-        mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tstUuid[0], "delete");
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[0]));
+        List deleteList = mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
+//
+//        // tests tstUuid[1] is in exclude
+//        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
+//        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
+//        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
+//
+//        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
+//        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tst[2]));
 
-        // tests tstUuid[1] is in exclude
-        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tstUuid[1], "put");
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tstUuid[1]));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tstUuid[1]));
-
-        mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
-*/
     }
 
     @Test

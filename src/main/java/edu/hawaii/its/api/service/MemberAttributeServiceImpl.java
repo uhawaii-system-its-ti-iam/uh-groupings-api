@@ -271,16 +271,22 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
-        WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
 
-        WsHasMemberResult[] memberResultArray = memberResults.getResults();
-
-        for (WsHasMemberResult hasMember : memberResultArray) {
-            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                return true;
-            }
+        if (isUuid(username)) {
+            return isMemberUuid(groupPath, username);
         }
-        return false;
+        else {
+            WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
+
+            WsHasMemberResult[] memberResultArray = memberResults.getResults();
+
+            for (WsHasMemberResult hasMember : memberResultArray) {
+                if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     //returns true if the person is a member of the group
@@ -307,7 +313,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isMemberUuid(String groupPath, String idnum) {
         logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
 
-        WsHasMemberResults memberResults = null /*= grouperFS.makeWsHasMemberResultsUuid(groupPath, idnum)*/;
+        WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, idnum);
 
         WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
