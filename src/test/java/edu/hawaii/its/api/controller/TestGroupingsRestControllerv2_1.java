@@ -232,6 +232,19 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void adminsGroupingsAnonTest() throws Exception {
+
+        try {
+            mapAdminListsHolder();
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+    }
+
+    @Test
     @WithMockUhUser(username = "iamtst01")
     public void memberAttributesTest() throws Exception {
 
@@ -248,7 +261,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGetUserAttributes("bobjones");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Test with blank field
@@ -256,7 +269,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGetUserAttributes("");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -272,7 +285,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapList("/api/groupings/v2.1/members/bobjones/groupings", "get");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Test with empty field
@@ -280,7 +293,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapList("/api/groupings/v2.1/members//groupings", "get");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -296,7 +309,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapList("/api/groupings/v2.1/owners/bobjones/groupings", "get");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Test with empty field
@@ -304,7 +317,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapList("/api/groupings/v2.1/owners//groupings", "get");
             fail("Shouldn't be here");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -357,7 +370,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGrouping("thisIsNotARealGrouping");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Test with empty field
@@ -365,7 +378,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGrouping("");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -439,15 +452,16 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/admins/" + tst[1], "post");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         // Try deleteAdmin without proper permissions
+        //todo Properties file
         try {
             mapGSR("/api/groupings/v2.1/admins/mhodges", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -474,7 +488,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings/someGrouping/owners/bobjones", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Looks for grouping, then username in grouping
@@ -482,7 +496,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings/someGrouping/owners/bobjones", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Test with one empty field
@@ -503,14 +517,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings//owners//", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
 
         try {
             mapGSR("/api/groupings/v2.1/groupings//owners//", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -524,17 +538,16 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/" + tst[2], "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/" + tst[0], "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
-
 
     @Test
     @WithMockUhUser(username = "iamtst01")
@@ -576,28 +589,28 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/includeMembers/bobjones", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/includeMembers/bobjones", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/excludeMembers/bobjones", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/excludeMembers/bobjones", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         // Empty fields tests
@@ -605,28 +618,28 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs("/api/groupings/v2.1/groupings//includeMembers//", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings//includeMembers//", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings//excludeMembers//", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings//excludeMembers//", "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -640,7 +653,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tst[3], "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         // Try delete member from include without proper permissions
@@ -648,7 +661,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/includeMembers/" + tst[2], "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         // Try add member to exclude without proper permissions
@@ -656,7 +669,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tst[2], "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         // Try delete member from exclude without proper permissions
@@ -664,7 +677,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tst[3], "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -699,32 +712,33 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Try with bad data
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/disable", "put");
+            mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/enable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(501));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/disable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(501));
         }
 
-        // Try with null fields
+        // Try with empty fields
+        //todo Should maybe throw 501? I guess it doesn't care if preference name is ""
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/preferences/" + null + "/enable", "put");
+            mapGSRs("/api/groupings/v2.1/groupings//preferences//enable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
-            mapGSRs("/api/groupings/v2.1/groupings/" + null + "/preferences/" + null + "/disable", "put");
+            mapGSRs("/api/groupings/v2.1/groupings//preferences//disable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -737,14 +751,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
             mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -757,21 +771,32 @@ public class TestGroupingsRestControllerv2_1 {
         // Check if grouping already exists (it shouldn't)
         try {
             mapGrouping(newGrouping);
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
+        // Make the grouping
         mapList("/api/groupings/v2.1/groupings/" + newGrouping, "post");
-        mapGrouping(newGrouping);
 
-        mapList("/api/groupings/v2.1/groupings/" + newGrouping, "delete");
-
+        // Grouping should exist now
         try {
             mapGrouping(newGrouping);
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            fail("Shouldn't be here.");
         }
 
+        // Delete the grouping
+        mapList("/api/groupings/v2.1/groupings/" + newGrouping, "delete");
+
+        // Check to see the grouping is gone
+        //todo Might need to refactor depending on outcome of deleteGrouping
+        try {
+            mapGrouping(newGrouping);
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(404));
+        }
     }
 
     @Test
@@ -781,14 +806,16 @@ public class TestGroupingsRestControllerv2_1 {
         // This should fail, "iamtst01" doesn't have proper permissions
         try {
             mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
             mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ksanidad-test", "delete");
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), not(200));
+            assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
@@ -810,8 +837,8 @@ public class TestGroupingsRestControllerv2_1 {
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
         } else {
-            throw new GroupingsHTTPException();
-        }
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
     }
 
     private List mapList(String uri, String httpCall) throws Exception {
@@ -822,8 +849,8 @@ public class TestGroupingsRestControllerv2_1 {
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
-            throw new GroupingsHTTPException();
-        }
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
     }
 
     private AdminListsHolder mapAdminListsHolder() throws Exception {
@@ -832,10 +859,14 @@ public class TestGroupingsRestControllerv2_1 {
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/adminsGroupings")
                 .with(csrf()))
-                .andExpect(status().isOk())
+//                .andExpect(status().isOk())
                 .andReturn();
-
-        return objectMapper.readValue(result.getResponse().getContentAsByteArray(), AdminListsHolder.class);
+        if(result.getResponse().getStatus() == 200){
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), AdminListsHolder.class);
+        } else {
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
     private Grouping mapGrouping(String groupingPath) throws Exception {
@@ -848,8 +879,8 @@ public class TestGroupingsRestControllerv2_1 {
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
         } else {
-            throw new GroupingsHTTPException();
-        }
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
     }
 
     private GroupingsServiceResult mapGSR(String uri, String httpCall) throws Exception {
@@ -860,8 +891,8 @@ public class TestGroupingsRestControllerv2_1 {
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
         } else {
-            throw new GroupingsHTTPException();
-        }
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
     }
 
     private List mapGSRs(String uri, String httpCall) throws Exception {
@@ -872,8 +903,8 @@ public class TestGroupingsRestControllerv2_1 {
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
-            throw new GroupingsHTTPException();
-        }
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
     }
 
     private MvcResult mapHelper(String uri, String httpCall) throws Exception {
