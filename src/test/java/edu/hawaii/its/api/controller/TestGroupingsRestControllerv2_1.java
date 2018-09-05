@@ -205,6 +205,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     //todo Try all functions with anonymous user. Should return not-200
+    //todo Check status codes and all possible end cases. They may be off or different from what we expect.
 
     // iamtst01 does not have permissions, so this should fail
     @Test
