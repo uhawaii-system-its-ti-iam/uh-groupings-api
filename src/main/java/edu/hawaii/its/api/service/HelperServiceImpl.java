@@ -213,7 +213,7 @@ public class HelperServiceImpl implements HelperService {
         }
         return groupings;
     }
-    
+
     //todo GroupingsIn optimization (work in progress)
 //    public List<Grouping> extractGroupingsNew(List<String> groupPaths) {
 ////        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
