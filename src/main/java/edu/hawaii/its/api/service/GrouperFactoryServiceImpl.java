@@ -380,6 +380,34 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return attributeAssignmentsResultList;
     }
 
+    // Covered by Integration Tests
+    @Override
+    public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
+            String attributeDefNameName,
+            List<String> ownerGroupNames) {
+
+        List<WsGetAttributeAssignmentsResults> attributeAssignmentsResultList = new ArrayList<>();
+        Iterator iterator = ownerGroupNames.iterator();
+
+        for (int i = 0; i < ownerGroupNames.size(); i += ATTRIBUTES_ASSIGN_ID_SIZE) {
+            GcGetAttributeAssignments attributeAssignments = new GcGetAttributeAssignments()
+                    .addAttributeDefNameName(attributeDefNameName)
+                    .assignAttributeAssignType(assignType)
+                    .addOwnerGroupName(ownerGroupNames.get(i));
+
+            for (int j = 0; j < ATTRIBUTES_ASSIGN_ID_SIZE; j++) {
+                if (iterator.hasNext()) {
+                    attributeAssignments.addOwnerGroupName(iterator.next().toString());
+                } else {
+                    break;
+                }
+            }
+            attributeAssignmentsResultList.add(attributeAssignments.execute());
+        }
+
+        return attributeAssignmentsResultList;
+    }
+
     //todo Need to test break
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
