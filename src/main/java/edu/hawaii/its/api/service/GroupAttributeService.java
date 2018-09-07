@@ -10,11 +10,15 @@ public interface GroupAttributeService {
 
     public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean listservOn);
 
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean releasedGroupingOn);
+
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean optInOn);
 
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean optOutOn);
 
     public boolean hasListserv(String groupingPath);
+
+    public boolean hasReleasedGrouping(String groupingPath);
 
     public boolean optOutPermission(String groupingPath);
 

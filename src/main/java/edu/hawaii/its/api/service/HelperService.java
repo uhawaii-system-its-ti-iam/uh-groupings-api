@@ -16,6 +16,9 @@ public interface HelperService {
 
     public List<String> extractGroupings(List<String> groupPaths);
 
+    //todo Not complete
+//    public List<Grouping> extractGroupingsNew(List<String> groupPaths);
+
     public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
 
     public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);

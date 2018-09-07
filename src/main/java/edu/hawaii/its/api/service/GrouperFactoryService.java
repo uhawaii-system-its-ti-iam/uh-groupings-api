@@ -78,6 +78,10 @@ public interface GrouperFactoryService {
             String attributeDefNameName,
             List<String> ownerGroupNames);
 
+    public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
+            String attributeDefNameName,
+            List<String> ownerGroupNames);
+
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
             String attributeDefNameName0,
             String attributeDefNameName1,

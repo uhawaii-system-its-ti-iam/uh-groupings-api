@@ -107,6 +107,9 @@ public class TestGroupAttributeService {
     }
 
     @Test
+    public void hasLdapTest() { assertTrue(groupAttributeService.hasListserv(GROUPING)); }
+
+    @Test
     public void changeListServeStatusTest() {
         GroupingsServiceResult groupingsServiceResult;
 
@@ -136,6 +139,11 @@ public class TestGroupAttributeService {
         }
         assertTrue(groupingsServiceResult.getResultCode().startsWith(FAILURE));
         assertTrue(groupAttributeService.hasListserv(GROUPING));
+    }
+
+    @Test
+    public void changeLdapStatusTest() {
+        //todo
     }
 
     @Test

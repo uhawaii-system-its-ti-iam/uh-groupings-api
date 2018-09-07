@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.*;
 
+import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -134,6 +135,9 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.test.grouping_awy_owners}")
     private String OWNERS;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -303,7 +307,9 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Test with null field
         try {
-            mapList("/api/groupings/v2.1/owners/" + null + "/groupings", "get");
+            String gar=null;
+            mapList("/api/groupings/v2.1/owners/" + gar + "/groupings", "get");
+            fail("Shouldn't be here");
         } catch (GroupingsHTTPException ghe) {
             ghe.printStackTrace();
         }
@@ -676,22 +682,27 @@ public class TestGroupingsRestControllerv2_1 {
         assertTrue(groupAttributeService.optInPermission(GROUPING));
         assertTrue(groupAttributeService.optOutPermission(GROUPING));
         assertTrue(groupAttributeService.hasListserv(GROUPING));
+        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put");
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put");
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/disable", "put");
+        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/enable", "put");
 
         assertFalse(groupAttributeService.optInPermission(GROUPING));
         assertFalse(groupAttributeService.optOutPermission(GROUPING));
         assertFalse(groupAttributeService.hasListserv(GROUPING));
+        assertTrue(groupAttributeService.hasReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put");
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put");
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/enable", "put");
+        mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/disable", "put");
 
         assertTrue(groupAttributeService.optInPermission(GROUPING));
         assertTrue(groupAttributeService.optOutPermission(GROUPING));
         assertTrue(groupAttributeService.hasListserv(GROUPING));
+        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
 
         // Try with bad data
         try {
