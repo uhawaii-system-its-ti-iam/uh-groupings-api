@@ -501,8 +501,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhUser(username = "awy")
     public void addMemberUuidPassTest() throws Exception {
-        // adds tstUuid[0] to GROUPING's include
-        //        membershipService.deleteGroupMember("awy", AWY_GROUPING, "10976564");
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
 
         // tests tstUuid[0] is in include but not exclude
