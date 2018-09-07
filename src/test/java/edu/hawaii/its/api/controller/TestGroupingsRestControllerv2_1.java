@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import jdk.jfr.events.ExceptionThrownEvent;
+import org.hibernate.annotations.WhereJoinTable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -513,7 +514,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
         assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));    }
 
-    //**
+    // **
     @Test
     @WithMockUhUser(username = "awy")
     public void deleteMemberUuidPassTest() throws Exception {
@@ -539,14 +540,14 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
     }
 
-    // WIP
+    // **
     @Test
     @WithMockUhUser(username = "awy")
     public void addDeleteAdminUuidPassTest() throws Exception {
-        mapGSRs("admins/" + tstUuid[0], "post");
+        mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "post");
         assertTrue(memberAttributeService.isAdmin(tstUuid[0]));
 
-        mapGSR("admins/" + tstUuid[0], "delete");
+        mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "delete");
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
     }
 

@@ -290,6 +290,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, String newMember) {
+        if (isUuid(newMember)) {
+            return new GcAddMember()
+                    .addSubjectId(newMember)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcAddMember()
                 .addSubjectIdentifier(newMember)
                 .assignGroupName(group)
