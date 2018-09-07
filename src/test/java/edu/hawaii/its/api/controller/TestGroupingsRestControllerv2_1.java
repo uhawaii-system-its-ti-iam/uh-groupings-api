@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import jdk.jfr.events.ExceptionThrownEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -129,6 +130,9 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.test.uhuuids}")
     private String[] tstUuid;
+
+    @Value("${groupings.api.test.grouping_awy_owners}")
+    private String OWNERS;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -492,32 +496,58 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    // WIP
+    // **
     @Test
     @WithMockUhUser(username = "awy")
-    // If a make a call to add, which grouping is it adding to
-    public void addDeleteMemberUuidPassTest() throws Exception {
+    public void addMemberUuidPassTest() throws Exception {
         // adds tstUuid[0] to GROUPING's include
-        List testList = mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
-
+        //        membershipService.deleteGroupMember("awy", AWY_GROUPING, "10976564");
+        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
 
         // tests tstUuid[0] is in include but not exclude
         assertTrue(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
         assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
 
+        // tests tstUuid[1] is in exclude
+        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
+        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));    }
 
-        // confirm tstUuid[0] deleted
-        List deleteList = mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
+    //**
+    @Test
+    @WithMockUhUser(username = "awy")
+    public void deleteMemberUuidPassTest() throws Exception {
+        // confirm tstUuid[0] deleted from include group
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
-//
-//        // tests tstUuid[1] is in exclude
-//        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
-//        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
-//        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
-//
-//        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
-//        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tst[2]));
 
+        // confirm tstUuid[1] is deleted from exclude group
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tst[1]));
+    }
+
+    // **
+    // Adds user by uuid correctly into owner group, but always returns that the test failed
+    @Test
+    @WithMockUhUser(username = "awy")
+    public void addDeleteOwnerUuidPassTest() throws Exception {
+        // User added as owner to AWY_GROUPING
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "put");
+        assertTrue(memberAttributeService.isMember(OWNERS, tstUuid[0]));
+
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
+    }
+
+    // WIP
+    @Test
+    @WithMockUhUser(username = "awy")
+    public void addDeleteAdminUuidPassTest() throws Exception {
+        mapGSRs("admins/" + tstUuid[0], "post");
+        assertTrue(memberAttributeService.isAdmin(tstUuid[0]));
+
+        mapGSR("admins/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
     }
 
     @Test
