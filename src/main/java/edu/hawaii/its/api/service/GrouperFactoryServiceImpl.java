@@ -649,7 +649,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                             .assignWsStemLookup(stemLookup)
                             .assignStemScope(stemScope)
                             .assignIncludeGroupDetail(true)
-                            .
                             .execute();
     }
 
