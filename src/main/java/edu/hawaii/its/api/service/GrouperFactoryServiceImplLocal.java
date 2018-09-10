@@ -211,6 +211,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Autowired
     private PersonRepository personRepository;
 
+    public boolean isUuid(String username) { return username.matches("\\d+"); }
+
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
 
@@ -405,9 +407,12 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             String memberToDelete) {
+        Person personToDelete;
+        if (isUuid(memberToDelete)) {
+            return makeWsDeleteMemberResults(group, lookup, new Person (null, memberToDelete, null));
+        }
 
-        Person personToDelete = new Person(null, null, memberToDelete);
-        return makeWsDeleteMemberResults(group, lookup, personToDelete);
+        return makeWsDeleteMemberResults(group, lookup, new Person(null, null, memberToDelete));
     }
 
     @Override
