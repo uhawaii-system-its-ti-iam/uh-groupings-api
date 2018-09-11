@@ -232,6 +232,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     }
 
+    // Anonymous user (not logged in) should be redirected
     @Test
     @WithAnonymousUser
     public void adminsGroupingsAnonTest() throws Exception {
@@ -242,14 +243,13 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
-
     }
 
     @Test
     @WithMockUhUser(username = "iamtst01")
     public void memberAttributesTest() throws Exception {
 
-        Map attributes = mapGetUserAttributes("iamtst01");
+        Map attributes = mapGetUserAttributes(tst[0]);
 
         assertThat(attributes.get("uid"), equalTo("iamtst01"));
         assertThat(attributes.get("givenName"), equalTo("tst01name"));
@@ -275,10 +275,22 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void memberAttributesAnonTest() throws Exception {
+
+        try {
+            mapGetUserAttributes(tst[0]);
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
+    @Test
     @WithMockUhUser(username = "iamtst01")
     public void memberGroupingsTest() throws Exception {
 
-        List listMemberships = mapList("/api/groupings/v2.1/members/iamtst01/groupings", "get");
+        List listMemberships = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
         assertThat(listMemberships.size(), not(0));
 
         // Test with username not in database
@@ -299,10 +311,22 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void memberGroupingsAnonTest() throws Exception {
+
+        try {
+            mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
+    @Test
     @WithMockUhUser(username = "iamtst01")
     public void ownerGroupingsTest() throws Exception {
 
-        List listGroupings = mapList("/api/groupings/v2.1/owners/iamtst01/groupings", "get");
+        List listGroupings = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
         assertThat(listGroupings.size(), not(0));
 
         // Test with username not in database
@@ -319,6 +343,18 @@ public class TestGroupingsRestControllerv2_1 {
             fail("Shouldn't be here");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
+        }
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void ownerGroupingsAnonTest() throws Exception {
+
+        try {
+            mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
         }
     }
 
@@ -397,6 +433,18 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void getGroupingsAnonTest() throws Exception {
+
+        try {
+            mapGrouping(GROUPING);
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
+    @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteAdminPassTest() throws Exception {
 
@@ -457,12 +505,30 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Try deleteAdmin without proper permissions
-        //todo Properties file
         try {
-            mapGSR("/api/groupings/v2.1/admins/mhodges", "delete");
+            mapGSR("/api/groupings/v2.1/admins/" + ADMIN_USERNAME, "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
+        }
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void addDeleteAdminAnonTest() throws Exception {
+
+        try {
+            mapGSR("/api/groupings/v2.1/admins/" + tst[0], "post");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSR("/api/groupings/v2.1/admins" + ADMIN_USERNAME, "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
         }
     }
 
@@ -510,6 +576,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Looks for grouping, then username in grouping
+        // Returns success even though the user is not in grouping
         GroupingsServiceResult gsr = mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/bobjones", "delete");
         gsr.getResultCode().startsWith(SUCCESS);
 
@@ -551,6 +618,25 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void addDeleteOwnerAnonTest() throws Exception {
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/owners/" + tst[0], "put");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/owners/" + tst[0], "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
+    @Test
     @WithMockUhUser(username = "iamtst01")
     public void addDeleteMemberPassTest() throws Exception {
 
@@ -586,6 +672,7 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/excludeMembers/" + tst[3], "put");
 
         // Garbage data tests
+        //todo Test all permutations of bad data
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/includeMembers/bobjones", "put");
             fail("Shouldn't be here.");
@@ -683,6 +770,39 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    @WithAnonymousUser
+    public void addDeleteMemberAnonTest() throws Exception {
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/includeMembers/" + tst[2], "put");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/includeMembers/" + tst[2], "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/excludeMembers/" + tst[2], "put");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSR("/api/groupings/v2.1/" + GROUPING + "/excludeMembers/" + tst[2], "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
+    @Test
     @WithMockUhUser(username = "iamtst01")
     public void enableDisablePreferencesPassTest() throws Exception {
 
@@ -712,6 +832,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
 
         // Try with bad data
+        //todo Test all permutations of bad data
         try {
             mapGSRs("/api/groupings/v2.1/groupings/somegrouping/preferences/nothing/enable", "put");
             fail("Shouldn't be here.");
@@ -762,6 +883,26 @@ public class TestGroupingsRestControllerv2_1 {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
+
+    @Test
+    @WithAnonymousUser
+    public void enableDisablePreferencesAnonTest() throws Exception {
+
+        try {
+            mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
 
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
@@ -820,28 +961,52 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    @Test
+    @WithAnonymousUser
+    public void addDeleteGroupingAnonTest() throws Exception {
+
+        // This should fail, "iamtst01" doesn't have proper permissions
+        try {
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+
+        try {
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ksanidad-test", "delete");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(302));
+        }
+    }
+
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
 
     ///////////////////////////////////////////////////////////////////////
     // MVC mapping
     //////////////////////////////////////////////////////////////////////
-    //todo Comment this properly
 
+    // Mapping of getUserAttributes call
     private Map mapGetUserAttributes(String username) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
+        // Perform GET call
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/members/" + username)
                 .with(csrf()))
                 .andReturn();
 
+        // Return data if 200 OK, throw exception with status code otherwise
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
+    // Mapping of any uri call that returns a list
     private List mapList(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -851,18 +1016,19 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
+    // Mapping of AdminsGroupings call
     private AdminListsHolder mapAdminListsHolder() throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/adminsGroupings")
                 .with(csrf()))
-//                .andExpect(status().isOk())
                 .andReturn();
-        if(result.getResponse().getStatus() == 200){
+        if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), AdminListsHolder.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
@@ -870,6 +1036,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    // Mapping of getGrouping call
     private Grouping mapGrouping(String groupingPath) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -881,9 +1048,11 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
+    // Mapping of any uri call that returns a GroupingServiceResult
     private GroupingsServiceResult mapGSR(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -893,9 +1062,11 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
+    // Mapping of any uri call that returns a list of GroupingsServiceResults
     private List mapGSRs(String uri, String httpCall) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -905,9 +1076,11 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());        }
+            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+        }
     }
 
+    // Helper function for mapping any uri with multiple possible HTTP call types (i.e. GET / POST / PUT / DELETE)
     private MvcResult mapHelper(String uri, String httpCall) throws Exception {
 
         MvcResult result;
