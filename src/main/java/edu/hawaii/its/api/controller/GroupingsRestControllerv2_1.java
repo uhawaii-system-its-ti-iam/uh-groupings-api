@@ -442,7 +442,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove grouping include member
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of grouping include member to remove
+     * @param uid:  uid or uuid of grouping include member to remove
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
@@ -453,7 +453,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteInclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMember(principal.getName(), path + INCLUDE, uid));
+                .body(membershipService.deleteGroupMemberByUsername(principal.getName(), path + INCLUDE, uid));
     }
 
     /**

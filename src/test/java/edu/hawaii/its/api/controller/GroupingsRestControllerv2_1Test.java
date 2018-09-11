@@ -616,17 +616,17 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    @WithMockUhUser 
+    @WithMockUhUser
     public void deleteIncludeTest() throws Exception {
 
         given(membershipService.deleteGroupMemberByUsername("user", "grouping" + INCLUDE, "frylock"))
                 .willReturn(new GroupingsServiceResult("SUCCESS", "deleted frylock from include"));
 
-        ResultActions abc = mockMvc.perform(delete("/api/groupings/v2.1/groupings/grouping/includeMembers/frylock").with(csrf()))
+        mockMvc.perform(delete("/api/groupings/v2.1/groupings/grouping/includeMembers/frylock").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("action").value("deleted frylock from include"));
-        System.out.println("hi");
+
     }
 
     @Test

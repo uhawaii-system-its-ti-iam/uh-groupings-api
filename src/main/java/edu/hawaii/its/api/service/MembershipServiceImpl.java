@@ -486,6 +486,10 @@ public class MembershipServiceImpl implements MembershipService {
                 + "; userToDelete: " + userToDeleteUsername
                 + ";");
 
+        if(isUuid(userToDeleteUsername)) {
+            return deleteGroupMemberByUuid(ownerUsername, groupPath, userToDeleteUsername);
+        }
+
         String action = "delete " + userToDeleteUsername + " from " + groupPath;
 
         String composite = hs.parentGroupingPath(groupPath);

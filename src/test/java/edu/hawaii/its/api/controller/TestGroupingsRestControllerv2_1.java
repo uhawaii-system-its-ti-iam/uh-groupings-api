@@ -505,7 +505,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     // **
     @Test
-    @WithMockUhUser(username = "awy")
+    @WithMockUhUser(username = "iamtst05")
     public void addMemberUuidPassTest() throws Exception {
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
 
@@ -516,11 +516,12 @@ public class TestGroupingsRestControllerv2_1 {
         // tests tstUuid[1] is in exclude
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
-        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));    }
+        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
+    }
 
     // **
     @Test
-    @WithMockUhUser(username = "awy")
+    @WithMockUhUser(username = "iamtst05")
     public void deleteMemberUuidPassTest() throws Exception {
         // confirm tstUuid[0] deleted from include group
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
@@ -532,9 +533,8 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // **
-    // Adds user by uuid correctly into owner group, but always returns that the test failed
     @Test
-    @WithMockUhUser(username = "awy")
+    @WithMockUhUser(username = "iamtst05")
     public void addDeleteOwnerUuidPassTest() throws Exception {
         // User added as owner to AWY_GROUPING
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "put");
@@ -546,7 +546,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     // **
     @Test
-    @WithMockUhUser(username = "awy")
+    @WithMockUhUser(username = "iamtst05")
     public void addDeleteAdminUuidPassTest() throws Exception {
         mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "post");
         assertTrue(memberAttributeService.isAdmin(tstUuid[0]));
