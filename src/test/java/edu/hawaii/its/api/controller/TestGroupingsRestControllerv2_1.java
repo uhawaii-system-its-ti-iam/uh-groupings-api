@@ -980,7 +980,7 @@ public class TestGroupingsRestControllerv2_1 {
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteGroupingPassTest() throws Exception {
         //Can choose any grouping path we want here
-        String newGrouping = "hawaii.edu:custom:test:ksanidad:ks-test";
+        String newGrouping = "hawaii.edu:custom:test:awy:awy-test123";
 
         // Check if grouping already exists (it shouldn't)
         try {

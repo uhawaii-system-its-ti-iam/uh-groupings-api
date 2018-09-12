@@ -233,7 +233,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add new include member
      *
      * @param path: path of grouping to update
-     * @param uid:  uid of member to add to include
+     * @param uid:  uid or uuid of member to add to include
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
@@ -252,7 +252,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add new exclude member
      *
      * @param path: path of grouping to update
-     * @param uid:  uid of member to add to exclude
+     * @param uid:  uid or uuid of member to add to exclude
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",
@@ -300,30 +300,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(results);
     }
-    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
-    //            method = RequestMethod.PUT,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
-    //            @PathVariable String preferenceId) {
-    //        logger.info("Entered REST enablePreference");
-    //        if (preferenceId.equals(OPT_IN)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
-    //        } else if (preferenceId.equals(OPT_OUT)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
-    //        } else if (preferenceId.equals(LISTSERV)) {
-    //            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
-    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-    //            listResult.add(result);
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(listResult);
-    //        }
-    //        throw new UnsupportedOperationException();
-    //    }
 
     /**
      * Update grouping to disable given preference
@@ -359,37 +335,11 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(results);
     }
-    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
-    //            method = RequestMethod.PUT,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
-    //            @PathVariable String path,
-    //            @PathVariable String preferenceId) {
-    //        logger.info("Entered REST disablePreference");
-    //        if (preferenceId.equals(OPT_IN)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
-    //        } else if (preferenceId.equals(OPT_OUT)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
-    //        } else if (preferenceId.equals(LISTSERV)) {
-    //            GroupingsServiceResult result =
-    //                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
-    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-    //            listResult.add(result);
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(listResult);
-    //        }
-    //        throw new UnsupportedOperationException();
-    //    }
 
     /**
      * Delete an admin
      *
-     * @param uid: uid of admin to delete
+     * @param uid: uid or uuid of admin to delete
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/admins/{uid}",
