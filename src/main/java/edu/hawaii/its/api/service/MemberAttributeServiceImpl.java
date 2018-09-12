@@ -209,15 +209,21 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 + "; newOwnerUsername: "
                 + newOwnerUsername
                 + ";");
-
-        String action = "give " + newOwnerUsername + " ownership of " + groupingPath;
+        String action;
         GroupingsServiceResult ownershipResult;
+
+        if (isUuid(newOwnerUsername)) {
+            action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
+        }
+        else {
+            action = "give " + newOwnerUsername + " ownership of " + groupingPath;
+        }
+
 
         if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
             WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
             ownershipResult = hs.makeGroupingsServiceResult(amr, action);
-
             return ownershipResult;
         }
 
@@ -261,21 +267,26 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return ownershipResults;
     }
 
-    //returns true if the user is a member of the group
+    //returns true if the user is a member of the group via username or UH id
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
 
-        WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
-
-        WsHasMemberResult[] memberResultArray = memberResults.getResults();
-
-        for (WsHasMemberResult hasMember : memberResultArray) {
-            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                return true;
-            }
+        if (isUuid(username)) {
+            return isMemberUuid(groupPath, username);
         }
-        return false;
+        else {
+            WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
+
+            WsHasMemberResult[] memberResultArray = memberResults.getResults();
+
+            for (WsHasMemberResult hasMember : memberResultArray) {
+                if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     //returns true if the person is a member of the group
@@ -298,6 +309,22 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
+    // returns true if the person is a member of the group
+    public boolean isMemberUuid(String groupPath, String idnum) {
+        logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
+
+        WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, idnum);
+
+        WsHasMemberResult[] memberResultArray = memberResults.getResults();
+
+        for (WsHasMemberResult hasMember : memberResultArray) {
+            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //returns true if the user is in the owner group of the grouping
     @Override
     public boolean isOwner(String groupingPath, String username) {
@@ -306,9 +333,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     //returns true if the user is in the admins group
     @Override
-    public boolean isAdmin(String username) {
-        return isMember(GROUPING_ADMINS, username);
-    }
+    public boolean isAdmin(String username) { return isMember(GROUPING_ADMINS, username); }
 
     //returns true if the user is in the apps group
     @Override
@@ -321,6 +346,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isSuperuser(String username) {
         return isAdmin(username) || isApp(username);
     }
+
+    // returns true if username is a UH id number
+    public boolean isUuid(String username) { return username.matches("\\d+"); }
 
     //checks to see if a membership has an attribute of a specific type and returns the list if it does
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID) {
@@ -347,11 +375,13 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
     public Map<String, String> getUserAttributes(String username) throws GcWebServiceError {
+        WsSubject[] subjects;
+        WsSubjectLookup lookup;
+        lookup = grouperFS.makeWsSubjectLookup(username);
 
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
 
         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-        WsSubject[] subjects = results.getWsSubjects();
+        subjects = results.getWsSubjects();
 
         //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
         try {

@@ -77,6 +77,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Empty.
     }
 
+    public boolean isUuid(String username) { return username.matches("\\d+"); }
+
     //todo Not tested
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
@@ -141,7 +143,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsSubjectLookup makeWsSubjectLookup(String username) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        wsSubjectLookup.setSubjectIdentifier(username);
+
+        if(isUuid(username)) {
+            wsSubjectLookup.setSubjectId(username);
+        }
+        else {
+            wsSubjectLookup.setSubjectIdentifier(username);
+        }
 
         return wsSubjectLookup;
     }
@@ -229,6 +237,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, String newMember) {
+        if (isUuid(newMember)) {
+            return new GcAddMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectId(newMember)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcAddMember()
                 .assignActAsSubject(lookup)
                 .addSubjectIdentifier(newMember)
@@ -240,7 +255,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, Person personToAdd) {
         if (personToAdd.getUsername() != null) {
-            return makeWsAddMemberResults(group, lookup, personToAdd.getUsername());
+            // return makeWsAddMemberResults(group, lookup, personToAdd.getUsername());
+            return new GcAddMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectIdentifier(personToAdd.getUsername())
+                    .assignGroupName(group)
+                    .execute();
         }
 
         if (personToAdd.getUuid() == null) {
@@ -258,6 +278,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, List<String> newMembers) {
         GcAddMember addMember = new GcAddMember();
+
         addMember.assignActAsSubject(lookup);
         addMember.assignGroupName(group);
 
@@ -269,6 +290,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, String newMember) {
+        if (isUuid(newMember)) {
+            return new GcAddMember()
+                    .addSubjectId(newMember)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcAddMember()
                 .addSubjectIdentifier(newMember)
                 .assignGroupName(group)
@@ -278,6 +305,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     //todo Not tested
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
+        if (isUuid(memberToDelete)) {
+            return new GcDeleteMember()
+                    .addSubjectId(memberToDelete)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcDeleteMember()
                 .addSubjectIdentifier(memberToDelete)
                 .assignGroupName(group)
@@ -288,6 +321,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             String memberToDelete) {
+        if (isUuid(memberToDelete)) {
+            return new GcDeleteMember()
+                    .assignActAsSubject(lookup)
+                    .addSubjectId(memberToDelete)
+                    .assignGroupName(group)
+                    .execute();
+        }
         return new GcDeleteMember()
                 .assignActAsSubject(lookup)
                 .addSubjectIdentifier(memberToDelete)
@@ -469,7 +509,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     // Covered by Integration Tests
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
-
+        if (isUuid(username)) {
+            return new GcHasMember()
+                    .assignGroupName(group)
+                    .addSubjectId(username)
+                    .execute();
+        }
         return new GcHasMember()
                 .assignGroupName(group)
                 .addSubjectIdentifier(username)
@@ -631,20 +676,19 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-//        try {
-//            return new GcGetGroups()
-//                    .addSubjectIdentifier(username)
-//                    .assignWsStemLookup(stemLookup)
-//                    .assignStemScope(stemScope)
-//                    .execute();
-//        } catch (Exception e){
-//            return new WsGetGroupsResults();
-//        }
-                    return new GcGetGroups()
-                            .addSubjectIdentifier(username)
-                            .assignWsStemLookup(stemLookup)
-                            .assignStemScope(stemScope)
-                            .execute();
+        if (isUuid(username)) {
+            return new GcGetGroups()
+                    .addSubjectId(username)
+                    .assignWsStemLookup(stemLookup)
+                    .assignStemScope(stemScope)
+                    .execute();
+        }
+
+        return new GcGetGroups()
+            .addSubjectIdentifier(username)
+            .assignWsStemLookup(stemLookup)
+            .assignStemScope(stemScope)
+            .execute();
     }
 
     // Covered by Integration Tests

@@ -178,6 +178,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Autowired
     private GroupAttributeService groupAttributeService;
 
+    // Returns true if username is a UH id number
+    public boolean isUuid(String username) { return username.matches("\\d+"); }
+
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
@@ -443,16 +446,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return grouping;
     }
 
-    //returns the list of groups that the user is in
+    //returns the list of groups that the user is in, searching by username or uuid
     @Override
     public List<String> getGroupPaths(String username) {
         logger.info("getGroupPaths; username: " + username + ";");
         WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
+        WsGetGroupsResults wsGetGroupsResults;
 
-        WsGetGroupsResults wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
+        wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
                 username,
                 stemLookup,
-                StemScope.ALL_IN_SUBTREE);
+                StemScope.ALL_IN_SUBTREE
+        );
 
         WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
 

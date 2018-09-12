@@ -111,9 +111,9 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off username
+     * Get a member's attributes based off username or id number
      *
-     * @param uid: Username of user to obtain attributes about
+     * @param uid: Username or id number of user to obtain attributes about
      * @return Map of user attributes
      */
     @RequestMapping(value = "/members/{uid}",
@@ -130,7 +130,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of a member's grouping memberships
      *
-     * @param uid: Username of member to get list of grouping memberships
+     * @param uid: Username or id number of member to get list of grouping memberships
      * @return List of members grouping memberships
      */
     @RequestMapping(value = "/members/{uid}/groupings",
@@ -145,7 +145,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings
+     * Get an owner's owned groupings by username or UH id number
      *
      * @param uid: Username of owner to get list of groupings they own
      * @return List of owner's owned groupings
@@ -215,7 +215,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add a new owner
      *
      * @param path: path of grouping to update
-     * @param uid:  uid of new owner to add
+     * @param uid:  uid/uuid of new owner to add
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/owners/{uid}",
@@ -233,7 +233,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add new include member
      *
      * @param path: path of grouping to update
-     * @param uid:  uid of member to add to include
+     * @param uid:  uid or uuid of member to add to include
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
@@ -252,7 +252,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add new exclude member
      *
      * @param path: path of grouping to update
-     * @param uid:  uid of member to add to exclude
+     * @param uid:  uid or uuid of member to add to exclude
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",
@@ -300,30 +300,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(results);
     }
-    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
-    //            method = RequestMethod.PUT,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
-    //            @PathVariable String preferenceId) {
-    //        logger.info("Entered REST enablePreference");
-    //        if (preferenceId.equals(OPT_IN)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
-    //        } else if (preferenceId.equals(OPT_OUT)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
-    //        } else if (preferenceId.equals(LISTSERV)) {
-    //            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
-    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-    //            listResult.add(result);
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(listResult);
-    //        }
-    //        throw new UnsupportedOperationException();
-    //    }
 
     /**
      * Update grouping to disable given preference
@@ -359,37 +335,11 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(results);
     }
-    //    @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
-    //            method = RequestMethod.PUT,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
-    //            @PathVariable String path,
-    //            @PathVariable String preferenceId) {
-    //        logger.info("Entered REST disablePreference");
-    //        if (preferenceId.equals(OPT_IN)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
-    //        } else if (preferenceId.equals(OPT_OUT)) {
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
-    //        } else if (preferenceId.equals(LISTSERV)) {
-    //            GroupingsServiceResult result =
-    //                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
-    //            List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
-    //            listResult.add(result);
-    //            return ResponseEntity
-    //                    .ok()
-    //                    .body(listResult);
-    //        }
-    //        throw new UnsupportedOperationException();
-    //    }
 
     /**
      * Delete an admin
      *
-     * @param uid: uid of admin to delete
+     * @param uid: uid or uuid of admin to delete
      * @return Information about results of the operation
      */
     @RequestMapping(value = "/admins/{uid}",
@@ -424,7 +374,7 @@ public class GroupingsRestControllerv2_1 {
      * Delete a grouping owner
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of owner to delete
+     * @param uid:  uid or uuid of owner to delete
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/owners/{uid}",
@@ -442,7 +392,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove grouping include member
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of grouping include member to remove
+     * @param uid:  uid or uuid of grouping include member to remove
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
@@ -460,7 +410,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove grouping exclude member
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of grouping exclude member to remove
+     * @param uid:  uid or uuid of grouping exclude member to remove
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",

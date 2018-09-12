@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -674,7 +676,7 @@ public class GroupingsRestControllerv2_1Test {
         given(groupingAssignmentService.getGrouping(grouping, username))
                 .willReturn(grouping());
 
-        mockMvc.perform(get("/api/groupings/v2.0/grouping/grouping"))
+        ResultActions abc = mockMvc.perform(get("/api/groupings/v2.0/grouping/grouping"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("bob"))
                 .andExpect(jsonPath("path").value("test:ing:me:bob"))
@@ -703,6 +705,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("owners.members[3].uuid").value("o3-uuid"))
                 .andExpect(jsonPath("owners.members[3].username").value("o3-username"))
                 .andExpect(jsonPath("composite.members", hasSize(0)));
+        System.out.println("hello");
     }
 
     @Test

@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
+import jdk.jfr.events.ExceptionThrownEvent;
+import org.hibernate.annotations.WhereJoinTable;
 import com.sun.net.httpserver.Authenticator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,6 +78,15 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
+
+    @Value("${groupings.api.test.grouping_awy}")
+    private String AWY_GROUPING;
+
+    @Value("${groupings.api.test.grouping_awy_include}")
+    private String AWY_INCLUDE;
+
+    @Value("${groupings.api.test.grouping_awy_exclude}")
+    private String AWY_EXCLUDE;
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
@@ -136,6 +147,12 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
+
+    @Value("${groupings.api.test.uhuuids}")
+    private String[] tstUuid;
+
+    @Value("${groupings.api.test.grouping_awy_owners}")
+    private String OWNERS;
 
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
@@ -224,6 +241,9 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsServiceResultException gsre) {
             logger.info("Grouping doesn't exist.");
         }
+        tstUuid[0] = "10976564";
+        tstUuid[1] = "11077773";
+        tstUuid[2] = "11077784";
     }
 
     @Test
@@ -248,7 +268,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         assertThat(listHolderFail.getAdminGroup().getMembers().size(), equalTo(0));
         assertThat(listHolderFail.getAllGroupings().size(), equalTo(0));
-
     }
 
     // app user has permissions to obtain this data
@@ -669,6 +688,54 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst05")
+    public void addMemberUuidPassTest() throws Exception {
+        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
+
+        // tests tstUuid[0] is in include but not exclude
+        assertTrue(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
+
+        // tests tstUuid[1] is in exclude
+        mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
+        assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst05")
+    public void deleteMemberUuidPassTest() throws Exception {
+        // confirm tstUuid[0] deleted from include group
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
+
+        // confirm tstUuid[1] is deleted from exclude group
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "delete");
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tst[1]));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst05")
+    public void addDeleteOwnerUuidPassTest() throws Exception {
+        // User added as owner to AWY_GROUPING
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "put");
+        assertTrue(memberAttributeService.isMember(OWNERS, tstUuid[0]));
+
+        mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst05")
+    public void addDeleteAdminUuidPassTest() throws Exception {
+        mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "post");
+        assertTrue(memberAttributeService.isAdmin(tstUuid[0]));
+
+        mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "delete");
+        assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
     }
 
     @Test
@@ -1146,4 +1213,5 @@ public class TestGroupingsRestControllerv2_1 {
         }
         return result;
     }
+    
 }

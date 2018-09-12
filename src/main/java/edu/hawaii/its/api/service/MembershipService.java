@@ -19,7 +19,8 @@ public interface MembershipService {
     public List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
             String userToAddUsername);
 
-    public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String group, String userToAddUuid);
+    public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String groupPath,
+            String userToAddUsername);
 
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
@@ -43,6 +44,9 @@ public interface MembershipService {
 
     //todo deleteGroupMembersByUuid
     //todo deleteGroupMembersByUsername
+
+    public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
+            String userToDelete);
 
     public List<String> listOwned(String adminUsername, String username);
 
