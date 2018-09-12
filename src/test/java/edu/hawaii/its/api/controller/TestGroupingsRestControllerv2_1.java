@@ -212,6 +212,15 @@ public class TestGroupingsRestControllerv2_1 {
         tstUuid[0] = "10976564";
         tstUuid[1] = "11077773";
         tstUuid[2] = "11077784";
+
+        // Ensures users are not already in group
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_INCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_INCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_INCLUDE, tstUuid[2]);
+
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_EXCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_EXCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername("iamtst05", AWY_EXCLUDE, tstUuid[2]);
     }
 
     @Test
@@ -658,7 +667,14 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     @WithMockUhUser(username = "iamtst05")
-    public void addMemberUuidPassTest() throws Exception {
+    public void addDeleteMemberUuidPassTest() throws Exception {
+        // Ensures tstUuid[0] & tstUuid[1] are not already in group
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
+
+        assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
+        assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
+
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "put");
 
         // tests tstUuid[0] is in include but not exclude
@@ -669,11 +685,7 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
         assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
-    }
 
-    @Test
-    @WithMockUhUser(username = "iamtst05")
-    public void deleteMemberUuidPassTest() throws Exception {
         // confirm tstUuid[0] deleted from include group
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/includeMembers/" + tstUuid[0], "delete");
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
@@ -686,6 +698,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void addDeleteOwnerUuidPassTest() throws Exception {
+        // Ensures user is not already an owner
+        assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
+
         // User added as owner to AWY_GROUPING
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "put");
         assertTrue(memberAttributeService.isMember(OWNERS, tstUuid[0]));
@@ -697,6 +712,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void addDeleteAdminUuidPassTest() throws Exception {
+        // Ensures user is not already an admin
+        assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
+
         mapGSR("/api/groupings/v2.1/admins/" + tstUuid[0], "post");
         assertTrue(memberAttributeService.isAdmin(tstUuid[0]));
 
