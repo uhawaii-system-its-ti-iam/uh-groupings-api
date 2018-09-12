@@ -374,7 +374,7 @@ public class GroupingsRestControllerv2_1 {
      * Delete a grouping owner
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of owner to delete
+     * @param uid:  uid or uuid of owner to delete
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/owners/{uid}",
@@ -410,7 +410,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove grouping exclude member
      *
      * @param path: path of grouping to modify
-     * @param uid:  uid of grouping exclude member to remove
+     * @param uid:  uid or uuid of grouping exclude member to remove
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",

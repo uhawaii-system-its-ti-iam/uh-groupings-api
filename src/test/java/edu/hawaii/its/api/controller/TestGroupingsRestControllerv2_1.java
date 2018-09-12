@@ -656,7 +656,6 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    // **
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void addMemberUuidPassTest() throws Exception {
@@ -672,7 +671,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
     }
 
-    // **
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void deleteMemberUuidPassTest() throws Exception {
@@ -685,7 +683,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tst[1]));
     }
 
-    // **
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void addDeleteOwnerUuidPassTest() throws Exception {
@@ -697,7 +694,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
     }
 
-    // **
     @Test
     @WithMockUhUser(username = "iamtst05")
     public void addDeleteAdminUuidPassTest() throws Exception {
