@@ -231,16 +231,20 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
         membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
 
+        //Reset preferences
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
         groupAttributeService.changeListservStatus(GROUPING, tst[0], true);
         groupAttributeService.changeReleasedGroupingStatus(GROUPING, tst[0], false);
 
+        // Delete grouping if it exists
         try{
             groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
         } catch (GroupingsServiceResultException gsre) {
             logger.info("Grouping doesn't exist.");
         }
+
+        // Initialize test uuids
         tstUuid[0] = "10976564";
         tstUuid[1] = "11077773";
         tstUuid[2] = "11077784";
