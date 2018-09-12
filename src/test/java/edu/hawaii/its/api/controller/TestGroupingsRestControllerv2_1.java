@@ -709,7 +709,6 @@ public class TestGroupingsRestControllerv2_1 {
         // Ensures tstUuid[0] & tstUuid[1] are not already in group
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
         assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
-
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
         assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
 
@@ -719,7 +718,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertTrue(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[0]));
         assertFalse(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[0]));
 
-        // tests tstUuid[1] is in exclude
+        // tests tstUuid[1] is in exclude but not include
         mapGSRs("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/excludeMembers/" + tstUuid[1], "put");
         assertFalse(memberAttributeService.isMember(AWY_INCLUDE, tstUuid[1]));
         assertTrue(memberAttributeService.isMember(AWY_EXCLUDE, tstUuid[1]));
@@ -743,6 +742,7 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "put");
         assertTrue(memberAttributeService.isMember(OWNERS, tstUuid[0]));
 
+        // Delete user from owner group
         mapGSR("/api/groupings/v2.1/groupings/" + AWY_GROUPING + "/owners/" + tstUuid[0], "delete");
         assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
     }
