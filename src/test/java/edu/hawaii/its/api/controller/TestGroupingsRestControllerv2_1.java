@@ -22,10 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
 import com.sun.net.httpserver.Authenticator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.validator.constraints.br.TituloEleitoral;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,14 +62,20 @@ import edu.hawaii.its.api.type.GroupingServiceResultExceptionTest;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingsRestControllerv2_1 {
 
-    @Value("${groupings.api.test.admin_username}")
-    private String ADMIN_USERNAME;
+    private static final Log logger = LogFactory.getLog(TestGroupingsRestControllerv2_1.class);
+
+    @Value("${grouperClient.webService.login}")
+    private String APP_USER;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
@@ -191,6 +201,29 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
 
         memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+
+        // Remove appropriate privileges
+        membershipService.deleteAdmin(ADMIN, tst[0]);
+        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+
+        // Add "iamtst03" to include and remove from exclude
+        membershipService.addGroupMember(tst[0], GROUPING_INCLUDE, tst[2]);
+        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[2]);
+
+        //Remove "iamtst04" from include and add to exclude
+        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
+        membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
+
+        groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
+        groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
+        groupAttributeService.changeListservStatus(GROUPING, tst[0], true);
+        groupAttributeService.changeReleasedGroupingStatus(GROUPING, tst[0], false);
+
+        try{
+            groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
+        } catch (GroupingsServiceResultException gsre) {
+            logger.info("Grouping doesn't exist.");
+        }
     }
 
     @Test
@@ -204,7 +237,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(gc);
     }
 
-    //todo Try all functions with anonymous user. Should return not-200
     //todo Check status codes and all possible end cases. They may be off or different from what we expect.
 
     // iamtst01 does not have permissions, so this should fail
@@ -220,14 +252,16 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // app user has permissions to obtain this data
+    //todo Fix to replace _groupings_api_2 with APP_USER
+    //todo Create new WithMockUhAdmin? Maybe?
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void adminsGroupingsPassTest() throws Exception {
 
         AdminListsHolder listHolderPass = mapAdminListsHolder();
 
-        // ADMIN_USERNAME can be replaced with any account that has admin access
-        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(ADMIN_USERNAME));
+        // ADMIN can be replaced with any account username that has admin access
+        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(ADMIN));
         assertThat(listHolderPass.getAllGroupings().size(), not(0));
 
     }
@@ -444,6 +478,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    //todo Fix to replace _groupings_api_2 with APP_USER
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteAdminPassTest() throws Exception {
@@ -506,7 +541,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Try deleteAdmin without proper permissions
         try {
-            mapGSR("/api/groupings/v2.1/admins/" + ADMIN_USERNAME, "delete");
+            mapGSR("/api/groupings/v2.1/admins/" + ADMIN, "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
@@ -525,7 +560,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         try {
-            mapGSR("/api/groupings/v2.1/admins" + ADMIN_USERNAME, "delete");
+            mapGSR("/api/groupings/v2.1/admins" + ADMIN, "delete");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -903,12 +938,12 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-
+    //todo Fix to replace _groupings_api_2 with APP_USER
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteGroupingPassTest() throws Exception {
         //Can choose any grouping path we want here
-        String newGrouping = "hawaii.edu:custom:test:ksanidad:ks-test";
+        String newGrouping = "hawaii.edu:custom:test:ksanidad:bw-test";
 
         // Check if grouping already exists (it shouldn't)
         try {
@@ -947,7 +982,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         // This should fail, "iamtst01" doesn't have proper permissions
         try {
-            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:bw-test", "post");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
@@ -967,7 +1002,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         // This should fail, "iamtst01" doesn't have proper permissions
         try {
-            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:ks-test", "post");
+            mapList("/api/groupings/v2.1/groupings/hawaii.edu:custom:test:ksanidad:bw-test", "post");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));

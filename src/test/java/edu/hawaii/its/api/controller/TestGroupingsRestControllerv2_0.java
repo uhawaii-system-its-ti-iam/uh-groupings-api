@@ -54,8 +54,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingsRestControllerv2_0 {
 
-    @Value("${groupings.api.test.admin_username}")
-    private String ADMIN_USERNAME;
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
@@ -555,13 +555,14 @@ public class TestGroupingsRestControllerv2_0 {
         assertEquals(infoFail.getAllGroupings().size(), 0);
     }
 
+    //todo Fix to replace _groupings_api_2 with APP_USER
     @Test
     @WithMockUhUser(username = "_groupings_api_2")
     public void adminListsPassTest() throws Exception {
         AdminListsHolder infoSuccess = mapAdminListsHolderOld();
 
-        //ADMIN_USERNAME can be replaced with any account that has admin access
-        assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(ADMIN_USERNAME));
+        //ADMIN can be replaced with any account username that has admin access
+        assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(ADMIN));
     }
 
     @Test
