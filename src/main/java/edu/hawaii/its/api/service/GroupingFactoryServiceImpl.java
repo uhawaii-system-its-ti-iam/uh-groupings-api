@@ -26,8 +26,9 @@ import java.util.TreeSet;
 @Service("groupingFactoryService")
 public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
-    @Value("${grouperClient.webService.login}")
-    private String APP_USER;
+    //todo For some reason cannot resolve
+//    @Value("${grouperClient.webService.login}")
+//    private String APP_USER;
 
     @Value("${groupings.api.settings}")
     private String SETTINGS;
@@ -186,7 +187,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup(APP_USER);
+        WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isSuperuser(adminUsername)) {

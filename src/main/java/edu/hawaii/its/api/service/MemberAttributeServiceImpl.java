@@ -377,14 +377,17 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public Map<String, String> getUserAttributes(String username) throws GcWebServiceError {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
-        lookup = grouperFS.makeWsSubjectLookup(username);
 
-
-        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-        subjects = results.getWsSubjects();
+//        if(username.equals(null)){
+//            throw new GcWebServiceError("Error 404 Not Fopund");
+//        }
 
         //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
         try {
+            lookup = grouperFS.makeWsSubjectLookup(username);
+            WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+            subjects = results.getWsSubjects();
+
             String[] attributeValues = subjects[0].getAttributeValues();
             Map<String, String> mapping = new HashMap<String, String>();
 

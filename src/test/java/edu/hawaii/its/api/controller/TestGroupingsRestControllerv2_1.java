@@ -748,7 +748,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst05")
+    @WithMockUhUser(username = "_groupings_api_2")
     public void addDeleteAdminUuidPassTest() throws Exception {
         // Ensures user is not already an admin
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
