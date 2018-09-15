@@ -199,7 +199,6 @@ public class HelperServiceImpl implements HelperService {
                     grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
                             ASSIGN_TYPE_GROUP,
                             TRIO,
-                            OPT_OUT,
                             groupPaths);
 
             attributeAssignmentsResults

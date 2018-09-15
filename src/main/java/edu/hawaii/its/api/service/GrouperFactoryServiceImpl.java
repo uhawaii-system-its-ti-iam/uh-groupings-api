@@ -72,6 +72,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Value("${groupings.api.composite_type.union}")
     private String UNION;
 
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
+
     @Value("${groupings.api.trio}")
     private String isTrio;
 
@@ -635,21 +638,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-//        try {
-//            return new GcGetGroups()
-//                    .addSubjectIdentifier(username)
-//                    .assignWsStemLookup(stemLookup)
-//                    .assignStemScope(stemScope)
-//                    .execute();
-//        } catch (Exception e){
-//            return new WsGetGroupsResults();
-//        }
-                    return new GcGetGroups()
-                            .addSubjectIdentifier(username)
-                            .assignWsStemLookup(stemLookup)
-                            .assignStemScope(stemScope)
-                            .assignIncludeGroupDetail(true)
-                            .execute();
+        try {
+            return new GcGetGroups()
+                    .addSubjectIdentifier(username)
+                    .assignWsStemLookup(stemLookup)
+                    .assignStemScope(stemScope)
+                    .execute();
+        } catch (Exception e){
+            return new WsGetGroupsResults();
+        }
     }
 
     // Covered by Integration Tests
