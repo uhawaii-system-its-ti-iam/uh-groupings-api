@@ -277,8 +277,11 @@ public class TestGroupingsRestControllerv2_1 {
     // app user has permissions to obtain this data
     //todo Fix to replace _groupings_api_2 with APP_USER
     //todo Create new WithMockUhAdmin? Maybe?
+    //todo Check result>session>attributes>0>value>authentication of both MockUHUser w/ _groupings_api_2 and MockAdminUser
+    //todo What are the differences? maybe this'll help me see where I went wrong
     @Test
-    @WithMockUhUser(username = "_groupings_api_2")
+    @WithMockAdminUser
+//    @WithMockUhUser(username = "_groupings_api_2")
     public void adminsGroupingsPassTest() throws Exception {
 
         AdminListsHolder listHolderPass = mapAdminListsHolder();
