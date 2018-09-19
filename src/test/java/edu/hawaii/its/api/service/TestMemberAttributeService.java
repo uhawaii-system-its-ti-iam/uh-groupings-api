@@ -37,6 +37,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -451,6 +452,7 @@ public class TestMemberAttributeService {
         // Test with invalid username
         try {
             attributes = memberAttributeService.getUserAttributes("notarealperson");
+            fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
         }
@@ -458,6 +460,7 @@ public class TestMemberAttributeService {
         // Test with null field
         try {
             attributes = memberAttributeService.getUserAttributes(null);
+            fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
         }

@@ -105,6 +105,14 @@ public class TestGroupingFactoryService {
                 "property 'grouperClient.webService.password' is required");
     }
 
+    @Before
+    public void setUp() {
+        // Make sure the grouping folder is cleared
+        if(!groupingFactoryService.pathIsEmpty(ADMIN, KAHLIN_TEST)){
+            groupingFactoryService.deleteGrouping(ADMIN, KAHLIN_TEST);
+        }
+    }
+
     @Test
     public void addGroupingTest() {
 
