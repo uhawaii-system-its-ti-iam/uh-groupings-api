@@ -289,8 +289,8 @@ public class TestGroupingsRestControllerv2_1 {
     //todo Check result>session>attributes>0>value>authentication of both MockUHUser w/ _groupings_api_2 and MockAdminUser
     //todo What are the differences? maybe this'll help me see where I went wrong
     @Test
-    @WithMockAdminUser
-//    @WithMockUhUser(username = "_groupings_api_2")
+//    @WithMockAdminUser
+    @WithMockUhUser(username = "_groupings_api_2")
     public void adminsGroupingsPassTest() throws Exception {
 
         AdminListsHolder listHolderPass = mapAdminListsHolder();

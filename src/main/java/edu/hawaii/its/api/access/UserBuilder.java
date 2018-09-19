@@ -39,11 +39,11 @@ public final class UserBuilder {
         User user = new User(uid, roleHolder.getAuthorites());
         logger.debug("Done adding roles; uid: " + uid);
 
-        // Convert the uhuuid to a Long and record it.
+        // Convert the uhuuid to a Long and record it. <-- Not doing that anymore, Grouper DB uses String
         // Don't move this statement above the exists call
         // above because exists implicitly checks that the
         // Long data type conversion will work okay.
-        user.setUhuuid(Long.valueOf(uhuuid));
+        user.setUhuuid(uhuuid);
 
         // Put all the attributes into the user
         // object just for the demonstration.
