@@ -168,6 +168,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private GrouperFactoryService grouperFS;
 
     @Autowired
+    private MembershipService membershipService;
+
+    @Autowired
     private HelperService hs;
 
     @Autowired
@@ -223,7 +226,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
             WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
+
             ownershipResult = hs.makeGroupingsServiceResult(amr, action);
+
+            //todo should we add this to the results?
+            membershipService.updateLastModified(groupingPath);
             return ownershipResult;
         }
 
@@ -256,6 +263,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                     lookup,
                     ownerToRemove);
             ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
+
+            //todo should we add this to the results?
+            membershipService.updateLastModified(groupingPath);
+
             return ownershipResults;
         }
 
