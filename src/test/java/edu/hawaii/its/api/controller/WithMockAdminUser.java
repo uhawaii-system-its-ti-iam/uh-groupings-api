@@ -14,6 +14,7 @@ public @interface WithMockAdminUser {
     //todo Hopefully there is no functional difference where we need ROLE_APP or something similar
     String[] roles() default {"ROLE_ADMIN"};
 
+    //todo Change long to String for consistency w/ Grouper
     long uhuuid() default 12345678L;
 
     String name() default "UH Groupings API 2";
