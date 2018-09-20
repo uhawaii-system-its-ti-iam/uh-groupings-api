@@ -10,6 +10,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -39,6 +41,8 @@ public interface GrouperFactoryService {
     public WsStemLookup makeWsStemLookup(String stemName);
 
     public WsStemLookup makeWsStemLookup(String stemName, String stemUuid);
+
+    public WsAttributeDefNameLookup makeWsAttributeDefNameLookup(String attributeDefName);
 
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath);
 
@@ -126,6 +130,9 @@ public interface GrouperFactoryService {
             String attributeAssignOperation,
             String attributeDefNameName,
             String ownerGroupName);
+
+    public WsAttributeDefNameDeleteResults makeWsAttributeDefNameDeleteResultsForGroup(WsSubjectLookup subjectLookup,
+            WsAttributeDefNameLookup attributeDefNameLookup);
 
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,

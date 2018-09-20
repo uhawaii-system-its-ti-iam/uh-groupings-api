@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
+import edu.internet2.middleware.grouperClient.api.GcAttributeDefDelete;
+import edu.internet2.middleware.grouperClient.api.GcAttributeDefNameDelete;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
@@ -33,6 +35,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -170,7 +174,16 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         WsGroupLookup groupLookup = new WsGroupLookup();
         groupLookup.setGroupName(group);
 
+
         return groupLookup;
+    }
+
+    @Override
+    public WsAttributeDefNameLookup makeWsAttributeDefNameLookup(String attributeDefName){
+        WsAttributeDefNameLookup defNameLookup = new WsAttributeDefNameLookup();
+        defNameLookup.setName(attributeDefName);
+
+        return defNameLookup;
     }
 
     @Override
@@ -585,6 +598,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String attributeAssignOperation,
             String attributeDefNameName,
             String ownerGroupName) {
+
         return new GcAssignAttributes()
                 .assignAttributeAssignType(attributeAssingType)
                 .assignAttributeAssignOperation(attributeAssignOperation)
@@ -600,12 +614,23 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String attributeAssignOperation,
             String attributeDefNameName,
             String ownerGroupName) {
+
         return new GcAssignAttributes()
                 .assignActAsSubject(lookup)
                 .assignAttributeAssignType(attributeAssingType)
                 .assignAttributeAssignOperation(attributeAssignOperation)
                 .addAttributeDefNameName(attributeDefNameName)
                 .addOwnerGroupName(ownerGroupName)
+                .execute();
+    }
+
+    @Override
+    public WsAttributeDefNameDeleteResults makeWsAttributeDefNameDeleteResultsForGroup(WsSubjectLookup subjectLookup,
+            WsAttributeDefNameLookup attributeDefNameLookup){
+
+        return new GcAttributeDefNameDelete()
+                .addAttributeDefNameLookup(attributeDefNameLookup)
+                .assignActAsSubject(subjectLookup)
                 .execute();
     }
 
@@ -683,17 +708,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             WsStemLookup stemLookup,
             StemScope stemScope) {
 
-<<<<<<< HEAD
-        try {
-            return new GcGetGroups()
-                    .addSubjectIdentifier(username)
-                    .assignWsStemLookup(stemLookup)
-                    .assignStemScope(stemScope)
-                    .execute();
-        } catch (Exception e){
-            return new WsGetGroupsResults();
-        }
-=======
         if (isUuid(username)) {
             return new GcGetGroups()
                     .addSubjectId(username)
@@ -707,7 +721,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             .assignWsStemLookup(stemLookup)
             .assignStemScope(stemScope)
             .execute();
->>>>>>> master
     }
 
     // Covered by Integration Tests
