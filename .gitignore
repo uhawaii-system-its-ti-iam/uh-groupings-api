@@ -13,3 +13,4 @@ src/main/resources/grouperClientLogs/*
 grouperClientLogs
 phantomjsdriver.log
 coverage*
+hs_err_pid11320.log

@@ -275,6 +275,8 @@ public class HelperServiceImpl implements HelperService {
         groupingsServiceResult.setAction(action);
         groupingsServiceResult.setResultCode(resultCode);
 
+        String help = resultCode;
+
         if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
             throw new GroupingsServiceResultException(groupingsServiceResult);
         }

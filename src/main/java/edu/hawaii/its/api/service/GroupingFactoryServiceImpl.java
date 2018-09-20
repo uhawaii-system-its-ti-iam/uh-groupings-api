@@ -26,6 +26,10 @@ import java.util.TreeSet;
 @Service("groupingFactoryService")
 public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
+    //todo For some reason cannot resolve
+//    @Value("${grouperClient.webService.login}")
+//    private String APP_USER;
+
     @Value("${groupings.api.settings}")
     private String SETTINGS;
 

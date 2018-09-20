@@ -100,6 +100,8 @@ public interface GrouperFactoryService {
 
     public WsHasMemberResults makeWsHasMemberResults(String group, String username);
 
+//    public WsHasMemberResults makeWsHasMemberResultsUuid(String group, String idnum);
+
     public WsHasMemberResults makeWsHasMemberResults(String group, Person person);
 
     public WsAssignAttributesResults makeWsAssignAttributesResults(String attributeAssignType,

@@ -165,6 +165,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Autowired
     private MemberAttributeService mas;
 
+    @Autowired
+    private MembershipService ms;
+
     //turn the listserv for a grouping on or off
     @Override
     public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean listservOn) {
@@ -258,6 +261,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
 
                     gsr = hs.makeGroupingsServiceResult(SUCCESS, action);
+
+                    //todo should we return this result as well?
+                    ms.updateLastModified(groupPath);
                 } else {
                     gsr = hs.makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
                 }
@@ -266,6 +272,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                     assignGroupAttributes(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupPath);
 
                     gsr = hs.makeGroupingsServiceResult(SUCCESS, action);
+
+                    //todo should we return this result as well?
+                    ms.updateLastModified(groupPath);
                 } else {
                     gsr = hs.makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
                 }

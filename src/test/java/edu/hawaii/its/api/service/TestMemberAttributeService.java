@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -29,14 +30,11 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.Null;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -84,6 +82,12 @@ public class TestMemberAttributeService {
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
+
+    @Value("${groupings.api.assign_type_group}")
+    private String ASSIGN_TYPE_GROUP;
+
+    @Value("${groupings.api.yyyymmddThhmm}")
+    private String YYYYMMDDTHHMM;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -168,10 +172,25 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         assertTrue(assignOwnershipFail.getResultCode().startsWith(FAILURE));
 
+        // get last modified time
+        WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime1 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+
+        // get last modified time and make sure that it has changed
+        try {
+            TimeUnit.MINUTES.sleep(1);
+        } catch (InterruptedException e){
+            fail();
+        }
+
         GroupingsServiceResult assignOwnershipSuccess =
                 memberAttributeService.assignOwnership(GROUPING, username[0], username[1]);
         assertTrue(memberAttributeService.isOwner(GROUPING, username[1]));
         assertTrue(assignOwnershipSuccess.getResultCode().startsWith(SUCCESS));
+
+        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+        assertNotEquals(lastModTime1, lastModTime2);
 
         try {
             removeOwnershipFail = memberAttributeService.removeOwnership(GROUPING, username[2], username[1]);
@@ -448,19 +467,21 @@ public class TestMemberAttributeService {
 //        assertEquals("iamtst02", attributes.get("uhuuid"));
 //        assertThat(attributes.get("uhuuid"), equalTo("iamtst02"));
 
-//        // Test with invalid username
-//        try {
-//            attributes = memberAttributeService.getUserAttributes("notarealperson");
-//        } catch (GcWebServiceError gce) {
-//            gce.printStackTrace();
-//        }
-//
-//        // Test with null field
-//        try {
-//            attributes = memberAttributeService.getUserAttributes(null);
-//        } catch (GcWebServiceError gce) {
-//            gce.printStackTrace();
-//        }
-   }
+        // Test with invalid username
+        try {
+            attributes = memberAttributeService.getUserAttributes("notarealperson");
+            fail("Shouldn't be here.");
+        } catch (GcWebServiceError gce) {
+            gce.printStackTrace();
+        }
+
+        // Test with null field
+        try {
+            attributes = memberAttributeService.getUserAttributes(null);
+            fail("Shouldn't be here.");
+        } catch (GcWebServiceError gce) {
+            gce.printStackTrace();
+        }
+    }
 
 }
