@@ -42,7 +42,6 @@ public interface GrouperFactoryService {
 
     public WsStemLookup makeWsStemLookup(String stemName, String stemUuid);
 
-    public WsAttributeDefNameLookup makeWsAttributeDefNameLookup(String attributeDefName);
 
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath);
 
@@ -131,8 +130,6 @@ public interface GrouperFactoryService {
             String attributeDefNameName,
             String ownerGroupName);
 
-    public WsAttributeDefNameDeleteResults makeWsAttributeDefNameDeleteResultsForGroup(WsSubjectLookup subjectLookup,
-            WsAttributeDefNameLookup attributeDefNameLookup);
 
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,

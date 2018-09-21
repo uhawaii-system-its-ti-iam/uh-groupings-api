@@ -179,14 +179,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsAttributeDefNameLookup makeWsAttributeDefNameLookup(String attributeDefName){
-        WsAttributeDefNameLookup defNameLookup = new WsAttributeDefNameLookup();
-        defNameLookup.setName(attributeDefName);
-
-        return defNameLookup;
-    }
-
-    @Override
     public WsStemLookup makeWsStemLookup(String stemName) {
         return makeWsStemLookup(stemName, null);
     }
@@ -624,15 +616,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    @Override
-    public WsAttributeDefNameDeleteResults makeWsAttributeDefNameDeleteResultsForGroup(WsSubjectLookup subjectLookup,
-            WsAttributeDefNameLookup attributeDefNameLookup){
-
-        return new GcAttributeDefNameDelete()
-                .addAttributeDefNameLookup(attributeDefNameLookup)
-                .assignActAsSubject(subjectLookup)
-                .execute();
-    }
 
     @Override
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,

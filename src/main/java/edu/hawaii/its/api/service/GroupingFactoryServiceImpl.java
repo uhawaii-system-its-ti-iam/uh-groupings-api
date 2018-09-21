@@ -349,6 +349,12 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return deleteGroupingResults;
     }
 
+    public void deleteAttribute(String adminUsername, String attributeDefName) {
+
+        grouperFactoryService.makeWsAttributeDefNameLookup()
+
+    }
+
     //set of elements in list0 or list1
     private List<String> union(List<String> list0, List<String> list1) {
 
