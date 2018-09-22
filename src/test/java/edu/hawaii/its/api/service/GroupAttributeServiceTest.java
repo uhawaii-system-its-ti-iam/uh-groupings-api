@@ -101,29 +101,29 @@ public class GroupAttributeServiceTest {
     @Before
     public void setup() {
 
-        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
-
-        admins.add(ADMIN_PERSON);
-        adminGroup = new Group(GROUPING_ADMINS, admins);
-        personRepository.save(ADMIN_PERSON);
-        groupRepository.save(adminGroup);
-
-        admins.add(APP_PERSON);
-        appGroup = new Group(GROUPING_APPS, apps);
-        personRepository.save(APP_PERSON);
-        groupRepository.save(appGroup);
-
-        for (int i = 0; i < 100; i++) {
-            String name = NAME + i;
-            String uuid = UUID + i;
-            String username = USERNAME + i;
-
-            Person person = new Person(name, uuid, username);
-            users.add(person);
-
-            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
-            lookups.add(lookup);
-        }
+//        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
+//
+//        admins.add(ADMIN_PERSON);
+//        adminGroup = new Group(GROUPING_ADMINS, admins);
+//        personRepository.save(ADMIN_PERSON);
+//        groupRepository.save(adminGroup);
+//
+//        admins.add(APP_PERSON);
+//        appGroup = new Group(GROUPING_APPS, apps);
+//        personRepository.save(APP_PERSON);
+//        groupRepository.save(appGroup);
+//
+//        for (int i = 0; i < 100; i++) {
+//            String name = NAME + i;
+//            String uuid = UUID + i;
+//            String username = USERNAME + i;
+//
+//            Person person = new Person(name, uuid, username);
+//            users.add(person);
+//
+//            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
+//            lookups.add(lookup);
+//        }
     }
 
     @Test

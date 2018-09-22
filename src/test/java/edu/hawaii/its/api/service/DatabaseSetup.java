@@ -1,9 +1,12 @@
 package edu.hawaii.its.api.service;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -13,8 +16,34 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
-@ActiveProfiles("localTest")
-class DatabaseSetup {
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
+@ActiveProfiles("localTest") class DatabaseSetup {
+
+    @Value("${groupings.api.grouping_admins}")
+    private String GROUPING_ADMINS;
+
+    @Value("${groupings.api.grouping_apps}")
+    private String GROUPING_APPS;
+
+    @Value("${groupings.api.test.username}")
+    private String USERNAME;
+
+    @Value("${groupings.api.test.name}")
+    private String NAME;
+
+    @Value("${groupings.api.test.uuid}")
+    private String UUID;
+
+    private static final String ADMIN_USER = "admin";
+    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
+    private List<Person> admins = new ArrayList<>();
+    private Group adminGroup;
+
+    private static final String APP_USER = "app";
+    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
+    private List<Person> apps = new ArrayList<>();
+    private Group appGroup;
 
     private String pathRoot = "path:to:grouping";
 
@@ -23,21 +52,62 @@ class DatabaseSetup {
     private GroupingRepository groupingRepository;
     private MembershipRepository membershipRepository;
 
+    private List<Person> users = new ArrayList<>();
+    private List<WsSubjectLookup> lookups = new ArrayList<>();
     private List<Person> persons = new ArrayList<>();
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
 
     // Constructor.
     DatabaseSetup(PersonRepository personRepository,
-                  GroupRepository groupRepository,
-                  GroupingRepository groupingRepository,
-                  MembershipRepository membershipRepository) {
+            GroupRepository groupRepository,
+            GroupingRepository groupingRepository,
+            MembershipRepository membershipRepository,
+            List<Person> users,
+            List<WsSubjectLookup> lookups,
+            List<Person> admins,
+            Group adminGroup,
+            Group appGroup) {
         this.personRepository = personRepository;
         this.groupRepository = groupRepository;
         this.groupingRepository = groupingRepository;
         this.membershipRepository = membershipRepository;
+        this.users = users;
+        this.lookups = lookups;
+        this.admins = admins;
+        this.adminGroup = adminGroup;
+        this.appGroup = appGroup;
 
         fillDatabase();
+        setUserLookups();
+        setAdminAppUsers();
+    }
+
+    private void setUserLookups() {
+        for (int i = 0; i < 100; i++) {
+            String name = NAME + i;
+            String uuid = UUID + i;
+            String username = USERNAME + i;
+
+            Person person = new Person(name, uuid, username);
+            users.add(person);
+
+            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
+            lookups.add(lookup);
+        }
+    }
+
+    private void setAdminAppUsers() {
+
+        admins.add(ADMIN_PERSON);
+        adminGroup = new Group(GROUPING_ADMINS, admins);
+        personRepository.save(ADMIN_PERSON);
+        groupRepository.save(adminGroup);
+
+        admins.add(APP_PERSON);
+        appGroup = new Group(GROUPING_APPS, apps);
+        personRepository.save(APP_PERSON);
+        groupRepository.save(appGroup);
     }
 
     private void fillDatabase() {
@@ -86,10 +156,10 @@ class DatabaseSetup {
     }
 
     private void setUpGroup(int i,
-                            List<Person> basisMembers,
-                            List<Person> excludeMembers,
-                            List<Person> includeMembers,
-                            List<Person> ownerMembers) {
+            List<Person> basisMembers,
+            List<Person> excludeMembers,
+            List<Person> includeMembers,
+            List<Person> ownerMembers) {
 
         //todo put strings in a config file
         String BASIS = ":basis";
@@ -239,11 +309,16 @@ class DatabaseSetup {
     }
 
     private void setUpGroupings() {
-        makeGrouping(pathRoot + 0, groups.get(0), groups.get(1), groups.get(2), groups.get(3), false, true, false, true);
-        makeGrouping(pathRoot + 1, groups.get(4), groups.get(5), groups.get(6), groups.get(7), false, true, true, false);
-        makeGrouping(pathRoot + 2, groups.get(8), groups.get(9), groups.get(10), groups.get(11), true, false, false, false);
-        makeGrouping(pathRoot + 3, groups.get(12), groups.get(13), groups.get(14), groups.get(15), true, true, true, false);
-        makeGrouping(pathRoot + 4, groups.get(16), groups.get(17), groups.get(18), groups.get(19), false, false, false, false);
+        makeGrouping(pathRoot + 0, groups.get(0), groups.get(1), groups.get(2), groups.get(3), false, true, false,
+                true);
+        makeGrouping(pathRoot + 1, groups.get(4), groups.get(5), groups.get(6), groups.get(7), false, true, true,
+                false);
+        makeGrouping(pathRoot + 2, groups.get(8), groups.get(9), groups.get(10), groups.get(11), true, false, false,
+                false);
+        makeGrouping(pathRoot + 3, groups.get(12), groups.get(13), groups.get(14), groups.get(15), true, true, true,
+                false);
+        makeGrouping(pathRoot + 4, groups.get(16), groups.get(17), groups.get(18), groups.get(19), false, false, false,
+                false);
     }
 
     private void setUpMemberships() {

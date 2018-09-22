@@ -120,29 +120,32 @@ public class MembershipServiceTest {
     @Before
     public void setup() {
 
-        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
+        // todo not sure if preserving admins/adminGroup/appGroup fuctionality is necessary
+        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
 
-        admins.add(ADMIN_PERSON);
-        adminGroup = new Group(GROUPING_ADMINS, admins);
-        personRepository.save(ADMIN_PERSON);
-        groupRepository.save(adminGroup);
+//        admins.add(ADMIN_PERSON);
+//        adminGroup = new Group(GROUPING_ADMINS, admins);
+//        personRepository.save(ADMIN_PERSON);
+//        groupRepository.save(adminGroup);
+//
+//        admins.add(APP_PERSON);
+//        appGroup = new Group(GROUPING_APPS, apps);
+//        personRepository.save(APP_PERSON);
+//        groupRepository.save(appGroup);
 
-        admins.add(APP_PERSON);
-        appGroup = new Group(GROUPING_APPS, apps);
-        personRepository.save(APP_PERSON);
-        groupRepository.save(appGroup);
+//        db.setUsers(users);
 
-        for (int i = 0; i < 100; i++) {
-            String name = NAME + i;
-            String uuid = UUID + i;
-            String username = USERNAME + i;
-
-            Person person = new Person(name, uuid, username);
-            users.add(person);
-
-            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
-            lookups.add(lookup);
-        }
+//        for (int i = 0; i < 100; i++) {
+//            String name = NAME + i;
+//            String uuid = UUID + i;
+//            String username = USERNAME + i;
+//
+//            Person person = new Person(name, uuid, username);
+//            users.add(person);
+//
+//            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
+//            lookups.add(lookup);
+//        }
     }
 
     @Test
