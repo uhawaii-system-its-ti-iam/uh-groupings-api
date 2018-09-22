@@ -72,6 +72,9 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Value("${groupings.api.trio}")
     private String TRIO;
 
+    @Value("${groupings.api.purge_grouping}")
+    private String PURGE;
+
     @Value("${groupings.api.self_opted}")
     private String SELF_OPTED;
 
@@ -349,9 +352,82 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return deleteGroupingResults;
     }
 
-    public void deleteAttribute(String adminUsername, String attributeDefName) {
+    public void markGroupForPurge(String adminUsername, String groupingPath) {
 
-        grouperFactoryService.makeWsAttributeDefNameLookup()
+        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
+        String action = adminUsername + " is deleting a Grouping: " + groupingPath;
+
+        //make sure that adminUsername is actually an admin
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
+        }
+
+
+        if (pathIsEmpty(adminUsername, groupingPath)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
+            );
+
+            deleteGroupingResults.add(gsr);
+
+            return deleteGroupingResults;
+        }
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsGroupLookup grouping = grouperFactoryService.makeWsGroupLookup(groupingPath);
+        WsStemLookup mainStem = grouperFactoryService.makeWsStemLookup(groupingPath);
+        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
+
+
+        grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                admin,
+                ASSIGN_TYPE_GROUP,
+                OPERATION_REMOVE_ATTRIBUTE,
+                TRIO,
+                groupingPath
+        );
+
+        grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                admin,
+                ASSIGN_TYPE_GROUP,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                PURGE,
+                groupingPath
+        );
+
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(":basis");
+        memberLists.add(":basis+include");
+        memberLists.add(":exclude");
+        memberLists.add(":include");
+        memberLists.add(":owners");
+
+        for (String group: memberLists) {
+
+            if (pathIsEmpty(adminUsername, groupingPath + group)) {
+
+            }
+            else {
+
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        PURGE,
+                        groupingPath + group
+                );
+
+            }
+        }
+
 
     }
 
