@@ -88,12 +88,12 @@ public class MembershipServiceTest {
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
-    private Group adminGroup;
+    private Group adminGroup = new Group();
 
     private static final String APP_USER = "app";
     private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
     private List<Person> apps = new ArrayList<>();
-    private Group appGroup;
+    private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
@@ -116,13 +116,16 @@ public class MembershipServiceTest {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Autowired
+    private DatabaseSetup databaseSetup;
 
     @Before
     public void setup() {
 
         // todo not sure if preserving admins/adminGroup/appGroup fuctionality is necessary
-        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
-
+//        DatabaseSetup ds = new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
+//        databaseSetup = new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
+        databaseSetup.initialize(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
 //        admins.add(ADMIN_PERSON);
 //        adminGroup = new Group(GROUPING_ADMINS, admins);
 //        personRepository.save(ADMIN_PERSON);

@@ -1,12 +1,21 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.runner.RunWith;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import edu.hawaii.its.api.access.User;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -18,8 +27,13 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-@ActiveProfiles("localTest") class DatabaseSetup {
+import javax.annotation.PostConstruct;
 
+@Service("databaseSetup")
+public class DatabaseSetup {
+
+    //todo Why are the @Value null
+    //todo Worse case scenario we hard-code values in, it might be OK since all local test files pull from this class anyway
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -57,9 +71,24 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
     private List<Person> persons = new ArrayList<>();
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
+//
+//    // Constructor.
+//    DatabaseSetup(PersonRepository personRepository,
+//            GroupRepository groupRepository,
+//            GroupingRepository groupingRepository,
+//            MembershipRepository membershipRepository) {
+//        this.personRepository = personRepository;
+//        this.groupRepository = groupRepository;
+//        this.groupingRepository = groupingRepository;
+//        this.membershipRepository = membershipRepository;
+//        fillDatabase();
+//
+////        fillDatabase();
+////        setUserLookups();
+////        setAdminAppUsers();
+//    }
 
-    // Constructor.
-    DatabaseSetup(PersonRepository personRepository,
+    public void initialize(PersonRepository personRepository,
             GroupRepository groupRepository,
             GroupingRepository groupingRepository,
             MembershipRepository membershipRepository,
@@ -67,7 +96,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
             List<WsSubjectLookup> lookups,
             List<Person> admins,
             Group adminGroup,
-            Group appGroup) {
+            Group appGroup){
         this.personRepository = personRepository;
         this.groupRepository = groupRepository;
         this.groupingRepository = groupingRepository;
@@ -100,12 +129,14 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
     private void setAdminAppUsers() {
 
         admins.add(ADMIN_PERSON);
-        adminGroup = new Group(GROUPING_ADMINS, admins);
+        adminGroup.setMembers(admins);
+        adminGroup.setPath(GROUPING_ADMINS);
         personRepository.save(ADMIN_PERSON);
         groupRepository.save(adminGroup);
 
         admins.add(APP_PERSON);
-        appGroup = new Group(GROUPING_APPS, apps);
+        appGroup.setMembers(apps);
+        appGroup.setPath(GROUPING_APPS);
         personRepository.save(APP_PERSON);
         groupRepository.save(appGroup);
     }
