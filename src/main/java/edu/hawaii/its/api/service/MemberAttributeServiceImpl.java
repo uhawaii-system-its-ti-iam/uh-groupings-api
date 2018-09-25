@@ -389,8 +389,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
 
+
 //        if(username.equals(null)){
-//            throw new GcWebServiceError("Error 404 Not Fopund");
+//            throw new GcWebServiceError("Error 404 Not Found");
 //        }
 
         //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
