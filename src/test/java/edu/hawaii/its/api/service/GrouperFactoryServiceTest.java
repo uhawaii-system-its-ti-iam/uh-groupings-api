@@ -110,12 +110,12 @@ public class GrouperFactoryServiceTest {
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
-    private Group adminGroup;
+    private Group adminGroup = new Group();
 
     private static final String APP_USER = "app";
     private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
     private List<Person> apps = new ArrayList<>();
-    private Group appGroup;
+    private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
@@ -138,32 +138,12 @@ public class GrouperFactoryServiceTest {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Autowired
+    private DatabaseSetupService databaseSetupService;
+
     @Before
     public void setup() {
-
-//        new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
-//
-//        admins.add(ADMIN_PERSON);
-//        adminGroup = new Group(GROUPING_ADMINS, admins);
-//        personRepository.save(ADMIN_PERSON);
-//        groupRepository.save(adminGroup);
-//
-//        admins.add(APP_PERSON);
-//        appGroup = new Group(GROUPING_APPS, apps);
-//        personRepository.save(APP_PERSON);
-//        groupRepository.save(appGroup);
-//
-//        for (int i = 0; i < 100; i++) {
-//            String name = NAME + i;
-//            String uuid = UUID + i;
-//            String username = USERNAME + i;
-//
-//            Person person = new Person(name, uuid, username);
-//            users.add(person);
-//
-//            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
-//            lookups.add(lookup);
-//        }
+        databaseSetupService.initialize(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
     }
 
     @Test

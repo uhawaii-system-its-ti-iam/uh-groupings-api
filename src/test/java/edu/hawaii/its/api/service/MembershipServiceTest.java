@@ -117,38 +117,13 @@ public class MembershipServiceTest {
     private MembershipRepository membershipRepository;
 
     @Autowired
-    private DatabaseSetup databaseSetup;
+    private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {
 
         // todo not sure if preserving admins/adminGroup/appGroup fuctionality is necessary
-//        DatabaseSetup ds = new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
-//        databaseSetup = new DatabaseSetup(personRepository, groupRepository, groupingRepository, membershipRepository);
-        databaseSetup.initialize(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
-//        admins.add(ADMIN_PERSON);
-//        adminGroup = new Group(GROUPING_ADMINS, admins);
-//        personRepository.save(ADMIN_PERSON);
-//        groupRepository.save(adminGroup);
-//
-//        admins.add(APP_PERSON);
-//        appGroup = new Group(GROUPING_APPS, apps);
-//        personRepository.save(APP_PERSON);
-//        groupRepository.save(appGroup);
-
-//        db.setUsers(users);
-
-//        for (int i = 0; i < 100; i++) {
-//            String name = NAME + i;
-//            String uuid = UUID + i;
-//            String username = USERNAME + i;
-//
-//            Person person = new Person(name, uuid, username);
-//            users.add(person);
-//
-//            WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
-//            lookups.add(lookup);
-//        }
+        databaseSetupService.initialize(personRepository, groupRepository, groupingRepository, membershipRepository, users, lookups, admins, adminGroup, appGroup);
     }
 
     @Test

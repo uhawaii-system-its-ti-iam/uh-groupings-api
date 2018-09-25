@@ -1,21 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.runner.RunWith;
+//import org.junit.runner.RunWith;
 
 import java.lang.reflect.Array;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import edu.hawaii.its.api.access.User;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -27,13 +20,9 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import javax.annotation.PostConstruct;
+@Service("databaseSetupService")
+public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
-@Service("databaseSetup")
-public class DatabaseSetup {
-
-    //todo Why are the @Value null
-    //todo Worse case scenario we hard-code values in, it might be OK since all local test files pull from this class anyway
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -71,23 +60,8 @@ public class DatabaseSetup {
     private List<Person> persons = new ArrayList<>();
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
-//
-//    // Constructor.
-//    DatabaseSetup(PersonRepository personRepository,
-//            GroupRepository groupRepository,
-//            GroupingRepository groupingRepository,
-//            MembershipRepository membershipRepository) {
-//        this.personRepository = personRepository;
-//        this.groupRepository = groupRepository;
-//        this.groupingRepository = groupingRepository;
-//        this.membershipRepository = membershipRepository;
-//        fillDatabase();
-//
-////        fillDatabase();
-////        setUserLookups();
-////        setAdminAppUsers();
-//    }
 
+    @Override
     public void initialize(PersonRepository personRepository,
             GroupRepository groupRepository,
             GroupingRepository groupingRepository,
@@ -134,7 +108,10 @@ public class DatabaseSetup {
         personRepository.save(ADMIN_PERSON);
         groupRepository.save(adminGroup);
 
-        admins.add(APP_PERSON);
+        //todo Is this right? There ends up being no one in apps
+
+//        admins.add(APP_PERSON);
+        apps.add(APP_PERSON);
         appGroup.setMembers(apps);
         appGroup.setPath(GROUPING_APPS);
         personRepository.save(APP_PERSON);
