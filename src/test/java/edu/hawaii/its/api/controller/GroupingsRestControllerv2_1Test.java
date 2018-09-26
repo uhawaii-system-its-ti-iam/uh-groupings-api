@@ -350,12 +350,35 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().is3xxRedirection());
     }
 
+    //todo GetUserAttributes has no tests(?)
+    //todo As Admin
     @Test
-    @WithMockUhUser
-    public void memberGroupingsTest() throws Exception {
-        final String uid = "grouping";
+    @WithMockUhUser(username = "bobo")
+    public void getMemberAttributesAdminTest() throws Exception {
 
-        given(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)))
+    }
+
+    //todo As Myself
+    @Test
+    @WithMockUhUser(username = "grouping")
+    public void getMemberAttributesMyselfTest() throws Exception {
+
+    }
+
+    //todo As Nobody
+    @Test
+    @WithMockUhUser(username = "randomUser")
+    public void getMemberAttributesTest() throws Exception {
+
+    }
+
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void memberGroupingsAdminTest() throws Exception {
+        final String uid = "grouping";
+        final String admin = "bobo";
+
+        given(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(admin, uid)))
                 .willReturn(groupingStringList());
 
         mockMvc.perform(get("/api/groupings/v2.1/members/grouping/groupings"))
@@ -366,18 +389,42 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @WithMockUhUser(username = "grouping")
+    public void memberGroupingsMyselfTest() throws Exception {
+        final String uid = "grouping";
+
+        given(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid, uid)))
+                .willReturn(groupingStringList());
+
+        mockMvc.perform(get("/api/groupings/v2.1/members/grouping/groupings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("g0-gName"))
+                .andExpect(jsonPath("$[1]").value("g1-gName"))
+                .andExpect(jsonPath("$[2]").value("g2-gName"));
+    }
+
+    //todo This user owns nothing
+    @Test
+    @WithMockUhUser(username = "randomUser")
+    public void memberGroupingsFailTest() throws Exception {
+        mockMvc.perform(get("/api/groupings/v2.1/members/grouping/groupings"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     @WithAnonymousUser
-    public void anonMemberGroupingsTest() throws Exception {
+    public void memberGroupingsAnonTest() throws Exception {
         mockMvc.perform(get("/api/groupings/v2.1/members/grouping/groupings"))
                 .andExpect(status().is3xxRedirection());
     }
 
     @Test
-    @WithMockUhUser
-    public void ownerGroupingsTest() throws Exception {
+    @WithMockUhUser(username = "bobo")
+    public void ownerGroupingsAdminTest() throws Exception {
         final String uid = "grouping";
+        final String admin = "bobo";
 
-        given(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid)))
+        given(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(admin, uid)))
                 .willReturn(groupingList());
 
         mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings"))
@@ -394,10 +441,40 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @WithMockUhUser(username = "grouping")
+    public void ownerGroupingsMyselfTest() throws Exception {
+        final String uid = "grouping";
+
+        given(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid, uid)))
+                .willReturn(groupingList());
+
+        mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("grouping0"))
+                .andExpect(jsonPath("$[1].name").value("grouping1"))
+                .andExpect(jsonPath("$[2].name").value("grouping2"))
+                .andExpect(jsonPath("$[0].basis.members[0].name").value("b0-name"))
+                .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
+                .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
+                .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
+                .andExpect(jsonPath("$[0].owners.members[0].uuid").value("o0-uuid"))
+                .andExpect(jsonPath("$[1].owners.members[2].uuid").value("o2-uuid"));
+    }
+
+
+    @Test
     @WithAnonymousUser
     public void anonOwnerGroupingsTest() throws Exception {
         mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    //todo This user owns nothing
+    @Test
+    @WithMockUhUser(username = "randomUser")
+    public void ownerGroupingsFailTest() throws Exception {
+        mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test

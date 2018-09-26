@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -179,7 +180,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     private GroupAttributeService groupAttributeService;
 
     // Returns true if username is a UH id number
-    public boolean isUuid(String username) { return username.matches("\\d+"); }
+    public boolean isUuid(String username) {
+        return username.matches("\\d+");
+    }
 
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
@@ -258,7 +261,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public GroupingAssignment getGroupingAssignment(String username) {
         GroupingAssignment groupingAssignment = new GroupingAssignment();
-        List<String> groupPaths = getGroupPaths(username);
+        List<String> groupPaths = getGroupPaths(username, username);
 
         groupingAssignment.setGroupingsIn(groupingsIn(groupPaths));
         groupingAssignment.setGroupingsOwned(groupingsOwned(groupPaths));
@@ -447,27 +450,35 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     //returns the list of groups that the user is in, searching by username or uuid
+    //todo This returns an error code of 500 for some reason
     @Override
-    public List<String> getGroupPaths(String username) {
+    public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
-        WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
-        WsGetGroupsResults wsGetGroupsResults;
 
-        wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
-                username,
-                stemLookup,
-                StemScope.ALL_IN_SUBTREE
-        );
+        if (ownerUsername.equals(username) || memberAttributeService.isSuperuser(ownerUsername)) {
+            WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
+            WsGetGroupsResults wsGetGroupsResults;
 
-        WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
+            wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
+                    username,
+                    stemLookup,
+                    StemScope.ALL_IN_SUBTREE
+            );
 
-        List<WsGroup> groups = new ArrayList<>();
+            WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
 
-        if (groupResults.getWsGroups() != null) {
-            groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
+            List<WsGroup> groups = new ArrayList<>();
+
+            if (groupResults.getWsGroups() != null) {
+                groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
+            }
+
+            return extractGroupPaths(groups);
+
+        } else {
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
-
-        return extractGroupPaths(groups);
     }
 
     @Override

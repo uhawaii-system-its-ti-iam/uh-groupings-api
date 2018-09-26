@@ -5,6 +5,7 @@ package edu.hawaii.its.api.service;
 import java.lang.reflect.Array;
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -50,10 +51,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
     private String pathRoot = "path:to:grouping";
 
-    private PersonRepository personRepository;
-    private GroupRepository groupRepository;
-    private GroupingRepository groupingRepository;
-    private MembershipRepository membershipRepository;
+//    private PersonRepository personRepository;
+//    private GroupRepository groupRepository;
+//    private GroupingRepository groupingRepository;
+//    private MembershipRepository membershipRepository;
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
@@ -61,20 +62,30 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
 
+    @Autowired
+    private GroupingRepository groupingRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
+    private MembershipRepository membershipRepository;
+
+//    PersonRepository personRepository,
+//    GroupRepository groupRepository,
+//    GroupingRepository groupingRepository,
+//    MembershipRepository membershipRepository,
+
     @Override
-    public void initialize(PersonRepository personRepository,
-            GroupRepository groupRepository,
-            GroupingRepository groupingRepository,
-            MembershipRepository membershipRepository,
+    public void initialize(
             List<Person> users,
             List<WsSubjectLookup> lookups,
             List<Person> admins,
             Group adminGroup,
             Group appGroup){
-        this.personRepository = personRepository;
-        this.groupRepository = groupRepository;
-        this.groupingRepository = groupingRepository;
-        this.membershipRepository = membershipRepository;
         this.users = users;
         this.lookups = lookups;
         this.admins = admins;
@@ -108,9 +119,6 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         personRepository.save(ADMIN_PERSON);
         groupRepository.save(adminGroup);
 
-        //todo Is this right? There ends up being no one in apps
-
-//        admins.add(APP_PERSON);
         apps.add(APP_PERSON);
         appGroup.setMembers(apps);
         appGroup.setPath(GROUPING_APPS);

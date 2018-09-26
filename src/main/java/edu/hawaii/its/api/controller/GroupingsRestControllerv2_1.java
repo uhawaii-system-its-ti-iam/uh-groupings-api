@@ -137,11 +137,11 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<String>> memberGroupings(@PathVariable String uid) {
+    public ResponseEntity<List<String>> memberGroupings(Principal principal, @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(uid)));
+                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
     }
 
     /**
@@ -154,11 +154,11 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<Grouping>> ownerGroupings(@PathVariable String uid) {
+    public ResponseEntity<List<Grouping>> ownerGroupings(Principal principal, @PathVariable String uid) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid)));
+                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
     }
 
     /**

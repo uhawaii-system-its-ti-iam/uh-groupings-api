@@ -387,7 +387,7 @@ public class MembershipServiceImpl implements MembershipService {
         List<String> groupsOwned = new ArrayList<>();
 
         if(mas.isSuperuser(admin)) {
-            List<Grouping> groups = groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(user));
+            List<Grouping> groups = groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(admin, user));
 
             for(Grouping group : groups) {
                 groupsOwned.add(group.getPath());

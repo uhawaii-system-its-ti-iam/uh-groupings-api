@@ -38,7 +38,7 @@ public interface GroupingAssignmentService {
 
     public Group makeBasisGroup(WsGetMembersResults membersResults);
 
-    public List<String> getGroupPaths(String username);
+    public List<String> getGroupPaths(String ownerUsername, String username);
 
     Group getMembers(String ownerUsername, String groupPath);
 }
