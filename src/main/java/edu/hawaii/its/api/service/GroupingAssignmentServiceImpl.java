@@ -451,6 +451,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns the list of groups that the user is in, searching by username or uuid
     //todo This returns an error code of 500 for some reason
+    //todo Maybe this should just return empty list like AdminsGroupings does?
     @Override
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
