@@ -70,11 +70,14 @@ public class TestGroupingFactoryService {
     @Value("${grouperClient.webService.login}")
     private String APP_USER;
 
-    @Autowired
-    GroupAttributeService groupAttributeService;
+    @Value("${groupings.api.trio}")
+    private String TRIO;
 
     @Autowired
-    GroupingAssignmentService groupingAssignmentService;
+    private GroupAttributeService groupAttributeService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
@@ -205,5 +208,16 @@ public class TestGroupingFactoryService {
             sResults = gsre.getGsr();
             assertThat(sResults.getResultCode(), startsWith(FAILURE));
         }
+    }
+
+    @Test
+    public void markPurgeTest() {
+
+        groupingFactoryService.addGrouping("kahlin", "hawaii.edu:custom:test:kahlin:test");
+
+        groupingFactoryService.markGroupForPurge("kahlin", "hawaii.edu:custom:test:kahlin:test");
+
+        assertTrue(groupAttributeService.groupHasAttribute("hawaii.edu:custom:test:kahlin:test", TRIO));
+
     }
 }

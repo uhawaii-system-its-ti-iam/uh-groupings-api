@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.el.ListELResolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,9 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED;
 
     @Value("${groupings.api.trio}")
     private String TRIO;
@@ -352,6 +356,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return deleteGroupingResults;
     }
 
+    @Override
     public void markGroupForPurge(String adminUsername, String groupingPath) {
 
         List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
@@ -366,7 +371,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
             deleteGroupingResults.add(gsr);
 
-            return deleteGroupingResults;
+            return;//deleteGroupingResults;
         }
 
 
@@ -378,7 +383,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
             deleteGroupingResults.add(gsr);
 
-            return deleteGroupingResults;
+            return;//deleteGroupingResults;
         }
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
@@ -420,6 +425,20 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                 grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                         admin,
                         ASSIGN_TYPE_GROUP,
+                        OPERATION_REMOVE_ATTRIBUTE,
+                        LISTSERV,
+                        groupingPath + group
+                );
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
+                        OPERATION_REMOVE_ATTRIBUTE,
+                        RELEASED,
+                        groupingPath + group
+                );
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
                         OPERATION_ASSIGN_ATTRIBUTE,
                         PURGE,
                         groupingPath + group
@@ -429,6 +448,10 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
 
+    }
+
+    public void print(){
+        System.out.println("Work");
     }
 
     //set of elements in list0 or list1

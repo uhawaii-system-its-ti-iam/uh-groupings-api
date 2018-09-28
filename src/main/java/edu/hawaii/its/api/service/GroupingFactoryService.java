@@ -13,6 +13,8 @@ public interface GroupingFactoryService {
 
     public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 
+    public void markGroupForPurge(String adminUsername, String groupingPath);
+
     public boolean pathIsEmpty(String adminUsername, String groupingPath);
 
 }
