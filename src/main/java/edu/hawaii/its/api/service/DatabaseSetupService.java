@@ -16,6 +16,10 @@ import java.util.List;
 public interface DatabaseSetupService {
 
     public void initialize(
+            PersonRepository personRepository,
+            GroupRepository groupRepository,
+            GroupingRepository groupingRepository,
+            MembershipRepository membershipRepository,
             List<Person> users,
             List<WsSubjectLookup> lookups,
             List<Person> admins,

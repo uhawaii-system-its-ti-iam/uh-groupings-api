@@ -121,7 +121,8 @@ public class GroupingAssignmentServiceTest {
 
     @Before
     public void setup() {
-        databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
+        databaseSetupService.initialize(personRepository, groupRepository, groupingRepository, membershipRepository,
+                users, lookups, admins, adminGroup, appGroup);
     }
 
     @Test

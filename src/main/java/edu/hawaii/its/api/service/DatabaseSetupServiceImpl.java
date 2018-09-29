@@ -51,10 +51,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
     private String pathRoot = "path:to:grouping";
 
-//    private PersonRepository personRepository;
-//    private GroupRepository groupRepository;
-//    private GroupingRepository groupingRepository;
-//    private MembershipRepository membershipRepository;
+    //    private PersonRepository personRepository;
+    //    private GroupRepository groupRepository;
+    //    private GroupingRepository groupingRepository;
+    //    private MembershipRepository membershipRepository;
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
@@ -74,18 +74,26 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     @Autowired
     private MembershipRepository membershipRepository;
 
-//    PersonRepository personRepository,
-//    GroupRepository groupRepository,
-//    GroupingRepository groupingRepository,
-//    MembershipRepository membershipRepository,
+    //    PersonRepository personRepository,
+    //    GroupRepository groupRepository,
+    //    GroupingRepository groupingRepository,
+    //    MembershipRepository membershipRepository,
 
     @Override
     public void initialize(
+            PersonRepository personRepository,
+            GroupRepository groupRepository,
+            GroupingRepository groupingRepository,
+            MembershipRepository membershipRepository,
             List<Person> users,
             List<WsSubjectLookup> lookups,
             List<Person> admins,
             Group adminGroup,
-            Group appGroup){
+            Group appGroup) {
+        this.personRepository = personRepository;
+        this.groupRepository = groupRepository;
+        this.groupingRepository = groupingRepository;
+        this.membershipRepository = membershipRepository;
         this.users = users;
         this.lookups = lookups;
         this.admins = admins;
