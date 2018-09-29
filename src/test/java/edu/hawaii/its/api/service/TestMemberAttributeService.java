@@ -463,8 +463,8 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("givenName").equals("tst02name"));
         assertTrue(attributes.get("uhuuid").equals("iamtst02"));
 
-        //todo Myself test
-        attributes = memberAttributeService.getUserAttributes("", useruid);
+        //todo Owner test
+        attributes = memberAttributeService.getUserAttributes("iamtst01", useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
@@ -472,12 +472,12 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uhuuid").equals("iamtst02"));
 
         //todo Not an owner test
-        attributes = memberAttributeService.getUserAttributes(ADMIN_USER, useruid);
-        assertTrue(attributes.get("uid").equals("iamtst02"));
-        assertTrue(attributes.get("cn").equals("tst02name"));
-        assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("tst02name"));
-        assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+        attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
+        assertTrue(attributes.get("uid").equals(""));
+        assertTrue(attributes.get("cn").equals(""));
+        assertTrue(attributes.get("sn").equals(""));
+        assertTrue(attributes.get("givenName").equals(""));
+        assertTrue(attributes.get("uhuuid").equals(""));
 
         //todo Implement assertThat over assertTrue/assertEquals/etc.
 //        assertEquals("iamtst02", attributes.get("uhuuid"));

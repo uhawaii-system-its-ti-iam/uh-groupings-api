@@ -451,7 +451,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "_grouping_api_2")
+    @WithMockUhUser(username = "_groupings_api_2")
     public void ownerGroupingsAdminTest() throws Exception {
 
         List listGroupings = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
