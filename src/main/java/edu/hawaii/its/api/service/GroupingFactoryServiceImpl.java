@@ -357,21 +357,21 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     }
 
     @Override
-    public void markGroupForPurge(String adminUsername, String groupingPath) {
+    public List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath) {
 
-        List<GroupingsServiceResult> deleteGroupingResults = new ArrayList<>();
-        String action = adminUsername + " is deleting a Grouping: " + groupingPath;
+        List<GroupingsServiceResult> purgeGroupingResults = new ArrayList<>();
+        String action = adminUsername + " is purging a Grouping: " + groupingPath;
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isSuperuser(adminUsername)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action
+                    FAILURE + ": " + adminUsername + " does not have permission to purge this grouping", action
             );
 
-            deleteGroupingResults.add(gsr);
+            purgeGroupingResults.add(gsr);
 
-            return;//deleteGroupingResults;
+            return purgeGroupingResults;
         }
 
 
@@ -381,15 +381,12 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                     FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
             );
 
-            deleteGroupingResults.add(gsr);
+            purgeGroupingResults.add(gsr);
 
-            return;//deleteGroupingResults;
+            return purgeGroupingResults;
         }
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsGroupLookup grouping = grouperFactoryService.makeWsGroupLookup(groupingPath);
-        WsStemLookup mainStem = grouperFactoryService.makeWsStemLookup(groupingPath);
-        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
 
 
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
@@ -447,11 +444,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             }
         }
 
-
-    }
-
-    public void print(){
-        System.out.println("Work");
+        return purgeGroupingResults;
     }
 
     //set of elements in list0 or list1

@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -213,11 +214,43 @@ public class TestGroupingFactoryService {
     @Test
     public void markPurgeTest() {
 
-        groupingFactoryService.addGrouping("kahlin", "hawaii.edu:custom:test:kahlin:test");
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        GroupingsServiceResult sResults;
 
-        groupingFactoryService.markGroupForPurge("kahlin", "hawaii.edu:custom:test:kahlin:test");
+        //add the grouping
+        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
-        assertTrue(groupAttributeService.groupHasAttribute("hawaii.edu:custom:test:kahlin:test", TRIO));
+        //Works correctly
+        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
+
+        results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+
+        assertThat(groupingFactoryService.pathIsEmpty(APP_USER, TEMP_TEST),
+                equalTo(true));
+
+
+        //Fails when the grouping doesn't exists
+        try {
+            results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
+
+
+        //Fails when user trying to delete grouping is not admin
+        try {
+
+            results = groupingFactoryService.markGroupForPurge("sbraun", TEMP_TEST + ":kahlin-test");
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
 
     }
 }

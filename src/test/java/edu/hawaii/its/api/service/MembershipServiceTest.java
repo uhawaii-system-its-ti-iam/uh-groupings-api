@@ -116,6 +116,9 @@ public class MembershipServiceTest {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Autowired
+    private  GroupAttributeService testing;
+
 
     @Before
     public void setup() {

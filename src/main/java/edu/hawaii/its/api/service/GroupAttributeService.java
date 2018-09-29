@@ -24,6 +24,8 @@ public interface GroupAttributeService {
 
     public boolean optInPermission(String groupingPath);
 
+    public boolean groupHasAttribute(String groupPath, String attribute);
+
     //do not include in REST controller
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
             String attributeName);
