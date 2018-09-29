@@ -35,6 +35,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.settings}")
     private String SETTINGS;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -385,34 +388,40 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     // Covered by Integration Tests
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
-    public Map<String, String> getUserAttributes(String username) throws GcWebServiceError {
+    public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
+        String[] attributeValues = new String[5];
+        Map<String, String> mapping = new HashMap<String, String>();
 
-
-//        if(username.equals(null)){
+        //        if(username.equals(null)){
 //            throw new GcWebServiceError("Error 404 Not Found");
 //        }
+        if(isSuperuser(ownerUsername) || membershipService.listOwned(ADMIN, ownerUsername).size() != 0){
+            //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
+            try {
+                lookup = grouperFS.makeWsSubjectLookup(username);
+                WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+                subjects = results.getWsSubjects();
 
-        //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
-        try {
-            lookup = grouperFS.makeWsSubjectLookup(username);
-            WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-            subjects = results.getWsSubjects();
+                attributeValues = subjects[0].getAttributeValues();
+                String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+                for (int i = 0; i < attributeValues.length; i++) {
+                    mapping.put(subjectAttributeNames[i], attributeValues[i]);
+                }
+                return mapping;
 
-            String[] attributeValues = subjects[0].getAttributeValues();
-            Map<String, String> mapping = new HashMap<String, String>();
-
+            } catch (NullPointerException npe) {
+                throw new GcWebServiceError("Error 404 Not Found");
+            }
+        } else {
             String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
             for (int i = 0; i < attributeValues.length; i++) {
-                mapping.put(subjectAttributeNames[i], attributeValues[i]);
+                mapping.put(subjectAttributeNames[i], "");
             }
-
             return mapping;
-
-        } catch (NullPointerException npe) {
-            throw new GcWebServiceError("Error 404 Not Found");
         }
+
     }
 
     //Local approach implemented separately

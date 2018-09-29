@@ -11,6 +11,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
+import java.security.Principal;
 import java.util.List;
 
 public interface GroupingAssignmentService {
@@ -39,6 +40,8 @@ public interface GroupingAssignmentService {
     public Group makeBasisGroup(WsGetMembersResults membersResults);
 
     public List<String> getGroupPaths(String ownerUsername, String username);
+
+    public List<String> getGroupPaths(Principal principal, String username);
 
     Group getMembers(String ownerUsername, String groupPath);
 }

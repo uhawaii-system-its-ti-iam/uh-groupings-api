@@ -124,7 +124,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getUserAttributes(uid));
+                .body(memberAttributeService.getUserAttributes(principal.getName(), uid));
     }
 
     /**
@@ -144,12 +144,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
     }
 
+    //todo Maybe come back to this using listOwned?
     /**
      * Get an owner's owned groupings by username or UH id number
      *
      * @param uid: Username of owner to get list of groupings they own
      * @return List of owner's owned groupings
      */
+    @GetMapping("/owners/{uid}/groupings")
     @RequestMapping(value = "/owners/{uid}/groupings",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -158,7 +160,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
+                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(principal, uid)));
     }
 
     /**

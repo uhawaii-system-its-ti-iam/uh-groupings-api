@@ -362,12 +362,21 @@ public class TestGroupingsRestControllerv2_1 {
     @WithMockUhUser(username = "iamtst03")
     public void memberAttributesFailTest() throws Exception {
 
-        try {
-            mapGetUserAttributes(tst[0]);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
+        Map attributes = mapGetUserAttributes(tst[0]);
+
+        assertThat(attributes.get("uid"), equalTo(""));
+        assertThat(attributes.get("givenName"), equalTo(""));
+        assertThat(attributes.get("uhuuid"), equalTo(""));
+        assertThat(attributes.get("cn"), equalTo(""));
+        assertThat(attributes.get("sn"), equalTo(""));
+
+//        assertThat(mapGetUserAttributes(tst[0]).size(), equalTo(0));
+//        try {
+//            mapGetUserAttributes(tst[0]);
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
     }
 
     @Test
@@ -431,12 +440,14 @@ public class TestGroupingsRestControllerv2_1 {
     @WithMockUhUser(username = "iamtst03")
     public void memberGroupingsFailTest() throws Exception {
 
-        try {
-            mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
+        List<String> results = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+        assertThat(results.size(), equalTo(0));
+//        try {
+//            mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
     }
 
     @Test
@@ -488,12 +499,14 @@ public class TestGroupingsRestControllerv2_1 {
     @WithMockUhUser(username = "iamtst03")
     public void ownerGroupingsFailTest() throws Exception {
 
-        try {
-            mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
+        List<String> results = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+        assertThat(results.size(), equalTo(0));
+//        try {
+//            mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
     }
 
     @Test

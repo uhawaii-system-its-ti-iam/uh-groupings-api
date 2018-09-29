@@ -343,12 +343,15 @@ public class TestGroupingAssignmentService {
         assertTrue(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
         assertTrue(groups2.contains(GROUPING_TRUE_EMPTY_OWNERS));
 
-        try{
-            groupingAssignmentService.getGroupPaths(username[1], username[0]);
-            fail("Shouldn't be here");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
+        List<String> groups3 = groupingAssignmentService.getGroupPaths(username[1], username[0]);
+        assertThat(groups3.size(), equalTo(0));
+
+//        try{
+//            groupingAssignmentService.getGroupPaths(username[1], username[0]);
+//            fail("Shouldn't be here");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
     }
 
     @Test

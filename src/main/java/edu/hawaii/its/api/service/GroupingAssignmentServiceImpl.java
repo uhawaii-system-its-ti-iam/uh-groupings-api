@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -451,7 +452,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns the list of groups that the user is in, searching by username or uuid
     //todo This returns an error code of 500 for some reason
-    //todo Maybe this should just return empty list like AdminsGroupings does?
+    //todo Changed to return empty list like AdminsGroupings does
     @Override
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
@@ -477,9 +478,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return extractGroupPaths(groups);
 
         } else {
-            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
+            List<String> results = new ArrayList<>();
+            return results;
+//            GroupingsHTTPException ghe = new GroupingsHTTPException();
+//            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
+    }
+
+    public List<String> getGroupPaths(Principal principal, String username) {
+        return getGroupPaths(principal.getName(), username);
     }
 
     @Override
