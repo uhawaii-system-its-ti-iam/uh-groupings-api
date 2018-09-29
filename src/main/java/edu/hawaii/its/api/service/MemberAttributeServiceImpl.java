@@ -35,7 +35,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.settings}")
     private String SETTINGS;
 
-    @Value("${groupings.api.test.admin_user}")
+    @Value("groupings.api.test.admin_user")
     private String ADMIN;
 
     @Value("${groupings.api.grouping_admins}")
