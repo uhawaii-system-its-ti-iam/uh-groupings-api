@@ -35,7 +35,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.settings}")
     private String SETTINGS;
 
-    @Value("groupings.api.test.admin_user")
+    @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
     @Value("${groupings.api.grouping_admins}")
@@ -220,8 +220,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         if (isUuid(newOwnerUsername)) {
             action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
-        }
-        else {
+        } else {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
         }
 
@@ -288,8 +287,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         if (isUuid(username)) {
             return isMemberUuid(groupPath, username);
-        }
-        else {
+        } else {
             WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
 
             WsHasMemberResult[] memberResultArray = memberResults.getResults();
@@ -347,7 +345,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     //returns true if the user is in the admins group
     @Override
-    public boolean isAdmin(String username) { return isMember(GROUPING_ADMINS, username); }
+    public boolean isAdmin(String username) {
+        return isMember(GROUPING_ADMINS, username);
+    }
 
     //returns true if the user is in the apps group
     @Override
@@ -362,7 +362,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // returns true if username is a UH id number
-    public boolean isUuid(String username) { return username.matches("\\d+"); }
+    public boolean isUuid(String username) {
+        return username.matches("\\d+");
+    }
 
     //checks to see if a membership has an attribute of a specific type and returns the list if it does
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID) {
@@ -397,7 +399,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         //        if(username.equals(null)){
 //            throw new GcWebServiceError("Error 404 Not Found");
 //        }
-        if(isSuperuser(ownerUsername) || membershipService.listOwned(ADMIN, ownerUsername).size() != 0){
+        if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
+                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
             //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
             try {
                 lookup = grouperFS.makeWsSubjectLookup(username);
@@ -405,7 +408,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+                String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }
@@ -415,7 +418,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = { "uid", "cn", "sn", "givenName", "uhuuid" };
+            String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }
