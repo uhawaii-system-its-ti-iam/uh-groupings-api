@@ -143,8 +143,7 @@ public class GrouperFactoryServiceTest {
 
     @Before
     public void setup() {
-        databaseSetupService.initialize(personRepository, groupRepository, groupingRepository, membershipRepository,
-                users, lookups, admins, adminGroup, appGroup);
+        databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
     }
 
     @Test
