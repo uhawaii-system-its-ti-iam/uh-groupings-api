@@ -7,6 +7,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
@@ -32,7 +33,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -294,8 +298,8 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupNamesTest() {
-        List<String> groupNames1 = groupingAssignmentService.getGroupPaths(username[1]);
-        List<String> groupNames3 = groupingAssignmentService.getGroupPaths(username[3]);
+        List<String> groupNames1 = groupingAssignmentService.getGroupPaths(ADMIN, username[1]);
+        List<String> groupNames3 = groupingAssignmentService.getGroupPaths(ADMIN, username[3]);
 
         //username[1] should be in the composite and the include, not basis or exclude
         assertTrue(groupNames1.contains(GROUPING));
@@ -312,13 +316,13 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupNames() {
-        List<String> groups = groupingAssignmentService.getGroupPaths(username[0]);
+        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
 
         assertTrue(groups.contains(GROUPING_OWNERS));
         assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
         assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
 
-        List<String> groups2 = groupingAssignmentService.getGroupPaths(username[1]);
+        List<String> groups2 = groupingAssignmentService.getGroupPaths(ADMIN, username[1]);
 
         assertFalse(groups2.contains(GROUPING_OWNERS));
         assertFalse(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
@@ -326,8 +330,33 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getGroupPathsPermissionsTest(){
+        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
+
+        assertTrue(groups.contains(GROUPING_OWNERS));
+        assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
+        assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
+
+        List<String> groups2 = groupingAssignmentService.getGroupPaths(username[0], username[0]);
+
+        assertTrue(groups2.contains(GROUPING_OWNERS));
+        assertTrue(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
+        assertTrue(groups2.contains(GROUPING_TRUE_EMPTY_OWNERS));
+
+        List<String> groups3 = groupingAssignmentService.getGroupPaths(username[1], username[0]);
+        assertThat(groups3.size(), equalTo(0));
+
+//        try{
+//            groupingAssignmentService.getGroupPaths(username[1], username[0]);
+//            fail("Shouldn't be here");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
+    }
+
+    @Test
     public void grouperTest() {
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(username[0]);
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
 
         List<String> groupings = new ArrayList<>();
         List<String> groupings2 = new ArrayList<>();

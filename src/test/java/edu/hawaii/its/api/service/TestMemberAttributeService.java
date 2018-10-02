@@ -456,12 +456,28 @@ public class TestMemberAttributeService {
 
         // Base test
         String useruid = username[1];
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(useruid);
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
         assertTrue(attributes.get("givenName").equals("tst02name"));
         assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+
+        //todo Owner test
+        attributes = memberAttributeService.getUserAttributes("iamtst01", useruid);
+        assertTrue(attributes.get("uid").equals("iamtst02"));
+        assertTrue(attributes.get("cn").equals("tst02name"));
+        assertTrue(attributes.get("sn").equals("tst02name"));
+        assertTrue(attributes.get("givenName").equals("tst02name"));
+        assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+
+        //todo Not an owner test
+        attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
+        assertTrue(attributes.get("uid").equals(""));
+        assertTrue(attributes.get("cn").equals(""));
+        assertTrue(attributes.get("sn").equals(""));
+        assertTrue(attributes.get("givenName").equals(""));
+        assertTrue(attributes.get("uhuuid").equals(""));
 
         //todo Implement assertThat over assertTrue/assertEquals/etc.
 //        assertEquals("iamtst02", attributes.get("uhuuid"));
@@ -469,7 +485,7 @@ public class TestMemberAttributeService {
 
         // Test with invalid username
         try {
-            attributes = memberAttributeService.getUserAttributes("notarealperson");
+            attributes = memberAttributeService.getUserAttributes(ADMIN_USER, "notarealperson");
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
@@ -477,7 +493,7 @@ public class TestMemberAttributeService {
 
         // Test with null field
         try {
-            attributes = memberAttributeService.getUserAttributes(null);
+            attributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();

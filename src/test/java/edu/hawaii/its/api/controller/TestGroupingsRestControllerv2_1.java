@@ -68,7 +68,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingsRestControllerv2_1 {
 
     private static final Log logger = LogFactory.getLog(TestGroupingsRestControllerv2_1.class);
@@ -238,7 +238,7 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeReleasedGroupingStatus(GROUPING, tst[0], false);
 
         // Delete grouping if it exists
-        try{
+        try {
             groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
         } catch (GroupingsServiceResultException gsre) {
             logger.info("Grouping doesn't exist.");
@@ -315,8 +315,8 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
-    public void memberAttributesTest() throws Exception {
+    @WithMockUhUser(username = "_groupings_api_2")
+    public void memberAttributesAdminTest() throws Exception {
 
         Map attributes = mapGetUserAttributes(tst[0]);
 
@@ -343,7 +343,43 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void memberAttributesMyselfTest() throws Exception {
+
+        Map attributes = mapGetUserAttributes(tst[0]);
+
+        assertThat(attributes.get("uid"), equalTo("iamtst01"));
+        assertThat(attributes.get("givenName"), equalTo("tst01name"));
+        assertThat(attributes.get("uhuuid"), equalTo("iamtst01"));
+        assertThat(attributes.get("cn"), equalTo("tst01name"));
+        assertThat(attributes.get("sn"), equalTo("tst01name"));
+
+    }
+
+    // This user owns nothing
+    @Test
+    @WithMockUhUser(username = "iamtst03")
+    public void memberAttributesFailTest() throws Exception {
+
+        Map attributes = mapGetUserAttributes(tst[0]);
+
+        assertThat(attributes.get("uid"), equalTo(""));
+        assertThat(attributes.get("givenName"), equalTo(""));
+        assertThat(attributes.get("uhuuid"), equalTo(""));
+        assertThat(attributes.get("cn"), equalTo(""));
+        assertThat(attributes.get("sn"), equalTo(""));
+
+//        assertThat(mapGetUserAttributes(tst[0]).size(), equalTo(0));
+//        try {
+//            mapGetUserAttributes(tst[0]);
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
+    }
+
+    //    @Test
     @WithAnonymousUser
     public void memberAttributesAnonTest() throws Exception {
 
@@ -356,8 +392,8 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
-    public void memberGroupingsTest() throws Exception {
+    @WithMockUhUser(username = "_groupings_api_2")
+    public void memberGroupingsAdminTest() throws Exception {
 
         List listMemberships = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
         assertThat(listMemberships.size(), not(0));
@@ -379,8 +415,16 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
-    @WithAnonymousUser
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void memberGroupingsMyselfTest() throws Exception {
+
+        List listMemberships = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+        assertThat(listMemberships.size(), not(0));
+    }
+
+    @Test
+//    @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
 
         try {
@@ -391,9 +435,24 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    // This user owns nothing
     @Test
-    @WithMockUhUser(username = "iamtst01")
-    public void ownerGroupingsTest() throws Exception {
+    @WithMockUhUser(username = "iamtst03")
+    public void memberGroupingsFailTest() throws Exception {
+
+        List<String> results = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+        assertThat(results.size(), equalTo(0));
+//        try {
+//            mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get");
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
+    }
+
+    @Test
+    @WithMockUhUser(username = "_groupings_api_2")
+    public void ownerGroupingsAdminTest() throws Exception {
 
         List listGroupings = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
         assertThat(listGroupings.size(), not(0));
@@ -415,8 +474,16 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
-    @WithAnonymousUser
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void ownerGroupingsMyselfTest() throws Exception {
+
+        List listGroupings = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+        assertThat(listGroupings.size(), not(0));
+    }
+
+    @Test
+//    @WithAnonymousUser
     public void ownerGroupingsAnonTest() throws Exception {
 
         try {
@@ -425,6 +492,21 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
+    }
+
+    // This user owns nothing
+    @Test
+    @WithMockUhUser(username = "iamtst03")
+    public void ownerGroupingsFailTest() throws Exception {
+
+        List<String> results = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+        assertThat(results.size(), equalTo(0));
+//        try {
+//            mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get");
+//            fail("Shouldn't be here.");
+//        } catch (GroupingsHTTPException ghe) {
+//            assertThat(ghe.getStatusCode(), equalTo(403));
+//        }
     }
 
     @Test
@@ -501,7 +583,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(grouping.getComposite().getUsernames().size(), equalTo(0));
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void getGroupingsAnonTest() throws Exception {
 
@@ -583,7 +665,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteAdminAnonTest() throws Exception {
 
@@ -687,7 +769,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteOwnerAnonTest() throws Exception {
 
@@ -896,7 +978,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteMemberAnonTest() throws Exception {
 
@@ -1011,7 +1093,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void enableDisablePreferencesAnonTest() throws Exception {
 
@@ -1088,7 +1170,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteGroupingAnonTest() throws Exception {
 
@@ -1238,5 +1320,5 @@ public class TestGroupingsRestControllerv2_1 {
         }
         return result;
     }
-    
+
 }
