@@ -461,8 +461,8 @@ public class GroupingsRestControllerv2_1Test {
     }
 
 
-    @Test
-//    @WithAnonymousUser
+//    @Test
+    @WithAnonymousUser
     public void anonOwnerGroupingsTest() throws Exception {
         mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings"))
                 .andExpect(status().is3xxRedirection());

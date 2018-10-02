@@ -423,8 +423,8 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(listMemberships.size(), not(0));
     }
 
-    @Test
-//    @WithAnonymousUser
+//    @Test
+    @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
 
         try {
@@ -482,8 +482,8 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(listGroupings.size(), not(0));
     }
 
-    @Test
-//    @WithAnonymousUser
+//    @Test
+    @WithAnonymousUser
     public void ownerGroupingsAnonTest() throws Exception {
 
         try {
