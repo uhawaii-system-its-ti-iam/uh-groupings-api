@@ -10,6 +10,10 @@ public class GroupingAssignment {
     List<Grouping> groupingsToOptOutOf;
     List<Grouping> groupingsToOptInTo;
 
+    public GroupingAssignment(){
+
+    }
+
     public List<Grouping> getGroupingsIn() {
         return groupingsIn;
     }
