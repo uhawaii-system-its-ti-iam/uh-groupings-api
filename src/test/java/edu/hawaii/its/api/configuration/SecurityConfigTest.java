@@ -20,8 +20,6 @@ public class SecurityConfigTest {
     @Test
     public void construction() {
         assertNotNull(securityConfig);
-        assertNotNull(securityConfig.singleLogoutFilter());
-        assertNotNull(securityConfig.logoutFilter());
     }
 
 }

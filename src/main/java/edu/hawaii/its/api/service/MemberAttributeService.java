@@ -31,7 +31,7 @@ public interface MemberAttributeService {
 
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    public Map<String, String> getUserAttributes(String username) throws GcWebServiceError;
+    public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
 
     public Map<String, String> getUserAttributesLocal(String username);
 

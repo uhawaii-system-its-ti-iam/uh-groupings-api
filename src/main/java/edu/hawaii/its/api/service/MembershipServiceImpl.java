@@ -387,7 +387,7 @@ public class MembershipServiceImpl implements MembershipService {
         List<String> groupsOwned = new ArrayList<>();
 
         if(mas.isSuperuser(admin)) {
-            List<Grouping> groups = groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(user));
+            List<Grouping> groups = groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(admin, user));
 
             for(Grouping group : groups) {
                 groupsOwned.add(group.getPath());
@@ -834,11 +834,12 @@ public class MembershipServiceImpl implements MembershipService {
                 updateLastModified(include);
                 updateComposite = true;
             }
-            if (updateComposite) {
-                updateLastModified(composite);
-            }
             if (updateOwners) {
                 updateLastModified(owners);
+                updateComposite = true;
+            }
+            if (updateComposite) {
+                updateLastModified(composite);
             }
         } else {
             gsrList.add(hs.makeGroupingsServiceResult(
