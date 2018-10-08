@@ -436,7 +436,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void memberGroupingsMyselfTest() throws Exception {
 
         List listMemberships = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get", uhUser01);
@@ -457,7 +456,6 @@ public class TestGroupingsRestControllerv2_1 {
 
     // This user owns nothing
     @Test
-    @WithMockUhUser(username = "iamtst03")
     public void memberGroupingsFailTest() throws Exception {
 
         List<String> results = mapList("/api/groupings/v2.1/members/" + tst[0] + "/groupings", "get", uhUser05);
@@ -492,7 +490,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void ownerGroupingsMyselfTest() throws Exception {
 
         List listGroupings = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get", uhUser01);
@@ -513,7 +510,6 @@ public class TestGroupingsRestControllerv2_1 {
 
     // This user owns nothing
     @Test
-    @WithMockUhUser(username = "iamtst03")
     public void ownerGroupingsFailTest() throws Exception {
 
         List<String> results = mapList("/api/groupings/v2.1/owners/" + tst[0] + "/groupings", "get", uhUser05);
@@ -521,7 +517,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void getGroupingPassTest() throws Exception {
 
         Grouping grouping = mapGrouping(GROUPING, uhUser01);
@@ -576,7 +571,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst02")
     public void getGroupingFailTest() throws Exception {
 
         Grouping grouping = mapGrouping(GROUPING, uhUser02);
