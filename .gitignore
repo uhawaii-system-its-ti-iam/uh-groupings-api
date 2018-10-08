@@ -14,3 +14,4 @@ grouperClientLogs
 phantomjsdriver.log
 coverage*
 hs_err_pid11320.log
+*.log
