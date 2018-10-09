@@ -8,6 +8,8 @@ Groupings can be integrated with one or more of the following: email LISTSERV li
 
 UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise access management system designed for the highly distributed management environment and heterogeneous information technology environment common to universities.
 
+[![Known Vulnerabilities](https://app.snyk.io/org/mhodgesatuh/project/8829c750-fd0b-4456-b154-825775268035/badge.svg)](https://app.snyk.io/org/mhodgesatuh/project/8829c750-fd0b-4456-b154-825775268035)
+
 ##### Build Tool
 First, you need to download and install maven (version 3.2.1+).
 
