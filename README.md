@@ -8,6 +8,9 @@ Groupings can be integrated with one or more of the following: email LISTSERV li
 
 UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise access management system designed for the highly distributed management environment and heterogeneous information technology environment common to universities.
 
+[![Build Status](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api.png?branch=master)](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api)
+[![Coverage Status](https://coveralls.io/repos/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg?branch=master)](https://coveralls.io/github/uhawaii-system-its-ti-iam/uh-groupings-api?branch=master)
+
 ##### Build Tool
 First, you need to download and install maven (version 3.2.1+).
 
