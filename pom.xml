@@ -60,11 +60,16 @@
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
             <version>2.0.5.RELEASE</version>
         </dependency>
-        <!-- Overrides Spring's bouncycastle version with updated version -->
+        <!-- Overrides Spring's bouncycastle and spring-web with updated versions -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.60</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>5.1.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
