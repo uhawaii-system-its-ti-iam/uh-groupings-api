@@ -279,7 +279,7 @@ public class GroupingsRestControllerv2_1 {
     @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST enablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
@@ -289,13 +289,13 @@ public class GroupingsRestControllerv2_1 {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
-                results = groupAttributeService.changeOptInStatus(path, principal.getName(), true);
+                results = groupAttributeService.changeOptInStatus(path, currentUser, true);
             } else if (OPT_OUT.equals(preferenceId)) {
-                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), true);
+                results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
             } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), true));
+                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
             } else {
-                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), true));
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
             }
         }
         return ResponseEntity
@@ -313,7 +313,7 @@ public class GroupingsRestControllerv2_1 {
     @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST disablePreference");
@@ -324,13 +324,13 @@ public class GroupingsRestControllerv2_1 {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
-                results = groupAttributeService.changeOptInStatus(path, principal.getName(), false);
+                results = groupAttributeService.changeOptInStatus(path, currentUser, false);
             } else if (OPT_OUT.equals(preferenceId)) {
-                results = groupAttributeService.changeOptOutStatus(path, principal.getName(), false);
+                results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
             } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeListservStatus(path, principal.getName(), false));
+                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
             } else {
-                results.add(groupAttributeService.changeReleasedGroupingStatus(path, principal.getName(), false));
+                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, false));
             }
         }
         return ResponseEntity
