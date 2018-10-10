@@ -341,17 +341,17 @@ public class MembershipServiceImpl implements MembershipService {
 
         Person personToDelete = new Person(null, userToDeleteUuid, null);
 
-        boolean inBasis = mas.isMember(basis, personToDelete);
-        boolean inComposite = mas.isMember(groupingPath, personToDelete);
-        boolean inExclude = mas.isMember(exclude, personToDelete);
+        boolean isInBasis = mas.isMember(basis, personToDelete);
+        boolean isInComposite = mas.isMember(groupingPath, personToDelete);
+        boolean isInExclude = mas.isMember(exclude, personToDelete);
 
         //if they are in the include group, get them out
         gsrList.add(deleteGroupMemberByUsername(ownerUsername, include, userToDeleteUuid));
 
         //make sure userToDelete is actually in the Grouping
-        if (inComposite) {
+        if (isInComposite) {
             //if they are not in the include group, then they are in the basis, so add them to the exclude group
-            if (inBasis) {
+            if (isInBasis) {
                 gsrList.addAll(addGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid));
             }
         }
@@ -362,7 +362,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         //should not be in exclude if not in basis
-        if (!inBasis && inExclude) {
+        if (!isInBasis && isInExclude) {
             gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid));
         }
 
