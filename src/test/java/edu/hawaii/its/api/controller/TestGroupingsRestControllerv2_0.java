@@ -335,41 +335,41 @@ public class TestGroupingsRestControllerv2_0 {
     public void groupingAssignmentTest() throws Exception {
         GroupingAssignment groupings = mapGroupingAssignment();
 
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
         for (Grouping grouping : groupings.getGroupingsIn()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertTrue(inGrouping);
+        assertTrue(isInGrouping);
 
-        boolean canOptin = false;
+        boolean isOptInPossible = false;
         for (Grouping grouping : groupings.getGroupingsToOptInTo()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                canOptin = true;
+                isOptInPossible = true;
                 break;
             }
         }
-        assertFalse(canOptin);
+        assertFalse(isOptInPossible);
 
-        boolean canOptOut = false;
+        boolean isOptOutPossible = false;
         for (Grouping grouping : groupings.getGroupingsToOptOutOf()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                canOptOut = true;
+                isOptOutPossible = true;
                 break;
             }
         }
-        assertTrue(canOptOut);
+        assertTrue(isOptOutPossible);
 
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner = false;
         for (Grouping grouping : groupings.getGroupingsOwned()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertTrue(ownsGrouping);
+        assertTrue(isGroupingOwner);
 
     }
 
@@ -378,29 +378,29 @@ public class TestGroupingsRestControllerv2_0 {
     public void myGroupingsTest2() throws Exception {
         GroupingAssignment groupings = mapGroupingAssignment();
 
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
         for (Grouping grouping : groupings.getGroupingsIn()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertFalse(inGrouping);
+        assertFalse(isInGrouping);
 
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner = false;
         for (Grouping grouping : groupings.getGroupingsOwned()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertFalse(ownsGrouping);
+        assertFalse(isGroupingOwner);
     }
 
     @Test
     @WithMockUhUser(username = "iamtst04")
     public void myGroupingsTest3() throws Exception {
-        boolean optedIn = false;
+        boolean isOptedIn = false;
 
         GroupingAssignment tst4Groupings = mapGroupingAssignment();
         assertEquals(tst4Groupings.getGroupingsOptedInTo().size(), 0);
@@ -408,17 +408,17 @@ public class TestGroupingsRestControllerv2_0 {
         tst4Groupings = mapGroupingAssignment();
         for (Grouping grouping : tst4Groupings.getGroupingsOptedInTo()) {
             if (grouping.getPath().contains(GROUPING)) {
-                optedIn = true;
+                isOptedIn = true;
             }
         }
         //in basis
-        assertFalse(optedIn);
+        assertFalse(isOptedIn);
     }
 
     @Test
     @WithMockUhUser(username = "iamtst06")
     public void myGroupingsTest4() throws Exception {
-        boolean optedOut = false;
+        boolean isOptedOut = false;
 
         GroupingAssignment tst5Groupings = mapGroupingAssignment();
         assertEquals(tst5Groupings.getGroupingsOptedOutOf().size(), 0);
@@ -427,10 +427,10 @@ public class TestGroupingsRestControllerv2_0 {
 
         for (Grouping grouping : tst5Groupings.getGroupingsOptedOutOf()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                optedOut = true;
+                isOptedOut = true;
             }
         }
-        assertTrue(optedOut);
+        assertTrue(isOptedOut);
 
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[5]);
     }

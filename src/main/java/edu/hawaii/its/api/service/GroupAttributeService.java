@@ -16,13 +16,13 @@ public interface GroupAttributeService {
 
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean optOutOn);
 
-    public boolean hasListserv(String groupingPath);
+    public boolean isHasListserv(String groupingPath);
 
-    public boolean hasReleasedGrouping(String groupingPath);
+    public boolean isHasReleasedGrouping(String groupingPath);
 
-    public boolean optOutPermission(String groupingPath);
+    public boolean isOptOutPossible(String groupingPath);
 
-    public boolean optInPermission(String groupingPath);
+    public boolean isOptInPossible(String groupingPath);
 
     //do not include in REST controller
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,

@@ -24,12 +24,12 @@ public class GrouperPropertyConfigurer {
     }
 
     private void setOverride(GrouperClientConfig config, String key) {
-        if (overrideExists(key)) {
+        if (isOverride(key)) {
             config.propertiesOverrideMap().put(key, env.getProperty(key));
         }
     }
 
-    private boolean overrideExists(String key) {
+    private boolean isOverride(String key) {
         return env.containsProperty(key);
     }
 }

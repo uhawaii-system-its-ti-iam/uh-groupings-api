@@ -205,16 +205,16 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        boolean inBasis = mas.isMember(basis, userToAddUsername);
-        boolean inComposite = mas.isMember(groupingPath, userToAddUsername);
-        boolean inInclude = mas.isMember(include, userToAddUsername);
+        boolean isInBasis = mas.isMember(basis, userToAddUsername);
+        boolean isInComposite = mas.isMember(groupingPath, userToAddUsername);
+        boolean isInInclude = mas.isMember(include, userToAddUsername);
 
         //check to see if they are already in the grouping
-        if (!inComposite) {
+        if (!isInComposite) {
             //get them out of the exclude
             gsrs.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToAddUsername));
             //only add them to the include if they are not in the basis
-            if (!inBasis) {
+            if (!isInBasis) {
                 gsrs.addAll(addGroupMemberByUsername(ownerUsername, include, userToAddUsername));
             } else {
                 gsrs.add(
@@ -225,7 +225,7 @@ public class MembershipServiceImpl implements MembershipService {
                     SUCCESS + ": " + userToAddUsername + " was already in " + groupingPath, action));
         }
         //should only be in one or the other
-        if (inBasis && inInclude) {
+        if (isInBasis && isInInclude) {
             gsrs.add(deleteGroupMemberByUsername(ownerUsername, include, userToAddUsername));
         }
 
@@ -248,16 +248,16 @@ public class MembershipServiceImpl implements MembershipService {
 
         Person personToAdd = new Person(null, userToAddUuid, null);
 
-        boolean inBasis = mas.isMember(basis, personToAdd);
-        boolean inComposite = mas.isMember(groupingPath, personToAdd);
-        boolean inInclude = mas.isMember(include, personToAdd);
+        boolean isInBasis = mas.isMember(basis, personToAdd);
+        boolean isInComposite = mas.isMember(groupingPath, personToAdd);
+        boolean isInInclude = mas.isMember(include, personToAdd);
 
         //check to see if they are already in the grouping
-        if (!inComposite) {
+        if (!isInComposite) {
             //get them out of the exclude
             gsrs.add(deleteGroupMemberByUsername(username, exclude, userToAddUuid));
             //only add them to the include if they are not in the basis
-            if (!inBasis) {
+            if (!isInBasis) {
                 gsrs.addAll(addGroupMemberByUsername(username, include, userToAddUuid));
             } else {
                 gsrs.add(hs.makeGroupingsServiceResult(SUCCESS + ": " + userToAddUuid + " was in " + basis, action));
@@ -267,7 +267,7 @@ public class MembershipServiceImpl implements MembershipService {
                     action));
         }
         //should only be in one or the other
-        if (inBasis && inInclude) {
+        if (isInBasis && isInInclude) {
             gsrs.add(deleteGroupMemberByUsername(username, include, userToAddUuid));
         }
 
@@ -616,7 +616,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     //returns true if the group allows that user to opt out
     @Override
-    public boolean groupOptOutPermission(String optOutUsername, String groupPath) {
+    public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
         logger.info("groupOptOutPermission; group: " + groupPath + "; username: " + optOutUsername + ";");
         WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optOutUsername, PRIVILEGE_OPT_OUT, groupPath);
 
@@ -628,7 +628,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     //returns true if the group allows that user to opt in
     @Override
-    public boolean groupOptInPermission(String optInUsername, String groupPath) {
+    public boolean isGroupCanOptIn(String optInUsername, String groupPath) {
         logger.info("groupOptInPermission; group: " + groupPath + "; username: " + optInUsername + ";");
 
         WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optInUsername, PRIVILEGE_OPT_IN, groupPath);
@@ -644,7 +644,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (groupOptInPermission(username, addGroup)) {
+        if (isGroupCanOptIn(username, addGroup)) {
 
             switch (outOrrIn) {
                 case "out ":
@@ -742,10 +742,10 @@ public class MembershipServiceImpl implements MembershipService {
             String include = composite + INCLUDE;
             String owners = composite + OWNERS;
 
-            boolean updateComposite = false;
-            boolean updateExclude = false;
-            boolean updateInclude = false;
-            boolean updateOwners = false;
+            boolean isCompositeUpdated= false;
+            boolean isExcludeUpdated= false;
+            boolean isIncludeUpdated = false;
+            boolean isOwnersUpdated = false;
 
             //check to see if it is the include, exclude or owners
             if (groupPath.endsWith(INCLUDE)) {
@@ -756,7 +756,7 @@ public class MembershipServiceImpl implements MembershipService {
                             user,
                             personToAdd);
 
-                    updateExclude = true;
+                    isExcludeUpdated = true;
 
                     gsrList.add(hs.makeGroupingsServiceResult(wsDeleteMemberResults,
                             "delete " + personToAdd.toString() + " from " + exclude));
@@ -766,7 +766,7 @@ public class MembershipServiceImpl implements MembershipService {
                     //add to include
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(include, user, personToAdd);
 
-                    updateInclude = true;
+                    isIncludeUpdated = true;
 
                     gsrList.add(hs.makeGroupingsServiceResult(addMemberResults, action));
                 } else {
@@ -785,7 +785,7 @@ public class MembershipServiceImpl implements MembershipService {
                             user,
                             personToAdd);
 
-                    updateInclude = true;
+                    isIncludeUpdated = true;
 
                     gsrList.add(hs.makeGroupingsServiceResult(wsDeleteMemberResults,
                             "delete " + personToAdd.toString() + " from " + include));
@@ -795,7 +795,7 @@ public class MembershipServiceImpl implements MembershipService {
                     //add to exclude
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
-                    updateExclude = true;
+                    isExcludeUpdated = true;
 
                     gsrList.add(hs.makeGroupingsServiceResult(addMemberResults, action));
                 }
@@ -811,7 +811,7 @@ public class MembershipServiceImpl implements MembershipService {
                     //add userToAdd to owners
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(owners, user, personToAdd);
 
-                    updateOwners = true;
+                    isOwnersUpdated = true;
 
                     gsrList.add(hs.makeGroupingsServiceResult(addMemberResults, action));
                 }
@@ -826,19 +826,19 @@ public class MembershipServiceImpl implements MembershipService {
             }
 
             //update groups that were changed
-            if (updateExclude) {
+            if (isExcludeUpdated) {
                 updateLastModified(exclude);
-                updateComposite = true;
+                isCompositeUpdated = true;
             }
-            if (updateInclude) {
+            if (isIncludeUpdated) {
                 updateLastModified(include);
-                updateComposite = true;
+                isCompositeUpdated = true;
             }
-            if (updateOwners) {
+            if (isOwnersUpdated) {
                 updateLastModified(owners);
-                updateComposite = true;
+                isCompositeUpdated = true;
             }
-            if (updateComposite) {
+            if (isCompositeUpdated) {
                 updateLastModified(composite);
             }
         } else {

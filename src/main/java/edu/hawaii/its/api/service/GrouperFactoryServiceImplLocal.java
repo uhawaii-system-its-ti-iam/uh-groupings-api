@@ -342,22 +342,22 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             addMember(groupToAddTo, newGroupMember);
         } else {
 
-            boolean inBasis = grouping.getBasis().isMember(newGroupMember);
-            boolean inExclude = grouping.getExclude().isMember(newGroupMember);
-            boolean inInclude = grouping.getInclude().isMember(newGroupMember);
+            boolean isInBasis = grouping.getBasis().isMember(newGroupMember);
+            boolean isInExclude = grouping.getExclude().isMember(newGroupMember);
+            boolean isInInclude = grouping.getInclude().isMember(newGroupMember);
 
             if (group.endsWith(OWNERS)) {
                 addMember(grouping.getOwners(), newGroupMember);
             } else if (group.endsWith(EXCLUDE)) {
-                if (inBasis) {
+                if (isInBasis) {
                     addMember(grouping.getExclude(), newGroupMember);
-                } else if (inInclude) {
+                } else if (isInInclude) {
                     deleteMember(grouping.getInclude(), newGroupMember);
                 }
             } else if (group.endsWith(INCLUDE)) {
-                if (inExclude) {
+                if (isInExclude) {
                     deleteMember(grouping.getExclude(), newGroupMember);
-                } else if (!inBasis) {
+                } else if (!isInBasis) {
                     addMember(grouping.getInclude(), newGroupMember);
                 }
             }
@@ -849,7 +849,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed) {
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -863,10 +863,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
-            membership.setOptInEnabled(allowed);
+            membership.setOptInEnabled(isAllowed);
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
-            membership.setOptOutEnabled(allowed);
+            membership.setOptOutEnabled(isAllowed);
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
@@ -888,23 +888,23 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Group group = groupRepository.findByPath(groupName);
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
-        boolean enabled = false;
+        boolean isEnabled = false;
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
             if (membership.isOptInEnabled()) {
-                enabled = true;
+                isEnabled = true;
             }
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
             if (membership.isOptOutEnabled()) {
-                enabled = true;
+                isEnabled = true;
             }
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
-        if (enabled) {
+        if (isEnabled) {
             wsResultMeta.setResultCode(SUCCESS_ALLOWED);
         }
 
@@ -1042,15 +1042,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return basisPlusIncludeMinusExcludeGroup;
     }
 
-    private boolean setGroupingAttribute(Grouping grouping, String attributeName, boolean on) {
+    private boolean setGroupingAttribute(Grouping grouping, String attributeName, boolean isOn) {
         if (attributeName.equals(LISTSERV)) {
-            grouping.setListservOn(on);
+            grouping.setListservOn(isOn);
         } else if (attributeName.equals(OPT_IN)) {
-            grouping.setOptInOn(on);
+            grouping.setOptInOn(isOn);
         } else if (attributeName.equals(OPT_OUT)) {
-            grouping.setOptOutOn(on);
+            grouping.setOptOutOn(isOn);
         } else if (attributeName.equals(RELEASED_GROUPING)) {
-            grouping.setReleasedGroupingOn(on);
+            grouping.setReleasedGroupingOn(isOn);
         } else {
             return false;
         }

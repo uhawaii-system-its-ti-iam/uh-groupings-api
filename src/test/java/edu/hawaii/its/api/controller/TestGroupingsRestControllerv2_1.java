@@ -1132,9 +1132,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = null;
-
-        result = mockMvc.perform(get("/api/groupings/v2.1/members/" + username)
+        MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/members/" + username)
                 .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
@@ -1168,9 +1166,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = null;
-
-        result = mockMvc.perform(get("/api/groupings/v2.1/adminsGroupings")
+        MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/adminsGroupings")
                 .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
@@ -1188,11 +1184,8 @@ public class TestGroupingsRestControllerv2_1 {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = null;
-        User currentUser = annotationUser;
-
-        result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
-                .with(user(currentUser))
+        MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
+                .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
 

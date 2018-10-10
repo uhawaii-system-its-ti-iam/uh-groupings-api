@@ -401,7 +401,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     }
 
     //returns true if there is not a group at groupingPath
-    public boolean pathIsEmpty(String adminUsername, String groupingPath) {
+    public boolean isPathEmpty(String adminUsername, String groupingPath) {
 
         WsFindGroupsResults wsFindGroupsResults = grouperFactoryService.makeWsFindGroupsResults(groupingPath);
 

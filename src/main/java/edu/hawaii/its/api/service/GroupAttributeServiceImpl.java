@@ -221,26 +221,26 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     //returns true if the grouping has a listserv, false otherwise
     @Override
-    public boolean hasListserv(String groupingPath) {
-        return groupHasAttribute(groupingPath, LISTSERV);
+    public boolean isHasListserv(String groupingPath) {
+        return isGroupHasAttribute(groupingPath, LISTSERV);
     }
 
     //returns true if the grouping has LDAP, false otherwise
     @Override
-    public boolean hasReleasedGrouping(String groupingPath) {
-        return groupHasAttribute(groupingPath, RELEASED_GROUPING);
+    public boolean isHasReleasedGrouping(String groupingPath) {
+        return isGroupHasAttribute(groupingPath, RELEASED_GROUPING);
     }
 
     //returns true if the grouping allows the user to opt out, false otherwise
     @Override
-    public boolean optOutPermission(String groupingPath) {
-        return groupHasAttribute(groupingPath, OPT_OUT);
+    public boolean isOptOutPossible(String groupingPath) {
+        return isGroupHasAttribute(groupingPath, OPT_OUT);
     }
 
     //returns true if the grouping allows the user to opt in, false otherwise
     @Override
-    public boolean optInPermission(String groupingPath) {
-        return groupHasAttribute(groupingPath, OPT_IN);
+    public boolean isOptInPossible(String groupingPath) {
+        return isGroupHasAttribute(groupingPath, OPT_IN);
     }
 
     //turns the attribute on or off in a group
@@ -255,7 +255,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
         if (mas.isOwner(groupPath, ownerUsername) || mas.isAdmin(ownerUsername)) {
-            boolean hasAttribute = groupHasAttribute(groupPath, attributeName);
+            boolean hasAttribute = isGroupHasAttribute(groupPath, attributeName);
             if (attributeOn) {
                 if (!hasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
@@ -289,7 +289,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     //returns true if the group has the attribute with that name
-    public boolean groupHasAttribute(String groupPath, String attributeName) {
+    public boolean isGroupHasAttribute(String groupPath, String attributeName) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = attributeAssignmentsResults(
                 ASSIGN_TYPE_GROUP,
                 groupPath,
