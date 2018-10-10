@@ -66,11 +66,12 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.60</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>5.1.0.RELEASE</version>
-        </dependency>
+        <!--Comment this out until we can figure out how to integrate the new version into our project-->
+        <!--<dependency>-->
+            <!--<groupId>org.springframework</groupId>-->
+            <!--<artifactId>spring-web</artifactId>-->
+            <!--<version>5.1.0.RELEASE</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-cas</artifactId>
