@@ -27,13 +27,13 @@ import javax.annotation.PostConstruct;
 
 import edu.hawaii.its.api.access.*;
 import jdk.jfr.events.ExceptionThrownEvent;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.hibernate.annotations.WhereJoinTable;
 import com.sun.net.httpserver.Authenticator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.validator.constraints.br.TituloEleitoral;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
