@@ -26,6 +26,8 @@ public interface GroupingAssignmentService {
 
     public Grouping getGrouping(String groupingPath, String ownerUsername);
 
+    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size);
+
     public GroupingAssignment getGroupingAssignment(String username);
 
     public AdminListsHolder adminLists(String adminUsername);
@@ -43,5 +45,7 @@ public interface GroupingAssignmentService {
 
     public List<String> getGroupPaths(Principal principal, String username);
 
-    Group getMembers(String ownerUsername, String groupPath);
+    public Group getMembers(String ownerUsername, String groupPath);
+
+    public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size);
 }
