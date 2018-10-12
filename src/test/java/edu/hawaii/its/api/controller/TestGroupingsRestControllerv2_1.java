@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.validator.constraints.br.TituloEleitoral;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -72,15 +73,15 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingsRestControllerv2_1 {
 
     private static final Log logger = LogFactory.getLog(TestGroupingsRestControllerv2_1.class);
 
-    @Value ("${groupings.api.test.grouping_delete}")
+    @Value("${groupings.api.test.grouping_delete}")
     private String DELETE_GROUPING;
 
-    @Value ("${groupings.api.test.grouping_delete_test}")
+    @Value("${groupings.api.test.grouping_delete_test}")
     private String DELETE_GROUPING_TEST;
 
     @Value("${grouperClient.webService.login}")
@@ -167,6 +168,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
 
+    @Value("${groupings.api.current_user}")
+    private String CURRENT_USER;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -224,30 +228,30 @@ public class TestGroupingsRestControllerv2_1 {
         Set<GrantedAuthority> authorities = new LinkedHashSet<>();
         authorities.add(new SimpleGrantedAuthority(Role.ADMIN.longName()));
         authorities.add(new SimpleGrantedAuthority(Role.UH.longName()));
-        adminUser = new User(APP_USER, APP_USER, authorities);
+        adminUser = new User(ADMIN, ADMIN, authorities);
 
         // Creates normal users for testing
         Set<GrantedAuthority> uhAuthorities = new LinkedHashSet<>();
         uhAuthorities.add(new SimpleGrantedAuthority(Role.UH.longName()));
-        uhUser01= new User("iamtst01", "iamtst01", uhAuthorities);
-        uhUser02= new User("iamtst02", "iamtst02", uhAuthorities);
-        uhUser05= new User("iamtst05", "iamtst05", uhAuthorities);
-        uhUser03 = new User("iamtst03", "iamtst03", uhAuthorities);
+        uhUser01 = new User(tst[0], tst[0], uhAuthorities);
+        uhUser02 = new User(tst[1], tst[1], uhAuthorities);
+        uhUser05 = new User(tst[4], tst[4], uhAuthorities);
+        uhUser03 = new User(tst[2], tst[2], uhAuthorities);
 
         // Creates anonymous user for testing
         Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
         anonUser = new User("anonymous", anonAuthorities);
         anon = new AnonymousUser();
 
-        //put in include
+        // put in include
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[0]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[1]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[2]);
 
-        //add to exclude
+        // add to exclude
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[3]);
 
-        //remove from exclude
+        // remove from exclude
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[4]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[5]);
 
@@ -260,15 +264,15 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.deleteAdmin(ADMIN, tst[0]);
         memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
 
-        // Add "iamtst03" to include and remove from exclude
+        // Add tst[2] to include and remove from exclude
         membershipService.addGroupMember(tst[0], GROUPING_INCLUDE, tst[2]);
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[2]);
 
-        //Remove "iamtst04" from include and add to exclude
+        // Remove tst[3] from include and add to exclude
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
         membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
 
-        //Reset preferences
+        // Reset preferences
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
         groupAttributeService.changeListservStatus(GROUPING, tst[0], true);
@@ -281,19 +285,14 @@ public class TestGroupingsRestControllerv2_1 {
             logger.info("Grouping doesn't exist.");
         }
 
-        // Initialize test uuids
-        tstUuid[0] = "10976564";
-        tstUuid[1] = "11077773";
-        tstUuid[2] = "11077784";
-
         // Ensures users are not already in group
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_INCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_INCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_INCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[2]);
 
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_EXCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_EXCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername("iamtst05", A_EXCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[2]);
     }
 
     @Test
@@ -402,7 +401,7 @@ public class TestGroupingsRestControllerv2_1 {
         //        }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void memberAttributesAnonTest() throws Exception {
 
@@ -442,7 +441,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(listMemberships.size(), not(0));
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
 
@@ -496,7 +495,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(listGroupings.size(), not(0));
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void ownerGroupingsAnonTest() throws Exception {
 
@@ -580,7 +579,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(grouping.getComposite().getUsernames().size(), equalTo(0));
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void getGroupingsAnonTest() throws Exception {
 
@@ -648,7 +647,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     public void addDeleteAdminAnonTest() throws Exception {
 
         try {
@@ -740,7 +739,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteOwnerAnonTest() throws Exception {
 
@@ -795,6 +794,8 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
     }
 
+    // todo adding an admin with a uuid is currently not supported
+    @Ignore
     @Test
     public void addDeleteAdminUuidPassTest() throws Exception {
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
@@ -927,7 +928,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteMemberAnonTest() throws Exception {
 
@@ -962,30 +963,30 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableDisablePreferencesPassTest() throws Exception {
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
-        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
 
-        assertFalse(groupAttributeService.optInPermission(GROUPING));
-        assertFalse(groupAttributeService.optOutPermission(GROUPING));
-        assertFalse(groupAttributeService.hasListserv(GROUPING));
-        assertTrue(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
 
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
-        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         //todo Test all permutations of bad data
         try {
@@ -1036,7 +1037,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void enableDisablePreferencesAnonTest() throws Exception {
 
@@ -1096,14 +1097,14 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         try {
-            mapList("/api/groupings/v2.1/groupings/" + DELETE_GROUPING_TEST , "delete", uhUser01);
+            mapList("/api/groupings/v2.1/groupings/" + DELETE_GROUPING_TEST, "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void addDeleteGroupingAnonTest() throws Exception {
 
@@ -1133,6 +1134,7 @@ public class TestGroupingsRestControllerv2_1 {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/members/" + username)
+                .header(CURRENT_USER, annotationUser.getUsername())
                 .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
@@ -1167,6 +1169,7 @@ public class TestGroupingsRestControllerv2_1 {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/adminsGroupings")
+                .header(CURRENT_USER, annotationUser.getUsername())
                 .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
@@ -1180,12 +1183,14 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // Mapping of getGrouping call
-    private Grouping mapGrouping(String groupingPath, User annotationUser) throws Exception {
+    private Grouping mapGrouping(String groupingPath, User currentUser) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
+        MvcResult result = null;
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
-                .with(user(annotationUser))
+        result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
+                .header(CURRENT_USER, currentUser.getUsername())
+                .with(user(currentUser))
                 .with(csrf()))
                 .andReturn();
 
@@ -1233,27 +1238,31 @@ public class TestGroupingsRestControllerv2_1 {
         switch (httpCall) {
             case "get":
                 result = mockMvc.perform(get(uri)
-                    .with(user(annotationUser))
-                    .with(csrf()))
-                    .andReturn();
+                        .with(user(annotationUser))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(csrf()))
+                        .andReturn();
                 break;
             case "post":
                 result = mockMvc.perform(post(uri)
-                    .with(user(annotationUser))
-                    .with(csrf()))
-                    .andReturn();
+                        .with(user(annotationUser))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(csrf()))
+                        .andReturn();
                 break;
             case "put":
                 result = mockMvc.perform(put(uri)
-                     .with(user(annotationUser))
-                     .with(csrf()))
-                     .andReturn();
+                        .with(user(annotationUser))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(csrf()))
+                        .andReturn();
                 break;
             case "delete":
                 result = mockMvc.perform(delete(uri)
-                     .with(user(annotationUser))
-                     .with(csrf()))
-                     .andReturn();
+                        .with(user(annotationUser))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(csrf()))
+                        .andReturn();
                 break;
             default:
                 throw new IllegalArgumentException();
