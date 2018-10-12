@@ -170,29 +170,29 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     //turn the listserv for a grouping on or off
     @Override
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean listservOn) {
-        return changeGroupAttributeStatus(groupingPath, owenerUsername, LISTSERV, listservOn);
+    public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean isListservOn) {
+        return changeGroupAttributeStatus(groupingPath, owenerUsername, LISTSERV, isListservOn);
     }
 
     //turn the LDAP for a grouping on or off
     @Override
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean releasedGroupingOn) {
-        return changeGroupAttributeStatus(groupingPath, ownerUsername, RELEASED_GROUPING, releasedGroupingOn);
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn) {
+        return changeGroupAttributeStatus(groupingPath, ownerUsername, RELEASED_GROUPING, isReleasedGroupingOn);
     }
 
     //turn the ability for users to opt-in to a grouping on or off
     @Override
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean optInOn) {
+    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
         if (mas.isOwner(groupingPath, ownerUsername) || mas.isAdmin(ownerUsername)) {
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, optInOn));
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, optInOn));
-            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, optInOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
+            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
         } else {
 
             GroupingsServiceResult failure = hs.makeGroupingsServiceResult(
                     FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                    "change opt in status for " + groupingPath + " to " + optInOn);
+                    "change opt in status for " + groupingPath + " to " + isOptInOn);
             //todo Same issue as MemberAttributeService, not sure if code is reachable by test
             results.add(failure);
         }
@@ -202,17 +202,17 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     //turn the ability for users to opt-out of a grouping on or off
     @Override
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
-            boolean optOutOn) {
+            boolean isOptOutOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
         if (mas.isOwner(groupingPath, ownerUsername) || mas.isAdmin(ownerUsername)) {
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, optOutOn));
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, optOutOn));
-            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, optOutOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOutOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
+            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
         } else {
 
             GroupingsServiceResult failure = hs.makeGroupingsServiceResult(
                     FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                    "change opt out status for " + groupingPath + " to " + optOutOn);
+                    "change opt out status for " + groupingPath + " to " + isOptOutOn);
             //todo Same issue as MemberAttributeService, not sure if code is reachable by test
             results.add(failure);
         }
@@ -245,19 +245,19 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     //turns the attribute on or off in a group
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
-            String attributeName, boolean attributeOn) {
+            String attributeName, boolean isAttributeOn) {
         GroupingsServiceResult gsr;
 
         String verb = "removed from ";
-        if (attributeOn) {
+        if (isAttributeOn) {
             verb = "added to ";
         }
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
         if (mas.isOwner(groupPath, ownerUsername) || mas.isAdmin(ownerUsername)) {
-            boolean hasAttribute = isGroupHasAttribute(groupPath, attributeName);
-            if (attributeOn) {
-                if (!hasAttribute) {
+            boolean isHasAttribute = isGroupHasAttribute(groupPath, attributeName);
+            if (isAttributeOn) {
+                if (!isHasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
 
                     gsr = hs.makeGroupingsServiceResult(SUCCESS, action);
@@ -268,7 +268,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                     gsr = hs.makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
                 }
             } else {
-                if (hasAttribute) {
+                if (isHasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupPath);
 
                     gsr = hs.makeGroupingsServiceResult(SUCCESS, action);
@@ -348,7 +348,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             String username,
             String privilegeName,
             String groupPath,
-            boolean set) {
+            boolean isSet) {
 
         logger.info("assignGrouperPrivilege; username: "
                 + username
@@ -357,18 +357,18 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 + "; privilegeName: "
                 + privilegeName
                 + " set: "
-                + set
+                + isSet
                 + ";");
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
-        String action = "set " + privilegeName + " " + set + " for " + username + " in " + groupPath;
+        String action = "set " + privilegeName + " " + isSet + " for " + username + " in " + groupPath;
 
         WsAssignGrouperPrivilegesLiteResult grouperPrivilegesLiteResult =
                 grouperFS.makeWsAssignGrouperPrivilegesLiteResult(
                         groupPath,
                         privilegeName,
                         lookup,
-                        set);
+                        isSet);
 
         return hs.makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
     }

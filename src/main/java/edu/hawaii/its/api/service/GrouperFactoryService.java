@@ -131,12 +131,12 @@ public interface GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed);
+            boolean isAllowed);
 
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed);
+            boolean isAllowed);
 
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,

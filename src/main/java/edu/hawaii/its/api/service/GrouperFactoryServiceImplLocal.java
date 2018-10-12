@@ -717,23 +717,23 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
-        Boolean onOrrOff = null;
+        Boolean isOnOrrOff = null;
 
         if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
-            onOrrOff = true;
+            isOnOrrOff = true;
         } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
-            onOrrOff = false;
+            isOnOrrOff = false;
         }
 
-        if (onOrrOff != null) {
+        if (isOnOrrOff != null) {
             if (attributeDefNameName.equals(LISTSERV)) {
-                grouping.setListservOn(onOrrOff);
+                grouping.setListservOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_IN)) {
-                grouping.setOptInOn(onOrrOff);
+                grouping.setOptInOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_OUT)) {
-                grouping.setOptOutOn(onOrrOff);
+                grouping.setOptOutOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(RELEASED_GROUPING)) {
-                grouping.setReleasedGroupingOn(onOrrOff);
+                grouping.setReleasedGroupingOn(isOnOrrOff);
             }
         }
 
@@ -818,7 +818,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed) {
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -832,10 +832,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
-            membership.setOptInEnabled(allowed);
+            membership.setOptInEnabled(isAllowed);
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
-            membership.setOptOutEnabled(allowed);
+            membership.setOptOutEnabled(isAllowed);
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
