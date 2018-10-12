@@ -258,6 +258,35 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    @Override
+    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
+        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
+                "; page: " + page + "; size: " + size + "'");
+
+        Grouping compositeGrouping = new Grouping();
+
+        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
+            compositeGrouping = new Grouping(groupingPath);
+
+            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
+            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
+            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
+            Group composite = getMembers(ownerUsername, groupingPath);
+            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+
+            compositeGrouping = setGroupingAttributes(compositeGrouping);
+
+            compositeGrouping.setBasis(basis);
+            compositeGrouping.setExclude(exclude);
+            compositeGrouping.setInclude(include);
+            compositeGrouping.setComposite(composite);
+            compositeGrouping.setOwners(owners);
+
+        }
+        return compositeGrouping;
+    }
+
     //get a GroupingAssignment object containing the groups that a user is in and can opt into
     @Override
     public GroupingAssignment getGroupingAssignment(String username) {
@@ -337,6 +366,29 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
                 groupPath);
+
+        //todo should we use EmptyGroup?
+        Group groupMembers = new Group();
+        if (members.getResults() != null && groupPath.contains(BASIS)) {
+            groupMembers = makeBasisGroup(members);
+        } else if (members.getResults() != null) {
+            groupMembers = makeGroup(members);
+        }
+        return groupMembers;
+    }
+
+    @Override
+    public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
+        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath +
+                "; page: " + page + "; size: " + size + ";");
+
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFS.makeWsGetMembersResultsPaginated(
+                SUBJECT_ATTRIBUTE_NAME_UID,
+                lookup,
+                groupPath,
+                page,
+                size);
 
         //todo should we use EmptyGroup?
         Group groupMembers = new Group();

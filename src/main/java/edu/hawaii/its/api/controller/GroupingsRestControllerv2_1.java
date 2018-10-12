@@ -7,11 +7,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -178,6 +180,26 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.getGrouping(path, principal.getName()));
+    }
+
+    //todo Is this the way we want/can do this? Might be better to split GET calls based on Groups individually
+    /**
+     * Get a specific grouping
+     *
+     * @param path: Path of specific grouping
+     * @return Grouping found at specified path
+     */
+    @RequestMapping(value = "/api/groupings/{path}/get",
+            params = { "page", "size" },
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Page<Grouping> getPaginatedGrouping(Principal principal,
+            @PathVariable String path,
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "size") int size) {
+        logger.info("Entered REST getPaginatedGrouping");
+        throw new UnsupportedOperationException();
     }
 
     /**
