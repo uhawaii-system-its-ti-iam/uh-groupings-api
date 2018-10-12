@@ -29,6 +29,7 @@ public class GrouperPropertyConfigurer {
         }
     }
 
+    // Checks to see if override exists
     private boolean isOverride(String key) {
         return env.containsProperty(key);
     }

@@ -206,49 +206,49 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingsInTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
             if (grouping.getPath().contains(GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertTrue(inGrouping);
+        assertTrue(isInGrouping);
 
-        inGrouping = false;
+        isInGrouping = false;
         groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[3]);
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
             if (grouping.getPath().contains(GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertFalse(inGrouping);
+        assertFalse(isInGrouping);
     }
 
     @Test
     public void groupingsOwnedTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner  = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
             if (grouping.getPath().contains(GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertTrue(ownsGrouping);
+        assertTrue(isGroupingOwner);
 
-        ownsGrouping = false;
+        isGroupingOwner = false;
         groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[4]);
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
             if (grouping.getPath().contains(GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertFalse(ownsGrouping);
+        assertFalse(isGroupingOwner);
     }
 
     @Test
@@ -260,23 +260,23 @@ public class TestGroupingAssignmentService {
     public void groupingsToOptTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
 
-        boolean canOptIn = false;
+        boolean isOptInPossible = false;
         for (Grouping grouping : groupingAssignment.getGroupingsToOptInTo()) {
             if (grouping.getPath().contains(GROUPING)) {
-                canOptIn = true;
+                isOptInPossible = true;
                 break;
             }
         }
-        assertFalse(canOptIn);
+        assertFalse(isOptInPossible);
 
-        boolean canOptOut = false;
+        boolean isOptOutPossible = false;
         for (Grouping grouping : groupingAssignment.getGroupingsToOptOutOf()) {
             if (grouping.getPath().contains(GROUPING)) {
-                canOptOut = true;
+                isOptOutPossible = true;
                 break;
             }
         }
-        assertTrue(canOptOut);
+        assertTrue(isOptOutPossible);
     }
 
     @Test

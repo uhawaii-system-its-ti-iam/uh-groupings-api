@@ -8,17 +8,17 @@ import java.util.List;
 
 public interface GroupAttributeService {
 
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean listservOn);
+    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean isListservOn);
 
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean releasedGroupingOn);
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn);
 
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean optInOn);
+    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn);
 
-    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean optOutOn);
+    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean isOptOutOn);
 
-    public boolean isHasListserv(String groupingPath);
+    public boolean isContainingListserv(String groupingPath);
 
-    public boolean isHasReleasedGrouping(String groupingPath);
+    public boolean isContainingReleasedGrouping(String groupingPath);
 
     public boolean isOptOutPossible(String groupingPath);
 

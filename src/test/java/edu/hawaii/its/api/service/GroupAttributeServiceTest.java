@@ -502,12 +502,12 @@ public class GroupAttributeServiceTest {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        boolean hasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_0_PATH);
-        assertTrue(hasReleasedGrouping);
+        boolean isHasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_0_PATH);
+        assertTrue(isHasReleasedGrouping);
 
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-        hasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_1_PATH);
-        assertFalse(hasReleasedGrouping);
+        isHasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_1_PATH);
+        assertFalse(isHasReleasedGrouping);
 
     }
 }
