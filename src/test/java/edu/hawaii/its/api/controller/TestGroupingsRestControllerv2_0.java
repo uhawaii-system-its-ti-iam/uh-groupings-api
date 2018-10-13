@@ -510,36 +510,36 @@ public class TestGroupingsRestControllerv2_0 {
 
     @Test
     public void changeListservStatusTest() throws Exception {
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
 
         mapGSR("/api/groupings/v2.0/" + GROUPING + "/false/setListserv", uhUser01);
 
-        assertFalse(groupAttributeService.hasListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
         mapGSR("/api/groupings/v2.0/" + GROUPING + "/true/setListserv", uhUser01);
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
     @Test
     public void changeOptInTest() throws Exception {
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
 
         mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptIn", uhUser01);
-        assertFalse(groupAttributeService.optInPermission(GROUPING));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
 
         mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptIn", uhUser01);
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
     }
 
     @Test
     public void changeOptOutTest() throws Exception {
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
 
         mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptOut", uhUser01);
-        assertFalse(groupAttributeService.optOutPermission(GROUPING));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
 
         mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptOut", uhUser01);
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
     }
 
     @Test

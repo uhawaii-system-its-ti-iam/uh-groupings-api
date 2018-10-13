@@ -20,13 +20,13 @@ public class Membership implements Comparable<Membership> {
     private Group group;
 
     @Column
-    private boolean selfOpted = false;
+    private boolean isSelfOpted = false;
 
     @Column
-    private boolean optInEnabled = false;
+    private boolean isOptInEnabled = false;
 
     @Column
-    private boolean optOutEnabled = false;
+    private boolean isOptOutEnabled = false;
 
     public Membership() {
 
@@ -50,15 +50,15 @@ public class Membership implements Comparable<Membership> {
     }
 
     public boolean isSelfOpted() {
-        return selfOpted;
+        return isSelfOpted;
     }
 
     public boolean isOptInEnabled() {
-        return optInEnabled;
+        return isOptInEnabled;
     }
 
     public boolean isOptOutEnabled() {
-        return optOutEnabled;
+        return isOptOutEnabled;
     }
 
     public void setIdentifier(String identifier) {
@@ -73,16 +73,16 @@ public class Membership implements Comparable<Membership> {
         this.group = group;
     }
 
-    public void setSelfOpted(boolean selfOpted) {
-        this.selfOpted = selfOpted;
+    public void setSelfOpted(boolean isSelfOpted) {
+        this.isSelfOpted = isSelfOpted;
     }
 
-    public void setOptInEnabled(boolean optInEnabled) {
-        this.optInEnabled = optInEnabled;
+    public void setOptInEnabled(boolean isOptInEnabled) {
+        this.isOptInEnabled = isOptInEnabled;
     }
 
-    public void setOptOutEnabled(boolean optOutEnabled) {
-        this.optOutEnabled = optOutEnabled;
+    public void setOptOutEnabled(boolean isOptOutEnabled) {
+        this.isOptOutEnabled = isOptOutEnabled;
     }
 
     @Override

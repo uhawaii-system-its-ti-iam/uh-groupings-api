@@ -226,7 +226,7 @@ public class GroupAttributeServiceTest {
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
         //starts ON
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // ON to ON
         try {
@@ -234,11 +234,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         //ON to OFF
         try {
@@ -246,11 +246,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
         assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to OFF
         try {
@@ -258,11 +258,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
         assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to ON
         try {
@@ -270,11 +270,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
     }
 
     @Test
@@ -488,11 +488,11 @@ public class GroupAttributeServiceTest {
     @Test
     public void hasListservTest() {
 
-        boolean isGroupingHasListserv = groupingsService.isHasListserv(GROUPING_0_PATH);
+        boolean isGroupingHasListserv = groupingsService.isContainingListserv(GROUPING_0_PATH);
 
         assertEquals(false, isGroupingHasListserv);
 
-        isGroupingHasListserv = groupingsService.isHasListserv(GROUPING_3_PATH);
+        isGroupingHasListserv = groupingsService.isContainingListserv(GROUPING_3_PATH);
 
         assertEquals(true, isGroupingHasListserv);
     }
@@ -502,11 +502,11 @@ public class GroupAttributeServiceTest {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        boolean isHasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_0_PATH);
+        boolean isHasReleasedGrouping = groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH);
         assertTrue(isHasReleasedGrouping);
 
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-        isHasReleasedGrouping = groupingsService.isHasReleasedGrouping(GROUPING_1_PATH);
+        isHasReleasedGrouping = groupingsService.isContainingReleasedGrouping(GROUPING_1_PATH);
         assertFalse(isHasReleasedGrouping);
 
     }

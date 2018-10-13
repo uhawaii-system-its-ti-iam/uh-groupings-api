@@ -776,11 +776,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
         if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
-            if (setGroupingAttribute(grouping, attributeDefNameName, true)) {
+            if (isGroupingAttributeSet(grouping, attributeDefNameName, true)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
         } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
-            if (setGroupingAttribute(grouping, attributeDefNameName, false)) {
+            if (isGroupingAttributeSet(grouping, attributeDefNameName, false)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
         }
@@ -1042,7 +1042,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return basisPlusIncludeMinusExcludeGroup;
     }
 
-    private boolean setGroupingAttribute(Grouping grouping, String attributeName, boolean isOn) {
+    private boolean isGroupingAttributeSet(Grouping grouping, String attributeName, boolean isOn) {
         if (attributeName.equals(LISTSERV)) {
             grouping.setListservOn(isOn);
         } else if (attributeName.equals(OPT_IN)) {

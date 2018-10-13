@@ -872,7 +872,7 @@ public class GroupingsRestControllerv2_0 {
      * @param isListservOn: true if the listserv should be on, false if it should be off
      * @return information about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{listservOn}/setListserv",
+    @RequestMapping(value = "/{grouping}/{isListservOn}/setListserv",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> setListserv(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
@@ -890,7 +890,7 @@ public class GroupingsRestControllerv2_0 {
      * @param isOptInOn:  true if the members should be able to opt in, false if not
      * @return information about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{optInOn}/setOptIn",
+    @RequestMapping(value = "/{grouping}/{isOptInOn}/setOptIn",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> setOptIn(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
@@ -908,7 +908,7 @@ public class GroupingsRestControllerv2_0 {
      * @param isOptOutOn: true if the members should be able to opt out, false if not
      * @return iformation about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{optOutOn}/setOptOut",
+    @RequestMapping(value = "/{grouping}/{isOptOutOn}/setOptOut",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> setOptOut(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,

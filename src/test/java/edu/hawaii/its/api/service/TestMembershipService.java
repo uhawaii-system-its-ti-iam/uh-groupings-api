@@ -117,14 +117,14 @@ public class TestMembershipService {
 
     @Test
     public void groupOptInPermissionTest() {
-        assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.groupOptInPermission(username[1], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
     }
 
     @Test
     public void groupOptOutPermissionTest() {
-        assertTrue(membershipService.groupOptOutPermission(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.groupOptOutPermission(username[1], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
     }
 
     @Test
@@ -236,11 +236,11 @@ public class TestMembershipService {
 
     @Test
     public void groupOptPermissionTest() {
-        assertTrue(membershipService.groupOptOutPermission(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.groupOptOutPermission(username[0], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_EXCLUDE));
 
-        assertTrue(membershipService.groupOptInPermission(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.groupOptInPermission(username[0], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_EXCLUDE));
     }
 
     @Test
