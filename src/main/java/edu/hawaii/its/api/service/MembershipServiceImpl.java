@@ -554,6 +554,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addAdmin; username: " + currentAdminUsername + "; newAdmin: " + newAdminUsername + ";");
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
+
         if (memberAttributeService.isUuid(newAdminUsername)){
             action = "add user with uuid " + newAdminUsername + " to " + GROUPING_ADMINS;
             // todo there is a test for adding an admin with a uuid, but I don't see a method to do it. Is there one?

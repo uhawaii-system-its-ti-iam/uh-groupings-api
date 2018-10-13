@@ -195,7 +195,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         //todo this can be optimized by getting opt attributes from grouper when getting the group list
         //rather than making individual calls to grouper, which is much slower
         for (Grouping grouping : groupings) {
-            grouping.setOptOutOn(groupAttributeService.optOutPermission(grouping.getPath()));
+            grouping.setOptOutOn(groupAttributeService.isOptOutPossible(grouping.getPath()));
         }
 
         return groupings;
