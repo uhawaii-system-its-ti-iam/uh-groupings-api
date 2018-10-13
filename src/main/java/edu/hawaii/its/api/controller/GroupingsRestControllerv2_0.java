@@ -15,17 +15,15 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +90,6 @@ public class GroupingsRestControllerv2_0 {
         return "University of Hawaii Groupings API";
     }
 
-//<<<<<<< HEAD:src/main/java/edu/hawaii/its/api/controller/GroupingsRestController.java
     /**
      * Get all admins and groupings
      *
@@ -102,12 +99,11 @@ public class GroupingsRestControllerv2_0 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<AdminListsHolder> adminsGroupings(Principal principal) {
+    public ResponseEntity<AdminListsHolder> adminsGroupings(@RequestHeader("current_user") String current_user) {
         logger.info("Entered REST adminsGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.adminLists(principal.getName()));
-        //      .body(groupingAssignmentService.getGrouping(path, principal.getName()));
+                .body(groupingAssignmentService.adminLists(current_user));
     }
 
     /**
@@ -120,11 +116,11 @@ public class GroupingsRestControllerv2_0 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<String>> memberGroupings(Principal principal, @PathVariable String uid) {
+    public ResponseEntity<List<String>> memberGroupings(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
+                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(currentUser, uid)));
     }
 
     /**
@@ -137,11 +133,11 @@ public class GroupingsRestControllerv2_0 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<Grouping>> ownerGroupings(Principal principal, @PathVariable String uid) {
+    public ResponseEntity<List<Grouping>> ownerGroupings(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(principal.getName(), uid)));
+                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, uid)));
     }
 
     /**
@@ -154,11 +150,11 @@ public class GroupingsRestControllerv2_0 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(Principal principal, @PathVariable String path) {
+    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser, @PathVariable String path) {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getGrouping(path, principal.getName()));
+                .body(groupingAssignmentService.getGrouping(path, currentUser));
     }
 
     //todo Need to find way to test any non-GET methods (its likely that its not possible, have to use Junit maybe)
@@ -173,11 +169,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addNewAdmin(Principal principal, @PathVariable String uid) {
+    public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
         logger.info("Entered REST addNewAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addAdmin(principal.getName(), uid));
+                .body(membershipService.addAdmin(currentUser, uid));
     }
 
     //todo Implement method and come back to fix REST controller method
@@ -191,7 +187,7 @@ public class GroupingsRestControllerv2_0 {
     //    @RequestMapping(value = "/groupings/{path}",
     //            method = RequestMethod.POST,
     //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<GroupingsServiceResult> addNewGrouping(Principal principal, @PathVariable String path) {
+    //    public ResponseEntity<GroupingsServiceResult> addNewGrouping(@RequestHeader("current_user") String currentUser, @PathVariable String path) {
     //        logger.info("Entered REST addNewGrouping");
     //        return ResponseEntity
     //                .ok()
@@ -208,12 +204,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/owners/{uid}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addOwner(Principal principal, @PathVariable String path,
+    public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.assignOwnership(path, principal.getName(), uid));
+                .body(memberAttributeService.assignOwnership(path, currentUser, uid));
     }
 
     /**
@@ -226,13 +222,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/includeMembers/{uid}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(Principal principal, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST includeMembers...");
         path = path + INCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMember(principal.getName(), path, uid));
+                .body(membershipService.addGroupMember(currentUser, path, uid));
     }
 
     /**
@@ -245,13 +241,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/excludeMembers/{uid}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(Principal principal, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST excludeMembers...");
         path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMember(principal.getName(), path, uid));
+                .body(membershipService.addGroupMember(currentUser, path, uid));
     }
 
     /**
@@ -264,19 +260,19 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(Principal principal, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST enablePreference");
         if (preferenceId.equals(OPT_IN)) {
             return ResponseEntity
                     .ok()
-                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), true));
+                    .body(groupAttributeService.changeOptInStatus(path, currentUser, true));
         } else if (preferenceId.equals(OPT_OUT)) {
             return ResponseEntity
                     .ok()
-                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), true));
+                    .body(groupAttributeService.changeOptOutStatus(path, currentUser, true));
         } else if (preferenceId.equals(LISTSERV)) {
-            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, principal.getName(), true);
+            GroupingsServiceResult result = groupAttributeService.changeListservStatus(path, currentUser, true);
             List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
             listResult.add(result);
             return ResponseEntity
@@ -296,21 +292,21 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/preferences/{preferenceId}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String preferenceId) {
         logger.info("Entered REST disablePreference");
         if (preferenceId.equals(OPT_IN)) {
             return ResponseEntity
                     .ok()
-                    .body(groupAttributeService.changeOptInStatus(path, principal.getName(), false));
+                    .body(groupAttributeService.changeOptInStatus(path, currentUser, false));
         } else if (preferenceId.equals(OPT_OUT)) {
             return ResponseEntity
                     .ok()
-                    .body(groupAttributeService.changeOptOutStatus(path, principal.getName(), false));
+                    .body(groupAttributeService.changeOptOutStatus(path, currentUser, false));
         } else if (preferenceId.equals(LISTSERV)) {
             GroupingsServiceResult result =
-                    groupAttributeService.changeListservStatus(path, principal.getName(), false);
+                    groupAttributeService.changeListservStatus(path, currentUser, false);
             List<GroupingsServiceResult> listResult = new ArrayList<GroupingsServiceResult>();
             listResult.add(result);
             return ResponseEntity
@@ -329,11 +325,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "admins/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(Principal principal, @PathVariable String uid) {
+    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
         logger.info("Entered REST deleteNewAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteAdmin(principal.getName(), uid));
+                .body(membershipService.deleteAdmin(currentUser, uid));
     }
 
     //todo Implement method and fix REST controller method
@@ -347,7 +343,7 @@ public class GroupingsRestControllerv2_0 {
     //    @RequestMapping (value = "/grouping/{path}",
     //            method = RequestMethod.DELETE,
     //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //   public ResponseEntity<GroupingsServiceResult> deleteNewGrouping(Principal principal, @PathVariable String path) {
+    //   public ResponseEntity<GroupingsServiceResult> deleteNewGrouping(@RequestHeader("current_user") String currentUser, @PathVariable String path) {
     //        logger.info("Entered REST deleteNewGrouping");
     //        return ResponseEntity
     //                .ok()
@@ -364,12 +360,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/grouping/{path}/owners/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteOwner(Principal principal, @PathVariable String path,
+    public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST deleteOwner");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.removeOwnership(path, principal.getName(), uid));
+                .body(memberAttributeService.removeOwnership(path, currentUser, uid));
     }
 
     /**
@@ -382,12 +378,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/grouping/{path}/includeMembers/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteInclude(Principal principal, @PathVariable String path,
+    public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST deleteInclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMemberByUsername(principal.getName(), path + INCLUDE, uid));
+                .body(membershipService.deleteGroupMemberByUsername(currentUser, path + INCLUDE, uid));
     }
 
     /**
@@ -400,12 +396,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/grouping/{path}/excludeMembers/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteExclude(Principal principal, @PathVariable String path,
+    public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMemberByUsername(principal.getName(), path + EXCLUDE, uid));
+                .body(membershipService.deleteGroupMemberByUsername(currentUser, path + EXCLUDE, uid));
     }
 
     //todo Implement when manager feature is implemented in v2.2
@@ -439,7 +435,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/owners/{uid}/demote",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView demoteOwner(Principal principal, @PathVariable String path,
+    public RedirectView demoteOwner(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST demoteOwner...");
         throw new UnsupportedOperationException();
@@ -456,7 +452,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/managers/{uid}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView addManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+    public RedirectView addManager(@RequestHeader("current_user") String currentUser, @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST addManager");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -473,7 +469,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/managers/{uid}/permissions/{id}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView enableManagerPermission(Principal principal, @PathVariable String path,
+    public RedirectView enableManagerPermission(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid, @PathVariable String id) {
         logger.info("Entered REST enableManagerPermission");
         throw new UnsupportedOperationException();
@@ -491,7 +487,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/managers/{uid}/permissions/{id}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView disableManagerPermission(Principal principal, @PathVariable String path,
+    public RedirectView disableManagerPermission(@RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid, @PathVariable String id) {
         logger.info("Entered REST disableManagerPermission");
         throw new UnsupportedOperationException();
@@ -508,7 +504,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/managers/{uid}/promote",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView promoteManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+    public RedirectView promoteManager(@RequestHeader("current_user") String currentUser, @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST promoteManager");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -524,7 +520,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "groupings/{path}/managers/{uid}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView deleteManager(Principal principal, @PathVariable String path, @PathVariable String uid) {
+    public RedirectView deleteManager(@RequestHeader("current_user") String currentUser, @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST deleteManager");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -546,11 +542,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{adminToAdd}/addAdmin",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addAdmin(Principal principal, @PathVariable String adminToAdd) {
+    public ResponseEntity<GroupingsServiceResult> addAdmin(@RequestHeader("current_user") String currentUser, @PathVariable String adminToAdd) {
         logger.info("Entered REST addAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addAdmin(principal.getName(), adminToAdd));
+                .body(membershipService.addAdmin(currentUser, adminToAdd));
     }
 
     /**
@@ -562,11 +558,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{adminToDelete}/deleteAdmin",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteAdmin(Principal principal, @PathVariable String adminToDelete) {
+    public ResponseEntity<GroupingsServiceResult> deleteAdmin(@RequestHeader("current_user") String currentUser, @PathVariable String adminToDelete) {
         logger.info("Entered REST deleteAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteAdmin(principal.getName(), adminToDelete));
+                .body(membershipService.deleteAdmin(currentUser, adminToDelete));
     }
 
     /**
@@ -582,13 +578,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToAdd}/addGroupingMember",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMember(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMember(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToAdd) {
         logger.info("Entered REST addGroupingMember...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMember(principal.getName(), grouping, userToAdd));
+                .body(membershipService.addGroupingMember(currentUser, grouping, userToAdd));
     }
 
     /**
@@ -604,13 +600,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToAdd}/addGroupingMemberByUsername",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMemberByUsername(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMemberByUsername(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToAdd) {
         logger.info("Entered REST addGroupingMemberByUsername...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMemberByUsername(principal.getName(), grouping, userToAdd));
+                .body(membershipService.addGroupingMemberByUsername(currentUser, grouping, userToAdd));
     }
 
     /**
@@ -626,13 +622,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToAdd}/addGroupingMemberByUuid",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMemberByUuid(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addGroupingMemberByUuid(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToAdd) {
         logger.info("Entered REST addGroupingMemberByUuid...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMemberByUuid(principal.getName(), grouping, userToAdd));
+                .body(membershipService.addGroupingMemberByUuid(currentUser, grouping, userToAdd));
     }
 
     /**
@@ -646,13 +642,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToAdd}/addMemberToIncludeGroup",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addMemberToIncludeGroup(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addMemberToIncludeGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToAdd) {
         logger.info("Entered REST addMemberToIncludeGroup...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberByUsername(principal.getName(), grouping + INCLUDE, userToAdd));
+                .body(membershipService.addGroupMemberByUsername(currentUser, grouping + INCLUDE, userToAdd));
     }
 
     /**
@@ -666,13 +662,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToAdd}/addMemberToExcludeGroup",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addMemberToExcludeGroup(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addMemberToExcludeGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToAdd) {
         logger.info("Entered REST addMemberToExcludeGroup...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberByUsername(principal.getName(), grouping + EXCLUDE, userToAdd));
+                .body(membershipService.addGroupMemberByUsername(currentUser, grouping + EXCLUDE, userToAdd));
     }
 
     /**
@@ -684,13 +680,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToDelete}/deleteGroupingMemberByUsername",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteGroupingMemberByUsername(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> deleteGroupingMemberByUsername(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToDelete) {
         logger.info("Entered REST deleteGroupingMemberByUsername...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupingMemberByUsername(principal.getName(), grouping, userToDelete));
+                .body(membershipService.deleteGroupingMemberByUsername(currentUser, grouping, userToDelete));
     }
 
     /**
@@ -702,13 +698,13 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToDelete}/deleteGroupingMemberByUuid",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteGroupingMemberByUuid(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> deleteGroupingMemberByUuid(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToDelete) {
         logger.info("Entered REST deleteGroupingMemberByUsername...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupingMemberByUuid(principal.getName(), grouping, userToDelete));
+                .body(membershipService.deleteGroupingMemberByUuid(currentUser, grouping, userToDelete));
     }
 
     /**
@@ -721,14 +717,14 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToDelete}/deleteMemberFromIncludeGroup",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteMemberFromIncludeGroup(Principal principal,
+    public ResponseEntity<GroupingsServiceResult> deleteMemberFromIncludeGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToDelete) {
         logger.info("Entered REST deleteMemberFromIncludeGroup...");
         return ResponseEntity
                 .ok()
                 .body(membershipService
-                        .deleteGroupMemberByUsername(principal.getName(), grouping + INCLUDE, userToDelete));
+                        .deleteGroupMemberByUsername(currentUser, grouping + INCLUDE, userToDelete));
     }
 
     /**
@@ -741,14 +737,14 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{userToDelete}/deleteMemberFromExcludeGroup",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteMemberFromExcludeGroup(Principal principal,
+    public ResponseEntity<GroupingsServiceResult> deleteMemberFromExcludeGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             @PathVariable String userToDelete) {
         logger.info("Entered REST deleteMemberFromExcludeGroup...");
         return ResponseEntity
                 .ok()
                 .body(membershipService
-                        .deleteGroupMemberByUsername(principal.getName(), grouping + EXCLUDE, userToDelete));
+                        .deleteGroupMemberByUsername(currentUser, grouping + EXCLUDE, userToDelete));
     }
 
     /**
@@ -764,12 +760,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{newOwner}/assignOwnership",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> assignOwnership(Principal principal, @PathVariable String grouping,
+    public ResponseEntity<GroupingsServiceResult> assignOwnership(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
             @PathVariable String newOwner) {
         logger.info("Entered REST assignOwnership...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.assignOwnership(grouping, principal.getName(), newOwner));
+                .body(memberAttributeService.assignOwnership(grouping, currentUser, newOwner));
     }
 
     /**
@@ -786,12 +782,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{ownerToRemove}/removeOwnership",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> removeOwnership(Principal principal, @PathVariable String grouping,
+    public ResponseEntity<GroupingsServiceResult> removeOwnership(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
             @PathVariable String ownerToRemove) {
         logger.info("Entered REST removeOwnership...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.removeOwnership(grouping, principal.getName(), ownerToRemove));
+                .body(memberAttributeService.removeOwnership(grouping, currentUser, ownerToRemove));
     }
 
     /**
@@ -809,11 +805,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/grouping",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Grouping> grouping(Principal principal, @PathVariable String grouping) {
+    public ResponseEntity<Grouping> grouping(@RequestHeader("current_user") String currentUser, @PathVariable String grouping) {
         logger.info("Entered REST grouping...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getGrouping(grouping, principal.getName()));
+                .body(groupingAssignmentService.getGrouping(grouping, currentUser));
     }
 
     /**
@@ -826,11 +822,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/groupingAssignment",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingAssignment> groupingAssignment(Principal principal) {
+    public ResponseEntity<GroupingAssignment> groupingAssignment(HttpServletRequest request, @RequestHeader("current_user") String currentUser) {
         logger.info("Entered REST GroupingAssingment...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getGroupingAssignment(principal.getName()));
+        return new ResponseEntity<GroupingAssignment>(groupingAssignmentService.getGroupingAssignment(currentUser), HttpStatus.OK);
+//                .ok()
+//                .body(groupingAssignmentService.getGroupingAssignment(currentUser));
     }
 
     /**
@@ -844,11 +840,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/optIn",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optIn(Principal principal, @PathVariable String grouping) {
+    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser, @PathVariable String grouping) {
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optIn(principal.getName(), grouping));
+                .body(membershipService.optIn(currentUser, grouping));
     }
 
     /**
@@ -862,11 +858,11 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/optOut",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optOut(Principal principal, @PathVariable String grouping) {
+    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser, @PathVariable String grouping) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optOut(principal.getName(), grouping));
+                .body(membershipService.optOut(currentUser, grouping));
     }
 
     /**
@@ -879,12 +875,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{listservOn}/setListserv",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> setListserv(Principal principal, @PathVariable String grouping,
+    public ResponseEntity<GroupingsServiceResult> setListserv(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
             @PathVariable boolean listservOn) {
         logger.info("Entered REST setListserv...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeListservStatus(grouping, principal.getName(), listservOn));
+                .body(groupAttributeService.changeListservStatus(grouping, currentUser, listservOn));
     }
 
     /**
@@ -897,12 +893,12 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{optInOn}/setOptIn",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> setOptIn(Principal principal, @PathVariable String grouping,
+    public ResponseEntity<List<GroupingsServiceResult>> setOptIn(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
             @PathVariable boolean optInOn) {
         logger.info("Entered REST setOptIn...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptInStatus(grouping, principal.getName(), optInOn));
+                .body(groupAttributeService.changeOptInStatus(grouping, currentUser, optInOn));
     }
 
     /**
@@ -915,22 +911,22 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{optOutOn}/setOptOut",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> setOptOut(Principal principal, @PathVariable String grouping,
+    public ResponseEntity<List<GroupingsServiceResult>> setOptOut(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
             @PathVariable boolean optOutOn) {
         logger.info("Entered REST setOptOut...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptOutStatus(grouping, principal.getName(), optOutOn));
+                .body(groupAttributeService.changeOptOutStatus(grouping, currentUser, optOutOn));
     }
 
     @RequestMapping(value = "/adminLists",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AdminListsHolder> adminLists(Principal principal) {
+    public ResponseEntity<AdminListsHolder> adminLists(@RequestHeader("current_user") String currentUser) {
         logger.info("Entered REST adminListHolder...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.adminLists(principal.getName()));
+                .body(groupingAssignmentService.adminLists(currentUser));
     }
 
     /**
@@ -942,7 +938,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/{basis}/{include}/{exclude}/{owners}/addGrouping",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addGrouping(Principal principal,
+    public ResponseEntity<List<GroupingsServiceResult>> addGrouping(@RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
             //todo when fully implemented, basis will be changed to a string that contains the set theory logic for the
             // groups that it will be comprised of
@@ -968,7 +964,7 @@ public class GroupingsRestControllerv2_0 {
     @RequestMapping(value = "/{grouping}/deleteGrouping",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView deleteGrouping(Principal principal, @PathVariable String grouping) {
+    public RedirectView deleteGrouping(@RequestHeader("current_user") String currentUser, @PathVariable String grouping) {
         logger.info("Entered REST deleteGrouping...");
 
         throw new UnsupportedOperationException();

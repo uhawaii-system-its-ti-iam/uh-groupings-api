@@ -362,6 +362,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // returns true if username is a UH id number
+    @Override
     public boolean isUuid(String username) {
         return username.matches("\\d+");
     }
