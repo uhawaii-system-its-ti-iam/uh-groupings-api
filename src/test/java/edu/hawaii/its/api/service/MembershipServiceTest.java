@@ -544,11 +544,11 @@ public class MembershipServiceTest {
 
     @Test
     public void groupOptOutPermissionTest() {
-        boolean oop = membershipService.groupOptOutPermission(users.get(1).getUsername(), GROUPING_2_EXCLUDE_PATH);
-        assertEquals(false, oop);
+        boolean isOop = membershipService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_2_EXCLUDE_PATH);
+        assertEquals(false, isOop);
 
-        oop = membershipService.groupOptOutPermission(users.get(1).getUsername(), GROUPING_1_EXCLUDE_PATH);
-        assertEquals(true, oop);
+        isOop = membershipService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_1_EXCLUDE_PATH);
+        assertEquals(true, isOop);
     }
 
     @Test

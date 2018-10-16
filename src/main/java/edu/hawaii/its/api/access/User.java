@@ -50,7 +50,7 @@ public class User extends org.springframework.security.core.userdetails.User {
         return attributes.getValue("cn");
     }
 
-    public boolean hasRole(Role role) {
+    public boolean isRole(Role role) {
         return getAuthorities().contains(new SimpleGrantedAuthority(role.longName()));
     }
 

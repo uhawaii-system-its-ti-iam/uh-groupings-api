@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,8 @@ public class UserBuilderTest {
     @Autowired
     private UserBuilder userBuilder;
 
-//    @Test
+    @Ignore
+    @Test
     public void testAdminUsers() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "duckart");
@@ -46,10 +48,10 @@ public class UserBuilderTest {
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
-        assertTrue(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ADMIN));
 
         map = new HashMap<>();
         map.put("uid", "someuser");
@@ -61,13 +63,14 @@ public class UserBuilderTest {
         assertEquals("10000001", user.getUhuuid());
 
         assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
-        assertTrue(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ADMIN));
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testEmployees() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "jjcale");
@@ -81,14 +84,15 @@ public class UserBuilderTest {
 
         // Granted Authorities.
         assertEquals(3, user.getAuthorities().size());
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
 
-        assertFalse(user.hasRole(Role.ADMIN));
+        assertFalse(user.isRole(Role.ADMIN));
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testEmployeesWithMultivalueUid() {
         Map<String, Object> map = new HashMap<>();
         ArrayList<Object> uids = new ArrayList<>();
@@ -105,13 +109,14 @@ public class UserBuilderTest {
 
         // Granted Authorities.
         assertEquals(4, user.getAuthorities().size());
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
-        assertTrue(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ADMIN));
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testNotAnEmployee() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "nobody");
@@ -125,13 +130,14 @@ public class UserBuilderTest {
 
         // Granted Authorities.
         assertEquals(2, user.getAuthorities().size());
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertFalse(user.hasRole(Role.EMPLOYEE));
-        assertFalse(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertFalse(user.isRole(Role.EMPLOYEE));
+        assertFalse(user.isRole(Role.ADMIN));
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testUidNull() {
         List<String> uids = new ArrayList<>();
         uids.add("   ");
@@ -147,7 +153,8 @@ public class UserBuilderTest {
         }
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testUidEmpty() {
         Map<String, String> map = new HashMap<>();
         map.put("uid", "");

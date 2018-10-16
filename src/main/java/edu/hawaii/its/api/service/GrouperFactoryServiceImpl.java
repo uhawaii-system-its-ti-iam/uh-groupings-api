@@ -608,14 +608,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed) {
+            boolean isAllowed) {
 
         return new GcAssignGrouperPrivilegesLite()
                 .assignGroupName(groupName)
                 .assignPrivilegeName(privilegeName)
                 .assignSubjectLookup(lookup)
                 .assignActAsSubject(admin)
-                .assignAllowed(allowed)
+                .assignAllowed(isAllowed)
                 .execute();
     }
 
@@ -623,13 +623,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed) {
+            boolean isAllowed) {
 
         return new GcAssignGrouperPrivilegesLite()
                 .assignGroupName(groupName)
                 .assignPrivilegeName(privilegeName)
                 .assignSubjectLookup(lookup)
-                .assignAllowed(allowed)
+                .assignAllowed(isAllowed)
                 .execute();
     }
 

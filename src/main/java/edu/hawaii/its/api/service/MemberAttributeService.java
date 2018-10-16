@@ -35,4 +35,5 @@ public interface MemberAttributeService {
 
     public Map<String, String> getUserAttributesLocal(String username);
 
+    public boolean isUuid(String username);
 }

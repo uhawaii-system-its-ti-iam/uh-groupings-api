@@ -433,13 +433,13 @@ public class GrouperFactoryServiceTest {
         String privilegeNameIn = PRIVILEGE_OPT_IN;
         String privilegeNameOut = PRIVILEGE_OPT_OUT;
         String groupName = GROUPING_3_PATH;
-        Boolean allowed = true;
+        Boolean isAllowed = true;
 
-        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, allowed);
-        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, allowed);
+        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, isAllowed);
+        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, isAllowed);
 
         try {
-            result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, "illegal", lookup, allowed);
+            result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, "illegal", lookup, isAllowed);
         } catch (IllegalArgumentException iae) {
             iae.printStackTrace();
         }

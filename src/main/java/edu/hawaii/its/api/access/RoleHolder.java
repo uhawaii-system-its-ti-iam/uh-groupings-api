@@ -22,7 +22,7 @@ public class RoleHolder {
         return authorities.size();
     }
 
-    public boolean contains(Role role) {
+    public boolean isContaining(Role role) {
         return authorities.contains(new SimpleGrantedAuthority(role.longName()));
     }
 

@@ -1,6 +1,10 @@
 package edu.hawaii.its.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.hawaii.its.api.access.AnonymousUser;
+import edu.hawaii.its.api.access.Role;
+import edu.hawaii.its.api.access.User;
+import edu.hawaii.its.api.type.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,17 +15,13 @@ import edu.hawaii.its.api.service.GroupingFactoryService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsHTTPException;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,8 +30,10 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -51,7 +53,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingsRestControllerv2_0 {
 
     @Value("${groupings.api.test.admin_user}")
@@ -114,6 +116,15 @@ public class TestGroupingsRestControllerv2_0 {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
+    @Value("${groupings.api.current_user}")
+    private String CURRENT_USER;
+
+    @Value("${grouperClient.webService.login}")
+    private String APP_USER;
+
+    @Value("${groupings.api.localhost.user}")
+    private String LOCAL_USER;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -143,6 +154,17 @@ public class TestGroupingsRestControllerv2_0 {
 
     private MockMvc mockMvc;
 
+    private User adminUser;
+    private AnonymousUser anon;
+    private User anonUser;
+    private User uhUser01;
+    private User uhUser02;
+    private User uhUser03;
+    private User uhUser04;
+    private User uhUser05;
+    private User uhUser06;
+    private User localUser;
+
     @PostConstruct
     public void init() {
         Assert.hasLength(env.getProperty("grouperClient.webService.url"),
@@ -159,6 +181,30 @@ public class TestGroupingsRestControllerv2_0 {
                 .apply(springSecurity())
                 .build();
 
+        // Creates admin user for testing
+        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
+        authorities.add(new SimpleGrantedAuthority(Role.ADMIN.longName()));
+        authorities.add(new SimpleGrantedAuthority(Role.UH.longName()));
+        adminUser = new User(ADMIN, ADMIN, authorities);
+
+        // Creates normal users for testing
+        Set<GrantedAuthority> uhAuthorities = new LinkedHashSet<>();
+        uhAuthorities.add(new SimpleGrantedAuthority(Role.UH.longName()));
+        uhUser01 = new User(tst[0], tst[0], uhAuthorities);
+        uhUser02 = new User(tst[1], tst[1], uhAuthorities);
+        uhUser03 = new User(tst[2], tst[2], uhAuthorities);
+        uhUser04 = new User(tst[3], tst[3], uhAuthorities);
+        uhUser05 = new User(tst[4], tst[4], uhAuthorities);
+        uhUser06 = new User(tst[5], tst[5], uhAuthorities);
+
+        // todo username is used twice, we can switch one with a UH number if we want to
+        localUser = new User(LOCAL_USER, LOCAL_USER, uhAuthorities);
+
+        // Creates anonymous user for testing
+        Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
+        anonUser = new User("anonymous", anonAuthorities);
+        anon = new AnonymousUser();
+
         //put in include
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[0]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[1]);
@@ -173,8 +219,13 @@ public class TestGroupingsRestControllerv2_0 {
 
         groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
+        groupAttributeService.changeListservStatus(GROUPING, tst[0], true);
 
+        // remove ownership
         memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+
+        // add ownership
+        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, tst[0]);
     }
 
     @Test
@@ -189,44 +240,42 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void assignAndRemoveOwnershipTest() throws Exception {
 
-        Grouping g = mapGroupingOld(GROUPING);
+        Grouping g = mapGroupingOld(GROUPING, uhUser01);
 
         assertFalse(g.getOwners().getUsernames().contains(tst[1]));
 
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/assignOwnership");
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/assignOwnership", uhUser01);
 
-        g = mapGroupingOld(GROUPING);
+        g = mapGroupingOld(GROUPING, uhUser01);
 
         assertTrue(g.getOwners().getUsernames().contains(tst[1]));
 
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/removeOwnership");
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/removeOwnership", uhUser01);
 
-        g = mapGroupingOld(GROUPING);
+        g = mapGroupingOld(GROUPING, uhUser01);
 
         assertFalse(g.getOwners().getUsernames().contains(tst[1]));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void addMemberTest() throws Exception {
 
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
 
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addMemberToIncludeGroup");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addMemberToIncludeGroup", uhUser01);
 
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
         //tst[3] is in basis and will go into include
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
 
         //add tst[3] back to exclude
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addMemberToExcludeGroup");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addMemberToExcludeGroup", uhUser01);
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
 
         //add tst[3] to Grouping
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addGroupingMemberByUsername");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/addGroupingMemberByUsername", uhUser01);
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
         //tst[3] is in basis, so will not go into include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
@@ -235,17 +284,16 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void deleteMemberTest() throws Exception {
 
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/deleteMemberFromExcludeGroup");
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[3] + "/deleteMemberFromExcludeGroup", uhUser01);
 
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
         assertTrue(memberAttributeService.isMember(GROUPING, tst[3]));
 
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[1]));
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/deleteMemberFromIncludeGroup");
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/" + tst[1] + "/deleteMemberFromIncludeGroup", uhUser01);
 
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[1]));
@@ -254,17 +302,16 @@ public class TestGroupingsRestControllerv2_0 {
         assertTrue(memberAttributeService.isMember(GROUPING, tst[5]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, tst[5]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[2]));
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[2] + "/deleteGroupingMemberByUsername");
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[5] + "/deleteGroupingMemberByUsername");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[2] + "/deleteGroupingMemberByUsername", uhUser01);
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/" + tst[5] + "/deleteGroupingMemberByUsername", uhUser01);
 
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[5]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[2]));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void getGroupingTestOld() throws Exception {
-        Grouping grouping = mapGroupingOld(GROUPING);
+        Grouping grouping = mapGroupingOld(GROUPING, uhUser01);
         Group basis = grouping.getBasis();
         Group composite = grouping.getComposite();
         Group exclude = grouping.getExclude();
@@ -303,140 +350,134 @@ public class TestGroupingsRestControllerv2_0 {
         assertTrue(include.getNames().contains(tstName[2]));
 
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
-        mapGSR("/api/groupings/v2.0/" + grouping.getPath() + "/" + tst[5] + "/assignOwnership");
-        grouping = mapGroupingOld(GROUPING);
+        mapGSR("/api/groupings/v2.0/" + grouping.getPath() + "/" + tst[5] + "/assignOwnership", uhUser01);
+        grouping = mapGroupingOld(GROUPING, uhUser01);
 
         assertTrue(grouping.getOwners().getNames().contains(tstName[5]));
-        mapGSR("/api/groupings/v2.0/" + grouping.getPath() + "/" + tst[5] + "/removeOwnership");
-        grouping = mapGroupingOld(GROUPING);
+        mapGSR("/api/groupings/v2.0/" + grouping.getPath() + "/" + tst[5] + "/removeOwnership", uhUser01);
+        grouping = mapGroupingOld(GROUPING, uhUser01);
 
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst05")
     public void groupingsAssignmentEmptyTest() throws Exception {
-        GroupingAssignment groupings = mapGroupingAssignment();
+        GroupingAssignment groupings = mapGroupingAssignment(uhUser05);
 
         assertEquals(groupings.getGroupingsIn().size(), groupings.getGroupingsToOptOutOf().size());
 
         for (Grouping grouping : groupings.getGroupingsIn()) {
-            mapGSRs("/api/groupings/v2.0/" + grouping.getPath() + "/optOut");
+            mapGSRs("/api/groupings/v2.0/" + grouping.getPath() + "/optOut", uhUser05);
         }
 
-        groupings = mapGroupingAssignment();
+        groupings = mapGroupingAssignment(uhUser05);
 
         assertEquals(0, groupings.getGroupingsIn().size());
         assertEquals(0, groupings.getGroupingsToOptOutOf().size());
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void groupingAssignmentTest() throws Exception {
-        GroupingAssignment groupings = mapGroupingAssignment();
+        GroupingAssignment groupings = mapGroupingAssignment(uhUser01);
 
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
         for (Grouping grouping : groupings.getGroupingsIn()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertTrue(inGrouping);
+        assertTrue(isInGrouping);
 
-        boolean canOptin = false;
+        boolean isOptInPossible = false;
         for (Grouping grouping : groupings.getGroupingsToOptInTo()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                canOptin = true;
+                isOptInPossible = true;
                 break;
             }
         }
-        assertFalse(canOptin);
+        assertFalse(isOptInPossible);
 
-        boolean canOptOut = false;
+        boolean isOptOutPossible = false;
         for (Grouping grouping : groupings.getGroupingsToOptOutOf()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                canOptOut = true;
+                isOptOutPossible = true;
                 break;
             }
         }
-        assertTrue(canOptOut);
+        assertTrue(isOptOutPossible);
 
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner = false;
         for (Grouping grouping : groupings.getGroupingsOwned()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertTrue(ownsGrouping);
+        assertTrue(isGroupingOwner);
 
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst04")
     public void myGroupingsTest2() throws Exception {
-        GroupingAssignment groupings = mapGroupingAssignment();
+        GroupingAssignment groupings = mapGroupingAssignment(uhUser04);
 
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
         for (Grouping grouping : groupings.getGroupingsIn()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertFalse(inGrouping);
+        assertFalse(isInGrouping);
 
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner = false;
         for (Grouping grouping : groupings.getGroupingsOwned()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertFalse(ownsGrouping);
+        assertFalse(isGroupingOwner);
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst04")
     public void myGroupingsTest3() throws Exception {
-        boolean optedIn = false;
+        boolean isOptedIn = false;
 
-        GroupingAssignment tst4Groupings = mapGroupingAssignment();
+        GroupingAssignment tst4Groupings = mapGroupingAssignment(uhUser04);
         assertEquals(tst4Groupings.getGroupingsOptedInTo().size(), 0);
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optIn");
-        tst4Groupings = mapGroupingAssignment();
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optIn", uhUser04);
+        tst4Groupings = mapGroupingAssignment(uhUser06);
         for (Grouping grouping : tst4Groupings.getGroupingsOptedInTo()) {
             if (grouping.getPath().contains(GROUPING)) {
-                optedIn = true;
+                isOptedIn = true;
             }
         }
         //in basis
-        assertFalse(optedIn);
+        assertFalse(isOptedIn);
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst06")
     public void myGroupingsTest4() throws Exception {
-        boolean optedOut = false;
+        boolean isOptedOut = false;
 
-        GroupingAssignment tst5Groupings = mapGroupingAssignment();
+        GroupingAssignment tst5Groupings = mapGroupingAssignment(uhUser06);
         assertEquals(tst5Groupings.getGroupingsOptedOutOf().size(), 0);
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optOut");
-        tst5Groupings = mapGroupingAssignment();
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optOut", uhUser06);
+        tst5Groupings = mapGroupingAssignment(uhUser06);
 
         for (Grouping grouping : tst5Groupings.getGroupingsOptedOutOf()) {
             if (grouping.getPath().contains(this.GROUPING)) {
-                optedOut = true;
+                isOptedOut = true;
             }
         }
-        assertTrue(optedOut);
+        assertTrue(isOptedOut);
 
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[5]);
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst04")
     public void optInTest() throws Exception {
         //tst[3] is not in Grouping, but is in basis and exclude
         assertFalse(memberAttributeService.isMember(GROUPING, tst[3]));
@@ -444,7 +485,7 @@ public class TestGroupingsRestControllerv2_0 {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
 
         //tst[3] opts into Grouping
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optIn");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optIn", uhUser04);
 
         //tst[3] is now in composite, still in basis and not in exclude
         assertTrue(memberAttributeService.isMember(GROUPING, tst[3]));
@@ -453,14 +494,13 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst06")
     public void optOutTest() throws Exception {
         //tst[5] is in the Grouping and in the basis
         assertTrue(memberAttributeService.isMember(GROUPING, tst[5]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, tst[5]));
 
         //tst[5] opts out of Grouping
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optOut");
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/optOut", uhUser06);
 
         //tst[5] is now in exclude, not in include or Grouping
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, tst[5]));
@@ -469,44 +509,40 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void changeListservStatusTest() throws Exception {
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
 
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/false/setListserv");
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/false/setListserv", uhUser01);
 
-        assertFalse(groupAttributeService.hasListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
-        mapGSR("/api/groupings/v2.0/" + GROUPING + "/true/setListserv");
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
+        mapGSR("/api/groupings/v2.0/" + GROUPING + "/true/setListserv", uhUser01);
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void changeOptInTest() throws Exception {
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
 
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptIn");
-        assertFalse(groupAttributeService.optInPermission(GROUPING));
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptIn", uhUser01);
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
 
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptIn");
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptIn", uhUser01);
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void changeOptOutTest() throws Exception {
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
 
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptOut");
-        assertFalse(groupAttributeService.optOutPermission(GROUPING));
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/false/setOptOut", uhUser01);
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
 
-        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptOut");
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
+        mapGSRs("/api/groupings/v2.0/" + GROUPING + "/true/setOptOut", uhUser01);
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
     }
 
     @Test
-    @WithMockUhUser(username = "aaronvil")
     public void aaronTest() throws Exception {
         //This test often fails because the test server is very slow.
         //Because the server caches some results and gets quicker the more times
@@ -515,7 +551,7 @@ public class TestGroupingsRestControllerv2_0 {
         int i = 0;
         while (i < 5) {
             try {
-                GroupingAssignment aaronsGroupings = mapGroupingAssignment();
+                GroupingAssignment aaronsGroupings = mapGroupingAssignment(localUser);
                 assertNotNull(aaronsGroupings);
                 break;
             } catch (AssertionError ae) {
@@ -526,11 +562,11 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void getEmptyGroupingTest() throws Exception {
 
-        Grouping storeEmpty = mapGroupingOld(GROUPING_STORE_EMPTY);
-        Grouping trueEmpty = mapGroupingOld(GROUPING_TRUE_EMPTY);
+        assertTrue(memberAttributeService.isOwner(GROUPING_STORE_EMPTY, tst[0]));
+        Grouping storeEmpty = mapGroupingOld(GROUPING_STORE_EMPTY, uhUser01);
+        Grouping trueEmpty = mapGroupingOld(GROUPING_TRUE_EMPTY, uhUser01);
 
         assertTrue(storeEmpty.getBasis().getMembers().size() == 0);
         assertTrue(storeEmpty.getComposite().getMembers().size() == 0);
@@ -547,33 +583,29 @@ public class TestGroupingsRestControllerv2_0 {
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void adminListsFailTest() throws Exception {
-        AdminListsHolder infoFail = mapAdminListsHolderOld();
+        AdminListsHolder infoFail = mapAdminListsHolderOld(uhUser01);
 
         assertEquals(infoFail.getAdminGroup().getMembers().size(), 0);
         assertEquals(infoFail.getAllGroupings().size(), 0);
     }
 
-    //todo Fix to replace _groupings_api_2 with APP_USER
     @Test
-    @WithMockUhUser(username = "_groupings_api_2")
     public void adminListsPassTest() throws Exception {
-        AdminListsHolder infoSuccess = mapAdminListsHolderOld();
+        AdminListsHolder infoSuccess = mapAdminListsHolderOld(adminUser);
 
         //ADMIN can be replaced with any account username that has admin access
         assertTrue(infoSuccess.getAdminGroup().getUsernames().contains(ADMIN));
     }
 
     @Test
-    @WithMockUhUser(username = "iamtst01")
     public void addDeleteAdminTestOld() throws Exception {
         GroupingsServiceResult addAdminResults;
         GroupingsServiceResult deleteAdminResults;
 
         try {
             //            addAdminResults = gc.addAdmin(tst[0], tst[0]).getBody();
-            addAdminResults = mapGSR("/api/groupings/v2.0/" + tst[0] + "/addAdmin");
+            addAdminResults = mapGSR("/api/groupings/v2.0/" + tst[0] + "/addAdmin", uhUser01);
         } catch (GroupingsHTTPException ghe) {
             addAdminResults = new GroupingsServiceResult();
             addAdminResults.setResultCode(FAILURE);
@@ -581,7 +613,7 @@ public class TestGroupingsRestControllerv2_0 {
 
         try {
             //            deleteAdminResults = gc.deleteAdmin(tst[0], tst[0]).getBody();
-            deleteAdminResults = mapGSR("/api/groupings/v2.0/" + tst[0] + "/deleteAdmin");
+            deleteAdminResults = mapGSR("/api/groupings/v2.0/" + tst[0] + "/deleteAdmin", uhUser01);
         } catch (GroupingsHTTPException ghe) {
             deleteAdminResults = new GroupingsServiceResult();
             deleteAdminResults.setResultCode(FAILURE);
@@ -595,20 +627,22 @@ public class TestGroupingsRestControllerv2_0 {
     //    2.0 REST API Mappings     //
     //////////////////////////////////
 
-    private Grouping mapGroupingOld(String groupingPath) throws Exception {
+    private Grouping mapGroupingOld(String groupingPath, User current_user) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get("/api/groupings/v2.0/" + groupingPath + "/grouping"))
+        MvcResult result = mockMvc.perform(get("/api/groupings/v2.0/" + groupingPath + "/grouping")
+                .header(CURRENT_USER, current_user.getUsername()))
                 .andExpect(status().isOk())
                 .andReturn();
 
         return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
     }
 
-    private GroupingsServiceResult mapGSR(String uri) throws Exception {
+    private GroupingsServiceResult mapGSR(String uri, User current_user) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(post(uri)
+                .header(CURRENT_USER, current_user.getUsername())
                 .with(csrf()))
                 .andReturn();
 
@@ -619,10 +653,11 @@ public class TestGroupingsRestControllerv2_0 {
         }
     }
 
-    private List mapGSRs(String uri) throws Exception {
+    private List mapGSRs(String uri, User current_user) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(post(uri)
+                .header(CURRENT_USER, current_user.getUsername())
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -630,10 +665,11 @@ public class TestGroupingsRestControllerv2_0 {
         return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
     }
 
-    private GroupingAssignment mapGroupingAssignment() throws Exception {
+    private GroupingAssignment mapGroupingAssignment(User current_user) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.0/groupingAssignment")
+                .header(CURRENT_USER, current_user.getUsername())
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -641,10 +677,11 @@ public class TestGroupingsRestControllerv2_0 {
         return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingAssignment.class);
     }
 
-    private AdminListsHolder mapAdminListsHolderOld() throws Exception {
+    private AdminListsHolder mapAdminListsHolderOld(User current_user) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get("/api/groupings/v2.0/adminLists")
+                .header(CURRENT_USER, current_user.getUsername())
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
