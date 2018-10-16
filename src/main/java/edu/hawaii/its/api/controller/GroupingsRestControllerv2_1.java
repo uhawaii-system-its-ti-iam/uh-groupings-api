@@ -184,22 +184,24 @@ public class GroupingsRestControllerv2_1 {
 
     //todo Is this the way we want/can do this? Might be better to split GET calls based on Groups individually
     /**
-     * Get a specific grouping
+     * Get a specific grouping by page
      *
      * @param path: Path of specific grouping
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/api/groupings/{path}/get",
+    @RequestMapping(value = "/groupings/{path}/get",
             params = { "page", "size" },
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Page<Grouping> getPaginatedGrouping(Principal principal,
+    public ResponseEntity<Grouping> getPaginatedGrouping(Principal principal,
             @PathVariable String path,
-            @RequestParam(value = "page") int page,
-            @RequestParam(value = "size") int size) {
+            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "size") Integer size) {
         logger.info("Entered REST getPaginatedGrouping");
-        throw new UnsupportedOperationException();
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getPaginatedGrouping(path, principal.getName(), page, size));
     }
 
     /**
