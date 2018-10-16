@@ -198,7 +198,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @RequestParam(value = "page") Integer page,
             @RequestParam(value = "size") Integer size) {
-        logger.info("Entered REST getPaginatedGrouping");
+        logger.info("Entered REST getPaginatedGrouping...");
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.getPaginatedGrouping(path, principal.getName(), page, size));
