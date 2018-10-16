@@ -1203,11 +1203,13 @@ public class TestGroupingsRestControllerv2_1 {
         // If page or size are 0, call it normally, else use pagination
         if(page.equals(0) || size.equals(0)) {
             result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
+                    .header(CURRENT_USER, annotationUser.getUsername())
                     .with(user(annotationUser))
                     .with(csrf()))
                     .andReturn();
         } else {
             result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath + "/get?page=" + page + "&size=" + size)
+                    .header(CURRENT_USER, annotationUser.getUsername())
                     .with(user(annotationUser))
                     .with(csrf()))
                     .andReturn();
