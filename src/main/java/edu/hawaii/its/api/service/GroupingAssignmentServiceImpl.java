@@ -269,11 +269,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
-            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
-            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
-            Group composite = getMembers(ownerUsername, groupingPath);
-            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+            Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
+            Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
+            Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
+            Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
+            Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
