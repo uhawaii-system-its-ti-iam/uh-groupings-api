@@ -195,7 +195,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         //todo this can be optimized by getting opt attributes from grouper when getting the group list
         //rather than making individual calls to grouper, which is much slower
         for (Grouping grouping : groupings) {
-            grouping.setOptOutOn(groupAttributeService.optOutPermission(grouping.getPath()));
+            grouping.setOptOutOn(groupAttributeService.isOptOutPossible(grouping.getPath()));
         }
 
         return groupings;
@@ -472,9 +472,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
-        boolean listservOn = false;
-        boolean optInOn = false;
-        boolean optOutOn = false;
+        boolean isListservOn = false;
+        boolean isOptInOn = false;
+        boolean isOptOutOn = false;
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
@@ -486,18 +486,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeDefName defName : attributeDefNames) {
                 String name = defName.getName();
                 if (name.equals(LISTSERV)) {
-                    listservOn = true;
+                    isListservOn = true;
                 } else if (name.equals(OPT_IN)) {
-                    optInOn = true;
+                    isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
-                    optOutOn = true;
+                    isOptOutOn = true;
                 }
             }
         }
 
-        grouping.setListservOn(listservOn);
-        grouping.setOptInOn(optInOn);
-        grouping.setOptOutOn(optOutOn);
+        grouping.setListservOn(isListservOn);
+        grouping.setOptInOn(isOptInOn);
+        grouping.setOptOutOn(isOptOutOn);
 
         return grouping;
     }

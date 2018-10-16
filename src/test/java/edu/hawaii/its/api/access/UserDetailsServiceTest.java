@@ -48,10 +48,10 @@ public class UserDetailsServiceTest {
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
-        assertTrue(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ADMIN));
 
         // Check a made-up junky role name.
 
@@ -67,10 +67,10 @@ public class UserDetailsServiceTest {
         assertEquals("10000001", user.getUhuuid());
 
         assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
-        assertTrue(user.hasRole(Role.ADMIN));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ADMIN));
     }
 
     @Test
@@ -91,11 +91,11 @@ public class UserDetailsServiceTest {
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() == 3);
-        assertTrue(user.hasRole(Role.ANONYMOUS));
-        assertTrue(user.hasRole(Role.UH));
-        assertTrue(user.hasRole(Role.EMPLOYEE));
+        assertTrue(user.isRole(Role.ANONYMOUS));
+        assertTrue(user.isRole(Role.UH));
+        assertTrue(user.isRole(Role.EMPLOYEE));
 
-        assertFalse(user.hasRole(Role.ADMIN));
+        assertFalse(user.isRole(Role.ADMIN));
     }
 
     @Test

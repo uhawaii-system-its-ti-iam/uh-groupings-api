@@ -391,10 +391,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
             Group exclude,
             Group include,
             Group owners,
-            boolean listserveOn,
-            boolean optInOn,
-            boolean optOutOn,
-            boolean releasedGroupingOn) {
+            boolean isListserveOn,
+            boolean isOptInOn,
+            boolean isOptOutOn,
+            boolean isReleasedGroupingOn) {
 
         Grouping grouping = new Grouping(path);
         Group composite = buildComposite(include, exclude, basis, path);
@@ -406,10 +406,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         grouping.setOwners(owners);
         grouping.setComposite(composite);
 
-        grouping.setListservOn(listserveOn);
-        grouping.setOptInOn(optInOn);
-        grouping.setOptOutOn(optOutOn);
-        grouping.setReleasedGroupingOn(releasedGroupingOn);
+        grouping.setListservOn(isListserveOn);
+        grouping.setOptInOn(isOptInOn);
+        grouping.setOptOutOn(isOptOutOn);
+        grouping.setReleasedGroupingOn(isReleasedGroupingOn);
 
         groupings.add(grouping);
     }

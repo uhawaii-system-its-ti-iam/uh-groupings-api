@@ -226,7 +226,7 @@ public class GroupAttributeServiceTest {
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
         //starts ON
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // ON to ON
         try {
@@ -234,11 +234,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         //ON to OFF
         try {
@@ -246,11 +246,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
         assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to OFF
         try {
@@ -258,11 +258,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
         assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to ON
         try {
@@ -270,11 +270,11 @@ public class GroupAttributeServiceTest {
             fail("Shouldn't be here");
         } catch (GroupingsServiceResultException gsre) {
             assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
-            assertFalse(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+            assertFalse(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
         }
         results.add(groupingsService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupingsService.hasReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH));
     }
 
     @Test
@@ -463,38 +463,38 @@ public class GroupAttributeServiceTest {
     @Test
     public void optOutPermissionTest() {
 
-        boolean permission = groupingsService.optOutPermission(GROUPING_0_PATH);
+        boolean isHasPermission = groupingsService.isOptOutPossible(GROUPING_0_PATH);
 
-        assertEquals(false, permission);
+        assertEquals(false, isHasPermission);
 
-        permission = groupingsService.optOutPermission(GROUPING_1_PATH);
+        isHasPermission = groupingsService.isOptOutPossible(GROUPING_1_PATH);
 
-        assertEquals(true, permission);
+        assertEquals(true, isHasPermission);
 
     }
 
     @Test
     public void optInPermissionTest() {
 
-        boolean permission = groupingsService.optInPermission(GROUPING_0_PATH);
+        boolean isHasPermission = groupingsService.isOptInPossible(GROUPING_0_PATH);
 
-        assertEquals(true, permission);
+        assertEquals(true, isHasPermission);
 
-        permission = groupingsService.optInPermission(GROUPING_2_PATH);
+        isHasPermission = groupingsService.isOptInPossible(GROUPING_2_PATH);
 
-        assertEquals(false, permission);
+        assertEquals(false, isHasPermission);
     }
 
     @Test
     public void hasListservTest() {
 
-        boolean groupingHasListserv = groupingsService.hasListserv(GROUPING_0_PATH);
+        boolean isGroupingHasListserv = groupingsService.isContainingListserv(GROUPING_0_PATH);
 
-        assertEquals(false, groupingHasListserv);
+        assertEquals(false, isGroupingHasListserv);
 
-        groupingHasListserv = groupingsService.hasListserv(GROUPING_3_PATH);
+        isGroupingHasListserv = groupingsService.isContainingListserv(GROUPING_3_PATH);
 
-        assertEquals(true, groupingHasListserv);
+        assertEquals(true, isGroupingHasListserv);
     }
 
     @Test
@@ -502,12 +502,12 @@ public class GroupAttributeServiceTest {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        boolean hasReleasedGrouping = groupingsService.hasReleasedGrouping(GROUPING_0_PATH);
-        assertTrue(hasReleasedGrouping);
+        boolean isHasReleasedGrouping = groupingsService.isContainingReleasedGrouping(GROUPING_0_PATH);
+        assertTrue(isHasReleasedGrouping);
 
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-        hasReleasedGrouping = groupingsService.hasReleasedGrouping(GROUPING_1_PATH);
-        assertFalse(hasReleasedGrouping);
+        isHasReleasedGrouping = groupingsService.isContainingReleasedGrouping(GROUPING_1_PATH);
+        assertFalse(isHasReleasedGrouping);
 
     }
 }

@@ -8,21 +8,21 @@ import java.util.List;
 
 public interface GroupAttributeService {
 
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean listservOn);
+    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean isListservOn);
 
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean releasedGroupingOn);
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn);
 
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean optInOn);
+    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn);
 
-    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean optOutOn);
+    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean isOptOutOn);
 
-    public boolean hasListserv(String groupingPath);
+    public boolean isContainingListserv(String groupingPath);
 
-    public boolean hasReleasedGrouping(String groupingPath);
+    public boolean isContainingReleasedGrouping(String groupingPath);
 
-    public boolean optOutPermission(String groupingPath);
+    public boolean isOptOutPossible(String groupingPath);
 
-    public boolean optInPermission(String groupingPath);
+    public boolean isOptInPossible(String groupingPath);
 
     //do not include in REST controller
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
