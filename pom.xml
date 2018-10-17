@@ -60,7 +60,12 @@
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
             <version>2.0.5.RELEASE</version>
         </dependency>
-        <!-- Overrides Spring's bouncycastle and spring-web with updated versions -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-cas</artifactId>
+        </dependency>
+
+        <!-- Overrides Spring's innate dependencies with updated versions -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -73,8 +78,14 @@
             <!--<version>5.1.0.RELEASE</version>-->
         <!--</dependency>-->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-cas</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.1</version>
         </dependency>
 
         <!-- hot swapping, disable cache for template, enable live reload -->
@@ -116,6 +127,7 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>${hibernate-jpa.version}</version>
         </dependency>
+        <!--Uses an old dom4j:dom4j dependency, not the new org.dom4j:dom4j-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
