@@ -38,6 +38,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -669,6 +670,25 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .assignIncludeSubjectDetail(true)
                 .execute();
     }
+
+    // todo Covered by Integration Tests
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            Integer page,
+            Integer size) {
+
+        GcGetMembers members = new GcGetMembers();
+        members.assignPageNumber(page);
+        members.assignPageSize(size);
+
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .addGroupName(groupName)
+                .assignIncludeSubjectDetail(true)
+                .execute();    }
 
     // Covered by Integration Tests
     @Override
