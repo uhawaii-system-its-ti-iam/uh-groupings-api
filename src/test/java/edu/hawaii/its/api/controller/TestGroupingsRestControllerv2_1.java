@@ -594,6 +594,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getPaginatedGroupingTest() throws Exception {
 
+        // Paging starts at 1 D:
         Grouping paginatedGrouping = mapGrouping(GROUPING, uhUser01, 1, 20);
 
         assertTrue(paginatedGrouping.getBasis().getMembers().size() <= 20);

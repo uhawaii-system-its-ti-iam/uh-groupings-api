@@ -212,7 +212,7 @@ public class TestGroupingAssignmentService {
         // As a result, a call for 20 ppl will give 17 instead
         // Is this OK or do we want to call again till we get 20?
 
-        // WHY DOES PAGING START AT ONE AHHHH
+        // Paging starts at 1 D:
         Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
         Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
 
