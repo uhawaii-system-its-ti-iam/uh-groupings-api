@@ -26,7 +26,6 @@
         <hibernate.version>5.2.3.Final</hibernate.version>
         <h2.version>1.4.192</h2.version>
         <org.jasig.cas.client-version>3.5.0</org.jasig.cas.client-version>
-
     </properties>
 
     <dependencies>
