@@ -6,6 +6,7 @@ import edu.hawaii.its.api.access.Role;
 import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.type.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -542,6 +543,7 @@ public class TestGroupingsRestControllerv2_0 {
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
     }
 
+    @Ignore
     @Test
     public void aaronTest() throws Exception {
         //This test often fails because the test server is very slow.
