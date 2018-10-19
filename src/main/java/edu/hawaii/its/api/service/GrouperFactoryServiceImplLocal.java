@@ -211,7 +211,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Autowired
     private PersonRepository personRepository;
 
-    public boolean isUuid(String username) { return username.matches("\\d+"); }
+    public boolean isUuid(String username) {
+        return username.matches("\\d+");
+    }
 
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
@@ -409,7 +411,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             String memberToDelete) {
         Person personToDelete;
         if (isUuid(memberToDelete)) {
-            return makeWsDeleteMemberResults(group, lookup, new Person (null, memberToDelete, null));
+            return makeWsDeleteMemberResults(group, lookup, new Person(null, memberToDelete, null));
         }
 
         return makeWsDeleteMemberResults(group, lookup, new Person(null, null, memberToDelete));
@@ -1210,6 +1212,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
     }
 
+    //todo Local version for testing. Haven't needed it yet, will implement if necessary
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
         //todo Not needed for getUserAttributes function, will implement if necessary
         return null;
@@ -1225,6 +1228,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
             String attributeDefNameName,
             List<String> ownerGroupNames) {
+        //todo
+        return null;
+    }
+
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            Integer page,
+            Integer size) {
+        //todo
         return null;
     }
 }
