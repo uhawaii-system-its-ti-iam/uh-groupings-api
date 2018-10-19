@@ -108,7 +108,7 @@ public class TestGroupingFactoryService {
     @Before
     public void setUp() {
         // Make sure the grouping folder is cleared
-        if(!groupingFactoryService.pathIsEmpty(APP_USER, TEMP_TEST)){
+        if(!groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST)){
             groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
         }
     }
@@ -136,7 +136,7 @@ public class TestGroupingFactoryService {
 
         results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
-        assertThat(groupingFactoryService.pathIsEmpty(APP_USER, TEMP_TEST),
+        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
                 equalTo(false));
 
 
@@ -185,7 +185,7 @@ public class TestGroupingFactoryService {
 
         results = groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
 
-        assertThat(groupingFactoryService.pathIsEmpty(APP_USER, TEMP_TEST),
+        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
                 equalTo(true));
 
 

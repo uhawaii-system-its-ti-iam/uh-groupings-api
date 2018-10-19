@@ -211,7 +211,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Autowired
     private PersonRepository personRepository;
 
-    public boolean isUuid(String username) { return username.matches("\\d+"); }
+    public boolean isUuid(String username) {
+        return username.matches("\\d+");
+    }
 
     @Override
     public WsGroupSaveResults addEmptyGroup(String username, String path) {
@@ -342,22 +344,22 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             addMember(groupToAddTo, newGroupMember);
         } else {
 
-            boolean inBasis = grouping.getBasis().isMember(newGroupMember);
-            boolean inExclude = grouping.getExclude().isMember(newGroupMember);
-            boolean inInclude = grouping.getInclude().isMember(newGroupMember);
+            boolean isInBasis = grouping.getBasis().isMember(newGroupMember);
+            boolean isInExclude = grouping.getExclude().isMember(newGroupMember);
+            boolean isInInclude = grouping.getInclude().isMember(newGroupMember);
 
             if (group.endsWith(OWNERS)) {
                 addMember(grouping.getOwners(), newGroupMember);
             } else if (group.endsWith(EXCLUDE)) {
-                if (inBasis) {
+                if (isInBasis) {
                     addMember(grouping.getExclude(), newGroupMember);
-                } else if (inInclude) {
+                } else if (isInInclude) {
                     deleteMember(grouping.getInclude(), newGroupMember);
                 }
             } else if (group.endsWith(INCLUDE)) {
-                if (inExclude) {
+                if (isInExclude) {
                     deleteMember(grouping.getExclude(), newGroupMember);
-                } else if (!inBasis) {
+                } else if (!isInBasis) {
                     addMember(grouping.getInclude(), newGroupMember);
                 }
             }
@@ -409,7 +411,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             String memberToDelete) {
         Person personToDelete;
         if (isUuid(memberToDelete)) {
-            return makeWsDeleteMemberResults(group, lookup, new Person (null, memberToDelete, null));
+            return makeWsDeleteMemberResults(group, lookup, new Person(null, memberToDelete, null));
         }
 
         return makeWsDeleteMemberResults(group, lookup, new Person(null, null, memberToDelete));
@@ -717,23 +719,23 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
-        Boolean onOrrOff = null;
+        Boolean isOnOrrOff = null;
 
         if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
-            onOrrOff = true;
+            isOnOrrOff = true;
         } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
-            onOrrOff = false;
+            isOnOrrOff = false;
         }
 
-        if (onOrrOff != null) {
+        if (isOnOrrOff != null) {
             if (attributeDefNameName.equals(LISTSERV)) {
-                grouping.setListservOn(onOrrOff);
+                grouping.setListservOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_IN)) {
-                grouping.setOptInOn(onOrrOff);
+                grouping.setOptInOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_OUT)) {
-                grouping.setOptOutOn(onOrrOff);
+                grouping.setOptOutOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(RELEASED_GROUPING)) {
-                grouping.setReleasedGroupingOn(onOrrOff);
+                grouping.setReleasedGroupingOn(isOnOrrOff);
             }
         }
 
@@ -776,11 +778,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
 
         if (attributeAssignOperation.equals(OPERATION_ASSIGN_ATTRIBUTE)) {
-            if (setGroupingAttribute(grouping, attributeDefNameName, true)) {
+            if (isGroupingAttributeSet(grouping, attributeDefNameName, true)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
         } else if (attributeAssignOperation.equals(OPERATION_REMOVE_ATTRIBUTE)) {
-            if (setGroupingAttribute(grouping, attributeDefNameName, false)) {
+            if (isGroupingAttributeSet(grouping, attributeDefNameName, false)) {
                 wsResultMeta.setResultCode(SUCCESS);
             }
         }
@@ -818,7 +820,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed) {
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -832,10 +834,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
-            membership.setOptInEnabled(allowed);
+            membership.setOptInEnabled(isAllowed);
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
-            membership.setOptOutEnabled(allowed);
+            membership.setOptOutEnabled(isAllowed);
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
@@ -849,7 +851,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed) {
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -863,10 +865,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
-            membership.setOptInEnabled(allowed);
+            membership.setOptInEnabled(isAllowed);
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
-            membership.setOptOutEnabled(allowed);
+            membership.setOptOutEnabled(isAllowed);
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
@@ -888,23 +890,23 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Group group = groupRepository.findByPath(groupName);
         Membership membership = membershipRepository.findByPersonAndGroup(person, group);
 
-        boolean enabled = false;
+        boolean isEnabled = false;
 
         if (privilegeName.equals(PRIVILEGE_OPT_IN)) {
 
             if (membership.isOptInEnabled()) {
-                enabled = true;
+                isEnabled = true;
             }
         } else if (privilegeName.equals(PRIVILEGE_OPT_OUT)) {
 
             if (membership.isOptOutEnabled()) {
-                enabled = true;
+                isEnabled = true;
             }
         } else {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
-        if (enabled) {
+        if (isEnabled) {
             wsResultMeta.setResultCode(SUCCESS_ALLOWED);
         }
 
@@ -1042,15 +1044,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return basisPlusIncludeMinusExcludeGroup;
     }
 
-    private boolean setGroupingAttribute(Grouping grouping, String attributeName, boolean on) {
+    private boolean isGroupingAttributeSet(Grouping grouping, String attributeName, boolean isOn) {
         if (attributeName.equals(LISTSERV)) {
-            grouping.setListservOn(on);
+            grouping.setListservOn(isOn);
         } else if (attributeName.equals(OPT_IN)) {
-            grouping.setOptInOn(on);
+            grouping.setOptInOn(isOn);
         } else if (attributeName.equals(OPT_OUT)) {
-            grouping.setOptOutOn(on);
+            grouping.setOptOutOn(isOn);
         } else if (attributeName.equals(RELEASED_GROUPING)) {
-            grouping.setReleasedGroupingOn(on);
+            grouping.setReleasedGroupingOn(isOn);
         } else {
             return false;
         }
@@ -1210,6 +1212,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
     }
 
+    //todo Local version for testing. Haven't needed it yet, will implement if necessary
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
         //todo Not needed for getUserAttributes function, will implement if necessary
         return null;
@@ -1225,6 +1228,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
             String attributeDefNameName,
             List<String> ownerGroupNames) {
+        //todo
+        return null;
+    }
+
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            Integer page,
+            Integer size) {
+        //todo
         return null;
     }
 }

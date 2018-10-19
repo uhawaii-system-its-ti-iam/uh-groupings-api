@@ -33,16 +33,16 @@ public class Grouping {
     private Group owners;
 
     @Column
-    private boolean listservOn = false;
+    private boolean isListservOn = false;
 
     @Column
-    private boolean optInOn = false;
+    private boolean isOptInOn = false;
 
     @Column
-    private boolean optOutOn = false;
+    private boolean isOptOutOn = false;
 
     @Column
-    private boolean releasedGroupingOn = false;
+    private boolean isReleasedGroupingOn = false;
 
     // Constructor.
     public Grouping() {
@@ -118,32 +118,32 @@ public class Grouping {
     }
 
     public boolean isListservOn() {
-        return listservOn;
+        return isListservOn;
     }
 
-    public void setListservOn(boolean listservOn) {
-        this.listservOn = listservOn;
+    public void setListservOn(boolean isListservOn) {
+        this.isListservOn = isListservOn;
     }
 
     public boolean isOptInOn() {
-        return optInOn;
+        return isOptInOn;
     }
 
-    public void setOptInOn(boolean optInOn) {
-        this.optInOn = optInOn;
+    public void setOptInOn(boolean isOptInOn) {
+        this.isOptInOn = isOptInOn;
     }
 
     public boolean isOptOutOn() {
-        return optOutOn;
+        return isOptOutOn;
     }
 
-    public void setOptOutOn(boolean optOutOn) {
-        this.optOutOn = optOutOn;
+    public void setOptOutOn(boolean isOptOutOn) {
+        this.isOptOutOn = isOptOutOn;
     }
 
-    public boolean isReleasedGroupingOn() { return releasedGroupingOn; }
+    public boolean isReleasedGroupingOn() { return isReleasedGroupingOn; }
 
-    public void setReleasedGroupingOn(boolean releasedGroupingOn) { this.releasedGroupingOn = releasedGroupingOn; }
+    public void setReleasedGroupingOn(boolean isReleasedGroupingOn) { this.isReleasedGroupingOn = isReleasedGroupingOn; }
 
     @Override
     public String toString() {

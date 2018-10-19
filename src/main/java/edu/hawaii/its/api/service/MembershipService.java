@@ -58,9 +58,9 @@ public interface MembershipService {
 
     public List<GroupingsServiceResult> optOut(String username, String groupingPath);
 
-    public boolean groupOptInPermission(String username, String groupPath);
+    public boolean isGroupCanOptIn(String username, String groupPath);
 
-    public boolean groupOptOutPermission(String username, String groupPath);
+    public boolean isGroupCanOptOut(String username, String groupPath);
 
     //do not include in REST controller
     public GroupingsServiceResult updateLastModified(String groupPath);

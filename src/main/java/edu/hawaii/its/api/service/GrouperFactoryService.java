@@ -135,12 +135,12 @@ public interface GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed);
+            boolean isAllowed);
 
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed);
+            boolean isAllowed);
 
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
@@ -150,6 +150,12 @@ public interface GrouperFactoryService {
 
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName, WsSubjectLookup lookup,
             String groupName);
+
+    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            Integer page,
+            Integer size);
 
     public WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
 

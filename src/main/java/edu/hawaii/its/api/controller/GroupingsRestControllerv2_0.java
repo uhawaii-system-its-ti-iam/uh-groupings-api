@@ -869,54 +869,54 @@ public class GroupingsRestControllerv2_0 {
      * This allows an owner of a Grouping to change whether or not a Grouping is connected to a Listserv
      *
      * @param grouping:   the path to the Grouping
-     * @param listservOn: true if the listserv should be on, false if it should be off
+     * @param isListservOn: true if the listserv should be on, false if it should be off
      * @return information about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{listservOn}/setListserv",
+    @RequestMapping(value = "/{grouping}/{isListservOn}/setListserv",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> setListserv(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
-            @PathVariable boolean listservOn) {
+            @PathVariable boolean isListservOn) {
         logger.info("Entered REST setListserv...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeListservStatus(grouping, currentUser, listservOn));
+                .body(groupAttributeService.changeListservStatus(grouping, currentUser, isListservOn));
     }
 
     /**
      * This allows an owner of a Grouping to change whether or not a Grouping's members can opt in
      *
      * @param grouping: the path to the Grouping
-     * @param optInOn:  true if the members should be able to opt in, false if not
-     * @return iformation about the success of the operation
+     * @param isOptInOn:  true if the members should be able to opt in, false if not
+     * @return information about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{optInOn}/setOptIn",
+    @RequestMapping(value = "/{grouping}/{isOptInOn}/setOptIn",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> setOptIn(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
-            @PathVariable boolean optInOn) {
+            @PathVariable boolean isOptInOn) {
         logger.info("Entered REST setOptIn...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptInStatus(grouping, currentUser, optInOn));
+                .body(groupAttributeService.changeOptInStatus(grouping, currentUser, isOptInOn));
     }
 
     /**
      * This allows an owner of a Grouping to change whether or not a Grouping's members can opt out
      *
      * @param grouping: the path to the Grouping
-     * @param optOutOn: true if the members should be able to opt out, false if not
+     * @param isOptOutOn: true if the members should be able to opt out, false if not
      * @return iformation about the success of the operation
      */
-    @RequestMapping(value = "/{grouping}/{optOutOn}/setOptOut",
+    @RequestMapping(value = "/{grouping}/{isOptOutOn}/setOptOut",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> setOptOut(@RequestHeader("current_user") String currentUser, @PathVariable String grouping,
-            @PathVariable boolean optOutOn) {
+            @PathVariable boolean isOptOutOn) {
         logger.info("Entered REST setOptOut...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptOutStatus(grouping, currentUser, optOutOn));
+                .body(groupAttributeService.changeOptOutStatus(grouping, currentUser, isOptOutOn));
     }
 
     @RequestMapping(value = "/adminLists",

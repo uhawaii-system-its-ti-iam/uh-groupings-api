@@ -208,12 +208,12 @@ public class MemberAttributeServiceTest {
     public void checkSelfOptedTest() {
 
         //user is not in group
-        boolean selfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(2).getUsername());
-        assertFalse(selfOpted);
+        boolean isSelfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(2).getUsername());
+        assertFalse(isSelfOpted);
 
         //user has not self opted
-        selfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(5).getUsername());
-        assertFalse(selfOpted);
+        isSelfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(5).getUsername());
+        assertFalse(isSelfOpted);
 
         //user has self opted
         Person person = personRepository.findByUsername(users.get(5).getUsername());
@@ -222,8 +222,8 @@ public class MemberAttributeServiceTest {
         membership.setSelfOpted(true);
         membershipRepository.save(membership);
 
-        selfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(5).getUsername());
-        assertTrue(selfOpted);
+        isSelfOpted = memberAttributeService.isSelfOpted(GROUPING_0_INCLUDE_PATH, users.get(5).getUsername());
+        assertTrue(isSelfOpted);
     }
 
     @Test
