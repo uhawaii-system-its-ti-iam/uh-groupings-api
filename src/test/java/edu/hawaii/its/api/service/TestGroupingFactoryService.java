@@ -227,7 +227,7 @@ public class TestGroupingFactoryService {
 
         results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
 
-        assertThat(groupingFactoryService.pathIsEmpty(APP_USER, TEMP_TEST),
+        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
                 equalTo(true));
 
 
