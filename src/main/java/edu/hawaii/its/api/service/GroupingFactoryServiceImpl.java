@@ -261,6 +261,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         String basisUid = getGroupId(groupingPath + BASIS);
         String includeUid = getGroupId(groupingPath + INCLUDE);
+        String ownersUid = getGroupId(groupingPath + OWNERS);
 
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
@@ -273,6 +274,11 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                         admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
                         + BASIS_PLUS_INCLUDE));
 
+        addGroupingResults.add(helperService.makeGroupingsServiceResult(
+                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + INCLUDE,
+                        admin, ownersUid), "add " + groupingPath + OWNERS + " to " + GROUPING_OWNERS));
+
+
         //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                 admin,
@@ -281,6 +287,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                 TRIO,
                 groupingPath
         );
+
 
         return addGroupingResults;
     }
