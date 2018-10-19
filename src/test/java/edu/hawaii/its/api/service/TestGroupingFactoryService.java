@@ -124,6 +124,8 @@ public class TestGroupingFactoryService {
     @Test
     public void addGroupingTest() {
 
+        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+
         List<GroupingsServiceResult> results = new ArrayList<>();
         GroupingsServiceResult sResults;
 
