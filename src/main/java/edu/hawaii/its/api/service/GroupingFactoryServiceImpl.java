@@ -209,7 +209,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
         //make sure that there is not already a group there
-        if (!pathIsEmpty(adminUsername, groupingPath)) {
+        if (!isPathEmpty(adminUsername, groupingPath)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": a group already exists at " + groupingPath, action);
@@ -314,7 +314,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
 
-        if (pathIsEmpty(adminUsername, groupingPath)) {
+        if (isPathEmpty(adminUsername, groupingPath)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
@@ -343,7 +343,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         for (String group: memberLists) {
 
-            if (pathIsEmpty(adminUsername, groupingPath + group)) {
+            if (isPathEmpty(adminUsername, groupingPath + group)) {
 
             }
             else {
@@ -382,7 +382,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
 
-        if (pathIsEmpty(adminUsername, groupingPath)) {
+        if (isPathEmpty(adminUsername, groupingPath)) {
 
             GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
@@ -421,7 +421,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         for (String group: memberLists) {
 
-            if (pathIsEmpty(adminUsername, groupingPath + group)) {
+            if (isPathEmpty(adminUsername, groupingPath + group)) {
 
             }
             else {
@@ -506,7 +506,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     }
 
     //returns true if there is not a group at groupingPath
-    public boolean pathIsEmpty(String adminUsername, String groupingPath) {
+    public boolean isPathEmpty(String adminUsername, String groupingPath) {
 
         WsFindGroupsResults wsFindGroupsResults = grouperFactoryService.makeWsFindGroupsResults(groupingPath);
 

@@ -42,6 +42,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -622,14 +623,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String privilegeName,
             WsSubjectLookup lookup,
             WsSubjectLookup admin,
-            boolean allowed) {
+            boolean isAllowed) {
 
         return new GcAssignGrouperPrivilegesLite()
                 .assignGroupName(groupName)
                 .assignPrivilegeName(privilegeName)
                 .assignSubjectLookup(lookup)
                 .assignActAsSubject(admin)
-                .assignAllowed(allowed)
+                .assignAllowed(isAllowed)
                 .execute();
     }
 
@@ -637,13 +638,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean allowed) {
+            boolean isAllowed) {
 
         return new GcAssignGrouperPrivilegesLite()
                 .assignGroupName(groupName)
                 .assignPrivilegeName(privilegeName)
                 .assignSubjectLookup(lookup)
-                .assignAllowed(allowed)
+                .assignAllowed(isAllowed)
                 .execute();
     }
 
@@ -684,6 +685,25 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .assignIncludeSubjectDetail(true)
                 .execute();
     }
+
+    // todo Covered by Integration Tests
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            Integer page,
+            Integer size) {
+
+        GcGetMembers members = new GcGetMembers();
+        members.assignPageNumber(page);
+        members.assignPageSize(size);
+
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .addGroupName(groupName)
+                .assignIncludeSubjectDetail(true)
+                .execute();    }
 
     // Covered by Integration Tests
     @Override

@@ -69,12 +69,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         roleHolder.add(Role.UH);
 
         //Determines if user is an owner.
-        if (fetchOwner(username)) {
+        if (isOwner(username)) {
             roleHolder.add(Role.OWNER);
         }
 
         //Determines if a user is an admin.
-        if (fetchAdmin(username)) {
+        if (isAdmin(username)) {
             roleHolder.add(Role.ADMIN);
         }
 
@@ -93,7 +93,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @param username - self-explanitory
      * @return true if the person has groupings that they own, otherwise false.
      */
-    public boolean fetchOwner(String username) {
+    public boolean isOwner(String username) {
         try {
             logger.info("//////////////////////////////");
             if (!groupingAssignmentService.getGroupingAssignment(username).getGroupingsOwned().isEmpty()) {
@@ -114,7 +114,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @param username - self-explanitory
      * @return true if the person gets pass the grouping admins check by checking if they can get all the groupings.
      */
-    public boolean fetchAdmin(String username) {
+    public boolean isAdmin(String username) {
         logger.info("//////////////////////////////");
         try {
             if (memberAttributeService.isAdmin(username)) {

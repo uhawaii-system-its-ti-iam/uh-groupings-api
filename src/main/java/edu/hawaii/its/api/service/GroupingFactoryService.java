@@ -15,6 +15,7 @@ public interface GroupingFactoryService {
 
     public List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath);
 
-    public boolean pathIsEmpty(String adminUsername, String groupingPath);
+    public boolean isPathEmpty(String adminUsername, String groupingPath);
+
 
 }

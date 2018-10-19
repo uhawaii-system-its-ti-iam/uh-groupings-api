@@ -195,7 +195,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         //todo this can be optimized by getting opt attributes from grouper when getting the group list
         //rather than making individual calls to grouper, which is much slower
         for (Grouping grouping : groupings) {
-            grouping.setOptOutOn(groupAttributeService.optOutPermission(grouping.getPath()));
+            grouping.setOptOutOn(groupAttributeService.isOptOutPossible(grouping.getPath()));
         }
 
         return groupings;
@@ -245,6 +245,35 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             Group basis = getMembers(ownerUsername, groupingPath + BASIS);
             Group composite = getMembers(ownerUsername, groupingPath);
             Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+
+            compositeGrouping = setGroupingAttributes(compositeGrouping);
+
+            compositeGrouping.setBasis(basis);
+            compositeGrouping.setExclude(exclude);
+            compositeGrouping.setInclude(include);
+            compositeGrouping.setComposite(composite);
+            compositeGrouping.setOwners(owners);
+
+        }
+        return compositeGrouping;
+    }
+
+    @Override
+    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
+        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
+                "; page: " + page + "; size: " + size + "'");
+
+        Grouping compositeGrouping = new Grouping();
+
+        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
+            compositeGrouping = new Grouping(groupingPath);
+
+            Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
+            Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
+            Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
+            Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
+            Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -348,6 +377,29 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
+    @Override
+    public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
+        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath +
+                "; page: " + page + "; size: " + size + ";");
+
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFS.makeWsGetMembersResultsPaginated(
+                SUBJECT_ATTRIBUTE_NAME_UID,
+                lookup,
+                groupPath,
+                page,
+                size);
+
+        //todo should we use EmptyGroup?
+        Group groupMembers = new Group();
+        if (members.getResults() != null && groupPath.contains(BASIS)) {
+            groupMembers = makeBasisGroup(members);
+        } else if (members.getResults() != null) {
+            groupMembers = makeGroup(members);
+        }
+        return groupMembers;
+    }
+
     //makes a group filled with members from membersResults
     @Override
     public Group makeGroup(WsGetMembersResults membersResults) {
@@ -420,9 +472,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
-        boolean listservOn = false;
-        boolean optInOn = false;
-        boolean optOutOn = false;
+        boolean isListservOn = false;
+        boolean isOptInOn = false;
+        boolean isOptOutOn = false;
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
@@ -434,18 +486,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeDefName defName : attributeDefNames) {
                 String name = defName.getName();
                 if (name.equals(LISTSERV)) {
-                    listservOn = true;
+                    isListservOn = true;
                 } else if (name.equals(OPT_IN)) {
-                    optInOn = true;
+                    isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
-                    optOutOn = true;
+                    isOptOutOn = true;
                 }
             }
         }
 
-        grouping.setListservOn(listservOn);
-        grouping.setOptInOn(optInOn);
-        grouping.setOptOutOn(optOutOn);
+        grouping.setListservOn(isListservOn);
+        grouping.setOptInOn(isOptInOn);
+        grouping.setOptOutOn(isOptOutOn);
 
         return grouping;
     }

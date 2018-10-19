@@ -518,7 +518,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingPassTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser01);
+        Grouping grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
         Group basis = grouping.getBasis();
         Group composite = grouping.getComposite();
         Group exclude = grouping.getExclude();
@@ -555,14 +555,14 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
 
         try {
-            mapGrouping("thisIsNotARealGrouping", uhUser01);
+            mapGrouping("thisIsNotARealGrouping", uhUser01, 0, 0);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
-            mapGrouping("", uhUser01);
+            mapGrouping("", uhUser01, 0, 0);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -572,7 +572,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingFailTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser02);
+        Grouping grouping = mapGrouping(GROUPING, uhUser02,0, 0);
         assertThat(grouping.getBasis().getUsernames().size(), equalTo(0));
         assertThat(grouping.getInclude().getUsernames().size(), equalTo(0));
         assertThat(grouping.getExclude().getUsernames().size(), equalTo(0));
@@ -584,11 +584,24 @@ public class TestGroupingsRestControllerv2_1 {
     public void getGroupingsAnonTest() throws Exception {
 
         try {
-            mapGrouping(GROUPING, null);
+            mapGrouping(GROUPING, null, 0, 0);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
+    }
+
+    @Test
+    public void getPaginatedGroupingTest() throws Exception {
+
+        // Paging starts at 1 D:
+        Grouping paginatedGrouping = mapGrouping(GROUPING, uhUser01, 1, 20);
+
+        assertTrue(paginatedGrouping.getBasis().getMembers().size() <= 20);
+        assertTrue(paginatedGrouping.getInclude().getMembers().size() <= 20);
+        assertTrue(paginatedGrouping.getExclude().getMembers().size() <= 20);
+        assertTrue(paginatedGrouping.getComposite().getMembers().size() <= 20);
+        assertTrue(paginatedGrouping.getOwners().getMembers().size() <= 20);
     }
 
     @Test
@@ -668,17 +681,17 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void addDeleteOwnerPassTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser01);
+        Grouping grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
         assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
 
         mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/" + tst[1], "put", uhUser01);
 
-        grouping = mapGrouping(GROUPING, uhUser01);
+        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
         assertTrue(grouping.getOwners().getUsernames().contains(tst[1]));
 
         mapGSR("/api/groupings/v2.1/groupings/" + GROUPING + "/owners/" + tst[1], "delete", uhUser01);
 
-        grouping = mapGrouping(GROUPING, uhUser01);
+        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
         assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
 
         try {
@@ -963,30 +976,30 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableDisablePreferencesPassTest() throws Exception {
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
-        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/disable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
 
-        assertFalse(groupAttributeService.optInPermission(GROUPING));
-        assertFalse(groupAttributeService.optOutPermission(GROUPING));
-        assertFalse(groupAttributeService.hasListserv(GROUPING));
-        assertTrue(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + LISTSERV + "/enable", "put", uhUser01);
         mapGSRs("/api/groupings/v2.1/groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
 
-        assertTrue(groupAttributeService.optInPermission(GROUPING));
-        assertTrue(groupAttributeService.optOutPermission(GROUPING));
-        assertTrue(groupAttributeService.hasListserv(GROUPING));
-        assertFalse(groupAttributeService.hasReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         //todo Test all permutations of bad data
         try {
@@ -1061,7 +1074,7 @@ public class TestGroupingsRestControllerv2_1 {
         String newGrouping = DELETE_GROUPING;
 
         try {
-            mapGrouping(newGrouping, adminUser);
+            mapGrouping(newGrouping, adminUser, 0, 0);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -1070,7 +1083,7 @@ public class TestGroupingsRestControllerv2_1 {
         mapList("/api/groupings/v2.1/groupings/" + newGrouping, "post", adminUser);
 
         try {
-            mapGrouping(newGrouping, adminUser);
+            mapGrouping(newGrouping, adminUser, 0, 0);
         } catch (GroupingsHTTPException ghe) {
             fail("Shouldn't be here.");
         }
@@ -1079,7 +1092,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         //todo Might need to refactor depending on outcome of deleteGrouping
         try {
-            mapGrouping(newGrouping, adminUser);
+            mapGrouping(newGrouping, adminUser, 0, 0);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -1144,7 +1157,8 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());
         }
     }
 
@@ -1158,10 +1172,9 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
-        }
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());        }
     }
-
 
     // Mapping of AdminsGroupings call
     private AdminListsHolder mapAdminListsHolder(User annotationUser) throws Exception {
@@ -1178,28 +1191,37 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), AdminListsHolder.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
-        }
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());        }
     }
 
-    // Mapping of getGrouping call
-    private Grouping mapGrouping(String groupingPath, User currentUser) throws Exception {
+    // Mapping of getGrouping and getPaginatedGrouping call
+    private Grouping mapGrouping(String groupingPath, User annotationUser, Integer page, Integer size) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-
         MvcResult result = null;
 
-        result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
-                .header(CURRENT_USER, currentUser.getUsername())
-                .with(user(currentUser))
-                .with(csrf()))
-                .andReturn();
+        // If page or size are 0, call it normally, else use pagination
+        if(page.equals(0) || size.equals(0)) {
+            result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath)
+                    .header(CURRENT_USER, annotationUser.getUsername())
+                    .with(user(annotationUser))
+                    .with(csrf()))
+                    .andReturn();
+        } else {
+            result = mockMvc.perform(get("/api/groupings/v2.1/groupings/" + groupingPath + "/get?page=" + page + "&size=" + size)
+                    .header(CURRENT_USER, annotationUser.getUsername())
+                    .with(user(annotationUser))
+                    .with(csrf()))
+                    .andReturn();
+        }
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());
         }
     }
 
@@ -1213,8 +1235,8 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
-        }
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());        }
     }
 
     // Mapping of any uri call that returns a list of GroupingsServiceResults
@@ -1227,8 +1249,8 @@ public class TestGroupingsRestControllerv2_1 {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed.", ghe, result.getResponse().getStatus());
-        }
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());        }
     }
 
     // Helper function for mapping any uri with multiple possible HTTP call types (i.e. GET / POST / PUT / DELETE)

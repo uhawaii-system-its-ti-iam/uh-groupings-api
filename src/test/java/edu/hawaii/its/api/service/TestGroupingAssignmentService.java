@@ -168,6 +168,8 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupingTest() {
+
+        // username[4] does not own grouping, method should return empty grouping
         Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, username[4]);
         assertEquals(grouping.getPath(), "");
         assertEquals(grouping.getName(), "");
@@ -204,51 +206,83 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getPaginatedGroupingTest() {
+        //todo Design Questions for getGrouping Pagination
+        // Deletes garbage data in call
+        // As a result, a call for 20 ppl will give 17 instead
+        // Is this OK or do we want to call again till we get 20?
+
+        // Paging starts at 1 D:
+        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
+        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
+
+        // Less than or equal to 20 per group? it worked!
+        assertTrue(paginatedGroupingPage1.getBasis().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage1.getInclude().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage1.getExclude().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage1.getComposite().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage1.getOwners().getMembers().size() <= 20);
+
+        assertTrue(paginatedGroupingPage2.getBasis().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage2.getInclude().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage2.getExclude().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage2.getComposite().getMembers().size() <= 20);
+        assertTrue(paginatedGroupingPage2.getOwners().getMembers().size() <= 20);
+
+        // Both pages should not be the same (assuming no groups are empty)
+        assertThat(paginatedGroupingPage1.getBasis(), not(paginatedGroupingPage2.getBasis()));
+        assertThat(paginatedGroupingPage1.getInclude(), not(paginatedGroupingPage2.getInclude()));
+        assertThat(paginatedGroupingPage1.getExclude(), not(paginatedGroupingPage2.getExclude()));
+        assertThat(paginatedGroupingPage1.getComposite(), not(paginatedGroupingPage2.getComposite()));
+        assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
+    }
+
+    @Test
     public void groupingsInTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
-        boolean inGrouping = false;
+        boolean isInGrouping = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
             if (grouping.getPath().contains(GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertTrue(inGrouping);
+        assertTrue(isInGrouping);
 
-        inGrouping = false;
+        isInGrouping = false;
         groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[3]);
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
             if (grouping.getPath().contains(GROUPING)) {
-                inGrouping = true;
+                isInGrouping = true;
                 break;
             }
         }
-        assertFalse(inGrouping);
+        assertFalse(isInGrouping);
     }
 
     @Test
     public void groupingsOwnedTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
-        boolean ownsGrouping = false;
+        boolean isGroupingOwner  = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
             if (grouping.getPath().contains(GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertTrue(ownsGrouping);
+        assertTrue(isGroupingOwner);
 
-        ownsGrouping = false;
+        isGroupingOwner = false;
         groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[4]);
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
             if (grouping.getPath().contains(GROUPING)) {
-                ownsGrouping = true;
+                isGroupingOwner = true;
                 break;
             }
         }
-        assertFalse(ownsGrouping);
+        assertFalse(isGroupingOwner);
     }
 
     @Test
@@ -260,23 +294,23 @@ public class TestGroupingAssignmentService {
     public void groupingsToOptTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
 
-        boolean canOptIn = false;
+        boolean isOptInPossible = false;
         for (Grouping grouping : groupingAssignment.getGroupingsToOptInTo()) {
             if (grouping.getPath().contains(GROUPING)) {
-                canOptIn = true;
+                isOptInPossible = true;
                 break;
             }
         }
-        assertFalse(canOptIn);
+        assertFalse(isOptInPossible);
 
-        boolean canOptOut = false;
+        boolean isOptOutPossible = false;
         for (Grouping grouping : groupingAssignment.getGroupingsToOptOutOf()) {
             if (grouping.getPath().contains(GROUPING)) {
-                canOptOut = true;
+                isOptOutPossible = true;
                 break;
             }
         }
-        assertTrue(canOptOut);
+        assertTrue(isOptOutPossible);
     }
 
     @Test
