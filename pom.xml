@@ -18,7 +18,7 @@
     </parent>
 
     <properties>
-        <maven-war-plugin.version>3.0.0</maven-war-plugin.version>
+        <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
         <java.version>1.8</java.version>
         <junit.version>4.12</junit.version>
         <commons-dbcp-version>2.1.1</commons-dbcp-version>
@@ -26,7 +26,6 @@
         <hibernate.version>5.2.3.Final</hibernate.version>
         <h2.version>1.4.192</h2.version>
         <org.jasig.cas.client-version>3.5.0</org.jasig.cas.client-version>
-
     </properties>
 
     <dependencies>
@@ -60,7 +59,12 @@
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
             <version>2.0.5.RELEASE</version>
         </dependency>
-        <!-- Overrides Spring's bouncycastle and spring-web with updated versions -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-cas</artifactId>
+        </dependency>
+
+        <!-- Overrides Spring's innate dependencies with updated versions -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -73,8 +77,14 @@
             <!--<version>5.1.0.RELEASE</version>-->
         <!--</dependency>-->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-cas</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.1</version>
         </dependency>
 
         <!-- hot swapping, disable cache for template, enable live reload -->
@@ -116,6 +126,7 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>${hibernate-jpa.version}</version>
         </dependency>
+        <!--Uses an old dom4j:dom4j dependency, not the new org.dom4j:dom4j-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
