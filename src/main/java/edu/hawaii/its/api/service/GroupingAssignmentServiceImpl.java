@@ -260,30 +260,54 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
-        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
+        logger.info("getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
                 "; page: " + page + "; size: " + size + "'");
 
         Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
-            compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
-            Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
-            Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
-            Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
-            Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+            // big kids grouping
+            Grouping bigGrouping = getPaginatedGroupingHelper(groupingPath, page, size * 5);
 
-            compositeGrouping = setGroupingAttributes(compositeGrouping);
+            // skim off the top
+            List<Person> basisList = bigGrouping.getBasis().getMembers();
 
-            compositeGrouping.setBasis(basis);
-            compositeGrouping.setExclude(exclude);
-            compositeGrouping.setInclude(include);
-            compositeGrouping.setComposite(composite);
-            compositeGrouping.setOwners(owners);
+            // Use sublist method
 
+            // Set basis after
+            
         }
+
+
+
+        return compositeGrouping;
+    }
+
+    @Override
+    public Grouping getPaginatedGroupingHelper(String groupingPath, Integer page, Integer size) {
+        logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
+                "; page: " + page + "; size: " + size + "'");
+
+        Grouping compositeGrouping = new Grouping();
+
+        compositeGrouping = new Grouping(groupingPath);
+
+        Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
+        Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
+        Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
+        Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
+        Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+
+        compositeGrouping = setGroupingAttributes(compositeGrouping);
+
+        compositeGrouping.setBasis(basis);
+        compositeGrouping.setExclude(exclude);
+        compositeGrouping.setInclude(include);
+        compositeGrouping.setComposite(composite);
+        compositeGrouping.setOwners(owners);
+
         return compositeGrouping;
     }
 
@@ -532,8 +556,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         } else {
             List<String> results = new ArrayList<>();
             return results;
-//            GroupingsHTTPException ghe = new GroupingsHTTPException();
-//            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
+            //            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
     }
 
