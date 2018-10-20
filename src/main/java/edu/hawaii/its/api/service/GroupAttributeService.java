@@ -24,7 +24,7 @@ public interface GroupAttributeService {
 
     public boolean isOptInPossible(String groupingPath);
 
-    public boolean groupHasAttribute(String groupPath, String attribute);
+    public boolean isGroupHasAttribute(String groupPath, String attribute);
 
     //do not include in REST controller
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
