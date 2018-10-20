@@ -28,6 +28,8 @@ public interface GroupingAssignmentService {
 
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size);
 
+    public Grouping getPaginatedGroupingHelper(String groupingPath, Integer page, Integer size);
+
     public GroupingAssignment getGroupingAssignment(String username);
 
     public AdminListsHolder adminLists(String adminUsername);
