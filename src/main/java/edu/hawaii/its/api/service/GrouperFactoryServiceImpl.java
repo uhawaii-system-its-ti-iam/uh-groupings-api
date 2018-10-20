@@ -686,7 +686,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    // todo Covered by Integration Tests
+    // Covered by Integration Tests
     @Override
     public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
@@ -703,7 +703,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
                 .assignIncludeSubjectDetail(true)
-                .execute();    }
+                .execute();
+    }
 
     // Covered by Integration Tests
     @Override
