@@ -255,4 +255,9 @@ public class TestGroupingFactoryService {
         }
 
     }
+
+    @Test
+    public void privilegesTest(){
+
+    }
 }

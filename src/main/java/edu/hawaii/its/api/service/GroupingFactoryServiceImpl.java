@@ -328,18 +328,18 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
         WsGroupLookup grouping = grouperFactoryService.makeWsGroupLookup(groupingPath);
         WsStemLookup mainStem = grouperFactoryService.makeWsStemLookup(groupingPath);
-        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + ":basis");
+        WsStemLookup basisStem = grouperFactoryService.makeWsStemLookup(groupingPath + BASIS);
 
 
         deleteGroupingResults.add(helperService.makeGroupingsServiceResult(grouperFactoryService.deleteGroup(admin,
                 grouping), "Delete composite group"));
 
         List<String> memberLists = new ArrayList<String>();
-        memberLists.add(":basis");
-        memberLists.add(":basis+include");
-        memberLists.add(":exclude");
-        memberLists.add(":include");
-        memberLists.add(":owners");
+        memberLists.add(BASIS);
+        memberLists.add(BASIS_PLUS_INCLUDE);
+        memberLists.add(EXCLUDE);
+        memberLists.add(INCLUDE);
+        memberLists.add(OWNERS);
 
         for (String group: memberLists) {
 
@@ -413,11 +413,11 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         );
 
         List<String> memberLists = new ArrayList<String>();
-        memberLists.add(":basis");
-        memberLists.add(":basis+include");
-        memberLists.add(":exclude");
-        memberLists.add(":include");
-        memberLists.add(":owners");
+        memberLists.add(BASIS);
+        memberLists.add(BASIS_PLUS_INCLUDE);
+        memberLists.add(EXCLUDE);
+        memberLists.add(INCLUDE);
+        memberLists.add(OWNERS);
 
         for (String group: memberLists) {
 
@@ -453,6 +453,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         return purgeGroupingResults;
     }
+    
 
     //set of elements in list0 or list1
     private List<String> union(List<String> list0, List<String> list1) {
