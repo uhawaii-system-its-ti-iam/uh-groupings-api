@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import edu.hawaii.its.api.access.*;
-import jdk.jfr.events.ExceptionThrownEvent;
+
 import org.hibernate.annotations.WhereJoinTable;
 import com.sun.net.httpserver.Authenticator;
 import org.apache.commons.logging.Log;

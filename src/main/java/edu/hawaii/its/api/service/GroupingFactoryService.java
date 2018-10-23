@@ -13,6 +13,9 @@ public interface GroupingFactoryService {
 
     public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 
+    public List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath);
+
     public boolean isPathEmpty(String adminUsername, String groupingPath);
+
 
 }
