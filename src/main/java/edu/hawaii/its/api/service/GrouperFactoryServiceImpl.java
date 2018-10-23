@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
+import edu.internet2.middleware.grouperClient.api.GcAttributeDefDelete;
+import edu.internet2.middleware.grouperClient.api.GcAttributeDefNameDelete;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
@@ -33,6 +35,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -72,6 +76,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     @Value("${groupings.api.composite_type.union}")
     private String UNION;
+
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
+
+    @Value("${groupings.api.trio}")
+    private String isTrio;
+
 
     // Constructor.
     public GrouperFactoryServiceImpl() {
@@ -163,6 +174,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsGroupLookup makeWsGroupLookup(String group) {
         WsGroupLookup groupLookup = new WsGroupLookup();
         groupLookup.setGroupName(group);
+
 
         return groupLookup;
     }
@@ -579,6 +591,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String attributeAssignOperation,
             String attributeDefNameName,
             String ownerGroupName) {
+
         return new GcAssignAttributes()
                 .assignAttributeAssignType(attributeAssingType)
                 .assignAttributeAssignOperation(attributeAssignOperation)
@@ -594,6 +607,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String attributeAssignOperation,
             String attributeDefNameName,
             String ownerGroupName) {
+
         return new GcAssignAttributes()
                 .assignActAsSubject(lookup)
                 .assignAttributeAssignType(attributeAssingType)
@@ -602,6 +616,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addOwnerGroupName(ownerGroupName)
                 .execute();
     }
+
 
     @Override
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
@@ -671,7 +686,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    // todo Covered by Integration Tests
+    // Covered by Integration Tests
     @Override
     public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
@@ -688,7 +703,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
                 .assignIncludeSubjectDetail(true)
-                .execute();    }
+                .execute();
+    }
 
     // Covered by Integration Tests
     @Override

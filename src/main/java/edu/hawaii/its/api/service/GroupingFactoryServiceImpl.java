@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.el.ListELResolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,8 +70,14 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED;
+
     @Value("${groupings.api.trio}")
     private String TRIO;
+
+    @Value("${groupings.api.purge_grouping}")
+    private String PURGE;
 
     @Value("${groupings.api.self_opted}")
     private String SELF_OPTED;
@@ -254,6 +261,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         String basisUid = getGroupId(groupingPath + BASIS);
         String includeUid = getGroupId(groupingPath + INCLUDE);
+        String ownersUid = getGroupId(groupingPath + OWNERS);
 
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
@@ -266,6 +274,11 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                         admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
                         + BASIS_PLUS_INCLUDE));
 
+        addGroupingResults.add(helperService.makeGroupingsServiceResult(
+                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + INCLUDE,
+                        admin, ownersUid), "add " + groupingPath + OWNERS + " to " + GROUPING_OWNERS));
+
+
         //add the isTrio attribute out to the grouping
         grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                 admin,
@@ -274,6 +287,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                 TRIO,
                 groupingPath
         );
+
 
         return addGroupingResults;
     }
@@ -347,6 +361,97 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
 
         return deleteGroupingResults;
+    }
+
+    @Override
+    public List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath) {
+
+        List<GroupingsServiceResult> purgeGroupingResults = new ArrayList<>();
+        String action = adminUsername + " is purging a Grouping: " + groupingPath;
+
+        //make sure that adminUsername is actually an admin
+        if (!memberAttributeService.isSuperuser(adminUsername)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + " does not have permission to purge this grouping", action
+            );
+
+            purgeGroupingResults.add(gsr);
+
+            return purgeGroupingResults;
+        }
+
+
+        if (isPathEmpty(adminUsername, groupingPath)) {
+
+            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + adminUsername + "the grouping " + groupingPath + " doesn't exist", action
+            );
+
+            purgeGroupingResults.add(gsr);
+
+            return purgeGroupingResults;
+        }
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+
+
+        grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                admin,
+                ASSIGN_TYPE_GROUP,
+                OPERATION_REMOVE_ATTRIBUTE,
+                TRIO,
+                groupingPath
+        );
+
+        grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                admin,
+                ASSIGN_TYPE_GROUP,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                PURGE,
+                groupingPath
+        );
+
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(":basis");
+        memberLists.add(":basis+include");
+        memberLists.add(":exclude");
+        memberLists.add(":include");
+        memberLists.add(":owners");
+
+        for (String group: memberLists) {
+
+            if (isPathEmpty(adminUsername, groupingPath + group)) {
+
+            }
+            else {
+
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
+                        OPERATION_REMOVE_ATTRIBUTE,
+                        LISTSERV,
+                        groupingPath + group
+                );
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
+                        OPERATION_REMOVE_ATTRIBUTE,
+                        RELEASED,
+                        groupingPath + group
+                );
+                grouperFactoryService.makeWsAssignAttributesResultsForGroup(
+                        admin,
+                        ASSIGN_TYPE_GROUP,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        PURGE,
+                        groupingPath + group
+                );
+
+            }
+        }
+
+        return purgeGroupingResults;
     }
 
     //set of elements in list0 or list1

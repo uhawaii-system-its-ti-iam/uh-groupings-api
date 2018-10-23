@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -70,11 +71,14 @@ public class TestGroupingFactoryService {
     @Value("${grouperClient.webService.login}")
     private String APP_USER;
 
-    @Autowired
-    GroupAttributeService groupAttributeService;
+    @Value("${groupings.api.trio}")
+    private String TRIO;
 
     @Autowired
-    GroupingAssignmentService groupingAssignmentService;
+    private GroupAttributeService groupAttributeService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
@@ -119,6 +123,8 @@ public class TestGroupingFactoryService {
     // todo the code should give admin privileges to the groupingSuperusers group
     @Test
     public void addGroupingTest() {
+
+        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
         List<GroupingsServiceResult> results = new ArrayList<>();
         GroupingsServiceResult sResults;
@@ -205,5 +211,48 @@ public class TestGroupingFactoryService {
             sResults = gsre.getGsr();
             assertThat(sResults.getResultCode(), startsWith(FAILURE));
         }
+    }
+
+    @Test
+    public void markPurgeTest() {
+
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        GroupingsServiceResult sResults;
+
+        //add the grouping
+        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+
+        //Works correctly
+        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
+
+        results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+
+        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
+                equalTo(true));
+
+
+        //Fails when the grouping doesn't exists
+        try {
+            results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
+
+
+        //Fails when user trying to delete grouping is not admin
+        try {
+
+            results = groupingFactoryService.markGroupForPurge("sbraun", TEMP_TEST + ":kahlin-test");
+
+        } catch (GroupingsServiceResultException gsre) {
+
+            sResults = gsre.getGsr();
+            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        }
+
     }
 }
