@@ -234,11 +234,12 @@ public class TestGroupingAssignmentService {
 
 
         // Test paging at the end of the grouping
-        Grouping paginatedGroupingPageEnd = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 16, 20);
-        assertThat(paginatedGroupingPageEnd.getBasis().getMembers().size(), equalTo(18));
+        Grouping paginatedGroupingPageEnd = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 18, 20);
+        assertThat(paginatedGroupingPageEnd.getBasis().getMembers().size(), equalTo(17));
 
         // Test paging without proper permissions
-
+        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[1], 1, 20);
+        assertThat(paginatedGroupingPagePermissions.getBasis().getMembers().size(), equalTo(0));
     }
 
     @Test

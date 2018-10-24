@@ -269,46 +269,25 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
 
 //            Grouping bigGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size * 5);
-            int i = 0;
-            Grouping grouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
-            Group basis = grouping.getBasis();
-            List<Person> basisList
+            int i = 1;
+            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+            Group basis = compositeGrouping.getBasis();
+            List<Person> basisList = basis.getMembers();
 
-            while(basis.getMembers().size() < size) {
+            while(basisList.size() < size) {
 
                 Grouping groupingToAdd = getPaginatedGroupingHelper(ownerUsername, groupingPath, page + i, size);
                 List<Person> basisToAddList = groupingToAdd.getBasis().getMembers();
+
+                if(basisToAddList.size() == 0) break;
+
                 List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
-
-                
-
+                basisList.addAll(subBasisToAddList);
                 i++;
             }
 
-            // Larger grouping to ensure size members are pulled for basis group
-            // Basis group will delete bad data automatically, leaving the return smaller
-            // Each page is pulling the same amount: need to fix so the 1st X-1 pages pull size, and the page we want pulls size * 5
-            // Can instead pull 5 pages at a time instead of 1 page
-//            Grouping bigGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size * 5);
-//
-//            // This is the base grouping for the other groups
-//            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
-//
-//            List<Person> basisList = bigGrouping.getBasis().getMembers();
-//
-//            // Need a basisList greater than the requested size, otherwise there's nothing to skim and we're done
-//            if(basisList.size() > size) {
-//
-//                // skim off the top
-//                List<Person> subBasisList = basisList.subList(0, size);
-//
-//                // Convert List back to Group
-//                Group subBasisGroup = new Group();
-//                subBasisGroup.setMembers(subBasisList);
-//
-//                // Set basis for final grouping return
-//                compositeGrouping.setBasis(subBasisGroup);
-//            }
+            basis.setMembers(basisList);
+            compositeGrouping.setBasis(basis);
         }
         return compositeGrouping;
     }
