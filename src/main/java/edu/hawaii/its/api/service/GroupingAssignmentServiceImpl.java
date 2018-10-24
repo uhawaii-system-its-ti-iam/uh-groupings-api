@@ -258,32 +258,70 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    // Fetch a grouping from Grouper of database, but paginated based on given page + size
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
-        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
+        logger.info("getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
                 "; page: " + page + "; size: " + size + "'");
 
         Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
-            compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
-            Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
-            Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
-            Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
-            Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+            // Paginating the basis will remove garbage data, leaving it smaller than the requested size
+            // Therefore we need to fill the rest of the current page with more data from another page
 
-            compositeGrouping = setGroupingAttributes(compositeGrouping);
+            // Get base grouping from pagination and isolate basis
+            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+            Group basis = compositeGrouping.getBasis();
+            List<Person> basisList = basis.getMembers();
 
+            int i = 1;
+            while(basisList.size() < size) {
+
+                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
+                List<Person> basisToAddList = basisToAdd.getMembers();
+
+                // If the next page is empty, we can assume we are at the end of the group
+                if(basisToAddList.size() == 0) break;
+
+                // Add as much as we need from the next page to the current page
+                // If it's not enough, repeat with the page after that
+                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
+                basisList.addAll(subBasisToAddList);
+                i++;
+            }
+
+            basis.setMembers(basisList);
             compositeGrouping.setBasis(basis);
-            compositeGrouping.setExclude(exclude);
-            compositeGrouping.setInclude(include);
-            compositeGrouping.setComposite(composite);
-            compositeGrouping.setOwners(owners);
-
         }
+        return compositeGrouping;
+    }
+
+    @Override
+    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size) {
+        logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
+                "; page: " + page + "; size: " + size + "'");
+
+        Grouping compositeGrouping = new Grouping();
+
+        compositeGrouping = new Grouping(groupingPath);
+
+        Group include = getPaginatedMembers(ownerUsername,groupingPath + INCLUDE, page, size);
+        Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
+        Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
+        Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
+        Group owners = getPaginatedMembers(ownerUsername,groupingPath + OWNERS, page, size);
+
+        compositeGrouping = setGroupingAttributes(compositeGrouping);
+
+        compositeGrouping.setBasis(basis);
+        compositeGrouping.setExclude(exclude);
+        compositeGrouping.setInclude(include);
+        compositeGrouping.setComposite(composite);
+        compositeGrouping.setOwners(owners);
+
         return compositeGrouping;
     }
 
@@ -379,7 +417,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Override
     public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath +
+        logger.info("getMembers; group: " + groupPath +
                 "; page: " + page + "; size: " + size + ";");
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
@@ -532,8 +570,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         } else {
             List<String> results = new ArrayList<>();
             return results;
-//            GroupingsHTTPException ghe = new GroupingsHTTPException();
-//            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
+            //            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
     }
 
