@@ -268,25 +268,36 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
 
-            // big kids grouping
-            Grouping bigGrouping = getPaginatedGroupingHelper(groupingPath, page, size * 5);
+            // Larger grouping to ensure size members are pulled for basis group
+            // Basis group will delete bad data automatically, leaving the return smaller
+            // Each page is pulling the same amount: need to fix so the 1st X-1 pages pull size, and the page we want pulls size * 5
+            // Can instead pull 5 pages at a time instead of 1 page
+            Grouping bigGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size * 5);
 
-            // skim off the top
+            // This is the base grouping for the other groups
+            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+
             List<Person> basisList = bigGrouping.getBasis().getMembers();
 
-            // Use sublist method
+            // Need a basisList greater than the requested size, otherwise there's nothing to skim and we're done
+            if(basisList.size() > size) {
 
-            // Set basis after
-            
+                // skim off the top
+                List<Person> subBasisList = basisList.subList(0, size);
+
+                // Convert List back to Group
+                Group subBasisGroup = new Group();
+                subBasisGroup.setMembers(subBasisList);
+
+                // Set basis for final grouping return
+                compositeGrouping.setBasis(subBasisGroup);
+            }
         }
-
-
-
         return compositeGrouping;
     }
 
     @Override
-    public Grouping getPaginatedGroupingHelper(String groupingPath, Integer page, Integer size) {
+    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size) {
         logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
                 "; page: " + page + "; size: " + size + "'");
 
@@ -294,11 +305,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         compositeGrouping = new Grouping(groupingPath);
 
-        Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
+        Group include = getPaginatedMembers(ownerUsername,groupingPath + INCLUDE, page, size);
         Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
         Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
         Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
-        Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+        Group owners = getPaginatedMembers(ownerUsername,groupingPath + OWNERS, page, size);
 
         compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -403,7 +414,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Override
     public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath +
+        logger.info("getMembers; group: " + groupPath +
                 "; page: " + page + "; size: " + size + ";");
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);

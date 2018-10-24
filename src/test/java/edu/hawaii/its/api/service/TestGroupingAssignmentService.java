@@ -207,27 +207,23 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getPaginatedGroupingTest() {
-        //todo Design Questions for getGrouping Pagination
-        // Deletes garbage data in call
-        // As a result, a call for 20 ppl will give 17 instead
-        // Is this OK or do we want to call again till we get 20?
 
         // Paging starts at 1 D:
         Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
         Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
 
-        // Less than or equal to 20 per group? it worked!
-        assertTrue(paginatedGroupingPage1.getBasis().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage1.getInclude().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage1.getExclude().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage1.getComposite().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage1.getOwners().getMembers().size() <= 20);
+        // Check to see the pages come out the right sizes
+        assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage1.getInclude().getMembers().size(), equalTo(10));
+        assertThat(paginatedGroupingPage1.getExclude().getMembers().size(), equalTo(1));
+        assertThat(paginatedGroupingPage1.getComposite().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage1.getOwners().getMembers().size(), equalTo(2));
 
-        assertTrue(paginatedGroupingPage2.getBasis().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage2.getInclude().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage2.getExclude().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage2.getComposite().getMembers().size() <= 20);
-        assertTrue(paginatedGroupingPage2.getOwners().getMembers().size() <= 20);
+        assertThat(paginatedGroupingPage2.getBasis().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage2.getInclude().getMembers().size(), equalTo(0));
+        assertThat(paginatedGroupingPage2.getExclude().getMembers().size(), equalTo(0));
+        assertThat(paginatedGroupingPage2.getComposite().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage2.getOwners().getMembers().size(), equalTo(0));
 
         // Both pages should not be the same (assuming no groups are empty)
         assertThat(paginatedGroupingPage1.getBasis(), not(paginatedGroupingPage2.getBasis()));
@@ -235,6 +231,14 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage1.getExclude(), not(paginatedGroupingPage2.getExclude()));
         assertThat(paginatedGroupingPage1.getComposite(), not(paginatedGroupingPage2.getComposite()));
         assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
+
+
+        // Test paging at the end of the grouping
+        Grouping paginatedGroupingPageEnd = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 16, 20);
+        assertThat(paginatedGroupingPageEnd.getBasis().getMembers().size(), equalTo(18));
+
+        // Test paging without proper permissions
+
     }
 
     @Test
