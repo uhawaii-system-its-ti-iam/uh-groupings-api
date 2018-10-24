@@ -258,6 +258,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    // Fetch a grouping from Grouper of database, but paginated based on given page + size
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
         logger.info("getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
@@ -268,19 +269,25 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
 
-//            Grouping bigGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size * 5);
-            int i = 1;
+            // Paginating the basis will remove garbage data, leaving it smaller than the requested size
+            // Therefore we need to fill the rest of the current page with more data from another page
+
+            // Get base grouping from pagination and isolate basis
             compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
             Group basis = compositeGrouping.getBasis();
             List<Person> basisList = basis.getMembers();
 
+            int i = 1;
             while(basisList.size() < size) {
 
-                Grouping groupingToAdd = getPaginatedGroupingHelper(ownerUsername, groupingPath, page + i, size);
-                List<Person> basisToAddList = groupingToAdd.getBasis().getMembers();
+                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
+                List<Person> basisToAddList = basisToAdd.getMembers();
 
+                // If the next page is empty, we can assume we are at the end of the group
                 if(basisToAddList.size() == 0) break;
 
+                // Add as much as we need from the next page to the current page
+                // If it's not enough, repeat with the page after that
                 List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
                 basisList.addAll(subBasisToAddList);
                 i++;
