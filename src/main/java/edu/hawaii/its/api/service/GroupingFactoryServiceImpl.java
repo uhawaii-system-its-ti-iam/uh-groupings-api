@@ -248,11 +248,11 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         }
 
-        // Creates the composite and make complement of basis+include minus exclude
+        // Creates the composite and make complement of basis+include minus
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
                 grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
                 groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE),
-                "create " + groupingPath + " and complement of " + EXCLUDE));
+                "create " + groupingPath + " and complement of " + groupingPath + EXCLUDE));
 
         //Assigns grouper api privilege to composite
         grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
@@ -261,7 +261,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         String basisUid = getGroupId(groupingPath + BASIS);
         String includeUid = getGroupId(groupingPath + INCLUDE);
-        String ownersUid = getGroupId(groupingPath + OWNERS);
+
 
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
@@ -274,9 +274,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                         admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
                         + BASIS_PLUS_INCLUDE));
 
-        addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + INCLUDE,
-                        admin, ownersUid), "add " + groupingPath + OWNERS + " to " + GROUPING_OWNERS));
+
 
 
         //add the isTrio attribute out to the grouping
@@ -454,109 +452,87 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return purgeGroupingResults;
     }
 
-    public void privilegegTets(String admin, String groupPath){
-
-        List<GroupingsServiceResult> addGroupingResults = new ArrayList<>();
-        String action = adminUsername + " is adding a Grouping: " + groupingPath;
-
+    public void privilegegTets(String adminUsername, String groupingPath){
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsSubjectLookup api = grouperFactoryService.makeWsSubjectLookup("_groupings_api_2");
+        WsSubjectLookup owners = grouperFactoryService.makeWsSubjectLookup(groupingPath + OWNERS);
 
-        //make sure that adminUsername is actually an admin
-        if (!memberAttributeService.isSuperuser(adminUsername)) {
-
-            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to add this grouping", action
-            );
-
-            addGroupingResults.add(gsr);
-
-            return addGroupingResults;
-        }
-
-        //make sure that there is not already a group there
-        if (!isPathEmpty(adminUsername, groupingPath)) {
-
-            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": a group already exists at " + groupingPath, action);
-
-            addGroupingResults.add(gsr);
-
-            return addGroupingResults;
-        }
-
-
-        //Use hash map in order to easily create and add members by using key and entry values, not including composite
-        Map<String, List<String>> memberLists = new HashMap<>();
-        memberLists.put(BASIS_PLUS_INCLUDE, new ArrayList<>());
-        memberLists.put(BASIS, new ArrayList<>());
-        memberLists.put(INCLUDE, new ArrayList<>());
-        memberLists.put(EXCLUDE, new ArrayList<>());
-        memberLists.put(OWNERS, new ArrayList<>());
-
-        // a stem the same as a folder
-        //create main stem to contain groups that build into the main group
-        grouperFactoryService.makeWsStemSaveResults(adminUsername, groupingPath);
-
-        //create basis stem to contain groups or users that make up the basis
-        grouperFactoryService.makeWsStemSaveResults(adminUsername, groupingPath + BASIS);
-
-
-        //Creates groups and assigns the grouper api privileges
-        for (Map.Entry<String, List<String>> entry : memberLists.entrySet()) {
-            String groupPath = groupingPath + entry.getKey();
-
-            //make the groups in grouper
-            addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                    grouperFactoryService.addEmptyGroup(adminUsername, groupPath), action));
-            grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupPath, "groupAttrUpdate",
-                    api, admin,true);
-
-        }
-
-        // Creates the composite and make complement of basis+include minus exclude
-        addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
-                        groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE),
-                "create " + groupingPath + " and complement of " + EXCLUDE));
-
-        //Assigns grouper api privilege to composite
-        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
-                api, admin,true);
-
-
-        String basisUid = getGroupId(groupingPath + BASIS);
-        String includeUid = getGroupId(groupingPath + INCLUDE);
         String ownersUid = getGroupId(groupingPath + OWNERS);
 
-        //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
-        addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
-                        admin, basisUid), "add " + groupingPath + BASIS + " to " + groupingPath
-                        + BASIS_PLUS_INCLUDE));
-
-        addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
-                        admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
-                        + BASIS_PLUS_INCLUDE));
-
-        addGroupingResults.add(helperService.makeGroupingsServiceResult(
-                grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + INCLUDE,
-                        admin, ownersUid), "add " + groupingPath + OWNERS + " to " + GROUPING_OWNERS));
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(BASIS);
+        memberLists.add(BASIS_PLUS_INCLUDE);
+        memberLists.add(EXCLUDE);
+        memberLists.add(INCLUDE);
+        memberLists.add(OWNERS);
+        memberLists.add(groupingPath);
 
 
-        //add the isTrio attribute out to the grouping
-        grouperFactoryService.makeWsAssignAttributesResultsForGroup(
-                admin,
-                ASSIGN_TYPE_GROUP,
-                OPERATION_ASSIGN_ATTRIBUTE,
-                TRIO,
-                groupingPath
-        );
+        //        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "admin",
+//                api, admin,true);
+
+       // grouperFactoryService.makeWsAddMemberResultsGroup(GROUPING_OWNERS, admin, ownersUid);
 
 
-        return addGroupingResults;
+        for (String group : memberLists) {
+
+            if (group == BASIS) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "read",
+                                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "view",
+                                        owners, admin,true);
+
+            } else if (group == EXCLUDE) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "update",
+                        owners, admin,true);
+
+            } else if (group == INCLUDE) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "update",
+                        owners, admin,true);
+
+            } else if (group == OWNERS) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "update",
+                        owners, admin,true);
+
+            } else if (group == groupingPath) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "view",
+                        owners, admin,true);
+                
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrRead",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
+                        owners, admin,true);
+            }
+        }
+
     }
 
     //set of elements in list0 or list1
