@@ -15,6 +15,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
@@ -444,12 +445,25 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     @Override
-    public Grouping getPaginatedFilteredMembers(
+    public Group getPaginatedAndFilteredMembers(
             String groupPath, String ownerUsername, String filterString, Integer page, Integer size) {
+        logger.info("getMembers; group: " + groupPath + "; ownerUsername: " + ownerUsername +
+                "; filterString: " + filterString + "; page: " + page + "; size: " + size + ";");
 
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFS.makeWsGetMembersResultsFilteredAndPaginated(
+            SUBJECT_ATTRIBUTE_NAME_UID,
+            lookup,
+            groupPath,
+            filterString,
+            page,
+            size);
 
-
-        return null;
+        Group groupMembers = new Group();
+        if(members.getResults() != null) {
+            groupMembers = makeGroup(members);
+        }
+        return groupMembers;
 
     }
 
