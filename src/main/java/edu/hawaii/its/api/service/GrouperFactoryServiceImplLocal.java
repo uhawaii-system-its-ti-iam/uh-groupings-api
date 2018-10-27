@@ -1212,7 +1212,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
     }
 
-    //todo Local version for testing. Haven't needed it yet, will implement if necessary
+    //todo Local versions of Grouper functions for testing. Haven't needed it yet, will implement if necessary
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
         //todo Not needed for getUserAttributes function, will implement if necessary
         return null;
@@ -1236,6 +1236,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
+            Integer page,
+            Integer size) {
+        //todo
+        return null;
+    }
+
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            String filterString,
             Integer page,
             Integer size) {
         //todo

@@ -157,6 +157,13 @@ public interface GrouperFactoryService {
             Integer page,
             Integer size);
 
+    public WsGetMembersResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            String filterString,
+            Integer page,
+            Integer size);
+
     public WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
 
     public WsAttributeAssign[] makeEmptyWsAttributeAssignArray();

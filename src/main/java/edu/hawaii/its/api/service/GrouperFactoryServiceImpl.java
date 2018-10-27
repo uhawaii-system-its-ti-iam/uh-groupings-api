@@ -30,6 +30,7 @@ import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
+import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -704,6 +705,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addGroupName(groupName)
                 .assignIncludeSubjectDetail(true)
                 .execute();
+    }
+
+    @Override
+    public WsGetMembersResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            String filterString,
+            Integer page,
+            Integer size) {
+
+        WsMemberFilter wsMemberFilter =
+
     }
 
     // Covered by Integration Tests

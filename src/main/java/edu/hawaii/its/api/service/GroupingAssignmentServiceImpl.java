@@ -438,6 +438,16 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
+    @Override
+    public Grouping getPaginatedFilteredMembers(
+            String groupPath, String ownerUsername, String filterString, Integer page, Integer size) {
+
+
+
+        return null;
+
+    }
+
     //makes a group filled with members from membersResults
     @Override
     public Group makeGroup(WsGetMembersResults membersResults) {
