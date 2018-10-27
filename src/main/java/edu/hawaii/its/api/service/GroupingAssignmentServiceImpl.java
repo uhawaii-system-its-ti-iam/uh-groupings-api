@@ -275,6 +275,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             // At some point, when this issue is resolved this functionality may not be necessary
             // todo Refactor this as a general case for all Groups and not just Basis
             // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
+            // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
 
             // Get base grouping from pagination and isolate basis
             compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
@@ -475,6 +476,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return group;
     }
 
+    // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
     // Make group specifically for basis group only
     public Group makeBasisGroup(WsGetMembersResults membersResults) {
         Group group = new Group();
