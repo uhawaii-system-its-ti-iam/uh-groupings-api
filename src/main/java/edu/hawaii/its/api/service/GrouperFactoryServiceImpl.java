@@ -715,8 +715,19 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             Integer page,
             Integer size) {
 
-        WsMemberFilter wsMemberFilter =
+        WsMemberFilter wsMemberFilter = new WsMemberFilter();
 
+        GcGetMembers members = new GcGetMembers();
+        members.assignPageNumber(page);
+        members.assignPageSize(size);
+        members.assignMemberFilter(wsMemberFilter);
+
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .addGroupName(groupName)
+                .assignIncludeSubjectDetail(true)
+                .execute();
     }
 
     // Covered by Integration Tests
