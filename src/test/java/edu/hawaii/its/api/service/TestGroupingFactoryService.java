@@ -259,5 +259,7 @@ public class TestGroupingFactoryService {
     @Test
     public void privilegesTest(){
 
+            groupingFactoryService.privilegegTets(APP_USER, "hawaii.edu:custom:test:kahlin:privilegeTesting");
+
     }
 }
