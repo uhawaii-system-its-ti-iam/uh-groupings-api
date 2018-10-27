@@ -271,6 +271,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             // Paginating the basis will remove garbage data, leaving it smaller than the requested size
             // Therefore we need to fill the rest of the current page with more data from another page
+            // This is dealing with stale subjects
+            // At some point, when this issue is resolved this functionality may not be necessary
+            // todo Refactor this as a general case for all Groups and not just Basis
+            // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
 
             // Get base grouping from pagination and isolate basis
             compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
