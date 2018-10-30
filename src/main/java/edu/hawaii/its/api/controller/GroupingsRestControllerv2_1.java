@@ -227,7 +227,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestParam(value = "page") Integer page,
             @RequestParam(value = "size") Integer size,
             @RequestParam(value = "uid") String filterString) {
-        
+
         logger.info("Entered REST getPaginatedAndFilteredGroup...");
 
         // todo
