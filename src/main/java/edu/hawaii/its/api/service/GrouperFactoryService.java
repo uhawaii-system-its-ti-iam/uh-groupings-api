@@ -13,6 +13,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
@@ -157,7 +158,7 @@ public interface GrouperFactoryService {
             Integer page,
             Integer size);
 
-    public WsGetMembersResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+    public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
             String filterString,
