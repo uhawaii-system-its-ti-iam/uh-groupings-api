@@ -113,11 +113,11 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path){
+    public WsGroupDeleteResults deleteGroup(WsSubjectLookup subjectLookup, WsGroupLookup path){
 
         return new GcGroupDelete()
                 .addGroupLookup(path)
-                .assignActAsSubject(username)
+                .assignActAsSubject(subjectLookup)
                 .execute();
 
     }
@@ -381,6 +381,16 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         membersToDelete.forEach(deleteMember::addSubjectIdentifier);
 
         return deleteMember.execute();
+    }
+
+    @Override
+    public WsDeleteMemberResults makeWsDeleteMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid){
+        return new GcDeleteMember()
+                .assignActAsSubject(lookup)
+                .addSubjectId(groupUid)
+                .assignGroupName(groupPath)
+                .execute();
+
     }
 
     // Covered by Integration Tests

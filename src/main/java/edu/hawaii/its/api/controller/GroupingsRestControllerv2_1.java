@@ -432,7 +432,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteNewGrouping");
         return ResponseEntity
                 .ok()
-                .body(groupingFactoryService.deleteGrouping(currentUser, path));
+                .body(groupingFactoryService.markGroupForPurge(currentUser, path));
     }
 
     /**

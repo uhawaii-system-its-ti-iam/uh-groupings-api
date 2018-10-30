@@ -78,6 +78,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
     @Value("${groupings.api.trio}")
     private String TRIO;
 
@@ -319,11 +322,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         compositeGrouping = new Grouping(groupingPath);
 
-        Group include = getPaginatedMembers(ownerUsername,groupingPath + INCLUDE, page, size);
+        Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
         Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
         Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
         Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
-        Group owners = getPaginatedMembers(ownerUsername,groupingPath + OWNERS, page, size);
+        Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
 
         compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -407,7 +410,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     //returns a group from grouper or the database
-    @Override public Group getMembers(String ownerUsername, String groupPath) {
+    @Override
+    public Group getMembers(String ownerUsername, String groupPath) {
         logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
@@ -556,6 +560,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         boolean isListservOn = false;
         boolean isOptInOn = false;
         boolean isOptOutOn = false;
+        boolean isReleasedGroupingOn = false;
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
@@ -572,6 +577,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
                     isOptOutOn = true;
+                } else if (name.equals(RELEASED_GROUPING)) {
+                    isReleasedGroupingOn = true;
                 }
             }
         }
@@ -579,6 +586,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setListservOn(isListservOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
+        grouping.setReleasedGroupingOn(isOptOutOn);
 
         return grouping;
     }
