@@ -445,6 +445,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
+    // todo Doesn't work
     @Override
     public Group getPaginatedAndFilteredMembers(
             String groupPath, String ownerUsername, String filterString, Integer page, Integer size) {

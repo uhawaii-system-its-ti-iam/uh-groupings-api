@@ -709,6 +709,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    // todo Doesn't work
     @Override
     public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
@@ -716,6 +717,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String filterString,
             Integer page,
             Integer size) {
+
+        return null;
 
 //        return new GcGetSubjects()
 
