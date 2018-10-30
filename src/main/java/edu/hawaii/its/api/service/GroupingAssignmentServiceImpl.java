@@ -260,6 +260,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    // todo May not need anymore; Pagination will just grab a singular page and allow users to see the stale subjects
     // Fetch a grouping from Grouper of database, but paginated based on given page + size
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
@@ -279,33 +280,36 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
             // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
 
-            // Get base grouping from pagination and isolate basis
             compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
-            Group basis = compositeGrouping.getBasis();
-            List<Person> basisList = basis.getMembers();
 
-            int i = 1;
-            while(basisList.size() < size) {
-
-                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
-                List<Person> basisToAddList = basisToAdd.getMembers();
-
-                // If the next page is empty, we can assume we are at the end of the group
-                if(basisToAddList.size() == 0) break;
-
-                // Add as much as we need from the next page to the current page
-                // If it's not enough, repeat with the page after that
-                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
-                basisList.addAll(subBasisToAddList);
-                i++;
-            }
-
-            basis.setMembers(basisList);
-            compositeGrouping.setBasis(basis);
+            // Get base grouping from pagination and isolate basis
+//            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+//            Group basis = compositeGrouping.getBasis();
+//            List<Person> basisList = basis.getMembers();
+//
+//            int i = 1;
+//            while(basisList.size() < size) {
+//
+//                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
+//                List<Person> basisToAddList = basisToAdd.getMembers();
+//
+//                // If the next page is empty, we can assume we are at the end of the group
+//                if(basisToAddList.size() == 0) break;
+//
+//                // Add as much as we need from the next page to the current page
+//                // If it's not enough, repeat with the page after that
+//                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
+//                basisList.addAll(subBasisToAddList);
+//                i++;
+//            }
+//
+//            basis.setMembers(basisList);
+//            compositeGrouping.setBasis(basis);
         }
         return compositeGrouping;
     }
 
+    // todo Default pagination method until everything is refactored
     @Override
     public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size) {
         logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
@@ -499,17 +503,24 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         try {
             WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
             String[] attributeNames = membersResults.getSubjectAttributeNames();
+            Person personToAdd = new Person();
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
                     if (subject != null) {
-                        // Add null source id users (some valid users have null source id)
-                        if (subject.getSourceId() == null) {
-                            group.addMember(makePerson(subject, attributeNames));
-                            // Add user to basis if not in intermediate group
-                        } else if (!subject.getSourceId().equals("g:gsa")) {
-                            group.addMember(makePerson(subject, attributeNames));
+                        personToAdd = makePerson(subject, attributeNames);
+                        if(subject.getSourceId().equals("g:gsa")){
+                            personToAdd.setUsername("User not available.");
                         }
+                        group.addMember(personToAdd);
+                            //todo Removing fix; instead we will display these users with appropriate information
+                        // Add null source id users (some valid users have null source id)
+//                        if (subject.getSourceId() == null) {
+//                            group.addMember(makePerson(subject, attributeNames));
+//                            // Add user to basis if not in intermediate group
+//                        } else if (!subject.getSourceId().equals("g:gsa")) {
+//                            group.addMember(makePerson(subject, attributeNames));
+//                        }
                     }
                 }
             }

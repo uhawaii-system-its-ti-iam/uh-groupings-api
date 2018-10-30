@@ -209,8 +209,15 @@ public class TestGroupingAssignmentService {
     @Test
     public void getPaginatedGroupingTest() {
 
+        // Is this because some values are null????
+        // Zac-many has #400-499 as null elements according to debugger
+        // This gives me 350 when it should be 369
+        Grouping grouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 369);
+
         // Paging starts at 1 D:
+        // This gives me 17 when it should be 20
         Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
+        // This gives me 19 when it should be 20
         Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
 
         // Check to see the pages come out the right sizes
