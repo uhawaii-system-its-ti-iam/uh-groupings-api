@@ -543,7 +543,6 @@ public class TestGroupingsRestControllerv2_0 {
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
     }
 
-    @Ignore
     @Test
     public void aaronTest() throws Exception {
         //This test often fails because the test server is very slow.
@@ -553,8 +552,8 @@ public class TestGroupingsRestControllerv2_0 {
         int i = 0;
         while (i < 5) {
             try {
-                GroupingAssignment aaronsGroupings = mapGroupingAssignment(localUser);
-                assertNotNull(aaronsGroupings);
+                GroupingAssignment groupings = mapGroupingAssignment(localUser);
+                assertNotNull(groupings);
                 break;
             } catch (AssertionError ae) {
                 i++;
