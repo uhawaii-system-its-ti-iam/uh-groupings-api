@@ -1,12 +1,11 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,22 +14,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingFactoryService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -65,8 +59,11 @@ public class TestGroupingFactoryService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    @Value("${groupings.api.purge_grouping}")
+    private String PURGE;
+
     @Value("${groupings.api.test.usernames}")
-    private String[] username;
+    private String[] USERNAMES;
 
     @Value("${grouperClient.webService.login}")
     private String APP_USER;
@@ -108,7 +105,7 @@ public class TestGroupingFactoryService {
     @Before
     public void setUp() {
         // Make sure the grouping folder is cleared
-        if(!groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST)){
+        if (!groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST)) {
             groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
         }
     }
@@ -124,21 +121,14 @@ public class TestGroupingFactoryService {
     @Test
     public void addGroupingTest() {
 
-        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
-
-        List<GroupingsServiceResult> results = new ArrayList<>();
         GroupingsServiceResult sResults;
 
-
-
         //Works correctly
-        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
+        assertTrue(memberAttributeService.isSuperuser(APP_USER));
 
-        results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+        List<GroupingsServiceResult> results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
-        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
-                equalTo(false));
-
+        assertFalse(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
 
         //Fails when the grouping already exists
         try {
@@ -154,7 +144,6 @@ public class TestGroupingFactoryService {
         groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
 
 
-
         //Fails when user trying to add grouping is not admin
         try {
 
@@ -167,10 +156,8 @@ public class TestGroupingFactoryService {
         }
 
 
-
-
-
     }
+
     @Test
     public void deleteGroupingTest() {
 
@@ -200,7 +187,6 @@ public class TestGroupingFactoryService {
         }
 
 
-
         //Fails when user trying to delete grouping is not admin
         try {
 
@@ -216,42 +202,43 @@ public class TestGroupingFactoryService {
     @Test
     public void markPurgeTest() {
 
-        List<GroupingsServiceResult> results = new ArrayList<>();
-        GroupingsServiceResult sResults;
+        // make sure the grouping does not exist
+        assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
 
-        //add the grouping
+        // add new grouping
         groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
-        //Works correctly
-        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
+        // currently we only support marking a grouping for purge if the user is a super user
+        assertTrue(memberAttributeService.isSuperuser(APP_USER));
 
-        results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+        groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
 
-        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
-                equalTo(true));
-
+        // todo change this to has purge attribute
+        assertTrue(groupAttributeService.isGroupHasAttribute(TEMP_TEST, PURGE));
 
         //Fails when the grouping doesn't exists
         try {
-            results = groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+            // delete grouping
+            groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
+            assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
+
+            // try to mark for purge
+            groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
 
         } catch (GroupingsServiceResultException gsre) {
 
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
         }
-
 
 
         //Fails when user trying to delete grouping is not admin
         try {
 
-            results = groupingFactoryService.markGroupForPurge("sbraun", TEMP_TEST + ":kahlin-test");
+            groupingFactoryService.markGroupForPurge(USERNAMES[1], TEMP_TEST + ":kahlin-test");
 
         } catch (GroupingsServiceResultException gsre) {
 
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
         }
 
     }
