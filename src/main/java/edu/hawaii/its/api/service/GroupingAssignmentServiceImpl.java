@@ -12,6 +12,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -451,7 +452,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 "; filterString: " + filterString + "; page: " + page + "; size: " + size + ";");
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperFS.makeWsGetMembersResultsFilteredAndPaginated(
+        WsFindAttributeDefNamesResults results = grouperFS.makeWsGetMembersResultsFilteredAndPaginated(
             SUBJECT_ATTRIBUTE_NAME_UID,
             lookup,
             groupPath,
@@ -460,9 +461,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             size);
 
         Group groupMembers = new Group();
-        if(members.getResults() != null) {
-            groupMembers = makeGroup(members);
-        }
+//        if(results.getResults() != null) {
+//            groupMembers = makeGroup(members);
+//        }
         return groupMembers;
 
     }

@@ -17,6 +17,7 @@ import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
 import edu.internet2.middleware.grouperClient.api.GcAttributeDefDelete;
 import edu.internet2.middleware.grouperClient.api.GcAttributeDefNameDelete;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
+import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.api.GcGetGrouperPrivilegesLite;
@@ -39,6 +40,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
@@ -708,26 +710,34 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsGetMembersResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+    public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
             String filterString,
             Integer page,
             Integer size) {
 
-        WsMemberFilter wsMemberFilter = new WsMemberFilter();
+//        return new GcGetSubjects()
 
-        GcGetMembers members = new GcGetMembers();
-        members.assignPageNumber(page);
-        members.assignPageSize(size);
-        members.assignMemberFilter(wsMemberFilter);
+//        return new GcFindAttributeDefNames()
+//                .addAttributeDefNameName(isTrio)
+//                .assignSortString(filterString)
+//                .assignActAsSubject(lookup)
+//                .execute();
 
-        return members
-                .addSubjectAttributeName(subjectAttributeName)
-                .assignActAsSubject(lookup)
-                .addGroupName(groupName)
-                .assignIncludeSubjectDetail(true)
-                .execute();
+//        WsMemberFilter wsMemberFilter = new WsMemberFilter();
+
+//        GcGetMembers members = new GcGetMembers();
+//        members.assignPageNumber(page);
+//        members.assignPageSize(size);
+////        members.assignMemberFilter(wsMemberFilter);
+//
+//        return members
+//                .addSubjectAttributeName(subjectAttributeName)
+//                .assignActAsSubject(lookup)
+//                .addGroupName(groupName)
+//                .assignIncludeSubjectDetail(true)
+//                .execute();
     }
 
     // Covered by Integration Tests

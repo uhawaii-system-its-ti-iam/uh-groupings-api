@@ -243,6 +243,13 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getFilteredGroupingTest() {
+
+        Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, username[0], "zac", 1, 20);
+
+    }
+
+    @Test
     public void groupingsInTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
         boolean isInGrouping = false;
