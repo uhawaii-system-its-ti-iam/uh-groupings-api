@@ -547,7 +547,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setListservOn(isListservOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
-        grouping.setReleasedGroupingOn(isOptOutOn);
+        grouping.setReleasedGroupingOn(isReleasedGroupingOn);
 
         return grouping;
     }
