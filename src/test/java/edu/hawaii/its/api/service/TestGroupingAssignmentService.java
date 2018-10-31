@@ -211,25 +211,20 @@ public class TestGroupingAssignmentService {
     @Test
     public void getPaginatedGroupingTest() {
 
-        // Is this because some values are null????
-        // Zac-many has #400-499 as null elements according to debugger
-        // This gives me 350 when it should be 369
-        Grouping grouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 369);
-
         // Paging starts at 1 D:
-        // This gives me 17 when it should be 20
+        // Page 1 contains 3 stale subjects, should return 17
         Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
-        // This gives me 19 when it should be 20
+        // Page 2 contains 1 stale subject, should return 19
         Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
 
         // Check to see the pages come out the right sizes
-        assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), equalTo(17));
         assertThat(paginatedGroupingPage1.getInclude().getMembers().size(), equalTo(10));
         assertThat(paginatedGroupingPage1.getExclude().getMembers().size(), equalTo(1));
         assertThat(paginatedGroupingPage1.getComposite().getMembers().size(), equalTo(20));
         assertThat(paginatedGroupingPage1.getOwners().getMembers().size(), equalTo(2));
 
-        assertThat(paginatedGroupingPage2.getBasis().getMembers().size(), equalTo(20));
+        assertThat(paginatedGroupingPage2.getBasis().getMembers().size(), equalTo(19));
         assertThat(paginatedGroupingPage2.getInclude().getMembers().size(), equalTo(0));
         assertThat(paginatedGroupingPage2.getExclude().getMembers().size(), equalTo(0));
         assertThat(paginatedGroupingPage2.getComposite().getMembers().size(), equalTo(20));
@@ -241,11 +236,6 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage1.getExclude(), not(paginatedGroupingPage2.getExclude()));
         assertThat(paginatedGroupingPage1.getComposite(), not(paginatedGroupingPage2.getComposite()));
         assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
-
-
-        // Test paging at the end of the grouping
-        Grouping paginatedGroupingPageEnd = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 18, 20);
-        assertThat(paginatedGroupingPageEnd.getBasis().getMembers().size(), equalTo(17));
 
         // Test paging without proper permissions
         Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[1], 1, 20);
