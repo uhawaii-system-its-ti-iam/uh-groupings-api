@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -11,6 +12,7 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -257,6 +259,28 @@ public class TestGroupingAssignmentService {
 
         Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, username[0], "zac", 1, 20);
 
+    }
+
+    // Testing why getting a grouping returns different results for a page of the size of the entire grouping
+    // Results are the pagination automatically removes stale subjects for us, but doesn't get the full page
+    // Plan is to leave as is, and some pages will be shorter than others
+    // Maybe UI can show messages of some sort to say this is the case
+    @Ignore
+    @Test
+    public void paginatedVersusNonpaginatedTest () {
+        Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, username[0]);
+        Grouping groupingPaginated = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 369);
+
+        List<Person> paginatedBasisMembers = groupingPaginated.getBasis().getMembers();
+        List<Person> nonPaginatedBasisMembers = groupingNonPaginated.getBasis().getMembers();
+
+        List<String> uuids = new ArrayList<>();
+
+        for(Person p : nonPaginatedBasisMembers) {
+            uuids.add(p.getUuid());
+        }
+
+        Collections.sort(uuids);
     }
 
     @Test

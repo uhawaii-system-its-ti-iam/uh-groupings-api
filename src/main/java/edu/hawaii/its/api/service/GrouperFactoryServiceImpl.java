@@ -728,6 +728,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             Integer page,
             Integer size) {
 
+        // todo Look into getSubjects call
+        // Can't paginate with it, but hopefully this doesn't matter as a filter would be a smaller subset
+
         return null;
 
 //        return new GcGetSubjects()
