@@ -243,7 +243,7 @@ public class TestGroupingAssignmentService {
     }
 
     // todo Method not implemented
-    @Ignore
+//    @Ignore
     @Test
     public void getFilteredGroupingTest() {
 
