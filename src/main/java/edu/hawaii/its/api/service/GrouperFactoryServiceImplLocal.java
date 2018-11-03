@@ -1248,7 +1248,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
             String filterString,

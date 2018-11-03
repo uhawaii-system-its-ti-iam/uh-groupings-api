@@ -721,7 +721,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     // todo Doesn't work
     @Override
-    public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
             String filterString,
@@ -731,29 +731,26 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // todo Look into getSubjects call
         // Can't paginate with it, but hopefully this doesn't matter as a filter would be a smaller subset
 
-        return null;
+//        return null;
 
-//        return new GcGetSubjects()
+//        GcGetMemberships memberships = new GcGetMemberships();
+//        memberships.assignPageNumberForMember(page);
+//        memberships.assignPageSizeForMember(size);
+//        memberships.assignPageNumber(page);
+//        memberships.assignPageSize(size);
+//        memberships.assignScope("zac");
 
-//        return new GcFindAttributeDefNames()
-//                .addAttributeDefNameName(isTrio)
-//                .assignSortString(filterString)
-//                .assignActAsSubject(lookup)
-//                .execute();
+        // Conversion Exception for assigning page and size for some reason
 
-//        WsMemberFilter wsMemberFilter = new WsMemberFilter();
+        return new GcGetMemberships()
+                .assignPageSizeForMember(size)
+                .assignPageNumberForMember(page)
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .addGroupName(groupName)
+                .assignIncludeSubjectDetail(true)
+                .execute();
 
-//        GcGetMembers members = new GcGetMembers();
-//        members.assignPageNumber(page);
-//        members.assignPageSize(size);
-////        members.assignMemberFilter(wsMemberFilter);
-//
-//        return members
-//                .addSubjectAttributeName(subjectAttributeName)
-//                .assignActAsSubject(lookup)
-//                .addGroupName(groupName)
-//                .assignIncludeSubjectDetail(true)
-//                .execute();
     }
 
     // Covered by Integration Tests

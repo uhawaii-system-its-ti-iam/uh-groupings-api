@@ -160,7 +160,7 @@ public interface GrouperFactoryService {
             Integer page,
             Integer size);
 
-    public WsFindAttributeDefNamesResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
             String groupName,
             String filterString,
