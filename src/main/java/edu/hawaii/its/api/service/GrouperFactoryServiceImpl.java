@@ -30,6 +30,7 @@ import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
+import edu.internet2.middleware.grouperClient.util.GrouperClientUtils;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -741,10 +742,20 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 //        memberships.assignScope("zac");
 
         // Conversion Exception for assigning page and size for some reason
+        // Is it possible that server version of Grouper is older, so it doesn't support?
+        // says Client version: 2.3.0 is less than (major/minor) server version: 2.2.2
+        // CannotResolveClassException
+//        Integer integer = new Integer(20);
+//        Integer integer2 = new Integer(1);
+        String scope = "";
+//        String scope = "select * from memberships where uid like '%zac%'";
+//        String scope = "Zachery Knoebel";
+//        GrouperClientUtils.argMapString()
 
         return new GcGetMemberships()
-                .assignPageSizeForMember(size)
-                .assignPageNumberForMember(page)
+//                .assignPageSizeForMember(integer)
+//                .assignPageNumberForMember(integer2)
+                .assignScope(scope)
                 .addSubjectAttributeName(subjectAttributeName)
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
