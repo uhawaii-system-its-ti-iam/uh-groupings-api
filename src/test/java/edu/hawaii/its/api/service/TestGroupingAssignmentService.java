@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.type.AdminListsHolder;
@@ -205,6 +206,7 @@ public class TestGroupingAssignmentService {
         assertTrue(grouping.getOwners().getUsernames().contains(username[0]));
     }
 
+    @Ignore
     @Test
     public void getPaginatedGroupingTest() {
 

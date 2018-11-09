@@ -33,6 +33,7 @@ public interface MemberAttributeService {
 
     public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
 
+    // todo: why do we have this?
     public Map<String, String> getUserAttributesLocal(String username);
 
     public boolean isUuid(String username);

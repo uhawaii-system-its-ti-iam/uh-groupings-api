@@ -193,13 +193,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public List<Grouping> groupingsIn(List<String> groupPaths) {
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
         List<Grouping> groupings = helperService.makeGroupings(groupingsIn);
-        //        List<Grouping> groupingsinTwo = helperService.extractGroupingsNew(groupPaths);
 
-        //todo this can be optimized by getting opt attributes from grouper when getting the group list
-        //rather than making individual calls to grouper, which is much slower
-        for (Grouping grouping : groupings) {
-            grouping.setOptOutOn(groupAttributeService.isOptOutPossible(grouping.getPath()));
-        }
+        // todo this may be able to be optimized by getting attributes from grouper when getting the group list
+        // rather than making individual calls to grouper. Testing will need to be done to see if the will be faster in
+        // the majority of cases or only for edge cases
+        groupings.forEach(this::setGroupingAttributes);
 
         return groupings;
     }
