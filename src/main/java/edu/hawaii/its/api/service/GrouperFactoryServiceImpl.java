@@ -716,6 +716,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addSubjectAttributeName(subjectAttributeName)
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
+                .assignIncludeGroupDetail(true)
                 .assignIncludeSubjectDetail(true)
                 .execute();
     }
