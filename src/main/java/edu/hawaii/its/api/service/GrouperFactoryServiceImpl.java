@@ -45,6 +45,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesRe
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
@@ -57,6 +58,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsParam;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStem;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
@@ -712,11 +714,15 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         members.assignPageNumber(page);
         members.assignPageSize(size);
 
+        // I don't think this will work, can only set my own parameters
+//        WsParam param = new WsParam();
+//        param.setParamName("groupSize");
+//        param.setParamValue("69");
+
         return members
                 .addSubjectAttributeName(subjectAttributeName)
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
-                .assignIncludeGroupDetail(true)
                 .assignIncludeSubjectDetail(true)
                 .execute();
     }
@@ -742,13 +748,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 //        memberships.assignPageSize(size);
 //        memberships.assignScope("zac");
 
-        // Conversion Exception for assigning page and size for some reason
+        // Conversion Exception
+        // +for assigning page and size for some reason
         // Is it possible that server version of Grouper is older, so it doesn't support?
         // says Client version: 2.3.0 is less than (major/minor) server version: 2.2.2
         // CannotResolveClassException
 //        Integer integer = new Integer(20);
 //        Integer integer2 = new Integer(1);
-        String scope = "";
+        String scope = ;
 //        String scope = "select * from memberships where uid like '%zac%'";
 //        String scope = "Zachery Knoebel";
 //        GrouperClientUtils.argMapString()
