@@ -209,6 +209,7 @@ public class TestGroupingAssignmentService {
         assertTrue(grouping.getOwners().getUsernames().contains(username[0]));
     }
 
+    @Ignore
     @Test
     public void getPaginatedGroupingTest() {
 
