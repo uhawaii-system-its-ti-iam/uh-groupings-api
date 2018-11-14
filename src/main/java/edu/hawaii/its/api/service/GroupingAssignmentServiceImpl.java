@@ -450,8 +450,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getMembers; group: " + groupPath + "; ownerUsername: " + ownerUsername +
                 "; filterString: " + filterString + "; page: " + page + "; size: " + size + ";");
 
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsGetMembershipsResults results = grouperFS.makeWsGetMembersResultsFilteredAndPaginated(
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+        WsGetMembershipsResults results = grouperFactoryService.makeWsGetMembersResultsFilteredAndPaginated(
             SUBJECT_ATTRIBUTE_NAME_UID,
             lookup,
             groupPath,

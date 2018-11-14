@@ -755,15 +755,17 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // CannotResolveClassException
 //        Integer integer = new Integer(20);
 //        Integer integer2 = new Integer(1);
-        String scope = ;
+//        String scope = ;
 //        String scope = "select * from memberships where uid like '%zac%'";
 //        String scope = "Zachery Knoebel";
 //        GrouperClientUtils.argMapString()
 
         return new GcGetMemberships()
+                .assignPageNumber(page)
+                .assignPageSize(size)
 //                .assignPageSizeForMember(integer)
 //                .assignPageNumberForMember(integer2)
-                .assignScope(scope)
+//                .assignScope(scope)
                 .addSubjectAttributeName(subjectAttributeName)
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)
