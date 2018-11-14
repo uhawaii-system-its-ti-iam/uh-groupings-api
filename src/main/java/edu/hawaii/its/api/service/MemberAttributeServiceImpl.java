@@ -1,13 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -17,15 +12,14 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsRestGetSubjectsRequest;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.Null;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -152,6 +146,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.person_attributes.uuid}")
     private String UUID;
 
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
+
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
 
@@ -233,13 +230,12 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
             //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
-            return ownershipResult;
+        } else {
+
+            ownershipResult = hs.makeGroupingsServiceResult(
+                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath, action);
         }
 
-        ownershipResult = hs.makeGroupingsServiceResult(
-                FAILURE + ", " + ownerUsername + " does not own " + groupingPath, action);
-
-        //todo Is this even reachable?
         return ownershipResult;
     }
 
@@ -269,14 +265,13 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
 
-            return ownershipResults;
+        } else {
+
+            ownershipResults = hs.makeGroupingsServiceResult(
+                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
+                    action);
         }
 
-        ownershipResults = hs.makeGroupingsServiceResult(
-                FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                action);
-
-        //todo Is this even reachable?
         return ownershipResults;
     }
 
@@ -409,7 +404,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
+                String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }
@@ -419,7 +414,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = {"uid", "cn", "sn", "givenName", "uhuuid"};
+            String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }

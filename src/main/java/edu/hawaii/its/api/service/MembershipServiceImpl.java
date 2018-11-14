@@ -204,15 +204,17 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
+        // todo: exchange these three grouper calls with getGrouping, once getGrouping is optimized for a single call to
+        // Grouper
         boolean isInBasis = memberAttributeService.isMember(basis, userToAddUsername);
         boolean isInComposite = memberAttributeService.isMember(groupingPath, userToAddUsername);
         boolean isInInclude = memberAttributeService.isMember(include, userToAddUsername);
 
-        //check to see if they are already in the grouping
+        // check to see if they are already in the grouping
         if (!isInComposite) {
-            //get them out of the exclude
+            // get them out of the exclude
             gsrs.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToAddUsername));
-            //only add them to the include if they are not in the basis
+            // only add them to the include if they are not in the basis
             if (!isInBasis) {
                 gsrs.addAll(addGroupMemberByUsername(ownerUsername, include, userToAddUsername));
             } else {
@@ -223,7 +225,7 @@ public class MembershipServiceImpl implements MembershipService {
             gsrs.add(helperService.makeGroupingsServiceResult(
                     SUCCESS + ": " + userToAddUsername + " was already in " + groupingPath, action));
         }
-        //should only be in one or the other
+        // should only be in one or the other
         if (isInBasis && isInInclude) {
             gsrs.add(deleteGroupMemberByUsername(ownerUsername, include, userToAddUsername));
         }
