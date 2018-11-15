@@ -27,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service("groupingAssignmentService")
@@ -583,13 +585,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     //take a list of WsGroups ans return a list of the paths for all of those groups
     public List<String> extractGroupPaths(List<WsGroup> groups) {
-        List<String> names = new ArrayList<>();
+        Set<String> names = new LinkedHashSet<>();
         if (groups != null) {
-            groups.stream()
-                    .filter(group -> !names.contains(group.getName()))
-                    .forEach(group -> names.add(group.getName()));
+            names = groups
+                    .parallelStream()
+                    .map(WsGroup::getName)
+                    .collect(Collectors.toSet());
+
         }
-        return names;
+        return names.stream().collect(Collectors.toList());
     }
 
     //returns the list of groupings that the user is allowed to opt-in to
@@ -598,7 +602,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
-        List<String> excludes = groupPaths.stream().map(group -> group + EXCLUDE).collect(Collectors.toList());
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
 
         WsGetAttributeAssignmentsResults assignmentsResults = grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
                 ASSIGN_TYPE_GROUP,
