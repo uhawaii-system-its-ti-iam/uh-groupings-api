@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -69,36 +72,37 @@ public class Group implements Comparable<Group> {
         members.add(person);
     }
 
+    @JsonIgnore
     @Transient
     public boolean isMember(Person person) {
         return members.contains(person);
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getNames() {
-        List<String> names = new ArrayList<>();
-        for (Person person : members) {
-            names.add(person.getName());
-        }
-        return names;
+        return members
+                .parallelStream()
+                .map(Person::getName)
+                .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getUuids() {
-        List<String> uuids = new ArrayList<>();
-        for (Person person : members) {
-            uuids.add(person.getUuid());
-        }
-        return uuids;
+        return members
+                .parallelStream()
+                .map(Person::getUuid)
+                .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getUsernames() {
-        List<String> usernames = new ArrayList<>();
-        for (Person person : members) {
-            usernames.add(person.getUsername());
-        }
-        return usernames;
+        return members
+                .parallelStream()
+                .map(Person::getUsername)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -142,8 +146,8 @@ public class Group implements Comparable<Group> {
         int size0 = getMembers().size();
         int size1 = group.getMembers().size();
         if (size0 != size1) {
-            Integer i0 = new Integer(size0);
-            Integer i1 = new Integer(size1);
+            Integer i0 = size0;
+            Integer i1 = size1;
             return i0.compareTo(i1);
         }
 

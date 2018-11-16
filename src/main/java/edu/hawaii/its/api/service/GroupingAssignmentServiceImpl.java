@@ -1,14 +1,10 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
@@ -20,7 +16,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service("groupingAssignmentService")
@@ -75,6 +74,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
 
     @Value("${groupings.api.trio}")
     private String TRIO;
@@ -169,7 +171,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public static final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
-    private GrouperFactoryService grouperFS;
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private HelperService helperService;
@@ -177,26 +179,16 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Autowired
     private MemberAttributeService memberAttributeService;
 
-    @Autowired
-    private GroupAttributeService groupAttributeService;
-
-    // Returns true if username is a UH id number
-    public boolean isUuid(String username) {
-        return username.matches("\\d+");
-    }
-
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
         List<Grouping> groupings = helperService.makeGroupings(groupingsIn);
-        //        List<Grouping> groupingsinTwo = helperService.extractGroupingsNew(groupPaths);
 
-        //todo this can be optimized by getting opt attributes from grouper when getting the group list
-        //rather than making individual calls to grouper, which is much slower
-        for (Grouping grouping : groupings) {
-            grouping.setOptOutOn(groupAttributeService.isOptOutPossible(grouping.getPath()));
-        }
+        // todo this may be able to be optimized by getting attributes from grouper when getting the group list
+        // rather than making individual calls to grouper. Testing will need to be done to see if the will be faster in
+        // the majority of cases or only for edge cases
+        groupings.forEach(this::setGroupingAttributes);
 
         return groupings;
     }
@@ -210,6 +202,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .map(groupPath -> groupPath.substring(0, groupPath.length() - OWNERS.length()))
                 .collect(Collectors.toList());
 
+        // make sure the owner group actually correspond to a grouping
         List<String> ownedGroupings = helperService.extractGroupings(ownerGroups);
 
         return helperService.makeGroupings(ownedGroupings);
@@ -258,32 +251,74 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    // Fetch a grouping from Grouper of database, but paginated based on given page + size
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
-        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
+        logger.info("getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername +
                 "; page: " + page + "; size: " + size + "'");
 
         Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
-            compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
-            Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
-            Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
-            Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
-            Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+            // Paginating the basis will remove garbage data, leaving it smaller than the requested size
+            // Therefore we need to fill the rest of the current page with more data from another page
+            // This is dealing with stale subjects
+            // At some point, when this issue is resolved this functionality may not be necessary
+            // todo Refactor this as a general case for all Groups and not just Basis
+            // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
 
-            compositeGrouping = setGroupingAttributes(compositeGrouping);
+            // Get base grouping from pagination and isolate basis
+            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+            Group basis = compositeGrouping.getBasis();
+            List<Person> basisList = basis.getMembers();
 
+            int i = 1;
+            while (basisList.size() < size) {
+
+                Group basisToAdd = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page + i, size);
+                List<Person> basisToAddList = basisToAdd.getMembers();
+
+                // If the next page is empty, we can assume we are at the end of the group
+                if (basisToAddList.size() == 0) break;
+
+                // Add as much as we need from the next page to the current page
+                // If it's not enough, repeat with the page after that
+                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
+                basisList.addAll(subBasisToAddList);
+                i++;
+            }
+
+            basis.setMembers(basisList);
             compositeGrouping.setBasis(basis);
-            compositeGrouping.setExclude(exclude);
-            compositeGrouping.setInclude(include);
-            compositeGrouping.setComposite(composite);
-            compositeGrouping.setOwners(owners);
-
         }
+        return compositeGrouping;
+    }
+
+    @Override
+    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size) {
+        logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
+                "; page: " + page + "; size: " + size + "'");
+
+        Grouping compositeGrouping = new Grouping();
+
+        compositeGrouping = new Grouping(groupingPath);
+
+        Group include = getPaginatedMembers(ownerUsername, groupingPath + INCLUDE, page, size);
+        Group exclude = getPaginatedMembers(ownerUsername, groupingPath + EXCLUDE, page, size);
+        Group basis = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page, size);
+        Group composite = getPaginatedMembers(ownerUsername, groupingPath, page, size);
+        Group owners = getPaginatedMembers(ownerUsername, groupingPath + OWNERS, page, size);
+
+        compositeGrouping = setGroupingAttributes(compositeGrouping);
+
+        compositeGrouping.setBasis(basis);
+        compositeGrouping.setExclude(exclude);
+        compositeGrouping.setInclude(include);
+        compositeGrouping.setComposite(composite);
+        compositeGrouping.setOwners(owners);
+
         return compositeGrouping;
     }
 
@@ -312,7 +347,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (memberAttributeService.isSuperuser(adminUsername)) {
 
             WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                    grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
+                    grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
                             ASSIGN_TYPE_GROUP,
                             TRIO);
 
@@ -335,6 +370,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> groupingsOpted = new ArrayList<>();
 
+        // todo get the self opted memberships in one grouper call
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
@@ -342,7 +378,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (groupsOpted.size() > 0) {
 
             List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
-                    grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
+                    grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
                             ASSIGN_TYPE_GROUP,
                             TRIO,
                             groupsOpted);
@@ -358,11 +394,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     //returns a group from grouper or the database
-    @Override public Group getMembers(String ownerUsername, String groupPath) {
+    @Override
+    public Group getMembers(String ownerUsername, String groupPath) {
         logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
 
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperFS.makeWsGetMembersResults(
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
                 groupPath);
@@ -379,11 +416,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Override
     public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath +
+        logger.info("getMembers; group: " + groupPath +
                 "; page: " + page + "; size: " + size + ";");
 
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperFS.makeWsGetMembersResultsPaginated(
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResultsPaginated(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
                 groupPath,
@@ -475,9 +512,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         boolean isListservOn = false;
         boolean isOptInOn = false;
         boolean isOptOutOn = false;
+        boolean isReleasedGroupingOn = false;
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsForGroup(
                         ASSIGN_TYPE_GROUP,
                         grouping.getPath());
 
@@ -491,6 +529,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
                     isOptOutOn = true;
+                } else if (name.equals(RELEASED_GROUPING)) {
+                    isReleasedGroupingOn = true;
                 }
             }
         }
@@ -498,6 +538,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setListservOn(isListservOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
+        grouping.setReleasedGroupingOn(isReleasedGroupingOn);
 
         return grouping;
     }
@@ -510,10 +551,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getGroupPaths; username: " + username + ";");
 
         if (ownerUsername.equals(username) || memberAttributeService.isSuperuser(ownerUsername)) {
-            WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
+            WsStemLookup stemLookup = grouperFactoryService.makeWsStemLookup(STEM);
             WsGetGroupsResults wsGetGroupsResults;
 
-            wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
+            wsGetGroupsResults = grouperFactoryService.makeWsGetGroupsResults(
                     username,
                     stemLookup,
                     StemScope.ALL_IN_SUBTREE
@@ -532,8 +573,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         } else {
             List<String> results = new ArrayList<>();
             return results;
-//            GroupingsHTTPException ghe = new GroupingsHTTPException();
-//            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
+            //            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
     }
 
@@ -544,13 +585,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     //take a list of WsGroups ans return a list of the paths for all of those groups
     public List<String> extractGroupPaths(List<WsGroup> groups) {
-        List<String> names = new ArrayList<>();
+        Set<String> names = new LinkedHashSet<>();
         if (groups != null) {
-            groups.stream()
-                    .filter(group -> !names.contains(group.getName()))
-                    .forEach(group -> names.add(group.getName()));
+            names = groups
+                    .parallelStream()
+                    .map(WsGroup::getName)
+                    .collect(Collectors.toSet());
+
         }
-        return names;
+        return names.stream().collect(Collectors.toList());
     }
 
     //returns the list of groupings that the user is allowed to opt-in to
@@ -559,9 +602,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
-        List<String> excludes = groupPaths.stream().map(group -> group + EXCLUDE).collect(Collectors.toList());
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
 
-        WsGetAttributeAssignmentsResults assignmentsResults = grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
+        WsGetAttributeAssignmentsResults assignmentsResults = grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
                 ASSIGN_TYPE_GROUP,
                 TRIO,
                 OPT_IN);
@@ -601,7 +647,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> opts = new ArrayList<>();
         List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
 
-        List<WsGetAttributeAssignmentsResults> assignmentsResults = grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
+        List<WsGetAttributeAssignmentsResults> assignmentsResults = grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
                 ASSIGN_TYPE_GROUP,
                 TRIO,
                 OPT_OUT,

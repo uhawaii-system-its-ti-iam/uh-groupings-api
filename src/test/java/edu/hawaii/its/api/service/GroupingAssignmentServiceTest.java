@@ -330,11 +330,10 @@ public class GroupingAssignmentServiceTest {
 
     @Test
     public void extractGroupPaths() {
-        List<WsGroup> groups = null;
-        List<String> groupNames = groupingAssignmentService.extractGroupPaths(groups);
+        List<String> groupNames = groupingAssignmentService.extractGroupPaths(null);
         assertEquals(0, groupNames.size());
 
-        groups = new ArrayList<>();
+        List<WsGroup> groups = new ArrayList<>();
         final int size = 300;
 
         for (int i = 0; i < size; i++) {
