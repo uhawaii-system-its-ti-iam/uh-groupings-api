@@ -188,7 +188,7 @@ public class GroupingsRestControllerv2_1 {
      * @param path: Path of specific grouping
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/groupings/{path}/get",
+    @RequestMapping(value = "/groupings/{path}",
             params = { "page", "size" },
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -392,7 +392,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteNewGrouping");
         return ResponseEntity
                 .ok()
-                .body(groupingFactoryService.deleteGrouping(currentUser, path));
+                .body(groupingFactoryService.markGroupForPurge(currentUser, path));
     }
 
     /**

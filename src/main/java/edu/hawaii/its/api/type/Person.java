@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.persistence.*;
 import javax.print.DocFlavor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Proxy;
 
 @Entity
@@ -105,6 +106,7 @@ public class Person implements Comparable<Person> {
         attributes.put(LAST_NAME, lastName);
     }
 
+    @JsonIgnore
     @ElementCollection
     public Map<String, String> getAttributes() {
         return attributes;

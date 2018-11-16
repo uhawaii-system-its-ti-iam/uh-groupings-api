@@ -3,16 +3,13 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service("helperService")
 public class HelperServiceImpl implements HelperService {
@@ -191,9 +186,9 @@ public class HelperServiceImpl implements HelperService {
         logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
 
         List<String> groupings = new ArrayList<>();
-        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
 
         if (groupPaths.size() > 0) {
+            List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
 
             List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
                     grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
@@ -213,7 +208,6 @@ public class HelperServiceImpl implements HelperService {
         }
         return groupings;
     }
-
 
 
     //todo GroupingsIn optimization (work in progress)
@@ -274,8 +268,6 @@ public class HelperServiceImpl implements HelperService {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
         groupingsServiceResult.setAction(action);
         groupingsServiceResult.setResultCode(resultCode);
-
-        String help = resultCode;
 
         if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
             throw new GroupingsServiceResultException(groupingsServiceResult);
