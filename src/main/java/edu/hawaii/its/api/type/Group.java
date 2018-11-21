@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,11 +72,13 @@ public class Group implements Comparable<Group> {
         members.add(person);
     }
 
+    @JsonIgnore
     @Transient
     public boolean isMember(Person person) {
         return members.contains(person);
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getNames() {
         return members
@@ -83,6 +87,7 @@ public class Group implements Comparable<Group> {
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getUuids() {
         return members
@@ -91,6 +96,7 @@ public class Group implements Comparable<Group> {
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     @Transient
     public List<String> getUsernames() {
         return members
