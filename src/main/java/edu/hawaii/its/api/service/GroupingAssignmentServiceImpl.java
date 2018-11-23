@@ -193,6 +193,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupings;
     }
 
+    @Override
+    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername) {
+        return groupingsOwned(getGroupPaths(actingUsername, ownerUsername));
+    }
+
     //returns a list of groupings that corresponds to all of the owner groups in groupPaths
     @Override
     public List<Grouping> groupingsOwned(List<String> groupPaths) {
