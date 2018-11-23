@@ -431,7 +431,7 @@ public class GroupingsRestControllerv2_1Test {
         final String uid = "grouping";
         final String admin = "bobo";
 
-        given(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(admin, uid)))
+        given(groupingAssignmentService.restGroupingsOwned(admin, uid))
                 .willReturn(groupingList());
 
         mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings")
@@ -453,7 +453,7 @@ public class GroupingsRestControllerv2_1Test {
     public void ownerGroupingsMyselfTest() throws Exception {
         final String uid = "grouping";
 
-        given(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(uid, uid)))
+        given(groupingAssignmentService.restGroupingsOwned(uid, uid))
                 .willReturn(groupingList());
 
         mockMvc.perform(get("/api/groupings/v2.1/owners/grouping/groupings")

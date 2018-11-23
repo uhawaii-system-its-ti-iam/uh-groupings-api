@@ -20,6 +20,8 @@ public interface GroupingAssignmentService {
 
     public List<Grouping> groupingsOwned(List<String> groupPaths);
 
+    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername);
+
     public List<Grouping> groupingsOptedInto(String username, List<String> groupPaths);
 
     public List<Grouping> groupingsOptedOutOf(String username, List<String> groupPaths);
