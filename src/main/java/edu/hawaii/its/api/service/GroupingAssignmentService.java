@@ -4,6 +4,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
@@ -33,6 +34,9 @@ public interface GroupingAssignmentService {
     public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size);
 
     public GroupingAssignment getGroupingAssignment(String username);
+
+    //get a MembershipAssignment object containing the groups that a user is in and can opt into
+    MembershipAssignment getMembershipAssignment(String username);
 
     public AdminListsHolder adminLists(String adminUsername);
 

@@ -4,6 +4,7 @@ import edu.hawaii.its.api.service.*;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +132,22 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(currentUser, uid)));
+    }
+
+    /**
+     * Get a list of a groupings a user is in and can opt into
+     *
+     * @return List of members grouping memberships
+     */
+    @RequestMapping(value = "/members/groupings",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser) {
+        logger.info("Entered REST memberGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getMembershipAssignment(currentUser));
     }
 
     //todo Maybe come back to this using listOwned?
