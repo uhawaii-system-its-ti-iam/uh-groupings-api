@@ -4,6 +4,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -341,6 +342,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         groupingAssignment.setGroupingsOptedInTo(groupingsOptedInto(username, groupPaths));
 
         return groupingAssignment;
+    }
+
+    //get a GroupingAssignment object containing the groups that a user is in and can opt into
+    @Override
+    public MembershipAssignment getMembershipAssignment(String username) {
+        MembershipAssignment membershipAssignment = new MembershipAssignment();
+        List<String> groupPaths = getGroupPaths(username, username);
+
+        membershipAssignment.setGroupingsIn(groupingsIn(groupPaths));
+        membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
+
+        return membershipAssignment;
     }
 
     //returns an adminLists object containing the list of all admins and all groupings
