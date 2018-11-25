@@ -431,12 +431,6 @@ public class TestGroupingsRestControllerv2_1 {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
-        try {
-            mapList(API_BASE + "members//groupings", "get", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
     }
 
     @Test
