@@ -54,6 +54,14 @@ paths:
            description: Requestee does not have permission to retrieve user's memberships
         '404':
           description: User does not exist
+  '/members/groupings':
+    get:
+      description: Returns a list of groupings a user is in and a list of groupings a user can opt into
+      responses:
+        '200':
+           description: Successful operation
+        '404':
+          description: User is not logged in
   '/owners/{uid}/groupings':
     get:
       description: Returns list of a user's owned groupings
