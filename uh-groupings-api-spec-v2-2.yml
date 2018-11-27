@@ -10,6 +10,39 @@ servers:
 security:
   - cas: []
 paths:
+  '/admins/{uid}':
+    post:
+      description: Adds user to list of admins
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user being added
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful addition
+        '403':
+          description: Requestee does not have permission to modify this resource
+        '404':
+          description: User does not exist
+    delete:
+      description: Deletes user from list of admins
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user being deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User successfully deleted
+        '403':
+          description: Requestee does not have permission to modify this resource
+        '404':
+          description: User does not exist
   '/adminsGroupings':
     get:
       description: Returns list of admins and groups
@@ -20,78 +53,6 @@ paths:
           description: Requestee does not have permission to retrieve this information
         '404':
           description: Information not found
-  '/members/{uid}':
-    get:
-      description: Returns user's attributes
-      parameters:
-        - name: uid
-          in: path
-          description: Username of UH ID of user to get attributes from
-          required: true
-          schema:
-            type: string
-      responses:
-         '200':
-           description: Successful operation
-         '403':
-           description: Requestee does not have permission to retrieve user's attributes
-         '404':
-           description: User does not exist
-  '/members/{uid}/groupings':
-    get:
-      description: Returns list of a user's grouping memberships
-      parameters:
-        - name: uid
-          in: path
-          description: Username or UH ID of user to get memberships from
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-           description: Successful operation
-        '403':
-           description: Requestee does not have permission to retrieve user's memberships
-        '404':
-          description: User does not exist
-  '/members/groupings':
-    get:
-      description: Returns a list of groupings a user is in and a list of groupings a user can opt into
-      responses:
-        '200':
-           description: Successful operation
-        '404':
-          description: User is not logged in
-  '/owners/{uid}/groupings':
-    get:
-      description: Returns list of a user's owned groupings
-      parameters:
-        - name: uid
-          in: path
-          description: Username or UH ID of user to get owned groupings from
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-           description: Successful operation
-        '403':
-           description: Requestee does not have permission to retrieve user's owned groupings
-        '404':
-          description: User does not exist
-  '/managers/{uid}/groupings':
-    get:
-      description: Returns list of a user's groupings that they manage
-      parameters:
-        - name: uid
-          in: path
-          description: Username or UH ID of user to get managed groupings from
-          required: true
-          schema:
-            type: string
-      responses:
-        '405':
-          description: Functionality has not been implemented
   '/groupings/{path}':
     get:
       description: Returns a specific grouping
@@ -139,39 +100,6 @@ paths:
           description: Requestee does not have the permission to delete the Grouping
         '404':
           description: Grouping does not exist
-  '/admins/{uid}':
-    post:
-      description: Adds user to list of admins
-      parameters:
-        - name: uid
-          in: path
-          description: Username or UH ID of user being added
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful addition
-        '403':
-          description: Requestee does not have permission to modify this resource
-        '404':
-          description: User does not exist
-    delete:
-      description: Deletes user from list of admins
-      parameters:
-        - name: uid
-          in: path
-          description: Username or UH ID of user being deleted
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: User successfully deleted
-        '403':
-          description: Requestee does not have permission to modify this resource
-        '404':
-          description: User does not exist
   '/groupings/{path}/owners/{uid}':
     put:
       description: Updates the grouping with new owner
@@ -474,6 +402,70 @@ paths:
           description: Requestee does not have the privaleges to update the group
         '404':
           description: Group or user not found
+  '/managers/{uid}/groupings':
+    get:
+      description: Returns list of a user's groupings that they manage
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get managed groupings from
+          required: true
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Functionality has not been implemented
+  '/members/{uid}':
+    get:
+      description: Returns user's attributes
+      parameters:
+        - name: uid
+          in: path
+          description: Username of UH ID of user to get attributes from
+          required: true
+          schema:
+            type: string
+      responses:
+         '200':
+           description: Successful operation
+         '403':
+           description: Requestee does not have permission to retrieve user's attributes
+         '404':
+           description: User does not exist
+  '/members/{uid}/groupings':
+    get:
+      description: Returns list of a user's grouping memberships
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get memberships from
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+           description: Successful operation
+        '403':
+           description: Requestee does not have permission to retrieve user's memberships
+        '404':
+          description: User does not exist
+  '/owners/{uid}/groupings':
+    get:
+      description: Returns list of a user's owned groupings
+      parameters:
+        - name: uid
+          in: path
+          description: Username or UH ID of user to get owned groupings from
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+           description: Successful operation
+        '403':
+           description: Requestee does not have permission to retrieve user's owned groupings
+        '404':
+          description: User does not exist
 components:
   schemas:
     Person:
