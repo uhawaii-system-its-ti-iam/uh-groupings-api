@@ -49,6 +49,8 @@ public interface GroupingAssignmentService {
 
     public Group getMembers(String ownerUsername, String groupPath);
 
+    public Group getBasisMembers(String ownerUsername, String groupPath);
+
     public Group getPaginatedMembers( String ownerUsername, String groupPath, Integer page, Integer size);
 
     public Group getPaginatedAndFilteredMembers(String groupPath, String ownerUsername, String filterString, Integer page, Integer size);
