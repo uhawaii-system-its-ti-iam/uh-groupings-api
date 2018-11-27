@@ -739,33 +739,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // todo Look into getSubjects call
         // Can't paginate with it, but hopefully this doesn't matter as a filter would be a smaller subset
 
-//        return null;
-
-//        GcGetMemberships memberships = new GcGetMemberships();
-//        memberships.assignPageNumberForMember(page);
-//        memberships.assignPageSizeForMember(size);
-//        memberships.assignPageNumber(page);
-//        memberships.assignPageSize(size);
-//        memberships.assignScope("zac");
-
-        // Conversion Exception
-        // +for assigning page and size for some reason
-        // Is it possible that server version of Grouper is older, so it doesn't support?
-        // says Client version: 2.3.0 is less than (major/minor) server version: 2.2.2
-        // CannotResolveClassException
-//        Integer integer = new Integer(20);
-//        Integer integer2 = new Integer(1);
-//        String scope = ;
-//        String scope = "select * from memberships where uid like '%zac%'";
-//        String scope = "Zachery Knoebel";
-//        GrouperClientUtils.argMapString()
-
         return new GcGetMemberships()
                 .assignPageNumber(page)
                 .assignPageSize(size)
-//                .assignPageSizeForMember(integer)
-//                .assignPageNumberForMember(integer2)
-//                .assignScope(scope)
                 .addSubjectAttributeName(subjectAttributeName)
                 .assignActAsSubject(lookup)
                 .addGroupName(groupName)

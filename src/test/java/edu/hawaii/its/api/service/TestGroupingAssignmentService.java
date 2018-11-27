@@ -209,7 +209,18 @@ public class TestGroupingAssignmentService {
         assertTrue(grouping.getOwners().getUsernames().contains(username[0]));
     }
 
-    @Ignore
+    @Test
+    public void getBasisGroupWithTimeoutTest() {
+        Grouping grouping = groupingAssignmentService.getGrouping();
+
+        assertEquals(grouping.getPath(), "");
+        assertEquals(grouping.getName(), "");
+        assertEquals(grouping.getOwners().getMembers().size(), 0);
+        assertEquals(grouping.getInclude().getMembers().size(), 0);
+        assertEquals(grouping.getExclude().getMembers().size(), 0);
+        assertEquals(grouping.getBasis().getMembers().size(), 0);
+        assertEquals(grouping.getComposite().getMembers().size(), 0);    }
+
     @Test
     public void getPaginatedGroupingTest() {
 
@@ -245,7 +256,7 @@ public class TestGroupingAssignmentService {
     }
 
     // todo Method not implemented
-//    @Ignore
+    @Ignore
     @Test
     public void getFilteredGroupingTest() {
 
