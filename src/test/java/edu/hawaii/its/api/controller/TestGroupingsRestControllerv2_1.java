@@ -1,60 +1,10 @@
 package edu.hawaii.its.api.controller;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.hamcrest.CoreMatchers.*;
-
-import static org.junit.Assert.fail;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import java.util.*;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-
-import edu.hawaii.its.api.access.*;
-
-import org.hibernate.annotations.WhereJoinTable;
-import com.sun.net.httpserver.Authenticator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.validator.constraints.br.TituloEleitoral;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.Assert;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import edu.hawaii.its.api.access.AnonymousUser;
+import edu.hawaii.its.api.access.Role;
+import edu.hawaii.its.api.access.User;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingFactoryService;
@@ -64,12 +14,44 @@ import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingServiceResultExceptionTest;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.MembershipAssignment;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.Assert;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.annotation.PostConstruct;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -421,11 +403,11 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsAdminTest() throws Exception {
 
-        List listMemberships = mapList(API_BASE + "members/" + tst[0] + "/groupings", "get", adminUser);
-        assertThat(listMemberships.size(), not(0));
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], adminUser);
+        assertThat(membershipAssignment.getGroupingsIn().size(), not(0));
 
         try {
-            mapList(API_BASE + "members/bob-jones/groupings", "get", adminUser);
+            mapMembershipAssignment("fake username ", adminUser);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -436,8 +418,8 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsMyselfTest() throws Exception {
 
-        List listMemberships = mapList(API_BASE + "members/" + tst[0] + "/groupings", "get", uhUser01);
-        assertThat(listMemberships.size(), not(0));
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], uhUser01);
+        assertThat(membershipAssignment.getGroupingsIn(), not(0));
     }
 
     //    @Test
@@ -456,14 +438,8 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsFailTest() throws Exception {
 
-        List<String> results = mapList(API_BASE + "members/" + tst[0] + "/groupings", "get", uhUser05);
-        assertThat(results.size(), equalTo(0));
-        //        try {
-        //            mapList(API_BASE + "members/" + tst[0] + "/groupings", "get");
-        //            fail("Shouldn't be here.");
-        //        } catch (GroupingsHTTPException ghe) {
-        //            assertThat(ghe.getStatusCode(), equalTo(403));
-        //        }
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], uhUser05);
+        assertThat(membershipAssignment.getGroupingsIn().size(), equalTo(0));
     }
 
     @Test
@@ -571,7 +547,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingFailTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser02,0, 0);
+        Grouping grouping = mapGrouping(GROUPING, uhUser02, 0, 0);
         assertThat(grouping.getBasis().getUsernames().size(), equalTo(0));
         assertThat(grouping.getInclude().getUsernames().size(), equalTo(0));
         assertThat(grouping.getExclude().getUsernames().size(), equalTo(0));
@@ -1164,7 +1140,8 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());        }
+                    ghe, result.getResponse().getStatus());
+        }
     }
 
     // Mapping of AdminsGroupings call
@@ -1183,7 +1160,8 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());        }
+                    ghe, result.getResponse().getStatus());
+        }
     }
 
     // Mapping of getGrouping and getPaginatedGrouping call
@@ -1193,7 +1171,7 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult result = null;
 
         // If page or size are 0, call it normally, else use pagination
-        if(page.equals(0) || size.equals(0)) {
+        if (page.equals(0) || size.equals(0)) {
             result = mockMvc.perform(get(API_BASE + "groupings/" + groupingPath)
                     .header(CURRENT_USER, currentUser.getUsername())
                     .with(user(currentUser))
@@ -1227,7 +1205,23 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());        }
+                    ghe, result.getResponse().getStatus());
+        }
+    }
+
+    // Mapping of MembershipAssignment call
+    private MembershipAssignment mapMembershipAssignment(String username, User user) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        MvcResult result = mapHelper(API_BASE + "members/" + username + "/groupings", "get", user);
+
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), MembershipAssignment.class);
+        } else {
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());
+        }
     }
 
     // Mapping of any uri call that returns a list of GroupingsServiceResults
@@ -1241,7 +1235,8 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());        }
+                    ghe, result.getResponse().getStatus());
+        }
     }
 
     // Helper function for mapping any uri with multiple possible HTTP call types (i.e. GET / POST / PUT / DELETE)
