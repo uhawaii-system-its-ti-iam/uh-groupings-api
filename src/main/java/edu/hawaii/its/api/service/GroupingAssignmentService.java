@@ -36,7 +36,7 @@ public interface GroupingAssignmentService {
     public GroupingAssignment getGroupingAssignment(String username);
 
     //get a MembershipAssignment object containing the groups that a user is in and can opt into
-    MembershipAssignment getMembershipAssignment(String username);
+    MembershipAssignment getMembershipAssignment(String username, String uid);
 
     public AdminListsHolder adminLists(String adminUsername);
 

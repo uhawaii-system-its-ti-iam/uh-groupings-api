@@ -344,11 +344,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingAssignment;
     }
 
-    //get a GroupingAssignment object containing the groups that a user is in and can opt into
+    //get a GroupingAssignment object containing the groups that a user with <uid> is in and can opt into
     @Override
-    public MembershipAssignment getMembershipAssignment(String username) {
+    public MembershipAssignment getMembershipAssignment(String username, String uid) {
         MembershipAssignment membershipAssignment = new MembershipAssignment();
-        List<String> groupPaths = getGroupPaths(username, username);
+        List<String> groupPaths = getGroupPaths(username, uid);
 
         membershipAssignment.setGroupingsIn(groupingsIn(groupPaths));
         membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
