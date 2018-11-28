@@ -49,7 +49,7 @@ public interface GroupingAssignmentService {
 
     public Group getMembers(String ownerUsername, String groupPath);
 
-    public Group getBasisMembers(String ownerUsername, String groupPath);
+    public Group getBasisMembers(String ownerUsername, String groupPath) throws Exception;
 
     public Group getPaginatedMembers( String ownerUsername, String groupPath, Integer page, Integer size);
 

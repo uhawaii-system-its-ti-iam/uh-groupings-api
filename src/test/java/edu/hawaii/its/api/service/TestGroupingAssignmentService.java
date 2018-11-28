@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import org.hibernate.AssertionFailure;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,9 +28,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -210,16 +213,31 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void getBasisGroupWithTimeoutTest() {
-        Grouping grouping = groupingAssignmentService.getGrouping();
+    public void getBasisGroupWithTimeoutTest() throws Exception {
+//        Grouping grouping = groupingAssignmentService.getGrouping("hawaii.edu:custom:test:julio:jtest102-l", ADMIN);
 
-        assertEquals(grouping.getPath(), "");
-        assertEquals(grouping.getName(), "");
-        assertEquals(grouping.getOwners().getMembers().size(), 0);
-        assertEquals(grouping.getInclude().getMembers().size(), 0);
-        assertEquals(grouping.getExclude().getMembers().size(), 0);
-        assertEquals(grouping.getBasis().getMembers().size(), 0);
-        assertEquals(grouping.getComposite().getMembers().size(), 0);    }
+        Group basisGroup = new Group();
+        try {
+            basisGroup = groupingAssignmentService.getBasisMembers(ADMIN, "hawaii.edu:custom:test:julio:jtest102-l:basis");
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe){
+            ghe.printStackTrace();
+        }
+
+        Group standardBasisGroup = groupingAssignmentService.getBasisMembers(ADMIN, GROUPING);
+        assertThat(standardBasisGroup.getMembers().size(), not(0));
+
+        //todo Split basis into its own function, then check for GroupingsHTTPException
+        //todo Split API calls in REST controller for each group (maybe a generic getGroup call?)
+        //todo Write filter using direct matching using getMember
+//        assertEquals(grouping.getPath(), "");
+//        assertEquals(grouping.getName(), "");
+//        assertEquals(grouping.getOwners().getMembers().size(), 2);
+//        assertEquals(grouping.getInclude().getMembers().size(), 0);
+//        assertEquals(grouping.getExclude().getMembers().size(), 0);
+//        assertEquals(grouping.getBasis().getMembers().size(), 0);
+//        assertEquals(grouping.getComposite().getMembers().size(), 0);
+    }
 
     @Test
     public void getPaginatedGroupingTest() {

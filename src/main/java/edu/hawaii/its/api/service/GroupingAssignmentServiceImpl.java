@@ -4,6 +4,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -247,9 +248,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
+
             Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
             Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
-            Group basis = getBasisMembers(ownerUsername, groupingPath + BASIS);
+            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
             Group composite = getMembers(ownerUsername, groupingPath);
             Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
 
@@ -432,7 +434,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     @Override
-    public Group getBasisMembers(String ownerUsername, String groupPath) {
+    public Group getBasisMembers(String ownerUsername, String groupPath) throws Exception {
         logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
@@ -452,15 +454,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             members = future.get(4, TimeUnit.SECONDS);
         } catch (TimeoutException te) {
             te.printStackTrace();
-            members.setResults(null);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-            members.setResults(null);
-        } catch (ExecutionException ee) {
-            ee.printStackTrace();
-            members.setResults(null);
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("getBasisMembers Operation Timed Out.", ghe, 504);
         }
-        if (!executor.isTerminated()) {
+//            members.setResults(null);
+//        } catch (InterruptedException ie) {
+//            ie.printStackTrace();
+////            members.setResults(null);
+//        } catch (ExecutionException ee) {
+//            ee.printStackTrace();
+////            members.setResults(null);
+//        }
+        if (executor.isTerminated()) {
             executor.shutdown();
         }
 
