@@ -596,6 +596,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
     }
 
+    @Override
     public List<String> getGroupPaths(Principal principal, String username) {
         return getGroupPaths(principal.getName(), username);
     }
