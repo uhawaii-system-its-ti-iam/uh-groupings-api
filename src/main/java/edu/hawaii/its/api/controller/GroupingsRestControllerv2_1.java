@@ -1,35 +1,24 @@
 package edu.hawaii.its.api.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import com.sun.org.apache.regexp.internal.RE;
+import edu.hawaii.its.api.service.*;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingFactoryService;
-import edu.hawaii.its.api.service.HelperService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 //todo Possibly tack on version number to Base RequestMapping?
@@ -129,20 +118,19 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of a member's grouping memberships
+     * Get a list of a groupings a user is in and can opt into
      *
-     * @param uid: Username or id number of member to get list of grouping memberships
      * @return List of members grouping memberships
      */
     @RequestMapping(value = "/members/{uid}/groupings",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<String>> memberGroupings(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
+    public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(helperService.extractGroupings(groupingAssignmentService.getGroupPaths(currentUser, uid)));
+                .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
     }
 
     //todo Maybe come back to this using listOwned?
@@ -161,7 +149,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, uid)));
+                .body(groupingAssignmentService.restGroupingsOwned(currentUser, uid));
     }
 
     /**
