@@ -32,9 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -366,6 +364,49 @@ public class GroupingAssignmentServiceTest {
         for (int i = 0; i < size; i++) {
             assertTrue(groupNames.contains("testName_" + i));
         }
+    }
+
+    @Test
+    public void getMembershipAssignmentTest() {
+        String username = users.get(0).getUsername();
+        // username should already be in GROUPING_0_PATH
+        List<String> groupingsIn = groupingAssignmentService
+                .getMembershipAssignment(username, username)
+                .getGroupingsIn()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        List<String> groupingsToOptInto = groupingAssignmentService
+                .getMembershipAssignment(username, username)
+                .getGroupingsToOptInTo()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        assertTrue(groupingsIn.contains(GROUPING_0_PATH));
+        assertFalse(groupingsToOptInto.contains(GROUPING_0_PATH));
+
+        // take username[1] out of GROUPING
+        membershipService.deleteGroupingMemberByUsername(username, GROUPING_0_PATH, username);
+
+        // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
+        groupingsIn = groupingAssignmentService
+                .getMembershipAssignment(username, username)
+                .getGroupingsIn()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        groupingsToOptInto = groupingAssignmentService
+                .getMembershipAssignment(username, username)
+                .getGroupingsToOptInTo()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        assertFalse(groupingsIn.contains(GROUPING_0_PATH));
+        assertTrue(groupingsToOptInto.contains(GROUPING_0_PATH));
     }
 
     @Test
