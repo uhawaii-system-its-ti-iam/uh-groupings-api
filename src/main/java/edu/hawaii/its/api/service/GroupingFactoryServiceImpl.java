@@ -426,11 +426,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         for (String group : memberLists) {
 
-            if (isPathEmpty(adminUsername, groupingPath + group)) {
-
-                // todo: Why is this empty?
-
-            } else {
+            if (!isPathEmpty(adminUsername, groupingPath + group)) {
 
                 grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                         admin,
