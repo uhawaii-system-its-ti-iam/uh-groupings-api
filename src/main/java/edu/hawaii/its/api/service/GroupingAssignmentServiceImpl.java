@@ -439,7 +439,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
                 "; componentId: " + componentId + ";");
 
-        String groupPath = parentGroupingPath + ":" + componentId;
+        String groupPath = parentGroupingPath + componentId;
         Group groupMembers = new Group();
 
         if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
@@ -460,7 +460,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             try {
                 //todo Move to properties file
-                members = future.get(4, TimeUnit.SECONDS);
+                members = future.get(20, TimeUnit.SECONDS);
             } catch (TimeoutException te) {
                 te.printStackTrace();
                 GroupingsHTTPException ghe = new GroupingsHTTPException();

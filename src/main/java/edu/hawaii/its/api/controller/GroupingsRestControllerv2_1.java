@@ -205,6 +205,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String componentId) throws Exception {
         logger.info("Entered REST getGrouping...");
+        componentId = ":" + componentId;
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
