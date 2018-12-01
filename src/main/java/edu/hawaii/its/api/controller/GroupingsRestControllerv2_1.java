@@ -182,7 +182,7 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path) {
+            @PathVariable String path) throws Exception {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
@@ -205,10 +205,9 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String componentId) throws Exception {
         logger.info("Entered REST getGrouping...");
-        String groupPath = path + ":" +componentId;
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getMembers(currentUser, groupPath));
+                .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
     }
 
     /**

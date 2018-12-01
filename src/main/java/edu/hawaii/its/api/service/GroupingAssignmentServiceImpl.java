@@ -237,6 +237,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingsOpted(EXCLUDE, username, groupPaths);
     }
 
+    //todo This might be obsolete with getGroup methods, but refactoring may take time
+    //todo Change getMembers to getGroupMembers with appropriate exception handlers
     //fetch a grouping from Grouper or the database
     @Override
     public Grouping getGrouping(String groupingPath, String ownerUsername) {
@@ -247,7 +249,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
-
 
             Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
             Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
@@ -434,68 +435,50 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     @Override
-    public Group getBasisMembers(String ownerUsername, String groupPath) throws Exception {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
+    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
+        logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+                "; componentId: " + componentId + ";");
 
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = new WsGetMembersResults();
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Callable<WsGetMembersResults> callable = new Callable<WsGetMembersResults>() {
-            @Override
-            public WsGetMembersResults call() {
-                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, lookup, groupPath);
-            }
-        };
-
-        Future<WsGetMembersResults> future = executor.submit(callable);
-
-        try {
-            members = future.get(4, TimeUnit.SECONDS);
-        } catch (TimeoutException te) {
-            te.printStackTrace();
-            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("getBasisMembers Operation Timed Out.", ghe, 504);
-        }
-//            members.setResults(null);
-//        } catch (InterruptedException ie) {
-//            ie.printStackTrace();
-////            members.setResults(null);
-//        } catch (ExecutionException ee) {
-//            ee.printStackTrace();
-////            members.setResults(null);
-//        }
-        if (executor.isTerminated()) {
-            executor.shutdown();
-        }
-
-        //        final Callable getBasisThread = new Thread() {
-        //                    WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
-        //                    SUBJECT_ATTRIBUTE_NAME_UID,
-        //                    lookup,
-        //                    groupPath);
-        //        };
-        //
-        //        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        //        final Future future = executor.submit(getBasisThread);
-        //
-        //        try {
-        //            future.get(4, TimeUnit.SECONDS);
-        //        } catch (TimeoutException te){
-        //            te.printStackTrace();
-        //        } catch (InterruptedException ie) {
-        //            ie.printStackTrace();
-        //        } catch (ExecutionException ee) {
-        //            ee.printStackTrace();
-        //        }
-        //        if(!executor.isTerminated()){
-        //            executor.shutdown();
-        //        }
-
-        //todo should we use EmptyGroup?
+        String groupPath = parentGroupingPath + ":" + componentId;
         Group groupMembers = new Group();
-        if (members.getResults() != null) {
-            groupMembers = makeBasisGroup(members);
+
+        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
+
+            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+            WsGetMembersResults members = new WsGetMembersResults();
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Callable<WsGetMembersResults> callable = new Callable<WsGetMembersResults>() {
+                @Override
+                public WsGetMembersResults call() {
+                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, lookup, groupPath);
+                }
+            };
+
+            Future<WsGetMembersResults> future = executor.submit(callable);
+
+            try {
+                //todo Move to properties file
+                members = future.get(4, TimeUnit.SECONDS);
+            } catch (TimeoutException te) {
+                te.printStackTrace();
+                GroupingsHTTPException ghe = new GroupingsHTTPException();
+                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+            }
+
+            if (executor.isTerminated()) {
+                executor.shutdown();
+            }
+
+            //todo should we use EmptyGroup?
+            if (members.getResults() != null) {
+                if (componentId.equals(BASIS)) {
+                    groupMembers = makeBasisGroup(members);
+                } else {
+                    groupMembers = makeGroup(members);
+                }
+            }
         }
         return groupMembers;
     }
