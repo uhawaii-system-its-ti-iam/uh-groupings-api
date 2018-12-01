@@ -221,7 +221,7 @@ public class TestGroupingAssignmentService {
             basisGroup = groupingAssignmentService.getBasisMembers(ADMIN, "hawaii.edu:custom:test:julio:jtest102-l:basis");
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe){
-            ghe.printStackTrace();
+            assertThat(ghe.getStatusCode(), equalTo(504));
         }
 
         Group standardBasisGroup = groupingAssignmentService.getBasisMembers(ADMIN, GROUPING);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.print.attribute.standard.Media;
 
 import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.logging.Log;
@@ -188,7 +189,27 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAssignmentService.getGrouping(path, currentUser));
     }
 
+    /**
+     * Get a specific group
+     *
+     * @param path: Path of specified parent grouping
+     * @param componentId:
+     * @return Group found as result
+     */
     //todo Is this the way we want/can do this? Might be better to split GET calls based on Groups individually
+    @RequestMapping(value = "/groupings/{path}/components/{componentId}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Group> getGroup(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String componentId) throws Exception {
+        logger.info("Entered REST getGrouping...");
+        String groupPath = path + ":" +componentId;
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getMembers(currentUser, groupPath));
+    }
 
     /**
      * Get a specific grouping by page
