@@ -240,6 +240,9 @@ public class TestGroupingAssignmentService {
         Group standardBasisGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING, BASIS);
         assertThat(standardBasisGroup.getMembers().size(), not(0));
 
+        Group standardIncludeGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING, INCLUDE);
+        assertThat(standardIncludeGroup.getMembers().size(), not(0));
+
         //todo Split basis into its own function, then check for GroupingsHTTPException
         //todo Split API calls in REST controller for each group (maybe a generic getGroup call?)
         //todo Write filter using direct matching using getMember
