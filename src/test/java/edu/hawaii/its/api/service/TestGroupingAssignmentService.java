@@ -88,6 +88,18 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.owners}")
+    private String OWNERS;
+
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
@@ -218,13 +230,14 @@ public class TestGroupingAssignmentService {
 
         Group basisGroup = new Group();
         try {
-            basisGroup = groupingAssignmentService.getBasisMembers(ADMIN, "hawaii.edu:custom:test:julio:jtest102-l:basis");
+            //todo Move to properties file
+            basisGroup = groupingAssignmentService.getGroupMembers(ADMIN, "hawaii.edu:custom:test:julio:jtest102-l", BASIS);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe){
             assertThat(ghe.getStatusCode(), equalTo(504));
         }
 
-        Group standardBasisGroup = groupingAssignmentService.getBasisMembers(ADMIN, GROUPING);
+        Group standardBasisGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING, BASIS);
         assertThat(standardBasisGroup.getMembers().size(), not(0));
 
         //todo Split basis into its own function, then check for GroupingsHTTPException
