@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.thymeleaf.spring5.expression.Mvc;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -1103,6 +1105,13 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    @Test
+    public void getGroupMembersTest() throws Exception {
+
+
+
+    }
+
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
 
     ///////////////////////////////////////////////////////////////////////
@@ -1187,6 +1196,26 @@ public class TestGroupingsRestControllerv2_1 {
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);
+        } else {
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());
+        }
+    }
+
+    // Mapping of getGroup call
+    private Group mapGroup(User currentUser, String parentGroupingPath, String componentId) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "groupings/" + parentGroupingPath + "/components/" + componentId)
+                .header(CURRENT_USER, currentUser.getUsername())
+                .with(user(currentUser))
+                .with(csrf()))
+                .andReturn();
+
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
