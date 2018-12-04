@@ -2,24 +2,14 @@ package edu.hawaii.its.api.type;
 
 import java.util.List;
 
-public class GroupingAssignment {
-    List<Grouping> groupingsIn;
-    List<Grouping> groupingsOwned;
-    List<Grouping> groupingsOptedOutOf;
-    List<Grouping> groupingsOptedInTo;
-    List<Grouping> groupingsToOptOutOf;
-    List<Grouping> groupingsToOptInTo;
+public class GroupingAssignment extends MembershipAssignment{
+    private List<Grouping> groupingsOwned;
+    private List<Grouping> groupingsOptedOutOf;
+    private List<Grouping> groupingsOptedInTo;
+    private List<Grouping> groupingsToOptOutOf;
 
     public GroupingAssignment(){
 
-    }
-
-    public List<Grouping> getGroupingsIn() {
-        return groupingsIn;
-    }
-
-    public void setGroupingsIn(List<Grouping> groupingsIn) {
-        this.groupingsIn = groupingsIn;
     }
 
     public List<Grouping> getGroupingsOwned() {
@@ -36,14 +26,6 @@ public class GroupingAssignment {
 
     public void setGroupingsToOptOutOf(List<Grouping> groupingsToOptOutOf) {
         this.groupingsToOptOutOf = groupingsToOptOutOf;
-    }
-
-    public List<Grouping> getGroupingsToOptInTo() {
-        return groupingsToOptInTo;
-    }
-
-    public void setGroupingsToOptInTo(List<Grouping> groupingsToOptInTo) {
-        this.groupingsToOptInTo = groupingsToOptInTo;
     }
 
     public List<Grouping> getGroupingsOptedOutOf() {

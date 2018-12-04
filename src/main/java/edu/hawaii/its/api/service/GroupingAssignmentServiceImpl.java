@@ -5,6 +5,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -208,6 +209,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupings;
     }
 
+    @Override
+    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername) {
+        return groupingsOwned(getGroupPaths(actingUsername, ownerUsername));
+    }
+
     //returns a list of groupings that corresponds to all of the owner groups in groupPaths
     @Override
     public List<Grouping> groupingsOwned(List<String> groupPaths) {
@@ -358,6 +364,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         groupingAssignment.setGroupingsOptedInTo(groupingsOptedInto(username, groupPaths));
 
         return groupingAssignment;
+    }
+
+    //get a GroupingAssignment object containing the groups that a user with <uid> is in and can opt into
+    @Override
+    public MembershipAssignment getMembershipAssignment(String username, String uid) {
+        MembershipAssignment membershipAssignment = new MembershipAssignment();
+        List<String> groupPaths = getGroupPaths(username, uid);
+
+        membershipAssignment.setGroupingsIn(groupingsIn(groupPaths));
+        membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
+
+        return membershipAssignment;
     }
 
     //returns an adminLists object containing the list of all admins and all groupings
@@ -679,6 +697,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
     }
 
+    @Override
     public List<String> getGroupPaths(Principal principal, String username) {
         return getGroupPaths(principal.getName(), username);
     }

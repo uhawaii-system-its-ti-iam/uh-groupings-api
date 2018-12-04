@@ -1,11 +1,9 @@
 package edu.hawaii.its.api.service;
 
-import org.hibernate.AssertionFailure;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -28,11 +26,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -411,6 +407,48 @@ public class TestGroupingAssignmentService {
         assertFalse(usernames.contains(username[3]));
         assertTrue(usernames.contains(username[4]));
         assertTrue(usernames.contains(username[5]));
+    }
+
+    @Test
+    public void getMembershipAssignmentTest() {
+        // username[1] should already be in GROUPING
+        List<String> groupingsIn = groupingAssignmentService
+                .getMembershipAssignment(username[0], username[0])
+                .getGroupingsIn()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        List<String> groupingsToOptInto = groupingAssignmentService
+                .getMembershipAssignment(username[0], username[0])
+                .getGroupingsToOptInTo()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        assertTrue(groupingsIn.contains(GROUPING));
+        assertFalse(groupingsToOptInto.contains(GROUPING));
+
+        // take username[1] out of GROUPING
+        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[0]);
+
+        // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
+        groupingsIn = groupingAssignmentService
+                .getMembershipAssignment(username[0], username[0])
+                .getGroupingsIn()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        groupingsToOptInto = groupingAssignmentService
+                .getMembershipAssignment(username[0], username[0])
+                .getGroupingsToOptInTo()
+                .stream()
+                .map(Grouping::getPath)
+                .collect(Collectors.toList());
+
+        assertFalse(groupingsIn.contains(GROUPING));
+        assertTrue(groupingsToOptInto.contains(GROUPING));
     }
 
     @Test
