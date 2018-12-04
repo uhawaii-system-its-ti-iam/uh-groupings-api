@@ -32,6 +32,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
 
 @RestController
 //todo Possibly tack on version number to Base RequestMapping?
@@ -196,7 +197,6 @@ public class GroupingsRestControllerv2_1 {
      * @param componentId:
      * @return Group found as result
      */
-    //todo Is this the way we want/can do this? Might be better to split GET calls based on Groups individually
     @RequestMapping(value = "/groupings/{path}/components/{componentId}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -209,6 +209,28 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+    }
+
+    /**
+     * Get a specific member of a group
+     *
+     * @param path: Path of specified parent grouping
+     * @param componentId:
+     * @return Group found as result
+     */
+    @RequestMapping(value = "/groupings/{path}/components/{componentId}/members/{uid}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<List<Person>> getMembers(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String componentId,
+            @PathVariable String uid) {
+        logger.info("Entered REST getMembers...");
+        String groupPath = path + ":" + componentId;
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getMembers(groupPath, uid));
     }
 
     /**
