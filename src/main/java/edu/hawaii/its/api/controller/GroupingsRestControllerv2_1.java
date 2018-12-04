@@ -190,6 +190,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String componentId) throws Exception {
         logger.info("Entered REST getGrouping...");
+        if(componentId.equals("composite")) componentId = "";
         componentId = ":" + componentId;
         return ResponseEntity
                 .ok()
@@ -212,6 +213,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String componentId,
             @PathVariable String uid) {
         logger.info("Entered REST getMembers...");
+        if(componentId.equals("composite")) componentId = "";
         String groupPath = path + ":" + componentId;
         return ResponseEntity
                 .ok()
