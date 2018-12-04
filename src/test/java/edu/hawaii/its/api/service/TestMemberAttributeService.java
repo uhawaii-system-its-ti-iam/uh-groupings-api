@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -29,6 +30,7 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Null;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -173,13 +175,14 @@ public class TestMemberAttributeService {
         assertTrue(assignOwnershipFail.getResultCode().startsWith(FAILURE));
 
         // get last modified time
-        WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        WsGetAttributeAssignmentsResults attributes =
+                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime1 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
         // get last modified time and make sure that it has changed
         try {
             TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             fail();
         }
 
@@ -217,6 +220,8 @@ public class TestMemberAttributeService {
     @Test
     public void isMemberTest() {
         //test isMember with username
+        memberAttributeService.isMember(GROUPING, "zknoebel");
+
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
@@ -481,8 +486,8 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uhuuid").equals(""));
 
         //todo Implement assertThat over assertTrue/assertEquals/etc.
-//        assertEquals("iamtst02", attributes.get("uhuuid"));
-//        assertThat(attributes.get("uhuuid"), equalTo("iamtst02"));
+        //        assertEquals("iamtst02", attributes.get("uhuuid"));
+        //        assertThat(attributes.get("uhuuid"), equalTo("iamtst02"));
 
         // Test with invalid username
         try {
@@ -501,4 +506,17 @@ public class TestMemberAttributeService {
         }
     }
 
+    @Test
+    public void getMembersTest() {
+
+        // iamtst04 is in the basis group
+        List<Person> members = memberAttributeService.getMembers(GROUPING_BASIS, username[3]);
+        assertThat(members.get(0).getName(), equalTo("tst04name"));
+        assertThat(members.get(0).getUsername(), equalTo("iamtst04"));
+        assertThat(members.get(0).getUuid(), equalTo("iamtst04"));
+
+        // iamtst01 is not in the basis group (results list should be empty)
+        members = memberAttributeService.getMembers(GROUPING_BASIS, username[0]);
+        assertThat(members.size(), equalTo(0));
+    }
 }
