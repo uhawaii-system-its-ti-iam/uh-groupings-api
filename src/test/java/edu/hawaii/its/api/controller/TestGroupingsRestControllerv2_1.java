@@ -1108,8 +1108,15 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupMembersTest() throws Exception {
 
+        Group group = mapGroup(GROUPING, "basis", adminUser);
+        assertThat(group.getMembers().size(), not(0));
 
-
+        try {
+            group = mapGroup("hawaii.edu:custom:test:julio:jtest102-l", "basis", adminUser);
+            fail("Shouldn't be here.");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(504));
+        }
     }
 
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
@@ -1204,7 +1211,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // Mapping of getGroup call
-    private Group mapGroup(User currentUser, String parentGroupingPath, String componentId) throws Exception {
+    private Group mapGroup(String parentGroupingPath, String componentId, User currentUser) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1213,6 +1220,9 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(user(currentUser))
                 .with(csrf()))
                 .andReturn();
+
+//        int code = result.getResponse().getStatus();
+//        Exception e = result.getResolvedException();
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
