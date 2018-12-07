@@ -648,4 +648,46 @@ public class GroupingsRestControllerv2_1 {
         throw new UnsupportedOperationException();
         //todo Implement method
     }
+
+    /**
+     * if the user is allowed to opt into the grouping
+     * this will add them to the include group of that grouping
+     * if the user is in the exclude group, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting in
+     * @param uid : the uid of the user that will be opted in
+     * @return information about the success of opting in
+     */
+    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}/self",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
+                                                              @PathVariable String path,
+                                                              @PathVariable String uid) {
+        logger.info("Entered REST optIn...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.optIn(currentUser, path, uid));
+    }
+
+    /**
+     * if the user is allowed to opt out of the grouping
+     * this will add them to the exclude group of that grouping
+     * if the user is in the include group of that Grouping, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting out
+     * @param uid : the uid of the user that will be opted out
+     * @return information about the success of opting out
+     */
+    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}/self",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
+                                                               @PathVariable String path,
+                                                               @PathVariable String uid) {
+        logger.info("Entered REST optOut...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.optOut(currentUser, path, uid));
+    }
 }

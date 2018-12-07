@@ -58,6 +58,10 @@ public interface MembershipService {
 
     public List<GroupingsServiceResult> optOut(String username, String groupingPath);
 
+    public List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
+
+    public List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
+
     public boolean isGroupCanOptIn(String username, String groupPath);
 
     public boolean isGroupCanOptOut(String username, String groupPath);
