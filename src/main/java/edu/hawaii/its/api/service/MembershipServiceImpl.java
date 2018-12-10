@@ -635,7 +635,7 @@ public class MembershipServiceImpl implements MembershipService {
         String preposition = "to ";
         String addGroup = groupingPath + INCLUDE;
 
-        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
+        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
             return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
         }
         else{
@@ -655,7 +655,7 @@ public class MembershipServiceImpl implements MembershipService {
         String preposition = "from ";
         String addGroup = groupingPath + EXCLUDE;
 
-        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
+        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
             return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
         }
         else{
@@ -703,7 +703,6 @@ public class MembershipServiceImpl implements MembershipService {
             switch (outOrrIn) {
                 case "out ":
                     results.addAll(deleteGroupingMemberByUsername(username, grouping, username));
-
                     break;
 
                 case "in ":
