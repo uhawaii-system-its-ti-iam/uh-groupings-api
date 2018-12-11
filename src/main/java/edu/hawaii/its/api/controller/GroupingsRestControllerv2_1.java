@@ -680,7 +680,7 @@ public class GroupingsRestControllerv2_1 {
      * @return information about the success of opting out
      */
     @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}/self",
-            method = RequestMethod.POST,
+            method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
                                                                @PathVariable String path,
