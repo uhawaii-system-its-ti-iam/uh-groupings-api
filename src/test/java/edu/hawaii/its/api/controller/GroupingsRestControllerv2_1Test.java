@@ -73,6 +73,9 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
 
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
     @MockBean
     private GroupAttributeService groupAttributeService;
 
@@ -97,6 +100,9 @@ public class GroupingsRestControllerv2_1Test {
     private MockMvc mockMvc;
 
     private static final String API_BASE = "/api/groupings/v2.1";
+    private static final String GROUPING = "grouping";
+    private static final String USERNAME = "user";
+    private static final String ADMIN = "admin";
 
     @Before
     public void setUp() {
@@ -213,53 +219,53 @@ public class GroupingsRestControllerv2_1Test {
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrList() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "add users to grouping"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "add users to grouping"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrList2() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "delete member from include group"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "delete member from include group"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrListIn() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "member is opted-in"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is opted-in"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrListIn2() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "member is not opted-in"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is not opted-in"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrListOut() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "member is opted-out"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is opted-out"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrListOut2() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "member is not opted-out"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is not opted-out"));
         return gsrList;
     }
 
     //Test data (2.1 API).
     private GroupingsServiceResult gsrListserv() {
-        return new GroupingsServiceResult("SUCCESS", "listserv status changed");
+        return new GroupingsServiceResult(SUCCESS, "listserv status changed");
     }
 
     //Test data (2.1 API).
     private GroupingsServiceResult gsrReleasedGrouping() {
-        return new GroupingsServiceResult("SUCCESS", "ldap status changed");
+        return new GroupingsServiceResult(SUCCESS, "ldap status changed");
     }
 
     //Test data.
@@ -495,13 +501,13 @@ public class GroupingsRestControllerv2_1Test {
     public void addNewAdminTest() throws Exception {
         String admin = "uhAdmin";
         given(membershipService.addAdmin(admin, "newAdmin"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "add admin"));
+                .willReturn(new GroupingsServiceResult(SUCCESS, "add admin"));
 
         mockMvc.perform(post(API_BASE + "/admins/newAdmin")
                 .with(csrf())
                 .header(CURRENT_USER, admin))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("add admin"));
     }
 
@@ -519,13 +525,13 @@ public class GroupingsRestControllerv2_1Test {
         String admin = "uhAdmin";
 
         given(memberAttributeService.assignOwnership("path1", "uhAdmin", "newOwner"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "give newOwner ownership of path1"));
+                .willReturn(new GroupingsServiceResult(SUCCESS, "give newOwner ownership of path1"));
 
         mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner")
                 .with(csrf())
                 .header(CURRENT_USER, admin))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("give newOwner ownership of path1"));
 
     }
@@ -541,16 +547,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void includeMembersTest() throws Exception {
-        String username = "user";
-
-        given(membershipService.addGroupMember(username, "grouping" + INCLUDE, "tst04name"))
+        given(membershipService.addGroupMember(USERNAME, "grouping" + INCLUDE, "tst04name"))
                 .willReturn(gsrList());
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/tst04name")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("add users to grouping"));
     }
 
@@ -565,15 +569,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void excludeMembersTest() throws Exception {
-        String username = "user";
-        given(membershipService.addGroupMember(username, "grouping" + EXCLUDE, "tst04name"))
+        given(membershipService.addGroupMember(USERNAME, "grouping" + EXCLUDE, "tst04name"))
                 .willReturn(gsrList2());
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/tst04name")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete member from include group"));
     }
 
@@ -588,42 +591,40 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void enablePreferenceTest() throws Exception {
-        String username = "user";
-
-        given(groupAttributeService.changeOptInStatus("grouping", username, true))
+        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
                 .willReturn(gsrListIn());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-in"));
 
-        given(groupAttributeService.changeOptOutStatus("grouping", username, true))
+        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, true))
                 .willReturn(gsrListOut());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
 
-        given(groupAttributeService.changeListservStatus("grouping", username, true))
+        given(groupAttributeService.changeListservStatus("grouping", USERNAME, true))
                 .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", username, true))
+        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, true))
                 .willReturn(gsrReleasedGrouping());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("ldap status changed"));
 
     }
@@ -645,42 +646,40 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void disablePreferenceTest() throws Exception {
-        String username = "user";
-
-        given(groupAttributeService.changeOptInStatus("grouping", username, false))
+        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, false))
                 .willReturn(gsrListIn2());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is not opted-in"));
 
-        given(groupAttributeService.changeOptOutStatus("grouping", "user", false))
+        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, false))
                 .willReturn(gsrListOut2());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
 
-        given(groupAttributeService.changeListservStatus("grouping", "user", false))
+        given(groupAttributeService.changeListservStatus("grouping", USERNAME, false))
                 .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", "user", false))
+        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, false))
                 .willReturn(gsrReleasedGrouping());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("ldap status changed"));
 
     }
@@ -702,16 +701,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteNewAdminTest() throws Exception {
-        String username = "user";
-
-        given(membershipService.deleteAdmin(username, "homerSimpson"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "deleted admin"));
+        given(membershipService.deleteAdmin(USERNAME, "homerSimpson"))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted admin"));
 
         mockMvc.perform(delete(API_BASE + "/admins/homerSimpson")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted admin"));
 
     }
@@ -727,16 +724,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteOwnerTest() throws Exception {
-        String username = "user";
-
-        given(memberAttributeService.removeOwnership("grouping", username, "frye"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "deleted owner"));
+        given(memberAttributeService.removeOwnership("grouping", USERNAME, "frye"))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted owner"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted owner"));
 
     }
@@ -753,16 +748,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteIncludeTest() throws Exception {
-        String username = "user";
-
-        given(membershipService.deleteGroupMemberByUsername(username, "grouping" + INCLUDE, "frylock"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "deleted frylock from include"));
+        given(membershipService.deleteGroupMemberByUsername(USERNAME, "grouping" + INCLUDE, "frylock"))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted frylock from include"));
 
     }
@@ -778,16 +771,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteExcludeTest() throws Exception {
-        String username = "user";
-
-        given(membershipService.deleteGroupMemberByUsername(username, "grouping" + EXCLUDE, "carl"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "deleted carl from exclude"));
+        given(membershipService.deleteGroupMemberByUsername(USERNAME, "grouping" + EXCLUDE, "carl"))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl")
                 .with(csrf())
-                .header(CURRENT_USER, username))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted carl from exclude"));
 
     }
@@ -813,14 +804,12 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void getGrouping() throws Exception {
-        final String grouping = "grouping";
-        final String username = "user";
 
-        given(groupingAssignmentService.getGrouping(grouping, username))
+        given(groupingAssignmentService.getGrouping(GROUPING, USERNAME))
                 .willReturn(grouping());
 
-        ResultActions abc = mockMvc.perform(get("/api/groupings/v2.0/grouping/grouping")
-                .header(CURRENT_USER, username))
+        mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING)
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("bob"))
                 .andExpect(jsonPath("path").value("test:ing:me:bob"))
@@ -855,120 +844,39 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "admin")
     public void addAdminTest() throws Exception {
-        String admin = "admin";
-        given(membershipService.addAdmin("admin", "newAdmin"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "add admin"));
+        String newAdmin = "newAdmin";
+        given(membershipService.addAdmin(ADMIN, newAdmin))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
 
-        mockMvc.perform(post("/api/groupings/v2.0/newAdmin/addAdmin")
+        mockMvc.perform(post(API_BASE + "/admins/" + newAdmin)
                 .with(csrf())
-                .header(CURRENT_USER, admin))
+                .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("action").value("add admin"));
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
+                .andExpect(jsonPath("action").value("add " + newAdmin));
     }
 
     @Test
     @WithMockUhUser(username = "admin")
     public void deleteAdminTest() throws Exception {
-        String admin = "admin";
-        given(membershipService.deleteAdmin(admin, "newAdmin"))
-                .willReturn(new GroupingsServiceResult("SUCCESS", "delete admin"));
+        String adminToDelete = "adminToDelete";
+        given(membershipService.deleteAdmin(ADMIN, adminToDelete))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "delete admin"));
 
-        mockMvc.perform(post("/api/groupings/v2.0/newAdmin/deleteAdmin")
+        mockMvc.perform(delete(API_BASE + "/admins/" + adminToDelete)
                 .with(csrf())
-                .header(CURRENT_USER, admin))
+                .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("delete admin"));
     }
 
-    @Test
-    @WithMockUhUser
-    public void addByUsernameTest() throws Exception {
-        String username = "user";
-
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "add grouping member by username"));
-
-        given(membershipService.addGroupingMemberByUsername(username, "grouping", username))
-                .willReturn(gsrList);
-
-        mockMvc.perform(post("/api/groupings/v2.0/grouping/user/addGroupingMemberByUsername")
-                .with(csrf())
-                .header(CURRENT_USER, username))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$[0].action").value("add grouping member by username"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void addByUuIDTest() throws Exception {
-        String username = "user";
-
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "add grouping member by uuid"));
-
-        given(membershipService.addGroupingMemberByUuid(username, "grouping", "user"))
-                .willReturn(gsrList);
-
-        mockMvc.perform(post("/api/groupings/v2.0/grouping/user/addGroupingMemberByUuid")
-                .with(csrf())
-                .header(CURRENT_USER, username))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$[0].action").value("add grouping member by uuid"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void deleteByUsernameTest() throws Exception {
-        String username = "user";
-
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "delete grouping member by username"));
-
-        //new GroupingsServiceResult("SUCCESS", "delete grouping member by username")
-
-        given(membershipService.deleteGroupingMemberByUsername(username, "grouping", "user"))
-                .willReturn(gsrList);
-
-        mockMvc.perform(post("/api/groupings/v2.0/grouping/user/deleteGroupingMemberByUsername")
-                .with(csrf())
-        .header(CURRENT_USER, username))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$[0].action").value("delete grouping member by username"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void deleteByUuIDTest() throws Exception {
-        String username = "user";
-
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult("SUCCESS", "delete grouping member by uuid"));
-
-        //new GroupingsServiceResult("SUCCESS", "delete grouping member by username")
-
-        given(membershipService.deleteGroupingMemberByUuid("user", "grouping", "user"))
-                .willReturn(gsrList);
-
-        mockMvc.perform(post("/api/groupings/v2.0/grouping/user/deleteGroupingMemberByUuid")
-                .with(csrf())
-        .header(CURRENT_USER, username))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$[0].action").value("delete grouping member by uuid"));
-    }
 
     @Test
     @WithMockUhUser(username = "admin")
     public void adminListsTest() throws Exception {
-        String admin = "admin";
-
-        String mvcResult = mockMvc.perform(get("/api/groupings/v2.0/adminLists")
-        .header(CURRENT_USER, admin))
+        String mvcResult = mockMvc.perform(get(API_BASE + "/adminsGroupings")
+        .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -979,19 +887,32 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void getAddGrouping() throws Exception {
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        results.add(new GroupingsServiceResult(SUCCESS, "add grouping"));
 
-        mockMvc.perform(post("/api/groupings/v2.0/fakeGroup/fakeBasis/fakeInclude/fakeExclude/fakeOwners/addGrouping")
+        given(groupingFactoryService.addGrouping(USERNAME, GROUPING))
+                .willReturn(results);
+
+        mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, "user"))
-                .andExpect(status().is5xxServerError());
+        .header(CURRENT_USER, USERNAME))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$[0].action").value("add grouping"));
     }
 
     @Test
     @WithMockUhUser
     public void getDeleteGrouping() throws Exception {
-        mockMvc.perform(delete("/api/groupings/v2.0/fakeGroup/deleteGrouping")
+        List<GroupingsServiceResult> results = new ArrayList<>();
+        results.add(new GroupingsServiceResult(SUCCESS, "delete grouping"));
+
+        given(groupingFactoryService.markGroupForPurge(USERNAME, GROUPING))
+                .willReturn(results);
+
+        mockMvc.perform(delete(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, "user"))
-                .andExpect(status().is5xxServerError());
+        .header(CURRENT_USER, USERNAME))
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$[0].action").value("delete grouping"));
     }
 }
