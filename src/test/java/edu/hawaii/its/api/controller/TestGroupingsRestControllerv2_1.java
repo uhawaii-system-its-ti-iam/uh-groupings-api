@@ -1119,6 +1119,17 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    @Test
+    public void searchMembersTest() throws Exception {
+
+        String path = GROUPING;
+        String componentId = "basis";
+        String uid = "iamtst04";
+
+        mapList(API_BASE + "/groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
+
+    }
+
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
 
     ///////////////////////////////////////////////////////////////////////
@@ -1220,9 +1231,6 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(user(currentUser))
                 .with(csrf()))
                 .andReturn();
-
-//        int code = result.getResponse().getStatus();
-//        Exception e = result.getResolvedException();
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
