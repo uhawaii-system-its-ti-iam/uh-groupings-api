@@ -578,7 +578,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         try {
             WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
             String[] attributeNames = membersResults.getSubjectAttributeNames();
-            Person personToAdd = new Person();
+            Person personToAdd;
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {

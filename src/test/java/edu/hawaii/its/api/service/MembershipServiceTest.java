@@ -471,38 +471,58 @@ public class MembershipServiceTest {
         optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
+
+        //non super users should not be able to opt in other users
+        optInResults = membershipService.optIn(users.get(0).getUsername(), GROUPING_0_PATH, users.get(1).getUsername());
+        assertEquals(1, optInResults.size());
+        assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
+
+        //super users should be able to opt in other users
+        optInResults = membershipService.optIn(ADMIN_USER, GROUPING_0_PATH, users.get(2).getUsername());
+        assertEquals(2, optInResults.size());
+        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
     }
 
     @Test
     public void optOutTest() {
-        List<GroupingsServiceResult> optInResults;
+        List<GroupingsServiceResult> optOutResults;
         try {
-            //opt in Permission for exclude group false
-            optInResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
+            //opt out Permission for exclude group false
+            optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
         } catch (GroupingsServiceResultException gsre) {
-            optInResults = new ArrayList<>();
-            optInResults.add(gsre.getGsr());
+            optOutResults = new ArrayList<>();
+            optOutResults.add(gsre.getGsr());
         }
-        assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //opt in Permission for exclude group true
-        optInResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
+        //opt out Permission for exclude group true
+        optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //opt in Permission for exclude group true, but already in the exclude group
-        optInResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
+        //opt out Permission for exclude group true, but already in the exclude group
+        optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //opt in Permission for exclude group true, but already self-opted
-        optInResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(2).getResultCode().startsWith(SUCCESS));
+        //opt out Permission for exclude group true, but already self-opted
+        optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
+        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
+        //non super users should not be able to opt out other users
+        optOutResults = membershipService.optOut(users.get(0).getUsername(), GROUPING_1_PATH, users.get(1).getUsername());
+        assertEquals(1, optOutResults.size());
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
+
+        //super users should be able to opt in other users
+        optOutResults = membershipService.optOut(ADMIN_USER, GROUPING_1_PATH, users.get(6).getUsername());
+        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
+        assertEquals(1, optOutResults.size());
     }
 
     @Test
