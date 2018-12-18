@@ -434,7 +434,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     @Override
-    public List<Person> getMembers(String groupPath, String username) {
+    public List<Person> searchMembers(String groupPath, String username) {
 
         List<Person> members = new ArrayList<>();
 

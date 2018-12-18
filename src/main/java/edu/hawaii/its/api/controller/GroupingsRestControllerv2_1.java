@@ -227,7 +227,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<Person>> getMembers(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<Person>> searchMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String componentId,
             @PathVariable String uid) throws Exception {
@@ -236,7 +236,7 @@ public class GroupingsRestControllerv2_1 {
         String groupPath = path + ":" + componentId;
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getMembers(groupPath, uid));
+                .body(memberAttributeService.searchMembers(groupPath, uid));
     }
 
     /**
