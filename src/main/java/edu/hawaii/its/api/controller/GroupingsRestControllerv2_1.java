@@ -211,7 +211,7 @@ public class GroupingsRestControllerv2_1 {
                     .ok()
                     .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
              return re;
-        } catch (Exception e) {
+        } catch (GroupingsHTTPException ghe) {
             return new ResponseEntity(HttpStatus.GATEWAY_TIMEOUT);
         }
     }
