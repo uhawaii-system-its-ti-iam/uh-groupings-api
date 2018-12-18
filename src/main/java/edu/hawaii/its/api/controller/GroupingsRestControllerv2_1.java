@@ -4,6 +4,7 @@ import edu.hawaii.its.api.service.*;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
@@ -11,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -21,6 +23,8 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 @RestController
 //todo Possibly tack on version number to Base RequestMapping?
@@ -192,9 +196,24 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getGrouping...");
         if(componentId.equals("composite")) componentId = "";
         componentId = ":" + componentId;
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+//        try {
+        //            return ResponseEntity
+        //                    .ok()
+        //                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+        //        } catch (Exception e) {
+        ////            return new ResponseEntity<Group>("504 error", HttpStatus.BAD_GATEWAY);
+        //            return ResponseEntity.
+        //                    status(HttpStatus.BAD_GATEWAY).
+        //                    body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+        //        }
+        try {
+             ResponseEntity re = ResponseEntity
+                    .ok()
+                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+             return re;
+        } catch (Exception e) {
+            return new ResponseEntity(HttpStatus.GATEWAY_TIMEOUT);
+        }
     }
 
     /**
@@ -211,7 +230,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<Person>> getMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String componentId,
-            @PathVariable String uid) {
+            @PathVariable String uid) throws Exception {
         logger.info("Entered REST getMembers...");
         if(componentId.equals("composite")) componentId = "";
         String groupPath = path + ":" + componentId;
