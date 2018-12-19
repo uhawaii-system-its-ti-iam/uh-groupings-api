@@ -75,6 +75,9 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.test.grouping_true_empty_owners}")
     private String GROUPING_TRUE_EMPTY_OWNERS;
 
+    @Value("${groupings.api.test.grouping_timeout_test}")
+    private String GROUPING_TIMEOUT;
+
     @Value("${groupings.api.yyyymmddThhmm}")
     private String YYYYMMDDTHHMM;
 
@@ -227,7 +230,7 @@ public class TestGroupingAssignmentService {
         Group basisGroup = new Group();
         try {
             //todo Move to properties file
-            basisGroup = groupingAssignmentService.getGroupMembers(ADMIN, "hawaii.edu:custom:test:julio:jtest102-l", BASIS);
+            basisGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe){
             assertThat(ghe.getStatusCode(), equalTo(504));
