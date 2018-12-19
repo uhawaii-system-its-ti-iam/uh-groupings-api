@@ -116,6 +116,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.grouping_true_empty_exclude}")
     private String GROUPING_TRUE_EMPTY_EXCLUDE;
 
+    @Value("${groupings.api.test.grouping_timeout_test}")
+    private String GROUPING_TIMEOUT;
+
     @Value("${groupings.api.basis}")
     private String BASIS;
 
@@ -1115,7 +1118,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(group.getMembers().size(), not(0));
 
         try {
-            group = mapGroup("hawaii.edu:custom:test:julio:jtest102-l", "basis", adminUser);
+            group = mapGroup(GROUPING_TIMEOUT, "basis", adminUser);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(504));
