@@ -18,8 +18,10 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.MembershipAssignment;
+import edu.hawaii.its.api.type.Person;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,6 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1126,8 +1129,10 @@ public class TestGroupingsRestControllerv2_1 {
         String componentId = "basis";
         String uid = "iamtst04";
 
-        mapList(API_BASE + "/groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
-
+        List<LinkedHashMap> searchResults = mapList(API_BASE + "/groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
+        assertThat(searchResults.get(0).get("name"), IsEqual.equalTo("tst04name"));
+        assertThat(searchResults.get(0).get("username"), IsEqual.equalTo("iamtst04"));
+        assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
     }
 
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
