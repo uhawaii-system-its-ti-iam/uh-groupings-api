@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
@@ -38,8 +39,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -915,4 +918,75 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete grouping"));
     }
+
+
+    @Test
+    @WithMockUhUser(username="abc")
+    public void lookUpPermissionTestMember() throws Exception {
+        String[] usernames = {USERNAME, ADMIN};
+
+
+        for (int i = 0; i < usernames.length; i++) {
+            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + usernames[i] + "/groupings"))
+                    .andDo(print())
+                    .andExpect(status().is5xxServerError())
+                    .andReturn();
+
+            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i] + "/groupings"))
+                    .andDo(print())
+                    .andExpect(status().is5xxServerError())
+                    .andReturn();
+
+            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i]))
+                    .andDo(print())
+                    .andExpect(status().is5xxServerError())
+                    .andReturn();
+        }
+    }
+
+    //todo find out appropriate permissions
+    @Test
+    @WithMockAdminUser(username = "bobo")
+    public void lookUpPermissionTestAdmin() throws Exception {
+        String[] lookUp = {USERNAME, ADMIN};
+        String admin = "bobo";
+        System.out.println("JFISOJRIEFHOSOIEHGOIESHGOISIOIH");
+
+        for (int i = 0; i < lookUp.length; i++) {
+            MvcResult ownerGroupingResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings")
+                    .header(CURRENT_USER, admin))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+            System.out.println("HELLO");
+
+            MvcResult memberGroupingResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings")
+                    .header(CURRENT_USER, admin))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i])
+                    .header(CURRENT_USER, admin))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+        }
+    }
+
+        //todo Test permissions for /v2.1/owners/{uid}/groupings
+        // Get an owner's owned groupings by username or UH id number
+            // test with admin (works)
+        // test with owner (works)
+            // can owner view other groups' owners?
+
+        //todo Test permissions for /v2.1/members/{uid}/groupings
+        // Get a list of a groupings a user is in and can opt into
+
+        //todo Test permissions for /v2.1/members/{uid}
+        // Get a member's attributes based off username or id number
+            // shouldnt this work for everybody?
+
+
+
 }
