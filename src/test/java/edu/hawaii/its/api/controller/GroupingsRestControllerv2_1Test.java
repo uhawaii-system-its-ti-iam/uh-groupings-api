@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -920,6 +922,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
 
+    // todo uh oh. USERNAME should be denied with ADMIN being ok
     @Test
     @WithMockUhUser(username="abc")
     public void lookUpPermissionTestMember() throws Exception {
@@ -944,13 +947,12 @@ public class GroupingsRestControllerv2_1Test {
         }
     }
 
-    //todo find out appropriate permissions
+    //todo ADMIN should work but username should not
     @Test
     @WithMockAdminUser(username = "bobo")
     public void lookUpPermissionTestAdmin() throws Exception {
         String[] lookUp = {USERNAME, ADMIN};
         String admin = "bobo";
-        System.out.println("JFISOJRIEFHOSOIEHGOIESHGOISIOIH");
 
         for (int i = 0; i < lookUp.length; i++) {
             MvcResult ownerGroupingResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings")
@@ -958,7 +960,6 @@ public class GroupingsRestControllerv2_1Test {
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andReturn();
-            System.out.println("HELLO");
 
             MvcResult memberGroupingResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings")
                     .header(CURRENT_USER, admin))
@@ -974,19 +975,33 @@ public class GroupingsRestControllerv2_1Test {
         }
     }
 
-        //todo Test permissions for /v2.1/owners/{uid}/groupings
-        // Get an owner's owned groupings by username or UH id number
-            // test with admin (works)
-        // test with owner (works)
-            // can owner view other groups' owners?
 
-        //todo Test permissions for /v2.1/members/{uid}/groupings
-        // Get a list of a groupings a user is in and can opt into
-
-        //todo Test permissions for /v2.1/members/{uid}
-        // Get a member's attributes based off username or id number
-            // shouldnt this work for everybody?
+    @Test
+    @WithMockUhUser(username="testUser")
+    public void lookUpPermissionTestOwner() throws Exception {
+        String[] lookUp = {USERNAME, ADMIN};
+        Grouping testGroup = grouping();
+        System.out.println("THE GROUPPPPPPSSSS: " + testGroup.getOwners());
+        System.out.println("THE PATHHHHHHHHHHH: " + testGroup.getPath());
 
 
+        assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
 
+//        for (int i = 0; i < lookUp.length; i++) {
+//            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
+//
+//            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
+//
+//            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
+//        }
+    }
 }
