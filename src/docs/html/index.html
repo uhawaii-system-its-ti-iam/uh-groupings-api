@@ -460,7 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_deletenewadminusingdelete">2.2.3. deleteNewAdmin</a></li>
 <li><a href="#_adminsgroupingsusingget">2.2.4. adminsGroupings</a></li>
 <li><a href="#_addnewgroupingusingpost">2.2.5. addNewGrouping</a></li>
-<li><a href="#_getpaginatedandfilteredgroupusingget">2.2.6. getPaginatedAndFilteredGroup</a></li>
+<li><a href="#_getgroupingusingget">2.2.6. getGrouping</a></li>
 <li><a href="#_deletenewgroupingusingdelete">2.2.7. deleteNewGrouping</a></li>
 <li><a href="#_getgroupusingget">2.2.8. getGroup</a></li>
 <li><a href="#_searchmembersusingget">2.2.9. searchMembers</a></li>
@@ -1510,7 +1510,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_getpaginatedandfilteredgroupusingget"><a class="anchor" href="#_getpaginatedandfilteredgroupusingget"></a><a class="link" href="#_getpaginatedandfilteredgroupusingget">2.2.6. getPaginatedAndFilteredGroup</a></h4>
+<h4 id="_getgroupingusingget"><a class="anchor" href="#_getgroupingusingget"></a><a class="link" href="#_getgroupingusingget">2.2.6. getGrouping</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>GET /api/groupings/v2.1/groupings/{path}</pre>
@@ -1548,27 +1548,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">path</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>page</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">page</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>size</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">size</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -1591,7 +1570,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_group">Group</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_grouping">Grouping</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
@@ -5363,7 +5342,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-19 13:35:39 -10:00
+Last updated 2019-01-07 07:20:46 -10:00
 </div>
 </div>
 </body>
