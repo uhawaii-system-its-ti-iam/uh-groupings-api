@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -482,7 +484,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             try {
                 members = future.get(TIMEOUT, TimeUnit.SECONDS);
             } catch (TimeoutException te) {
-//                te.printStackTrace();
+                //                te.printStackTrace();
                 GroupingsHTTPException ghe = new GroupingsHTTPException();
                 throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
             }
@@ -549,6 +551,82 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
 
     }
+
+    @Override
+    @Async
+    public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId) {
+
+        logger.info("getAsynchronousMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+                "; componentId: " + componentId + ";");
+
+        String groupPath = parentGroupingPath + componentId;
+        Group groupMembers = new Group();
+        WsGetMembersResults members = new WsGetMembersResults();
+
+        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
+
+            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+
+            members = grouperFactoryService.makeWsGetMembersResults(
+                    SUBJECT_ATTRIBUTE_NAME_UID,
+                    lookup,
+                    groupPath);
+        }
+
+        //todo should we use EmptyGroup?
+        if (members.getResults() != null) {
+            if (componentId.equals(BASIS)) {
+                groupMembers = makeBasisGroup(members);
+            } else {
+                groupMembers = makeGroup(members);
+            }
+        }
+        return new AsyncResult<Group>(groupMembers);
+    }
+
+    //    @Override
+    //    public Group getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId){
+    //        logger.info("getAsynchronousMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+    //                "; componentId: " + componentId + ";");
+    //
+    //        String groupPath = parentGroupingPath + componentId;
+    //        Group groupMembers = new Group();
+    //
+    //        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+    //                .isAdmin(ownerUsername)) {
+    //
+    //            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+    //            WsGetMembersResults members = new WsGetMembersResults();
+    //
+    //            ExecutorService executor = Executors.newSingleThreadExecutor();
+    //            Callable<WsGetMembersResults> callable = new Callable<WsGetMembersResults>() {
+    //                @Override
+    //                public WsGetMembersResults call() {
+    //                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, lookup, groupPath);
+    //                }
+    //            };
+    //
+    //            Future<WsGetMembersResults> future = executor.submit(callable);
+    //            if(future.isDone()) {
+    //
+    //            }
+    ////            try {
+    ////
+    ////            } catch (TimeoutException te) {
+    ////                //                te.printStackTrace();
+    ////                GroupingsHTTPException ghe = new GroupingsHTTPException();
+    ////                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+    ////            }
+    //
+    //            if (executor.isTerminated()) {
+    //                executor.shutdown();
+    //            }
+    //
+    //        }
+    //
+    //        return groupMembers;
+    //    }
 
     //makes a group filled with members from membersResults
     @Override

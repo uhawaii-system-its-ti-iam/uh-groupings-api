@@ -23,6 +23,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
@@ -141,7 +142,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Maybe come back to this using listOwned?
-
     /**
      * Get an owner's owned groupings by username or UH id number
      *
@@ -193,7 +193,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<Group> getGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String componentId) throws Exception {
-        logger.info("Entered REST getGrouping...");
+        logger.info("Entered REST getGroup...");
         if(componentId.equals("composite")) componentId = "";
         componentId = ":" + componentId;
 //        try {
@@ -281,6 +281,31 @@ public class GroupingsRestControllerv2_1 {
 
         // todo
         throw new UnsupportedOperationException();
+    }
+
+    // todo Test mapping; subject to change
+    /**
+     * Get a group asynchronously
+     *
+     * @param path: Path of specified parent grouping
+     * @param componentId:
+     * @return Group found as result
+     */
+    @RequestMapping(value = "/groupings/{path}/components/{componentId}/async",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Group> getAsyncMembers(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String componentId) throws Exception {
+        logger.info("Entered REST getAsyncMembers...");
+        if(componentId.equals("composite")) componentId = "";
+        componentId = ":" + componentId;
+
+        Future<Group> future = groupingAssignmentService.getAsynchronousMembers(currentUser, path, componentId);
+
+        return ResponseEntity
+                .ok()
+                .body(future.get());
     }
 
     /**
