@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,6 +31,9 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -104,6 +109,8 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -295,6 +302,21 @@ public class TestGroupingAssignmentService {
 
         Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, username[0], "zac", 1, 20);
 
+    }
+
+    @Test
+    public void getAsyncGroupTest() throws InterruptedException, ExecutionException {
+
+        final Future<Group> future = groupingAssignmentService.getAsynchronousMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
+
+        while(true) {
+            if(future.isDone()) {
+                assertThat(future.get().getMembers().size(), not(0));
+                break;
+            }
+//            logger.info("Doing something else...");
+            Thread.sleep(1000);
+        }
     }
 
     // Testing why getting a grouping returns different results for a page of the size of the entire grouping

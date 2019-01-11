@@ -14,6 +14,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public interface GroupingAssignmentService {
 
@@ -60,4 +61,6 @@ public interface GroupingAssignmentService {
     public Group getPaginatedMembers( String ownerUsername, String groupPath, Integer page, Integer size);
 
     public Group getPaginatedAndFilteredMembers(String groupPath, String ownerUsername, String filterString, Integer page, Integer size);
+
+    public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId);
 }
