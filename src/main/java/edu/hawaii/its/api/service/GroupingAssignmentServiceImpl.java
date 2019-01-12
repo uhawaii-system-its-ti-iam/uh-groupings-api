@@ -557,7 +557,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId) {
 
         logger.info("getAsynchronousMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-                "; componentId: " + componentId + ";");
+                "; componentId: " + componentId + "; Thread:" + Thread.currentThread().getName() + ";");
 
         String groupPath = parentGroupingPath + componentId;
         Group groupMembers = new Group();
@@ -568,10 +568,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
 
-            members = grouperFactoryService.makeWsGetMembersResults(
-                    SUBJECT_ATTRIBUTE_NAME_UID,
-                    lookup,
-                    groupPath);
+            try {
+                Thread.sleep(5000);
+                members = grouperFactoryService.makeWsGetMembersResults(
+                        SUBJECT_ATTRIBUTE_NAME_UID,
+                        lookup,
+                        groupPath);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
         }
 
         //todo should we use EmptyGroup?
@@ -582,6 +587,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 groupMembers = makeGroup(members);
             }
         }
+//        return new AsyncResult<>();
         return new AsyncResult<Group>(groupMembers);
     }
 

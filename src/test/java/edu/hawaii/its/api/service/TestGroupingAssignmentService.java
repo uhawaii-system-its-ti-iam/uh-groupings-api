@@ -307,15 +307,19 @@ public class TestGroupingAssignmentService {
     @Test
     public void getAsyncGroupTest() throws InterruptedException, ExecutionException {
 
+        logger.info("Creating getAsync testing thread.");
         final Future<Group> future = groupingAssignmentService.getAsynchronousMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
+        int sleepCounter = 0;
 
         while(true) {
             if(future.isDone()) {
+                logger.info("Async call finished.");
                 assertThat(future.get().getMembers().size(), not(0));
                 break;
             }
-//            logger.info("Doing something else...");
             Thread.sleep(1000);
+            sleepCounter++;
+            logger.info("Test thread sleeping for " + (sleepCounter) + " seconds...");
         }
     }
 
