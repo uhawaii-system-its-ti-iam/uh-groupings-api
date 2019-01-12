@@ -48,6 +48,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -1132,10 +1133,18 @@ public class TestGroupingsRestControllerv2_1 {
         String componentId = "basis";
         String uid = "iamtst04";
 
-        List<LinkedHashMap> searchResults = mapList(API_BASE + "/groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
+        List<LinkedHashMap> searchResults = mapList(API_BASE + "groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
         assertThat(searchResults.get(0).get("name"), IsEqual.equalTo("tst04name"));
         assertThat(searchResults.get(0).get("username"), IsEqual.equalTo("iamtst04"));
         assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
+    }
+
+    @Test
+    public void getAsyncMembersTest() throws Exception {
+
+        Group group = mapAsyncGroup(API_BASE + "groupings/" + GROUPING_TIMEOUT + "/components/" + "basis/async", adminUser);
+
+        
     }
 
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
@@ -1287,6 +1296,26 @@ public class TestGroupingsRestControllerv2_1 {
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+        } else {
+            GroupingsHTTPException ghe = new GroupingsHTTPException();
+            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+                    ghe, result.getResponse().getStatus());
+        }
+    }
+
+    //todo May or may not need this; saving in case
+//     Mapping of call that returns a group object asynchronously
+    private Group mapAsyncGroup(String uri, User user) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        MvcResult result = mockMvc.perform(get(uri)
+                .with(user(user))
+                .header(CURRENT_USER, user.getUsername())
+                .with(csrf()))
+                .andReturn();
+
+        if (result.getResponse().getStatus() == 200) {
+            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),

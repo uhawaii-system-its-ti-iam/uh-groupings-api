@@ -303,9 +303,25 @@ public class GroupingsRestControllerv2_1 {
 
         Future<Group> future = groupingAssignmentService.getAsynchronousMembers(currentUser, path, componentId);
 
-        return ResponseEntity
-                .ok()
-                .body(future.get());
+        try {
+            while(true){
+                if(future.isDone()) {
+                    return ResponseEntity
+                            .ok()
+                            .body(future.get());
+                }
+                else {
+                    logger.info("Processing...");
+                }
+            }
+        } catch (InterruptedException ie ) {
+            ie.printStackTrace();
+        }
+
+        return null;
+//        return ResponseEntity
+//                .ok()
+//                .body(future.get());
     }
 
     /**
