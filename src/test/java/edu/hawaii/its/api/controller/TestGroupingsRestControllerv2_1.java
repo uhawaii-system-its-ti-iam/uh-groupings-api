@@ -1144,7 +1144,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         Group group = mapAsyncGroup(API_BASE + "groupings/" + GROUPING_TIMEOUT + "/components/" + "basis/async", adminUser);
 
-        
+        assertThat(group.getMembers().size(), not(0));
     }
 
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
