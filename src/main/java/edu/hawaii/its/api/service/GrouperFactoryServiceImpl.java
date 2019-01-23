@@ -1,23 +1,10 @@
 package edu.hawaii.its.api.service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
-
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
-import edu.internet2.middleware.grouperClient.api.GcAttributeDefDelete;
-import edu.internet2.middleware.grouperClient.api.GcAttributeDefNameDelete;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
-import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.api.GcGetGrouperPrivilegesLite;
@@ -25,29 +12,22 @@ import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
-import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
+import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemSave;
-import edu.internet2.middleware.grouperClient.util.GrouperClientUtils;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
-import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -58,14 +38,19 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsParam;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStem;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Service("grouperFactoryService")
 @Profile(value = {"localhost", "test", "integrationTest", "qa", "prod"})
@@ -87,8 +72,22 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     private String OPT_OUT;
 
     @Value("${groupings.api.trio}")
-    private String isTrio;
+    private String IS_TRIO;
 
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String USERNAME;
 
     // Constructor.
     public GrouperFactoryServiceImpl() {
@@ -699,30 +698,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                                                        String sortString,
                                                        Boolean isAscending
     ) {
-
         GcGetMembers members = new GcGetMembers();
-
-        // use pagination if given a page number and page size
-        if (pageNumber != null && pageSize != null) {
-            members.assignPageNumber(pageNumber);
-            members.assignPageSize(pageSize);
-
-            // sort by a specific column
-            if (sortString != null) {
-                members.assignSortString(sortString);
-            }
-
-            // change the sort to be ascending or decending (default is ascending)
-            if (isAscending != null) {
-                members.assignAscending(isAscending);
-            }
-        }
 
         if (groupPaths != null && groupPaths.size() > 0) {
             for (String path : groupPaths) {
                 members.addGroupName(path);
             }
         }
+
+        members.assignPageNumber(pageNumber);
+        members.assignPageSize(pageSize);
+        members.assignAscending(isAscending);
+        members.assignSortString(sortString);
 
         return members
                 .addSubjectAttributeName(subjectAttributeName)
@@ -779,11 +766,11 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
 
         return new GcGetSubjects()
-                .addSubjectAttributeName("uid")
-                .addSubjectAttributeName("cn")
-                .addSubjectAttributeName("sn")
-                .addSubjectAttributeName("givenName")
-                .addSubjectAttributeName("uhuuid")
+                .addSubjectAttributeName(USERNAME)
+                .addSubjectAttributeName(COMPOSITE_NAME)
+                .addSubjectAttributeName(LAST_NAME)
+                .addSubjectAttributeName(FIRST_NAME)
+                .addSubjectAttributeName(UHUUID)
                 .addWsSubjectLookup(lookup)
                 .execute();
     }
