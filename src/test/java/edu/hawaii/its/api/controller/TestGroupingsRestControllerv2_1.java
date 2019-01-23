@@ -68,9 +68,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.grouping_delete}")
     private String DELETE_GROUPING;
 
-    @Value("${groupings.api.test.grouping_delete_test}")
-    private String DELETE_GROUPING_TEST;
-
     @Value("${grouperClient.webService.login}")
     private String APP_USER;
 
@@ -164,6 +161,24 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.purge_grouping}")
     private String PURGE;
 
+    @Value("${groupings.api.person_attributes.username}")
+    private String USERNAME;
+
+    @Value("${groupings.api.person_attributes.uuid}")
+    private String UUID;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -238,34 +253,35 @@ public class TestGroupingsRestControllerv2_1 {
         anonUser = new User("anonymous", anonAuthorities);
         anon = new AnonymousUser();
 
-        // put in include
+        // add to include
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[0]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[1]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[2]);
+        membershipService.addGroupMember(tst[0], GROUPING_INCLUDE, tst[2]);
+
+        // remove from include
+        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
 
         // add to exclude
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[3]);
+        membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
 
         // remove from exclude
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[4]);
         membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[5]);
-
-        groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
-        groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
-
-        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
-
-        // Remove appropriate privileges
-        membershipService.deleteAdmin(ADMIN, tst[0]);
-        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
-
-        // Add tst[2] to include and remove from exclude
-        membershipService.addGroupMember(tst[0], GROUPING_INCLUDE, tst[2]);
         membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[2]);
 
+        // Remove admin privileges
+        membershipService.deleteAdmin(ADMIN, tst[0]);
+
+        // add ownership
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, tst[0]);
+        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, tst[4]);
+
+        // Remove ownership
+        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+
         // Remove tst[3] from include and add to exclude
-        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
-        membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
 
         // Reset preferences
         groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
@@ -341,11 +357,11 @@ public class TestGroupingsRestControllerv2_1 {
 
         Map attributes = mapGetUserAttributes(tst[0], adminUser);
 
-        assertThat(attributes.get("uid"), equalTo("iamtst01"));
-        assertThat(attributes.get("givenName"), equalTo("tst01name"));
-        assertThat(attributes.get("uhuuid"), equalTo("iamtst01"));
-        assertThat(attributes.get("cn"), equalTo("tst01name"));
-        assertThat(attributes.get("sn"), equalTo("tst01name"));
+        assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
+        assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
         try {
             mapGetUserAttributes("bob-jones", adminUser);
@@ -367,11 +383,11 @@ public class TestGroupingsRestControllerv2_1 {
 
         Map attributes = mapGetUserAttributes(tst[0], uhUser01);
 
-        assertThat(attributes.get("uid"), equalTo("iamtst01"));
-        assertThat(attributes.get("givenName"), equalTo("tst01name"));
-        assertThat(attributes.get("uhuuid"), equalTo("iamtst01"));
-        assertThat(attributes.get("cn"), equalTo("tst01name"));
-        assertThat(attributes.get("sn"), equalTo("tst01name"));
+        assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
+        assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
     }
 
@@ -381,11 +397,11 @@ public class TestGroupingsRestControllerv2_1 {
 
         Map attributes = mapGetUserAttributes(tst[0], uhUser03);
 
-        assertThat(attributes.get("uid"), equalTo(""));
-        assertThat(attributes.get("givenName"), equalTo(""));
-        assertThat(attributes.get("uhuuid"), equalTo(""));
-        assertThat(attributes.get("cn"), equalTo(""));
-        assertThat(attributes.get("sn"), equalTo(""));
+        assertThat(attributes.get(USERNAME), equalTo(""));
+        assertThat(attributes.get(FIRST_NAME), equalTo(""));
+        assertThat(attributes.get(UHUUID), equalTo(""));
+        assertThat(attributes.get(COMPOSITE_NAME), equalTo(""));
+        assertThat(attributes.get(LAST_NAME), equalTo(""));
 
         //        assertThat(mapGetUserAttributes(tst[0]).size(), equalTo(0));
         //        try {
@@ -1085,7 +1101,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         try {
-            mapList(API_BASE + "groupings/" + DELETE_GROUPING_TEST, "delete", uhUser01);
+            mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
@@ -1104,7 +1120,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         try {
-            mapList(API_BASE + "groupings/" + DELETE_GROUPING_TEST, "delete", anon);
+            mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", anon);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));

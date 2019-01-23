@@ -450,7 +450,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 null,
                 null);
 
-        //todo should we use EmptyGroup?
         Group groupMembers = new Group();
         if (members.getResults() != null) {
             groupMembers = makeGroup(members);
