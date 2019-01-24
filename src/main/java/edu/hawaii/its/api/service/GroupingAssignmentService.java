@@ -45,7 +45,7 @@ public interface GroupingAssignmentService {
 
     public List<String> extractGroupPaths(List<WsGroup> groups);
 
-    public Group makeGroup(WsGetMembersResults membersResults);
+    public List<Group> makeGroup(WsGetMembersResults membersResults);
 
     public Group makeBasisGroup(WsGetMembersResults membersResults);
 
@@ -53,7 +53,7 @@ public interface GroupingAssignmentService {
 
     public List<String> getGroupPaths(Principal principal, String username);
 
-    public Group getMembers(String ownerUsername, String groupPath);
+    public List<Group> getMembers(String ownerUsername, List<String> groupPaths);
 
     public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
 

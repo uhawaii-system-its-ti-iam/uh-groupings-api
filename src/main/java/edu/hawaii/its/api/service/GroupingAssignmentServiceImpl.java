@@ -14,6 +14,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
@@ -255,11 +256,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
-            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
-            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
-            Group composite = getMembers(ownerUsername, groupingPath);
-            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+//            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
+//            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
+//            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
+//            Group composite = getMembers(ownerUsername, groupingPath);
+//            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+            String[] paths = {groupingPath + INCLUDE, groupingPath + EXCLUDE, groupingPath + BASIS, groupingPath, groupingPath + OWNERS};
+            List<Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -394,7 +397,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             List<String> groupPaths = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
 
-            Group admin = getMembers(adminUsername, GROUPING_ADMINS);
+            List<String> adminGrouping = new ArrayList<>(1);
+            adminGrouping.add(GROUPING_ADMINS);
+            Group admin = getMembers(adminUsername, adminGrouping).get(0);
             groupings = helperService.makeGroupings(groupPaths);
             info.setAdminGroup(admin);
             info.setAllGroupings(groupings);
@@ -434,11 +439,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns a group from grouper or the database
     @Override
-    public Group getMembers(String ownerUsername, String groupPath) {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
-
-        List<String> groupPaths = new ArrayList<>();
-        groupPaths.add(groupPath);
+    public List<Group> getMembers(String ownerUsername, List<String> groupPaths) {
+        logger.info("getMembers; user: " + ownerUsername + "; groups: " + groupPaths + ";");
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
@@ -469,7 +471,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-            WsGetMembersResults members;
+            WsGetMembersResults membersResults;
 
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Callable<WsGetMembersResults> callable = () -> {
@@ -488,7 +490,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             Future<WsGetMembersResults> future = executor.submit(callable);
 
             try {
-                members = future.get(TIMEOUT, TimeUnit.SECONDS);
+                membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
             } catch (TimeoutException te) {
 //                te.printStackTrace();
                 GroupingsHTTPException ghe = new GroupingsHTTPException();
@@ -499,12 +501,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 executor.shutdown();
             }
 
-            //todo should we use EmptyGroup?
-            if (members.getResults() != null) {
+            if (membersResults.getResults() != null) {
                 if (componentId.equals(BASIS)) {
-                    groupMembers = makeBasisGroup(members);
+                    groupMembers = makeBasisGroup(membersResults);
                 } else {
-                    groupMembers = makeGroup(members);
+                    groupMembers = makeGroup(membersResults).get(0);
                 }
             }
         }
@@ -529,7 +530,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 null,
                 null);
 
-        //todo should we use EmptyGroup?
         Group groupMembers = new Group();
         if (members.getResults() != null && groupPath.contains(BASIS)) {
             groupMembers = makeBasisGroup(members);
@@ -565,25 +565,29 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //makes a group filled with members from membersResults
     @Override
-    public Group makeGroup(WsGetMembersResults membersResults) {
-        Group group = new Group();
-        try {
-            WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
+    public List<Group> makeGroup(WsGetMembersResults membersResults) {
+        List<Group> groups = new ArrayList<>();
+        if(membersResults.getResults().length > 0) {
             String[] attributeNames = membersResults.getSubjectAttributeNames();
 
-            if (subjects.length > 0) {
-                for (WsSubject subject : subjects) {
-                    if (subject != null) {
-                        group.addMember(makePerson(subject, attributeNames));
+            for (WsGetMembersResult result : membersResults.getResults()) {
+                WsSubject[] subjects = result.getWsSubjects();
+
+
+                if (subjects.length > 0) {
+                    for (WsSubject subject : subjects) {
+                        Group group = new Group();
+                        if (subject != null) {
+                            group.addMember(makePerson(subject, attributeNames));
+                        }
+                        groups.add(group);
                     }
                 }
             }
             // Return empty group if for any unforeseen results
-        } catch (NullPointerException npe) {
-            return new Group();
-        }
 
-        return group;
+        }
+        return groups;
     }
 
     // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
