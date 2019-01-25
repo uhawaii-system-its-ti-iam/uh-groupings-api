@@ -144,6 +144,9 @@ public class GroupingsRestControllerv2_1Test {
 
         grouping.setListservOn(true);
 
+        System.out.println("FJDSIJFSEHFOIJVDKLDFHIOJDKKOKGHJSHDVHFJGHOIDFHDGJKERUIVHRJFHIOGRHOIFGFJOIKGRLIJOHGRHOIGRGGIHOGRHOIGRHO " + grouping.getPath());
+        System.out.println("FJDSIJFSEHFOIJVDKLDFHIOJDKKOKGHJSHDVHFJGHOIDFHDGJKERUIVHRJFHIOGRHOIFGFJOIKGRLIJOHGRHOIGRGGIHOGRHOIGRHO "  + grouping.getOwners());
+
         return grouping;
     }
 
@@ -981,8 +984,9 @@ public class GroupingsRestControllerv2_1Test {
     public void lookUpPermissionTestOwner() throws Exception {
         String[] lookUp = {USERNAME, ADMIN};
         Grouping testGroup = grouping();
-        System.out.println("THE GROUPPPPPPSSSS: " + testGroup.getOwners());
-        System.out.println("THE PATHHHHHHHHHHH: " + testGroup.getPath());
+        System.out.println("grilled cheese: " + testGroup);
+        System.out.println("THE GROUPS: " + testGroup.getOwners());
+        System.out.println("THE PATH: " + testGroup.getPath());
 
 
         assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
