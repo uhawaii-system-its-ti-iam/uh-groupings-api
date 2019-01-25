@@ -39,6 +39,7 @@ public interface GrouperFactoryService {
 
     public WsStemLookup makeWsStemLookup(String stemName, String stemUuid);
 
+    public String getDescription(String groupPath);
 
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath);
 
