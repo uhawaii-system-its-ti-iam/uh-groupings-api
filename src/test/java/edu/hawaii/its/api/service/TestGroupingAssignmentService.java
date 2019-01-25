@@ -224,6 +224,13 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getGoupingDescTest(){
+        Grouping tester = groupingAssignmentService.getGrouping("hawaii.edu:custom:test:kahlin:descTest", ADMIN);
+
+        System.out.println(tester.getDescription());
+    }
+
+    @Test
     public void getBasisGroupWithTimeoutTest() throws Exception {
 //        Grouping grouping = groupingAssignmentService.getGrouping("hawaii.edu:custom:test:julio:jtest102-l", ADMIN);
 

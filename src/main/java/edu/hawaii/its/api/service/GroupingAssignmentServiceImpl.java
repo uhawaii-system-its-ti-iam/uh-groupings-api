@@ -263,6 +263,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
+            compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
             compositeGrouping.setBasis(basis);
             compositeGrouping.setExclude(exclude);
             compositeGrouping.setInclude(include);

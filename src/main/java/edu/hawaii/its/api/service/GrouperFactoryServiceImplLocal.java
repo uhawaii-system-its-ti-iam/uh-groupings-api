@@ -238,6 +238,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
+    public String getDescription(String groupPath){
+        WsFindGroupsResults wsFindGroupsResults = makeWsFindGroupsResults(groupPath);
+
+        return wsFindGroupsResults.getGroupResults()[0].getDescription();
+
+    }
+
+    @Override
     public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
 
         return new GcStemDelete()

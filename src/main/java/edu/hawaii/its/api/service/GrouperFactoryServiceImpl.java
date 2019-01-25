@@ -117,6 +117,14 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
+    public String getDescription(String groupPath){
+        WsFindGroupsResults wsFindGroupsResults = makeWsFindGroupsResults(groupPath);
+
+        return wsFindGroupsResults.getGroupResults()[0].getDescription();
+
+    }
+
+    @Override
     public WsGroupDeleteResults deleteGroup(WsSubjectLookup subjectLookup, WsGroupLookup path) {
 
         return new GcGroupDelete()
