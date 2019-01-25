@@ -87,6 +87,8 @@ public class TestMembershipService {
 
     @Before
     public void setUp() {
+        //add ownership
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
         groupAttributeService.changeListservStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
@@ -103,16 +105,10 @@ public class TestMembershipService {
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
 
-        //        // Remove from include
-        //        for(int i = 0; i < 6; i++) {
-        //            membershipService.deleteGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[i]);
-        //        }
+        //remove ownership
+        memberAttributeService.removeOwnership(GROUPING, username[0], username[2]);
+        memberAttributeService.removeOwnership(GROUPING, username[0], username[4]);
 
-        //        try {
-        //            membershipService.deleteAdmin(ADMIN, username[3]);
-        //        } catch (GroupingsServiceResultException gsre) {
-        //            gsre.printStackTrace();
-        //        }
     }
 
     @Test
@@ -148,6 +144,8 @@ public class TestMembershipService {
 
     @Test
     public void optTest() {
+        //reset group
+        membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[3]);
 
         //tst[3] is not in the composite or include, but is in the basis and exclude
         //tst[3] is not self opted into the exclude
@@ -155,6 +153,13 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
+
+        //non super user tries to opt another user in
+        assertFalse(memberAttributeService.isSuperuser(username[0]));
+        membershipService.optIn(username[0], GROUPING, username[3]);
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+        membershipService.optOut(username[0], GROUPING, username[3]);
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
         //tst[3] opts in to the Grouping
@@ -177,9 +182,11 @@ public class TestMembershipService {
         //tst[3] is now self opted into exclude
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
-        //reset group
-        membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[3]);
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
+        //admins can opt other users
+        membershipService.optIn(ADMIN, GROUPING, username[3]);
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
+        membershipService.optOut(ADMIN, GROUPING, username[3]);
+        assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
     }
 
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them
