@@ -35,7 +35,7 @@
         <asciidoctor.html.output.directory>${project.basedir}/src/docs/html</asciidoctor.html.output.directory>
         <asciidoctor.pdf.output.directory>${project.basedir}/src/docs/pdf</asciidoctor.pdf.output.directory>
         <swagger.input>${swagger.output.dir}/swagger.json</swagger.input>
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <springfox.version>2.9.2</springfox.version>
     </properties>
 
@@ -468,7 +468,7 @@
                     <dependency>
                         <groupId>org.jruby</groupId>
                         <artifactId>jruby-complete</artifactId>
-                        <version>1.7.21</version>
+                        <version>1.7.26</version>
                     </dependency>
                 </dependencies>
                 <!-- Configure generic document generation settings -->
