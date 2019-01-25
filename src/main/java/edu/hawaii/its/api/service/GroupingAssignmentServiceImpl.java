@@ -4,8 +4,10 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
@@ -13,12 +15,15 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Service("groupingAssignmentService")
@@ -169,6 +180,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME;
 
+    @Value("${groupings.api.timeout}")
+    private Integer TIMEOUT;
+
     public static final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
@@ -228,6 +242,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingsOpted(EXCLUDE, username, groupPaths);
     }
 
+    //todo This might be obsolete with getGroup methods, but refactoring may take time
+    //todo Change getMembers to getGroupMembers with appropriate exception handlers
     //fetch a grouping from Grouper or the database
     @Override
     public Grouping getGrouping(String groupingPath, String ownerUsername) {
@@ -257,6 +273,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return compositeGrouping;
     }
 
+    // todo May not need anymore; Pagination will just grab a singular page and allow users to see the stale subjects
     // Fetch a grouping from Grouper of database, but paginated based on given page + size
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size) {
@@ -274,34 +291,38 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             // At some point, when this issue is resolved this functionality may not be necessary
             // todo Refactor this as a general case for all Groups and not just Basis
             // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
+            // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
+
+            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
 
             // Get base grouping from pagination and isolate basis
-            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
-            Group basis = compositeGrouping.getBasis();
-            List<Person> basisList = basis.getMembers();
-
-            int i = 1;
-            while (basisList.size() < size) {
-
-                Group basisToAdd = getPaginatedMembers(ownerUsername, groupingPath + BASIS, page + i, size);
-                List<Person> basisToAddList = basisToAdd.getMembers();
-
-                // If the next page is empty, we can assume we are at the end of the group
-                if (basisToAddList.size() == 0) break;
-
-                // Add as much as we need from the next page to the current page
-                // If it's not enough, repeat with the page after that
-                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
-                basisList.addAll(subBasisToAddList);
-                i++;
-            }
-
-            basis.setMembers(basisList);
-            compositeGrouping.setBasis(basis);
+            //            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
+            //            Group basis = compositeGrouping.getBasis();
+            //            List<Person> basisList = basis.getMembers();
+            //
+            //            int i = 1;
+            //            while(basisList.size() < size) {
+            //
+            //                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
+            //                List<Person> basisToAddList = basisToAdd.getMembers();
+            //
+            //                // If the next page is empty, we can assume we are at the end of the group
+            //                if(basisToAddList.size() == 0) break;
+            //
+            //                // Add as much as we need from the next page to the current page
+            //                // If it's not enough, repeat with the page after that
+            //                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
+            //                basisList.addAll(subBasisToAddList);
+            //                i++;
+            //            }
+            //
+            //            basis.setMembers(basisList);
+            //            compositeGrouping.setBasis(basis);
         }
         return compositeGrouping;
     }
 
+    // todo Default pagination method until everything is refactored
     @Override
     public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size) {
         logger.info("getPaginatedGroupingHelper; grouping: " + groupingPath +
@@ -416,11 +437,97 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public Group getMembers(String ownerUsername, String groupPath) {
         logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
 
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(groupPath);
+
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
-                groupPath);
+                groupPaths,
+                null,
+                null,
+                null,
+                null);
+
+        Group groupMembers = new Group();
+        if (members.getResults() != null) {
+            groupMembers = makeGroup(members);
+        }
+        return groupMembers;
+    }
+
+    @Override
+    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
+        logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+                "; componentId: " + componentId + ";");
+
+        String groupPath = parentGroupingPath + componentId;
+        Group groupMembers = new Group();
+
+        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+                .isAdmin(ownerUsername)) {
+
+            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+            WsGetMembersResults members;
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Callable<WsGetMembersResults> callable = () -> {
+                List<String> groupPaths = new ArrayList<>();
+                groupPaths.add(groupPath);
+
+                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
+                        lookup,
+                        groupPaths,
+                        null,
+                        null,
+                        null,
+                        null);
+            };
+
+            Future<WsGetMembersResults> future = executor.submit(callable);
+
+            try {
+                members = future.get(TIMEOUT, TimeUnit.SECONDS);
+            } catch (TimeoutException te) {
+//                te.printStackTrace();
+                GroupingsHTTPException ghe = new GroupingsHTTPException();
+                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+            }
+
+            if (executor.isTerminated()) {
+                executor.shutdown();
+            }
+
+            //todo should we use EmptyGroup?
+            if (members.getResults() != null) {
+                if (componentId.equals(BASIS)) {
+                    groupMembers = makeBasisGroup(members);
+                } else {
+                    groupMembers = makeGroup(members);
+                }
+            }
+        }
+        return groupMembers;
+    }
+
+    @Override
+    public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
+        logger.info("getMembers; group: " + groupPath +
+                "; page: " + page + "; size: " + size + ";");
+
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(groupPath);
+
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
+                SUBJECT_ATTRIBUTE_NAME_UID,
+                lookup,
+                groupPaths,
+                page,
+                size,
+                null,
+                null);
 
         //todo should we use EmptyGroup?
         Group groupMembers = new Group();
@@ -432,27 +539,28 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
+    // todo Doesn't work
     @Override
-    public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size) {
-        logger.info("getMembers; group: " + groupPath +
-                "; page: " + page + "; size: " + size + ";");
+    public Group getPaginatedAndFilteredMembers(
+            String groupPath, String ownerUsername, String filterString, Integer page, Integer size) {
+        logger.info("getMembers; group: " + groupPath + "; ownerUsername: " + ownerUsername +
+                "; filterString: " + filterString + "; page: " + page + "; size: " + size + ";");
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResultsPaginated(
+        WsGetMembershipsResults results = grouperFactoryService.makeWsGetMembersResultsFilteredAndPaginated(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
                 groupPath,
+                filterString,
                 page,
                 size);
 
-        //todo should we use EmptyGroup?
         Group groupMembers = new Group();
-        if (members.getResults() != null && groupPath.contains(BASIS)) {
-            groupMembers = makeBasisGroup(members);
-        } else if (members.getResults() != null) {
-            groupMembers = makeGroup(members);
-        }
+        //        if(results.getResults() != null) {
+        //            groupMembers = makeGroup(members);
+        //        }
         return groupMembers;
+
     }
 
     //makes a group filled with members from membersResults
@@ -478,23 +586,31 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return group;
     }
 
+    // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
     // Make group specifically for basis group only
     public Group makeBasisGroup(WsGetMembersResults membersResults) {
         Group group = new Group();
         try {
             WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
             String[] attributeNames = membersResults.getSubjectAttributeNames();
+            Person personToAdd;
 
             if (subjects.length > 0) {
                 for (WsSubject subject : subjects) {
                     if (subject != null) {
-                        // Add null source id users (some valid users have null source id)
-                        if (subject.getSourceId() == null) {
-                            group.addMember(makePerson(subject, attributeNames));
-                            // Add user to basis if not in intermediate group
-                        } else if (!subject.getSourceId().equals("g:gsa")) {
-                            group.addMember(makePerson(subject, attributeNames));
+                        personToAdd = makePerson(subject, attributeNames);
+                        if (subject.getSourceId().equals("g:gsa")) {
+                            personToAdd.setUsername("User not available.");
                         }
+                        group.addMember(personToAdd);
+                        //todo Removing fix; instead we will display these users with appropriate information
+                        // Add null source id users (some valid users have null source id)
+                        //                        if (subject.getSourceId() == null) {
+                        //                            group.addMember(makePerson(subject, attributeNames));
+                        //                            // Add user to basis if not in intermediate group
+                        //                        } else if (!subject.getSourceId().equals("g:gsa")) {
+                        //                            group.addMember(makePerson(subject, attributeNames));
+                        //                        }
                     }
                 }
             }
@@ -626,10 +742,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .map(group -> group + EXCLUDE)
                 .collect(Collectors.toList());
 
-        WsGetAttributeAssignmentsResults assignmentsResults = grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
-                ASSIGN_TYPE_GROUP,
-                TRIO,
-                OPT_IN);
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_IN);
 
         if (assignmentsResults.getWsAttributeAssigns() != null) {
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
@@ -666,11 +783,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> opts = new ArrayList<>();
         List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
 
-        List<WsGetAttributeAssignmentsResults> assignmentsResults = grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
-                ASSIGN_TYPE_GROUP,
-                TRIO,
-                OPT_OUT,
-                groupPaths);
+        List<WsGetAttributeAssignmentsResults> assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_OUT,
+                        groupPaths);
 
         assignmentsResults
                 .stream()

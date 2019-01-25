@@ -628,6 +628,46 @@ public class MembershipServiceImpl implements MembershipService {
         return opt(optOutUsername, groupingPath, addGroup, outOrrIn, preposition);
     }
 
+    //user adds them self to the group if they have permission
+    @Override
+    public List<GroupingsServiceResult> optIn(String currentUser, String groupingPath, String uid) {
+        String outOrrIn = "in ";
+        String preposition = "to ";
+        String addGroup = groupingPath + INCLUDE;
+
+        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
+            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
+        }
+        else{
+            GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
+                    FAILURE + currentUser + " cannot opt " + uid + " into " + groupingPath,
+                    currentUser + " opts " + uid + " into " + groupingPath);
+            List<GroupingsServiceResult> list = new ArrayList<>();
+            list.add(groupingsServiceResult);
+            return list;
+        }
+    }
+
+    //user removes them self from the group if they have permission
+    @Override
+    public List<GroupingsServiceResult> optOut(String currentUser, String groupingPath, String uid) {
+        String outOrrIn = "out ";
+        String preposition = "from ";
+        String addGroup = groupingPath + EXCLUDE;
+
+        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
+            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
+        }
+        else{
+            GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
+                    FAILURE + currentUser + " cannot opt " + uid + " out of " + groupingPath,
+                    currentUser + " opts " + uid + " out of " + groupingPath);
+            List<GroupingsServiceResult> list = new ArrayList<>();
+            list.add(groupingsServiceResult);
+            return list;
+        }
+    }
+
     //returns true if the group allows that user to opt out
     @Override
     public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
@@ -663,7 +703,6 @@ public class MembershipServiceImpl implements MembershipService {
             switch (outOrrIn) {
                 case "out ":
                     results.addAll(deleteGroupingMemberByUsername(username, grouping, username));
-
                     break;
 
                 case "in ":

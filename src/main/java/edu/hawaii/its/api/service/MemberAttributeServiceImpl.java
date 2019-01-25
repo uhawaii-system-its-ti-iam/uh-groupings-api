@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -14,13 +15,17 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service("memberAttributeService")
@@ -221,7 +226,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
         }
 
-
         if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
             WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
@@ -393,8 +397,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         Map<String, String> mapping = new HashMap<String, String>();
 
         //        if(username.equals(null)){
-//            throw new GcWebServiceError("Error 404 Not Found");
-//        }
+        //            throw new GcWebServiceError("Error 404 Not Found");
+        //        }
         if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
                 groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
             //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
@@ -404,7 +408,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
+                String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }
@@ -414,7 +418,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
+            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }
@@ -427,5 +431,26 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public Map<String, String> getUserAttributesLocal(String username) {
         Person personToGet = personRepository.findByUsername(username);
         return personToGet.getAttributes();
+    }
+
+    @Override
+    public List<Person> searchMembers(String groupPath, String username) {
+
+        List<Person> members = new ArrayList<>();
+
+        WsHasMemberResults results = grouperFS.makeWsHasMemberResults(groupPath, username);
+        WsHasMemberResult[] memberResultArray = results.getResults();
+
+        for (WsHasMemberResult hasMember : memberResultArray) {
+
+            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                String memberName = hasMember.getWsSubject().getName();
+                String memberUuid = hasMember.getWsSubject().getId();
+                String memberUsername = hasMember.getWsSubject().getIdentifierLookup();
+
+                members.add(new Person(memberName, memberUuid, memberUsername));
+            }
+        }
+        return members;
     }
 }

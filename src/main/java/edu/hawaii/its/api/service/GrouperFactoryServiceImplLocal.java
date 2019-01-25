@@ -18,6 +18,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
@@ -946,36 +947,44 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
                                                        WsSubjectLookup lookup,
-                                                       String groupName) {
+                                                       List<String> groupPaths,
+                                                       Integer pageNumber,
+                                                       Integer pageSize,
+                                                       String sortString,
+                                                       Boolean isAscending
+                                                       ) {
 
         WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
         String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
         wsGetMembersResults.setSubjectAttributeNames(attributeNames);
-        WsGetMembersResult wsGetMembersResult = new WsGetMembersResult();
-        WsSubject[] subjects;
 
-        Group group = groupRepository.findByPath(groupName);
-        List<Person> members = group.getMembers();
-        List<WsSubject> subjectList = new ArrayList<>();
+        List<WsGetMembersResult> results = new ArrayList<>();
 
-        for (Person person : members) {
-            WsSubject subject = new WsSubject();
-            subject.setId(person.getUuid());
-            subject.setName(person.getName());
 
-            //has to be the same order as attributeNames array
-            subject.setAttributeValues(
-                    new String[]{person.getUsername(), person.getUuid(), person.getLastName(), person.getName(),
-                            person.getFirstName()});
+        for(String groupPath : groupPaths) {
+            WsGetMembersResult wsGetMembersResult = new WsGetMembersResult();
+            Group group = groupRepository.findByPath(groupPath);
+            List<Person> members = group.getMembers();
+            List<WsSubject> subjectList = new ArrayList<>();
+            for (Person person : members) {
+                WsSubject subject = new WsSubject();
+                subject.setId(person.getUuid());
+                subject.setName(person.getName());
 
-            subjectList.add(subject);
+                //has to be the same order as attributeNames array
+                subject.setAttributeValues(
+                        new String[]{person.getUsername(), person.getUuid(), person.getLastName(), person.getName(),
+                                person.getFirstName()});
+
+                subjectList.add(subject);
+            }
+            WsSubject[] subjects = subjectList.toArray(new WsSubject[subjectList.size()]);
+            wsGetMembersResult.setWsSubjects(subjects);
+
+            results.add(wsGetMembersResult);
         }
 
-        subjects = subjectList.toArray(new WsSubject[subjectList.size()]);
-
-        wsGetMembersResult.setWsSubjects(subjects);
-        wsGetMembersResults.setResults(new WsGetMembersResult[]{wsGetMembersResult});
-
+        wsGetMembersResults.setResults(results.toArray(new WsGetMembersResult[results.size()]));
         return wsGetMembersResults;
     }
 
@@ -1215,7 +1224,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return "GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]";
     }
 
-    //todo Local version for testing. Haven't needed it yet, will implement if necessary
+    //todo Local versions of Grouper functions for testing. Haven't needed it yet, will implement if necessary
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
         //todo Not needed for getUserAttributes function, will implement if necessary
         return null;
@@ -1237,11 +1246,12 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
-                                                                WsSubjectLookup lookup,
-                                                                String groupName,
-                                                                Integer page,
-                                                                Integer size) {
+    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            String filterString,
+            Integer page,
+            Integer size) {
         //todo
         return null;
     }
