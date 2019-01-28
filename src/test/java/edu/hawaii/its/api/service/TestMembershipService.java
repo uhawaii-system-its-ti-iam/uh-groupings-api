@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -300,7 +301,8 @@ public class TestMembershipService {
 
     @Test
     public void getMembersTest() {
-        Group group = groupingAssignmentService.getMembers(username[0], GROUPING);
+        String[] groupings = {GROUPING};
+        Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(0);
         List<String> usernames = group.getUsernames();
 
         assertTrue(usernames.contains(username[0]));

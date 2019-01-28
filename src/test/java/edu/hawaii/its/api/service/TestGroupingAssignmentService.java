@@ -401,7 +401,9 @@ public class TestGroupingAssignmentService {
         // Testing for garbage uuid basis bug fix
         // Group testGroup = groupingAssignmentService.getMembers(username[0], GROUPING_BASIS);
 
-        Group group = groupingAssignmentService.getMembers(username[0], GROUPING);
+        List<String> groupings = new ArrayList<>();
+        groupings.add(GROUPING);
+        Group group = groupingAssignmentService.getMembers(username[0], groupings).get(0);
         List<String> usernames = group.getUsernames();
 
         assertTrue(usernames.contains(username[0]));
