@@ -256,21 +256,25 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
-//            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
-//            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
-//            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
-//            Group composite = getMembers(ownerUsername, groupingPath);
-//            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
-            String[] paths = {groupingPath + INCLUDE, groupingPath + EXCLUDE, groupingPath + BASIS, groupingPath, groupingPath + OWNERS};
-            List<Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
+            String basis = groupingPath + BASIS;
+            String include = groupingPath + INCLUDE;
+            String exclude = groupingPath + EXCLUDE;
+            String owners = groupingPath + OWNERS;
+
+            String[] paths = {include,
+                    exclude,
+                    basis,
+                    groupingPath,
+                    owners};
+            Map<String, Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
-            compositeGrouping.setBasis(basis);
-            compositeGrouping.setExclude(exclude);
-            compositeGrouping.setInclude(include);
-            compositeGrouping.setComposite(composite);
-            compositeGrouping.setOwners(owners);
+            compositeGrouping.setBasis(groups.get(basis));
+            compositeGrouping.setExclude(groups.get(exclude));
+            compositeGrouping.setInclude(groups.get(include));
+            compositeGrouping.setComposite(groups.get(groupingPath));
+            compositeGrouping.setOwners(groups.get(owners));
 
         }
         return compositeGrouping;
@@ -383,7 +387,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
-        AdminListsHolder info = new AdminListsHolder();
+        AdminListsHolder adminListsHolder = new AdminListsHolder();
         List<Grouping> groupings;
 
         if (memberAttributeService.isSuperuser(adminUsername)) {
@@ -399,12 +403,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             List<String> adminGrouping = new ArrayList<>(1);
             adminGrouping.add(GROUPING_ADMINS);
-            Group admin = getMembers(adminUsername, adminGrouping).get(0);
+            Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
             groupings = helperService.makeGroupings(groupPaths);
-            info.setAdminGroup(admin);
-            info.setAllGroupings(groupings);
+            adminListsHolder.setAdminGroup(admin);
+            adminListsHolder.setAllGroupings(groupings);
         }
-        return info;
+        return adminListsHolder;
     }
 
     //returns a list of groupings corresponding to the include group or exclude group (includeOrrExclude) in groupPaths that
@@ -439,7 +443,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns a group from grouper or the database
     @Override
-    public List<Group> getMembers(String ownerUsername, List<String> groupPaths) {
+    public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
         logger.info("getMembers; user: " + ownerUsername + "; groups: " + groupPaths + ";");
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
@@ -452,9 +456,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 null,
                 null);
 
-        Group groupMembers = new Group();
+        Map<String, Group> groupMembers = new HashMap<>();
         if (members.getResults() != null) {
-            groupMembers = makeGroup(members);
+            groupMembers = makeGroups(members);
         }
         return groupMembers;
     }
@@ -505,7 +509,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 if (componentId.equals(BASIS)) {
                     groupMembers = makeBasisGroup(membersResults);
                 } else {
-                    groupMembers = makeGroup(membersResults).get(0);
+                    groupMembers = makeGroup(membersResults);
                 }
             }
         }
@@ -534,6 +538,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (members.getResults() != null && groupPath.contains(BASIS)) {
             groupMembers = makeBasisGroup(members);
         } else if (members.getResults() != null) {
+            //todo change to makeGroup() instead of groups
             groupMembers = makeGroup(members);
         }
         return groupMembers;
@@ -563,25 +568,48 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     }
 
+    @Override
+    public Group makeGroup(WsGetMembersResults membersResults) {
+        Group group = new Group();
+        try {
+            WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
+            String[] attributeNames = membersResults.getSubjectAttributeNames();
+
+            if (subjects.length > 0) {
+                for (WsSubject subject : subjects) {
+                    if (subject != null) {
+                        group.addMember(makePerson(subject, attributeNames));
+                    }
+                }
+            }
+            // Return empty group if for any unforeseen results
+        } catch (NullPointerException npe) {
+            return new Group();
+        }
+
+        return group;
+    }
+
     //makes a group filled with members from membersResults
     @Override
-    public List<Group> makeGroup(WsGetMembersResults membersResults) {
-        List<Group> groups = new ArrayList<>();
-        if(membersResults.getResults().length > 0) {
+    public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
+        Map<String, Group> groups = new HashMap<>();
+        if (membersResults.getResults().length > 0) {
             String[] attributeNames = membersResults.getSubjectAttributeNames();
 
             for (WsGetMembersResult result : membersResults.getResults()) {
                 WsSubject[] subjects = result.getWsSubjects();
+                Group group = new Group(result.getWsGroup().getName());
 
 
                 if (subjects.length > 0) {
                     for (WsSubject subject : subjects) {
-                        Group group = new Group();
                         if (subject != null) {
                             group.addMember(makePerson(subject, attributeNames));
                         }
-                        groups.add(group);
                     }
+//                    groups.add(group);
+                    groups.put(group.getPath(), group);
                 }
             }
             // Return empty group if for any unforeseen results
@@ -709,8 +737,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return extractGroupPaths(groups);
 
         } else {
-            List<String> results = new ArrayList<>();
-            return results;
+            return new ArrayList<>();
             //            GroupingsHTTPException ghe = new GroupingsHTTPException();
             //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
