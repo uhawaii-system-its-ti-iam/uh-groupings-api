@@ -403,7 +403,7 @@ public class TestGroupingAssignmentService {
 
         List<String> groupings = new ArrayList<>();
         groupings.add(GROUPING);
-        Group group = groupingAssignmentService.getMembers(username[0], groupings).get(0);
+        Group group = groupingAssignmentService.getMembers(username[0], groupings).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
         assertTrue(usernames.contains(username[0]));
