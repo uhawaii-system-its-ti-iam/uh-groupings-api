@@ -11,11 +11,9 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
@@ -42,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -443,13 +439,19 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public Group getMembers(String ownerUsername, String groupPath) {
         logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
 
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(groupPath);
+
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
-                groupPath);
+                groupPaths,
+                null,
+                null,
+                null,
+                null);
 
-        //todo should we use EmptyGroup?
         Group groupMembers = new Group();
         if (members.getResults() != null) {
             groupMembers = makeGroup(members);
@@ -469,14 +471,20 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-            WsGetMembersResults members = new WsGetMembersResults();
+            WsGetMembersResults members;
 
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Callable<WsGetMembersResults> callable = new Callable<WsGetMembersResults>() {
-                @Override
-                public WsGetMembersResults call() {
-                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, lookup, groupPath);
-                }
+            Callable<WsGetMembersResults> callable = () -> {
+                List<String> groupPaths = new ArrayList<>();
+                groupPaths.add(groupPath);
+
+                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
+                        lookup,
+                        groupPaths,
+                        null,
+                        null,
+                        null,
+                        null);
             };
 
             Future<WsGetMembersResults> future = executor.submit(callable);
@@ -510,13 +518,18 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getMembers; group: " + groupPath +
                 "; page: " + page + "; size: " + size + ";");
 
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(groupPath);
+
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResultsPaginated(
+        WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
-                groupPath,
+                groupPaths,
                 page,
-                size);
+                size,
+                null,
+                null);
 
         //todo should we use EmptyGroup?
         Group groupMembers = new Group();
