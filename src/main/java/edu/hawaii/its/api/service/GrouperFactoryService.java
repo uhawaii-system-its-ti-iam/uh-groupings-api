@@ -1,19 +1,13 @@
 package edu.hawaii.its.api.service;
 
-import java.util.List;
-
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameDeleteResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefNameLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
@@ -21,14 +15,16 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
+import java.util.List;
 
 public interface GrouperFactoryService {
     public WsGroupSaveResults addEmptyGroup(String username, String path);
@@ -151,14 +147,13 @@ public interface GrouperFactoryService {
 
     public WsGetMembershipsResults makeWsGetMembershipsResults(String groupName, WsSubjectLookup lookup);
 
-    public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName, WsSubjectLookup lookup,
-            String groupName);
-
-    public WsGetMembersResults makeWsGetMembersResultsPaginated(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            String groupName,
-            Integer page,
-            Integer size);
+    public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
+                                                       WsSubjectLookup lookup,
+                                                       List<String> groupPaths,
+                                                       Integer pageNumber,
+                                                       Integer pageSize,
+                                                       String sortString,
+                                                       Boolean isAscending);
 
     public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
             WsSubjectLookup lookup,
