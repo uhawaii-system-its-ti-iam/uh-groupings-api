@@ -103,7 +103,7 @@ public class TestGroupingAssignmentService {
     private String ADMIN;
 
     @Value("${groupings.api.test.usernames}")
-    private String[] username;
+    private String[] usernames;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -113,6 +113,9 @@ public class TestGroupingAssignmentService {
 
     @Autowired
     private MembershipService membershipService;
+
+    @Autowired
+    private MemberAttributeService memberAttributeService;
 
     @Autowired
     private HelperService helperService;
@@ -132,27 +135,33 @@ public class TestGroupingAssignmentService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
+        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
         //put in include
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
+        List<String> includeNames = new ArrayList<>();
+        includeNames.add(usernames[0]);
+        includeNames.add(usernames[1]);
+        includeNames.add(usernames[2]);
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
+        membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[4]);
+        membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[5]);
 
         //add to exclude
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
+        membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[3]);
+
+        // assign ownership
+        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
     }
 
     @Test
     public void adminListsTest() {
         //try with non-admin
-        AdminListsHolder info = groupingAssignmentService.adminLists(username[0]);
+        AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
         assertNotNull(info);
         assertEquals(info.getAllGroupings().size(), 0);
         assertEquals(info.getAdminGroup().getMembers().size(), 0);
@@ -187,8 +196,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void getGroupingTest() {
 
-        // username[4] does not own grouping, method should return empty grouping
-        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, username[4]);
+        // usernames[4] does not own grouping, method should return empty grouping
+        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
         assertEquals(grouping.getPath(), "");
         assertEquals(grouping.getName(), "");
         assertEquals(grouping.getOwners().getMembers().size(), 0);
@@ -197,30 +206,30 @@ public class TestGroupingAssignmentService {
         assertEquals(grouping.getBasis().getMembers().size(), 0);
         assertEquals(grouping.getComposite().getMembers().size(), 0);
 
-        grouping = groupingAssignmentService.getGrouping(GROUPING, username[0]);
+        grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
 
         assertEquals(grouping.getPath(), GROUPING);
 
         // Testing for garbage uuid basis bug fix
         // List<String> list = grouping.getBasis().getUuids();
 
-        assertTrue(grouping.getBasis().getUsernames().contains(username[3]));
-        assertTrue(grouping.getBasis().getUsernames().contains(username[4]));
-        assertTrue(grouping.getBasis().getUsernames().contains(username[5]));
+        assertTrue(grouping.getBasis().getUsernames().contains(usernames[3]));
+        assertTrue(grouping.getBasis().getUsernames().contains(usernames[4]));
+        assertTrue(grouping.getBasis().getUsernames().contains(usernames[5]));
 
-        assertTrue(grouping.getComposite().getUsernames().contains(username[0]));
-        assertTrue(grouping.getComposite().getUsernames().contains(username[1]));
-        assertTrue(grouping.getComposite().getUsernames().contains(username[2]));
-        assertTrue(grouping.getComposite().getUsernames().contains(username[4]));
-        assertTrue(grouping.getComposite().getUsernames().contains(username[5]));
+        assertTrue(grouping.getComposite().getUsernames().contains(usernames[0]));
+        assertTrue(grouping.getComposite().getUsernames().contains(usernames[1]));
+        assertTrue(grouping.getComposite().getUsernames().contains(usernames[2]));
+        assertTrue(grouping.getComposite().getUsernames().contains(usernames[4]));
+        assertTrue(grouping.getComposite().getUsernames().contains(usernames[5]));
 
-        assertTrue(grouping.getExclude().getUsernames().contains(username[3]));
+        assertTrue(grouping.getExclude().getUsernames().contains(usernames[3]));
 
-        assertTrue(grouping.getInclude().getUsernames().contains(username[0]));
-        assertTrue(grouping.getInclude().getUsernames().contains(username[1]));
-        assertTrue(grouping.getInclude().getUsernames().contains(username[2]));
+        assertTrue(grouping.getInclude().getUsernames().contains(usernames[0]));
+        assertTrue(grouping.getInclude().getUsernames().contains(usernames[1]));
+        assertTrue(grouping.getInclude().getUsernames().contains(usernames[2]));
 
-        assertTrue(grouping.getOwners().getUsernames().contains(username[0]));
+        assertTrue(grouping.getOwners().getUsernames().contains(usernames[0]));
     }
 
     @Test
@@ -259,9 +268,9 @@ public class TestGroupingAssignmentService {
 
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
-        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 20);
+        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20);
         // Page 2 contains 1 stale subject, should return 19
-        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 2, 20);
+        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));
@@ -284,7 +293,7 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
 
         // Test paging without proper permissions
-        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[1], 1, 20);
+        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20);
         assertThat(paginatedGroupingPagePermissions.getBasis().getMembers().size(), equalTo(0));
     }
 
@@ -293,7 +302,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void getFilteredGroupingTest() {
 
-        Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, username[0], "zac", 1, 20);
+        Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, usernames[0], "zac", 1, 20);
 
     }
 
@@ -304,8 +313,8 @@ public class TestGroupingAssignmentService {
     @Ignore
     @Test
     public void paginatedVersusNonpaginatedTest () {
-        Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, username[0]);
-        Grouping groupingPaginated = groupingAssignmentService.getPaginatedGrouping(GROUPING, username[0], 1, 369);
+        Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
+        Grouping groupingPaginated = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369);
 
         List<Person> paginatedBasisMembers = groupingPaginated.getBasis().getMembers();
         List<Person> nonPaginatedBasisMembers = groupingNonPaginated.getBasis().getMembers();
@@ -321,7 +330,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsInTest() {
-        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
+        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[0]);
         boolean isInGrouping = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
@@ -333,7 +342,7 @@ public class TestGroupingAssignmentService {
         assertTrue(isInGrouping);
 
         isInGrouping = false;
-        groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[3]);
+        groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[3]);
         for (Grouping grouping : groupingAssignment.getGroupingsIn()) {
             if (grouping.getPath().contains(GROUPING)) {
                 isInGrouping = true;
@@ -345,7 +354,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsOwnedTest() {
-        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
+        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[0]);
         boolean isGroupingOwner  = false;
 
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
@@ -357,7 +366,7 @@ public class TestGroupingAssignmentService {
         assertTrue(isGroupingOwner);
 
         isGroupingOwner = false;
-        groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[4]);
+        groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[4]);
         for (Grouping grouping : groupingAssignment.getGroupingsOwned()) {
             if (grouping.getPath().contains(GROUPING)) {
                 isGroupingOwner = true;
@@ -374,7 +383,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsToOptTest() {
-        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(username[0]);
+        GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[0]);
 
         boolean isOptInPossible = false;
         for (Grouping grouping : groupingAssignment.getGroupingsToOptInTo()) {
@@ -399,33 +408,33 @@ public class TestGroupingAssignmentService {
     public void getMembersTest() {
 
         // Testing for garbage uuid basis bug fix
-        // Group testGroup = groupingAssignmentService.getMembers(username[0], GROUPING_BASIS);
+        // Group testGroup = groupingAssignmentService.getMembers(usernames[0], GROUPING_BASIS);
 
         List<String> groupings = new ArrayList<>();
         groupings.add(GROUPING);
-        Group group = groupingAssignmentService.getMembers(username[0], groupings).get(GROUPING);
+        Group group = groupingAssignmentService.getMembers(usernames[0], groupings).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
-        assertTrue(usernames.contains(username[0]));
-        assertTrue(usernames.contains(username[1]));
-        assertTrue(usernames.contains(username[2]));
-        assertFalse(usernames.contains(username[3]));
-        assertTrue(usernames.contains(username[4]));
-        assertTrue(usernames.contains(username[5]));
+        assertTrue(usernames.contains(this.usernames[0]));
+        assertTrue(usernames.contains(this.usernames[1]));
+        assertTrue(usernames.contains(this.usernames[2]));
+        assertFalse(usernames.contains(this.usernames[3]));
+        assertTrue(usernames.contains(this.usernames[4]));
+        assertTrue(usernames.contains(this.usernames[5]));
     }
 
     @Test
     public void getMembershipAssignmentTest() {
-        // username[1] should already be in GROUPING
+        // usernames[1] should already be in GROUPING
         List<String> groupingsIn = groupingAssignmentService
-                .getMembershipAssignment(username[0], username[0])
+                .getMembershipAssignment(usernames[0], usernames[0])
                 .getGroupingsIn()
                 .stream()
                 .map(Grouping::getPath)
                 .collect(Collectors.toList());
 
         List<String> groupingsToOptInto = groupingAssignmentService
-                .getMembershipAssignment(username[0], username[0])
+                .getMembershipAssignment(usernames[0], usernames[0])
                 .getGroupingsToOptInTo()
                 .stream()
                 .map(Grouping::getPath)
@@ -434,19 +443,19 @@ public class TestGroupingAssignmentService {
         assertTrue(groupingsIn.contains(GROUPING));
         assertFalse(groupingsToOptInto.contains(GROUPING));
 
-        // take username[1] out of GROUPING
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[0]);
+        // take usernames[1] out of GROUPING
+        membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[0]);
 
-        // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
+        // GROUPING has OPT-IN turned on, so usernames[1] should be able to opt back into GROUPING
         groupingsIn = groupingAssignmentService
-                .getMembershipAssignment(username[0], username[0])
+                .getMembershipAssignment(usernames[0], usernames[0])
                 .getGroupingsIn()
                 .stream()
                 .map(Grouping::getPath)
                 .collect(Collectors.toList());
 
         groupingsToOptInto = groupingAssignmentService
-                .getMembershipAssignment(username[0], username[0])
+                .getMembershipAssignment(usernames[0], usernames[0])
                 .getGroupingsToOptInTo()
                 .stream()
                 .map(Grouping::getPath)
@@ -458,16 +467,16 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupNamesTest() {
-        List<String> groupNames1 = groupingAssignmentService.getGroupPaths(ADMIN, username[1]);
-        List<String> groupNames3 = groupingAssignmentService.getGroupPaths(ADMIN, username[3]);
+        List<String> groupNames1 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[1]);
+        List<String> groupNames3 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[3]);
 
-        //username[1] should be in the composite and the include, not basis or exclude
+        //usernames[1] should be in the composite and the include, not basis or exclude
         assertTrue(groupNames1.contains(GROUPING));
         assertTrue(groupNames1.contains(GROUPING_INCLUDE));
         assertFalse(groupNames1.contains(GROUPING_BASIS));
         assertFalse(groupNames1.contains(GROUPING_EXCLUDE));
 
-        //username[3] should be in the basis and exclude, not the composite or include
+        //usernames[3] should be in the basis and exclude, not the composite or include
         assertTrue(groupNames3.contains(GROUPING_BASIS));
         assertTrue(groupNames3.contains(GROUPING_EXCLUDE));
         assertFalse(groupNames3.contains(GROUPING));
@@ -476,13 +485,13 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupNames() {
-        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
+        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
 
         assertTrue(groups.contains(GROUPING_OWNERS));
         assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
         assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
 
-        List<String> groups2 = groupingAssignmentService.getGroupPaths(ADMIN, username[1]);
+        List<String> groups2 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[1]);
 
         assertFalse(groups2.contains(GROUPING_OWNERS));
         assertFalse(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
@@ -491,23 +500,23 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupPathsPermissionsTest(){
-        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
+        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
 
         assertTrue(groups.contains(GROUPING_OWNERS));
         assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
         assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
 
-        List<String> groups2 = groupingAssignmentService.getGroupPaths(username[0], username[0]);
+        List<String> groups2 = groupingAssignmentService.getGroupPaths(usernames[0], usernames[0]);
 
         assertTrue(groups2.contains(GROUPING_OWNERS));
         assertTrue(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
         assertTrue(groups2.contains(GROUPING_TRUE_EMPTY_OWNERS));
 
-        List<String> groups3 = groupingAssignmentService.getGroupPaths(username[1], username[0]);
+        List<String> groups3 = groupingAssignmentService.getGroupPaths(usernames[1], usernames[0]);
         assertThat(groups3.size(), equalTo(0));
 
 //        try{
-//            groupingAssignmentService.getGroupPaths(username[1], username[0]);
+//            groupingAssignmentService.getGroupPaths(usernames[1], usernames[0]);
 //            fail("Shouldn't be here");
 //        } catch (GroupingsHTTPException ghe) {
 //            assertThat(ghe.getStatusCode(), equalTo(403));
@@ -516,7 +525,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void grouperTest() {
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, username[0]);
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
 
         List<String> groupings = new ArrayList<>();
         List<String> groupings2 = new ArrayList<>();
