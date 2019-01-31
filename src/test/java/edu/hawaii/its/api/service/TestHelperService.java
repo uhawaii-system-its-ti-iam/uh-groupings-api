@@ -94,9 +94,11 @@ public class TestHelperService {
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
         //put in include
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
+        List<String> includeNames = new ArrayList<>();
+        includeNames.add(username[0]);
+        includeNames.add(username[1]);
+        includeNames.add(username[2]);
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
         membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
