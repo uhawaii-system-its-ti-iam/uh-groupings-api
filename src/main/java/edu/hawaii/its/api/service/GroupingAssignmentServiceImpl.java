@@ -573,6 +573,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 "; componentId: " + componentId + "; Thread:" + Thread.currentThread().getName() + ";");
 
         String groupPath = parentGroupingPath + componentId;
+        List<String> groupPathList = new ArrayList<>();
+        groupPathList.add(groupPath);
         Group groupMembers = new Group();
         WsGetMembersResults members = new WsGetMembersResults();
 
@@ -586,7 +588,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 members = grouperFactoryService.makeWsGetMembersResults(
                         SUBJECT_ATTRIBUTE_NAME_UID,
                         lookup,
-                        groupPath);
+                        groupPathList,
+                        null,
+                        null,
+                        "username",
+                        true);
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
             }
