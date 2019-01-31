@@ -1,13 +1,12 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -115,10 +114,6 @@ public class TestGroupAttributeService {
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
-    // Fails if name is not hasLdapTest
-    @Test
-    public void hasLdapTest() { assertTrue(groupAttributeService.isContainingListserv(GROUPING)); }
-
     @Test
     public void changeListServeStatusTest() {
         GroupingsServiceResult groupingsServiceResult;
@@ -190,7 +185,7 @@ public class TestGroupAttributeService {
     }
 
     @Test
-    public void changeuhReleasedGroupingsStatusTest() {
+    public void changeUhReleasedGroupingsStatusTest() {
         //todo
     }
 
