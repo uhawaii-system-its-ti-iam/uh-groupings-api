@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +22,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -41,6 +44,8 @@ public class TestMembershipService {
     private String GROUPING_EXCLUDE;
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+    @Value("${groupings.api.test.grouping_many_extra}")
+    private String GROUPING_EXTRA;
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
@@ -75,6 +80,9 @@ public class TestMembershipService {
     @Autowired
     public Environment env; // Just for the settings check.
 
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
     @PostConstruct
     public void init() {
         Assert.hasLength(env.getProperty("grouperClient.webService.url"),
@@ -93,17 +101,25 @@ public class TestMembershipService {
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
-        //put in include
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[0]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[1]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[2]);
+        //add to include
+        List<String> includeNames = new ArrayList<>();
+        includeNames.add(username[0]);
+        includeNames.add(username[1]);
+        includeNames.add(username[2]);
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
+
+        // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[5]);
 
         //remove from exclude
         membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
         membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
 
         //add to exclude
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
+        membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
 
         //remove ownership
         memberAttributeService.removeOwnership(GROUPING, username[0], username[2]);
@@ -300,7 +316,8 @@ public class TestMembershipService {
 
     @Test
     public void getMembersTest() {
-        Group group = groupingAssignmentService.getMembers(username[0], GROUPING);
+        String[] groupings = {GROUPING};
+        Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
         assertTrue(usernames.contains(username[0]));

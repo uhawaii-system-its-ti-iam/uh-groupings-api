@@ -14,6 +14,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
@@ -255,11 +256,17 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
-            Group include = getMembers(ownerUsername, groupingPath + INCLUDE);
-            Group exclude = getMembers(ownerUsername, groupingPath + EXCLUDE);
-            Group basis = getMembers(ownerUsername, groupingPath + BASIS);
-            Group composite = getMembers(ownerUsername, groupingPath);
-            Group owners = getMembers(ownerUsername, groupingPath + OWNERS);
+            String basis = groupingPath + BASIS;
+            String include = groupingPath + INCLUDE;
+            String exclude = groupingPath + EXCLUDE;
+            String owners = groupingPath + OWNERS;
+
+            String[] paths = {include,
+                    exclude,
+                    basis,
+                    groupingPath,
+                    owners};
+            Map<String, Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -381,7 +388,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
-        AdminListsHolder info = new AdminListsHolder();
+        AdminListsHolder adminListsHolder = new AdminListsHolder();
         List<Grouping> groupings;
 
         if (memberAttributeService.isSuperuser(adminUsername)) {
@@ -395,12 +402,14 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             List<String> groupPaths = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
 
-            Group admin = getMembers(adminUsername, GROUPING_ADMINS);
+            List<String> adminGrouping = new ArrayList<>(1);
+            adminGrouping.add(GROUPING_ADMINS);
+            Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
             groupings = helperService.makeGroupings(groupPaths);
-            info.setAdminGroup(admin);
-            info.setAllGroupings(groupings);
+            adminListsHolder.setAdminGroup(admin);
+            adminListsHolder.setAllGroupings(groupings);
         }
-        return info;
+        return adminListsHolder;
     }
 
     //returns a list of groupings corresponding to the include group or exclude group (includeOrrExclude) in groupPaths that
@@ -435,11 +444,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns a group from grouper or the database
     @Override
-    public Group getMembers(String ownerUsername, String groupPath) {
-        logger.info("getMembers; user: " + ownerUsername + "; group: " + groupPath + ";");
-
-        List<String> groupPaths = new ArrayList<>();
-        groupPaths.add(groupPath);
+    public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
+        logger.info("getMembers; user: " + ownerUsername + "; groups: " + groupPaths + ";");
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
@@ -451,9 +457,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 null,
                 null);
 
-        Group groupMembers = new Group();
+        Map<String, Group> groupMembers = new HashMap<>();
         if (members.getResults() != null) {
-            groupMembers = makeGroup(members);
+            groupMembers = makeGroups(members);
         }
         return groupMembers;
     }
@@ -470,7 +476,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 .isAdmin(ownerUsername)) {
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-            WsGetMembersResults members;
+            WsGetMembersResults membersResults;
 
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Callable<WsGetMembersResults> callable = () -> {
@@ -489,7 +495,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             Future<WsGetMembersResults> future = executor.submit(callable);
 
             try {
-                members = future.get(TIMEOUT, TimeUnit.SECONDS);
+                membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
             } catch (TimeoutException te) {
 //                te.printStackTrace();
                 GroupingsHTTPException ghe = new GroupingsHTTPException();
@@ -500,12 +506,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 executor.shutdown();
             }
 
-            //todo should we use EmptyGroup?
-            if (members.getResults() != null) {
+            if (membersResults.getResults() != null) {
                 if (componentId.equals(BASIS)) {
-                    groupMembers = makeBasisGroup(members);
+                    groupMembers = makeBasisGroup(membersResults);
                 } else {
-                    groupMembers = makeGroup(members);
+                    groupMembers = makeGroup(membersResults);
                 }
             }
         }
@@ -530,11 +535,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 null,
                 null);
 
-        //todo should we use EmptyGroup?
         Group groupMembers = new Group();
         if (members.getResults() != null && groupPath.contains(BASIS)) {
             groupMembers = makeBasisGroup(members);
         } else if (members.getResults() != null) {
+            //todo change to makeGroup() instead of groups
             groupMembers = makeGroup(members);
         }
         return groupMembers;
@@ -564,7 +569,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     }
 
-    //makes a group filled with members from membersResults
     @Override
     public Group makeGroup(WsGetMembersResults membersResults) {
         Group group = new Group();
@@ -585,6 +589,34 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
 
         return group;
+    }
+
+    //makes a group filled with members from membersResults
+    @Override
+    public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
+        Map<String, Group> groups = new HashMap<>();
+        if (membersResults.getResults().length > 0) {
+            String[] attributeNames = membersResults.getSubjectAttributeNames();
+
+            for (WsGetMembersResult result : membersResults.getResults()) {
+                WsSubject[] subjects = result.getWsSubjects();
+                Group group = new Group(result.getWsGroup().getName());
+
+
+                if (subjects.length > 0) {
+                    for (WsSubject subject : subjects) {
+                        if (subject != null) {
+                            group.addMember(makePerson(subject, attributeNames));
+                        }
+                    }
+//                    groups.add(group);
+                    groups.put(group.getPath(), group);
+                }
+            }
+            // Return empty group if for any unforeseen results
+
+        }
+        return groups;
     }
 
     // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
@@ -706,8 +738,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return extractGroupPaths(groups);
 
         } else {
-            List<String> results = new ArrayList<>();
-            return results;
+            return new ArrayList<>();
             //            GroupingsHTTPException ghe = new GroupingsHTTPException();
             //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
