@@ -162,22 +162,30 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a specific grouping with potential for page, size, sortstring, or ascending/descending
+     *
+     * @param path: Path of specific grouping
+     * @return Grouping found at specified path
+     */
+
+
+    /**
      * Get a specific grouping
      *
      * @param path: Path of specific grouping
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/groupings/{path}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path) throws Exception {
-        logger.info("Entered REST getGrouping...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getGrouping(path, currentUser));
-    }
+//    @RequestMapping(value = "/groupings/{path}",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path) throws Exception {
+//        logger.info("Entered REST getGrouping...");
+//        return ResponseEntity
+//                .ok()
+//                .body(groupingAssignmentService.getGrouping(path, currentUser));
+//    }
 
     /**
      * Get a specific group
@@ -245,43 +253,43 @@ public class GroupingsRestControllerv2_1 {
      * @param path: Path of specific grouping
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/groupings/{path}",
-            params = { "page", "size" },
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Grouping> getPaginatedGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestParam(value = "page") Integer page,
-            @RequestParam(value = "size") Integer size) {
-        logger.info("Entered REST getPaginatedGrouping...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size));
-    }
-
-    /**
-     * Get a specific subset of members in a group based on a filter string
-     *
-     * @param path: Path of specific group
-     * @return Members found in group that contains filterString
-     */
-    @RequestMapping(value = "/groupings/{path}",
-            params = { "page", "size", "uid" },
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Group> getPaginatedAndFilteredGroup(@RequestHeader("current_user") String curentUser,
-            @PathVariable String path,
-            @RequestParam(value = "page") Integer page,
-            @RequestParam(value = "size") Integer size,
-            @RequestParam(value = "uid") String filterString) {
-
-        logger.info("Entered REST getPaginatedAndFilteredGroup...");
-
-        // todo
-        throw new UnsupportedOperationException();
-    }
+//    @RequestMapping(value = "/groupings/{path}",
+//            params = { "page", "size" },
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<Grouping> getPaginatedGrouping(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path,
+//            @RequestParam(value = "page") Integer page,
+//            @RequestParam(value = "size") Integer size) {
+//        logger.info("Entered REST getPaginatedGrouping...");
+//        return ResponseEntity
+//                .ok()
+//                .body(groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size));
+//    }
+//
+//    /**
+//     * Get a specific subset of members in a group based on a filter string
+//     *
+//     * @param path: Path of specific group
+//     * @return Members found in group that contains filterString
+//     */
+//    @RequestMapping(value = "/groupings/{path}",
+//            params = { "page", "size", "uid" },
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<Group> getPaginatedAndFilteredGroup(@RequestHeader("current_user") String curentUser,
+//            @PathVariable String path,
+//            @RequestParam(value = "page") Integer page,
+//            @RequestParam(value = "size") Integer size,
+//            @RequestParam(value = "uid") String filterString) {
+//
+//        logger.info("Entered REST getPaginatedAndFilteredGroup...");
+//
+//        // todo
+//        throw new UnsupportedOperationException();
+//    }
 
     // todo Test mapping; subject to change
     /**
