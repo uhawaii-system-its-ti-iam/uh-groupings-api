@@ -174,21 +174,21 @@ public class GroupingsRestControllerv2_1 {
      * @param isAscending: Page of grouping to retrieve (starts at 1)
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/groupings/{path}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String sortString,
-            @RequestParam(required = false) Boolean isAscending) {
-        logger.info("Entered REST getGrouping...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
-    }
+//    @RequestMapping(value = "/groupings/{path}",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path,
+//            @RequestParam(required = false) Integer page,
+//            @RequestParam(required = false) Integer size,
+//            @RequestParam(required = false) String sortString,
+//            @RequestParam(required = false) Boolean isAscending) {
+//        logger.info("Entered REST getGrouping...");
+//        return ResponseEntity
+//                .ok()
+//                .body(groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
+//    }
 
     /**
      * Get a specific grouping
@@ -196,17 +196,17 @@ public class GroupingsRestControllerv2_1 {
      * @param path: Path of specific grouping
      * @return Grouping found at specified path
      */
-    //    @RequestMapping(value = "/groupings/{path}",
-    //            method = RequestMethod.GET,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    @ResponseBody
-    //    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-    //            @PathVariable String path) throws Exception {
-    //        logger.info("Entered REST getGrouping...");
-    //        return ResponseEntity
-    //                .ok()
-    //                .body(groupingAssignmentService.getGrouping(path, currentUser));
-    //    }
+        @RequestMapping(value = "/groupings/{path}",
+                method = RequestMethod.GET,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+        @ResponseBody
+        public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
+                @PathVariable String path) throws Exception {
+            logger.info("Entered REST getGrouping...");
+            return ResponseEntity
+                    .ok()
+                    .body(groupingAssignmentService.getGrouping(path, currentUser));
+        }
 
     /**
      * Get a specific group
