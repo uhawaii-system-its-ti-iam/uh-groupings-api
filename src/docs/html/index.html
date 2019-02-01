@@ -444,13 +444,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_basic-error-controller_resource">2.1. Basic-error-controller</a>
 <ul class="sectlevel3">
-<li><a href="#_errorhtmlusingpost">2.1.1. errorHtml</a></li>
-<li><a href="#_errorhtmlusingget">2.1.2. errorHtml</a></li>
-<li><a href="#_errorhtmlusingput">2.1.3. errorHtml</a></li>
-<li><a href="#_errorhtmlusingdelete">2.1.4. errorHtml</a></li>
-<li><a href="#_errorhtmlusingpatch">2.1.5. errorHtml</a></li>
-<li><a href="#_errorhtmlusinghead">2.1.6. errorHtml</a></li>
-<li><a href="#_errorhtmlusingoptions">2.1.7. errorHtml</a></li>
+<li><a href="#_errorusingpost">2.1.1. error</a></li>
+<li><a href="#_errorusingget">2.1.2. error</a></li>
+<li><a href="#_errorusingput">2.1.3. error</a></li>
+<li><a href="#_errorusingdelete">2.1.4. error</a></li>
+<li><a href="#_errorusingpatch">2.1.5. error</a></li>
+<li><a href="#_errorusinghead">2.1.6. error</a></li>
+<li><a href="#_errorusingoptions">2.1.7. error</a></li>
 </ul>
 </li>
 <li><a href="#_groupings-rest-controllerv-2_1_resource">2.2. Groupings-rest-controllerv-2_1</a>
@@ -460,7 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_deletenewadminusingdelete">2.2.3. deleteNewAdmin</a></li>
 <li><a href="#_adminsgroupingsusingget">2.2.4. adminsGroupings</a></li>
 <li><a href="#_addnewgroupingusingpost">2.2.5. addNewGrouping</a></li>
-<li><a href="#_getgroupingusingget">2.2.6. getGrouping</a></li>
+<li><a href="#_getpaginatedandfilteredgroupusingget">2.2.6. getPaginatedAndFilteredGroup</a></li>
 <li><a href="#_deletenewgroupingusingdelete">2.2.7. deleteNewGrouping</a></li>
 <li><a href="#_getgroupusingget">2.2.8. getGroup</a></li>
 <li><a href="#_searchmembersusingget">2.2.9. searchMembers</a></li>
@@ -597,7 +597,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Basic Error Controller</p>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingpost"><a class="anchor" href="#_errorhtmlusingpost"></a><a class="link" href="#_errorhtmlusingpost">2.1.1. errorHtml</a></h4>
+<h4 id="_errorusingpost"><a class="anchor" href="#_errorusingpost"></a><a class="link" href="#_errorusingpost">2.1.1. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>POST /error</pre>
@@ -622,7 +622,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -662,14 +662,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingget"><a class="anchor" href="#_errorhtmlusingget"></a><a class="link" href="#_errorhtmlusingget">2.1.2. errorHtml</a></h4>
+<h4 id="_errorusingget"><a class="anchor" href="#_errorusingget"></a><a class="link" href="#_errorusingget">2.1.2. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>GET /error</pre>
@@ -694,7 +694,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
@@ -719,14 +719,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingput"><a class="anchor" href="#_errorhtmlusingput"></a><a class="link" href="#_errorhtmlusingput">2.1.3. errorHtml</a></h4>
+<h4 id="_errorusingput"><a class="anchor" href="#_errorusingput"></a><a class="link" href="#_errorusingput">2.1.3. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>PUT /error</pre>
@@ -751,7 +751,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -791,14 +791,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingdelete"><a class="anchor" href="#_errorhtmlusingdelete"></a><a class="link" href="#_errorhtmlusingdelete">2.1.4. errorHtml</a></h4>
+<h4 id="_errorusingdelete"><a class="anchor" href="#_errorusingdelete"></a><a class="link" href="#_errorusingdelete">2.1.4. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>DELETE /error</pre>
@@ -823,7 +823,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
@@ -848,14 +848,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingpatch"><a class="anchor" href="#_errorhtmlusingpatch"></a><a class="link" href="#_errorhtmlusingpatch">2.1.5. errorHtml</a></h4>
+<h4 id="_errorusingpatch"><a class="anchor" href="#_errorusingpatch"></a><a class="link" href="#_errorusingpatch">2.1.5. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>PATCH /error</pre>
@@ -880,7 +880,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
@@ -915,14 +915,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusinghead"><a class="anchor" href="#_errorhtmlusinghead"></a><a class="link" href="#_errorhtmlusinghead">2.1.6. errorHtml</a></h4>
+<h4 id="_errorusinghead"><a class="anchor" href="#_errorusinghead"></a><a class="link" href="#_errorusinghead">2.1.6. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>HEAD /error</pre>
@@ -947,7 +947,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
@@ -982,14 +982,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_errorhtmlusingoptions"><a class="anchor" href="#_errorhtmlusingoptions"></a><a class="link" href="#_errorhtmlusingoptions">2.1.7. errorHtml</a></h4>
+<h4 id="_errorusingoptions"><a class="anchor" href="#_errorusingoptions"></a><a class="link" href="#_errorusingoptions">2.1.7. error</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>OPTIONS /error</pre>
@@ -1014,7 +1014,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_modelandview">ModelAndView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, object &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
@@ -1049,7 +1049,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>text/html</code></p>
+<p><code><strong>/</strong></code></p>
 </li>
 </ul>
 </div>
@@ -1510,7 +1510,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_getgroupingusingget"><a class="anchor" href="#_getgroupingusingget"></a><a class="link" href="#_getgroupingusingget">2.2.6. getGrouping</a></h4>
+<h4 id="_getpaginatedandfilteredgroupusingget"><a class="anchor" href="#_getpaginatedandfilteredgroupusingget"></a><a class="link" href="#_getpaginatedandfilteredgroupusingget">2.2.6. getPaginatedAndFilteredGroup</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>GET /api/groupings/v2.1/groupings/{path}</pre>
@@ -1548,6 +1548,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">path</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>page</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">page</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>size</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">size</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1570,7 +1591,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_grouping">Grouping</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_group">Group</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
@@ -5342,7 +5363,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-07 07:20:46 -10:00
+Last updated 2019-01-28 12:46:31 HST
 </div>
 </div>
 </body>
