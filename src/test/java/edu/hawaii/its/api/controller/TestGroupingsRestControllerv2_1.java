@@ -593,6 +593,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getPaginatedGroupingTest() throws Exception {
 
+        //todo Changed groupingPath for testing
         // Paging starts at 1 D:
 //        Grouping paginatedGrouping = mapGrouping(GROUPING, uhUser01, 1, 20);
         Grouping paginatedGrouping = mapGrouping("tmp:win-single", uhUser01, 1, 20);
@@ -1219,6 +1220,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    //todo Fix for sortString and isAscending
     // Mapping of getGrouping and getPaginatedGrouping call
     private Grouping mapGrouping(String groupingPath, User currentUser, Integer page, Integer size) throws Exception {
 
