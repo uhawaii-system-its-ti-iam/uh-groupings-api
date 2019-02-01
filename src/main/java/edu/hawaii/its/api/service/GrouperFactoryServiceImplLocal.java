@@ -981,6 +981,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             WsSubject[] subjects = subjectList.toArray(new WsSubject[subjectList.size()]);
             wsGetMembersResult.setWsSubjects(subjects);
 
+            WsGroup wsGroup = new WsGroup();
+            wsGroup.setName(groupPath);
+            wsGetMembersResult.setWsGroup(wsGroup);
+
             results.add(wsGetMembersResult);
         }
 
