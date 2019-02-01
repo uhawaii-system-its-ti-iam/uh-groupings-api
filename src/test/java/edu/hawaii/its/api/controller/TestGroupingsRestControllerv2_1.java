@@ -18,7 +18,6 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.MembershipAssignment;
-import edu.hawaii.its.api.type.Person;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hamcrest.core.IsEqual;
@@ -26,7 +25,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.thymeleaf.spring5.expression.Mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -123,7 +122,7 @@ public class TestGroupingsRestControllerv2_1 {
     private String BASIS_PLUS_INCLUDE;
 
     @Value("${groupings.api.test.usernames}")
-    private String[] tst;
+    private String[] usernames;
 
     @Value("${groupings.api.test.names}")
     private String[] tstName;
@@ -243,10 +242,10 @@ public class TestGroupingsRestControllerv2_1 {
         // Creates normal users for testing
         Set<GrantedAuthority> uhAuthorities = new LinkedHashSet<>();
         uhAuthorities.add(new SimpleGrantedAuthority(Role.UH.longName()));
-        uhUser01 = new User(tst[0], tst[0], uhAuthorities);
-        uhUser02 = new User(tst[1], tst[1], uhAuthorities);
-        uhUser05 = new User(tst[4], tst[4], uhAuthorities);
-        uhUser03 = new User(tst[2], tst[2], uhAuthorities);
+        uhUser01 = new User(usernames[0], usernames[0], uhAuthorities);
+        uhUser02 = new User(usernames[1], usernames[1], uhAuthorities);
+        uhUser05 = new User(usernames[4], usernames[4], uhAuthorities);
+        uhUser03 = new User(usernames[2], usernames[2], uhAuthorities);
 
         // Creates anonymous user for testing
         Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
@@ -254,40 +253,40 @@ public class TestGroupingsRestControllerv2_1 {
         anon = new AnonymousUser();
 
         // add to include
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[0]);
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[1]);
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[2]);
-        membershipService.addGroupMember(tst[0], GROUPING_INCLUDE, tst[2]);
+        List<String> includeNames = new ArrayList<>();
+        includeNames.add(usernames[0]);
+        includeNames.add(usernames[1]);
+        includeNames.add(usernames[2]);
+        includeNames.add(usernames[4]);
+        includeNames.add(usernames[5]);
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
-        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[3]);
+        membershipService.deleteGroupMemberByUsername(usernames[0], GROUPING_INCLUDE, usernames[3]);
 
         // add to exclude
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[3]);
-        membershipService.addGroupMember(tst[0], GROUPING_EXCLUDE, tst[3]);
+        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[3]);
 
         // remove from exclude
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[4]);
-        membershipService.addGroupMemberByUsername(tst[0], GROUPING_INCLUDE, tst[5]);
-        membershipService.deleteGroupMemberByUsername(tst[0], GROUPING_EXCLUDE, tst[2]);
+        membershipService.deleteGroupMemberByUsername(usernames[0], GROUPING_EXCLUDE, usernames[2]);
 
         // Remove admin privileges
-        membershipService.deleteAdmin(ADMIN, tst[0]);
+        membershipService.deleteAdmin(ADMIN, usernames[0]);
 
         // add ownership
-        memberAttributeService.assignOwnership(GROUPING, ADMIN, tst[0]);
-        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, tst[4]);
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
 
         // Remove ownership
-        memberAttributeService.removeOwnership(GROUPING, tst[0], tst[1]);
+        memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
 
-        // Remove tst[3] from include and add to exclude
+        // Remove usernames[3] from include and add to exclude
 
         // Reset preferences
-        groupAttributeService.changeOptInStatus(GROUPING, tst[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, tst[0], true);
-        groupAttributeService.changeListservStatus(GROUPING, tst[0], true);
-        groupAttributeService.changeReleasedGroupingStatus(GROUPING, tst[0], false);
+        groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeReleasedGroupingStatus(GROUPING, usernames[0], false);
 
         // Delete grouping if it exists
         try {
@@ -297,13 +296,13 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Ensures users are not already in group
-        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername(tst[4], A_INCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[2]);
 
-        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername(tst[4], A_EXCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[2]);
     }
 
     @Test
@@ -355,7 +354,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberAttributesAdminTest() throws Exception {
 
-        Map attributes = mapGetUserAttributes(tst[0], adminUser);
+        Map attributes = mapGetUserAttributes(usernames[0], adminUser);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
         assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
@@ -381,7 +380,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberAttributesMyselfTest() throws Exception {
 
-        Map attributes = mapGetUserAttributes(tst[0], uhUser01);
+        Map attributes = mapGetUserAttributes(usernames[0], uhUser01);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
         assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
@@ -395,7 +394,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberAttributesFailTest() throws Exception {
 
-        Map attributes = mapGetUserAttributes(tst[0], uhUser03);
+        Map attributes = mapGetUserAttributes(usernames[0], uhUser03);
 
         assertThat(attributes.get(USERNAME), equalTo(""));
         assertThat(attributes.get(FIRST_NAME), equalTo(""));
@@ -403,9 +402,9 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(attributes.get(COMPOSITE_NAME), equalTo(""));
         assertThat(attributes.get(LAST_NAME), equalTo(""));
 
-        //        assertThat(mapGetUserAttributes(tst[0]).size(), equalTo(0));
+        //        assertThat(mapGetUserAttributes(usernames[0]).size(), equalTo(0));
         //        try {
-        //            mapGetUserAttributes(tst[0]);
+        //            mapGetUserAttributes(usernames[0]);
         //            fail("Shouldn't be here.");
         //        } catch (GroupingsHTTPException ghe) {
         //            assertThat(ghe.getStatusCode(), equalTo(403));
@@ -417,7 +416,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void memberAttributesAnonTest() throws Exception {
 
         try {
-            mapGetUserAttributes(tst[0], anon);
+            mapGetUserAttributes(usernames[0], anon);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -427,7 +426,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsAdminTest() throws Exception {
 
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], adminUser);
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], adminUser);
         assertThat(membershipAssignment.getGroupingsIn().size(), not(0));
 
         try {
@@ -442,7 +441,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsMyselfTest() throws Exception {
 
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], uhUser01);
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser01);
         assertThat(membershipAssignment.getGroupingsIn(), not(0));
     }
 
@@ -451,7 +450,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void memberGroupingsAnonTest() throws Exception {
 
         try {
-            mapList(API_BASE + "members/" + tst[0] + "/groupings", "get", anonUser);
+            mapList(API_BASE + "members/" + usernames[0] + "/groupings", "get", anonUser);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -462,14 +461,14 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberGroupingsFailTest() throws Exception {
 
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(tst[0], uhUser05);
+        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser05);
         assertThat(membershipAssignment.getGroupingsIn().size(), equalTo(0));
     }
 
     @Test
     public void ownerGroupingsAdminTest() throws Exception {
 
-        List listGroupings = mapList(API_BASE + "owners/" + tst[0] + "/groupings", "get", adminUser);
+        List listGroupings = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", adminUser);
         assertThat(listGroupings.size(), not(0));
 
         try {
@@ -490,7 +489,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void ownerGroupingsMyselfTest() throws Exception {
 
-        List listGroupings = mapList(API_BASE + "owners/" + tst[0] + "/groupings", "get", uhUser01);
+        List listGroupings = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
         assertThat(listGroupings.size(), not(0));
     }
 
@@ -499,7 +498,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void ownerGroupingsAnonTest() throws Exception {
 
         try {
-            mapList(API_BASE + "owners/" + tst[0] + "/groupings", "get", anon);
+            mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", anon);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -510,7 +509,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void ownerGroupingsFailTest() throws Exception {
 
-        List<String> results = mapList(API_BASE + "owners/" + tst[0] + "/groupings", "get", uhUser05);
+        List<String> results = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser05);
         assertThat(results.size(), equalTo(0));
     }
 
@@ -523,30 +522,30 @@ public class TestGroupingsRestControllerv2_1 {
         Group exclude = grouping.getExclude();
         Group include = grouping.getInclude();
 
-        assertTrue(basis.getUsernames().contains(tst[3]));
-        assertTrue(basis.getUsernames().contains(tst[4]));
-        assertTrue(basis.getUsernames().contains(tst[5]));
+        assertTrue(basis.getUsernames().contains(usernames[3]));
+        assertTrue(basis.getUsernames().contains(usernames[4]));
+        assertTrue(basis.getUsernames().contains(usernames[5]));
         assertTrue(basis.getNames().contains(tstName[3]));
         assertTrue(basis.getNames().contains(tstName[4]));
         assertTrue(basis.getNames().contains(tstName[5]));
 
-        assertTrue(composite.getUsernames().contains(tst[0]));
-        assertTrue(composite.getUsernames().contains(tst[1]));
-        assertTrue(composite.getUsernames().contains(tst[2]));
-        assertTrue(composite.getUsernames().contains(tst[4]));
-        assertTrue(composite.getUsernames().contains(tst[5]));
+        assertTrue(composite.getUsernames().contains(usernames[0]));
+        assertTrue(composite.getUsernames().contains(usernames[1]));
+        assertTrue(composite.getUsernames().contains(usernames[2]));
+        assertTrue(composite.getUsernames().contains(usernames[4]));
+        assertTrue(composite.getUsernames().contains(usernames[5]));
         assertTrue(composite.getNames().contains(tstName[0]));
         assertTrue(composite.getNames().contains(tstName[1]));
         assertTrue(composite.getNames().contains(tstName[2]));
         assertTrue(composite.getNames().contains(tstName[4]));
         assertTrue(composite.getNames().contains(tstName[5]));
 
-        assertTrue(exclude.getUsernames().contains(tst[3]));
+        assertTrue(exclude.getUsernames().contains(usernames[3]));
         assertTrue(exclude.getNames().contains(tstName[3]));
 
-        assertTrue(include.getUsernames().contains(tst[0]));
-        assertTrue(include.getUsernames().contains(tst[1]));
-        assertTrue(include.getUsernames().contains(tst[2]));
+        assertTrue(include.getUsernames().contains(usernames[0]));
+        assertTrue(include.getUsernames().contains(usernames[1]));
+        assertTrue(include.getUsernames().contains(usernames[2]));
         assertTrue(include.getNames().contains(tstName[0]));
         assertTrue(include.getNames().contains(tstName[1]));
         assertTrue(include.getNames().contains(tstName[2]));
@@ -607,19 +606,19 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteAdminPassTest() throws Exception {
 
         AdminListsHolder listHolderPass = mapAdminListsHolder(adminUser);
-        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(usernames[0]));
 
-        mapGSR(API_BASE + "admins/" + tst[0], "post", adminUser);
+        mapGSR(API_BASE + "admins/" + usernames[0], "post", adminUser);
         listHolderPass = mapAdminListsHolder(adminUser);
-        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(usernames[0]));
 
-        mapGSR(API_BASE + "admins/" + tst[0], "post", adminUser);
+        mapGSR(API_BASE + "admins/" + usernames[0], "post", adminUser);
         listHolderPass = mapAdminListsHolder(adminUser);
-        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+        assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(usernames[0]));
 
-        mapGSR(API_BASE + "admins/" + tst[0], "delete", adminUser);
+        mapGSR(API_BASE + "admins/" + usernames[0], "delete", adminUser);
         listHolderPass = mapAdminListsHolder(adminUser);
-        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(tst[0]));
+        assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(usernames[0]));
 
         try {
             mapGSR(API_BASE + "admins/bob-jones/", "post", adminUser);
@@ -645,7 +644,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteAdminFailTest() throws Exception {
 
         try {
-            mapGSR(API_BASE + "admins/" + tst[1], "post", uhUser01);
+            mapGSR(API_BASE + "admins/" + usernames[1], "post", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
@@ -663,7 +662,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteAdminAnonTest() throws Exception {
 
         try {
-            mapGSR(API_BASE + "admins/" + tst[0], "post", null);
+            mapGSR(API_BASE + "admins/" + usernames[0], "post", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -681,17 +680,17 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteOwnerPassTest() throws Exception {
 
         Grouping grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
-        assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
+        assertFalse(grouping.getOwners().getUsernames().contains(usernames[1]));
 
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + tst[1], "put", uhUser01);
-
-        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
-        assertTrue(grouping.getOwners().getUsernames().contains(tst[1]));
-
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + tst[1], "delete", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[1], "put", uhUser01);
 
         grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
-        assertFalse(grouping.getOwners().getUsernames().contains(tst[1]));
+        assertTrue(grouping.getOwners().getUsernames().contains(usernames[1]));
+
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[1], "delete", uhUser01);
+
+        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
+        assertFalse(grouping.getOwners().getUsernames().contains(usernames[1]));
 
         try {
             mapGSR(API_BASE + "groupings/someGrouping/owners/bob-jones", "put", uhUser01);
@@ -708,15 +707,15 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         try {
-            mapGSR(API_BASE + "groupings/someGrouping/owners/" + tst[0], "put", uhUser01);
+            mapGSR(API_BASE + "groupings/someGrouping/owners/" + usernames[0], "put", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            List list = mapList(API_BASE + "owners/" + tst[0] + "/groupings", "get", uhUser01);
+            List list = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
             list.contains("someGrouping");
         }
 
         GroupingsServiceResult gsr = mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/bob-jones", "delete", uhUser01);
-        gsr.getResultCode().startsWith(SUCCESS);
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
 
         try {
             mapGSR(API_BASE + "groupings//owners//", "put", uhUser01);
@@ -737,33 +736,34 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteOwnerFailTest() throws Exception {
 
         try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + tst[2], "put", uhUser02);
+            mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[2], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + tst[0], "delete", uhUser02);
+            mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[0], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
     }
 
-    //    @Test
+        @Test
+        @Ignore
     @WithAnonymousUser
     public void addDeleteOwnerAnonTest() throws Exception {
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/owners/" + tst[0], "put", null);
+            mapGSR(API_BASE + "" + GROUPING + "/owners/" + usernames[0], "put", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/owners/" + tst[0], "delete", null);
+            mapGSR(API_BASE + "" + GROUPING + "/owners/" + usernames[0], "delete", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -792,7 +792,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
 
         mapGSR(API_BASE + "groupings/" + A_GROUPING + "/excludeMembers/" + tstUuid[1], "delete", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tst[1]));
+        assertFalse(memberAttributeService.isMember(A_EXCLUDE, usernames[1]));
     }
 
     @Test
@@ -821,32 +821,32 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addDeleteMemberPassTest() throws Exception {
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
 
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + tst[3], "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "put", uhUser01);
 
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[3]));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
 
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + tst[3], "delete", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "delete", uhUser01);
 
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[3]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
 
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, tst[2]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[2]));
 
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + tst[2], "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "put", uhUser01);
 
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, tst[2]));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[2]));
 
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + tst[2], "delete", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "delete", uhUser01);
 
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, tst[2]));
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
 
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + tst[2], "put", uhUser01);
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + tst[3], "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[2], "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[3], "put", uhUser01);
 
         // Garbage data tests
         //todo Test all permutations of bad data
@@ -859,13 +859,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         try {
             mapGSRs(API_BASE + "groupings/somegrouping/includeMembers/bob-jones", "delete", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings/somegrouping/excludeMembers/bob-jones", "put", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -912,28 +905,28 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteMemberFailTest() throws Exception {
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + tst[3], "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + tst[2], "delete", uhUser02);
+            mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[2], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + tst[2], "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
         }
 
         try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + tst[3], "delete", uhUser02);
+            mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[3], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(400));
@@ -945,28 +938,28 @@ public class TestGroupingsRestControllerv2_1 {
     public void addDeleteMemberAnonTest() throws Exception {
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + tst[2], "put", null);
+            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + usernames[2], "put", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + tst[2], "delete", null);
+            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + usernames[2], "delete", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + tst[2], "put", null);
+            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + usernames[2], "put", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
 
         try {
-            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + tst[2], "delete", null);
+            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + usernames[2], "delete", null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
