@@ -783,7 +783,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    public WsGroupSaveResults updateGroup(String groupPath, String description) {
+    public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
         WsGroup updatedGroup = new WsGroup();
         updatedGroup.setDescription(description);
 

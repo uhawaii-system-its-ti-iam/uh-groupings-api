@@ -378,7 +378,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
 
         if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
-            grouperFactoryService.updateGroup(groupPath, description);
+            grouperFactoryService.updateGroupDescription(groupPath, description);
 
             gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
         } else {
