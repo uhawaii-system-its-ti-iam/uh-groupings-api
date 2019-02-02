@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,6 +31,9 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -104,6 +109,8 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.usernames}")
     private String[] usernames;
+
+    public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -270,14 +277,15 @@ public class TestGroupingAssignmentService {
 //        assertEquals(grouping.getComposite().getMembers().size(), 0);
     }
 
+    // todo lazy fix, need to test sortString and isAscending
     @Test
     public void getPaginatedGroupingTest() {
 
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
-        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20);
+        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, null, null);
         // Page 2 contains 1 stale subject, should return 19
-        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20);
+        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, null, null);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));
@@ -300,7 +308,7 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
 
         // Test paging without proper permissions
-        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20);
+        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, null, null);
         assertThat(paginatedGroupingPagePermissions.getBasis().getMembers().size(), equalTo(0));
     }
 
@@ -313,6 +321,26 @@ public class TestGroupingAssignmentService {
 
     }
 
+    @Ignore
+    @Test
+    public void getAsyncGroupTest() throws InterruptedException, ExecutionException {
+
+        logger.info("Creating getAsync testing thread.");
+        final Future<Group> future = groupingAssignmentService.getAsynchronousMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
+        int sleepCounter = 0;
+
+        while(true) {
+            if(future.isDone()) {
+                logger.info("Async call finished.");
+                assertThat(future.get().getMembers().size(), not(0));
+                break;
+            }
+            Thread.sleep(1000);
+            sleepCounter++;
+            logger.info("Test thread sleeping for " + (sleepCounter) + " seconds...");
+        }
+    }
+
     // Testing why getting a grouping returns different results for a page of the size of the entire grouping
     // Results are the pagination automatically removes stale subjects for us, but doesn't get the full page
     // Plan is to leave as is, and some pages will be shorter than others
@@ -321,7 +349,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void paginatedVersusNonpaginatedTest () {
         Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
-        Grouping groupingPaginated = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369);
+        Grouping groupingPaginated = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369, null, null);
 
         List<Person> paginatedBasisMembers = groupingPaginated.getBasis().getMembers();
         List<Person> nonPaginatedBasisMembers = groupingNonPaginated.getBasis().getMembers();
