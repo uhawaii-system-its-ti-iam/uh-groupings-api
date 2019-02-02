@@ -41,6 +41,8 @@ public interface GrouperFactoryService {
 
     public String getDescription(String groupPath);
 
+    public WsGroupSaveResults updateGroupDescription(String groupPath, String description);
+
     public WsStemSaveResults makeWsStemSaveResults(String username, String stemPath);
 
     public WsStemDeleteResults deleteStem(WsSubjectLookup username, WsStemLookup stem);
