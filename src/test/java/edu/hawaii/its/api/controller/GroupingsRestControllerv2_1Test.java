@@ -805,7 +805,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void getGrouping() throws Exception {
 
-        given(groupingAssignmentService.getGrouping(GROUPING, USERNAME))
+        given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, null, null, null, null))
                 .willReturn(grouping());
 
         mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING)
