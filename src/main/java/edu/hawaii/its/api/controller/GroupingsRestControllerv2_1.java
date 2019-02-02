@@ -392,6 +392,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping description
+     * Not implemented yet, in the works
+     *
+     */
+    @RequestMapping(value = "/groupings/{path}/description",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> updateGroupingDescription(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path) {
+        logger.info("Entered REST updateGroupingDescription");
+
+        return ResponseEntity
+                .ok()
+                .body();
+    }
+
+    /**
      * Update grouping to add a new owner
      *
      * @param path: path of grouping to update
