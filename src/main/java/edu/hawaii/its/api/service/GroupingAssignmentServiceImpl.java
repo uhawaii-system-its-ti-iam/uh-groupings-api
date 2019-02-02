@@ -536,12 +536,22 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 isAscending);
 
         Group groupMembers = new Group();
-        if (members.getResults() != null && groupPath.contains(BASIS)) {
-            groupMembers = makeBasisGroup(members);
-        } else if (members.getResults() != null) {
-            //todo change to makeGroup() instead of groups
-            groupMembers = makeGroup(members);
+//        if (members.getResults() != null && groupPath.contains(BASIS)) {
+//            groupMembers = makeBasisGroup(members);
+//        } else if (members.getResults() != null) {
+//            //todo change to makeGroup() instead of groups
+//            groupMembers = makeGroup(members);
+//        }
+
+        if (members.getResults() != null) {
+            if (groupPath.contains(BASIS)) {
+                groupMembers = makeBasisGroup(members);
+            }  else {
+                //todo change to makeGroup() instead of groups
+                groupMembers = makeGroup(members);
+            }
         }
+
         return groupMembers;
     }
 
