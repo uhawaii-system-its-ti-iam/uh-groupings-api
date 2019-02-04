@@ -92,6 +92,7 @@ public class TestMembershipService {
     public void setUp() {
         //add ownership
         memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
+
         groupAttributeService.changeListservStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);

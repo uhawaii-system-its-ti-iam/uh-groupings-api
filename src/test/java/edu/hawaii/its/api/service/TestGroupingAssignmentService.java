@@ -134,32 +134,35 @@ public class TestGroupingAssignmentService {
 
     @Before
     public void setUp() {
+        // assign ownership
+        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+
+        // update statuses
         groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
-        //put in include
+        // put in include
         List<String> includeNames = new ArrayList<>();
         includeNames.add(usernames[0]);
         includeNames.add(usernames[1]);
         includeNames.add(usernames[2]);
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
-        //remove from exclude
+        // remove from exclude
         membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[4]);
         membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[5]);
 
-        //add to exclude
+        // add to exclude
         membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[3]);
 
-        // assign ownership
-        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
-        memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
     }
 
     @Test
     public void adminListsTest() {
-        //try with non-admin
+        // try with non-admin
         AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
         assertNotNull(info);
         assertEquals(info.getAllGroupings().size(), 0);
