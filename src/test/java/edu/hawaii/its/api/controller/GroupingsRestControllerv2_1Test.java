@@ -144,9 +144,6 @@ public class GroupingsRestControllerv2_1Test {
 
         grouping.setListservOn(true);
 
-        System.out.println("FJDSIJFSEHFOIJVDKLDFHIOJDKKOKGHJSHDVHFJGHOIDFHDGJKERUIVHRJFHIOGRHOIFGFJOIKGRLIJOHGRHOIGRGGIHOGRHOIGRHO " + grouping.getPath());
-        System.out.println("FJDSIJFSEHFOIJVDKLDFHIOJDKKOKGHJSHDVHFJGHOIDFHDGJKERUIVHRJFHIOGRHOIFGFJOIKGRLIJOHGRHOIGRGGIHOGRHOIGRHO "  + grouping.getOwners());
-
         return grouping;
     }
 
@@ -925,60 +922,66 @@ public class GroupingsRestControllerv2_1Test {
     }
 
 
-    // todo uh oh. USERNAME should be denied with ADMIN being ok
+    // todo uh oh. USERNAME should be denied
     @Test
     @WithMockUhUser(username="abc")
     public void lookUpPermissionTestMember() throws Exception {
         String[] usernames = {USERNAME, ADMIN};
 
-
         for (int i = 0; i < usernames.length; i++) {
-            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + usernames[i] + "/groupings"))
+            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + usernames[i] + "/groupings")
+                    .header(CURRENT_USER, "i0-username"))
                     .andDo(print())
                     .andExpect(status().is5xxServerError())
                     .andReturn();
 
-            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i] + "/groupings"))
+            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i] + "/groupings")
+                    .header(CURRENT_USER, "i0-username"))
                     .andDo(print())
                     .andExpect(status().is5xxServerError())
                     .andReturn();
 
-            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i]))
+            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i])
+                    .header(CURRENT_USER, "i0-username"))
                     .andDo(print())
                     .andExpect(status().is5xxServerError())
                     .andReturn();
         }
     }
 
-    //todo ADMIN should work but username should not
+    //todo ADMIN should work
+    // todo this test is done
     @Test
     @WithMockAdminUser(username = "bobo")
     public void lookUpPermissionTestAdmin() throws Exception {
         String[] lookUp = {USERNAME, ADMIN};
-        String admin = "bobo";
+
+        String newAdmin = "newAdmin";
+        given(membershipService.addAdmin(ADMIN, newAdmin))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
 
         for (int i = 0; i < lookUp.length; i++) {
             MvcResult ownerGroupingResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings")
-                    .header(CURRENT_USER, admin))
+                    .header(CURRENT_USER, newAdmin))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andReturn();
 
             MvcResult memberGroupingResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings")
-                    .header(CURRENT_USER, admin))
+                    .header(CURRENT_USER, newAdmin))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andReturn();
 
             MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i])
-                    .header(CURRENT_USER, admin))
+                    .header(CURRENT_USER, newAdmin))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andReturn();
         }
     }
 
-
+    // todo NOT FINISHED
     @Test
     @WithMockUhUser(username="testUser")
     public void lookUpPermissionTestOwner() throws Exception {
