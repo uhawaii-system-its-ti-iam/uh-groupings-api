@@ -115,6 +115,9 @@ public class TestMemberAttributeService {
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
 
+        // add to owners
+        memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
+
         //add to include
         List<String> includeNames = new ArrayList<>();
         includeNames.add(usernames[0]);
@@ -128,9 +131,6 @@ public class TestMemberAttributeService {
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[3]);
-
-        // add to owners
-        memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);

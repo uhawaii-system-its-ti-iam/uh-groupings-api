@@ -252,6 +252,10 @@ public class TestGroupingsRestControllerv2_1 {
         anonUser = new User("anonymous", anonAuthorities);
         anon = new AnonymousUser();
 
+        // add ownership
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
+
         // add to include
         List<String> includeNames = new ArrayList<>();
         includeNames.add(usernames[0]);
@@ -272,10 +276,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Remove admin privileges
         membershipService.deleteAdmin(ADMIN, usernames[0]);
-
-        // add ownership
-        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
-        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
 
         // Remove ownership
         memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
