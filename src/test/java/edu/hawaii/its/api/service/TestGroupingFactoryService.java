@@ -147,7 +147,7 @@ public class TestGroupingFactoryService {
         //Fails when user trying to add grouping is not admin
         try {
 
-            results = groupingFactoryService.addGrouping("sbraun", TEMP_TEST + ":kahlin-test");
+            results = groupingFactoryService.addGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
 
         } catch (GroupingsServiceResultException gsre) {
 
@@ -189,8 +189,8 @@ public class TestGroupingFactoryService {
 
         //Fails when user trying to delete grouping is not admin
         try {
-
-            results = groupingFactoryService.deleteGrouping("sbraun", TEMP_TEST + ":kahlin-test");
+            // TODO: how do we know that this grouping exists?
+            results = groupingFactoryService.deleteGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
 
         } catch (GroupingsServiceResultException gsre) {
 

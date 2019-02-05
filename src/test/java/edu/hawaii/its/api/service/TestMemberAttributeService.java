@@ -1,22 +1,18 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Person;
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +115,9 @@ public class TestMemberAttributeService {
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
 
+        // add to owners
+        memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
+
         //add to include
         List<String> includeNames = new ArrayList<>();
         includeNames.add(usernames[0]);
@@ -133,9 +131,6 @@ public class TestMemberAttributeService {
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[3]);
-
-        // add to owners
-        memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
