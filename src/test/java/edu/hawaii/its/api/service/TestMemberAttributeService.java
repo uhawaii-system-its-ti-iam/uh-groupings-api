@@ -8,6 +8,7 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -45,6 +46,8 @@ public class TestMemberAttributeService {
     private String GROUPING_EXCLUDE;
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+    @Value("${groupings.api.test.grouping_many_extra}")
+    private String GROUPING_EXTRA;
 
     @Value("${groupings.api.test.grouping_timeout_test}")
     private String GROUPING_TIMEOUT;
@@ -97,6 +100,9 @@ public class TestMemberAttributeService {
     private HelperService helperService;
 
     @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
+    @Autowired
     public Environment env; // Just for the settings check.
 
     @PostConstruct
@@ -117,6 +123,10 @@ public class TestMemberAttributeService {
 
         // add to owners
         memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
+
+        // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN_USER);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
 
         //add to include
         List<String> includeNames = new ArrayList<>();
