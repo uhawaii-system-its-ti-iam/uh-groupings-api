@@ -50,6 +50,8 @@ import java.util.concurrent.Future;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -516,7 +518,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingPassTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
+        Grouping grouping = mapGrouping(GROUPING, uhUser01, null, null, null, null);
         Group basis = grouping.getBasis();
         Group composite = grouping.getComposite();
         Group exclude = grouping.getExclude();
@@ -553,14 +555,14 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(grouping.getOwners().getNames().contains(tstName[5]));
 
         try {
-            mapGrouping("thisIsNotARealGrouping", uhUser01, 0, 0);
+            mapGrouping("thisIsNotARealGrouping", uhUser01, null, null, null, null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
 
         try {
-            mapGrouping("", uhUser01, 0, 0);
+            mapGrouping("", uhUser01, null, null, null, null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
@@ -570,7 +572,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingFailTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser02, 0, 0);
+        Grouping grouping = mapGrouping(GROUPING, uhUser02, null, null, null, null);
         assertThat(grouping.getBasis().getUsernames().size(), equalTo(0));
         assertThat(grouping.getInclude().getUsernames().size(), equalTo(0));
         assertThat(grouping.getExclude().getUsernames().size(), equalTo(0));
@@ -582,7 +584,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void getGroupingsAnonTest() throws Exception {
 
         try {
-            mapGrouping(GROUPING, null, 0, 0);
+            mapGrouping(GROUPING, null, null, null, null, null);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
@@ -593,13 +595,17 @@ public class TestGroupingsRestControllerv2_1 {
     public void getPaginatedGroupingTest() throws Exception {
 
         // Paging starts at 1 D:
-        Grouping paginatedGrouping = mapGrouping(GROUPING, uhUser01, 1, 20);
+        Grouping paginatedGrouping = mapGrouping(GROUPING, uhUser01, 1, 20, "name", true);
 
-        assertTrue(paginatedGrouping.getBasis().getMembers().size() <= 20);
-        assertTrue(paginatedGrouping.getInclude().getMembers().size() <= 20);
-        assertTrue(paginatedGrouping.getExclude().getMembers().size() <= 20);
-        assertTrue(paginatedGrouping.getComposite().getMembers().size() <= 20);
-        assertTrue(paginatedGrouping.getOwners().getMembers().size() <= 20);
+        // Check size
+        assertThat(paginatedGrouping.getBasis().getMembers().size(), lessThanOrEqualTo(20));
+        assertThat(paginatedGrouping.getInclude().getMembers().size(), lessThanOrEqualTo(20));
+        assertThat(paginatedGrouping.getExclude().getMembers().size(), lessThanOrEqualTo(20));
+        assertThat(paginatedGrouping.getComposite().getMembers().size(), lessThanOrEqualTo(20));
+        assertThat(paginatedGrouping.getOwners().getMembers().size(), lessThanOrEqualTo(20));
+
+        // Check if sorted properly
+        assertThat(paginatedGrouping.getBasis().getMembers().get(0).getName(), startsWith("A"));
     }
 
     @Test
@@ -679,17 +685,17 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void addDeleteOwnerPassTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
+        Grouping grouping = mapGrouping(GROUPING, uhUser01, null, null, null, null);
         assertFalse(grouping.getOwners().getUsernames().contains(usernames[1]));
 
         mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[1], "put", uhUser01);
 
-        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
+        grouping = mapGrouping(GROUPING, uhUser01, null, null, null, null);
         assertTrue(grouping.getOwners().getUsernames().contains(usernames[1]));
 
         mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[1], "delete", uhUser01);
 
-        grouping = mapGrouping(GROUPING, uhUser01, 0, 0);
+        grouping = mapGrouping(GROUPING, uhUser01, null, null, null, null);
         assertFalse(grouping.getOwners().getUsernames().contains(usernames[1]));
 
         try {
@@ -1218,25 +1224,35 @@ public class TestGroupingsRestControllerv2_1 {
 
     //todo Fix for sortString and isAscending
     // Mapping of getGrouping and getPaginatedGrouping call
-    private Grouping mapGrouping(String groupingPath, User currentUser, Integer page, Integer size) throws Exception {
+    private Grouping mapGrouping(String groupingPath, User currentUser, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = null;
+        // Base uri string with no parameters
+        String baseUri = API_BASE + "groupings/" + groupingPath + "?";
 
-        // If page or size are 0, call it normally, else use pagination
-        if (page.equals(0) || size.equals(0)) {
-            result = mockMvc.perform(get(API_BASE + "groupings/" + groupingPath)
-                    .header(CURRENT_USER, currentUser.getUsername())
-                    .with(user(currentUser))
-                    .with(csrf()))
-                    .andReturn();
-        } else {
-            result = mockMvc.perform(get(API_BASE + "groupings/" + groupingPath + "?page=" + page + "&size=" + size)
-                    .header(CURRENT_USER, currentUser.getUsername())
-                    .with(user(currentUser))
-                    .with(csrf()))
-                    .andReturn();
+        // Add parameters based off what is or isn't null (null is non-existent param
+        String params = "";
+        if(page != null) params = params + "page=" + page;
+        if(size != null) {
+            if(!params.equals("")) params = params + "&";
+            params = params + "size=" + size;
         }
+        if(sortString != null) {
+            if(!params.equals("")) params = params + "&";
+            params = params + "sortString=" + sortString;
+        }
+        if(isAscending != null) {
+            if(!params.equals("")) params = params + "&";
+            params = params + "isAscending=" + isAscending;
+        }
+
+        // Make the API call
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MvcResult result = mockMvc.perform(get(baseUri + params)
+                .header(CURRENT_USER, currentUser.getUsername())
+                .with(user(currentUser))
+                .with(csrf()))
+                .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Grouping.class);

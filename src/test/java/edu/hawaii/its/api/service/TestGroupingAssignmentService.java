@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -265,15 +266,14 @@ public class TestGroupingAssignmentService {
 //        assertEquals(grouping.getComposite().getMembers().size(), 0);
     }
 
-    // todo lazy fix, need to test sortString and isAscending
     @Test
     public void getPaginatedGroupingTest() {
 
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
-        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, null, null);
+        Grouping paginatedGroupingPage1 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
         // Page 2 contains 1 stale subject, should return 19
-        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, null, null);
+        Grouping paginatedGroupingPage2 = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));
@@ -295,8 +295,12 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage1.getComposite(), not(paginatedGroupingPage2.getComposite()));
         assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
 
-        // Test paging without proper permissions
-        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, null, null);
+        // Test if sorted properly (sorted ascending should have the names start with "A", sorted descending should not)
+        assertThat(paginatedGroupingPage1.getBasis().getMembers().get(0).getName(), startsWith("A"));
+        assertThat(paginatedGroupingPage2.getBasis().getMembers().get(0).getName(), not(startsWith("A")));
+
+        // Test paging without proper permissions (should return empty)
+        Grouping paginatedGroupingPagePermissions = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
         assertThat(paginatedGroupingPagePermissions.getBasis().getMembers().size(), equalTo(0));
     }
 
