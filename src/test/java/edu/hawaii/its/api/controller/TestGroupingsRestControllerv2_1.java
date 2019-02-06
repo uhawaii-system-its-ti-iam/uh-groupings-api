@@ -5,12 +5,7 @@ import edu.hawaii.its.api.access.AnonymousUser;
 import edu.hawaii.its.api.access.Role;
 import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingFactoryService;
-import edu.hawaii.its.api.service.HelperService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.*;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -18,6 +13,7 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.MembershipAssignment;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hamcrest.core.IsEqual;
@@ -178,6 +174,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME;
 
+    @Value("${groupings.api.test.grouping_many_extra}")
+    private String GROUPING_EXTRA;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -205,6 +204,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
     private MockMvc mockMvc;
 
     private User adminUser;
@@ -229,6 +231,11 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Before
     public void setUp() {
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[5]);
+
         mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
