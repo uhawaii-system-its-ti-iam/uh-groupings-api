@@ -926,27 +926,23 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username="abc")
     public void lookUpPermissionTestMember() throws Exception {
-        String[] usernames = {USERNAME, ADMIN};
+        MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, "i0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
 
-        for (int i = 0; i < usernames.length; i++) {
-            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + usernames[i] + "/groupings")
-                    .header(CURRENT_USER, "i0-username"))
-                    .andDo(print())
-                    .andExpect(status().is5xxServerError())
-                    .andReturn();
+        MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, "i0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
 
-            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i] + "/groupings")
-                    .header(CURRENT_USER, "i0-username"))
-                    .andDo(print())
-                    .andExpect(status().is5xxServerError())
-                    .andReturn();
-
-            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + usernames[i])
-                    .header(CURRENT_USER, "i0-username"))
-                    .andDo(print())
-                    .andExpect(status().is5xxServerError())
-                    .andReturn();
-        }
+        MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
+                .header(CURRENT_USER, "i0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
     }
 
     //todo ADMIN should work
@@ -981,20 +977,19 @@ public class GroupingsRestControllerv2_1Test {
         }
     }
 
-    // todo NOT FINISHED
+    // todo Do we need this?
     @Test
     @WithMockUhUser(username="testUser")
     public void lookUpPermissionTestOwner() throws Exception {
         String[] lookUp = {USERNAME, ADMIN};
         Grouping testGroup = grouping();
-        System.out.println("grilled cheese: " + testGroup);
-        System.out.println("THE GROUPS: " + testGroup.getOwners());
+        System.out.println("TEST GROUP: " + testGroup);
+        System.out.println("OWNERS: " + testGroup.getOwners());
         System.out.println("THE PATH: " + testGroup.getPath());
 
-
+        // Keeps failing; is this a bug?
         assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
 
-//        for (int i = 0; i < lookUp.length; i++) {
 //            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
 //                    .andDo(print())
 //                    .andExpect(status().isOk())
@@ -1009,6 +1004,5 @@ public class GroupingsRestControllerv2_1Test {
 //                    .andDo(print())
 //                    .andExpect(status().isOk())
 //                    .andReturn();
-//        }
     }
 }
