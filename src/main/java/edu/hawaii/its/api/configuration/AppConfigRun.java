@@ -5,9 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @Profile(value = { "localhost", "test", "integrationTest", "qa" })
 @Configuration
+@EnableAsync
 @ComponentScan(basePackages = "edu.hawaii.its")
 @PropertySources({
         @PropertySource("classpath:custom.properties"),
