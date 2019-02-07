@@ -397,12 +397,12 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             //consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> putDescription(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
                                                                  @PathVariable String path,
                                                                  @RequestBody String dtoString) {
         //@RequestBody String s) {
 
-        logger.info("Entered REST putDescription");
+        logger.info("Entered REST updateDescription");
 
         //String description = httpEntity.getBody();
         //System.out.println(s);
@@ -411,7 +411,7 @@ public class GroupingsRestControllerv2_1 {
 
 
 
-        // The description String must be formatted because the putDescription method receives a String that will
+        // The description String must be formatted because the updateDescription method receives a String that will
         // have " characters at the front and end of the message.
         //String formattedDtoString = dtoString.substring(1, dtoString.length() - 1);
 
