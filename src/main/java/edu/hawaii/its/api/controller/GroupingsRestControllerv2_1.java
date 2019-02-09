@@ -391,39 +391,22 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingFactoryService.addGrouping(currentUser, path));
     }
 
-    // CLINT STUFF:
-    // description field update for a Group
+    /**
+     * Update grouping description
+     *
+     * @param path: path of grouping to update
+     * @param dtoString:  new description to be updated
+     * @return Information about results of operation
+     */
     @RequestMapping(value = "/groupings/{path}/description",
             method = RequestMethod.PUT,
-            //consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
                                                                  @PathVariable String path,
                                                                  @RequestBody String dtoString) {
-        //@RequestBody String s) {
-
         logger.info("Entered REST updateDescription");
-
-        //String description = httpEntity.getBody();
-        //System.out.println(s);
-
-        // String formattedDtoString = dtoString.substring(1, 3);
-
-
-
-        // The description String must be formatted because the updateDescription method receives a String that will
-        // have " characters at the front and end of the message.
-        //String formattedDtoString = dtoString.substring(1, dtoString.length() - 1);
-
-        // todo: remove the SimpleDto class... ...is this already done and I forgot I did it? :)
-        //        String dtoString = dto.getDataString();
-
         return ResponseEntity
                 .ok()
-                //.body(groupAttributeService.updateDescription(path, currentUser, description));
-                //.body(groupAttributeService.updateDescription(path, currentUser, s));
-                //.body(new GroupingsServiceResult("SUCCESS", "hi there ;^)"));
-                //.body(groupAttributeService.updateDescription(path, currentUser, formattedDtoString));
                 .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
     }
 
