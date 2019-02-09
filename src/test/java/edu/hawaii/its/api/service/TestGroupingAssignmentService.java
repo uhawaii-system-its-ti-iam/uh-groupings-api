@@ -1,24 +1,22 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,18 +31,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -142,32 +134,35 @@ public class TestGroupingAssignmentService {
 
     @Before
     public void setUp() {
+        // assign ownership
+        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+
+        // update statuses
         groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
-        //put in include
+        // put in include
         List<String> includeNames = new ArrayList<>();
         includeNames.add(usernames[0]);
         includeNames.add(usernames[1]);
         includeNames.add(usernames[2]);
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
-        //remove from exclude
+        // remove from exclude
         membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[4]);
         membershipService.addGroupingMemberByUsername(usernames[0], GROUPING, usernames[5]);
 
-        //add to exclude
+        // add to exclude
         membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[3]);
 
-        // assign ownership
-        memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
-        memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
     }
 
     @Test
     public void adminListsTest() {
-        //try with non-admin
+        // try with non-admin
         AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
         assertNotNull(info);
         assertEquals(info.getAllGroupings().size(), 0);
