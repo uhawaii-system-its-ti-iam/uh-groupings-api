@@ -116,6 +116,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    /**
+     *
+     * @param groupPath
+     * @return a string that is the description of the desired group
+     */
+
     @Override
     public String getDescription(String groupPath){
         WsFindGroupsResults wsFindGroupsResults = makeWsFindGroupsResults(groupPath);
@@ -782,6 +788,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addWsSubjectLookup(lookup)
                 .execute();
     }
+
+    /*
+    /   Updates the group description given the path, and description
+    /   Creates new local WsGroup called
+    /   Creates new local WsGroupLookup and sets it to the group at groupPath
+    /   Executes Save group structure and updates description
+     */
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
         WsGroup updatedGroup = new WsGroup();
