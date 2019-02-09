@@ -1,14 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Grouping;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
-import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +55,9 @@ public class TestHelperService {
     @Value("${groupings.api.test.grouping_true_empty_owners}")
     private String GROUPING_TRUE_EMPTY_OWNERS;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
@@ -89,23 +88,10 @@ public class TestHelperService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
+        groupAttributeService.changeListservStatus(GROUPING, ADMIN, true);
+        groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
 
-        //put in include
-        List<String> includeNames = new ArrayList<>();
-        includeNames.add(username[0]);
-        includeNames.add(username[1]);
-        includeNames.add(username[2]);
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
-
-        //remove from exclude
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
-
-        //add to exclude
-        membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
     }
 
     @Test
@@ -122,12 +108,13 @@ public class TestHelperService {
 
     @Test
     public void membershipResultsTest() {
-
         // username is in group
+        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[1]);
         WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING);
         assertFalse(results.getWsMemberships().equals(null));
 
         // username is not in group
+        membershipService.deleteGroupingMemberByUsername(ADMIN, GROUPING, username[3]);
         try {
             results = helperService.membershipsResults(username[3], GROUPING);
             assertTrue(results.getWsMemberships().equals(null));
