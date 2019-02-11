@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.controller;
 
 import edu.hawaii.its.api.access.User;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
