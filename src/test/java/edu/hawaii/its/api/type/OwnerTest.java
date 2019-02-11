@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.type;
 
-import edu.hawaii.its.api.type.Owner;
 import org.junit.Before;
 import org.junit.Test;
 
