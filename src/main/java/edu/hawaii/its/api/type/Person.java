@@ -1,14 +1,16 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Proxy;
+
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.persistence.*;
-import javax.print.DocFlavor;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.Proxy;
 
 @Entity
 @Proxy(lazy = false)

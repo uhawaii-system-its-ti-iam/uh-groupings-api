@@ -1,12 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.Dates;
-
-import edu.internet2.middleware.grouperClient.ws.beans.*;
-
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
