@@ -2,6 +2,7 @@
 .project
 /.settings
 /bin
+*.DS_Store
 grouperClientFailoverState.bin
 /target
 output.txt
