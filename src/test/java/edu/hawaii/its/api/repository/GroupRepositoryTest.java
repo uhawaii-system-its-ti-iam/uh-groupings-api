@@ -1,10 +1,8 @@
 package edu.hawaii.its.api.repository;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Person;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +12,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)

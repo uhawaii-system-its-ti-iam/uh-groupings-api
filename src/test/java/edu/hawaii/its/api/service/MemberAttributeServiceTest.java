@@ -1,8 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -13,10 +11,10 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,16 +27,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.sn;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+//import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
+//import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
+//import static org.bouncycastle.asn1.x500.style.RFC4519Style.sn;
+//import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
