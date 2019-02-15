@@ -403,7 +403,7 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
                                                                  @PathVariable String path,
-                                                                 @RequestBody String dtoString) {
+                                                                 @RequestBody(required = false) String dtoString) {
         logger.info("Entered REST updateDescription");
         return ResponseEntity
                 .ok()
