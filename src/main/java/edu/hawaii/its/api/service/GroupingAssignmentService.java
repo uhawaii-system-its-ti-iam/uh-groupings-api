@@ -1,22 +1,19 @@
 package edu.hawaii.its.api.service;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public interface GroupingAssignmentService {
 

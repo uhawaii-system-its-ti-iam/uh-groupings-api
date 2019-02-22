@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -65,5 +68,25 @@ public class StringsTest {
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    // Basic iterator testing for possible implementation
+    @Test
+    public void myTest(){
+        System.out.println("hello");
+        List<String> list = new ArrayList<>();
+
+        list.add("name");
+        list.add("name2");
+        list.add("name3");
+
+        for(String s:list) {
+            System.out.println(s);
+        }
+
+        Iterator<String> itor = list.iterator();
+        while(itor.hasNext()) {
+            System.out.println(itor.next());
+        }
     }
 }
