@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -1066,7 +1068,11 @@ public class TestMembershipService {
 
         GroupingsServiceResult results;
 
+
+
+
         //checks to see that username[3] is NOT an admin
+        results = membershipService.deleteAdmin(ADMIN, username[3]);
         assertFalse(memberAttributeService.isSuperuser(username[3]));
 
         //makes username[3] an admin
@@ -1123,5 +1129,6 @@ public class TestMembershipService {
             assertTrue(results.getResultCode().startsWith(FAILURE));
 
         }
+
     }
 }

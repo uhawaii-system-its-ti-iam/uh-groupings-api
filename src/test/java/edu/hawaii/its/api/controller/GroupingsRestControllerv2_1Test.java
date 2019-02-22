@@ -27,7 +27,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
@@ -36,10 +35,15 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -914,5 +918,94 @@ public class GroupingsRestControllerv2_1Test {
         .header(CURRENT_USER, USERNAME))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete grouping"));
+    }
+
+
+    // todo uh oh. USERNAME should be denied
+    @Ignore
+    @Test
+    @WithMockUhUser(username="abc")
+    public void lookUpPermissionTestMember() throws Exception {
+        Person random = new Person("0o0-name", "0o0-uuid", "0o0-username");
+        MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
+
+        MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
+
+        MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
+    }
+
+    //todo ADMIN should work
+    // todo this test is done
+    @Ignore
+    @Test
+    @WithMockAdminUser(username = "bobo")
+    public void lookUpPermissionTestAdmin() throws Exception {
+        String newAdmin = "newAdmin";
+        given(membershipService.addAdmin(ADMIN, newAdmin))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
+
+        MvcResult ownerGroupingResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, newAdmin))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult memberGroupingResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
+                .header(CURRENT_USER, newAdmin))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
+                .header(CURRENT_USER, newAdmin))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
+    @Ignore
+    @Test
+    @WithMockUhUser(username="testUser")
+    public void lookUpPermissionTestOwner() throws Exception {
+        Grouping testGroup = grouping();
+        System.out.println("TEST GROUP: " + testGroup);
+        System.out.println("OWNERS: " + testGroup.getOwners());
+        System.out.println("THE PATH: " + testGroup.getPath());
+
+        // Try to look up information about member in owned group <-- SUCCEED
+
+        // Create an unrelated group
+        // Try to look up information about member in unrelated group <-- FAIL
+
+        // Keeps failing; is this a bug?
+        assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
+
+//            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
+//
+//            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
+//
+//            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
+//                    .andDo(print())
+//                    .andExpect(status().isOk())
+//                    .andReturn();
     }
 }
