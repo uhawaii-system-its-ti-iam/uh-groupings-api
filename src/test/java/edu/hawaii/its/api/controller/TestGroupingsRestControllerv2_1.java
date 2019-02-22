@@ -1182,6 +1182,28 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(group.getMembers().size(), not(0));
     }
 
+    @Test
+    public void paginatedLargeGroupingTest() throws Exception {
+//        Grouping paginatedLargeGrouping = new Grouping();
+//        for (int i = 1; i <= 150; i++) {
+//            paginatedLargeGrouping = mapGrouping(GROUPING, adminUser, i, 20, "name", true);
+//        }
+
+        recursionFunctionToTest(GROUPING_TIMEOUT, adminUser, 1, 20, "name", true);
+    }
+
+    private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
+
+        if(page > 150) {
+            return;
+        } else {
+            mapGrouping(groupingPath, user, page, size, sortString, isAscending);
+            recursionFunctionToTest(groupingPath, user, page + 1, size, sortString, isAscending);
+            return;
+        }
+
+    }
+
     //todo v2.2 tests (right now these endpoints just throw UnsupportedOperationException, pointless to test)
 
     ///////////////////////////////////////////////////////////////////////
