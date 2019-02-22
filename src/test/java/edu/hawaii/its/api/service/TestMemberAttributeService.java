@@ -29,7 +29,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
