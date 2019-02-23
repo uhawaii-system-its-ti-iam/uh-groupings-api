@@ -384,7 +384,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
                 //todo Shouldn't be reached, and is not reachable anyway due to exception
-                wsResultMeta = wsResultMetaData;
+//                wsResultMeta = wsResultMetaData;
             }
         }
 
