@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.function.Predicate.isEqual;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -41,6 +43,9 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.basis_plus_include}")
     private String BASIS_PLUS_INCLUDE;
 
+    @Value("${groupings.api.test.grouping_many_default_description}")
+    private String DEFAULT_DESCRIPTION;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
@@ -53,6 +58,8 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.yyyymmddThhmm}")
     private String YYYYMMDDTHHMM;
 
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -314,6 +321,15 @@ public class TestGroupAttributeService {
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+
+    }
+
+    @Test
+    public void updateDescriptionTest(){
+
+        //Test to make sure description is set to the default.
+        assertThat(DEFAULT_DESCRIPTION, containsString(grouperFactoryService.getDescription(GROUPING)));
+
 
     }
 }
