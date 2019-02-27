@@ -209,6 +209,7 @@ public class TestGroupingFactoryService {
         assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
 
         // add new grouping
+        
         groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
 
         // currently we only support marking a grouping for purge if the user is a super user
@@ -243,6 +244,13 @@ public class TestGroupingFactoryService {
 
             assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
         }
+
+    }
+
+    @Test
+    public void privilegesTest(){
+
+            groupingFactoryService.privilegegTets(APP_USER, "hawaii.edu:custom:test:kahlin:privilegeTesting");
 
     }
 }

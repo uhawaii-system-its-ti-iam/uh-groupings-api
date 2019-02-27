@@ -367,4 +367,30 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return helperService.makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
     }
 
+    // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
+    public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description) {
+        logger.info( "updateDescription(); groupPath:" + groupPath +
+                "; ownerUsername:" + ownerUsername +
+                "; description: " + description + ";");
+
+        GroupingsServiceResult gsr;
+
+        String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
+
+        if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
+            grouperFactoryService.updateGroupDescription(groupPath, description);
+
+            gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
+        } else {
+
+            // todo: delete the line of code below once all description method-related tasks are working!
+            System.out.println("\nYA GOttA FiX THIs!!\n");
+
+            gsr = helperService.makeGroupingsServiceResult(FAILURE + ", " + ownerUsername + " is not an owner of "
+                    + groupPath + " and cannot change the description of this grouping", action);
+        }
+
+        return gsr;
+    }
+
 }

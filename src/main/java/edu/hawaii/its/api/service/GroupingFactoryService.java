@@ -17,5 +17,6 @@ public interface GroupingFactoryService {
 
     public boolean isPathEmpty(String adminUsername, String groupingPath);
 
+    public void privilegegTets(String adminUsername, String groupingPath);
 
 }
