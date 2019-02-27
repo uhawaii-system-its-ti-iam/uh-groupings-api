@@ -21,14 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.annotation.PostConstruct;
@@ -398,6 +391,25 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingFactoryService.addGrouping(currentUser, path));
+    }
+
+    /**
+     * Update grouping description
+     *
+     * @param path: path of grouping to update
+     * @param dtoString:  new description to be updated
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path}/description",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
+                                                                 @PathVariable String path,
+                                                                 @RequestBody(required = false) String dtoString) {
+        logger.info("Entered REST updateDescription");
+        return ResponseEntity
+                .ok()
+                .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
     }
 
     /**

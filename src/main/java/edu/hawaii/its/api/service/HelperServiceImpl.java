@@ -289,6 +289,10 @@ public class HelperServiceImpl implements HelperService {
                     .collect(Collectors.toList());
         }
 
+        for(Grouping group : groupings) {
+            group.setDescription(grouperFS.getDescription(group.getPath()));
+        }
+
         return groupings;
     }
 
