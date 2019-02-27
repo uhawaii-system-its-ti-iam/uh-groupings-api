@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -25,7 +24,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +37,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -152,9 +149,6 @@ public class GrouperFactoryServiceTest {
     @Autowired
     private DatabaseSetupService databaseSetupService;
 
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
@@ -224,6 +218,7 @@ public class GrouperFactoryServiceTest {
 
         results = gfsl.makeWsAddMemberResults(GROUPING_3_PATH, lookup, members);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+
     }
 
     @Test
@@ -237,31 +232,9 @@ public class GrouperFactoryServiceTest {
     @Test
     public void makeWsDeleteMemberResultsTest() {
         WsDeleteMemberResults results;
-        System.out.println("ABCD USER UUID: " + users.get(6).getUuid());
-        users.get(6).setUuid("8798448783459");
-
-        System.out.println("ABCD USER UUID: " + users.get(6).getUuid());
-// TESTING WIP
-// todo WHAT IM DOING
-        //todo FINISH THIS TEST! DELETE THE RED STUFF USE THE LINE DIRECTLY BELOW MEEEEEE
-        System.out.println(memberAttributeService.isMember(GROUPING_3_PATH, users.get(6)));
-
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
         results = gfsl.makeWsDeleteMemberResults(GROUPING_3_PATH, users.get(5).getUsername());
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
-
-        results = gfsl.makeWsDeleteMemberResults(GROUPING_3_PATH, users.get(6).getUuid());
-        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
-
-        users.get(6).setUuid("uuid6");
-
-        System.out.println("in group: " + )
-
-
-
-
-
     }
 
     @Test
@@ -520,30 +493,6 @@ public class GrouperFactoryServiceTest {
         WsAttributeAssign[] testArray;
         testArray = gfsl.makeEmptyWsAttributeAssignArray();
         assertTrue(testArray.length == 0);
-    }
-
-    @Ignore
-    @Test
-    public void deleteGroupTest() {
-        WsAddMemberResults results;
-        Group deleteMe = new Group();
-        deleteMe.setPath("gesoijdfodridogj");
-
-        WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
-        WsGroupLookup groupLookup = gfsl.makeWsGroupLookup("deleteMe");
-
-
-        assertNotNull(deleteMe);
-        // fails on vvv this line
-        gfsl.deleteGroup(subjectLookup, groupLookup);
-        assertNull(deleteMe);
-
-    }
-
-    @Ignore
-    @Test
-    public void deleteStemTest() {
-        //todo implement
     }
 
 }
