@@ -509,11 +509,24 @@ public class GroupAttributeServiceTest {
     }
 
     @Test
-    public void updateDescriptionTestAdmin() {
+//            (expected = GroupingsServiceResultException.class)
+    public void updateDescriptionPermissionsTestMember() {
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
 
         // username0 is the username of the owner
         groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
     }
 }
+
+
+// todo tests
+// empty string
+// numerical only
+// letters only
+// mix
+// string with spaces
+// string with no spaces
+
 
