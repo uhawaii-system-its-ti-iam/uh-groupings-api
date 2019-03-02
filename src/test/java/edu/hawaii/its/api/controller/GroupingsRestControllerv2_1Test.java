@@ -306,7 +306,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[0].path").value("test:ing:me:bob"))
                 .andExpect(jsonPath("allGroupings[0].listservOn").value("true"))
 
-                        // basis
+                // basis
                 .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].name").value("b0-name"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].uuid").value("b0-uuid"))
@@ -317,7 +317,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].uuid").value("b2-uuid"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].username").value("b2-username"))
 
-                        // exclude
+                // exclude
                 .andExpect(jsonPath("allGroupings[0].exclude.members", hasSize(1)))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
@@ -425,12 +425,12 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     //todo This user owns nothing
-//    @Test
-//    @WithMockUhUser(username = "")
-//    public void memberGroupingsFailTest() throws Exception {
-//        mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
-//                .andExpect(status().is4xxClientError());
-//    }
+    //    @Test
+    //    @WithMockUhUser(username = "")
+    //    public void memberGroupingsFailTest() throws Exception {
+    //        mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
+    //                .andExpect(status().is4xxClientError());
+    //    }
 
     //    @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
@@ -483,7 +483,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[1].owners.members[2].uuid").value("o2-uuid"));
     }
 
-
     @Ignore
     @Test
     @WithAnonymousUser
@@ -493,12 +492,12 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     //todo This user owns nothing
-//    @Test
-//    @WithMockUhUser(username = "")
-//    public void ownerGroupingsFailTest() throws Exception {
-//        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-//                .andExpect(status().is4xxClientError());
-//    }
+    //    @Test
+    //    @WithMockUhUser(username = "")
+    //    public void ownerGroupingsFailTest() throws Exception {
+    //        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
+    //                .andExpect(status().is4xxClientError());
+    //    }
 
     @Test
     @WithMockUhUser(username = "uhAdmin")
@@ -698,7 +697,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
+        mockMvc.perform(
+                put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -875,12 +875,11 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("action").value("delete admin"));
     }
 
-
     @Test
     @WithMockUhUser(username = "admin")
     public void adminListsTest() throws Exception {
         String mvcResult = mockMvc.perform(get(API_BASE + "/adminsGroupings")
-        .header(CURRENT_USER, ADMIN))
+                .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -899,7 +898,7 @@ public class GroupingsRestControllerv2_1Test {
 
         mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("add grouping"));
     }
@@ -915,16 +914,14 @@ public class GroupingsRestControllerv2_1Test {
 
         mockMvc.perform(delete(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete grouping"));
     }
 
-
-    // todo uh oh. USERNAME should be denied
     @Ignore
     @Test
-    @WithMockUhUser(username="abc")
+    @WithMockUhUser(username = "abc")
     public void lookUpPermissionTestMember() throws Exception {
         Person random = new Person("0o0-name", "0o0-uuid", "0o0-username");
         MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
@@ -946,8 +943,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
     }
 
-    //todo ADMIN should work
-    // todo this test is done
     @Ignore
     @Test
     @WithMockAdminUser(username = "bobo")
@@ -978,7 +973,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Ignore
     @Test
-    @WithMockUhUser(username="testUser")
+    @WithMockUhUser(username = "testUser")
     public void lookUpPermissionTestOwner() throws Exception {
         Grouping testGroup = grouping();
         System.out.println("TEST GROUP: " + testGroup);
@@ -991,21 +986,45 @@ public class GroupingsRestControllerv2_1Test {
         // Try to look up information about member in unrelated group <-- FAIL
 
         // Keeps failing; is this a bug?
-        assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
+        assertTrue(memberAttributeService.isOwner(testGroup.getPath(), "o0-username"));
 
-//            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//
-//            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//
-//            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
+        //            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
+        //
+        //            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
+        //
+        //            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
+    }
+
+    @Test
+    @WithMockUhUser(username = "abc")
+    public void memberDescriptionTest() throws Exception {
+        Grouping groupingTest = grouping();
+
+        MvcResult memberDescriptionResult = mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+                .header(CURRENT_USER, "abc"))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockAdminUser(username = "bobo")
+    public void adminDescriptionTest() throws Exception {
+        Grouping groupingTest = grouping();
+
+        MvcResult adminDescriptionResult = mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+            .header(CURRENT_USER, "bobo"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn();
     }
 }
