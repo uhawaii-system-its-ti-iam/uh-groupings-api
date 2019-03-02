@@ -57,6 +57,9 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
@@ -65,6 +68,7 @@ public class TestGroupAttributeService {
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -334,21 +338,35 @@ public class TestGroupAttributeService {
 
         GroupingsServiceResult groupingsServiceResult;
 
+        // Sets the description to the default
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+
         //Test to make sure description is set to the default.
         String description = grouperFactoryService.getDescription(GROUPING);
         assertThat(DEFAULT_DESCRIPTION, containsString(description));
 
         //Try to update grouping while user isn't owner or admin
         try {
-            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, "aaronvil", DEFAULT_DESCRIPTION + " modified");
+            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
         } catch (GroupingsServiceResultException gsre) {
             groupingsServiceResult = gsre.getGsr();
         }
         assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
 
         //Testing with admin
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, "aaronvil", DEFAULT_DESCRIPTION + " modified");
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
         assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Testing with owner
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modified");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        // Test with empty string
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Revert any changes
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
 
     }
 }
