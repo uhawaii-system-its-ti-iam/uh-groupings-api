@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMembershipService {
 
-    @Value("${groupings.agr gfpi.test.grouping_many}")
+    @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
     @Value("${groupings.api.test.grouping_many_basis}")
     private String GROUPING_BASIS;
