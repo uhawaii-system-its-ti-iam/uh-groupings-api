@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
@@ -246,7 +247,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
-        return null;
+
+        return new GcFindGroups()
+                .addGroupName(groupPath)
+                .execute();
+
     }
 
     /**

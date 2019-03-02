@@ -383,9 +383,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
         } else {
 
-            // todo: delete the line of code below once all description method-related tasks are working!
-            System.out.println("\nYA GOttA FiX THIs!!\n");
-
             gsr = helperService.makeGroupingsServiceResult(FAILURE + ", " + ownerUsername + " is not an owner of "
                     + groupPath + " and cannot change the description of this grouping", action);
         }
