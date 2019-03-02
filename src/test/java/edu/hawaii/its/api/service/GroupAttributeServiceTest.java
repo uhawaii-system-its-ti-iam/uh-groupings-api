@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -82,6 +83,9 @@ public class GroupAttributeServiceTest {
 
     @Autowired
     private GroupAttributeService groupingsService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private GroupingRepository groupingRepository;
@@ -507,5 +511,30 @@ public class GroupAttributeServiceTest {
         assertFalse(isHasReleasedGrouping);
 
     }
+
+    @Test
+//            (expected = GroupingsServiceResultException.class)
+    public void updateDescriptionPermissionsTestMember() {
+        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
+    }
+
+    @Test
+    public void updateDescriptionTestAdmin() {
+        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        // username0 is the username of the owner
+        groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
+    }
 }
+
+
+// todo tests
+    // empty string
+    // numerical only
+    // letters only
+    // mix
+    // string with spaces
+    // string with no spaces
 
