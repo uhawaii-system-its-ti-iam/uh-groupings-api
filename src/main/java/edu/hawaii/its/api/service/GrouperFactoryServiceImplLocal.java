@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
@@ -246,8 +247,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
-        return null;
+        return new GcFindGroups()
+                .addGroupName(groupPath)
+                .execute();
     }
+
 
     /**
      * @param group: group to be looked up
@@ -364,7 +368,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
                 //todo Shouldn't be reached, and is not reachable anyway due to exception
-//                wsResultMeta = wsResultMetaData;
+                wsResultMeta = wsResultMetaData;
             }
         }
 
@@ -385,7 +389,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
-                                                           String memberToDelete) {
+            String memberToDelete) {
         if (isUuid(memberToDelete)) {
             return makeWsDeleteMemberResults(group, lookup, new Person(null, memberToDelete, null));
         }
@@ -395,14 +399,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResultsGroup(String group, WsSubjectLookup lookup,
-                                                                String memberToDelete) {
+            String memberToDelete) {
         return makeWsDeleteMemberResults(group, lookup, new Person(null, memberToDelete, null));
 
     }
 
     @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
-                                                           Person personToDelete) {
+            Person personToDelete) {
         WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
@@ -445,7 +449,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
-                                                           List<String> membersToDelete) {
+            List<String> membersToDelete) {
         WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
@@ -465,7 +469,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                     String attributeDefNameName) {
+            String attributeDefNameName) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
@@ -501,8 +505,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                     String attributeDefNameName0,
-                                                                                     String attributeDefNameName1) {
+            String attributeDefNameName0,
+            String attributeDefNameName1) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0);
 
@@ -562,8 +566,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                           String attributeDefNameName,
-                                                                                           List<String> ownerGroupNames) {
+            String attributeDefNameName,
+            List<String> ownerGroupNames) {
         List<WsGetAttributeAssignmentsResults> resultsList = new ArrayList<>();
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(
                 assignType,
@@ -577,9 +581,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                           String attributeDefNameName0,
-                                                                                           String attributeDefNameName1,
-                                                                                           List<String> ownerGroupNames) {
+            String attributeDefNameName0,
+            String attributeDefNameName1,
+            List<String> ownerGroupNames) {
         List<WsGetAttributeAssignmentsResults> resultsList = new ArrayList<>();
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = makeWsGetAttributeAssignmentsResultsTrio(
@@ -595,8 +599,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForMembership(String assignType,
-                                                                                              String attributeDefNameName,
-                                                                                              String membershipId) {
+            String attributeDefNameName,
+            String membershipId) {
         Membership membership = membershipRepository.findByIdentifier(membershipId);
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
@@ -619,7 +623,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
-                                                                                         String group) {
+            String group) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
 
         Grouping grouping = groupingRepository.findByPath(group);
@@ -642,8 +646,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
-                                                                                         String attributeDefNameName,
-                                                                                         String group) {
+            String attributeDefNameName,
+            String group) {
         return makeWsGetAttributeAssignmentsResultsForGroup(assignType, group);
     }
 
@@ -704,11 +708,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResults(String attributeAssignType,
-                                                                   String attributeAssignOperation,
-                                                                   String ownerGroupName,
-                                                                   String attributeDefNameName,
-                                                                   String attributeAssignValueOperation,
-                                                                   WsAttributeAssignValue value) {
+            String attributeAssignOperation,
+            String ownerGroupName,
+            String attributeDefNameName,
+            String attributeAssignValueOperation,
+            WsAttributeAssignValue value) {
 
         WsAssignAttributesResults wsAssignAttributesResults = new WsAssignAttributesResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
@@ -742,9 +746,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForMembership(String attributeAssignType,
-                                                                                String attributeAssignOperation,
-                                                                                String attributeDefNameName,
-                                                                                String ownerMembershipId) {
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerMembershipId) {
 
         WsAssignAttributesResults wsAssignAttributesResults = new WsAssignAttributesResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
@@ -766,9 +770,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(String attributeAssignType,
-                                                                           String attributeAssignOperation,
-                                                                           String attributeDefNameName,
-                                                                           String ownerGroupName) {
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerGroupName) {
         WsAssignAttributesResults wsAssignAttributesResults = new WsAssignAttributesResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(FAILURE);
@@ -791,10 +795,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(WsSubjectLookup lookup,
-                                                                           String attributeAssignType,
-                                                                           String attributeAssignOperation,
-                                                                           String attributeDefNameName,
-                                                                           String ownerGroupName) {
+            String attributeAssignType,
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerGroupName) {
         WsAssignAttributesResults wsAssignAttributesResults;
 
         Grouping grouping = groupingRepository.findByPath(ownerGroupName);
@@ -816,9 +820,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
-                                                                                       String privilegeName,
-                                                                                       WsSubjectLookup lookup,
-                                                                                       boolean isAllowed) {
+            String privilegeName,
+            WsSubjectLookup lookup,
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -846,10 +850,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
-                                                                                       String privilegeName,
-                                                                                       WsSubjectLookup lookup,
-                                                                                       WsSubjectLookup admin,
-                                                                                       boolean isAllowed) {
+            String privilegeName,
+            WsSubjectLookup lookup,
+            WsSubjectLookup admin,
+            boolean isAllowed) {
 
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
@@ -877,8 +881,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
-                                                                                 String privilegeName,
-                                                                                 WsSubjectLookup lookup) {
+            String privilegeName,
+            WsSubjectLookup lookup) {
 
         WsGetGrouperPrivilegesLiteResult wsGetGrouperPrivilegesLiteResult = new WsGetGrouperPrivilegesLiteResult();
         WsResultMeta wsResultMeta = new WsResultMeta();
@@ -915,7 +919,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetMembershipsResults makeWsGetMembershipsResults(String groupName,
-                                                               WsSubjectLookup lookup) {
+            WsSubjectLookup lookup) {
 
         Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
         Group group = groupRepository.findByPath(groupName);
@@ -940,13 +944,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
-                                                       WsSubjectLookup lookup,
-                                                       List<String> groupPaths,
-                                                       Integer pageNumber,
-                                                       Integer pageSize,
-                                                       String sortString,
-                                                       Boolean isAscending
-                                                       ) {
+            WsSubjectLookup lookup,
+            List<String> groupPaths,
+            Integer pageNumber,
+            Integer pageSize,
+            String sortString,
+            Boolean isAscending
+    ) {
 
         WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
         String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
@@ -988,8 +992,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetGroupsResults makeWsGetGroupsResults(String username,
-                                                     WsStemLookup stemLookup,
-                                                     StemScope stemScope) {
+            WsStemLookup stemLookup,
+            StemScope stemScope) {
 
         WsGetGroupsResults wsGetGroupsResults = new WsGetGroupsResults();
         WsGetGroupsResult wsGetGroupsResult = new WsGetGroupsResult();
@@ -1230,15 +1234,15 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
-                                                String leftGroupPath, String rightGroupPath) {
+            String leftGroupPath, String rightGroupPath) {
         //todo
         return null;
     }
 
     @Override
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
-                                                                                              String attributeDefNameName,
-                                                                                              List<String> ownerGroupNames) {
+            String attributeDefNameName,
+            List<String> ownerGroupNames) {
         //todo
         return null;
     }
