@@ -359,6 +359,25 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Returns if user is an aadmin
+     *
+     * @param uid: uid of admin to add
+     * @return Information about results of the operation
+     *
+    //todo
+    @RequestMapping(value = "/admins/{uid}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> isAdmin(@RequestHeader("current_user") String currentUser,
+                                                              @PathVariable String uid) {
+        logger.info("Entered REST addNewAdmin...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.isAdmin(uid));
+    }
+    */
+
+    /**
      * Create a new admin
      *
      * @param uid: uid of admin to add
@@ -374,6 +393,8 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.addAdmin(currentUser, uid));
     }
+
+
 
     /**
      * Create a new grouping
