@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -183,6 +184,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.timeout}")
     private Integer TIMEOUT;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     public static final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
@@ -252,7 +256,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isAdmin(ownerUsername)) {
+                .isSuperuser(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
             String basis = groupingPath + BASIS;
@@ -260,11 +264,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             String exclude = groupingPath + EXCLUDE;
             String owners = groupingPath + OWNERS;
 
-            String[] paths = { include,
+            String[] paths = {include,
                     exclude,
                     basis,
                     groupingPath,
-                    owners };
+                    owners};
             Map<String, Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
@@ -284,7 +288,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     // isAscending puts the database in ascending or descending order before returning page
     @Override
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size,
-            String sortString, Boolean isAscending) {
+                                         String sortString, Boolean isAscending) {
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
@@ -292,7 +296,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isAdmin(ownerUsername)) {
+                .isSuperuser(ownerUsername)) {
 
             compositeGrouping = new Grouping(groupingPath);
 
@@ -403,8 +407,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             groupings = helperService.makeGroupings(groupPaths);
             adminListsHolder.setAdminGroup(admin);
             adminListsHolder.setAllGroupings(groupings);
+            return adminListsHolder;
         }
-        return adminListsHolder;
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
     //returns a list of groupings corresponding to the include group or exclude group (includeOrrExclude) in groupPaths that
@@ -468,7 +473,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         Group groupMembers = new Group();
 
         if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-                .isAdmin(ownerUsername)) {
+                .isSuperuser(ownerUsername)) {
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
             WsGetMembersResults membersResults;
@@ -514,7 +519,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Override
     public Group getPaginatedMembers(String ownerUsername, String groupPath, Integer page, Integer size,
-            String sortString, Boolean isAscending) {
+                                     String sortString, Boolean isAscending) {
         logger.info("getPaginatedMembers; ownerUsername: " + ownerUsername + "; group: " + groupPath +
                 "; page: " + page + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending
                 + ";");
@@ -543,7 +548,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (members.getResults() != null) {
             if (groupPath.contains(BASIS)) {
                 groupMembers = makeBasisGroup(members);
-            }  else {
+            } else {
                 //todo change to makeGroup() instead of groups
                 groupMembers = makeGroup(members);
             }
@@ -590,7 +595,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         WsGetMembersResults members = new WsGetMembersResults();
 
         if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-                .isAdmin(ownerUsername)) {
+                .isSuperuser(ownerUsername)) {
 
             WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
 
@@ -629,7 +634,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //        Group groupMembers = new Group();
     //
     //        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-    //                .isAdmin(ownerUsername)) {
+    //                .isSuperuser(ownerUsername)) {
     //
     //            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
     //            WsGetMembersResults members = new WsGetMembersResults();

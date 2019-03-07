@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -20,10 +21,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -73,6 +71,9 @@ public class TestGroupingFactoryService {
 
     @Value("${groupings.api.trio}")
     private String TRIO;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -149,16 +150,10 @@ public class TestGroupingFactoryService {
 
         //Fails when user trying to add grouping is not admin
         try {
-
-            results = groupingFactoryService.addGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
-
-        } catch (GroupingsServiceResultException gsre) {
-
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+            groupingFactoryService.addGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-
-
     }
 
     @Test
@@ -193,12 +188,10 @@ public class TestGroupingFactoryService {
         //Fails when user trying to delete grouping is not admin
         try {
             // TODO: how do we know that this grouping exists?
-            results = groupingFactoryService.deleteGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
+            groupingFactoryService.deleteGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
 
-        } catch (GroupingsServiceResultException gsre) {
-
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
     }
 
@@ -236,12 +229,9 @@ public class TestGroupingFactoryService {
 
         //Fails when user trying to delete grouping is not admin
         try {
-
             groupingFactoryService.markGroupForPurge(USERNAMES[1], TEMP_TEST + ":kahlin-test");
-
-        } catch (GroupingsServiceResultException gsre) {
-
-            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
     }
