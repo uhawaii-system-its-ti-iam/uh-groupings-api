@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -112,6 +113,9 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.test.usernames}")
     private String[] usernames;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
@@ -172,14 +176,13 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void adminListsTest() {
-        // try with non-admin
-        AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
-        assertNotNull(info);
-        assertEquals(info.getAllGroupings().size(), 0);
-        assertEquals(info.getAdminGroup().getMembers().size(), 0);
-        assertEquals(info.getAdminGroup().getUsernames().size(), 0);
-        assertEquals(info.getAdminGroup().getNames().size(), 0);
-        assertEquals(info.getAdminGroup().getUuids().size(), 0);
+        try {
+            // try with non-admin
+            AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
+            fail("shouldn't be here");
+        } catch (AccessDeniedException ade){
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
 
         //todo What about with admin???
         AdminListsHolder infoAdmin = groupingAssignmentService.adminLists(ADMIN);
