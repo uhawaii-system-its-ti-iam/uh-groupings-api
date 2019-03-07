@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,14 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class GroupingAssignmentServiceTest {
@@ -71,6 +69,9 @@ public class GroupingAssignmentServiceTest {
 
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME_KEY;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     private static final String PATH_ROOT = "path:to:grouping";
 
@@ -314,13 +315,15 @@ public class GroupingAssignmentServiceTest {
     @Test
     public void adminListsTest() {
         AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN_USER);
-        AdminListsHolder emptyAdminListHolder = groupingAssignmentService.adminLists(users.get(1).getUsername());
 
         assertEquals(adminListsHolder.getAllGroupings().size(), 5);
         assertEquals(adminListsHolder.getAdminGroup().getMembers().size(), 1);
 
-        assertEquals(emptyAdminListHolder.getAllGroupings().size(), 0);
-        assertEquals(emptyAdminListHolder.getAdminGroup().getMembers().size(), 0);
+        try {
+            groupingAssignmentService.adminLists(users.get(1).getUsername());
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
     }
 
     /////////////////////////////////////////////////////
@@ -442,7 +445,7 @@ public class GroupingAssignmentServiceTest {
             list[i] = new WsSubject();
             list[i].setName("testSubject_" + i);
             list[i].setId("testSubject_uuid_" + i);
-            list[i].setAttributeValues(new String[] { "testSubject_username_" + i });
+            list[i].setAttributeValues(new String[]{"testSubject_username_" + i});
         }
 
         getMembersResult1.setWsSubjects(list);
@@ -466,8 +469,8 @@ public class GroupingAssignmentServiceTest {
         String name = "name";
         String id = "uuid";
         String identifier = "username";
-        String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
-        String[] attributeValues = new String[] { identifier, id, null, name, null };
+        String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
+        String[] attributeValues = new String[]{identifier, id, null, name, null};
 
         WsSubject subject = new WsSubject();
         subject.setName(name);
@@ -480,7 +483,7 @@ public class GroupingAssignmentServiceTest {
         assertTrue(person.getUuid().equals(id));
         assertTrue(person.getUsername().equals(identifier));
 
-        assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
+        assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[]{}));
     }
 
     //todo Finish this test for setGroupingAttributes
