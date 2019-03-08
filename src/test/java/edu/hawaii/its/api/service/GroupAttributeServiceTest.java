@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
@@ -59,6 +60,8 @@ public class GroupAttributeServiceTest {
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
+
+    @Value("${}")
 
     private static final String PATH_ROOT = "path:to:grouping";
 
@@ -513,20 +516,21 @@ public class GroupAttributeServiceTest {
     }
 
     @Test
-//            (expected = GroupingsServiceResultException.class)
-    public void updateDescriptionPermissionsTestMember() {
+    public void updateDescriptionPermissionsTest() {
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
-    }
+        // Member
+        try {
+            groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
+            fail();
+        } catch (GroupingsServiceResultException err) {
 
-    @Test
-    public void updateDescriptionTestAdmin() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+        }
 
-        // username0 is the username of the owner
+        // username0 = owner
         groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
     }
+
 }
 
 
