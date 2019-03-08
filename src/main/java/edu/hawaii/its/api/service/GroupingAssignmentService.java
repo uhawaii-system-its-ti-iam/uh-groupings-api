@@ -59,7 +59,7 @@ public interface GroupingAssignmentService {
 
     public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
 
-    public Group getPaginatedMembers( String ownerUsername, String groupPath, Integer page, Integer size, String sortString, Boolean isAscending);
+    public Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size, String sortString, Boolean isAscending);
 
     public Group getPaginatedAndFilteredMembers(String groupPath, String ownerUsername, String filterString, Integer page, Integer size);
 

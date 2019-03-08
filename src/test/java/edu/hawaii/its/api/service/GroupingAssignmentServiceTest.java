@@ -159,6 +159,25 @@ public class GroupingAssignmentServiceTest {
     }
 
     @Test
+    public void getPaginatedGroupingTest() {
+        Grouping groupingRandom = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 20, "name", true);
+        Grouping groupingOwner = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), 1, 20, "name", true);
+        Grouping groupingAdmin = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, ADMIN_USER, 1, 20, "name", true);
+
+        Grouping groupingNull = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), null, null, null, null);
+
+        assertEquals(0, groupingRandom.getComposite().getMembers().size());
+        assertEquals(0, groupingRandom.getInclude().getMembers().size());
+        assertEquals(0, groupingRandom.getExclude().getMembers().size());
+        assertEquals(0, groupingRandom.getBasis().getMembers().size());
+        assertEquals(0, groupingRandom.getOwners().getMembers().size());
+    }
+
+    @Test
     public void getMyGroupingsTest() {
         GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
 
