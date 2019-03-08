@@ -1006,25 +1006,21 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser(username = "abc")
-    public void memberDescriptionTest() throws Exception {
+    public void descriptionTest() throws Exception {
         Grouping groupingTest = grouping();
 
+        // Check that regular member cannot change description
         MvcResult memberDescriptionResult = mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
                 .header(CURRENT_USER, "abc"))
                 .andDo(print())
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().is4xxClientError())
                 .andReturn();
-    }
 
-    @Test
-    @WithMockAdminUser(username = "bobo")
-    public void adminDescriptionTest() throws Exception {
-        Grouping groupingTest = grouping();
-
+        // Admin should be able to change description
         MvcResult adminDescriptionResult = mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
-            .header(CURRENT_USER, "bobo"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andReturn();
+                .header(CURRENT_USER, "admin"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
     }
 }
