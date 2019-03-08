@@ -7,6 +7,7 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
@@ -17,11 +18,14 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -305,7 +309,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     basis,
                     groupingPath,
                     owners };
-            Map<String, Group> groups = getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
+            Map<String, Group> groups =
+                    getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
@@ -516,14 +521,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     @Override
-    public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
+    public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
+            Integer size,
             String sortString, Boolean isAscending) {
         logger.info("getPaginatedMembers; ownerUsername: " + ownerUsername + "; groups: " + groupPaths +
                 "; page: " + page + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending
                 + ";");
 
-//        List<String> groupPaths = new ArrayList<>();
-//        groupPaths.add(groupPath);
+        //        List<String> groupPaths = new ArrayList<>();
+        //        groupPaths.add(groupPath);
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
@@ -541,21 +547,21 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
 
         //        Group groupMembers = new Group();
-//        if (members.getResults() != null && groupPath.contains(BASIS)) {
-//            groupMembers = makeBasisGroup(members);
-//        } else if (members.getResults() != null) {
-//            //todo change to makeGroup() instead of groups
-//            groupMembers = makeGroup(members);
-//        }
+        //        if (members.getResults() != null && groupPath.contains(BASIS)) {
+        //            groupMembers = makeBasisGroup(members);
+        //        } else if (members.getResults() != null) {
+        //            //todo change to makeGroup() instead of groups
+        //            groupMembers = makeGroup(members);
+        //        }
 
-//        if (members.getResults() != null) {
-//            if (groupPath.contains(BASIS)) {
-//                groupMembers = makeBasisGroup(members);
-//            }  else {
-//                //todo change to makeGroup() instead of groups
-//                groupMembers = makeGroup(members);
-//            }
-//        }
+        //        if (members.getResults() != null) {
+        //            if (groupPath.contains(BASIS)) {
+        //                groupMembers = makeBasisGroup(members);
+        //            }  else {
+        //                //todo change to makeGroup() instead of groups
+        //                groupMembers = makeGroup(members);
+        //            }
+        //        }
 
         return groupMembers;
     }
@@ -673,6 +679,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //makes a group filled with members from membersResults
 
+    //todo Remove may be depreciated and unused
     @Override
     public Group makeGroup(WsGetMembersResults membersResults) {
         Group group = new Group();
@@ -695,7 +702,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return group;
     }
 
-    //todo This method needs to try/catch
     //makes a group filled with members from membersResults
     @Override
     public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
@@ -707,24 +713,29 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 WsSubject[] subjects = result.getWsSubjects();
                 Group group = new Group(result.getWsGroup().getName());
 
-                if(subjects != null) {
+                if (subjects != null) {
                     if (subjects.length > 0) {
                         for (WsSubject subject : subjects) {
                             if (subject != null) {
-                                group.addMember(makePerson(subject, attributeNames));
+                                Person personToAdd = makePerson(subject, attributeNames);
+                                if (group.getPath().contains(BASIS)) {
+                                    if (subject.getSourceId().equals("g:gsa")) {
+                                        personToAdd.setUsername("User Not Available.");
+                                    }
+                                }
+                                group.addMember(personToAdd);
                             }
                         }
-                        //                    groups.add(group);
                     }
                 }
                 groups.put(group.getPath(), group);
             }
-            // Return empty group if for any unforeseen results
-
         }
+        // Return empty group if for any unforeseen results
         return groups;
     }
 
+    //todo Remove may be depreciated and unused
     // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
     // Make group specifically for basis group only
     public Group makeBasisGroup(WsGetMembersResults membersResults) {
