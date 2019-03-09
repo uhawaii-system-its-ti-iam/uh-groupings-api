@@ -280,7 +280,6 @@ public class TestGroupingAssignmentService {
 
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
-        Grouping getGrouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
         Grouping paginatedGroupingPage1 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
 //        // Page 2 contains 1 stale subject, should return 19

@@ -966,6 +966,16 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             Group group = groupRepository.findByPath(groupPath);
             List<Person> members = group.getMembers();
             List<WsSubject> subjectList = new ArrayList<>();
+
+            if(pageNumber != null && pageSize != null){
+                if(sortString != null) {
+                    members.sort();
+                }
+
+                pageNumber = pageNumber - 1;
+                members = members.subList()
+            }
+
             for (Person person : members) {
                 WsSubject subject = new WsSubject();
                 subject.setId(person.getUuid());
