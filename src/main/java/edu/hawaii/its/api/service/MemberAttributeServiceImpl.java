@@ -3,7 +3,6 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -15,10 +14,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -226,7 +223,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
         }
 
-        if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
+        if (isOwner(groupingPath, ownerUsername) || isSuperuser(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
             WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
 
@@ -258,7 +255,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         GroupingsServiceResult ownershipResults;
         String action = "remove ownership of " + groupingPath + " from " + ownerToRemove;
 
-        if (isOwner(groupingPath, ownerUsername) || isAdmin(ownerUsername)) {
+        if (isOwner(groupingPath, ownerUsername) || isSuperuser(ownerUsername)) {
             WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
             WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
                     groupingPath + OWNERS,
@@ -408,7 +405,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+                String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }
@@ -418,7 +415,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+            String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }
