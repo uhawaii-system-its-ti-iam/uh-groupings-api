@@ -39,10 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -880,7 +877,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "admin")
     public void adminListsTest() throws Exception {
         String mvcResult = mockMvc.perform(get(API_BASE + "/adminsGroupings")
-        .header(CURRENT_USER, ADMIN))
+                .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -899,7 +896,7 @@ public class GroupingsRestControllerv2_1Test {
 
         mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("add grouping"));
     }
@@ -915,7 +912,7 @@ public class GroupingsRestControllerv2_1Test {
 
         mockMvc.perform(delete(API_BASE + "/groupings/" + GROUPING)
                 .with(csrf())
-        .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete grouping"));
     }
@@ -924,7 +921,7 @@ public class GroupingsRestControllerv2_1Test {
     // todo uh oh. USERNAME should be denied
     @Ignore
     @Test
-    @WithMockUhUser(username="abc")
+    @WithMockUhUser(username = "abc")
     public void lookUpPermissionTestMember() throws Exception {
         Person random = new Person("0o0-name", "0o0-uuid", "0o0-username");
         MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
@@ -978,7 +975,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Ignore
     @Test
-    @WithMockUhUser(username="testUser")
+    @WithMockUhUser(username = "testUser")
     public void lookUpPermissionTestOwner() throws Exception {
         Grouping testGroup = grouping();
         System.out.println("TEST GROUP: " + testGroup);
@@ -991,7 +988,7 @@ public class GroupingsRestControllerv2_1Test {
         // Try to look up information about member in unrelated group <-- FAIL
 
         // Keeps failing; is this a bug?
-        assertTrue(memberAttributeService.isOwner(testGroup.getPath(),"o0-username"));
+        assertTrue(memberAttributeService.isOwner(testGroup.getPath(), "o0-username"));
 
 //            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
 //                    .andDo(print())
