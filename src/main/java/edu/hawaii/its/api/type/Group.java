@@ -68,6 +68,8 @@ public class Group implements Comparable<Group> {
         this.members = members != null ? members : new ArrayList<>();
     }
 
+
+
     public void addMember(Person person) {
         members.add(person);
     }
@@ -77,6 +79,8 @@ public class Group implements Comparable<Group> {
     public boolean isMember(Person person) {
         return members.contains(person);
     }
+
+
 
     @JsonIgnore
     @Transient

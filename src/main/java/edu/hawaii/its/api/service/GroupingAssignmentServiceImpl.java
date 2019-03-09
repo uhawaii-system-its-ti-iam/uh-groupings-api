@@ -187,6 +187,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.timeout}")
     private Integer TIMEOUT;
 
+    @Value("${groupings.api.stale_subject_id}")
+    private String STALE_SUBJECT_ID;
+
     public static final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
     @Autowired
@@ -590,6 +593,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     }
 
+    //todo Might be unnecessary
     @Override
     @Async
     public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId) {
@@ -713,20 +717,20 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 WsSubject[] subjects = result.getWsSubjects();
                 Group group = new Group(result.getWsGroup().getName());
 
-                if (subjects != null) {
-                    if (subjects.length > 0) {
-                        for (WsSubject subject : subjects) {
-                            if (subject != null) {
-                                Person personToAdd = makePerson(subject, attributeNames);
-                                if (group.getPath().contains(BASIS)) {
-                                    if (subject.getSourceId().equals("g:gsa")) {
-                                        personToAdd.setUsername("User Not Available.");
-                                    }
-                                }
-                                group.addMember(personToAdd);
-                            }
-                        }
+                if (subjects == null || subjects.length == 0) {
+                    continue;
+                }
+                for (WsSubject subject : subjects) {
+                    if (subject == null) {
+                        continue;
                     }
+                    Person personToAdd = makePerson(subject, attributeNames);
+                    //todo Move to propeties file name as STALE_SUBJECT_ID
+                    if (group.getPath().endsWith(BASIS) && subject.getSourceId() != null
+                            && subject.getSourceId().equals(STALE_SUBJECT_ID)) {
+                        personToAdd.setUsername("User Not Available.");
+                    }
+                    group.addMember(personToAdd);
                 }
                 groups.put(group.getPath(), group);
             }
@@ -749,7 +753,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 for (WsSubject subject : subjects) {
                     if (subject != null) {
                         personToAdd = makePerson(subject, attributeNames);
-                        if (subject.getSourceId().equals("g:gsa")) {
+                        if (subject.getSourceId().equals(STALE_SUBJECT_ID)) {
                             personToAdd.setUsername("User not available.");
                         }
                         group.addMember(personToAdd);
