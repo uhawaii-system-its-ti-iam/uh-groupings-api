@@ -30,10 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.Constants.a;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.CoreMatchers.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -163,18 +167,29 @@ public class GroupingAssignmentServiceTest {
         Grouping groupingRandom = groupingAssignmentService
                 .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 20, "name", true);
         Grouping groupingOwner = groupingAssignmentService
-                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), 1, 20, "name", true);
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), 1, 4, "name", true);
         Grouping groupingAdmin = groupingAssignmentService
                 .getPaginatedGrouping(GROUPING_0_PATH, ADMIN_USER, 1, 20, "name", true);
-
         Grouping groupingNull = groupingAssignmentService
                 .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), null, null, null, null);
 
-        assertEquals(0, groupingRandom.getComposite().getMembers().size());
-        assertEquals(0, groupingRandom.getInclude().getMembers().size());
-        assertEquals(0, groupingRandom.getExclude().getMembers().size());
-        assertEquals(0, groupingRandom.getBasis().getMembers().size());
-        assertEquals(0, groupingRandom.getOwners().getMembers().size());
+        assertThat(groupingRandom.getComposite().getMembers().size(), equalTo(0));
+        assertThat(groupingRandom.getBasis().getMembers().size(), equalTo(0));
+        assertThat(groupingRandom.getInclude().getMembers().size(), equalTo(0));
+        assertThat(groupingRandom.getExclude().getMembers().size(), equalTo(0));
+        assertThat(groupingRandom.getOwners().getMembers().size(), equalTo(0));
+
+        assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
+        assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        assertTrue(groupingOwner.getComposite().getUuids().contains(users.get(0).getUuid()));
+        assertFalse(groupingOwner.getComposite().getNames().contains(users.get(7).getName()));
+        assertFalse(groupingOwner.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        assertFalse(groupingOwner.getComposite().getUuids().contains(users.get(7).getUuid()));
+
+//        assertTrue(groupingOwner.getInclude().getNames().contains(users.get(5).getName()));
+//        assertTrue(groupingOwner.getExclude().getNames().contains(users.get(2).getName()));
+//        assertTrue(groupingOwner.getBasis().getNames().contains(users.get(4).getName()));
+//        assertTrue(groupingOwner.getOwners().getNames().contains(users.get(0).getName()));
     }
 
     @Test
