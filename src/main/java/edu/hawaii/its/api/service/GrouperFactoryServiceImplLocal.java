@@ -969,11 +969,12 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
             if(pageNumber != null && pageSize != null){
                 if(sortString != null) {
-                    members.sort();
+//                    members.sort();
                 }
 
-                pageNumber = pageNumber - 1;
-                members = members.subList()
+                Integer offset = pageNumber - 1;
+                members = members.subList(offset * pageSize, (offset + 1) * pageSize);
+
             }
 
             for (Person person : members) {
