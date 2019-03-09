@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -22,13 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestMembershipService {
 
     @Value("${groupings.agr gfpi.test.grouping_many}")
@@ -61,6 +60,9 @@ public class TestMembershipService {
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -217,8 +219,12 @@ public class TestMembershipService {
         // Tests that the list now contains the path to GROUPING 1 since user is now an owner
         assertTrue(membershipService.listOwned(ADMIN, username[1]).get(0).equals(GROUPING));
 
-        // Tests if a non admin can access users groups owned
-        assertTrue(membershipService.listOwned(username[0], username[1]).isEmpty());
+        try {
+            // Tests if a non admin can access users groups owned
+            membershipService.listOwned(username[0], username[1]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
 
         //Reset ownership
         membershipService.deleteGroupMemberByUsername(username[0], GROUPING_OWNERS, username[1]);
@@ -1069,8 +1075,6 @@ public class TestMembershipService {
         GroupingsServiceResult results;
 
 
-
-
         //checks to see that username[3] is NOT an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
         assertFalse(memberAttributeService.isSuperuser(username[3]));
@@ -1108,13 +1112,9 @@ public class TestMembershipService {
 
         //tries to make username[4] an admin but fails due to username[3] not being an admin
         try {
-
-            results = membershipService.addAdmin(username[3], username[4]);
-
-        } catch (GroupingsServiceResultException e) {
-            results = e.getGsr();
-            assertTrue(results.getResultCode().startsWith(FAILURE));
-
+            membershipService.addAdmin(username[3], username[4]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to see that username[4] is NOT an admin
@@ -1122,13 +1122,9 @@ public class TestMembershipService {
 
         //tries to delete username[4] as an admin but fails due to username[3] not being an admin
         try {
-            results = membershipService.deleteAdmin(username[3], username[4]);
-
-        } catch (GroupingsServiceResultException e) {
-            results = e.getGsr();
-            assertTrue(results.getResultCode().startsWith(FAILURE));
-
+            membershipService.deleteAdmin(username[3], username[4]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-
     }
 }

@@ -180,7 +180,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
+        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
             results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
@@ -199,7 +199,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
                                                            boolean isOptOutOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
+        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOutOn));
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
             results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
@@ -248,7 +248,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         }
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
-        if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
+        if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
             boolean isHasAttribute = isGroupHasAttribute(groupPath, attributeName);
             if (isAttributeOn) {
                 if (!isHasAttribute) {

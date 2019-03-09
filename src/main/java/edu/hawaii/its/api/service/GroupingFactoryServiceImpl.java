@@ -3,20 +3,16 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import javax.el.ListELResolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -171,6 +167,9 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Value("${grouperClient.webService.login}")
     private String APP_USER;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     @Autowired
     private GrouperFactoryService grouperFactoryService;
 
@@ -197,14 +196,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isSuperuser(adminUsername)) {
-
-            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to add this grouping", action
-            );
-
-            addGroupingResults.add(gsr);
-
-            return addGroupingResults;
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         //make sure that there is not already a group there
@@ -304,14 +296,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isSuperuser(adminUsername)) {
-
-            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to delete this grouping", action
-            );
-
-            deleteGroupingResults.add(gsr);
-
-            return deleteGroupingResults;
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
@@ -376,14 +361,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         //make sure that adminUsername is actually an admin
         if (!memberAttributeService.isSuperuser(adminUsername)) {
-
-            GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + adminUsername + " does not have permission to purge this grouping", action
-            );
-
-            purgeGroupingResults.add(gsr);
-
-            return purgeGroupingResults;
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
 

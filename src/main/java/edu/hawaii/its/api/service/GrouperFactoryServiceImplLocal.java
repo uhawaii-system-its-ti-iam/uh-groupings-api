@@ -250,7 +250,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return new GcFindGroups()
                 .addGroupName(groupPath)
                 .execute();
-    }
+    } // todo JFKSEJFOIJSEJFOIJ
 
 
     /**
