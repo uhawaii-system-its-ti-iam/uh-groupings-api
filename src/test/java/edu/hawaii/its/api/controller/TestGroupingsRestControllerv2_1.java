@@ -53,20 +53,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @ActiveProfiles("integrationTest")
@@ -192,6 +183,9 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Value("${groupings.api.test.grouping_many_extra}")
     private String GROUPING_EXTRA;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -343,11 +337,12 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void adminsGroupingsFailTest() throws Exception {
-
-        AdminListsHolder listHolderFail = mapAdminListsHolder(uhUser01);
-
-        assertThat(listHolderFail.getAdminGroup().getMembers().size(), equalTo(0));
-        assertThat(listHolderFail.getAllGroupings().size(), equalTo(0));
+        try {
+            mapAdminListsHolder(uhUser01);
+            fail("Shouldn't be here");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(403));
+        }
     }
 
     @Test
@@ -674,14 +669,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR(API_BASE + "admins/" + usernames[1], "post", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSR(API_BASE + "admins/" + ADMIN, "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
@@ -755,7 +750,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR(API_BASE + "groupings//owners//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
@@ -777,8 +772,8 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-        @Test
-        @Ignore
+    @Test
+    @Ignore
     @WithAnonymousUser
     public void addDeleteOwnerAnonTest() throws Exception {
 
@@ -910,7 +905,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings//includeMembers//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
@@ -924,7 +919,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings//excludeMembers//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
@@ -1117,14 +1112,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapList(API_BASE + "groupings/" + DELETE_GROUPING, "post", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
@@ -1194,7 +1189,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
 
-        if(page > 150) {
+        if (page > 150) {
             return;
         } else {
             mapGrouping(groupingPath, user, page, size, sortString, isAscending);
@@ -1274,17 +1269,17 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Add parameters based off what is or isn't null (null is non-existent param
         String params = "";
-        if(page != null) params = params + "page=" + page;
-        if(size != null) {
-            if(!params.equals("")) params = params + "&";
+        if (page != null) params = params + "page=" + page;
+        if (size != null) {
+            if (!params.equals("")) params = params + "&";
             params = params + "size=" + size;
         }
-        if(sortString != null) {
-            if(!params.equals("")) params = params + "&";
+        if (sortString != null) {
+            if (!params.equals("")) params = params + "&";
             params = params + "sortString=" + sortString;
         }
-        if(isAscending != null) {
-            if(!params.equals("")) params = params + "&";
+        if (isAscending != null) {
+            if (!params.equals("")) params = params + "&";
             params = params + "isAscending=" + isAscending;
         }
 

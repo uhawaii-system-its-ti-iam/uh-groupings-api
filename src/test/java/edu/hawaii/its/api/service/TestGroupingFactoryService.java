@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -20,10 +21,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -73,6 +71,9 @@ public class TestGroupingFactoryService {
 
     @Value("${groupings.api.trio}")
     private String TRIO;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -254,4 +255,5 @@ public class TestGroupingFactoryService {
 //            groupingFactoryService.privilegegTets(APP_USER, "hawaii.edu:custom:test:kahlin:privilegeTesting");
 //
 //    }
+
 }
