@@ -247,11 +247,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
+
+
         return new GcFindGroups()
                 .addGroupName(groupPath)
                 .execute();
-    } // todo JFKSEJFOIJSEJFOIJ
 
+    }
 
     /**
      * @param group: group to be looked up
