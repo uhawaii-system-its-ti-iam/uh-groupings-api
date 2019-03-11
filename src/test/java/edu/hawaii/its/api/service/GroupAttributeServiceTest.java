@@ -516,31 +516,18 @@ public class GroupAttributeServiceTest {
 
     }
 
-    @Ignore
     @Test
-    public void updateDescriptionPermissionsTest() {
+//            (expected = GroupingsServiceResultException.class)
+    public void updateDescriptionPermissionsTestMember() {
         Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
 
-        // Member
-        try {
-            groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
-            fail();
-        } catch (GroupingsServiceResultException err) {
-            assertTrue(err.getGsr().getResultCode().startsWith(FAILURE));
-        }
+        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
 
-        // username0 = owner
+        // username0 is the username of the owner
         groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
     }
-
 }
 
 
 // todo tests
-    // empty string
-    // numerical only
-    // letters only
-    // mix
-    // string with spaces
-    // string with no spaces
 

@@ -368,6 +368,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
+    // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description) {
         logger.info( "updateDescription(); groupPath:" + groupPath +
                 "; ownerUsername:" + ownerUsername +
@@ -381,12 +382,10 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             grouperFactoryService.updateGroupDescription(groupPath, description);
 
             gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
-
         } else {
 
             gsr = helperService.makeGroupingsServiceResult(FAILURE + ", " + ownerUsername + " is not an owner of "
                     + groupPath + " and cannot change the description of this grouping", action);
-
         }
 
         return gsr;
