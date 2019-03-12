@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.comparator.NullSafeComparator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -968,13 +969,19 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             List<WsSubject> subjectList = new ArrayList<>();
 
             if(pageNumber != null && pageSize != null){
-                if(sortString != null) {
-//                    members.sort();
+                if(sortString != null && sortString == "name") {
+                    //todo If we want to sort be anything other than name, we need to write modify comparator
+                    if(isAscending == null || isAscending == true) {
+                        Collections.sort(members);
+                    } else {
+                        Collections.sort(members, Collections.reverseOrder());
+                    }
                 }
 
                 Integer offset = pageNumber - 1;
-                members = members.subList(offset * pageSize, (offset + 1) * pageSize);
-
+                if(members.size() >= pageSize) {
+                    members = members.subList(offset * pageSize, (offset + 1) * pageSize);
+                }
             }
 
             for (Person person : members) {
