@@ -25,11 +25,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -59,6 +58,9 @@ public class GroupAttributeServiceTest {
     @Value("${groupings.api.test.uuid}")
     private String UUID;
 
+    @Value("Default description.")
+    private String DEFAULT_DESCRIPTION;
+
     private static final String PATH_ROOT = "path:to:grouping";
 
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
@@ -82,6 +84,9 @@ public class GroupAttributeServiceTest {
 
     @Autowired
     private GroupAttributeService groupingsService;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private GroupingRepository groupingRepository;
@@ -509,14 +514,46 @@ public class GroupAttributeServiceTest {
     }
 
     @Test
-//            (expected = GroupingsServiceResultException.class)
-    public void updateDescriptionPermissionsTestMember() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+    public void updateDescriptionTest() {
 
-        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
+        GroupingsServiceResult groupingsServiceResult;
 
-        // username0 is the username of the owner
-        groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
+        // Sets the description to the default
+       // groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
+
+        Grouping groupingZero = groupingRepository.findByPath(GROUPING_0_PATH);
+        //groupingZero.setDescription(DEFAULT_DESCRIPTION);
+      //  assertThat(groupingZero.getDescription(), containsString(DEFAULT_DESCRIPTION));
+        System.out.println("Description is: ");
+        System.out.println(grouperFactoryService.getDescription(groupingZero.getPath()));
+
+//        //Try to update grouping while user isn't owner or admin
+//        try {
+//            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
+//        } catch (GroupingsServiceResultException gsre) {
+//            groupingsServiceResult = gsre.getGsr();
+//        }
+//        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
+//
+//        //Testing with admin
+//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
+//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+//
+//        //Testing with owner
+//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
+//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+//
+//        // Test with empty string
+//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
+//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+//
+//        //Revert any changes
+//        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+//
+//        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
+//
+//        // username0 is the username of the owner
+//        groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
     }
 }
 
