@@ -1,23 +1,22 @@
 package edu.hawaii.its.api.controller;
 
+import edu.hawaii.its.api.access.User;
+import edu.hawaii.its.api.access.UserContextService;
+import edu.hawaii.its.api.type.GroupingsHTTPException;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import edu.hawaii.its.api.type.GroupingsHTTPException;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.access.User;
-import edu.hawaii.its.api.access.UserContextService;
-
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @ControllerAdvice
 public class ErrorControllerAdvice {
@@ -35,7 +34,7 @@ public class ErrorControllerAdvice {
     @Autowired
     private UserContextService userContextService;
 
-    @ExceptionHandler (GcWebServiceError.class)
+    @ExceptionHandler(GcWebServiceError.class)
     public ResponseEntity<GroupingsHTTPException>
     handleGcWebServiceError(GcWebServiceError gce) {
         return exceptionResponse(gce.getMessage(), gce, 404);
@@ -60,7 +59,7 @@ public class ErrorControllerAdvice {
     //todo Possibly could return 400 (bad request) instead
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<GroupingsHTTPException> handleIllegalArgumentException(IllegalArgumentException iae,
-            WebRequest request) {
+                                                                                 WebRequest request) {
         return exceptionResponse("Resource not available", iae, 404);
     }
 
@@ -88,6 +87,15 @@ public class ErrorControllerAdvice {
     public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
             GroupingsServiceResultException gsre) {
         ResponseEntity<GroupingsHTTPException> re = exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
+        return re;
+    }
+
+    //todo Not tested
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<GroupingsHTTPException> handleAccessDeniedException(
+            AccessDeniedException ade) {
+        ResponseEntity<GroupingsHTTPException> re = exceptionResponse("The current user does not have permission to " +
+                "preform this action.", ade, 403);
         return re;
     }
 

@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,14 +27,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MembershipServiceTest {
@@ -58,6 +56,9 @@ public class MembershipServiceTest {
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -143,7 +144,13 @@ public class MembershipServiceTest {
         assertTrue(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()).get(0).equals(GROUPING_1_PATH));
 
         // Tests if a non admin can access users groups owned
-        assertTrue(membershipService.listOwned(users.get(0).getUsername(), users.get(1).getUsername()).isEmpty());
+        try {
+            membershipService.listOwned(users.get(0).getUsername(), users.get(1).getUsername());
+            // should get access denied exception
+            fail();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
 
     }
 
@@ -394,17 +401,15 @@ public class MembershipServiceTest {
     @Test
     public void addAdminTest() {
 
-        GroupingsServiceResult gsr;
         try {
             //user is not super user
-            gsr = membershipService.addAdmin(users.get(9).getUsername(), users.get(9).getUsername());
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+            membershipService.addAdmin(users.get(9).getUsername(), users.get(9).getUsername());
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(gsr.getResultCode().startsWith(FAILURE));
 
         //user is super user
-        gsr = membershipService.addAdmin(ADMIN_USER, users.get(9).getUsername());
+        GroupingsServiceResult gsr = membershipService.addAdmin(ADMIN_USER, users.get(9).getUsername());
         assertEquals(SUCCESS, gsr.getResultCode());
 
         //users.get(9) is already and admin
@@ -415,21 +420,18 @@ public class MembershipServiceTest {
 
     @Test
     public void deleteAdminTest() {
-        GroupingsServiceResult gsr;
-
         //usernameToDelete is not a superuser
         String usernameToDelete = users.get(9).getUsername();
 
         try {
             //user is not super user
-            gsr = membershipService.deleteAdmin(usernameToDelete, ADMIN_USER);
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+            membershipService.deleteAdmin(usernameToDelete, ADMIN_USER);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(gsr.getResultCode().startsWith(FAILURE));
 
         //user is super user usernameToDelete is not superuser
-        gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
+        GroupingsServiceResult gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
         assertEquals(SUCCESS, gsr.getResultCode());
 
         //make usernameToDelete a superuser
