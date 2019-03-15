@@ -279,52 +279,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(memberAttributeService.searchMembers(groupPath, uid));
     }
 
-    /**
-     * Get a specific grouping by page
-     *
-     * @param path: Path of specific grouping
-     * @return Grouping found at specified path
-     */
-    //    @RequestMapping(value = "/groupings/{path}",
-    //            params = { "page", "size" },
-    //            method = RequestMethod.GET,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    @ResponseBody
-    //    public ResponseEntity<Grouping> getPaginatedGrouping(@RequestHeader("current_user") String currentUser,
-    //            @PathVariable String path,
-    //            @RequestParam(value = "page") Integer page,
-    //            @RequestParam(value = "size") Integer size) {
-    //        logger.info("Entered REST getPaginatedGrouping...");
-    //        return ResponseEntity
-    //                .ok()
-    //                .body(groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size));
-    //    }
-    //
-    //    /**
-    //     * Get a specific subset of members in a group based on a filter string
-    //     *
-    //     * @param path: Path of specific group
-    //     * @return Members found in group that contains filterString
-    //     */
-    //    @RequestMapping(value = "/groupings/{path}",
-    //            params = { "page", "size", "uid" },
-    //            method = RequestMethod.GET,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    @ResponseBody
-    //    public ResponseEntity<Group> getPaginatedAndFilteredGroup(@RequestHeader("current_user") String curentUser,
-    //            @PathVariable String path,
-    //            @RequestParam(value = "page") Integer page,
-    //            @RequestParam(value = "size") Integer size,
-    //            @RequestParam(value = "uid") String filterString) {
-    //
-    //        logger.info("Entered REST getPaginatedAndFilteredGroup...");
-    //
-    //        // todo
-    //        throw new UnsupportedOperationException();
-    //    }
-
-    // todo Test mapping; subject to change
-
+    // todo Don't want this accessable right now, we're not using this
     /**
      * Get a group asynchronously
      *
@@ -332,38 +287,38 @@ public class GroupingsRestControllerv2_1 {
      * @param componentId:
      * @return Group found as result
      */
-    @RequestMapping(value = "/groupings/{path}/components/{componentId}/async",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Group> getAsyncMembers(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String componentId) throws Exception {
-        logger.info("Entered REST getAsyncMembers...");
-        if (componentId.equals("composite"))
-            componentId = "";
-        componentId = ":" + componentId;
-
-        Future<Group> future = groupingAssignmentService.getAsynchronousMembers(currentUser, path, componentId);
-
-        try {
-            while (true) {
-                if (future.isDone()) {
-                    return ResponseEntity
-                            .ok()
-                            .body(future.get());
-                } else {
-                    logger.info("Processing...");
-                }
-            }
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
-
-        return null;
-        //        return ResponseEntity
-        //                .ok()
-        //                .body(future.get());
-    }
+//    @RequestMapping(value = "/groupings/{path}/components/{componentId}/async",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<Group> getAsyncMembers(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path,
+//            @PathVariable String componentId) throws Exception {
+//        logger.info("Entered REST getAsyncMembers...");
+//        if (componentId.equals("composite"))
+//            componentId = "";
+//        componentId = ":" + componentId;
+//
+//        Future<Group> future = groupingAssignmentService.getAsynchronousMembers(currentUser, path, componentId);
+//
+//        try {
+//            while (true) {
+//                if (future.isDone()) {
+//                    return ResponseEntity
+//                            .ok()
+//                            .body(future.get());
+//                } else {
+//                    logger.info("Processing...");
+//                }
+//            }
+//        } catch (InterruptedException ie) {
+//            ie.printStackTrace();
+//        }
+//
+//        return null;
+//        //        return ResponseEntity
+//        //                .ok()
+//        //                .body(future.get());
+//    }
 
     /**
      * Create a new admin

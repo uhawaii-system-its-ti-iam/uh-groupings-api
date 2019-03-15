@@ -1169,6 +1169,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
     }
 
+    @Ignore
     @Test
     public void getAsyncMembersTest() throws Exception {
 
@@ -1177,6 +1178,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(group.getMembers().size(), not(0));
     }
 
+    @Ignore
     @Test
     public void paginatedLargeGroupingTest() throws Exception {
 //        Grouping paginatedLargeGrouping = new Grouping();
