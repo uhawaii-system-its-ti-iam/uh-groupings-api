@@ -519,9 +519,9 @@ public class GroupAttributeServiceTest {
         GroupingsServiceResult groupingsServiceResult;
 
         // Sets the description to the default
-       // groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
 
         Grouping groupingZero = groupingRepository.findByPath(GROUPING_0_PATH);
+        groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
         //groupingZero.setDescription(DEFAULT_DESCRIPTION);
       //  assertThat(groupingZero.getDescription(), containsString(DEFAULT_DESCRIPTION));
         System.out.println("Description is: ");
