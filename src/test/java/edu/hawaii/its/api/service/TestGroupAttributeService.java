@@ -358,7 +358,7 @@ public class TestGroupAttributeService {
         assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
 
         //Testing with owner
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modified");
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
         assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
 
         // Test with empty string
