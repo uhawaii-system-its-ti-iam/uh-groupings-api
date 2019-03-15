@@ -1169,6 +1169,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
     }
 
+    //todo Commented the functionality being tested out; it's not being used
     @Ignore
     @Test
     public void getAsyncMembersTest() throws Exception {
@@ -1178,6 +1179,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(group.getMembers().size(), not(0));
     }
 
+    //todo This tests if recursive calls break pagination, we don't need this at the moment
     @Ignore
     @Test
     public void paginatedLargeGroupingTest() throws Exception {
@@ -1189,6 +1191,7 @@ public class TestGroupingsRestControllerv2_1 {
         recursionFunctionToTest(GROUPING_TIMEOUT, adminUser, 1, 20, "name", true);
     }
 
+    //todo Helper function for paginatedLargeGroupingTest
     private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
 
         if (page > 150) {
@@ -1370,23 +1373,23 @@ public class TestGroupingsRestControllerv2_1 {
 
     //todo May or may not need this; saving in case
 //     Mapping of call that returns a group object asynchronously
-    private Group mapAsyncGroup(String uri, User user) throws Exception {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = mockMvc.perform(get(uri)
-                .with(user(user))
-                .header(CURRENT_USER, user.getUsername())
-                .with(csrf()))
-                .andReturn();
-
-        if (result.getResponse().getStatus() == 200) {
-            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
-        } else {
-            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());
-        }
-    }
+//    private Group mapAsyncGroup(String uri, User user) throws Exception {
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        MvcResult result = mockMvc.perform(get(uri)
+//                .with(user(user))
+//                .header(CURRENT_USER, user.getUsername())
+//                .with(csrf()))
+//                .andReturn();
+//
+//        if (result.getResponse().getStatus() == 200) {
+//            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
+//        } else {
+//            GroupingsHTTPException ghe = new GroupingsHTTPException();
+//            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
+//                    ghe, result.getResponse().getStatus());
+//        }
+//    }
 
     // Helper function for mapping any uri with multiple possible HTTP call types (i.e. GET / POST / PUT / DELETE)
     private MvcResult mapHelper(String uri, String httpCall, User annotationUser) throws Exception {
