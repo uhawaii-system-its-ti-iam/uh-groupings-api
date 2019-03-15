@@ -191,6 +191,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Group newGroup = new Group(path);
         groupRepository.save(newGroup);
 
+
         WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
@@ -211,9 +212,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public String getDescription(String groupPath){
-        WsFindGroupsResults wsFindGroupsResults = makeWsFindGroupsResults(groupPath);
 
-        return wsFindGroupsResults.getGroupResults()[0].getDescription();
+
+        return makeWsFindGroupsResults(groupPath).getGroupResults()[0].getDescription();
 
     }
 
@@ -248,9 +249,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
 
-        return new GcFindGroups()
-                .addGroupName(groupPath)
-                .execute();
+        WsFindGroupsResults groupsResults = new WsFindGroupsResults();
+        WsGroup[] groups = new WsGroup[1];
+
+        WsGroup group = new WsGroup();
+        group.setName(groupPath);
+        group.setDescription(groupingRepository.findByPath(groupPath).getDescription());
+        groups[0] = group;
+
+        groupsResults.setGroupResults(groups);
+
+        return groupsResults;
 
     }
 
@@ -654,8 +663,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
+        WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
+
         WsGroup updatedGroup = new WsGroup();
         updatedGroup.setDescription(description);
+        groupingRepository.findByPath(groupPath).setDescription(description);
+
+
 
         WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
                 makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
@@ -664,7 +678,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         groupToSave.setWsGroup(updatedGroup);
         groupToSave.setWsGroupLookup(groupLookup);
 
-        return new GcGroupSave().addGroupToSave(groupToSave).execute();
+        WsResultMeta metaData = new WsResultMeta();
+        metaData.setResultCode(SUCCESS);
+
+        wsGroupSaveResults.setResultMetadata(metaData);
+
+
+        return wsGroupSaveResults;
     }
 
     @Override
