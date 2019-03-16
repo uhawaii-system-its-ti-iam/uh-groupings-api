@@ -944,7 +944,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGetMembershipsResults;
     }
 
-    //todo Write handler for pagination
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
                                                        WsSubjectLookup lookup,
@@ -971,6 +970,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             if(pageNumber != null && pageSize != null){
                 if(sortString != null && sortString == "name") {
                     //todo If we want to sort be anything other than name, we need to write modify comparator
+                    //todo Comparing by subjectId, sourceId, etc. would require rewriting the Person object
+                    //todo This functionality isn't entirely necessary for code coverage, but could be useful in the future
                     if(isAscending == null || isAscending == true) {
                         Collections.sort(members);
                     } else {
@@ -1249,7 +1250,25 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     //todo Local versions of Grouper functions for testing. Haven't needed it yet, will implement if necessary
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
         //todo Not needed for getUserAttributes function, will implement if necessary
-        return null;
+
+//        lookup.setSubjectSourceId();
+        String username = lookup.getSubjectIdentifier();
+        Person person = personRepository.findByUsername(username);
+
+        WsGetSubjectsResults results = new WsGetSubjectsResults();
+        String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
+        WsSubject[] subjects = new WsSubject[1];
+        subjects[0] = new WsSubject();
+
+        results.setSubjectAttributeNames(attributeNames);
+
+        subjects[0].setAttributeValues(new String[]{person.getUsername(), person.getUuid(), person.getLastName(), person.getName(),
+                person.getFirstName()});
+        results.setWsSubjects(subjects);
+
+        return results;
+//        return new WsGetSubjectsResults();
+//        return null;
     }
 
     @Override
