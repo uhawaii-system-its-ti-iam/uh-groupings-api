@@ -23,15 +23,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 //import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
@@ -66,6 +69,21 @@ public class MemberAttributeServiceTest {
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String UID;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -272,27 +290,17 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getUserAttributesLocalTest() {
+    public void getUserAttributesTest() {
 
         String username = users.get(5).getUsername();
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
 
-        Map<String, String> attributes = memberAttributeService.getUserAttributesLocal(username);
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, username);
 
-        assertTrue(attributes.get("uid").equals(personFive.getUsername()));
-        assertTrue(attributes.get("cn").equals(personFive.getName()));
-        assertTrue(attributes.get("uuid").equals(personFive.getUuid()));
-
-        //todo Possible code for non-null data, if ever implemented
-        //        assertTrue(attributes.get("givenName").equals(personFive.getFirstName()));
-        //        assertTrue(attributes.get("sn").equals(personFive.getLastName()));
-
-        // FirstName and LastName in mock database is null
-        assertNull(attributes.get("givenName"));
-        assertNull(personFive.getFirstName());
-
-        assertNull(attributes.get("sn"));
-        assertNull(personFive.getLastName());
+        assertThat(attributes.get(UID), equalTo(personFive.getUsername()));
+        assertThat(attributes.get(COMPOSITE_NAME), equalTo(personFive.getName()));
+        assertThat(attributes.get(UHUUID), equalTo(personFive.getUuid()));
+        assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
+        assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
     }
-
 }

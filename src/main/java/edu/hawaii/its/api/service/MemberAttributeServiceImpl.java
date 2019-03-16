@@ -405,7 +405,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
+                String[] subjectAttributeNames = {UID, UHUUID, LAST_NAME, COMPOSITE_NAME, FIRST_NAME};
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }

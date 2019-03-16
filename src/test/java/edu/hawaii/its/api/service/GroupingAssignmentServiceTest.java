@@ -125,6 +125,7 @@ public class GroupingAssignmentServiceTest {
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
+
     }
 
     @Test
@@ -549,6 +550,12 @@ public class GroupingAssignmentServiceTest {
 //        WsGetMembersResults results = grouperFS.makeWsGetMembersResults(id, lookup, GROUPING_3_BASIS_PATH);
 //        Group members = groupingAssignmentService.makeBasisGroup(results);
 //        assertTrue(members.getMembers().size() == 0);
+    }
+
+    @Test
+    public void staleSubjectTest() {
+
+//        groupingAssignmentService.makeGroups();
     }
 
 }
