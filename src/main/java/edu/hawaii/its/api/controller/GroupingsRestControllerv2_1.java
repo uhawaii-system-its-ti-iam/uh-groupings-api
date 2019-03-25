@@ -446,7 +446,7 @@ public class GroupingsRestControllerv2_1 {
    * @param uids: uids or uuids of members to include
    * @return Information about the results of the operation
    */
-  @RequestMapping(value = "/groupings/{path}/inludeMembers/{uids}",
+  @RequestMapping(value = "/groupings/{path}/includeMembers/{uids}",
       method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
