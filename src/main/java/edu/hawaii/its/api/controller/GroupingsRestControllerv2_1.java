@@ -426,10 +426,10 @@ public class GroupingsRestControllerv2_1 {
    * @param uid:  uid or uuid of member to add to include
    * @return Information about results of the operation
    */
-  @RequestMapping(value = "/groupings/{path}/includeMember/{uid}",
+  @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
       method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<GroupingsServiceResult>> includeMember(
+  public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
       @RequestHeader("current_user") String currentUser, @PathVariable String path,
       @PathVariable String uid) {
     logger.info("Entered REST includeMember...");
@@ -445,14 +445,14 @@ public class GroupingsRestControllerv2_1 {
    * @param path: path of grouping to update
    * @param uids: uids or uuids of members to include
    * @return Information about the results of the operation
-   */
-  @RequestMapping(value = "/groupings/{path}/includeMembers/{uids}",
+*/
+  @RequestMapping(value = "/groupings/{path}/includeMultipleMembers/{uids}",
       method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
+  public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
       @RequestHeader("current_user") String currentUser, @PathVariable String path,
       @PathVariable List<String> uids) {
-    logger.info("Entering Rest includeMembers...");
+    logger.info("Entering Rest includeMultipleMembers...");
     path = path + INCLUDE;
     return ResponseEntity
         .ok()
