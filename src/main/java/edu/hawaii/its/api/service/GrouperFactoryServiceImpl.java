@@ -278,6 +278,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             return new GcAddMember()
                     .assignActAsSubject(lookup)
                     .addSubjectIdentifier(personToAdd.getUsername())
+                .addSubjectIdentifier("zknoebel")
                     .assignGroupName(group)
                     .execute();
         }
