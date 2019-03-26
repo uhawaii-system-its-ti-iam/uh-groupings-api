@@ -333,4 +333,15 @@ public class MemberAttributeServiceTest {
             assertThat(gce.getContainerResponseObject(), equalTo("Error 404 Not Found"));
         }
     }
+
+    @Test
+    public void searchMembersTest() {
+
+        List<Person> membersResults = memberAttributeService.searchMembers(GROUPING_0_PATH, users.get(5).getUsername());
+        Person testPerson = personRepository.findByUsername(users.get(5).getUsername());
+
+        assertThat(membersResults.get(0).getUsername(), equalTo(testPerson.getUsername()));
+        assertThat(membersResults.get(0).getUuid(), equalTo(testPerson.getUuid()));
+        assertThat(membersResults.get(0).getName(), equalTo(testPerson.getName()));
+    }
 }
