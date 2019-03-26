@@ -375,8 +375,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], adminUser);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
+        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
@@ -401,8 +401,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], uhUser01);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
+        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
