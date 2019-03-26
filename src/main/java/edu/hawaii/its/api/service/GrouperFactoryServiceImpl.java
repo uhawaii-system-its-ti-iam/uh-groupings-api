@@ -273,12 +273,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     //todo Need to test null uuid
     @Override
     public WsAddMemberResults makeWsAddMemberResults(String group, WsSubjectLookup lookup, Person personToAdd) {
+      /*  if(personToAdd.getUsername() == null)
+                   return new GcAddMember()
+                   .assignActAsSubject(null)
+                   .addSubjectIdentifier(null)
+                   .assignGroupName(group)
+                   .execute();
+        */
         if (personToAdd.getUsername() != null) {
             // return makeWsAddMemberResults(group, lookup, personToAdd.getUsername());
             return new GcAddMember()
                     .assignActAsSubject(lookup)
                     .addSubjectIdentifier(personToAdd.getUsername())
-                .addSubjectIdentifier("zknoebel")
                     .assignGroupName(group)
                     .execute();
         }

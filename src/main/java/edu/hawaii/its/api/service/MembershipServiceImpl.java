@@ -418,7 +418,6 @@ public class MembershipServiceImpl implements MembershipService {
         try {
           gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
         } catch (GcWebServiceError e) {
-          System.out.println("Theres an error");
         }
       }
     }
