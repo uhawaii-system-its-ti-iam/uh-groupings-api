@@ -4,6 +4,8 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
@@ -414,8 +416,11 @@ public class MembershipServiceImpl implements MembershipService {
                 gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
 
             } catch (Exception NumberFormatException) {
-                gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
+                try {
+                    gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
 
+                } catch (GcWebServiceError e) {
+                }
             }
         }
 
