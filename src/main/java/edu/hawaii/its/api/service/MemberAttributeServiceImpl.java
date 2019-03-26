@@ -424,12 +424,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
-    //Local approach implemented separately
-    public Map<String, String> getUserAttributesLocal(String username) {
-        Person personToGet = personRepository.findByUsername(username);
-        return personToGet.getAttributes();
-    }
-
     @Override
     public List<Person> searchMembers(String groupPath, String username) {
 

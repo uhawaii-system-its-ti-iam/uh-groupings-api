@@ -478,16 +478,16 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("tst02name"));
-        assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+        assertTrue(attributes.get("givenName").equals("iamtst02"));
+        assertTrue(attributes.get("uhuuid").equals("tst02name"));
 
         //todo Owner test
         attributes = memberAttributeService.getUserAttributes("iamtst01", useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("tst02name"));
-        assertTrue(attributes.get("uhuuid").equals("iamtst02"));
+        assertTrue(attributes.get("givenName").equals("iamtst02"));
+        assertTrue(attributes.get("uhuuid").equals("tst02name"));
 
         //todo Not an owner test
         attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
