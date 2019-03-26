@@ -670,7 +670,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
-        Person person = new Person(null, null, username);
+        Person person = new Person(null, null, null);
+
+        //Override to accomodate our local database, which has "uuidX" as a uuid
+        if(isUuid(username) || username.contains("uuid")) {
+            person.setUuid(username);
+        } else {
+            person.setUsername(username);
+        }
         return makeWsHasMemberResults(group, person);
     }
 

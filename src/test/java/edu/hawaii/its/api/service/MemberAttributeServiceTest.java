@@ -11,6 +11,8 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 //import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
 //import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
@@ -261,6 +264,16 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
+    public void isMemberUuidTest() {
+
+        Person person2 = users.get(2);
+        Person person5 = users.get(5);
+
+        assertFalse(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person2.getUuid()));
+        assertTrue(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person5.getUuid()));
+    }
+
+    @Test
     public void isOwnerTest() {
 
         assertFalse(memberAttributeService.isOwner(GROUPING_0_PATH, users.get(1).getUsername()));
@@ -302,5 +315,22 @@ public class MemberAttributeServiceTest {
         assertThat(attributes.get(UHUUID), equalTo(personFive.getUuid()));
         assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
         assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
+
+        // Test with user that owns no groupings
+        Map<String, String> emptyAttributes = memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
+
+        assertThat(emptyAttributes.get(UID), equalTo(""));
+        assertThat(emptyAttributes.get(COMPOSITE_NAME), equalTo(""));
+        assertThat(emptyAttributes.get(UHUUID), equalTo(""));
+        assertThat(emptyAttributes.get(FIRST_NAME), equalTo(""));
+        assertThat(emptyAttributes.get(LAST_NAME), equalTo(""));
+
+        // Test with null username
+        try{
+            Map<String, String> nullPersonAttributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
+            fail("Shouldn't be here.");
+        } catch (GcWebServiceError gce) {
+            assertThat(gce.getContainerResponseObject(), equalTo("Error 404 Not Found"));
+        }
     }
 }
