@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -163,6 +164,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     @Autowired
     private PersonRepository personRepository;
 
@@ -232,9 +236,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
         } else {
-
-            ownershipResult = hs.makeGroupingsServiceResult(
-                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath, action);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return ownershipResult;
@@ -267,10 +269,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             membershipService.updateLastModified(groupingPath);
 
         } else {
-
-            ownershipResults = hs.makeGroupingsServiceResult(
-                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                    action);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return ownershipResults;

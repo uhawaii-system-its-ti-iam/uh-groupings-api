@@ -279,6 +279,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setComposite(groups.get(groupingPath));
             compositeGrouping.setOwners(groups.get(owners));
 
+        } else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return compositeGrouping;
     }
@@ -316,6 +318,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setInclude(include);
             compositeGrouping.setComposite(composite);
             compositeGrouping.setOwners(owners);
+        } else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return compositeGrouping;
@@ -514,6 +518,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 }
             }
         }
+        else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
         return groupMembers;
     }
 
@@ -613,6 +620,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 ie.printStackTrace();
             }
         }
+        else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
 
         //todo should we use EmptyGroup?
         if (members.getResults() != null) {
@@ -622,7 +632,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 groupMembers = makeGroup(members);
             }
         }
-        return new AsyncResult<Group>(groupMembers);
+        return new AsyncResult<>(groupMembers);
     }
 
     //    @Override
@@ -664,6 +674,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //            }
     //
     //        }
+//    else {
+//        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+//    }
     //
     //        return groupMembers;
     //    }
