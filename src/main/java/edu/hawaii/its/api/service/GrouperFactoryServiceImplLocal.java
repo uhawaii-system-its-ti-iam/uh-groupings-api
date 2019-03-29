@@ -670,7 +670,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         groupingRepository.findByPath(groupPath).setDescription(description);
 
 
-
         WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
                 makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
 
