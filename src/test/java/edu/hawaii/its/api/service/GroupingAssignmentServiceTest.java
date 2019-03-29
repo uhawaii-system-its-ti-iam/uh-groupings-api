@@ -132,15 +132,13 @@ public class GroupingAssignmentServiceTest {
 
     @Test
     public void getGroupingTest() {
-        Grouping groupingRandom = groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(1).getUsername());
+        try {
+            groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(1).getUsername());
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
         Grouping groupingOwner = groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(0).getUsername());
         Grouping groupingAdmin = groupingAssignmentService.getGrouping(GROUPING_0_PATH, ADMIN_USER);
-
-        assertEquals(0, groupingRandom.getComposite().getMembers().size());
-        assertEquals(0, groupingRandom.getInclude().getMembers().size());
-        assertEquals(0, groupingRandom.getExclude().getMembers().size());
-        assertEquals(0, groupingRandom.getBasis().getMembers().size());
-        assertEquals(0, groupingRandom.getOwners().getMembers().size());
 
         assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
         assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
