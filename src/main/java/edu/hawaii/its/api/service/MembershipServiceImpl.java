@@ -420,6 +420,7 @@ public class MembershipServiceImpl implements MembershipService {
                     gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
 
                 } catch (GcWebServiceError e) {
+
                 }
             }
         }
