@@ -459,9 +459,8 @@ public class TestMembershipService {
         //has a non owner try to remove the owner
         try {
             membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
-        } catch (GroupingsServiceResultException e) {
-            sResults = e.getGsr();
-            assertTrue(sResults.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //Makes sure that owner is still in the group
@@ -555,9 +554,8 @@ public class TestMembershipService {
         //has a non owner try to remove the owner
         try {
             membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
-        } catch (GroupingsServiceResultException e) {
-            results = e.getGsr();
-            assertTrue(results.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //Makes sure that owner is still in the group
@@ -673,9 +671,8 @@ public class TestMembershipService {
         //has a non owner try to remove the owner
         try {
             membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
-        } catch (GroupingsServiceResultException e) {
-            sResults = e.getGsr();
-            assertTrue(sResults.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //Makes sure that owner is still in the group
@@ -716,9 +713,8 @@ public class TestMembershipService {
         try {
             lResults = membershipService.addGroupMember(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException e) {
-            result = e.getGsr();
-            assertTrue(result.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to make sure user is not in include
@@ -734,9 +730,8 @@ public class TestMembershipService {
         try {
             lResults = membershipService.addGroupMember(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException e) {
-            result = e.getGsr();
-            assertTrue(result.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to make sure user is not in include
@@ -847,9 +842,8 @@ public class TestMembershipService {
         try {
             lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException e) {
-            result = e.getGsr();
-            assertTrue(result.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to make sure user is not in include
@@ -865,9 +859,8 @@ public class TestMembershipService {
         try {
             lResults = membershipService.addGroupMemberByUuid(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException e) {
-            result = e.getGsr();
-            assertTrue(result.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to make sure user is not in include
@@ -1000,11 +993,10 @@ public class TestMembershipService {
 
         //has non owner/superuser try to delete
         try {
-            results = membershipService.deleteGroupMemberByUuid(username[4], GROUPING_EXCLUDE, username[3]);
+            membershipService.deleteGroupMemberByUuid(username[4], GROUPING_EXCLUDE, username[3]);
 
-        } catch (GroupingsServiceResultException e) {
-            results = e.getGsr();
-            assertTrue(results.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         //checks to make sure username[3] is still a part of the exclude
