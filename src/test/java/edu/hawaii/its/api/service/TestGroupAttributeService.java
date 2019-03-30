@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupAttributeService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -65,6 +66,9 @@ public class TestGroupAttributeService {
 
     @Value("${groupings.api.yyyymmddThhmm}")
     private String YYYYMMDDTHHMM;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
@@ -132,7 +136,6 @@ public class TestGroupAttributeService {
 
     @Test
     public void changeListServeStatusTest() {
-        GroupingsServiceResult groupingsServiceResult;
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
@@ -148,7 +151,7 @@ public class TestGroupAttributeService {
         //get last modified time and make sure that it hasn't changed
         try {
             TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             fail();
         }
         attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
@@ -161,7 +164,7 @@ public class TestGroupAttributeService {
         //todo get last modified time and make sure that it has changed
         try {
             TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             fail();
         }
         attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
@@ -174,7 +177,7 @@ public class TestGroupAttributeService {
         //todo get last modified time and make sure that it hasn't changed
         try {
             TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             fail();
         }
         attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
@@ -183,20 +186,18 @@ public class TestGroupAttributeService {
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
-            groupingsServiceResult = groupAttributeService.changeListservStatus(GROUPING, username[1], true);
-        } catch (GroupingsServiceResultException gsre) {
-            groupingsServiceResult = gsre.getGsr();
+            groupAttributeService.changeListservStatus(GROUPING, username[1], true);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(groupingsServiceResult.getResultCode().startsWith(FAILURE));
         assertFalse(groupAttributeService.isContainingListserv(GROUPING));
         groupAttributeService.changeListservStatus(GROUPING, username[0], true);
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
         try {
-            groupingsServiceResult = groupAttributeService.changeListservStatus(GROUPING, username[1], false);
-        } catch (GroupingsServiceResultException gsre) {
-            groupingsServiceResult = gsre.getGsr();
+            groupAttributeService.changeListservStatus(GROUPING, username[1], false);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(groupingsServiceResult.getResultCode().startsWith(FAILURE));
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
@@ -244,9 +245,8 @@ public class TestGroupAttributeService {
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], true);
-        } catch (GroupingsServiceResultException gsre) {
-            optInFail = new ArrayList<>();
-            optInFail.add(gsre.getGsr());
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertFalse(groupAttributeService.isOptInPossible(GROUPING));
@@ -258,9 +258,8 @@ public class TestGroupAttributeService {
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], false);
-        } catch (GroupingsServiceResultException gsre) {
-            optInFail = new ArrayList<>();
-            optInFail.add(gsre.getGsr());
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertTrue(groupAttributeService.isOptInPossible(GROUPING));
@@ -309,8 +308,8 @@ public class TestGroupAttributeService {
 
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], true);
-        } catch (GroupingsServiceResultException gsre) {
-            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
@@ -323,8 +322,8 @@ public class TestGroupAttributeService {
 
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], false);
-        } catch (GroupingsServiceResultException gsre) {
-            assertTrue(gsre.getGsr().getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
