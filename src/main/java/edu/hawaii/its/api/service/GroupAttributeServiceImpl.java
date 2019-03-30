@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -150,6 +151,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     public static final Log logger = LogFactory.getLog(GroupAttributeServiceImpl.class);
 
     @Autowired
@@ -185,11 +189,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
             results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
         } else {
-
-            // adding FAILURE to the beginning of the result will turn it into an error that will be handled
-            helperService.makeGroupingsServiceResult(
-                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                    "change opt in status for " + groupingPath + " to " + isOptInOn);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return results;
     }
@@ -204,11 +204,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
             results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
         } else {
-
-            // adding FAILURE to the beginning of the result will turn it into an error that will be handled
-            helperService.makeGroupingsServiceResult(
-                    FAILURE + ", " + ownerUsername + " does not own " + groupingPath,
-                    "change opt out status for " + groupingPath + " to " + isOptOutOn);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return results;
     }
@@ -274,11 +270,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 }
             }
         } else {
-            gsr = helperService.makeGroupingsServiceResult(
-                    FAILURE + ", " + ownerUsername + "does not have permission to set " + attributeName
-                            + " because " + ownerUsername + " does not own " + groupPath, action);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         return gsr;
     }
 
