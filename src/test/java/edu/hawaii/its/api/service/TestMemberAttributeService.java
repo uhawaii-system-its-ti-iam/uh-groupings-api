@@ -2,15 +2,12 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
@@ -29,17 +27,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestMemberAttributeService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -88,7 +81,8 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.yyyymmddThhmm}")
     private String YYYYMMDDTHHMM;
 
-    public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -169,21 +163,17 @@ public class TestMemberAttributeService {
 
     @Test
     public void assignRemoveOwnershipTest() {
-        //expect to fail
-        GroupingsServiceResult assignOwnershipFail;
-        GroupingsServiceResult removeOwnershipFail;
 
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[0]));
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[2]));
 
         try {
-            assignOwnershipFail = memberAttributeService.assignOwnership(GROUPING, usernames[1], usernames[1]);
-        } catch (GroupingsServiceResultException gsre) {
-            assignOwnershipFail = gsre.getGsr();
+            memberAttributeService.assignOwnership(GROUPING, usernames[1], usernames[1]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        assertTrue(assignOwnershipFail.getResultCode().startsWith(FAILURE));
 
         // get last modified time
         WsGetAttributeAssignmentsResults attributes =
@@ -207,13 +197,12 @@ public class TestMemberAttributeService {
         assertNotEquals(lastModTime1, lastModTime2);
 
         try {
-            removeOwnershipFail = memberAttributeService.removeOwnership(GROUPING, usernames[2], usernames[1]);
-        } catch (GroupingsServiceResultException gsre) {
-            removeOwnershipFail = gsre.getGsr();
+            memberAttributeService.removeOwnership(GROUPING, usernames[2], usernames[1]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        assertTrue(removeOwnershipFail.getResultCode().startsWith(FAILURE));
 
         GroupingsServiceResult removeOwnershipSuccess =
                 memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
@@ -221,11 +210,10 @@ public class TestMemberAttributeService {
         assertTrue(removeOwnershipSuccess.getResultCode().startsWith(SUCCESS));
 
         //have an owner remove itself
-        assignOwnershipSuccess = memberAttributeService.assignOwnership(GROUPING, usernames[0], usernames[1]);
+        memberAttributeService.assignOwnership(GROUPING, usernames[0], usernames[1]);
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        removeOwnershipSuccess = memberAttributeService.removeOwnership(GROUPING, usernames[1], usernames[1]);
+        memberAttributeService.removeOwnership(GROUPING, usernames[1], usernames[1]);
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-
     }
 
     @Test
@@ -503,7 +491,7 @@ public class TestMemberAttributeService {
 
         // Test with invalid username
         try {
-            attributes = memberAttributeService.getUserAttributes(ADMIN_USER, "notarealperson");
+            memberAttributeService.getUserAttributes(ADMIN_USER, "notarealperson");
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
@@ -511,7 +499,7 @@ public class TestMemberAttributeService {
 
         // Test with null field
         try {
-            attributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
+            memberAttributeService.getUserAttributes(ADMIN_USER, null);
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
