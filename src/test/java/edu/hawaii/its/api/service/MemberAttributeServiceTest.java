@@ -182,6 +182,12 @@ public class MemberAttributeServiceTest {
         assertTrue(grouping.getOwners().isMember(randomUser));
         assertEquals(SUCCESS, adminAdds.getResultCode());
 
+        //Test to make sure UUID works
+        GroupingsServiceResult uuidAdds = memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
+        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+        assertTrue(grouping.getOwners().getMembers().contains(randomUser));
+        assertTrue(grouping.getOwners().isMember(randomUser));
+        assertEquals(SUCCESS, uuidAdds.getResultCode());
     }
 
     @Test
@@ -251,12 +257,16 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, person2));
         assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, person5));
 
-        //test with uuid
+        //test with null username
         person2.setUsername(null);
         person5.setUsername(null);
 
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, person2));
         assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, person5));
+
+        //test with dummy uuid
+
+        assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, "1234"));
     }
 
     @Test
