@@ -212,8 +212,8 @@ public class MembershipServiceTest {
             listGsr = membershipService.deleteGroupingMemberByUuid(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(6).getUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         // Test if user is admin
@@ -257,8 +257,8 @@ public class MembershipServiceTest {
             listGsr = membershipService.addGroupingMemberByUuid(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(3).getUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         // Test if user is admin
@@ -293,8 +293,8 @@ public class MembershipServiceTest {
             listGsr = membershipService.addGroupingMemberByUsername(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(3).getUsername());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         // Test if user is admin
@@ -337,8 +337,8 @@ public class MembershipServiceTest {
             listGsr = membershipService.deleteGroupingMemberByUsername(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(6).getUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         // Test if user is admin
@@ -616,8 +616,8 @@ public class MembershipServiceTest {
             listGsr = membershipService.addGroupMemberByUsername(users.get(2).getUsername(), GROUPING_3_INCLUDE_PATH,
                     users.get(3).getUsername());
             assertTrue(listGsr.get(0).getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
     }
 

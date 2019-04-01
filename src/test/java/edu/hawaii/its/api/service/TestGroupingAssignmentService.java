@@ -8,18 +8,15 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,17 +38,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -178,9 +169,9 @@ public class TestGroupingAssignmentService {
     public void adminListsTest() {
         try {
             // try with non-admin
-            AdminListsHolder info = groupingAssignmentService.adminLists(usernames[0]);
+            groupingAssignmentService.adminLists(usernames[0]);
             fail("shouldn't be here");
-        } catch (AccessDeniedException ade){
+        } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
@@ -212,16 +203,13 @@ public class TestGroupingAssignmentService {
     public void getGroupingTest() {
 
         // usernames[4] does not own grouping, method should return empty grouping
-        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
-        assertEquals(grouping.getPath(), "");
-        assertEquals(grouping.getName(), "");
-        assertEquals(grouping.getOwners().getMembers().size(), 0);
-        assertEquals(grouping.getInclude().getMembers().size(), 0);
-        assertEquals(grouping.getExclude().getMembers().size(), 0);
-        assertEquals(grouping.getBasis().getMembers().size(), 0);
-        assertEquals(grouping.getComposite().getMembers().size(), 0);
+        try {
+            groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
 
-        grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
+        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
 
         assertEquals(grouping.getPath(), GROUPING);
 
@@ -251,10 +239,9 @@ public class TestGroupingAssignmentService {
     public void getBasisGroupWithTimeoutTest() throws Exception {
         //        Grouping grouping = groupingAssignmentService.getGrouping("hawaii.edu:custom:test:julio:jtest102-l", ADMIN);
 
-        Group basisGroup = new Group();
         try {
             //todo Move to properties file
-            basisGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
+            groupingAssignmentService.getGroupMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(504));
@@ -314,9 +301,11 @@ public class TestGroupingAssignmentService {
         assertThat(paginatedGroupingPage2.getBasis().getMembers().get(0).getName(), not(startsWith("A")));
 
         // Test paging without proper permissions (should return empty)
-        Grouping paginatedGroupingPagePermissions =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
-        assertThat(paginatedGroupingPagePermissions.getBasis().getMembers().size(), equalTo(0));
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
     }
 
     // todo Method not implemented
@@ -324,8 +313,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void getFilteredGroupingTest() {
 
-        Group group = groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, usernames[0], "zac", 1, 20);
-
+        groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, usernames[0], "zac", 1, 20);
     }
 
     @Ignore
@@ -356,10 +344,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void paginatedVersusNonpaginatedTest() {
         Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
-        Grouping groupingPaginated =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369, null, null);
+        groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369, null, null);
 
-        List<Person> paginatedBasisMembers = groupingPaginated.getBasis().getMembers();
         List<Person> nonPaginatedBasisMembers = groupingNonPaginated.getBasis().getMembers();
 
         List<String> uuids = new ArrayList<>();
@@ -374,9 +360,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void paginatedLargeGroupingTest() {
 
-        Grouping paginatedLargeGrouping = new Grouping();
         for (int i = 1; i <= 150; i++) {
-            paginatedLargeGrouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], i, 20, "name", true);
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], i, 20, "name", true);
         }
     }
 
