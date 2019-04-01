@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,11 +40,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.givenName;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.sn;
-//import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -87,6 +83,9 @@ public class MemberAttributeServiceTest {
 
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
+
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -160,15 +159,13 @@ public class MemberAttributeServiceTest {
             randomUserAdds = memberAttributeService
                     .assignOwnership(GROUPING_0_PATH, randomUser.getUsername(), randomUser.getUsername());
             assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException gsre) {
-            randomUserAdds = gsre.getGsr();
-            assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertFalse(grouping.getOwners().getMembers().contains(randomUser));
         assertFalse(grouping.getOwners().isMember(randomUser));
-        assertNotEquals(randomUserAdds.getResultCode(), SUCCESS);
 
         GroupingsServiceResult ownerAdds =
                 memberAttributeService
@@ -195,10 +192,9 @@ public class MemberAttributeServiceTest {
             //non-owner/non-admin tries to remove ownership
             randomUserRemoves = memberAttributeService
                     .removeOwnership(GROUPING_0_PATH, users.get(1).getUsername(), users.get(1).getUsername());
-        } catch (GroupingsServiceResultException gsre) {
-            randomUserRemoves = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(randomUserRemoves.getResultCode().startsWith(FAILURE));
 
         //add owner for owner to remove
         membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,

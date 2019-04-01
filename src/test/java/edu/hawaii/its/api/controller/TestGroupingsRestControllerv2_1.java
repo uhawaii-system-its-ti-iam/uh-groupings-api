@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -588,11 +589,12 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void getGroupingFailTest() throws Exception {
 
-        Grouping grouping = mapGrouping(GROUPING, uhUser02, null, null, null, null);
-        assertThat(grouping.getBasis().getUsernames().size(), equalTo(0));
-        assertThat(grouping.getInclude().getUsernames().size(), equalTo(0));
-        assertThat(grouping.getExclude().getUsernames().size(), equalTo(0));
-        assertThat(grouping.getComposite().getUsernames().size(), equalTo(0));
+        try {
+            mapGrouping(GROUPING, uhUser02, null, null, null, null);
+            fail("Should not be here");
+        } catch (GroupingsHTTPException ghe) {
+            assertThat(ghe.getStatusCode(), equalTo(403));
+        }
     }
 
     //    @Test
@@ -602,8 +604,8 @@ public class TestGroupingsRestControllerv2_1 {
         try {
             mapGrouping(GROUPING, null, null, null, null, null);
             fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
     }
 
@@ -761,14 +763,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[2], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/" + usernames[0], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
@@ -930,32 +932,32 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[2], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[3], "delete", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 
-    //    @Test
+    @Ignore
     @WithAnonymousUser
     public void addDeleteMemberAnonTest() throws Exception {
 
@@ -1052,14 +1054,14 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser02);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(400));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
     }
 

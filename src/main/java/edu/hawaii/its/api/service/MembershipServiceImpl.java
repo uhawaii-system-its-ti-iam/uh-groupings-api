@@ -527,8 +527,7 @@ public class MembershipServiceImpl implements MembershipService {
             return helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + ownerUsername + " may only delete from exclude, include or owner group", action);
         }
-        return helperService.makeGroupingsServiceResult(
-                FAILURE + ": " + ownerUsername + " does not have permission to edit " + groupPath, action);
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
     public GroupingsServiceResult deleteGroupMemberByUuid(String ownerUsername, String groupPath,
@@ -562,8 +561,7 @@ public class MembershipServiceImpl implements MembershipService {
             return helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + ownerUsername + " may only delete from exclude, include or owner group", action);
         }
-        return helperService.makeGroupingsServiceResult(
-                FAILURE + ": " + ownerUsername + " does not have permission to edit " + groupPath, action);
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
     //adds a user to the admins group via username or UH id number
@@ -910,8 +908,7 @@ public class MembershipServiceImpl implements MembershipService {
                 updateLastModified(composite);
             }
         } else {
-            gsrList.add(helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + username + "does not have permission to edit " + groupPath, action));
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return gsrList;
