@@ -694,6 +694,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsResultMeta.setResultCode("not member");
 
         WsSubject wsSubject = new WsSubject();
+        if(person == null) person = new Person(null, null, null);
         wsSubject.setName(person.getName());
         wsSubject.setId(person.getUuid());
         wsSubject.setIdentifierLookup(person.getUsername());
