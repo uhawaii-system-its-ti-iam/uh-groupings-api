@@ -164,8 +164,14 @@ public class GroupingAssignmentServiceTest {
     @Test
     public void getPaginatedGroupingTest() {
 
-        Grouping groupingRandom = groupingAssignmentService
-                .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 4, "name", true);
+        try{
+            Grouping groupingRandom = groupingAssignmentService
+                    .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 4, "name", true);
+            fail("Shouldn't be here.");
+        } catch(AccessDeniedException ade) {
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+        }
+
         Grouping groupingOwner = groupingAssignmentService
                 .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), 1, 4, "name", true);
         Grouping groupingAdmin = groupingAssignmentService
@@ -173,11 +179,11 @@ public class GroupingAssignmentServiceTest {
         Grouping groupingNull = groupingAssignmentService
                 .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), null, null, null, null);
 
-        assertThat(groupingRandom.getComposite().getMembers().size(), equalTo(0));
-        assertThat(groupingRandom.getBasis().getMembers().size(), equalTo(0));
-        assertThat(groupingRandom.getInclude().getMembers().size(), equalTo(0));
-        assertThat(groupingRandom.getExclude().getMembers().size(), equalTo(0));
-        assertThat(groupingRandom.getOwners().getMembers().size(), equalTo(0));
+//        assertThat(groupingRandom.getComposite().getMembers().size(), equalTo(0));
+//        assertThat(groupingRandom.getBasis().getMembers().size(), equalTo(0));
+//        assertThat(groupingRandom.getInclude().getMembers().size(), equalTo(0));
+//        assertThat(groupingRandom.getExclude().getMembers().size(), equalTo(0));
+//        assertThat(groupingRandom.getOwners().getMembers().size(), equalTo(0));
 
         assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
         assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
