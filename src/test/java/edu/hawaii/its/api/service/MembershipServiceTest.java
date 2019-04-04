@@ -403,6 +403,25 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void deleteGroupMemberTest() {
+
+        GroupingsServiceResult gsr = new GroupingsServiceResult();
+
+        // Should fail because "1234" is not a real person, but it needs to trip the isUuid check
+        //todo Check gsre for something to put in assertion catch
+        try {
+            gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_0_PATH, "1234");
+            fail("Shouldn't be here.");
+        } catch(GroupingsServiceResultException gsre) {
+        }
+
+        GroupingsServiceResult gsr2 =
+                membershipService.deleteGroupMember(ADMIN_USER, GROUPING_0_PATH, users.get(1).getUsername());
+
+        assertTrue(gsr2.getResultCode().startsWith(SUCCESS));
+    }
+
+    @Test
     public void addAdminTest() {
 
         try {
