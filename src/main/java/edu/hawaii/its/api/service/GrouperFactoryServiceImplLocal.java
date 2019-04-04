@@ -668,19 +668,21 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsGroup updatedGroup = new WsGroup();
         updatedGroup.setDescription(description);
         groupingRepository.findByPath(groupPath).setDescription(description);
+        System.out.println("Doesn;t seem like you are gonna wrk");
+        System.out.println(groupingRepository.findByPath(groupPath).getDescription());
+        System.out.println("Works?");
 
-
-        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
-                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
-
-        WsGroupToSave groupToSave = new WsGroupToSave();
-        groupToSave.setWsGroup(updatedGroup);
-        groupToSave.setWsGroupLookup(groupLookup);
-
-        WsResultMeta metaData = new WsResultMeta();
-        metaData.setResultCode(SUCCESS);
-
-        wsGroupSaveResults.setResultMetadata(metaData);
+//        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
+//                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
+//
+//        WsGroupToSave groupToSave = new WsGroupToSave();
+//        groupToSave.setWsGroup(updatedGroup);
+//        groupToSave.setWsGroupLookup(groupLookup);
+//
+//        WsResultMeta metaData = new WsResultMeta();
+//        metaData.setResultCode(SUCCESS);
+//
+//        wsGroupSaveResults.setResultMetadata(metaData);
 
 
         return wsGroupSaveResults;

@@ -31,7 +31,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GroupAttributeServiceTest {
 
     @Value("${groupings.api.grouping_admins}")
@@ -454,11 +454,13 @@ public class GroupAttributeServiceTest {
         // Sets the description to the default
 
         Grouping groupingZero = groupingRepository.findByPath(GROUPING_0_PATH);
-        groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
-        //groupingZero.setDescription(DEFAULT_DESCRIPTION);
+        groupingZero = groupingRepository.save(groupingZero);
+       //groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
+       ///groupingZero.setDescription(DEFAULT_DESCRIPTION);
       //  assertThat(groupingZero.getDescription(), containsString(DEFAULT_DESCRIPTION));
+        groupingRepository.findByPath(GROUPING_0_PATH).setDescription("i AM KAHLIN and I am teasting");
         System.out.println("Description is: ");
-        System.out.println(grouperFactoryService.getDescription(groupingZero.getPath()));
+        System.out.println(groupingRepository.findByPath(GROUPING_0_PATH).getDescription());
 
 //        //Try to update grouping while user isn't owner or admin
 //        try {
