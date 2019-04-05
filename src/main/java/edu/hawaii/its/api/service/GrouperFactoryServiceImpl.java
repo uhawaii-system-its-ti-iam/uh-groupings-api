@@ -5,6 +5,7 @@ import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
+import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.api.GcGetGrouperPrivilegesLite;
@@ -23,7 +24,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
@@ -89,6 +92,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Value("${groupings.api.person_attributes.username}")
     private String USERNAME;
 
+    @Value("${groupings.api.assign_type_group}")
+    private String ASSIGN_TYPE_GROUP;
+
     // Constructor.
     public GrouperFactoryServiceImpl() {
         // Empty.
@@ -96,6 +102,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     public boolean isUuid(String username) {
         return username.matches("\\d+");
+    }
+
+    @Override
+    public List<String> getSyncDestinations() {
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames().assignScope("uh-settings:attributes:for-groups:uh-grouping:destinations").execute();
+        List<String> syncDestinations = new ArrayList<>();
+        for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
+            if (wsAttributeDefName.getName() != null) {
+                syncDestinations.add(wsAttributeDefName.getName());
+            }
+        }
+        return syncDestinations;
     }
 
     //todo Not tested

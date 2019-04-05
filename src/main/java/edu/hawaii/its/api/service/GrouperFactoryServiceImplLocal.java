@@ -169,6 +169,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME_KEY;
 
+    @Value("${groupings.api.test.sync_destinations}")
+    private List<String> SYNC_DESTINATIONS;
+
     @Autowired
     private GroupingRepository groupingRepository;
 
@@ -183,6 +186,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     public boolean isUuid(String username) {
         return username.matches("\\d+");
+    }
+
+    @Override
+    public List<String> getSyncDestinations() {
+        return SYNC_DESTINATIONS;
     }
 
     @Override
@@ -971,7 +979,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                                                        Integer pageSize,
                                                        String sortString,
                                                        Boolean isAscending
-                                                       ) {
+    ) {
 
         WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
         String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
@@ -980,7 +988,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         List<WsGetMembersResult> results = new ArrayList<>();
 
 
-        for(String groupPath : groupPaths) {
+        for (String groupPath : groupPaths) {
             WsGetMembersResult wsGetMembersResult = new WsGetMembersResult();
             Group group = groupRepository.findByPath(groupPath);
             List<Person> members = group.getMembers();
@@ -1270,11 +1278,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            String groupName,
-            String filterString,
-            Integer page,
-            Integer size) {
+                                                                               WsSubjectLookup lookup,
+                                                                               String groupName,
+                                                                               String filterString,
+                                                                               Integer page,
+                                                                               Integer size) {
         //todo
         return null;
     }
