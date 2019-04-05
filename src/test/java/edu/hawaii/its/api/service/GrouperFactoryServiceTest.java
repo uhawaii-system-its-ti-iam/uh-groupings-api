@@ -174,11 +174,11 @@ public class GrouperFactoryServiceTest {
         assertTrue(results == null);
     }
 
-    //todo This tests a non-implemented function that returns null. Should adjust once function is implemented.
+    //todo: adjust once method is fully implemented.
     @Test
     public void makeWsFindGroupResultsTest() {
         WsFindGroupsResults results = gfsl.makeWsFindGroupsResults("groupPath");
-        assertTrue(results == null);
+        assertTrue(results != null);
     }
 
     @Test
