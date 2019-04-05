@@ -28,6 +28,9 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    @Value("${groupings.api.grouping_owners}")
+    private String GROUPING_OWNERS;
+
     @Value("${groupings.api.grouping_apps}")
     private String GROUPING_APPS;
 
@@ -36,6 +39,18 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
     @Value("${groupings.api.test.name}")
     private String NAME;
+
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.owners}")
+    private String OWNERS;
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
@@ -163,21 +178,24 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     }
 
     private void setUpGroup(int i,
-            List<Person> basisMembers,
-            List<Person> excludeMembers,
-            List<Person> includeMembers,
-            List<Person> ownerMembers) {
+                            List<Person> basisMembers,
+                            List<Person> excludeMembers,
+                            List<Person> includeMembers,
+                            List<Person> ownerMembers) {
 
-        //todo put strings in a config file
-        String BASIS = ":basis";
         makeGroup(basisMembers, pathRoot + i + BASIS);
-        String EXCLUDE = ":exclude";
         makeGroup(excludeMembers, pathRoot + i + EXCLUDE);
-        String INCLUDE = ":include";
         makeGroup(includeMembers, pathRoot + i + INCLUDE);
-        String OWNERS = ":owners";
         makeGroup(ownerMembers, pathRoot + i + OWNERS);
 
+        // todo add code to update the owner group when adding and removing owners during testing
+        // add all of the owners to the owner group
+        Group ownerGroup = groupRepository.findByPath(GROUPING_OWNERS);
+        if (ownerGroup == null) {
+            ownerGroup = new Group(GROUPING_OWNERS);
+        }
+        ownerMembers.forEach(ownerGroup::addMember);
+        groupRepository.save(ownerGroup);
     }
 
     private void setUpGroup0() {

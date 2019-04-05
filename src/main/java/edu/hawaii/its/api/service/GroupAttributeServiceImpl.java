@@ -168,6 +168,15 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Autowired
     private MembershipService membershipService;
 
+    @Override
+    public List<String> getSyncDestinations(String currentUsername) {
+        if (memberAttributeService.isOwner(currentUsername) || memberAttributeService.isSuperuser(currentUsername)) {
+            return grouperFactoryService.getSyncDestinations();
+        } else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+    }
+
     //turn the listserv for a grouping on or off
     @Override
     public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean isListservOn) {
@@ -188,10 +197,10 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
             results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
             results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
+            return results;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return results;
     }
 
     //turn the ability for users to opt-out of a grouping on or off

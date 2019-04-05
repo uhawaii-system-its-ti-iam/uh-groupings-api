@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -56,6 +60,9 @@ public class TestGroupAttributeService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -101,6 +108,32 @@ public class TestGroupAttributeService {
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+        //todo find a more specific way to test this
+
+        // test with admin
+        List<String> destinations = groupAttributeService.getSyncDestinations(ADMIN);
+        assertTrue(destinations.size() > 0);
+
+        // test with owner
+        destinations = groupAttributeService.getSyncDestinations(username[0]);
+        assertTrue(destinations.size() > 0);
+
+        // make sure username[6] doesn't own anything
+        List<String> ownedGroupings = membershipService.listOwned(ADMIN, username[5]);
+        for (String grouping : ownedGroupings) {
+            memberAttributeService.removeOwnership(grouping, ADMIN, username[5]);
+        }
+
+        try {
+            groupAttributeService.getSyncDestinations(username[5]);
+            fail("shouldn't be here");
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
     }
 
     @Test
