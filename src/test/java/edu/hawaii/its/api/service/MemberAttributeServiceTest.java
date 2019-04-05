@@ -264,8 +264,8 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, person2));
         assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, person5));
 
-        //test with dummy uuid
-
+        //test with uuid
+        assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, "5"));
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, "1234"));
     }
 

@@ -376,7 +376,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         //should not be in exclude if not in basis
         if (!isInBasis && isInExclude) {
-            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid));
+            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid    ));
         }
 
         return gsrList;
@@ -521,7 +521,7 @@ public class MembershipServiceImpl implements MembershipService {
                     return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
                 }
                 return helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + ownerUsername + " was not in " + groupPath,
+                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUsername + " was not in " + groupPath,
                                 action);
             }
             return helperService.makeGroupingsServiceResult(
@@ -555,7 +555,7 @@ public class MembershipServiceImpl implements MembershipService {
                     return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
                 }
                 return helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + ownerUsername + " was not in " + groupPath,
+                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUuid + " was not in " + groupPath,
                                 action);
             }
             return helperService.makeGroupingsServiceResult(
