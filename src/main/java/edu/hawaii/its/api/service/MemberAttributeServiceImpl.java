@@ -104,6 +104,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.owners}")
     private String OWNERS;
 
+    @Value("${groupings.api.grouping_owners}")
+    private String OWNERS_GROUP;
+
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
@@ -183,6 +186,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private GroupingAssignmentService groupingAssignmentService;
 
     public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
+
+    @Override
+    public boolean isOwner(String username) {
+        return isMember(OWNERS_GROUP, username);
+    }
 
     //return true if the membership between the group and user has the self-opted attribute, false otherwise
     @Override
