@@ -37,12 +37,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 
@@ -86,6 +87,9 @@ public class GrouperFactoryServiceTest {
 
     @Value("${groupings.api.test.name}")
     private String NAME;
+
+    @Value("${groupings.api.test.sync_destinations}")
+    private List<String> SYNC_DESTINATIONS;
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
@@ -324,6 +328,11 @@ public class GrouperFactoryServiceTest {
         String assignType = "assignType";
 
         results = gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, GROUPING_3_PATH);
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+        assertEquals(SYNC_DESTINATIONS, gfsl.getSyncDestinations());
     }
 
     @Test
