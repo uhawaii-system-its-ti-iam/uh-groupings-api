@@ -47,21 +47,13 @@ public interface GroupingAssignmentService {
 
     public Map<String, Group> makeGroups(WsGetMembersResults membersResults);
 
-    public Group makeGroup(WsGetMembersResults membersResults);
-
-    public Group makeBasisGroup(WsGetMembersResults membersResults);
-
     public List<String> getGroupPaths(String ownerUsername, String username);
 
     public List<String> getGroupPaths(Principal principal, String username);
 
     public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths);
 
-    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
+//    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
 
     public Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size, String sortString, Boolean isAscending);
-
-    public Group getPaginatedAndFilteredMembers(String groupPath, String ownerUsername, String filterString, Integer page, Integer size);
-
-    public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId);
 }
