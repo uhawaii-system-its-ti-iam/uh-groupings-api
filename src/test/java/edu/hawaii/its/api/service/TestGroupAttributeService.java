@@ -7,6 +7,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.omg.PortableInterceptor.SUCCESSFUL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.function.Predicate.isEqual;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -42,11 +46,20 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.basis_plus_include}")
     private String BASIS_PLUS_INCLUDE;
 
+    @Value("Test Many Groups In Basis")
+    private String DEFAULT_DESCRIPTION;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
+
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
@@ -56,6 +69,9 @@ public class TestGroupAttributeService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -313,6 +329,43 @@ public class TestGroupAttributeService {
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+
+    }
+
+    @Test
+    public void updateDescriptionTest(){
+
+        GroupingsServiceResult groupingsServiceResult;
+
+        // Sets the description to the default
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+
+        //Test to make sure description is set to the default.
+        String description = grouperFactoryService.getDescription(GROUPING);
+        assertThat(DEFAULT_DESCRIPTION, containsString(description));
+
+        //Try to update grouping while user isn't owner or admin
+        try {
+            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
+        } catch (GroupingsServiceResultException gsre) {
+            groupingsServiceResult = gsre.getGsr();
+        }
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
+
+        //Testing with admin
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Testing with owner
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        // Test with empty string
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Revert any changes
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
 
     }
 }

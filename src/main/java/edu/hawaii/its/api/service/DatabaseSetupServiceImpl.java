@@ -406,6 +406,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         grouping.setInclude(include);
         grouping.setOwners(owners);
         grouping.setComposite(composite);
+        grouping.setDescription("");
 
         grouping.setListservOn(isListserveOn);
         grouping.setOptInOn(isOptInOn);
