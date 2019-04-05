@@ -7,7 +7,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omg.PortableInterceptor.SUCCESSFUL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.function.Predicate.isEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
@@ -58,9 +61,6 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
-
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
@@ -69,6 +69,9 @@ public class TestGroupAttributeService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
@@ -117,6 +120,32 @@ public class TestGroupAttributeService {
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+        //todo find a more specific way to test this
+
+        // test with admin
+        List<String> destinations = groupAttributeService.getSyncDestinations(ADMIN);
+        assertTrue(destinations.size() > 0);
+
+        // test with owner
+        destinations = groupAttributeService.getSyncDestinations(username[0]);
+        assertTrue(destinations.size() > 0);
+
+        // make sure username[6] doesn't own anything
+        List<String> ownedGroupings = membershipService.listOwned(ADMIN, username[5]);
+        for (String grouping : ownedGroupings) {
+            memberAttributeService.removeOwnership(grouping, ADMIN, username[5]);
+        }
+
+        try {
+            groupAttributeService.getSyncDestinations(username[5]);
+            fail("shouldn't be here");
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
     }
 
     @Test
