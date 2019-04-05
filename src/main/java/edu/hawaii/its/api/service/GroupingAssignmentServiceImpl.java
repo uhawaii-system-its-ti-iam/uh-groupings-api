@@ -337,40 +337,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     }
 
-    // Paginating the basis will remove garbage data, leaving it smaller than the requested size
-    // Therefore we need to fill the rest of the current page with more data from another page
-    // This is dealing with stale subjects
-    // At some point, when this issue is resolved this functionality may not be necessary
-    // todo Refactor this as a general case for all Groups and not just Basis
-    // todo Possibly refactor to avoid while loops and sanitize input relating to negative page/size values
-    // todo Remove workaround for stale subjects, return as is with "User is unavailable" or something similar
-
-    //todo Probably don't need this code but keeping in case
-    //todo Delete after pagination is complete
-    // Get base grouping from pagination and isolate basis
-    //            compositeGrouping = getPaginatedGroupingHelper(ownerUsername, groupingPath, page, size);
-    //            Group basis = compositeGrouping.getBasis();
-    //            List<Person> basisList = basis.getMembers();
-    //
-    //            int i = 1;
-    //            while(basisList.size() < size) {
-    //
-    //                Group basisToAdd = getPaginatedMembers(ownerUsername,groupingPath + BASIS, page + i, size);
-    //                List<Person> basisToAddList = basisToAdd.getMembers();
-    //
-    //                // If the next page is empty, we can assume we are at the end of the group
-    //                if(basisToAddList.size() == 0) break;
-    //
-    //                // Add as much as we need from the next page to the current page
-    //                // If it's not enough, repeat with the page after that
-    //                List<Person> subBasisToAddList = basisToAddList.subList(0, size - basis.getMembers().size());
-    //                basisList.addAll(subBasisToAddList);
-    //                i++;
-    //            }
-    //
-    //            basis.setMembers(basisList);
-    //            compositeGrouping.setBasis(basis);
-
     //get a GroupingAssignment object containing the groups that a user is in and can opt into
     @Override
     public GroupingAssignment getGroupingAssignment(String username) {
@@ -481,61 +447,61 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //todo Consider deleting. Is not being used in any meaningful way at the moment
     //todo Commenting out in case this become useful later
-    //    @Override
-    //    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
-    //        logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-    //                "; componentId: " + componentId + ";");
-    //
-    //        String groupPath = parentGroupingPath + componentId;
-    //        Group groupMembers = new Group();
-    //
-    //        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-    //                .isSuperuser(ownerUsername)) {
-    //
-    //            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-    //            WsGetMembersResults membersResults;
-    //
-    //            ExecutorService executor = Executors.newSingleThreadExecutor();
-    //            Callable<WsGetMembersResults> callable = () -> {
-    //                List<String> groupPaths = new ArrayList<>();
-    //                groupPaths.add(groupPath);
-    //
-    //                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
-    //                        lookup,
-    //                        groupPaths,
-    //                        null,
-    //                        null,
-    //                        null,
-    //                        null);
-    //            };
-    //
-    //            Future<WsGetMembersResults> future = executor.submit(callable);
-    //
-    //            try {
-    //                membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
-    //            } catch (TimeoutException te) {
-    //                //                te.printStackTrace();
-    //                GroupingsHTTPException ghe = new GroupingsHTTPException();
-    //                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
-    //            }
-    //
-    //            if (executor.isTerminated()) {
-    //                executor.shutdown();
-    //            }
-    //
-    //            if (membersResults.getResults() != null) {
-    //                if (componentId.equals(BASIS)) {
-    //                    groupMembers = makeBasisGroup(membersResults);
-    //                } else {
-    //                    groupMembers = makeGroup(membersResults);
-    //                }
-    //            }
-    //        }
-    //        else {
-    //            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-    //        }
-    //        return groupMembers;
-    //    }
+//        @Override
+//        public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
+//            logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+//                    "; componentId: " + componentId + ";");
+//
+//            String groupPath = parentGroupingPath + componentId;
+//            Group groupMembers = new Group();
+//
+//            if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+//                    .isSuperuser(ownerUsername)) {
+//
+//                WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+//                WsGetMembersResults membersResults;
+//
+//                ExecutorService executor = Executors.newSingleThreadExecutor();
+//                Callable<WsGetMembersResults> callable = () -> {
+//                    List<String> groupPaths = new ArrayList<>();
+//                    groupPaths.add(groupPath);
+//
+//                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
+//                            lookup,
+//                            groupPaths,
+//                            null,
+//                            null,
+//                            null,
+//                            null);
+//                };
+//
+//                Future<WsGetMembersResults> future = executor.submit(callable);
+//
+//                try {
+//                    membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
+//                } catch (TimeoutException te) {
+//                    //                te.printStackTrace();
+//                    GroupingsHTTPException ghe = new GroupingsHTTPException();
+//                    throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+//                }
+//
+//                if (executor.isTerminated()) {
+//                    executor.shutdown();
+//                }
+//
+//                if (membersResults.getResults() != null) {
+//                    if (componentId.equals(BASIS)) {
+//                        groupMembers = makeBasisGroup(membersResults);
+//                    } else {
+//                        groupMembers = makeGroup(membersResults);
+//                    }
+//                }
+//            }
+//            else {
+//                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+//            }
+//            return groupMembers;
+//        }
 
     @Override
     public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
@@ -683,7 +649,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return extractGroupPaths(groups);
 
         } else {
-            return new ArrayList<>();
+            return new ArrayList<>();   
             //            GroupingsHTTPException ghe = new GroupingsHTTPException();
             //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
