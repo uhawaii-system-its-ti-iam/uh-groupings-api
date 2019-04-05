@@ -375,9 +375,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
             gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
         } else {
-
-            gsr = helperService.makeGroupingsServiceResult(FAILURE + ", " + ownerUsername + " is not an owner of "
-                    + groupPath + " and cannot change the description of this grouping", action);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return gsr;
