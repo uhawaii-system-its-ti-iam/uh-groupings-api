@@ -201,6 +201,7 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
+    //todo Default getGrouping method w/o pagination; depreciated but saving in case
     /**
      * Get a specific grouping
      *
@@ -219,6 +220,7 @@ public class GroupingsRestControllerv2_1 {
     //                    .body(groupingAssignmentService.getGrouping(path, currentUser));
     //        }
 
+    //todo Not being used currently, commenting out because it could be useful later
     /**
      * Get a specific group
      *
@@ -226,37 +228,38 @@ public class GroupingsRestControllerv2_1 {
      * @param componentId:
      * @return Group found as result
      */
-    @RequestMapping(value = "/groupings/{path}/components/{componentId}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Group> getGroup(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String componentId) throws Exception {
-        logger.info("Entered REST getGroup...");
-        if (componentId.equals("composite"))
-            componentId = "";
-        componentId = ":" + componentId;
-        //        try {
-        //            return ResponseEntity
-        //                    .ok()
-        //                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
-        //        } catch (Exception e) {
-        ////            return new ResponseEntity<Group>("504 error", HttpStatus.BAD_GATEWAY);
-        //            return ResponseEntity.
-        //                    status(HttpStatus.BAD_GATEWAY).
-        //                    body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
-        //        }
-        try {
-            ResponseEntity re = ResponseEntity
-                    .ok()
-                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
-            return re;
-        } catch (GroupingsHTTPException ghe) {
-            return new ResponseEntity(HttpStatus.GATEWAY_TIMEOUT);
-        }
-    }
+//    @RequestMapping(value = "/groupings/{path}/components/{componentId}",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<Group> getGroup(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path,
+//            @PathVariable String componentId) throws Exception {
+//        logger.info("Entered REST getGroup...");
+//        if (componentId.equals("composite"))
+//            componentId = "";
+//        componentId = ":" + componentId;
+//        //        try {
+//        //            return ResponseEntity
+//        //                    .ok()
+//        //                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+//        //        } catch (Exception e) {
+//        ////            return new ResponseEntity<Group>("504 error", HttpStatus.BAD_GATEWAY);
+//        //            return ResponseEntity.
+//        //                    status(HttpStatus.BAD_GATEWAY).
+//        //                    body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+//        //        }
+//        try {
+//            ResponseEntity re = ResponseEntity
+//                    .ok()
+//                    .body(groupingAssignmentService.getGroupMembers(currentUser, path, componentId));
+//            return re;
+//        } catch (GroupingsHTTPException ghe) {
+//            return new ResponseEntity(HttpStatus.GATEWAY_TIMEOUT);
+//        }
+//    }
 
+    //todo Not being used currently, commenting out because it could be useful later
     /**
      * Get a specific member of a group
      *
@@ -264,63 +267,22 @@ public class GroupingsRestControllerv2_1 {
      * @param componentId:
      * @return Group found as result
      */
-    @RequestMapping(value = "/groupings/{path}/components/{componentId}/members/{uid}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<List<Person>> searchMembers(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String componentId,
-            @PathVariable String uid) throws Exception {
-        logger.info("Entered REST getMembers...");
-        if (componentId.equals("composite"))
-            componentId = "";
-        String groupPath = path + ":" + componentId;
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.searchMembers(groupPath, uid));
-    }
-
-    // todo Don't want this accessable right now, we're not using this
-    /**
-     * Get a group asynchronously
-     *
-     * @param path:        Path of specified parent grouping
-     * @param componentId:
-     * @return Group found as result
-     */
-    //    @RequestMapping(value = "/groupings/{path}/components/{componentId}/async",
-    //            method = RequestMethod.GET,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<Group> getAsyncMembers(@RequestHeader("current_user") String currentUser,
-    //            @PathVariable String path,
-    //            @PathVariable String componentId) throws Exception {
-    //        logger.info("Entered REST getAsyncMembers...");
-    //        if (componentId.equals("composite"))
-    //            componentId = "";
-    //        componentId = ":" + componentId;
-    //
-    //        Future<Group> future = groupingAssignmentService.getAsynchronousMembers(currentUser, path, componentId);
-    //
-    //        try {
-    //            while (true) {
-    //                if (future.isDone()) {
-    //                    return ResponseEntity
-    //                            .ok()
-    //                            .body(future.get());
-    //                } else {
-    //                    logger.info("Processing...");
-    //                }
-    //            }
-    //        } catch (InterruptedException ie) {
-    //            ie.printStackTrace();
-    //        }
-    //
-    //        return null;
-    //        //        return ResponseEntity
-    //        //                .ok()
-    //        //                .body(future.get());
-    //    }
+//    @RequestMapping(value = "/groupings/{path}/components/{componentId}/members/{uid}",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<List<Person>> searchMembers(@RequestHeader("current_user") String currentUser,
+//            @PathVariable String path,
+//            @PathVariable String componentId,
+//            @PathVariable String uid) throws Exception {
+//        logger.info("Entered REST getMembers...");
+//        if (componentId.equals("composite"))
+//            componentId = "";
+//        String groupPath = path + ":" + componentId;
+//        return ResponseEntity
+//                .ok()
+//                .body(memberAttributeService.searchMembers(groupPath, uid));
+//    }
 
     /**
      * Create a new admin
@@ -341,7 +303,7 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Create a new grouping
-     * Not implemented yet, even REST API controller function might not be doable at this stage
+     * Not implemented fully
      *
      * @param path: String containing the path of grouping
      * @return Information about results of operation
