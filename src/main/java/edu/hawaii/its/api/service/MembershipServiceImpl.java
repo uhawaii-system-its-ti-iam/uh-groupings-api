@@ -418,7 +418,6 @@ public class MembershipServiceImpl implements MembershipService {
             } catch (Exception NumberFormatException) {
                 try {
                     gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
-
                 } catch (GcWebServiceError e) {
 
                 }
