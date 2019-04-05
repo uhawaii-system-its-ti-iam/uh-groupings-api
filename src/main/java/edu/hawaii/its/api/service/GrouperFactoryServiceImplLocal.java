@@ -674,10 +674,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
         Person person = new Person(null, null, null);
 
-        //Override to accomodate our local database, which has "uuidX" as a uuid
-        if (isUuid(username) || username.contains("uuid")) {
+        if (isUuid(username)) {
             person = personRepository.findByUuid(username);
-            //            person.setUuid(username);
         } else {
             person = personRepository.findByUsername(username);
         }

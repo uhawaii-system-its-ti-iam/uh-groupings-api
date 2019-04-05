@@ -91,7 +91,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private void setUserLookups() {
         for (int i = 0; i < 100; i++) {
             String name = NAME + i;
-            String uuid = UUID + i;
+            String uuid = String.valueOf(i);
             String username = USERNAME + i;
 
             Person person = new Person(name, uuid, username);
@@ -150,7 +150,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private void setUpPersons() {
         int numberOfPersons = 100;
         for (int i = 0; i < numberOfPersons; i++) {
-            makePerson("name" + i, "uuid" + i, "username" + i);
+            makePerson("name" + i, String.valueOf(i), "username" + i);
         }
     }
 
