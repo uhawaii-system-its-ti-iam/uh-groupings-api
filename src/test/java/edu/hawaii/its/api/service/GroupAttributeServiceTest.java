@@ -5,6 +5,7 @@ import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
@@ -31,7 +32,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class GroupAttributeServiceTest {
 
     @Value("${groupings.api.grouping_admins}")
@@ -451,54 +452,33 @@ public class GroupAttributeServiceTest {
 
         GroupingsServiceResult groupingsServiceResult;
 
-        // Sets the description to the default
+        //Set the description to the default description
+        groupingsService.updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION);
+        assertThat(DEFAULT_DESCRIPTION, containsString(groupingRepository.findByPath(GROUPING_0_PATH).getDescription()));
 
-        Grouping groupingZero = groupingRepository.findByPath(GROUPING_0_PATH);
-        groupingZero = groupingRepository.save(groupingZero);
-       //groupingsService.updateDescription(GROUPING_0_PATH, "username0", DEFAULT_DESCRIPTION);
-       ///groupingZero.setDescription(DEFAULT_DESCRIPTION);
-      //  assertThat(groupingZero.getDescription(), containsString(DEFAULT_DESCRIPTION));
-        groupingRepository.findByPath(GROUPING_0_PATH).setDescription("i AM KAHLIN and I am teasting");
-        System.out.println("Description is: ");
-        System.out.println(groupingRepository.findByPath(GROUPING_0_PATH).getDescription());
+        //Try to update grouping while user isn't owner or admin
+        try {
+            groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
+        } catch (GroupingsServiceResultException gsre) {
+            groupingsServiceResult = gsre.getGsr();
+        }
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
 
-//        //Try to update grouping while user isn't owner or admin
-//        try {
-//            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
-//        } catch (GroupingsServiceResultException gsre) {
-//            groupingsServiceResult = gsre.getGsr();
-//        }
-//        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
-//
-//        //Testing with admin
-//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
-//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
-//
-//        //Testing with owner
-//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
-//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
-//
-//        // Test with empty string
-//        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
-//        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
-//
-//        //Revert any changes
-//        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
-//
-//        groupingsService.updateDescription(GROUPING_0_PATH, "randomUser123", "Testing");
-//
-//        // username0 is the username of the owner
-//        groupingsService.updateDescription(GROUPING_0_PATH, "username0", "Sunflower");
+        //Testing with admin
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION + " modifiedbyadmin1");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Testing with owner
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION + " modifiedbyowner2");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        // Test with empty string
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Revert any changes
+        groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION);
     }
 }
-
-
-// todo tests
-// empty string
-// numerical only
-// letters only
-// mix
-// string with spaces
-// string with no spaces
 
 

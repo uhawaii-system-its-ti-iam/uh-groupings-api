@@ -214,7 +214,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public String getDescription(String groupPath){
 
 
-        return makeWsFindGroupsResults(groupPath).getGroupResults()[0].getDescription();
+        return groupingRepository.findByPath(groupPath).getDescription();
 
     }
 
@@ -254,7 +254,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         WsGroup group = new WsGroup();
         group.setName(groupPath);
-        group.setDescription(groupingRepository.findByPath(groupPath).getDescription());
+        //group.setDescription(groupingRepository.findByPath(groupPath).getDescription());
         groups[0] = group;
 
         groupsResults.setGroupResults(groups);
@@ -666,23 +666,22 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
 
         WsGroup updatedGroup = new WsGroup();
-        updatedGroup.setDescription(description);
-        groupingRepository.findByPath(groupPath).setDescription(description);
-        System.out.println("Doesn;t seem like you are gonna wrk");
-        System.out.println(groupingRepository.findByPath(groupPath).getDescription());
-        System.out.println("Works?");
+        Grouping groupingToUpdate = groupingRepository.findByPath(groupPath);
+        groupingToUpdate.setDescription(description);
+        groupingRepository.save(groupingToUpdate);
 
-//        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
-//                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
-//
-//        WsGroupToSave groupToSave = new WsGroupToSave();
-//        groupToSave.setWsGroup(updatedGroup);
-//        groupToSave.setWsGroupLookup(groupLookup);
-//
-//        WsResultMeta metaData = new WsResultMeta();
-//        metaData.setResultCode(SUCCESS);
-//
-//        wsGroupSaveResults.setResultMetadata(metaData);
+
+        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
+                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
+
+        WsGroupToSave groupToSave = new WsGroupToSave();
+        groupToSave.setWsGroup(updatedGroup);
+        groupToSave.setWsGroupLookup(groupLookup);
+
+        WsResultMeta metaData = new WsResultMeta();
+        metaData.setResultCode(SUCCESS);
+
+        wsGroupSaveResults.setResultMetadata(metaData);
 
 
         return wsGroupSaveResults;
