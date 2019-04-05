@@ -134,6 +134,20 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
+    /**
+     *
+     * @param groupPath
+     * @return a string that is the description of the desired group
+     */
+
+    @Override
+    public String getDescription(String groupPath){
+        WsFindGroupsResults wsFindGroupsResults = makeWsFindGroupsResults(groupPath);
+
+        return wsFindGroupsResults.getGroupResults()[0].getDescription();
+
+    }
+
     @Override
     public WsGroupDeleteResults deleteGroup(WsSubjectLookup subjectLookup, WsGroupLookup path) {
 
@@ -791,6 +805,27 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addSubjectAttributeName(UHUUID)
                 .addWsSubjectLookup(lookup)
                 .execute();
+    }
+
+    /*
+    /   Updates the group description given the path, and description
+    /   Creates new local WsGroup called
+    /   Creates new local WsGroupLookup and sets it to the group at groupPath
+    /   Executes Save group structure and updates description
+     */
+
+    public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
+        WsGroup updatedGroup = new WsGroup();
+        updatedGroup.setDescription(description);
+
+        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
+                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
+
+        WsGroupToSave groupToSave = new WsGroupToSave();
+        groupToSave.setWsGroup(updatedGroup);
+        groupToSave.setWsGroupLookup(groupLookup);
+
+        return new GcGroupSave().addGroupToSave(groupToSave).execute();
     }
 
     @Override

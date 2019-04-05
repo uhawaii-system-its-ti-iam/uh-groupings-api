@@ -17,6 +17,9 @@ public class Grouping {
     @Column
     private String name;
 
+    @Column
+    private String description;
+
     @OneToOne
     private Group basis;
 
@@ -53,6 +56,7 @@ public class Grouping {
     public Grouping(String path) {
         setPath(path);
 
+        setDescription("");
         setBasis(new EmptyGroup());
         setExclude(new EmptyGroup());
         setInclude(new EmptyGroup());
@@ -75,6 +79,14 @@ public class Grouping {
         if (index != -1) {
             this.name = this.name.substring(index + 1);
         }
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription(){
+        return this.description;
     }
 
     public Group getBasis() {
