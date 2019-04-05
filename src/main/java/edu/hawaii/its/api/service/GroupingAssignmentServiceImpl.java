@@ -480,61 +480,62 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     //todo Consider deleting. Is not being used in any meaningful way at the moment
-    @Override
-    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
-        logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-                "; componentId: " + componentId + ";");
-
-        String groupPath = parentGroupingPath + componentId;
-        Group groupMembers = new Group();
-
-        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-
-            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-            WsGetMembersResults membersResults;
-
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Callable<WsGetMembersResults> callable = () -> {
-                List<String> groupPaths = new ArrayList<>();
-                groupPaths.add(groupPath);
-
-                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
-                        lookup,
-                        groupPaths,
-                        null,
-                        null,
-                        null,
-                        null);
-            };
-
-            Future<WsGetMembersResults> future = executor.submit(callable);
-
-            try {
-                membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
-            } catch (TimeoutException te) {
-                //                te.printStackTrace();
-                GroupingsHTTPException ghe = new GroupingsHTTPException();
-                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
-            }
-
-            if (executor.isTerminated()) {
-                executor.shutdown();
-            }
-
-            if (membersResults.getResults() != null) {
-                if (componentId.equals(BASIS)) {
-                    groupMembers = makeBasisGroup(membersResults);
-                } else {
-                    groupMembers = makeGroup(membersResults);
-                }
-            }
-        }
-        else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-        return groupMembers;
-    }
+    //todo Commenting out in case this become useful later
+//    @Override
+//    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
+//        logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+//                "; componentId: " + componentId + ";");
+//
+//        String groupPath = parentGroupingPath + componentId;
+//        Group groupMembers = new Group();
+//
+//        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+//                .isSuperuser(ownerUsername)) {
+//
+//            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+//            WsGetMembersResults membersResults;
+//
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            Callable<WsGetMembersResults> callable = () -> {
+//                List<String> groupPaths = new ArrayList<>();
+//                groupPaths.add(groupPath);
+//
+//                return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
+//                        lookup,
+//                        groupPaths,
+//                        null,
+//                        null,
+//                        null,
+//                        null);
+//            };
+//
+//            Future<WsGetMembersResults> future = executor.submit(callable);
+//
+//            try {
+//                membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
+//            } catch (TimeoutException te) {
+//                //                te.printStackTrace();
+//                GroupingsHTTPException ghe = new GroupingsHTTPException();
+//                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+//            }
+//
+//            if (executor.isTerminated()) {
+//                executor.shutdown();
+//            }
+//
+//            if (membersResults.getResults() != null) {
+//                if (componentId.equals(BASIS)) {
+//                    groupMembers = makeBasisGroup(membersResults);
+//                } else {
+//                    groupMembers = makeGroup(membersResults);
+//                }
+//            }
+//        }
+//        else {
+//            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+//        }
+//        return groupMembers;
+//    }
 
     @Override
     public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
@@ -583,148 +584,30 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
-    // todo Doesn't work
-    @Override
-    public Group getPaginatedAndFilteredMembers(
-            String groupPath, String ownerUsername, String filterString, Integer page, Integer size) {
-        logger.info("getMembers; group: " + groupPath + "; ownerUsername: " + ownerUsername +
-                "; filterString: " + filterString + "; page: " + page + "; size: " + size + ";");
-
-        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-        WsGetMembershipsResults results = grouperFactoryService.makeWsGetMembersResultsFilteredAndPaginated(
-                SUBJECT_ATTRIBUTE_NAME_UID,
-                lookup,
-                groupPath,
-                filterString,
-                page,
-                size);
-
-        Group groupMembers = new Group();
-        //        if(results.getResults() != null) {
-        //            groupMembers = makeGroup(members);
-        //        }
-        return groupMembers;
-
-    }
-
-    //todo Might be unnecessary
-    @Override
-    @Async
-    public Future<Group> getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId) {
-
-        logger.info("getAsynchronousMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-                "; componentId: " + componentId + "; Thread:" + Thread.currentThread().getName() + ";");
-
-        String groupPath = parentGroupingPath + componentId;
-        List<String> groupPathList = new ArrayList<>();
-        groupPathList.add(groupPath);
-        Group groupMembers = new Group();
-        WsGetMembersResults members = new WsGetMembersResults();
-
-        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-
-            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-
-            try {
-                Thread.sleep(5000);
-                members = grouperFactoryService.makeWsGetMembersResults(
-                        SUBJECT_ATTRIBUTE_NAME_UID,
-                        lookup,
-                        groupPathList,
-                        null,
-                        null,
-                        null,
-                        null);
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
-            }
-        }
-        else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-
-        //todo should we use EmptyGroup?
-        if (members.getResults() != null) {
-            if (componentId.equals(BASIS)) {
-                groupMembers = makeBasisGroup(members);
-            } else {
-                groupMembers = makeGroup(members);
-            }
-        }
-        return new AsyncResult<>(groupMembers);
-    }
-
-    //    @Override
-    //    public Group getAsynchronousMembers(String ownerUsername, String parentGroupingPath, String componentId){
-    //        logger.info("getAsynchronousMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-    //                "; componentId: " + componentId + ";");
-    //
-    //        String groupPath = parentGroupingPath + componentId;
-    //        Group groupMembers = new Group();
-    //
-    //        if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-    //                .isSuperuser(ownerUsername)) {
-    //
-    //            WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-    //            WsGetMembersResults members = new WsGetMembersResults();
-    //
-    //            ExecutorService executor = Executors.newSingleThreadExecutor();
-    //            Callable<WsGetMembersResults> callable = new Callable<WsGetMembersResults>() {
-    //                @Override
-    //                public WsGetMembersResults call() {
-    //                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID, lookup, groupPath);
-    //                }
-    //            };
-    //
-    //            Future<WsGetMembersResults> future = executor.submit(callable);
-    //            if(future.isDone()) {
-    //
-    //            }
-    ////            try {
-    ////
-    ////            } catch (TimeoutException te) {
-    ////                //                te.printStackTrace();
-    ////                GroupingsHTTPException ghe = new GroupingsHTTPException();
-    ////                throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
-    ////            }
-    //
-    //            if (executor.isTerminated()) {
-    //                executor.shutdown();
-    //            }
-    //
-    //        }
-//    else {
-//        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-//    }
-    //
-    //        return groupMembers;
-    //    }
 
     //makes a group filled with members from membersResults
-
     //todo Remove may be depreciated and unused
-    @Override
-    public Group makeGroup(WsGetMembersResults membersResults) {
-        Group group = new Group();
-        try {
-            WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
-            String[] attributeNames = membersResults.getSubjectAttributeNames();
-
-            if (subjects.length > 0) {
-                for (WsSubject subject : subjects) {
-                    if (subject != null) {
-                        group.addMember(makePerson(subject, attributeNames));
-                    }
-                }
-            }
-            // Return empty group if for any unforeseen results
-        } catch (NullPointerException npe) {
-            return new Group();
-        }
-
-        return group;
-    }
+//    @Override
+//    public Group makeGroup(WsGetMembersResults membersResults) {
+//        Group group = new Group();
+//        try {
+//            WsSubject[] subjects = membersResults.getResults()[0].getWsSubjects();
+//            String[] attributeNames = membersResults.getSubjectAttributeNames();
+//
+//            if (subjects.length > 0) {
+//                for (WsSubject subject : subjects) {
+//                    if (subject != null) {
+//                        group.addMember(makePerson(subject, attributeNames));
+//                    }
+//                }
+//            }
+//            // Return empty group if for any unforeseen results
+//        } catch (NullPointerException npe) {
+//            return new Group();
+//        }
+//
+//        return group;
+//    }
 
     //makes a group filled with members from membersResults
     @Override

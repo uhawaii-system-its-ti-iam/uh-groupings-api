@@ -63,6 +63,9 @@ public class MembershipServiceTest {
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
+    @Value("${groupings.api.not_in_group}")
+    private String NOT_IN_GROUP;
+
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
     private static final String EXCLUDE = ":exclude";
@@ -405,20 +408,15 @@ public class MembershipServiceTest {
     @Test
     public void deleteGroupMemberTest() {
 
-        GroupingsServiceResult gsr = new GroupingsServiceResult();
-
-        // Should fail because "1234" is not a real person, but it needs to trip the isUuid check
-        //todo Check gsre for something to put in assertion catch
-        try {
-            gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_0_PATH, "1234");
-            fail("Shouldn't be here.");
-        } catch(GroupingsServiceResultException gsre) {
-        }
+        // Passes even though 1234 is not a person
+        GroupingsServiceResult gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, "1234");
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
+        assertTrue(gsr.getResultCode().contains(NOT_IN_GROUP));
 
         GroupingsServiceResult gsr2 =
-                membershipService.deleteGroupMember(ADMIN_USER, GROUPING_0_PATH, users.get(1).getUsername());
-
+                membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, users.get(5).getUsername());
         assertTrue(gsr2.getResultCode().startsWith(SUCCESS));
+        assertFalse(gsr2.getResultCode().contains(NOT_IN_GROUP));
     }
 
     @Test
