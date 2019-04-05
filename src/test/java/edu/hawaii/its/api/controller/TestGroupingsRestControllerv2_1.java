@@ -1144,6 +1144,8 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    //todo Not currently supporting this endpoint
+    @Ignore
     @Test
     public void getGroupMembersTest() throws Exception {
 
@@ -1158,6 +1160,8 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    //todo Not currently supporting this endpoint
+    @Ignore
     @Test
     public void searchMembersTest() throws Exception {
 
@@ -1169,16 +1173,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(searchResults.get(0).get("name"), IsEqual.equalTo("tst04name"));
         assertThat(searchResults.get(0).get("username"), IsEqual.equalTo("iamtst04"));
         assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
-    }
-
-    //todo Commented the functionality being tested out; it's not being used
-    @Ignore
-    @Test
-    public void getAsyncMembersTest() throws Exception {
-
-        Group group = mapAsyncGroup(API_BASE + "groupings/" + GROUPING_TIMEOUT + "/components/" + "basis/async", adminUser);
-
-        assertThat(group.getMembers().size(), not(0));
     }
 
     //todo This tests if recursive calls break pagination, we don't need this at the moment
@@ -1193,7 +1187,7 @@ public class TestGroupingsRestControllerv2_1 {
         recursionFunctionToTest(GROUPING_TIMEOUT, adminUser, 1, 20, "name", true);
     }
 
-    //todo Helper function for paginatedLargeGroupingTest
+    // Helper function for paginatedLargeGroupingTest
     private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
 
         if (page > 150) {
