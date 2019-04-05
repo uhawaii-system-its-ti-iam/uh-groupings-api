@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -366,6 +367,25 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Returns if user is an aadmin
+     *
+     * @param uid: uid of admin to add
+     * @return Information about results of the operation
+     *
+    //todo
+    @RequestMapping(value = "/admins/{uid}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> isAdmin(@RequestHeader("current_user") String currentUser,
+                                                              @PathVariable String uid) {
+        logger.info("Entered REST addNewAdmin...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.isAdmin(uid));
+    }
+    */
+
+    /**
      * Create a new admin
      *
      * @param uid: uid of admin to add
@@ -381,6 +401,8 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.addAdmin(currentUser, uid));
     }
+
+
 
     /**
      * Create a new grouping
@@ -398,6 +420,25 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingFactoryService.addGrouping(currentUser, path));
+    }
+
+    /**
+     * Update grouping description
+     *
+     * @param path: path of grouping to update
+     * @param dtoString:  new description to be updated
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path}/description",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
+                                                                 @PathVariable String path,
+                                                                 @RequestBody(required = false) String dtoString) {
+        logger.info("Entered REST updateDescription");
+        return ResponseEntity
+                .ok()
+                .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
     }
 
     /**

@@ -239,9 +239,10 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         }
 
-        // Creates the composite and make complement of basis+include minus exclude
+        // Creates the composite and make complement of basis+include minus
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
                 grouperFactoryService.addCompositeGroup(adminUsername, groupingPath, "complement",
+
                         groupingPath + BASIS_PLUS_INCLUDE, groupingPath + EXCLUDE),
                 "create " + groupingPath + " and complement of " + EXCLUDE));
 
@@ -254,6 +255,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         String includeUid = getGroupId(groupingPath + INCLUDE);
         String ownersUid = getGroupId(groupingPath + OWNERS);
 
+
         //add memberships for BASIS_PLUS_INCLUDE (basis group and include group)
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
                 grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
@@ -264,6 +266,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                 grouperFactoryService.makeWsAddMemberResultsGroup(groupingPath + BASIS_PLUS_INCLUDE,
                         admin, includeUid), "add " + groupingPath + INCLUDE + " to " + groupingPath
                         + BASIS_PLUS_INCLUDE));
+
 
         addGroupingResults.add(helperService.makeGroupingsServiceResult(
                 grouperFactoryService.makeWsAddMemberResultsGroup(GROUPING_OWNERS,
@@ -297,6 +300,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+
 
         List<String> memberLists = new ArrayList<String>();
         // empty string is for composite
@@ -400,11 +404,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
 
         for (String group : memberLists) {
 
-            if (isPathEmpty(adminUsername, groupingPath + group)) {
-
-                // todo: Why is this empty?
-
-            } else {
+            if (!isPathEmpty(adminUsername, groupingPath + group)) {
 
                 grouperFactoryService.makeWsAssignAttributesResultsForGroup(
                         admin,
@@ -432,6 +432,89 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         }
 
         return purgeGroupingResults;
+    }
+
+    public void privilegegTets(String adminUsername, String groupingPath){
+
+        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
+        WsSubjectLookup owners = grouperFactoryService.makeWsSubjectLookup(groupingPath + OWNERS);
+
+        String ownersUid = getGroupId(groupingPath + OWNERS);
+
+        List<String> memberLists = new ArrayList<String>();
+        memberLists.add(BASIS);
+        memberLists.add(BASIS_PLUS_INCLUDE);
+        memberLists.add(EXCLUDE);
+        memberLists.add(INCLUDE);
+        memberLists.add(OWNERS);
+        memberLists.add(groupingPath);
+
+
+        //        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "admin",
+//                api, admin,true);
+
+       // grouperFactoryService.makeWsAddMemberResultsGroup(GROUPING_OWNERS, admin, ownersUid);
+
+
+        for (String group : memberLists) {
+
+            if (group == BASIS) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "read",
+                                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "view",
+                                        owners, admin,true);
+
+            } else if (group == EXCLUDE) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "update",
+                        owners, admin,true);
+
+            } else if (group == INCLUDE) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "update",
+                        owners, admin,true);
+
+            } else if (group == OWNERS) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "view",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "update",
+                        owners, admin,true);
+
+            } else if (group == groupingPath) {
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "read",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "view",
+                        owners, admin,true);
+                
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrRead",
+                        owners, admin,true);
+
+                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
+                        owners, admin,true);
+            }
+        }
+
     }
 
     //set of elements in list0 or list1

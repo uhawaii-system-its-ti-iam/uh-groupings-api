@@ -5,6 +5,7 @@ import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
@@ -22,7 +23,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -52,6 +56,9 @@ public class GroupAttributeServiceTest {
     @Value("${groupings.api.test.uuid}")
     private String UUID;
 
+    @Value("Default description.")
+    private String DEFAULT_DESCRIPTION;
+
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
@@ -74,6 +81,9 @@ public class GroupAttributeServiceTest {
 
     @Autowired
     private GroupAttributeService groupingsService;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private GroupingRepository groupingRepository;
@@ -436,5 +446,39 @@ public class GroupAttributeServiceTest {
         assertFalse(isHasReleasedGrouping);
 
     }
+
+    @Test
+    public void updateDescriptionTest() {
+
+        GroupingsServiceResult groupingsServiceResult;
+
+        //Set the description to the default description
+        groupingsService.updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION);
+        assertThat(DEFAULT_DESCRIPTION, containsString(groupingRepository.findByPath(GROUPING_0_PATH).getDescription()));
+
+        //Try to update grouping while user isn't owner or admin
+        try {
+            groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
+        } catch (GroupingsServiceResultException gsre) {
+            groupingsServiceResult = gsre.getGsr();
+        }
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
+
+        //Testing with admin
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION + " modifiedbyadmin1");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Testing with owner
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION + " modifiedbyowner2");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        // Test with empty string
+        groupingsServiceResult = groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Revert any changes
+        groupingsService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION);
+    }
 }
+
 
