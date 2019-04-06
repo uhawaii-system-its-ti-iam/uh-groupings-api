@@ -347,10 +347,9 @@ public class TestGroupAttributeService {
         //Try to update grouping while user isn't owner or admin
         try {
             groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
-        } catch (GroupingsServiceResultException gsre) {
-            groupingsServiceResult = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
 
         //Testing with admin
         groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
