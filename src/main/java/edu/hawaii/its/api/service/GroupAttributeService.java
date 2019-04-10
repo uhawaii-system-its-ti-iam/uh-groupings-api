@@ -4,16 +4,17 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GroupAttributeService {
 
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean isListservOn);
+    public GroupingsServiceResult changeListservStatus(String groupingPath, String currentUsername, boolean isListservOn);
 
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn);
+    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String currentUsername, boolean isReleasedGroupingOn);
 
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn);
+    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String currentUsername, boolean isOptInOn);
 
-    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername, boolean isOptOutOn);
+    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
 
     public boolean isContainingListserv(String groupingPath);
 
@@ -23,13 +24,17 @@ public interface GroupAttributeService {
 
     public boolean isOptInPossible(String groupingPath);
 
-    public boolean isGroupHasAttribute(String groupPath, String attribute);
+    public boolean isGroupAttribute(String groupPath, String attribute);
 
-    public List<String> getSyncDestinations(String currentUsername);
+    public List<String> getAllSyncDestinations(String currentUsername);
 
     //do not include in REST controller
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
                                                                         String attributeName);
+
+    public List<String> getAllSyncDestinations();
+
+    public Map<String, Boolean> getSyncDestinations(String grouping);
 
     public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description);
 }

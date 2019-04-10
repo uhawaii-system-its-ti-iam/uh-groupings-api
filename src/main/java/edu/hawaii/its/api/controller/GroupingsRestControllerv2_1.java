@@ -208,10 +208,10 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<List<String>> getSyncDestinations(@RequestHeader("current_user") String currentUser) throws Exception {
-        logger.info("Entered REST getSyncDestinations...");
+        logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.getSyncDestinations(currentUser));
+                .body(groupAttributeService.getAllSyncDestinations(currentUser));
     }
 
     /**
