@@ -111,11 +111,11 @@ public class GroupAttributeServiceTest {
 
     @Test
     public void getSyncDestinationsTest() {
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getSyncDestinations(ADMIN_USER));
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getSyncDestinations(users.get(0).getUsername()));
+        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(ADMIN_USER));
+        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(users.get(0).getUsername()));
 
         try {
-            groupAttributeService.getSyncDestinations(users.get(6).getUsername());
+            groupAttributeService.getAllSyncDestinations(users.get(6).getUsername());
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);

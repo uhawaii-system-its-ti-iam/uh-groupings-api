@@ -1103,7 +1103,7 @@ public class TestGroupingsRestControllerv2_1 {
         mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", adminUser);
 
         // make sure purge attribute is added
-        assertTrue(groupAttributeService.isGroupHasAttribute(DELETE_GROUPING, PURGE));
+        assertTrue(groupAttributeService.isGroupAttribute(DELETE_GROUPING, PURGE));
 
     }
 
