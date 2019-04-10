@@ -127,11 +127,11 @@ public class TestGroupAttributeService {
         //todo find a more specific way to test this
 
         // test with admin
-        List<String> destinations = groupAttributeService.getSyncDestinations(ADMIN);
+        List<String> destinations = groupAttributeService.getAllSyncDestinations(ADMIN);
         assertTrue(destinations.size() > 0);
 
         // test with owner
-        destinations = groupAttributeService.getSyncDestinations(username[0]);
+        destinations = groupAttributeService.getAllSyncDestinations(username[0]);
         assertTrue(destinations.size() > 0);
 
         // make sure username[6] doesn't own anything
@@ -141,7 +141,7 @@ public class TestGroupAttributeService {
         }
 
         try {
-            groupAttributeService.getSyncDestinations(username[5]);
+            groupAttributeService.getAllSyncDestinations(username[5]);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
