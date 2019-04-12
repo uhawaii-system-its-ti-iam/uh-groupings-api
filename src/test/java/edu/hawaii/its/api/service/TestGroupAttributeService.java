@@ -21,6 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -42,11 +49,17 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.basis_plus_include}")
     private String BASIS_PLUS_INCLUDE;
 
+    @Value("Test Many Groups In Basis")
+    private String DEFAULT_DESCRIPTION;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
+
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
@@ -56,6 +69,12 @@ public class TestGroupAttributeService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -101,6 +120,32 @@ public class TestGroupAttributeService {
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+        //todo find a more specific way to test this
+
+        // test with admin
+        List<String> destinations = groupAttributeService.getAllSyncDestinations(ADMIN);
+        assertTrue(destinations.size() > 0);
+
+        // test with owner
+        destinations = groupAttributeService.getAllSyncDestinations(username[0]);
+        assertTrue(destinations.size() > 0);
+
+        // make sure username[6] doesn't own anything
+        List<String> ownedGroupings = membershipService.listOwned(ADMIN, username[5]);
+        for (String grouping : ownedGroupings) {
+            memberAttributeService.removeOwnership(grouping, ADMIN, username[5]);
+        }
+
+        try {
+            groupAttributeService.getAllSyncDestinations(username[5]);
+            fail("shouldn't be here");
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
     }
 
     @Test
@@ -313,6 +358,42 @@ public class TestGroupAttributeService {
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+
+    }
+
+    @Test
+    public void updateDescriptionTest(){
+
+        GroupingsServiceResult groupingsServiceResult;
+
+        // Sets the description to the default
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+
+        //Test to make sure description is set to the default.
+        String description = grouperFactoryService.getDescription(GROUPING);
+        assertThat(DEFAULT_DESCRIPTION, containsString(description));
+
+        //Try to update grouping while user isn't owner or admin
+        try {
+            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+        }
+
+        //Testing with admin
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Testing with owner
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        // Test with empty string
+        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+
+        //Revert any changes
+        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
 
     }
 }
