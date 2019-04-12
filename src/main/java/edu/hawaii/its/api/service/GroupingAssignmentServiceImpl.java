@@ -649,12 +649,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return extractGroupPaths(groups);
 
         } else {
-            return new ArrayList<>();   
+            return new ArrayList<>();
             //            GroupingsHTTPException ghe = new GroupingsHTTPException();
             //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
     }
 
+    //todo Why do we have this? It's used nowhere
     @Override
     public List<String> getGroupPaths(Principal principal, String username) {
         return getGroupPaths(principal.getName(), username);
