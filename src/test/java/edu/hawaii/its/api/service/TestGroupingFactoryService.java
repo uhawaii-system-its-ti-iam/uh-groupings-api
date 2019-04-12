@@ -122,117 +122,138 @@ public class TestGroupingFactoryService {
     // todo running this with out a stem gives an error "Cant find stem: ..." - make sure the code adds this stem if
     // necessary
     // todo the code should give admin privileges to the groupingSuperusers group
-    @Test
-    public void addGroupingTest() {
+    // todo Don't run these tests quite yet as these functions shouldn't be used for now.
+//    @Test
+//    public void addGroupingTest() {
+//
+//        GroupingsServiceResult sResults;
+//
+//        //Works correctly
+//        assertTrue(memberAttributeService.isSuperuser(APP_USER));
+//
+//        List<GroupingsServiceResult> results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+//
+//        assertFalse(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
+//
+//        //Fails when the grouping already exists
+//        try {
+//            results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            sResults = gsre.getGsr();
+//            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+//        }
+//
+//        //delete the grouping
+//        groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
+//
+//
+//        //Fails when user trying to add grouping is not admin
+//        try {
+//
+//            results = groupingFactoryService.addGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            sResults = gsre.getGsr();
+//            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+//        }
+//
+//
+//    }
+//
+//    @Test
+//    public void deleteGroupingTest() {
+//
+//        List<GroupingsServiceResult> results = new ArrayList<>();
+//        GroupingsServiceResult sResults;
+//
+//        //add the grouping
+//        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+//
+//        //Works correctly
+//        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
+//
+//        results = groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
+//
+//        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
+//                equalTo(true));
+//
+//
+//        //Fails when the grouping doesn't exists
+//        try {
+//            results = groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            sResults = gsre.getGsr();
+//            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+//        }
+//
+//
+//        //Fails when user trying to delete grouping is not admin
+//        try {
+//            // TODO: how do we know that this grouping exists?
+//            results = groupingFactoryService.deleteGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            sResults = gsre.getGsr();
+//            assertThat(sResults.getResultCode(), startsWith(FAILURE));
+//        }
+//    }
+//
+//    @Test
+//    public void markPurgeTest() {
+//
+//        // make sure the grouping does not exist
+//        assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
+//
+//        // add new grouping
+//
+//        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
+//
+//        // currently we only support marking a grouping for purge if the user is a super user
+//        assertTrue(memberAttributeService.isSuperuser(APP_USER));
+//
+//        groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+//
+//        // todo change this to has purge attribute
+//        assertTrue(groupAttributeService.isGroupAttribute(TEMP_TEST, PURGE));
+//
+//        //Fails when the grouping doesn't exists
+//        try {
+//            // delete grouping
+//            groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
+//            assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
+//
+//            // try to mark for purge
+//            groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
+//        }
+//
+//
+//        //Fails when user trying to delete grouping is not admin
+//        try {
+//
+//            groupingFactoryService.markGroupForPurge(USERNAMES[1], TEMP_TEST + ":kahlin-test");
+//
+//        } catch (GroupingsServiceResultException gsre) {
+//
+//            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
+//        }
+//
+//    }
+//
+//    @Test
+//    public void privilegesTest(){
+//
+//            groupingFactoryService.privilegegTets(APP_USER, "hawaii.edu:custom:test:kahlin:privilegeTesting");
+//
+//    }
 
-        GroupingsServiceResult sResults;
-
-        //Works correctly
-        assertTrue(memberAttributeService.isSuperuser(APP_USER));
-
-        List<GroupingsServiceResult> results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
-
-        assertFalse(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
-
-        //Fails when the grouping already exists
-        try {
-            results = groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
-
-        } catch (GroupingsServiceResultException gsre) {
-
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
-        }
-
-        //delete the grouping
-        groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
-
-
-        //Fails when user trying to add grouping is not admin
-        try {
-            groupingFactoryService.addGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
-        } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
-    }
-
-    @Test
-    public void deleteGroupingTest() {
-
-        List<GroupingsServiceResult> results = new ArrayList<>();
-        GroupingsServiceResult sResults;
-
-        //add the grouping
-        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
-
-        //Works correctly
-        assertThat(memberAttributeService.isSuperuser(APP_USER), equalTo(true));
-
-        results = groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
-
-        assertThat(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST),
-                equalTo(true));
-
-
-        //Fails when the grouping doesn't exists
-        try {
-            results = groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
-
-        } catch (GroupingsServiceResultException gsre) {
-
-            sResults = gsre.getGsr();
-            assertThat(sResults.getResultCode(), startsWith(FAILURE));
-        }
-
-
-        //Fails when user trying to delete grouping is not admin
-        try {
-            // TODO: how do we know that this grouping exists?
-            groupingFactoryService.deleteGrouping(USERNAMES[1], TEMP_TEST + ":kahlin-test");
-
-        } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
-    }
-
-    @Test
-    public void markPurgeTest() {
-
-        // make sure the grouping does not exist
-        assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
-
-        // add new grouping
-        groupingFactoryService.addGrouping(APP_USER, TEMP_TEST);
-
-        // currently we only support marking a grouping for purge if the user is a super user
-        assertTrue(memberAttributeService.isSuperuser(APP_USER));
-
-        groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
-
-        // todo change this to has purge attribute
-        assertTrue(groupAttributeService.isGroupHasAttribute(TEMP_TEST, PURGE));
-
-        //Fails when the grouping doesn't exists
-        try {
-            // delete grouping
-            groupingFactoryService.deleteGrouping(APP_USER, TEMP_TEST);
-            assertTrue(groupingFactoryService.isPathEmpty(APP_USER, TEMP_TEST));
-
-            // try to mark for purge
-            groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
-
-        } catch (GroupingsServiceResultException gsre) {
-
-            assertThat(gsre.getGsr().getResultCode(), startsWith(FAILURE));
-        }
-
-
-        //Fails when user trying to delete grouping is not admin
-        try {
-            groupingFactoryService.markGroupForPurge(USERNAMES[1], TEMP_TEST + ":kahlin-test");
-        } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
-
-    }
 }

@@ -205,6 +205,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Autowired GroupAttributeService groupAttributeService;
+
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
@@ -280,6 +282,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
+            compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
             compositeGrouping.setBasis(groups.get(basis));
             compositeGrouping.setExclude(groups.get(exclude));
             compositeGrouping.setInclude(groups.get(include));
@@ -302,12 +305,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
 
-        Grouping compositeGrouping = new Grouping();
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
 
-            compositeGrouping = new Grouping(groupingPath);
+            Grouping compositeGrouping = new Grouping(groupingPath);
             String basis = groupingPath + BASIS;
             String include = groupingPath + INCLUDE;
             String exclude = groupingPath + EXCLUDE;
@@ -323,18 +325,17 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
+            compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
             compositeGrouping.setBasis(groups.get(basis));
             compositeGrouping.setExclude(groups.get(exclude));
             compositeGrouping.setInclude(groups.get(include));
             compositeGrouping.setComposite(groups.get(groupingPath));
             compositeGrouping.setOwners(groups.get(owners));
 
+            return compositeGrouping;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
-        return compositeGrouping;
-
     }
 
     //get a GroupingAssignment object containing the groups that a user is in and can opt into
@@ -587,6 +588,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
+
+        //todo: after the UI starts using the map instead of the hard coded sync destinations, the hard coded ones can
+        // be removed. Currently those are isListserveOn and isReleasedGroupingOn
+        // isOptOutOn and isOptInOn can be left alone because they are not sync destinations
         boolean isListservOn = false;
         boolean isOptInOn = false;
         boolean isOptOutOn = false;
@@ -617,6 +622,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
         grouping.setReleasedGroupingOn(isReleasedGroupingOn);
+
+
+        // set the sync destinations map
+        Map<String, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());
+        grouping.setSyncDestinations(syncDestinations);
 
         return grouping;
     }

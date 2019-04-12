@@ -9,39 +9,13 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
+import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
-import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
+import edu.internet2.middleware.grouperClient.ws.beans.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -199,6 +173,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME_KEY;
 
+    @Value("${groupings.api.test.sync_destinations}")
+    private List<String> SYNC_DESTINATIONS;
+
     @Autowired
     private GroupingRepository groupingRepository;
 
@@ -213,6 +190,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     public boolean isUuid(String username) {
         return username.matches("\\d+");
+    }
+
+    @Override
+    public List<String> getSyncDestinations() {
+        return SYNC_DESTINATIONS;
     }
 
     @Override
@@ -236,6 +218,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                 .addGroupLookup(path)
                 .assignActAsSubject(username)
                 .execute();
+
+    }
+
+    @Override
+    public String getDescription(String groupPath) {
+
+        return groupingRepository.findByPath(groupPath).getDescription();
 
     }
 
@@ -269,7 +258,19 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
-        return null;
+
+        WsFindGroupsResults groupsResults = new WsFindGroupsResults();
+        WsGroup[] groups = new WsGroup[1];
+
+        WsGroup group = new WsGroup();
+        group.setName(groupPath);
+        //group.setDescription(groupingRepository.findByPath(groupPath).getDescription());
+        groups[0] = group;
+
+        groupsResults.setGroupResults(groups);
+
+        return groupsResults;
+
     }
 
     /**
@@ -671,6 +672,30 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
+    public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
+        WsGroupSaveResults wsGroupSaveResults = new WsGroupSaveResults();
+
+        WsGroup updatedGroup = new WsGroup();
+        Grouping groupingToUpdate = groupingRepository.findByPath(groupPath);
+        groupingToUpdate.setDescription(description);
+        groupingRepository.save(groupingToUpdate);
+
+        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
+                makeWsFindGroupsResults(groupPath).getGroupResults()[0].getUuid());
+
+        WsGroupToSave groupToSave = new WsGroupToSave();
+        groupToSave.setWsGroup(updatedGroup);
+        groupToSave.setWsGroupLookup(groupLookup);
+
+        WsResultMeta metaData = new WsResultMeta();
+        metaData.setResultCode(SUCCESS);
+
+        wsGroupSaveResults.setResultMetadata(metaData);
+
+        return wsGroupSaveResults;
+    }
+
+    @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
         Person person = new Person(null, null, null);
 
@@ -692,7 +717,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsResultMeta.setResultCode("not member");
 
         WsSubject wsSubject = new WsSubject();
-        if(person == null) person = new Person(null, null, null);
+        if (person == null)
+            person = new Person(null, null, null);
         wsSubject.setName(person.getName());
         wsSubject.setId(person.getUuid());
         wsSubject.setIdentifierLookup(person.getUsername());
