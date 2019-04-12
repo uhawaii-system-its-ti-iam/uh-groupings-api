@@ -22,6 +22,8 @@ public interface MemberAttributeService {
 
     public boolean isOwner(String groupingPath, String username);
 
+    public boolean isOwner(String username);
+
     public boolean isAdmin(String username);
 
     public boolean isApp(String username);

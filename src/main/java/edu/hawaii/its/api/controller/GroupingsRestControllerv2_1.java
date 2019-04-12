@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -129,7 +130,7 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Map<String, String>> memberAttributes(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
+                                                                @PathVariable String uid) {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
@@ -146,7 +147,7 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
+                                                                @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
@@ -167,7 +168,7 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<List<Grouping>> ownerGroupings(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
+                                                         @PathVariable String uid) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
@@ -189,11 +190,11 @@ public class GroupingsRestControllerv2_1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String sortString,
-            @RequestParam(required = false) Boolean isAscending) {
+                                                @PathVariable String path,
+                                                @RequestParam(required = false) Integer page,
+                                                @RequestParam(required = false) Integer size,
+                                                @RequestParam(required = false) String sortString,
+                                                @RequestParam(required = false) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
@@ -202,6 +203,20 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Default getGrouping method w/o pagination; depreciated but saving in case
+    /**
+     * Get the list of sync destinations
+     */
+    @RequestMapping(value = "/groupings/syncDestinations",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<List<String>> getSyncDestinations(@RequestHeader("current_user") String currentUser) throws Exception {
+        logger.info("Entered REST getAllSyncDestinations...");
+        return ResponseEntity
+                .ok()
+                .body(groupAttributeService.getAllSyncDestinations(currentUser));
+    }
+
     /**
      * Get a specific grouping
      *
@@ -285,6 +300,25 @@ public class GroupingsRestControllerv2_1 {
 //    }
 
     /**
+     * Returns if user is an aadmin
+     *
+     * @param uid: uid of admin to add
+     * @return Information about results of the operation
+     *
+    //todo
+    @RequestMapping(value = "/admins/{uid}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> isAdmin(@RequestHeader("current_user") String currentUser,
+                                                              @PathVariable String uid) {
+        logger.info("Entered REST addNewAdmin...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.isAdmin(uid));
+    }
+    */
+
+    /**
      * Create a new admin
      *
      * @param uid: uid of admin to add
@@ -294,12 +328,14 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
+                                                              @PathVariable String uid) {
         logger.info("Entered REST addNewAdmin...");
         return ResponseEntity
                 .ok()
                 .body(membershipService.addAdmin(currentUser, uid));
     }
+
+
 
     /**
      * Create a new grouping
@@ -320,6 +356,25 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping description
+     *
+     * @param path: path of grouping to update
+     * @param dtoString:  new description to be updated
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path}/description",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
+                                                                 @PathVariable String path,
+                                                                 @RequestBody(required = false) String dtoString) {
+        logger.info("Entered REST updateDescription");
+        return ResponseEntity
+                .ok()
+                .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
+    }
+
+    /**
      * Update grouping to add a new owner
      *
      * @param path: path of grouping to update
@@ -330,8 +385,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+                                                           @PathVariable String path,
+                                                           @PathVariable String uid) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
@@ -459,7 +514,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
+                                                                 @PathVariable String uid) {
         logger.info("Entered REST deleteNewAdmin...");
         return ResponseEntity
                 .ok()
@@ -496,8 +551,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+                                                              @PathVariable String path,
+                                                              @PathVariable String uid) {
         logger.info("Entered REST deleteOwner");
         return ResponseEntity
                 .ok()
@@ -515,8 +570,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+                                                                @PathVariable String path,
+                                                                @PathVariable String uid) {
         logger.info("Entered REST deleteInclude");
         return ResponseEntity
                 .ok()
@@ -534,8 +589,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+                                                                @PathVariable String path,
+                                                                @PathVariable String uid) {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
@@ -616,7 +671,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView demoteOwner(@RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
+                                    @PathVariable String uid) {
         logger.info("Entered REST demoteOwner...");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -633,7 +688,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView addManager(@RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
+                                   @PathVariable String uid) {
         logger.info("Entered REST addManager");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -653,8 +708,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView enableManagerPermission(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid, @PathVariable String id) {
+                                                @PathVariable String path,
+                                                @PathVariable String uid, @PathVariable String id) {
         logger.info("Entered REST enableManagerPermission");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -672,8 +727,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView disableManagerPermission(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid, @PathVariable String id) {
+                                                 @PathVariable String path,
+                                                 @PathVariable String uid, @PathVariable String id) {
         logger.info("Entered REST disableManagerPermission");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -690,7 +745,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView promoteManager(@RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
+                                       @PathVariable String uid) {
         logger.info("Entered REST promoteManager");
         throw new UnsupportedOperationException();
         //todo Implement method
@@ -707,10 +762,9 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public RedirectView deleteManager(@RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
+                                      @PathVariable String uid) {
         logger.info("Entered REST deleteManager");
         throw new UnsupportedOperationException();
         //todo Implement method
     }
-
 }
