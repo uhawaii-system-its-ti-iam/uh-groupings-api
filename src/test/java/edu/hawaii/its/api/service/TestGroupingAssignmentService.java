@@ -236,43 +236,13 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void getBasisGroupWithTimeoutTest() throws Exception {
-        //        Grouping grouping = groupingAssignmentService.getGrouping("hawaii.edu:custom:test:julio:jtest102-l", ADMIN);
-
-        try {
-            //todo Move to properties file
-            groupingAssignmentService.getGroupMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(504));
-        }
-
-        Group standardBasisGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING, BASIS);
-        assertThat(standardBasisGroup.getMembers().size(), not(0));
-
-        Group standardIncludeGroup = groupingAssignmentService.getGroupMembers(ADMIN, GROUPING, INCLUDE);
-        assertThat(standardIncludeGroup.getMembers().size(), not(0));
-
-        //todo Split basis into its own function, then check for GroupingsHTTPException
-        //todo Split API calls in REST controller for each group (maybe a generic getGroup call?)
-        //todo Write filter using direct matching using getMember
-        //        assertEquals(grouping.getPath(), "");
-        //        assertEquals(grouping.getName(), "");
-        //        assertEquals(grouping.getOwners().getMembers().size(), 2);
-        //        assertEquals(grouping.getInclude().getMembers().size(), 0);
-        //        assertEquals(grouping.getExclude().getMembers().size(), 0);
-        //        assertEquals(grouping.getBasis().getMembers().size(), 0);
-        //        assertEquals(grouping.getComposite().getMembers().size(), 0);
-    }
-
-    @Test
     public void getPaginatedGroupingTest() {
 
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
         Grouping paginatedGroupingPage1 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
-        // Page 2 contains 1 stale subject, should return 19
+//        // Page 2 contains 1 stale subject, should return 19
         Grouping paginatedGroupingPage2 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
 
@@ -305,34 +275,6 @@ public class TestGroupingAssignmentService {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
-    }
-
-    // todo Method not implemented
-    @Ignore
-    @Test
-    public void getFilteredGroupingTest() {
-
-        groupingAssignmentService.getPaginatedAndFilteredMembers(GROUPING, usernames[0], "zac", 1, 20);
-    }
-
-    @Ignore
-    @Test
-    public void getAsyncGroupTest() throws InterruptedException, ExecutionException {
-
-        logger.info("Creating getAsync testing thread.");
-        final Future<Group> future = groupingAssignmentService.getAsynchronousMembers(ADMIN, GROUPING_TIMEOUT, BASIS);
-        int sleepCounter = 0;
-
-        while (true) {
-            if (future.isDone()) {
-                logger.info("Async call finished.");
-                assertThat(future.get().getMembers().size(), not(0));
-                break;
-            }
-            Thread.sleep(1000);
-            sleepCounter++;
-            logger.info("Test thread sleeping for " + (sleepCounter) + " seconds...");
         }
     }
 

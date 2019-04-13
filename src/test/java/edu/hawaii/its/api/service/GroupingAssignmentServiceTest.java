@@ -10,14 +10,20 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
+import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import sun.security.acl.PrincipalImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,15 +33,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.Constants.a;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class GroupingAssignmentServiceTest {
@@ -72,6 +83,9 @@ public class GroupingAssignmentServiceTest {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.stale_subject_id}")
+    private String STALE_SUBJECT_ID;
 
     private static final String PATH_ROOT = "path:to:grouping";
 
@@ -122,6 +136,7 @@ public class GroupingAssignmentServiceTest {
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
+
     }
 
     @Test
@@ -155,6 +170,52 @@ public class GroupingAssignmentServiceTest {
         assertTrue(groupingAdmin.getExclude().getNames().contains(users.get(2).getName()));
         assertTrue(groupingAdmin.getBasis().getNames().contains(users.get(4).getName()));
         assertTrue(groupingAdmin.getOwners().getNames().contains(users.get(0).getName()));
+    }
+
+    @Test
+    public void getPaginatedGroupingTest() {
+
+        try {
+            Grouping groupingRandom = groupingAssignmentService
+                    .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 4, "name", true);
+            fail("Shouldn't be here.");
+        } catch (AccessDeniedException ade) {
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+        }
+
+        Grouping groupingOwner = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), 1, 4, "name", true);
+        Grouping groupingAdmin = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, ADMIN_USER, 1, 4, "name", false);
+        Grouping groupingNull = groupingAssignmentService
+                .getPaginatedGrouping(GROUPING_0_PATH, users.get(0).getUsername(), null, null, null, null);
+
+        //        assertThat(groupingRandom.getComposite().getMembers().size(), equalTo(0));
+        //        assertThat(groupingRandom.getBasis().getMembers().size(), equalTo(0));
+        //        assertThat(groupingRandom.getInclude().getMembers().size(), equalTo(0));
+        //        assertThat(groupingRandom.getExclude().getMembers().size(), equalTo(0));
+        //        assertThat(groupingRandom.getOwners().getMembers().size(), equalTo(0));
+
+        assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
+        assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        assertTrue(groupingOwner.getComposite().getUuids().contains(users.get(0).getUuid()));
+        assertFalse(groupingOwner.getComposite().getNames().contains(users.get(7).getName()));
+        assertFalse(groupingOwner.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        assertFalse(groupingOwner.getComposite().getUuids().contains(users.get(7).getUuid()));
+
+        assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(7).getName()));
+        assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        assertTrue(groupingAdmin.getComposite().getUuids().contains(users.get(7).getUuid()));
+        assertFalse(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
+        assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        assertFalse(groupingAdmin.getComposite().getUuids().contains(users.get(0).getUuid()));
+
+        assertTrue(groupingNull.getComposite().getNames().contains(users.get(0).getName()));
+        assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        assertTrue(groupingNull.getComposite().getUuids().contains(users.get(0).getUuid()));
+        assertTrue(groupingNull.getComposite().getNames().contains(users.get(7).getName()));
+        assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        assertTrue(groupingNull.getComposite().getUuids().contains(users.get(7).getUuid()));
     }
 
     @Test
@@ -412,63 +473,64 @@ public class GroupingAssignmentServiceTest {
     }
 
     @Test
-    public void makeGroup() {
-        WsGetMembersResults getMembersResults = new WsGetMembersResults();
-        WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
-        WsGetMembersResult getMembersResult1 = new WsGetMembersResult();
-        WsSubject[] subjects = new WsSubject[0];
-        getMembersResult1.setWsSubjects(subjects);
-        getMembersResult[0] = getMembersResult1;
-        getMembersResults.setResults(getMembersResult);
-        assertNotNull(groupingAssignmentService.makeGroup(getMembersResults));
-
-        subjects = new WsSubject[1];
-        getMembersResults.getResults()[0].setWsSubjects(subjects);
-        assertNotNull(groupingAssignmentService.makeGroup(getMembersResults));
-
-        subjects[0] = new WsSubject();
-        getMembersResults.getResults()[0].setWsSubjects(subjects);
-        assertNotNull(groupingAssignmentService.makeGroup(getMembersResults));
-
+    public void getGroupPathsPrincipalTest() {
+        Principal principal = new AttributePrincipalImpl(ADMIN_USER);
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(principal, users.get(1).getUsername());
+        assertTrue(groupPaths.contains(GROUPING_0_PATH));
     }
 
     @Test
-    public void makeGroupTest() {
+    public void makeGroupsTest() {
+
         WsGetMembersResults getMembersResults = new WsGetMembersResults();
+        String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+
+        // We create an array here because getMembersResults.setResults() only takes an array
         WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
-        WsGetMembersResult getMembersResult1 = new WsGetMembersResult();
+        WsGetMembersResult subGetMembersResult = new WsGetMembersResult();
+
+        WsGroup wsGroup = new WsGroup();
+        wsGroup.setName(GROUPING_0_PATH);
 
         WsSubject[] list = new WsSubject[3];
         for (int i = 0; i < 3; i++) {
             list[i] = new WsSubject();
             list[i].setName("testSubject_" + i);
             list[i].setId("testSubject_uuid_" + i);
-            list[i].setAttributeValues(new String[]{"testSubject_username_" + i});
+            // Attribute values need to match names in order (uuid is set seperately, so it can be blank here
+            list[i].setAttributeValues(new String[] { "testSubject_username_" + i, "", "", "testSubject_" + i, "" });
         }
 
-        getMembersResult1.setWsSubjects(list);
-        getMembersResult[0] = getMembersResult1;
+        subGetMembersResult.setWsSubjects(list);
+        subGetMembersResult.setWsGroup(wsGroup);
+        getMembersResult[0] = subGetMembersResult;
+
         getMembersResults.setResults(getMembersResult);
+        getMembersResults.setSubjectAttributeNames(attributeNames);
 
-        Group group = groupingAssignmentService.makeGroup(getMembersResults);
+        Map<String, Group> groups = groupingAssignmentService.makeGroups(getMembersResults);
 
-        for (int i = 0; i < group.getMembers().size(); i++) {
-            assertTrue(group.getMembers().get(i).getName().equals("testSubject_" + i));
-            assertTrue(group.getNames().contains("testSubject_" + i));
-            assertTrue(group.getMembers().get(i).getUuid().equals("testSubject_uuid_" + i));
-            assertTrue(group.getUuids().contains("testSubject_uuid_" + i));
-            assertTrue(group.getMembers().get(i).getUsername().equals("testSubject_username_" + i));
-            assertTrue(group.getUsernames().contains("testSubject_username_" + i));
+        assertThat(groups.size(), not(equalTo(0)));
+        Group resultGroup = groups.get(GROUPING_0_PATH);
+
+        for (int i = 0; i < resultGroup.getMembers().size(); i++) {
+            assertTrue(resultGroup.getMembers().get(i).getName().equals("testSubject_" + i));
+            assertTrue(resultGroup.getNames().contains("testSubject_" + i));
+            assertTrue(resultGroup.getMembers().get(i).getUuid().equals("testSubject_uuid_" + i));
+            assertTrue(resultGroup.getUuids().contains("testSubject_uuid_" + i));
+            assertTrue(resultGroup.getMembers().get(i).getUsername().equals("testSubject_username_" + i));
+            assertTrue(resultGroup.getUsernames().contains("testSubject_username_" + i));
         }
     }
 
     @Test
-    public void makePerson() {
+    public void makePersonTest() {
         String name = "name";
         String id = "uuid";
         String identifier = "username";
-        String[] attributeNames = new String[]{UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY};
-        String[] attributeValues = new String[]{identifier, id, null, name, null};
+        String[] attributeNames =
+                new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeValues = new String[] { identifier, id, null, name, null };
 
         WsSubject subject = new WsSubject();
         subject.setName(name);
@@ -481,7 +543,7 @@ public class GroupingAssignmentServiceTest {
         assertTrue(person.getUuid().equals(id));
         assertTrue(person.getUsername().equals(identifier));
 
-        assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[]{}));
+        assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
     }
 
     //todo Finish this test for setGroupingAttributes
@@ -491,21 +553,54 @@ public class GroupingAssignmentServiceTest {
         grouping = groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
     }
 
-    //todo
     @Test
-    public void makeBasisGroupTest() {
-        //groupingAssignmentService.getMembers(users.get(0).getUsername(), GROUPING_3_BASIS_PATH);
+    public void makeGroupsNullValuesTest() {
 
-//        WsSubject garbageSubject = new WsSubject();
-//        garbageSubject.setSourceId("g:gsa");
-//        String id = garbageSubject.getId();
-//        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(garbageSubject.getName());
-//        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_3_BASIS_PATH, garbageSubject.getName());
-//
-//        WsGetMembersResults results = grouperFS.makeWsGetMembersResults(id, lookup, GROUPING_3_BASIS_PATH);
-//        Group members = groupingAssignmentService.makeBasisGroup(results);
-//        assertTrue(members.getMembers().size() == 0);
+        WsGetMembersResults getMembersResults = new WsGetMembersResults();
+        String[] attributeNames =
+                new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+
+        // We create an array here because getMembersResults.setResults() only takes an array
+        // nullSubject... will have a null Subject Array while testSubject... will have 2 subjects with test attributes
+        WsGetMembersResult[] getMembersResult = new WsGetMembersResult[2];
+        WsGetMembersResult nullSubjectArrayGetMembersResult = new WsGetMembersResult();
+        WsGetMembersResult testSubjectsGetMembersResult = new WsGetMembersResult();
+
+        WsGroup wsGroup0 = new WsGroup();
+        wsGroup0.setName(GROUPING_0_PATH);
+        nullSubjectArrayGetMembersResult.setWsGroup(wsGroup0);
+
+        WsGroup wsGroup1 = new WsGroup();
+        wsGroup1.setName(GROUPING_3_BASIS_PATH);
+        testSubjectsGetMembersResult.setWsGroup(wsGroup1);
+
+        // Set up subjects: one null, one with STALE_SUBJECT_ID
+        WsSubject[] list = new WsSubject[2];
+        list[1] = new WsSubject();
+        list[1].setName("iDontExistAnymoreName");
+        list[1].setId("iDontExistAnymoreUUID");
+        list[1].setAttributeValues(new String[] { "iDontExistAnymoreUsername", "", "", "iDontExistAnymoreName", "" });
+        list[1].setSourceId(STALE_SUBJECT_ID);
+
+        // Push to array and set results
+        nullSubjectArrayGetMembersResult.setWsSubjects(null);
+        testSubjectsGetMembersResult.setWsSubjects(list);
+        getMembersResult[0] = nullSubjectArrayGetMembersResult;
+        getMembersResult[1] = testSubjectsGetMembersResult;
+        getMembersResults.setResults(getMembersResult);
+        getMembersResults.setSubjectAttributeNames(attributeNames);
+
+        Map<String, Group> groups = groupingAssignmentService.makeGroups(getMembersResults);
+
+        // Only one result should've created a group (the non-null subject array one)
+        // The second group should have only one member because it had a null subject
+        assertThat(groups.size(), equalTo(1));
+        assertThat(groups.get(GROUPING_3_BASIS_PATH).getMembers().size(), equalTo(1));
+
+        // Second group
+        // Check if stale subject id produces the right username restructure
+        List<Person> group1Members = groups.get(GROUPING_3_BASIS_PATH).getMembers();
+        assertThat(group1Members.get(0).getUsername(), equalTo("User Not Available."));
     }
-
 }
 
