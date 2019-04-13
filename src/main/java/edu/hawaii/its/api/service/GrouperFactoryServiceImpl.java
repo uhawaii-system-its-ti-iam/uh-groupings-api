@@ -750,29 +750,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    // todo Doesn't work
-    @Override
-    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
-                                                                               WsSubjectLookup lookup,
-                                                                               String groupName,
-                                                                               String filterString,
-                                                                               Integer page,
-                                                                               Integer size) {
-
-        // todo Look into getSubjects call
-        // Can't paginate with it, but hopefully this doesn't matter as a filter would be a smaller subset
-
-        return new GcGetMemberships()
-                .assignPageNumber(page)
-                .assignPageSize(size)
-                .addSubjectAttributeName(subjectAttributeName)
-                .assignActAsSubject(lookup)
-                .addGroupName(groupName)
-                .assignIncludeSubjectDetail(true)
-                .execute();
-
-    }
-
     // Covered by Integration Tests
     @Override
     public WsGetGroupsResults makeWsGetGroupsResults(String username,
