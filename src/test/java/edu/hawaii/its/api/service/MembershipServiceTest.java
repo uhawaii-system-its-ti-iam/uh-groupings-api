@@ -11,10 +11,13 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +34,7 @@ import static org.junit.Assert.*;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MembershipServiceTest {
@@ -59,6 +62,9 @@ public class MembershipServiceTest {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.not_in_group}")
+    private String NOT_IN_GROUP;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -138,7 +144,8 @@ public class MembershipServiceTest {
         assertTrue(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()).isEmpty());
 
         // Adds user to owners of GROUPING 1
-        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH, users.get(1).getUsername());
+        membershipService
+                .addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH, users.get(1).getUsername());
 
         // Tests that the list now contains the path to GROUPING 1 since user is now an owner
         assertTrue(membershipService.listOwned(ADMIN_USER, users.get(1).getUsername()).get(0).equals(GROUPING_1_PATH));
@@ -399,6 +406,20 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void deleteGroupMemberTest() {
+
+        // Passes even though 1234 is not a person
+        GroupingsServiceResult gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, "1234");
+        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
+        assertTrue(gsr.getResultCode().contains(NOT_IN_GROUP));
+
+        GroupingsServiceResult gsr2 =
+                membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, users.get(5).getUsername());
+        assertTrue(gsr2.getResultCode().startsWith(SUCCESS));
+        assertFalse(gsr2.getResultCode().contains(NOT_IN_GROUP));
+    }
+
+    @Test
     public void addAdminTest() {
 
         try {
@@ -515,7 +536,8 @@ public class MembershipServiceTest {
         assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
         //non super users should not be able to opt out other users
-        optOutResults = membershipService.optOut(users.get(0).getUsername(), GROUPING_1_PATH, users.get(1).getUsername());
+        optOutResults =
+                membershipService.optOut(users.get(0).getUsername(), GROUPING_1_PATH, users.get(1).getUsername());
         assertEquals(1, optOutResults.size());
         assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
 
