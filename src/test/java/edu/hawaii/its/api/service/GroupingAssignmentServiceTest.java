@@ -593,7 +593,9 @@ public class GroupingAssignmentServiceTest {
         Map<String, Group> groups = groupingAssignmentService.makeGroups(getMembersResults);
 
         // Only one result should've created a group (the non-null subject array one)
+        // The second group should have only one member because it had a null subject
         assertThat(groups.size(), equalTo(1));
+        assertThat(groups.get(GROUPING_3_BASIS_PATH).getMembers().size(), equalTo(1));
 
         // Second group
         // Check if stale subject id produces the right username restructure
