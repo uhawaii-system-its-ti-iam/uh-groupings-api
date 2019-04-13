@@ -574,7 +574,7 @@ public class GroupingAssignmentServiceTest {
         wsGroup1.setName(GROUPING_3_BASIS_PATH);
         testSubjectsGetMembersResult.setWsGroup(wsGroup1);
 
-        // Set up subject list: one null, one with STALE_SUBJECT_ID
+        // Set up subjects: one null, one with STALE_SUBJECT_ID
         WsSubject[] list = new WsSubject[2];
         list[1] = new WsSubject();
         list[1].setName("iDontExistAnymoreName");

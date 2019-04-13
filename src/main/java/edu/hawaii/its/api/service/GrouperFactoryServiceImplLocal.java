@@ -1324,15 +1324,4 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         //todo
         return null;
     }
-
-    @Override
-    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            String groupName,
-            String filterString,
-            Integer page,
-            Integer size) {
-        //todo
-        return null;
-    }
 }
