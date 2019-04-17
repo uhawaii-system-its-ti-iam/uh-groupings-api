@@ -14,7 +14,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
@@ -169,12 +171,17 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private MembershipService membershipService;
 
     @Override
-    public List<String> getSyncDestinations(String currentUsername) {
+    public List<String> getAllSyncDestinations(String currentUsername) {
         if (memberAttributeService.isOwner(currentUsername) || memberAttributeService.isSuperuser(currentUsername)) {
-            return grouperFactoryService.getSyncDestinations();
+            return getAllSyncDestinations();
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+    }
+
+    @Override
+    public List<String> getAllSyncDestinations() {
+        return grouperFactoryService.getSyncDestinations();
     }
 
     //turn the listserv for a grouping on or off
@@ -221,25 +228,25 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     //returns true if the grouping has a listserv, false otherwise
     @Override
     public boolean isContainingListserv(String groupingPath) {
-        return isGroupHasAttribute(groupingPath, LISTSERV);
+        return isGroupAttribute(groupingPath, LISTSERV);
     }
 
     //returns true if the grouping has LDAP, false otherwise
     @Override
     public boolean isContainingReleasedGrouping(String groupingPath) {
-        return isGroupHasAttribute(groupingPath, RELEASED_GROUPING);
+        return isGroupAttribute(groupingPath, RELEASED_GROUPING);
     }
 
     //returns true if the grouping allows the user to opt out, false otherwise
     @Override
     public boolean isOptOutPossible(String groupingPath) {
-        return isGroupHasAttribute(groupingPath, OPT_OUT);
+        return isGroupAttribute(groupingPath, OPT_OUT);
     }
 
     //returns true if the grouping allows the user to opt in, false otherwise
     @Override
     public boolean isOptInPossible(String groupingPath) {
-        return isGroupHasAttribute(groupingPath, OPT_IN);
+        return isGroupAttribute(groupingPath, OPT_IN);
     }
 
     //turns the attribute on or off in a group
@@ -254,7 +261,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
         if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
-            boolean isHasAttribute = isGroupHasAttribute(groupPath, attributeName);
+            boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
             if (isAttributeOn) {
                 if (!isHasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
@@ -285,7 +292,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     //returns true if the group has the attribute with that name
-    public boolean isGroupHasAttribute(String groupPath, String attributeName) {
+    public boolean isGroupAttribute(String groupPath, String attributeName) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = attributeAssignmentsResults(
                 ASSIGN_TYPE_GROUP,
                 groupPath,
@@ -300,6 +307,23 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             }
         }
         return false;
+    }
+
+    @Override
+    public Map<String, Boolean> getSyncDestinations(String grouping) {
+        List<String> destinations = getAllSyncDestinations();
+
+        // todo: this should be done faster than a loop making individual calls
+        Map<String, Boolean> syncDestinations = new HashMap<>();
+
+        if (destinations != null) {
+
+            for (String destination : destinations) {
+                syncDestinations.put(destination, isGroupAttribute(grouping, destination));
+            }
+        }
+
+        return syncDestinations;
     }
 
     //checks to see if a group has an attribute of a specific type and returns the list if it does
@@ -371,7 +395,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description) {
-        logger.info( "updateDescription(); groupPath:" + groupPath +
+        logger.info("updateDescription(); groupPath:" + groupPath +
                 "; ownerUsername:" + ownerUsername +
                 "; description: " + description + ";");
 
@@ -384,9 +408,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
             gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
         } else {
-
-            gsr = helperService.makeGroupingsServiceResult(FAILURE + ", " + ownerUsername + " is not an owner of "
-                    + groupPath + " and cannot change the description of this grouping", action);
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
         return gsr;

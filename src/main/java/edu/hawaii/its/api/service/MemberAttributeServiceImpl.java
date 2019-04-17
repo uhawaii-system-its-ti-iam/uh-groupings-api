@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -14,8 +15,10 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -412,7 +415,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 subjects = results.getWsSubjects();
 
                 attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
+                String[] subjectAttributeNames = { UID, UHUUID, LAST_NAME, COMPOSITE_NAME, FIRST_NAME };
                 for (int i = 0; i < attributeValues.length; i++) {
                     mapping.put(subjectAttributeNames[i], attributeValues[i]);
                 }
@@ -422,19 +425,13 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = {UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID};
+            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }
             return mapping;
         }
 
-    }
-
-    //Local approach implemented separately
-    public Map<String, String> getUserAttributesLocal(String username) {
-        Person personToGet = personRepository.findByUsername(username);
-        return personToGet.getAttributes();
     }
 
     @Override

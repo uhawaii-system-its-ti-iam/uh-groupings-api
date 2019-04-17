@@ -78,6 +78,7 @@ public class Group implements Comparable<Group> {
         return members.contains(person);
     }
 
+
     @JsonIgnore
     @Transient
     public List<String> getNames() {
