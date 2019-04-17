@@ -32,6 +32,9 @@ public interface GroupAttributeService {
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
                                                                         String attributeName);
 
+    public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
+            String attributeName, boolean isAttributeOn);
+
     public List<String> getAllSyncDestinations();
 
     public Map<String, Boolean> getSyncDestinations(String grouping);
