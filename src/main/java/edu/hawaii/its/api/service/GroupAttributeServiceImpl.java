@@ -250,6 +250,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     //turns the attribute on or off in a group
+    @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
                                                              String attributeName, boolean isAttributeOn) {
         GroupingsServiceResult gsr;
