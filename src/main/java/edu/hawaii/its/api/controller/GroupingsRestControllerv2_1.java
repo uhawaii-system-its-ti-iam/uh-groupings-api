@@ -202,7 +202,6 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
-    //todo Default getGrouping method w/o pagination; depreciated but saving in case
     /**
      * Get the list of sync destinations
      */
@@ -217,6 +216,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupAttributeService.getAllSyncDestinations(currentUser));
     }
 
+    //todo Default getGrouping method w/o pagination; depreciated but saving in case
     /**
      * Get a specific grouping
      *
@@ -335,8 +335,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
-
-
     /**
      * Create a new grouping
      * Not implemented fully
@@ -414,6 +412,27 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * if the user is allowed to opt into the grouping
+     * this will add them to the include group of that grouping
+     * if the user is in the exclude group, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting in
+     * @param uid  : the uid of the user that will be opted in
+     * @return information about the success of opting in
+     */
+    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}/self",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST optIn...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.optIn(currentUser, path, uid));
+    }
+
+    /**
      * Update grouping to add new exclude member
      *
      * @param path: path of grouping to update
@@ -434,12 +453,62 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * if the user is allowed to opt out of the grouping
+     * this will add them to the exclude group of that grouping
+     * if the user is in the include group of that Grouping, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting out
+     * @param uid  : the uid of the user that will be opted out
+     * @return information about the success of opting out
+     */
+    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}/self",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST optOut...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.optOut(currentUser, path, uid));
+    }
+
+    /**
      * Update grouping to enable given preference
      *
      * @param path:         path of grouping to update
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
+//    @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
+//            method = RequestMethod.PUT,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
+//            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+//            @PathVariable String preferenceId) {
+//        logger.info("Entered REST enablePreference");
+//        List<GroupingsServiceResult> results = new ArrayList<>();
+//
+//        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
+//                && !RELEASED_GROUPING.equals(preferenceId)) {
+//            throw new UnsupportedOperationException();
+//        } else {
+//            if (OPT_IN.equals(preferenceId)) {
+//                results = groupAttributeService.changeOptInStatus(path, currentUser, true);
+//            } else if (OPT_OUT.equals(preferenceId)) {
+//                results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
+//            } else if (LISTSERV.equals(preferenceId)) {
+//                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
+//            } else {
+//                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
+//            }
+//        }
+//        return ResponseEntity
+//                .ok()
+//                .body(results);
+//    }
+
+    //todo 4/15/2019
     @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -453,15 +522,7 @@ public class GroupingsRestControllerv2_1 {
                 && !RELEASED_GROUPING.equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
-            if (OPT_IN.equals(preferenceId)) {
-                results = groupAttributeService.changeOptInStatus(path, currentUser, true);
-            } else if (OPT_OUT.equals(preferenceId)) {
-                results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
-            } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
-            } else {
-                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
-            }
+            groupAttributeService.changeGroupAttributeStatus();
         }
         return ResponseEntity
                 .ok()
@@ -595,48 +656,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.deleteGroupMemberByUsername(currentUser, path + EXCLUDE, uid));
-    }
-
-    /**
-     * if the user is allowed to opt into the grouping
-     * this will add them to the include group of that grouping
-     * if the user is in the exclude group, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting in
-     * @param uid  : the uid of the user that will be opted in
-     * @return information about the success of opting in
-     */
-    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}/self",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST optIn...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.optIn(currentUser, path, uid));
-    }
-
-    /**
-     * if the user is allowed to opt out of the grouping
-     * this will add them to the exclude group of that grouping
-     * if the user is in the include group of that Grouping, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting out
-     * @param uid  : the uid of the user that will be opted out
-     * @return information about the success of opting out
-     */
-    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}/self",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST optOut...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.optOut(currentUser, path, uid));
     }
 
     //todo Implement when manager feature is implemented in v2.2
