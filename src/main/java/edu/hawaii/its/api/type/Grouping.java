@@ -1,10 +1,16 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "grouping")
@@ -35,6 +41,9 @@ public class Grouping {
     @OneToOne
     private Group owners;
 
+    @ElementCollection
+    private Map<String, Boolean> syncDestinations = new HashMap<>();
+
     @Column
     private boolean isListservOn = false;
 
@@ -64,6 +73,24 @@ public class Grouping {
         setOwners(new EmptyGroup());
     }
 
+    @JsonIgnore
+    @ElementCollection
+    public Map<String, Boolean> getSyncDestinations() {
+        return syncDestinations;
+    }
+
+    public void setSyncDestinations(Map<String, Boolean> syncDestinations) {
+        this.syncDestinations = syncDestinations;
+    }
+
+    @Transient
+    public boolean isSyncDestinationOn(String key) {
+        if (!syncDestinations.containsKey(key)) {
+            return false;
+        }
+        return syncDestinations.get(key);
+    }
+
     public String getName() {
         return name;
     }
@@ -85,7 +112,7 @@ public class Grouping {
         this.description = description;
     }
 
-    public String getDescription(){
+    public String getDescription() {
         return this.description;
     }
 
@@ -153,9 +180,13 @@ public class Grouping {
         this.isOptOutOn = isOptOutOn;
     }
 
-    public boolean isReleasedGroupingOn() { return isReleasedGroupingOn; }
+    public boolean isReleasedGroupingOn() {
+        return isReleasedGroupingOn;
+    }
 
-    public void setReleasedGroupingOn(boolean isReleasedGroupingOn) { this.isReleasedGroupingOn = isReleasedGroupingOn; }
+    public void setReleasedGroupingOn(boolean isReleasedGroupingOn) {
+        this.isReleasedGroupingOn = isReleasedGroupingOn;
+    }
 
     @Override
     public String toString() {

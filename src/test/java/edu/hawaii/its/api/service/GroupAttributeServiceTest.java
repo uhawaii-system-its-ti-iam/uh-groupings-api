@@ -111,11 +111,11 @@ public class GroupAttributeServiceTest {
 
     @Test
     public void getSyncDestinationsTest() {
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getSyncDestinations(ADMIN_USER));
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getSyncDestinations(users.get(0).getUsername()));
+        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(ADMIN_USER));
+        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(users.get(0).getUsername()));
 
         try {
-            groupAttributeService.getSyncDestinations(users.get(6).getUsername());
+            groupAttributeService.getAllSyncDestinations(users.get(6).getUsername());
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
@@ -491,10 +491,9 @@ public class GroupAttributeServiceTest {
         //Try to update grouping while user isn't owner or admin
         try {
             groupingsServiceResult = groupAttributeService.updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
-        } catch (GroupingsServiceResultException gsre) {
-            groupingsServiceResult = gsre.getGsr();
+        } catch (AccessDeniedException ade) {
+            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(FAILURE));
 
         //Testing with admin
         groupingsServiceResult = groupAttributeService.updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION + " modifiedbyadmin1");
