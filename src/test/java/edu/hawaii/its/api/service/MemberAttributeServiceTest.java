@@ -11,6 +11,8 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,16 +26,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -62,6 +68,21 @@ public class MemberAttributeServiceTest {
 
     @Value("${groupings.api.test.uuid}")
     private String UUID;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String UID;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
@@ -161,6 +182,12 @@ public class MemberAttributeServiceTest {
         assertTrue(grouping.getOwners().isMember(randomUser));
         assertEquals(SUCCESS, adminAdds.getResultCode());
 
+        //Test to make sure UUID works
+        GroupingsServiceResult uuidAdds = memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
+        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+        assertTrue(grouping.getOwners().getMembers().contains(randomUser));
+        assertTrue(grouping.getOwners().isMember(randomUser));
+        assertEquals(SUCCESS, uuidAdds.getResultCode());
     }
 
     @Test
@@ -230,12 +257,26 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, person2));
         assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, person5));
 
-        //test with uuid
+        //test with null username
         person2.setUsername(null);
         person5.setUsername(null);
 
         assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, person2));
         assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, person5));
+
+        //test with uuid
+        assertTrue(memberAttributeService.isMember(GROUPING_0_PATH, "5"));
+        assertFalse(memberAttributeService.isMember(GROUPING_0_PATH, "1234"));
+    }
+
+    @Test
+    public void isMemberUuidTest() {
+
+        Person person2 = users.get(2);
+        Person person5 = users.get(5);
+
+        assertFalse(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person2.getUuid()));
+        assertTrue(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person5.getUuid()));
     }
 
     @Test
@@ -268,27 +309,45 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getUserAttributesLocalTest() {
+    public void getUserAttributesTest() {
 
         String username = users.get(5).getUsername();
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
 
-        Map<String, String> attributes = memberAttributeService.getUserAttributesLocal(username);
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, username);
 
-        assertTrue(attributes.get("uid").equals(personFive.getUsername()));
-        assertTrue(attributes.get("cn").equals(personFive.getName()));
-        assertTrue(attributes.get("uuid").equals(personFive.getUuid()));
+        assertThat(attributes.get(UID), equalTo(personFive.getUsername()));
+        assertThat(attributes.get(COMPOSITE_NAME), equalTo(personFive.getName()));
+        assertThat(attributes.get(UHUUID), equalTo(personFive.getUuid()));
+        assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
+        assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
 
-        //todo Possible code for non-null data, if ever implemented
-        //        assertTrue(attributes.get("givenName").equals(personFive.getFirstName()));
-        //        assertTrue(attributes.get("sn").equals(personFive.getLastName()));
+        // Test with user that owns no groupings
+        Map<String, String> emptyAttributes = memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
 
-        // FirstName and LastName in mock database is null
-        assertNull(attributes.get("givenName"));
-        assertNull(personFive.getFirstName());
+        assertThat(emptyAttributes.get(UID), equalTo(""));
+        assertThat(emptyAttributes.get(COMPOSITE_NAME), equalTo(""));
+        assertThat(emptyAttributes.get(UHUUID), equalTo(""));
+        assertThat(emptyAttributes.get(FIRST_NAME), equalTo(""));
+        assertThat(emptyAttributes.get(LAST_NAME), equalTo(""));
 
-        assertNull(attributes.get("sn"));
-        assertNull(personFive.getLastName());
+        // Test with null username
+        try{
+            Map<String, String> nullPersonAttributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
+            fail("Shouldn't be here.");
+        } catch (GcWebServiceError gce) {
+            assertThat(gce.getContainerResponseObject(), equalTo("Error 404 Not Found"));
+        }
     }
 
+    @Test
+    public void searchMembersTest() {
+
+        List<Person> membersResults = memberAttributeService.searchMembers(GROUPING_0_PATH, users.get(5).getUsername());
+        Person testPerson = personRepository.findByUsername(users.get(5).getUsername());
+
+        assertThat(membersResults.get(0).getUsername(), equalTo(testPerson.getUsername()));
+        assertThat(membersResults.get(0).getUuid(), equalTo(testPerson.getUuid()));
+        assertThat(membersResults.get(0).getName(), equalTo(testPerson.getName()));
+    }
 }

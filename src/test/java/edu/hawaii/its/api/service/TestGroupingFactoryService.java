@@ -220,7 +220,7 @@ public class TestGroupingFactoryService {
 //        groupingFactoryService.markGroupForPurge(APP_USER, TEMP_TEST);
 //
 //        // todo change this to has purge attribute
-//        assertTrue(groupAttributeService.isGroupHasAttribute(TEMP_TEST, PURGE));
+//        assertTrue(groupAttributeService.isGroupAttribute(TEMP_TEST, PURGE));
 //
 //        //Fails when the grouping doesn't exists
 //        try {
