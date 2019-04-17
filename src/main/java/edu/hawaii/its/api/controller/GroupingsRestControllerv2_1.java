@@ -414,6 +414,26 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping to add include multiple members
+     *
+     * @param path: path of grouping to update
+     * @param uids:  uids or uuids of members to add to include
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path}/includeMultipleMembers/{uids}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List <String> uids) {
+        logger.info("Entered REST includeMultipleMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    /**
      * Update grouping to add new exclude member
      *
      * @param path: path of grouping to update
