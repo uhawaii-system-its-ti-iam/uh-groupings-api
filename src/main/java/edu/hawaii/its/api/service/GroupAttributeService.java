@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface GroupAttributeService {
 
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String currentUsername, boolean isListservOn);
+//    public GroupingsServiceResult changeListservStatus(String groupingPath, String currentUsername, boolean isListservOn);
 
     public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String currentUsername, boolean isReleasedGroupingOn);
 

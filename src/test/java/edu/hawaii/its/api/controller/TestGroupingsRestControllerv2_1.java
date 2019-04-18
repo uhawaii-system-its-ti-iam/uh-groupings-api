@@ -303,7 +303,8 @@ public class TestGroupingsRestControllerv2_1 {
         // Reset preferences
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
-        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+//        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
         groupAttributeService.changeReleasedGroupingStatus(GROUPING, usernames[0], false);
 
         // Delete grouping if it exists
