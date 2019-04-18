@@ -184,12 +184,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return grouperFactoryService.getSyncDestinations();
     }
 
-    //turn the listserv for a grouping on or off
-//    @Override
-//    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean isListservOn) {
-//        return changeGroupAttributeStatus(groupingPath, ownerUsername, LISTSERV, isListservOn);
-//    }
-
     //turn the releasedGrouping attribute for a grouping on or off
     @Override
     public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn) {
