@@ -52,6 +52,12 @@ public class TestGroupAttributeService {
     @Value("Test Many Groups In Basis")
     private String DEFAULT_DESCRIPTION;
 
+    @Value("${groupings.api.listserv}")
+    private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
@@ -395,5 +401,14 @@ public class TestGroupAttributeService {
         //Revert any changes
         groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
 
+    }
+
+    @Test
+    public void changeGroupAttributeStatusTest() {
+        boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
+        GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
+        boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
+        assertTrue(true);
+//        groupAttributeService.isContainingListserv()
     }
 }
