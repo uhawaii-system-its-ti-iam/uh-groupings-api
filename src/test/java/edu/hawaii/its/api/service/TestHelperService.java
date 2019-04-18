@@ -94,7 +94,6 @@ public class TestHelperService {
 
     @Before
     public void setUp() {
-//        groupAttributeService.changeListservStatus(GROUPING, ADMIN, true);
         groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
