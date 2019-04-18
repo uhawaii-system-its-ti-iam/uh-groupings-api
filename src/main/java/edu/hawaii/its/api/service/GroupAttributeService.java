@@ -33,7 +33,7 @@ public interface GroupAttributeService {
                                                                         String attributeName);
 
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
-            String attributeName, boolean isAttributeOn);
+            String attributeName, boolean turnAttributeOn);
 
     public List<String> getAllSyncDestinations();
 
