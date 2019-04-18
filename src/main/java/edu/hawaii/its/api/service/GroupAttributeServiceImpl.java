@@ -185,10 +185,10 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     //turn the listserv for a grouping on or off
-    @Override
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean isListservOn) {
-        return changeGroupAttributeStatus(groupingPath, owenerUsername, LISTSERV, isListservOn);
-    }
+//    @Override
+//    public GroupingsServiceResult changeListservStatus(String groupingPath, String ownerUsername, boolean isListservOn) {
+//        return changeGroupAttributeStatus(groupingPath, ownerUsername, LISTSERV, isListservOn);
+//    }
 
     //turn the releasedGrouping attribute for a grouping on or off
     @Override

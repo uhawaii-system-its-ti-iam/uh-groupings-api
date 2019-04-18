@@ -529,7 +529,8 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
             } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
+//                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
+                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, true));
             } else {
                 results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
             }
@@ -566,7 +567,8 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
             } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
+//                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
+                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, false));
             } else {
                 results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, false));
             }
