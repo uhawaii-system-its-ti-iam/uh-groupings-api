@@ -151,7 +151,6 @@ public class TestGroupingAssignmentService {
         memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
 
         // update statuses
-//        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);

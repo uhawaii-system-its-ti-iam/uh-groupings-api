@@ -610,8 +610,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
 
-//        given(groupAttributeService.changeListservStatus("grouping", USERNAME, true))
-//                .willReturn(gsrListserv());
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable")
@@ -667,8 +665,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
 
-//        given(groupAttributeService.changeListservStatus("grouping", USERNAME, false))
-//                .willReturn(gsrListserv());
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false))
                         .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable")

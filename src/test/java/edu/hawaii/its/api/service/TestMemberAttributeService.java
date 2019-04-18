@@ -123,7 +123,6 @@ public class TestMemberAttributeService {
 
     @Before
     public void setUp() {
-//        groupAttributeService.changeListservStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN_USER, LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
