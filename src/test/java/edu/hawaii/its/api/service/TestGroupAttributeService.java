@@ -106,7 +106,8 @@ public class TestGroupAttributeService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
@@ -179,7 +180,8 @@ public class TestGroupAttributeService {
         WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
 
 
@@ -193,7 +195,8 @@ public class TestGroupAttributeService {
         String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertEquals(lastModTime, lastModTime2);
 
-        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
         assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
         //todo get last modified time and make sure that it has changed
@@ -206,7 +209,8 @@ public class TestGroupAttributeService {
         String lastModTime3 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertNotEquals(lastModTime2, lastModTime3);
 
-        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
         assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
         //todo get last modified time and make sure that it hasn't changed
@@ -221,15 +225,18 @@ public class TestGroupAttributeService {
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
-            groupAttributeService.changeListservStatus(GROUPING, username[1], true);
+//            groupAttributeService.changeListservStatus(GROUPING, username[1], true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertFalse(groupAttributeService.isContainingListserv(GROUPING));
-        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+//        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
         assertTrue(groupAttributeService.isContainingListserv(GROUPING));
         try {
-            groupAttributeService.changeListservStatus(GROUPING, username[1], false);
+//            groupAttributeService.changeListservStatus(GROUPING, username[1], false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }

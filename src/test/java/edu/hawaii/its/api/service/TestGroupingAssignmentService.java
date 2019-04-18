@@ -101,6 +101,12 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
+    @Value("${groupings.api.listserv}")
+    private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
     @Value("${groupings.api.test.usernames}")
     private String[] usernames;
 
@@ -145,7 +151,8 @@ public class TestGroupingAssignmentService {
         memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
 
         // update statuses
-        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+//        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
