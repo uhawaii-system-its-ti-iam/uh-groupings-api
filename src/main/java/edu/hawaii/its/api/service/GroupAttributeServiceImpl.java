@@ -252,18 +252,18 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     //turns the attribute on or off in a group
     @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
-                                                             String attributeName, boolean isAttributeOn) {
+                                                             String attributeName, boolean turnAttributeOn) {
         GroupingsServiceResult gsr;
 
         String verb = "removed from ";
-        if (isAttributeOn) {
+        if (turnAttributeOn) {
             verb = "added to ";
         }
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
         if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
             boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
-            if (isAttributeOn) {
+            if (turnAttributeOn) {
                 if (!isHasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
 
