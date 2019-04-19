@@ -245,45 +245,45 @@ public class GroupAttributeServiceTest {
 
         // ON to ON
         try {
-            groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        results.add(groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
+        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         //ON to OFF
         try {
-            groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        results.add(groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
+        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
         assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to OFF
         try {
-            groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        results.add(groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, false));
+        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
         assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
 
         // OFF to ON
         try {
-            groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, user, true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        results.add(groupAttributeService.changeReleasedGroupingStatus(GROUPING_0_PATH, owner, true));
+        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
         assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
     }
