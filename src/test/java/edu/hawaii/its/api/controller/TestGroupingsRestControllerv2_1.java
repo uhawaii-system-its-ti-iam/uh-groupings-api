@@ -992,8 +992,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableDisablePreferencesPassTest() throws Exception {
-        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
-        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
@@ -1002,8 +1002,8 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + LISTSERV + "/disable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
 
-        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
-        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
@@ -1012,8 +1012,8 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + LISTSERV + "/enable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
 
-        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
-        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
