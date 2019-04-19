@@ -5,6 +5,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -409,6 +410,8 @@ public class TestGroupAttributeService {
 
     }
 
+    //todo Test to play around with GroupAttribute methods
+    @Ignore
     @Test
     public void changeGroupAttributeStatusTest() {
         boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
