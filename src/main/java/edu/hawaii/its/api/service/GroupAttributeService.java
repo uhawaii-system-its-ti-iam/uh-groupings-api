@@ -8,8 +8,6 @@ import java.util.Map;
 
 public interface GroupAttributeService {
 
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String currentUsername, boolean isReleasedGroupingOn);
-
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String currentUsername, boolean isOptInOn);
 
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
