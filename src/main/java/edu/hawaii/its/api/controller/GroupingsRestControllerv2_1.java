@@ -549,10 +549,9 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
             } else if (LISTSERV.equals(preferenceId)) {
-                //                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
                 results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, true));
             } else {
-                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
+                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, RELEASED_GROUPING, true));
             }
         }
         return ResponseEntity
@@ -588,10 +587,9 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
             } else if (LISTSERV.equals(preferenceId)) {
-                //                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
                 results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, false));
             } else {
-                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, false));
+                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, RELEASED_GROUPING, false));
             }
         }
         return ResponseEntity
@@ -600,7 +598,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Do we need to test if a non-existent destination is given?
-
     /**
      *
      */
@@ -618,7 +615,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Do we need to test if a non-existent destination is given?
-
     /**
      *
      */

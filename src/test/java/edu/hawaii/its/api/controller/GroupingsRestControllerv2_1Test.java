@@ -619,7 +619,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, true))
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
                 .willReturn(gsrReleasedGrouping());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable")
                 .with(csrf())
@@ -674,7 +674,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, false))
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false))
                 .willReturn(gsrReleasedGrouping());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable")
                 .with(csrf())
