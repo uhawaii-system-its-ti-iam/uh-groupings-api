@@ -166,21 +166,21 @@ public class TestGroupAttributeService {
 
     @Test
     public void hasListservTest() {
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
     }
 
     @Test
     public void changeListServStatusTest() {
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
         //get last modified time
         WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
 
         //get last modified time and make sure that it hasn't changed
@@ -194,7 +194,7 @@ public class TestGroupAttributeService {
         assertEquals(lastModTime, lastModTime2);
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING,LISTSERV));
 
         //todo get last modified time and make sure that it has changed
         try {
@@ -207,7 +207,7 @@ public class TestGroupAttributeService {
         assertNotEquals(lastModTime2, lastModTime3);
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
         //todo get last modified time and make sure that it hasn't changed
         try {
@@ -225,15 +225,15 @@ public class TestGroupAttributeService {
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,false);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
     }
 
     @Test
@@ -409,6 +409,5 @@ public class TestGroupAttributeService {
         GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
         boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
         assertTrue(true);
-//        groupAttributeService.isContainingListserv()
     }
 }

@@ -213,18 +213,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return results;
     }
 
-    //returns true if the grouping has a listserv, false otherwise
-    @Override
-    public boolean isContainingListserv(String groupingPath) {
-        return isGroupAttribute(groupingPath, LISTSERV);
-    }
-
-    //returns true if the grouping has LDAP, false otherwise
-    @Override
-    public boolean isContainingReleasedGrouping(String groupingPath) {
-        return isGroupAttribute(groupingPath, RELEASED_GROUPING);
-    }
-
     //returns true if the grouping allows the user to opt out, false otherwise
     @Override
     public boolean isOptOutPossible(String groupingPath) {
