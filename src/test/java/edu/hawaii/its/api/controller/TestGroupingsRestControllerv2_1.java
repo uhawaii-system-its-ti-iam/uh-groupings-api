@@ -994,8 +994,8 @@ public class TestGroupingsRestControllerv2_1 {
     public void enableDisablePreferencesPassTest() throws Exception {
         assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
-        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser01);
@@ -1004,8 +1004,8 @@ public class TestGroupingsRestControllerv2_1 {
 
         assertFalse(groupAttributeService.isOptInPossible(GROUPING));
         assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
-        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
-        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser01);
@@ -1014,8 +1014,8 @@ public class TestGroupingsRestControllerv2_1 {
 
         assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
-        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
-        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
 
         //todo Test all permutations of bad data
         try {

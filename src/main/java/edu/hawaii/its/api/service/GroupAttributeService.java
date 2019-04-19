@@ -12,10 +12,6 @@ public interface GroupAttributeService {
 
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
 
-    public boolean isContainingListserv(String groupingPath);
-
-    public boolean isContainingReleasedGrouping(String groupingPath);
-
     public boolean isOptOutPossible(String groupingPath);
 
     public boolean isOptInPossible(String groupingPath);

@@ -241,7 +241,7 @@ public class GroupAttributeServiceTest {
         String owner = users.get(0).getUsername(); // username0
 
         //starts ON
-        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
 
         // ON to ON
         try {
@@ -252,7 +252,7 @@ public class GroupAttributeServiceTest {
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
 
         //ON to OFF
         try {
@@ -263,7 +263,7 @@ public class GroupAttributeServiceTest {
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
 
         // OFF to OFF
         try {
@@ -274,7 +274,7 @@ public class GroupAttributeServiceTest {
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
 
         // OFF to ON
         try {
@@ -285,7 +285,7 @@ public class GroupAttributeServiceTest {
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
     }
 
     @Test
@@ -473,11 +473,11 @@ public class GroupAttributeServiceTest {
     @Test
     public void hasListservTest() {
 
-        boolean isGroupingHasListserv = groupAttributeService.isContainingListserv(GROUPING_0_PATH);
+        boolean isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, LISTSERV);
 
         assertEquals(false, isGroupingHasListserv);
 
-        isGroupingHasListserv = groupAttributeService.isContainingListserv(GROUPING_3_PATH);
+        isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_3_PATH, LISTSERV);
 
         assertEquals(true, isGroupingHasListserv);
     }
@@ -487,11 +487,11 @@ public class GroupAttributeServiceTest {
 
         groupingRepository.findByPath(GROUPING_0_PATH);
 
-        boolean isHasReleasedGrouping = groupAttributeService.isContainingReleasedGrouping(GROUPING_0_PATH);
+        boolean isHasReleasedGrouping = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING);
         assertTrue(isHasReleasedGrouping);
 
         groupingRepository.findByPath(GROUPING_1_PATH);
-        isHasReleasedGrouping = groupAttributeService.isContainingReleasedGrouping(GROUPING_1_PATH);
+        isHasReleasedGrouping = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, RELEASED_GROUPING);
         assertFalse(isHasReleasedGrouping);
 
     }
