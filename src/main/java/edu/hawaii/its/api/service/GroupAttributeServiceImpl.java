@@ -213,19 +213,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return results;
     }
 
-    //returns true if the grouping allows the user to opt out, false otherwise
-    @Override
-    public boolean isOptOutPossible(String groupingPath) {
-        return isGroupAttribute(groupingPath, OPT_OUT);
-    }
-
-    //returns true if the grouping allows the user to opt in, false otherwise
-    @Override
-    public boolean isOptInPossible(String groupingPath) {
-        return isGroupAttribute(groupingPath, OPT_IN);
-    }
-
     //turns the attribute on or off in a group
+    // OPT_IN, OPT_OUT, and sync destinations are allowed
     @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
                                                              String attributeName, boolean turnAttributeOn) {

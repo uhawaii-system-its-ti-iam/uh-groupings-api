@@ -72,6 +72,12 @@ public class GroupAttributeServiceTest {
     @Value("${groupings.api.test.sync_destinations}")
     private List<String> SYNC_DESTINATIONS;
 
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
+
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
+
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
@@ -448,11 +454,11 @@ public class GroupAttributeServiceTest {
     @Test
     public void optOutPermissionTest() {
 
-        boolean isHasPermission = groupAttributeService.isOptOutPossible(GROUPING_0_PATH);
+        boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_OUT);
 
         assertEquals(false, isHasPermission);
 
-        isHasPermission = groupAttributeService.isOptOutPossible(GROUPING_1_PATH);
+        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, OPT_OUT);
 
         assertEquals(true, isHasPermission);
 
@@ -461,11 +467,11 @@ public class GroupAttributeServiceTest {
     @Test
     public void optInPermissionTest() {
 
-        boolean isHasPermission = groupAttributeService.isOptInPossible(GROUPING_0_PATH);
+        boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_IN);
 
         assertEquals(true, isHasPermission);
 
-        isHasPermission = groupAttributeService.isOptInPossible(GROUPING_2_PATH);
+        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_2_PATH, OPT_IN);
 
         assertEquals(false, isHasPermission);
     }

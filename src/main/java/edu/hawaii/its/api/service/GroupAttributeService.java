@@ -12,10 +12,6 @@ public interface GroupAttributeService {
 
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
 
-    public boolean isOptOutPossible(String groupingPath);
-
-    public boolean isOptInPossible(String groupingPath);
-
     public boolean isGroupAttribute(String groupPath, String attribute);
 
     public List<String> getAllSyncDestinations(String currentUsername);
