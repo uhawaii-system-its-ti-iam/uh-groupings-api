@@ -434,6 +434,26 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping to add include multiple members
+     *
+     * @param path: path of grouping to update
+     * @param uids: uids or uuids of members to add to include
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path}/includeMultipleMembers/{uids}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST includeMultipleMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    /**
      * Update grouping to add new exclude member
      *
      * @param path: path of grouping to update
@@ -529,7 +549,7 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
             } else if (LISTSERV.equals(preferenceId)) {
-//                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
+                //                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
                 results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, true));
             } else {
                 results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
@@ -541,6 +561,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Remove these later. Keeping for now to ensure smooth UI-transition
+
     /**
      * Update grouping to disable given preference
      *
@@ -567,7 +588,7 @@ public class GroupingsRestControllerv2_1 {
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
             } else if (LISTSERV.equals(preferenceId)) {
-//                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
+                //                results.add(groupAttributeService.changeListservStatus(path, currentUser, false));
                 results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, false));
             } else {
                 results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, false));
@@ -579,6 +600,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Do we need to test if a non-existent destination is given?
+
     /**
      *
      */
@@ -589,13 +611,14 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String syncDestName) {
-//        groupAttributeService.getAllSyncDestinations(currentUser);
+        //        groupAttributeService.getAllSyncDestinations(currentUser);
         return ResponseEntity
                 .ok()
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, true));
     }
 
     //todo Do we need to test if a non-existent destination is given?
+
     /**
      *
      */
