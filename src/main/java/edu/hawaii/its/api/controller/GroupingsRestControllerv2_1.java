@@ -597,7 +597,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(results);
     }
 
-    //todo Do we need to test if a non-existent destination is given?
+    //todo Do we need to test if a non-existent destination is given? No, although we may have to sanitize
     /**
      *
      */
@@ -608,13 +608,12 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String syncDestName) {
-        //        groupAttributeService.getAllSyncDestinations(currentUser);
         return ResponseEntity
                 .ok()
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, true));
     }
 
-    //todo Do we need to test if a non-existent destination is given?
+    //todo Do we need to test if a non-existent destination is given? No, although we may have to sanitize
     /**
      *
      */
