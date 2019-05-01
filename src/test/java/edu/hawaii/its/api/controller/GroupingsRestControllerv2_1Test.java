@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -76,6 +77,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
+
+    @Value("${url.base}")
+    private String BASE_URL;
 
     @MockBean
     private GroupAttributeService groupAttributeService;
@@ -917,8 +921,39 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].action").value("delete grouping"));
     }
 
+    @Test
+    @WithMockUhUser
+    public void descriptionCheck() throws Exception {
+        Grouping testGrouping = groupingTwo();
+        String mockGroupPath = testGrouping.getPath();
 
-    // todo uh oh. USERNAME should be denied
+        mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content("Test")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUhUser
+    public void memberLookupTest() throws Exception {
+        mockMvc.perform(get(API_BASE + "/members/i0-uuid")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
+
     @Ignore
     @Test
     @WithMockUhUser(username = "abc")
@@ -943,8 +978,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
     }
 
-    //todo ADMIN should work
-    // todo this test is done
     @Ignore
     @Test
     @WithMockAdminUser(username = "bobo")
@@ -1005,4 +1038,40 @@ public class GroupingsRestControllerv2_1Test {
 //                    .andExpect(status().isOk())
 //                    .andReturn();
     }
+
+    @Test
+    @WithMockUhUser
+    public void selfTest() throws Exception {
+        Grouping test = groupingTwo();
+
+        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
+                        .header("current_user", "o6-username")
+                        .header("accept", "application/json"))
+                       .andDo(print())
+                       .andExpect(status().isOk())
+                       .andReturn();
+
+        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
+                .header("current_user", "o6-username")
+                .header("accept", "application/json"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
+    @Test
+    @WithMockUhUser
+    public void syncDestinationsTest() throws Exception {
+        Grouping group = groupingTwo();
+        System.out.println(group.getOwners());
+
+        mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
+                .header("current_user", "o6-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
 }
