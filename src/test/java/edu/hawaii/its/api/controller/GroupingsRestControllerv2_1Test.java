@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -76,6 +77,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
+
+    @Value("${url.base}")
+    private String BASE_URL;
 
     @MockBean
     private GroupAttributeService groupAttributeService;
@@ -303,7 +307,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[0].path").value("test:ing:me:bob"))
                 .andExpect(jsonPath("allGroupings[0].listservOn").value("true"))
 
-                        // basis
+                // basis
                 .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].name").value("b0-name"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].uuid").value("b0-uuid"))
@@ -314,7 +318,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].uuid").value("b2-uuid"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].username").value("b2-username"))
 
-                        // exclude
+                // exclude
                 .andExpect(jsonPath("allGroupings[0].exclude.members", hasSize(1)))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
@@ -422,12 +426,12 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     //todo This user owns nothing
-//    @Test
-//    @WithMockUhUser(username = "")
-//    public void memberGroupingsFailTest() throws Exception {
-//        mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
-//                .andExpect(status().is4xxClientError());
-//    }
+    //    @Test
+    //    @WithMockUhUser(username = "")
+    //    public void memberGroupingsFailTest() throws Exception {
+    //        mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
+    //                .andExpect(status().is4xxClientError());
+    //    }
 
     //    @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
@@ -480,7 +484,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[1].owners.members[2].uuid").value("o2-uuid"));
     }
 
-
     @Ignore
     @Test
     @WithAnonymousUser
@@ -490,12 +493,12 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     //todo This user owns nothing
-//    @Test
-//    @WithMockUhUser(username = "")
-//    public void ownerGroupingsFailTest() throws Exception {
-//        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-//                .andExpect(status().is4xxClientError());
-//    }
+    //    @Test
+    //    @WithMockUhUser(username = "")
+    //    public void ownerGroupingsFailTest() throws Exception {
+    //        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
+    //                .andExpect(status().is4xxClientError());
+    //    }
 
     @Test
     @WithMockUhUser(username = "uhAdmin")
@@ -695,7 +698,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
+        mockMvc.perform(
+                put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -872,7 +876,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("action").value("delete admin"));
     }
 
-
     @Test
     @WithMockUhUser(username = "admin")
     public void adminListsTest() throws Exception {
@@ -918,7 +921,38 @@ public class GroupingsRestControllerv2_1Test {
     }
 
 
-    // todo uh oh. USERNAME should be denied
+    @Test
+    @WithMockUhUser
+    public void descriptionCheck() throws Exception {
+        Grouping testGrouping = groupingTwo();
+        String mockGroupPath = testGrouping.getPath();
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content("Test")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUhUser
+    public void memberLookupTest() throws Exception {
+        mockMvc.perform(get(API_BASE + "/members/i0-uuid")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
+                .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
     @Ignore
     @Test
     @WithMockUhUser(username = "abc")
@@ -943,8 +977,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
     }
 
-    //todo ADMIN should work
-    // todo this test is done
     @Ignore
     @Test
     @WithMockAdminUser(username = "bobo")
@@ -990,19 +1022,75 @@ public class GroupingsRestControllerv2_1Test {
         // Keeps failing; is this a bug?
         assertTrue(memberAttributeService.isOwner(testGroup.getPath(), "o0-username"));
 
-//            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//
-//            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//
-//            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
-//                    .andDo(print())
-//                    .andExpect(status().isOk())
-//                    .andReturn();
+        //            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
+        //
+        //            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
+        //
+        //            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
+        //                    .andDo(print())
+        //                    .andExpect(status().isOk())
+        //                    .andReturn();
     }
+
+    @Test
+    @WithMockUhUser(username = "abc")
+    public void descriptionTest() throws Exception {
+        Grouping groupingTest = grouping();
+
+        // Check that regular member cannot change description
+        MvcResult memberDescriptionResult = mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+                .header(CURRENT_USER, "abc"))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+
+        // Admin should be able to change description
+        MvcResult adminDescriptionResult = mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+                .header(CURRENT_USER, "admin"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUhUser
+    public void selfTest() throws Exception {
+        Grouping test = groupingTwo();
+
+        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
+                        .header("current_user", "o6-username")
+                        .header("accept", "application/json"))
+                       .andDo(print())
+                       .andExpect(status().isOk())
+                       .andReturn();
+
+        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
+                .header("current_user", "o6-username")
+                .header("accept", "application/json"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
+    @Test
+    @WithMockUhUser
+    public void syncDestinationsTest() throws Exception {
+        Grouping group = groupingTwo();
+        System.out.println(group.getOwners());
+
+        mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
+                .header("current_user", "o6-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
 }

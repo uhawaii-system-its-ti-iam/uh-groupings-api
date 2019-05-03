@@ -122,6 +122,7 @@ public class TestGroupingFactoryService {
     // todo running this with out a stem gives an error "Cant find stem: ..." - make sure the code adds this stem if
     // necessary
     // todo the code should give admin privileges to the groupingSuperusers group
+
     // todo Don't run these tests quite yet as these functions shouldn't be used for now.
 //    @Test
 //    public void addGroupingTest() {
@@ -255,5 +256,4 @@ public class TestGroupingFactoryService {
 //            groupingFactoryService.privilegegTets(APP_USER, "hawaii.edu:custom:test:kahlin:privilegeTesting");
 //
 //    }
-
 }
