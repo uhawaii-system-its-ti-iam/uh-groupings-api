@@ -196,6 +196,15 @@ public class GroupingsRestControllerv2_1 {
             @RequestParam(required = false) String sortString,
             @RequestParam(required = false) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
+//        ResponseEntity<Grouping> re = ResponseEntity.ok().body(groupingAssignmentService
+//                .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
+//        logger.info("Return getGrouping..." + re);
+//        return re;
+
+//        Grouping grouping = groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending);
+//        logger.info("RETURN FROM REST GETGROUPING..." + grouping);
+
+        //todo getPaginatedGrouping does not return anything in syncDest, but only here in the REST controller
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService
