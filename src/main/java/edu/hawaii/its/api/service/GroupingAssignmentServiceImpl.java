@@ -332,6 +332,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setComposite(groups.get(groupingPath));
             compositeGrouping.setOwners(groups.get(owners));
 
+            System.out.println("CompositeGroupingComingBack" + compositeGrouping);
+//            logger.info(compositeGrouping);
             return compositeGrouping;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
@@ -626,6 +628,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         // set the sync destinations map
         Map<String, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());
+        System.out.println("syncDestinationMapComesBack:" + syncDestinations);
         grouping.setSyncDestinations(syncDestinations);
 
         return grouping;

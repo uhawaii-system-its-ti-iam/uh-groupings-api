@@ -73,7 +73,7 @@ public class Grouping {
         setOwners(new EmptyGroup());
     }
 
-    @JsonIgnore
+//    @JsonIgnore
     @ElementCollection
     public Map<String, Boolean> getSyncDestinations() {
         return syncDestinations;
