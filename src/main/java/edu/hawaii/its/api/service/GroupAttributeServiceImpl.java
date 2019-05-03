@@ -360,6 +360,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
+    // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description) {
         logger.info("updateDescription(); groupPath:" + groupPath +
                 "; ownerUsername:" + ownerUsername +

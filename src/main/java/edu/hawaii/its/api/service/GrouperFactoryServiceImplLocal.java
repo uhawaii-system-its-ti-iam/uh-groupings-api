@@ -258,7 +258,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
-
         WsFindGroupsResults groupsResults = new WsFindGroupsResults();
         WsGroup[] groups = new WsGroup[1];
 
@@ -270,7 +269,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         groupsResults.setGroupResults(groups);
 
         return groupsResults;
-
     }
 
     /**
@@ -1321,6 +1319,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
             String attributeDefNameName,
             List<String> ownerGroupNames) {
+        //todo
+        return null;
+    }
+
+//    @Override
+    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            String groupName,
+            String filterString,
+            Integer page,
+            Integer size) {
         //todo
         return null;
     }
