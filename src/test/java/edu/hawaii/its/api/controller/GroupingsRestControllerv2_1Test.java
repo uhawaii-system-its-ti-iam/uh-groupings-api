@@ -619,8 +619,8 @@ public class GroupingsRestControllerv2_1Test {
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("listserv status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("listserv status changed"));
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
                 .willReturn(gsrReleasedGrouping());
@@ -628,8 +628,8 @@ public class GroupingsRestControllerv2_1Test {
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("ldap status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("ldap status changed"));
 
     }
 
@@ -674,8 +674,8 @@ public class GroupingsRestControllerv2_1Test {
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("listserv status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("listserv status changed"));
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false))
                 .willReturn(gsrReleasedGrouping());
@@ -683,8 +683,8 @@ public class GroupingsRestControllerv2_1Test {
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("ldap status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("ldap status changed"));
 
     }
 
