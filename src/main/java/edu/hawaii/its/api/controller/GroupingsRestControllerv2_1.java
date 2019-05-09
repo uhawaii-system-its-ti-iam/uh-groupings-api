@@ -196,13 +196,13 @@ public class GroupingsRestControllerv2_1 {
             @RequestParam(required = false) String sortString,
             @RequestParam(required = false) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
-//        ResponseEntity<Grouping> re = ResponseEntity.ok().body(groupingAssignmentService
-//                .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
-//        logger.info("Return getGrouping..." + re);
-//        return re;
+        //        ResponseEntity<Grouping> re = ResponseEntity.ok().body(groupingAssignmentService
+        //                .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
+        //        logger.info("Return getGrouping..." + re);
+        //        return re;
 
-//        Grouping grouping = groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending);
-//        logger.info("RETURN FROM REST GETGROUPING..." + grouping);
+        //        Grouping grouping = groupingAssignmentService.getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending);
+        //        logger.info("RETURN FROM REST GETGROUPING..." + grouping);
 
         //todo getPaginatedGrouping does not return anything in syncDest, but only here in the REST controller
         return ResponseEntity
@@ -510,35 +510,6 @@ public class GroupingsRestControllerv2_1 {
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
-    //    @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
-    //            method = RequestMethod.PUT,
-    //            produces = MediaType.APPLICATION_JSON_VALUE)
-    //    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
-    //            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-    //            @PathVariable String preferenceId) {
-    //        logger.info("Entered REST enablePreference");
-    //        List<GroupingsServiceResult> results = new ArrayList<>();
-    //
-    //        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
-    //                && !RELEASED_GROUPING.equals(preferenceId)) {
-    //            throw new UnsupportedOperationException();
-    //        } else {
-    //            if (OPT_IN.equals(preferenceId)) {
-    //                results = groupAttributeService.changeOptInStatus(path, currentUser, true);
-    //            } else if (OPT_OUT.equals(preferenceId)) {
-    //                results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
-    //            } else if (LISTSERV.equals(preferenceId)) {
-    //                results.add(groupAttributeService.changeListservStatus(path, currentUser, true));
-    //            } else {
-    //                results.add(groupAttributeService.changeReleasedGroupingStatus(path, currentUser, true));
-    //            }
-    //        }
-    //        return ResponseEntity
-    //                .ok()
-    //                .body(results);
-    //    }
-
-    //todo Remove these later. Keeping for now to ensure smooth UI-transition
     @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -549,26 +520,19 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST enablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
-                && !RELEASED_GROUPING.equals(preferenceId)) {
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
                 results = groupAttributeService.changeOptInStatus(path, currentUser, true);
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
-            } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, true));
-            } else {
-                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, RELEASED_GROUPING, true));
             }
         }
         return ResponseEntity
                 .ok()
                 .body(results);
     }
-
-    //todo Remove these later. Keeping for now to ensure smooth UI-transition
 
     /**
      * Update grouping to disable given preference
@@ -587,18 +551,13 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST disablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId) && !LISTSERV.equals(preferenceId)
-                && !RELEASED_GROUPING.equals(preferenceId)) {
+        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId)) {
             throw new UnsupportedOperationException();
         } else {
             if (OPT_IN.equals(preferenceId)) {
                 results = groupAttributeService.changeOptInStatus(path, currentUser, false);
             } else if (OPT_OUT.equals(preferenceId)) {
                 results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
-            } else if (LISTSERV.equals(preferenceId)) {
-                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, LISTSERV, false));
-            } else {
-                results.add(groupAttributeService.changeGroupAttributeStatus(path, currentUser, RELEASED_GROUPING, false));
             }
         }
         return ResponseEntity
@@ -607,8 +566,13 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Do we need to test if a non-existent destination is given? No, although we may have to sanitize
+
     /**
+     * Update grouping to enable given preference
      *
+     * @param path:         path of grouping to update
+     * @param syncDestName: name of syncDest to update
+     * @return Information about result of operation
      */
     @RequestMapping(value = "/groupings/{path}/syncDest/{syncDestName}/enable",
             method = RequestMethod.PUT,
@@ -623,8 +587,13 @@ public class GroupingsRestControllerv2_1 {
     }
 
     //todo Do we need to test if a non-existent destination is given? No, although we may have to sanitize
+
     /**
+     * Update grouping to disable given preference
      *
+     * @param path:         path of grouping to update
+     * @param syncDestName: name of syncDest to update
+     * @return Information about result of operation
      */
     @RequestMapping(value = "/groupings/{path}/syncDest/{syncDestName}/disable",
             method = RequestMethod.PUT,
