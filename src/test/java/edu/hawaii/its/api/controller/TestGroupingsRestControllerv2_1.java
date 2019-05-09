@@ -999,8 +999,8 @@ public class TestGroupingsRestControllerv2_1 {
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDest/" + LISTSERV + "/disable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDest/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + LISTSERV + "/disable", "put", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
 
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
@@ -1009,8 +1009,8 @@ public class TestGroupingsRestControllerv2_1 {
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDest/" + LISTSERV + "/enable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDest/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + LISTSERV + "/enable", "put", uhUser01);
+        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
 
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
