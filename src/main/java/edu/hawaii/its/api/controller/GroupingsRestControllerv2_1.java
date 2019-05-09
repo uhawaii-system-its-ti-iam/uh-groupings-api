@@ -574,7 +574,7 @@ public class GroupingsRestControllerv2_1 {
      * @param syncDestName: name of syncDest to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/syncDest/{syncDestName}/enable",
+    @RequestMapping(value = "/groupings/{path}/syncDests/{syncDestName}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> enableSyncDest(
@@ -595,7 +595,7 @@ public class GroupingsRestControllerv2_1 {
      * @param syncDestName: name of syncDest to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/syncDest/{syncDestName}/disable",
+    @RequestMapping(value = "/groupings/{path}/syncDests/{syncDestName}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> disableSyncDest(
