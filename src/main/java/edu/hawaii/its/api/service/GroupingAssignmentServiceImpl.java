@@ -591,13 +591,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
 
-        //todo: after the UI starts using the map instead of the hard coded sync destinations, the hard coded ones can
-        // be removed. Currently those are isListserveOn and isReleasedGroupingOn
-        // isOptOutOn and isOptInOn can be left alone because they are not sync destinations
-        boolean isListservOn = false;
         boolean isOptInOn = false;
         boolean isOptOutOn = false;
-        boolean isReleasedGroupingOn = false;
 
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 grouperFactoryService.makeWsGetAttributeAssignmentsResultsForGroup(
@@ -608,23 +603,16 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (attributeDefNames != null && attributeDefNames.length > 0) {
             for (WsAttributeDefName defName : attributeDefNames) {
                 String name = defName.getName();
-                if (name.equals(LISTSERV)) {
-                    isListservOn = true;
-                } else if (name.equals(OPT_IN)) {
+                if (name.equals(OPT_IN)) {
                     isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
                     isOptOutOn = true;
-                } else if (name.equals(RELEASED_GROUPING)) {
-                    isReleasedGroupingOn = true;
                 }
             }
         }
 
-        grouping.setListservOn(isListservOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
-        grouping.setReleasedGroupingOn(isReleasedGroupingOn);
-
 
         // set the sync destinations map
         Map<String, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());

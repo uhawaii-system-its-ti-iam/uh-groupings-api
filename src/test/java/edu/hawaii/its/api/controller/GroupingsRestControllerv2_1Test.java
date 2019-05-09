@@ -594,7 +594,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void enablePreferenceTest() throws Exception {
+    public void enablePreferenceSyncDestTest() throws Exception {
         given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
                 .willReturn(gsrListIn());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable")
@@ -615,7 +615,7 @@ public class GroupingsRestControllerv2_1Test {
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + LISTSERV + "/enable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
@@ -624,7 +624,7 @@ public class GroupingsRestControllerv2_1Test {
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
                 .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + RELEASED_GROUPING + "/enable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
@@ -636,20 +636,20 @@ public class GroupingsRestControllerv2_1Test {
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonEnablePreferenceTest() throws Exception {
+    public void anonEnablePreferenceSyncDestTest() throws Exception {
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + LISTSERV + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + RELEASED_GROUPING + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
     @Test
     @WithMockUhUser
-    public void disablePreferenceTest() throws Exception {
+    public void disablePreferenceSyncDestTest() throws Exception {
         given(groupAttributeService.changeOptInStatus("grouping", USERNAME, false))
                 .willReturn(gsrListIn2());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable")
@@ -670,7 +670,7 @@ public class GroupingsRestControllerv2_1Test {
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false))
                         .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + LISTSERV + "/disable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
@@ -679,7 +679,7 @@ public class GroupingsRestControllerv2_1Test {
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false))
                 .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + RELEASED_GROUPING + "/disable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
@@ -691,15 +691,15 @@ public class GroupingsRestControllerv2_1Test {
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonDisablePreferenceTest() throws Exception {
+    public void anonDisablePreferenceSyncDestTest() throws Exception {
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDest/" + LISTSERV + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(
-                put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
+                put(API_BASE + "/groupings/grouping/syncDest/" + RELEASED_GROUPING + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
