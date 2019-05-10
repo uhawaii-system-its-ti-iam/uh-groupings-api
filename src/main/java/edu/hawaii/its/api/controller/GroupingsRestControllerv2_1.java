@@ -453,6 +453,26 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addGroupMember(currentUser, path, uid));
     }
 
+  /**
+   * Update grouping to add exclude multiple members
+   *
+   * @param path: path of grouping to update
+   * @param uids:  uids or uuids of members to add to exclude
+   * @return Information about results of the operation
+   */
+  @RequestMapping(value = "/groupings/{path}/excludeMultipleMembers/{uids}",
+      method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
+      @RequestHeader("current_user") String currentUser, @PathVariable String path,
+      @PathVariable List <String> uids) {
+    logger.info("Entered REST excludeMultipleMembers...");
+    path = path + EXCLUDE;
+    return ResponseEntity
+        .ok()
+        .body(membershipService.addGroupMembers(currentUser, path, uids));
+  }
+
     /**
      * Update grouping to enable given preference
      *
