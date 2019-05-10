@@ -467,7 +467,7 @@ public class GroupingsRestControllerv2_1 {
       @RequestHeader("current_user") String currentUser, @PathVariable String path,
       @PathVariable List <String> uids) {
     logger.info("Entered REST excludeMultipleMembers...");
-    path = path + INCLUDE;
+    path = path + EXCLUDE;
     return ResponseEntity
         .ok()
         .body(membershipService.addGroupMembers(currentUser, path, uids));
