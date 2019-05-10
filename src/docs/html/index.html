@@ -467,23 +467,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_excludemembersusingput">2.2.10. excludeMembers</a></li>
 <li><a href="#_deleteexcludeusingdelete">2.2.11. deleteExclude</a></li>
 <li><a href="#_optoutusingput">2.2.12. optOut</a></li>
-<li><a href="#_includemembersusingput">2.2.13. includeMembers</a></li>
-<li><a href="#_deleteincludeusingdelete">2.2.14. deleteInclude</a></li>
-<li><a href="#_optinusingput">2.2.15. optIn</a></li>
-<li><a href="#_addmanagerusingput">2.2.16. addManager</a></li>
-<li><a href="#_deletemanagerusingdelete">2.2.17. deleteManager</a></li>
-<li><a href="#_disablemanagerpermissionusingput">2.2.18. disableManagerPermission</a></li>
-<li><a href="#_enablemanagerpermissionusingput">2.2.19. enableManagerPermission</a></li>
-<li><a href="#_promotemanagerusingput">2.2.20. promoteManager</a></li>
-<li><a href="#_addownerusingput">2.2.21. addOwner</a></li>
-<li><a href="#_deleteownerusingdelete">2.2.22. deleteOwner</a></li>
-<li><a href="#_demoteownerusingput">2.2.23. demoteOwner</a></li>
-<li><a href="#_disablepreferenceusingput">2.2.24. disablePreference</a></li>
-<li><a href="#_enablepreferenceusingput">2.2.25. enablePreference</a></li>
-<li><a href="#_managergroupingsusingget">2.2.26. managerGroupings</a></li>
-<li><a href="#_memberattributesusingget">2.2.27. memberAttributes</a></li>
-<li><a href="#_membergroupingsusingget">2.2.28. memberGroupings</a></li>
-<li><a href="#_ownergroupingsusingget">2.2.29. ownerGroupings</a></li>
+<li><a href="#_excludemultiplemembersusingput">2.2.13. excludeMultipleMembers</a></li>
+<li><a href="#_includemembersusingput">2.2.14. includeMembers</a></li>
+<li><a href="#_deleteincludeusingdelete">2.2.15. deleteInclude</a></li>
+<li><a href="#_optinusingput">2.2.16. optIn</a></li>
+<li><a href="#_includemultiplemembersusingput">2.2.17. includeMultipleMembers</a></li>
+<li><a href="#_addmanagerusingput">2.2.18. addManager</a></li>
+<li><a href="#_deletemanagerusingdelete">2.2.19. deleteManager</a></li>
+<li><a href="#_disablemanagerpermissionusingput">2.2.20. disableManagerPermission</a></li>
+<li><a href="#_enablemanagerpermissionusingput">2.2.21. enableManagerPermission</a></li>
+<li><a href="#_promotemanagerusingput">2.2.22. promoteManager</a></li>
+<li><a href="#_addownerusingput">2.2.23. addOwner</a></li>
+<li><a href="#_deleteownerusingdelete">2.2.24. deleteOwner</a></li>
+<li><a href="#_demoteownerusingput">2.2.25. demoteOwner</a></li>
+<li><a href="#_disablepreferenceusingput">2.2.26. disablePreference</a></li>
+<li><a href="#_enablepreferenceusingput">2.2.27. enablePreference</a></li>
+<li><a href="#_managergroupingsusingget">2.2.28. managerGroupings</a></li>
+<li><a href="#_memberattributesusingget">2.2.29. memberAttributes</a></li>
+<li><a href="#_membergroupingsusingget">2.2.30. memberGroupings</a></li>
+<li><a href="#_ownergroupingsusingget">2.2.31. ownerGroupings</a></li>
 </ul>
 </li>
 <li><a href="#_home-controller_resource">2.3. Home-controller</a>
@@ -2250,10 +2252,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_includemembersusingput"><a class="anchor" href="#_includemembersusingput"></a><a class="link" href="#_includemembersusingput">2.2.13. includeMembers</a></h4>
+<h4 id="_excludemultiplemembersusingput"><a class="anchor" href="#_excludemultiplemembersusingput"></a><a class="link" href="#_excludemultiplemembersusingput">2.2.13. excludeMultipleMembers</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/excludeMultipleMembers/{uids}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2290,9 +2292,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uids</strong><br>
 <em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uids</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 </tbody>
@@ -2364,10 +2366,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_deleteincludeusingdelete"><a class="anchor" href="#_deleteincludeusingdelete"></a><a class="link" href="#_deleteincludeusingdelete">2.2.14. deleteInclude</a></h4>
+<h4 id="_includemembersusingput"><a class="anchor" href="#_includemembersusingput"></a><a class="link" href="#_includemembersusingput">2.2.14. includeMembers</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>DELETE /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2431,11 +2433,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -2448,8 +2450,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="sect4">
+<h5 id="_consumes_12"><a class="anchor" href="#_consumes_12"></a><a class="link" href="#_consumes_12">Consumes</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_21"><a class="anchor" href="#_produces_21"></a><a class="link" href="#_produces_21">Produces</a></h5>
@@ -2463,10 +2480,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_optinusingput"><a class="anchor" href="#_optinusingput"></a><a class="link" href="#_optinusingput">2.2.15. optIn</a></h4>
+<h4 id="_deleteincludeusingdelete"><a class="anchor" href="#_deleteincludeusingdelete"></a><a class="link" href="#_deleteincludeusingdelete">2.2.15. deleteInclude</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}/self</pre>
+<pre>DELETE /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2530,11 +2547,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -2547,23 +2564,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
 </tbody>
 </table>
-</div>
-<div class="sect4">
-<h5 id="_consumes_12"><a class="anchor" href="#_consumes_12"></a><a class="link" href="#_consumes_12">Consumes</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_22"><a class="anchor" href="#_produces_22"></a><a class="link" href="#_produces_22">Produces</a></h5>
@@ -2577,10 +2579,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_addmanagerusingput"><a class="anchor" href="#_addmanagerusingput"></a><a class="link" href="#_addmanagerusingput">2.2.16. addManager</a></h4>
+<h4 id="_optinusingput"><a class="anchor" href="#_optinusingput"></a><a class="link" href="#_optinusingput">2.2.16. optIn</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/includeMembers/{uid}/self</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2644,7 +2646,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -2691,10 +2693,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_deletemanagerusingdelete"><a class="anchor" href="#_deletemanagerusingdelete"></a><a class="link" href="#_deletemanagerusingdelete">2.2.17. deleteManager</a></h4>
+<h4 id="_includemultiplemembersusingput"><a class="anchor" href="#_includemultiplemembersusingput"></a><a class="link" href="#_includemultiplemembersusingput">2.2.17. includeMultipleMembers</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>DELETE /api/groupings/v2.1/groupings/{path}/managers/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/includeMultipleMembers/{uids}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2731,9 +2733,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uids</strong><br>
 <em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uids</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 </tbody>
@@ -2758,11 +2760,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -2775,8 +2777,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="sect4">
+<h5 id="_consumes_14"><a class="anchor" href="#_consumes_14"></a><a class="link" href="#_consumes_14">Consumes</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_24"><a class="anchor" href="#_produces_24"></a><a class="link" href="#_produces_24">Produces</a></h5>
@@ -2790,10 +2807,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_disablemanagerpermissionusingput"><a class="anchor" href="#_disablemanagerpermissionusingput"></a><a class="link" href="#_disablemanagerpermissionusingput">2.2.18. disableManagerPermission</a></h4>
+<h4 id="_addmanagerusingput"><a class="anchor" href="#_addmanagerusingput"></a><a class="link" href="#_addmanagerusingput">2.2.18. addManager</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/permissions/{id}/disable</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2819,13 +2836,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
 <em>required</em></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>id</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">id</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 <tr>
@@ -2890,7 +2900,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_consumes_14"><a class="anchor" href="#_consumes_14"></a><a class="link" href="#_consumes_14">Consumes</a></h5>
+<h5 id="_consumes_15"><a class="anchor" href="#_consumes_15"></a><a class="link" href="#_consumes_15">Consumes</a></h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2911,10 +2921,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_enablemanagerpermissionusingput"><a class="anchor" href="#_enablemanagerpermissionusingput"></a><a class="link" href="#_enablemanagerpermissionusingput">2.2.19. enableManagerPermission</a></h4>
+<h4 id="_deletemanagerusingdelete"><a class="anchor" href="#_deletemanagerusingdelete"></a><a class="link" href="#_deletemanagerusingdelete">2.2.19. deleteManager</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/permissions/{id}/enable</pre>
+<pre>DELETE /api/groupings/v2.1/groupings/{path}/managers/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -2940,13 +2950,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
 <em>required</em></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>id</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">id</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 <tr>
@@ -2988,8 +2991,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -3002,23 +3005,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
 </tbody>
 </table>
-</div>
-<div class="sect4">
-<h5 id="_consumes_15"><a class="anchor" href="#_consumes_15"></a><a class="link" href="#_consumes_15">Consumes</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_26"><a class="anchor" href="#_produces_26"></a><a class="link" href="#_produces_26">Produces</a></h5>
@@ -3032,10 +3020,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_promotemanagerusingput"><a class="anchor" href="#_promotemanagerusingput"></a><a class="link" href="#_promotemanagerusingput">2.2.20. promoteManager</a></h4>
+<h4 id="_disablemanagerpermissionusingput"><a class="anchor" href="#_disablemanagerpermissionusingput"></a><a class="link" href="#_disablemanagerpermissionusingput">2.2.20. disableManagerPermission</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/promote</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/permissions/{id}/disable</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3061,6 +3049,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
 <em>required</em></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>id</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">id</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 <tr>
@@ -3146,10 +3141,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_addownerusingput"><a class="anchor" href="#_addownerusingput"></a><a class="link" href="#_addownerusingput">2.2.21. addOwner</a></h4>
+<h4 id="_enablemanagerpermissionusingput"><a class="anchor" href="#_enablemanagerpermissionusingput"></a><a class="link" href="#_enablemanagerpermissionusingput">2.2.21. enableManagerPermission</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/owners/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/permissions/{id}/enable</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3175,6 +3170,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
 <em>required</em></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>id</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">id</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 <tr>
@@ -3213,7 +3215,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -3260,10 +3262,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_deleteownerusingdelete"><a class="anchor" href="#_deleteownerusingdelete"></a><a class="link" href="#_deleteownerusingdelete">2.2.22. deleteOwner</a></h4>
+<h4 id="_promotemanagerusingput"><a class="anchor" href="#_promotemanagerusingput"></a><a class="link" href="#_promotemanagerusingput">2.2.22. promoteManager</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>DELETE /api/groupings/v2.1/groupings/{path}/owners/{uid}</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/managers/{uid}/promote</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3327,11 +3329,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -3344,8 +3346,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="sect4">
+<h5 id="_consumes_18"><a class="anchor" href="#_consumes_18"></a><a class="link" href="#_consumes_18">Consumes</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_29"><a class="anchor" href="#_produces_29"></a><a class="link" href="#_produces_29">Produces</a></h5>
@@ -3359,10 +3376,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_demoteownerusingput"><a class="anchor" href="#_demoteownerusingput"></a><a class="link" href="#_demoteownerusingput">2.2.23. demoteOwner</a></h4>
+<h4 id="_addownerusingput"><a class="anchor" href="#_addownerusingput"></a><a class="link" href="#_addownerusingput">2.2.23. addOwner</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/owners/{uid}/demote</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/owners/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3426,7 +3443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -3452,7 +3469,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_consumes_18"><a class="anchor" href="#_consumes_18"></a><a class="link" href="#_consumes_18">Consumes</a></h5>
+<h5 id="_consumes_19"><a class="anchor" href="#_consumes_19"></a><a class="link" href="#_consumes_19">Consumes</a></h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3473,10 +3490,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_disablepreferenceusingput"><a class="anchor" href="#_disablepreferenceusingput"></a><a class="link" href="#_disablepreferenceusingput">2.2.24. disablePreference</a></h4>
+<h4 id="_deleteownerusingdelete"><a class="anchor" href="#_deleteownerusingdelete"></a><a class="link" href="#_deleteownerusingdelete">2.2.24. deleteOwner</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/preferences/{preferenceId}/disable</pre>
+<pre>DELETE /api/groupings/v2.1/groupings/{path}/owners/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3513,9 +3530,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>preferenceId</strong><br>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
 <em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">preferenceId</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 </tbody>
@@ -3540,11 +3557,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_groupingsserviceresult">GroupingsServiceResult</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>204</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
 <tr>
@@ -3557,23 +3574,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
 </tbody>
 </table>
-</div>
-<div class="sect4">
-<h5 id="_consumes_19"><a class="anchor" href="#_consumes_19"></a><a class="link" href="#_consumes_19">Consumes</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect4">
 <h5 id="_produces_31"><a class="anchor" href="#_produces_31"></a><a class="link" href="#_produces_31">Produces</a></h5>
@@ -3587,10 +3589,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_enablepreferenceusingput"><a class="anchor" href="#_enablepreferenceusingput"></a><a class="link" href="#_enablepreferenceusingput">2.2.25. enablePreference</a></h4>
+<h4 id="_demoteownerusingput"><a class="anchor" href="#_demoteownerusingput"></a><a class="link" href="#_demoteownerusingput">2.2.25. demoteOwner</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>PUT /api/groupings/v2.1/groupings/{path}/preferences/{preferenceId}/enable</pre>
+<pre>PUT /api/groupings/v2.1/groupings/{path}/owners/{uid}/demote</pre>
 </div>
 </div>
 <div class="sect4">
@@ -3627,9 +3629,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>preferenceId</strong><br>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
 <em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">preferenceId</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 </tbody>
@@ -3654,7 +3656,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_redirectview">RedirectView</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
@@ -3701,14 +3703,242 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_managergroupingsusingget"><a class="anchor" href="#_managergroupingsusingget"></a><a class="link" href="#_managergroupingsusingget">2.2.26. managerGroupings</a></h4>
+<h4 id="_disablepreferenceusingput"><a class="anchor" href="#_disablepreferenceusingput"></a><a class="link" href="#_disablepreferenceusingput">2.2.26. disablePreference</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>PUT /api/groupings/v2.1/groupings/{path}/preferences/{preferenceId}/disable</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_25"><a class="anchor" href="#_parameters_25"></a><a class="link" href="#_parameters_25">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>path</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">path</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>preferenceId</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">preferenceId</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_33"><a class="anchor" href="#_responses_33"></a><a class="link" href="#_responses_33">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_consumes_21"><a class="anchor" href="#_consumes_21"></a><a class="link" href="#_consumes_21">Consumes</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_produces_33"><a class="anchor" href="#_produces_33"></a><a class="link" href="#_produces_33">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enablepreferenceusingput"><a class="anchor" href="#_enablepreferenceusingput"></a><a class="link" href="#_enablepreferenceusingput">2.2.27. enablePreference</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>PUT /api/groupings/v2.1/groupings/{path}/preferences/{preferenceId}/enable</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_26"><a class="anchor" href="#_parameters_26"></a><a class="link" href="#_parameters_26">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>path</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">path</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>preferenceId</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">preferenceId</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_34"><a class="anchor" href="#_responses_34"></a><a class="link" href="#_responses_34">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_groupingsserviceresult">GroupingsServiceResult</a> &gt; array</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>201</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Created</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_consumes_22"><a class="anchor" href="#_consumes_22"></a><a class="link" href="#_consumes_22">Consumes</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_produces_34"><a class="anchor" href="#_produces_34"></a><a class="link" href="#_produces_34">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_managergroupingsusingget"><a class="anchor" href="#_managergroupingsusingget"></a><a class="link" href="#_managergroupingsusingget">2.2.28. managerGroupings</a></h4>
 <div class="literalblock">
 <div class="content">
 <pre>GET /api/groupings/v2.1/managers/{uid}/groupings</pre>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_25"><a class="anchor" href="#_parameters_25"></a><a class="link" href="#_parameters_25">Parameters</a></h5>
+<h5 id="_parameters_27"><a class="anchor" href="#_parameters_27"></a><a class="link" href="#_parameters_27">Parameters</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -3736,7 +3966,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_33"><a class="anchor" href="#_responses_33"></a><a class="link" href="#_responses_33">Responses</a></h5>
+<h5 id="_responses_35"><a class="anchor" href="#_responses_35"></a><a class="link" href="#_responses_35">Responses</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 10%;">
@@ -3775,190 +4005,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_produces_33"><a class="anchor" href="#_produces_33"></a><a class="link" href="#_produces_33">Produces</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_memberattributesusingget"><a class="anchor" href="#_memberattributesusingget"></a><a class="link" href="#_memberattributesusingget">2.2.27. memberAttributes</a></h4>
-<div class="literalblock">
-<div class="content">
-<pre>GET /api/groupings/v2.1/members/{uid}</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_parameters_26"><a class="anchor" href="#_parameters_26"></a><a class="link" href="#_parameters_26">Parameters</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 11.1111%;">
-<col style="width: 16.6666%;">
-<col style="width: 50%;">
-<col style="width: 22.2223%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">Type</th>
-<th class="tableblock halign-left valign-middle">Name</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_responses_34"><a class="anchor" href="#_responses_34"></a><a class="link" href="#_responses_34">Responses</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 10%;">
-<col style="width: 70%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">HTTP Code</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_produces_34"><a class="anchor" href="#_produces_34"></a><a class="link" href="#_produces_34">Produces</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_membergroupingsusingget"><a class="anchor" href="#_membergroupingsusingget"></a><a class="link" href="#_membergroupingsusingget">2.2.28. memberGroupings</a></h4>
-<div class="literalblock">
-<div class="content">
-<pre>GET /api/groupings/v2.1/members/{uid}/groupings</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_parameters_27"><a class="anchor" href="#_parameters_27"></a><a class="link" href="#_parameters_27">Parameters</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 11.1111%;">
-<col style="width: 16.6666%;">
-<col style="width: 50%;">
-<col style="width: 22.2223%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">Type</th>
-<th class="tableblock halign-left valign-middle">Name</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
-<em>required</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_responses_35"><a class="anchor" href="#_responses_35"></a><a class="link" href="#_responses_35">Responses</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 10%;">
-<col style="width: 70%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">HTTP Code</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_membershipassignment">MembershipAssignment</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
 <h5 id="_produces_35"><a class="anchor" href="#_produces_35"></a><a class="link" href="#_produces_35">Produces</a></h5>
 <div class="ulist">
 <ul>
@@ -3970,10 +4016,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_ownergroupingsusingget"><a class="anchor" href="#_ownergroupingsusingget"></a><a class="link" href="#_ownergroupingsusingget">2.2.29. ownerGroupings</a></h4>
+<h4 id="_memberattributesusingget"><a class="anchor" href="#_memberattributesusingget"></a><a class="link" href="#_memberattributesusingget">2.2.29. memberAttributes</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>GET /api/groupings/v2.1/owners/{uid}/groupings</pre>
+<pre>GET /api/groupings/v2.1/members/{uid}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -4030,7 +4076,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_grouping">Grouping</a> &gt; array</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
@@ -4061,17 +4107,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_home-controller_resource"><a class="anchor" href="#_home-controller_resource"></a><a class="link" href="#_home-controller_resource">2.3. Home-controller</a></h3>
-<div class="paragraph">
-<p>Home Controller</p>
-</div>
 <div class="sect3">
-<h4 id="_homeusingget"><a class="anchor" href="#_homeusingget"></a><a class="link" href="#_homeusingget">2.3.1. home</a></h4>
+<h4 id="_membergroupingsusingget"><a class="anchor" href="#_membergroupingsusingget"></a><a class="link" href="#_membergroupingsusingget">2.2.30. memberGroupings</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>GET /</pre>
+<pre>GET /api/groupings/v2.1/members/{uid}/groupings</pre>
 </div>
 </div>
 <div class="sect4">
@@ -4093,101 +4133,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>ISO3Country</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>ISO3Language</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>country</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayCountry</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayLanguage</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayName</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayScript</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayVariant</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>language</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>model</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">model</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>script</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>unicodeLocaleAttributes</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string &gt; array(multi)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>unicodeLocaleKeys</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string &gt; array(multi)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>variant</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
 </tr>
 </tbody>
@@ -4212,7 +4168,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
 <td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><a href="#_membershipassignment">MembershipAssignment</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
@@ -4237,21 +4193,119 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code><strong>/</strong></code></p>
+<p><code>application/json</code></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_homeusingget_1"><a class="anchor" href="#_homeusingget_1"></a><a class="link" href="#_homeusingget_1">2.3.2. home</a></h4>
+<h4 id="_ownergroupingsusingget"><a class="anchor" href="#_ownergroupingsusingget"></a><a class="link" href="#_ownergroupingsusingget">2.2.31. ownerGroupings</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>GET /home</pre>
+<pre>GET /api/groupings/v2.1/owners/{uid}/groupings</pre>
 </div>
 </div>
 <div class="sect4">
 <h5 id="_parameters_30"><a class="anchor" href="#_parameters_30"></a><a class="link" href="#_parameters_30">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Header</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>current_user</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">current_user</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Path</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>uid</strong><br>
+<em>required</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">uid</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_38"><a class="anchor" href="#_responses_38"></a><a class="link" href="#_responses_38">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; <a href="#_grouping">Grouping</a> &gt; array</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_produces_38"><a class="anchor" href="#_produces_38"></a><a class="link" href="#_produces_38">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_home-controller_resource"><a class="anchor" href="#_home-controller_resource"></a><a class="link" href="#_home-controller_resource">2.3. Home-controller</a></h3>
+<div class="paragraph">
+<p>Home Controller</p>
+</div>
+<div class="sect3">
+<h4 id="_homeusingget"><a class="anchor" href="#_homeusingget"></a><a class="link" href="#_homeusingget">2.3.1. home</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_31"><a class="anchor" href="#_parameters_31"></a><a class="link" href="#_parameters_31">Parameters</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -4370,7 +4424,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_38"><a class="anchor" href="#_responses_38"></a><a class="link" href="#_responses_38">Responses</a></h5>
+<h5 id="_responses_39"><a class="anchor" href="#_responses_39"></a><a class="link" href="#_responses_39">Responses</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 10%;">
@@ -4409,7 +4463,183 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_produces_38"><a class="anchor" href="#_produces_38"></a><a class="link" href="#_produces_38">Produces</a></h5>
+<h5 id="_produces_39"><a class="anchor" href="#_produces_39"></a><a class="link" href="#_produces_39">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code><strong>/</strong></code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_homeusingget_1"><a class="anchor" href="#_homeusingget_1"></a><a class="link" href="#_homeusingget_1">2.3.2. home</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /home</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_32"><a class="anchor" href="#_parameters_32"></a><a class="link" href="#_parameters_32">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>ISO3Country</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>ISO3Language</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>country</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayCountry</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayLanguage</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayName</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayScript</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>displayVariant</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>language</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>model</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">model</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>script</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>unicodeLocaleAttributes</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string &gt; array(multi)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>unicodeLocaleKeys</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string &gt; array(multi)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Query</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>variant</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_40"><a class="anchor" href="#_responses_40"></a><a class="link" href="#_responses_40">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_produces_40"><a class="anchor" href="#_produces_40"></a><a class="link" href="#_produces_40">Produces</a></h5>
 <div class="ulist">
 <ul>
 <li>
@@ -4427,7 +4657,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_31"><a class="anchor" href="#_parameters_31"></a><a class="link" href="#_parameters_31">Parameters</a></h5>
+<h5 id="_parameters_33"><a class="anchor" href="#_parameters_33"></a><a class="link" href="#_parameters_33">Parameters</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 22.2222%;">
@@ -4524,7 +4754,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_39"><a class="anchor" href="#_responses_39"></a><a class="link" href="#_responses_39">Responses</a></h5>
+<h5 id="_responses_41"><a class="anchor" href="#_responses_41"></a><a class="link" href="#_responses_41">Responses</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 10%;">
@@ -4563,7 +4793,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_produces_39"><a class="anchor" href="#_produces_39"></a><a class="link" href="#_produces_39">Produces</a></h5>
+<h5 id="_produces_41"><a class="anchor" href="#_produces_41"></a><a class="link" href="#_produces_41">Produces</a></h5>
 <div class="ulist">
 <ul>
 <li>
@@ -4584,182 +4814,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="literalblock">
 <div class="content">
 <pre>GET /actuator/health</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_parameters_32"><a class="anchor" href="#_parameters_32"></a><a class="link" href="#_parameters_32">Parameters</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 11.1111%;">
-<col style="width: 16.6666%;">
-<col style="width: 50%;">
-<col style="width: 22.2223%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">Type</th>
-<th class="tableblock halign-left valign-middle">Name</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Body</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>body</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">body</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_responses_40"><a class="anchor" href="#_responses_40"></a><a class="link" href="#_responses_40">Responses</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 10%;">
-<col style="width: 70%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">HTTP Code</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_produces_40"><a class="anchor" href="#_produces_40"></a><a class="link" href="#_produces_40">Produces</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-<li>
-<p><code>application/vnd.spring-boot.actuator.v2+json</code></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_handleusingget_1"><a class="anchor" href="#_handleusingget_1"></a><a class="link" href="#_handleusingget_1">2.4.2. handle</a></h4>
-<div class="literalblock">
-<div class="content">
-<pre>GET /actuator/health/{component}</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_parameters_33"><a class="anchor" href="#_parameters_33"></a><a class="link" href="#_parameters_33">Parameters</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 11.1111%;">
-<col style="width: 16.6666%;">
-<col style="width: 50%;">
-<col style="width: 22.2223%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">Type</th>
-<th class="tableblock halign-left valign-middle">Name</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Body</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>body</strong><br>
-<em>optional</em></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">body</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_responses_41"><a class="anchor" href="#_responses_41"></a><a class="link" href="#_responses_41">Responses</a></h5>
-<table class="tableblock frame-all grid-all spread">
-<colgroup>
-<col style="width: 10%;">
-<col style="width: 70%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">HTTP Code</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
-<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_produces_41"><a class="anchor" href="#_produces_41"></a><a class="link" href="#_produces_41">Produces</a></h5>
-<div class="ulist">
-<ul>
-<li>
-<p><code>application/json</code></p>
-</li>
-<li>
-<p><code>application/vnd.spring-boot.actuator.v2+json</code></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_handleusingget"><a class="anchor" href="#_handleusingget"></a><a class="link" href="#_handleusingget">2.4.3. handle</a></h4>
-<div class="literalblock">
-<div class="content">
-<pre>GET /actuator/health/{component}/{instance}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -4844,10 +4898,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
-<h4 id="_handleusingget_3"><a class="anchor" href="#_handleusingget_3"></a><a class="link" href="#_handleusingget_3">2.4.4. handle</a></h4>
+<h4 id="_handleusingget_1"><a class="anchor" href="#_handleusingget_1"></a><a class="link" href="#_handleusingget_1">2.4.2. handle</a></h4>
 <div class="literalblock">
 <div class="content">
-<pre>GET /actuator/info</pre>
+<pre>GET /actuator/health/{component}</pre>
 </div>
 </div>
 <div class="sect4">
@@ -4931,6 +4985,182 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_handleusingget"><a class="anchor" href="#_handleusingget"></a><a class="link" href="#_handleusingget">2.4.3. handle</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /actuator/health/{component}/{instance}</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_36"><a class="anchor" href="#_parameters_36"></a><a class="link" href="#_parameters_36">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Body</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>body</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">body</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_44"><a class="anchor" href="#_responses_44"></a><a class="link" href="#_responses_44">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_produces_44"><a class="anchor" href="#_produces_44"></a><a class="link" href="#_produces_44">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+<li>
+<p><code>application/vnd.spring-boot.actuator.v2+json</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_handleusingget_3"><a class="anchor" href="#_handleusingget_3"></a><a class="link" href="#_handleusingget_3">2.4.4. handle</a></h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /actuator/info</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_37"><a class="anchor" href="#_parameters_37"></a><a class="link" href="#_parameters_37">Parameters</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>Body</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>body</strong><br>
+<em>optional</em></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">body</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">&lt; string, string &gt; map</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_45"><a class="anchor" href="#_responses_45"></a><a class="link" href="#_responses_45">Responses</a></h5>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>200</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">OK</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>401</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Unauthorized</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>403</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Forbidden</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock"><strong>404</strong></p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">Not Found</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">No Content</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_produces_45"><a class="anchor" href="#_produces_45"></a><a class="link" href="#_produces_45">Produces</a></h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/json</code></p>
+</li>
+<li>
+<p><code>application/vnd.spring-boot.actuator.v2+json</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_web-mvc-links-handler_resource"><a class="anchor" href="#_web-mvc-links-handler_resource"></a><a class="link" href="#_web-mvc-links-handler_resource">2.5. Web-mvc-links-handler</a></h3>
@@ -4945,7 +5175,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_responses_44"><a class="anchor" href="#_responses_44"></a><a class="link" href="#_responses_44">Responses</a></h5>
+<h5 id="_responses_46"><a class="anchor" href="#_responses_46"></a><a class="link" href="#_responses_46">Responses</a></h5>
 <table class="tableblock frame-all grid-all spread">
 <colgroup>
 <col style="width: 10%;">
@@ -4984,7 +5214,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_produces_44"><a class="anchor" href="#_produces_44"></a><a class="link" href="#_produces_44">Produces</a></h5>
+<h5 id="_produces_46"><a class="anchor" href="#_produces_46"></a><a class="link" href="#_produces_46">Produces</a></h5>
 <div class="ulist">
 <ul>
 <li>
@@ -5547,7 +5777,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-04-15 10:45:58 HST
+Last updated 2019-03-19 15:03:12 HST
 </div>
 </div>
 </body>
