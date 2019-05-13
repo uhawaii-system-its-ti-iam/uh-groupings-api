@@ -594,7 +594,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void enablePreferenceTest() throws Exception {
+    public void enablePreferenceSyncDestTest() throws Exception {
         given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
                 .willReturn(gsrListIn());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable")
@@ -613,43 +613,43 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
 
-        given(groupAttributeService.changeListservStatus("grouping", USERNAME, true))
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("listserv status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, true))
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
                 .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("ldap status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("ldap status changed"));
 
     }
 
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonEnablePreferenceTest() throws Exception {
+    public void anonEnablePreferenceSyncDestTest() throws Exception {
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/enable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/enable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
     @Test
     @WithMockUhUser
-    public void disablePreferenceTest() throws Exception {
+    public void disablePreferenceSyncDestTest() throws Exception {
         given(groupAttributeService.changeOptInStatus("grouping", USERNAME, false))
                 .willReturn(gsrListIn2());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable")
@@ -668,38 +668,38 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
 
-        given(groupAttributeService.changeListservStatus("grouping", USERNAME, false))
-                .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable")
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false))
+                        .willReturn(gsrListserv());
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("listserv status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("listserv status changed"));
 
-        given(groupAttributeService.changeReleasedGroupingStatus("grouping", USERNAME, false))
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false))
                 .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/disable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("ldap status changed"));
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("ldap status changed"));
 
     }
 
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonDisablePreferenceTest() throws Exception {
+    public void anonDisablePreferenceSyncDestTest() throws Exception {
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + LISTSERV + "/disable").with(csrf()))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         mockMvc.perform(
-                put(API_BASE + "/groupings/grouping/preferences/" + RELEASED_GROUPING + "/disable").with(csrf()))
+                put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/disable").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
