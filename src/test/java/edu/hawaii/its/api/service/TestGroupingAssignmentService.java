@@ -101,6 +101,12 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
+    @Value("${groupings.api.listserv}")
+    private String LISTSERV;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
     @Value("${groupings.api.test.usernames}")
     private String[] usernames;
 
@@ -145,7 +151,7 @@ public class TestGroupingAssignmentService {
         memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
 
         // update statuses
-        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
@@ -245,6 +251,8 @@ public class TestGroupingAssignmentService {
 //        // Page 2 contains 1 stale subject, should return 19
         Grouping paginatedGroupingPage2 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
+
+        Grouping normalGrouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));

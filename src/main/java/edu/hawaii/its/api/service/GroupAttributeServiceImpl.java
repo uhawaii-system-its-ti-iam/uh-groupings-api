@@ -184,18 +184,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return grouperFactoryService.getSyncDestinations();
     }
 
-    //turn the listserv for a grouping on or off
-    @Override
-    public GroupingsServiceResult changeListservStatus(String groupingPath, String owenerUsername, boolean isListservOn) {
-        return changeGroupAttributeStatus(groupingPath, owenerUsername, LISTSERV, isListservOn);
-    }
-
-    //turn the releasedGrouping attribute for a grouping on or off
-    @Override
-    public GroupingsServiceResult changeReleasedGroupingStatus(String groupingPath, String ownerUsername, boolean isReleasedGroupingOn) {
-        return changeGroupAttributeStatus(groupingPath, ownerUsername, RELEASED_GROUPING, isReleasedGroupingOn);
-    }
-
     //turn the ability for users to opt-in to a grouping on or off
     @Override
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn) {
@@ -225,44 +213,22 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return results;
     }
 
-    //returns true if the grouping has a listserv, false otherwise
-    @Override
-    public boolean isContainingListserv(String groupingPath) {
-        return isGroupAttribute(groupingPath, LISTSERV);
-    }
-
-    //returns true if the grouping has LDAP, false otherwise
-    @Override
-    public boolean isContainingReleasedGrouping(String groupingPath) {
-        return isGroupAttribute(groupingPath, RELEASED_GROUPING);
-    }
-
-    //returns true if the grouping allows the user to opt out, false otherwise
-    @Override
-    public boolean isOptOutPossible(String groupingPath) {
-        return isGroupAttribute(groupingPath, OPT_OUT);
-    }
-
-    //returns true if the grouping allows the user to opt in, false otherwise
-    @Override
-    public boolean isOptInPossible(String groupingPath) {
-        return isGroupAttribute(groupingPath, OPT_IN);
-    }
-
     //turns the attribute on or off in a group
+    // OPT_IN, OPT_OUT, and sync destinations are allowed
+    @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
-                                                             String attributeName, boolean isAttributeOn) {
+                                                             String attributeName, boolean turnAttributeOn) {
         GroupingsServiceResult gsr;
 
         String verb = "removed from ";
-        if (isAttributeOn) {
+        if (turnAttributeOn) {
             verb = "added to ";
         }
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
         if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isSuperuser(ownerUsername)) {
             boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
-            if (isAttributeOn) {
+            if (turnAttributeOn) {
                 if (!isHasAttribute) {
                     assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
 
