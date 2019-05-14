@@ -60,12 +60,6 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.self_opted}")
     private String SELF_OPTED;
 
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
@@ -123,7 +117,7 @@ public class TestMemberAttributeService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN_USER, LISTSERV, true);
+        groupAttributeService.changeListservStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
 

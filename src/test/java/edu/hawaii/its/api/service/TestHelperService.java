@@ -58,12 +58,6 @@ public class TestHelperService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
     @Value("${groupings.api.test.usernames}")
     private String[] username;
 
@@ -94,7 +88,7 @@ public class TestHelperService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
+        groupAttributeService.changeListservStatus(GROUPING, ADMIN, true);
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
 
