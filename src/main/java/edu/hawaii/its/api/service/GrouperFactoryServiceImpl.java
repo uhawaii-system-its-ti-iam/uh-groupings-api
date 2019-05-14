@@ -113,7 +113,6 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 syncDestinations.add(wsAttributeDefName.getName());
             }
         }
-        System.out.println("getSyncDestTesting: " + syncDestinations);
         return syncDestinations;
     }
 

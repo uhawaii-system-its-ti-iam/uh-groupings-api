@@ -5,7 +5,6 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +51,6 @@ public class TestGroupAttributeService {
 
     @Value("Test Many Groups In Basis")
     private String DEFAULT_DESCRIPTION;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
@@ -113,7 +100,7 @@ public class TestGroupAttributeService {
 
     @Before
     public void setUp() {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
+        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
@@ -163,31 +150,31 @@ public class TestGroupAttributeService {
 
     @Test
     public void optOutPermissionTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
     }
 
     @Test
     public void optInPermissionTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
     }
 
     @Test
     public void hasListservTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
     @Test
-    public void changeListServStatusTest() {
+    public void changeListServeStatusTest() {
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
 
         //get last modified time
         WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
 
 
         //get last modified time and make sure that it hasn't changed
@@ -200,8 +187,8 @@ public class TestGroupAttributeService {
         String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertEquals(lastModTime, lastModTime2);
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING,LISTSERV));
+        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
         //todo get last modified time and make sure that it has changed
         try {
@@ -213,8 +200,8 @@ public class TestGroupAttributeService {
         String lastModTime3 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertNotEquals(lastModTime2, lastModTime3);
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        groupAttributeService.changeListservStatus(GROUPING, username[0], false);
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
 
         //todo get last modified time and make sure that it hasn't changed
         try {
@@ -228,19 +215,19 @@ public class TestGroupAttributeService {
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,true);
+            groupAttributeService.changeListservStatus(GROUPING, username[1], true);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        groupAttributeService.changeListservStatus(GROUPING, username[0], true);
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,false);
+            groupAttributeService.changeListservStatus(GROUPING, username[1], false);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
     }
 
     @Test
@@ -257,17 +244,17 @@ public class TestGroupAttributeService {
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
@@ -280,7 +267,7 @@ public class TestGroupAttributeService {
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
@@ -291,11 +278,11 @@ public class TestGroupAttributeService {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
         try {
@@ -304,7 +291,7 @@ public class TestGroupAttributeService {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
     }
@@ -318,17 +305,17 @@ public class TestGroupAttributeService {
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -342,7 +329,7 @@ public class TestGroupAttributeService {
         assertTrue(optOutFail.get(0).getResultCode().startsWith(FAILURE));
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -354,11 +341,11 @@ public class TestGroupAttributeService {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -368,7 +355,7 @@ public class TestGroupAttributeService {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
 
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -408,15 +395,5 @@ public class TestGroupAttributeService {
         //Revert any changes
         groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
 
-    }
-
-    //todo Test to play around with GroupAttribute methods
-    @Ignore
-    @Test
-    public void changeGroupAttributeStatusTest() {
-        boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
-        boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        assertTrue(true);
     }
 }

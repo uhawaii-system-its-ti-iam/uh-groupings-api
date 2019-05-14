@@ -303,8 +303,8 @@ public class TestGroupingsRestControllerv2_1 {
         // Reset preferences
         groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], RELEASED_GROUPING, false);
+        groupAttributeService.changeListservStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeReleasedGroupingStatus(GROUPING, usernames[0], false);
 
         // Delete grouping if it exists
         try {
@@ -991,31 +991,31 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void enableDisablePreferencesAndSyncDestsPassTest() throws Exception {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
+    public void enableDisablePreferencesPassTest() throws Exception {
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + LISTSERV + "/disable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + LISTSERV + "/disable", "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/enable", "put", uhUser01);
 
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
+        assertFalse(groupAttributeService.isOptInPossible(GROUPING));
+        assertFalse(groupAttributeService.isOptOutPossible(GROUPING));
+        assertFalse(groupAttributeService.isContainingListserv(GROUPING));
+        assertTrue(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser01);
         mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + LISTSERV + "/enable", "put", uhUser01);
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/syncDests/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + LISTSERV + "/enable", "put", uhUser01);
+        mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + RELEASED_GROUPING + "/disable", "put", uhUser01);
 
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, RELEASED_GROUPING));
+        assertTrue(groupAttributeService.isOptInPossible(GROUPING));
+        assertTrue(groupAttributeService.isOptOutPossible(GROUPING));
+        assertTrue(groupAttributeService.isContainingListserv(GROUPING));
+        assertFalse(groupAttributeService.isContainingReleasedGrouping(GROUPING));
 
         //todo Test all permutations of bad data
         try {
