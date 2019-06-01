@@ -16,3 +16,5 @@ phantomjsdriver.log
 coverage*
 hs_err_pid11320.log
 *.log
+src/docs/html/index.html
+src/docs/pdf/index.pdf
