@@ -466,7 +466,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>convertSwagger2markup</goal>
                         </goals>
@@ -513,7 +513,7 @@
                 <executions>
                     <execution>
                         <id>output-html</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>process-asciidoc</goal>
                         </goals>
@@ -525,7 +525,7 @@
 
                     <execution>
                         <id>output-pdf</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>process-asciidoc</goal>
                         </goals>
