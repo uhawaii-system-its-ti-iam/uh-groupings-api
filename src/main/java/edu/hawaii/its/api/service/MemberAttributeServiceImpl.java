@@ -246,6 +246,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
             //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
+            membershipService.updateLastModified(groupingPath + OWNERS);
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -256,11 +257,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     //remove ownership of a grouping from a current owner
     //todo change ownerUsername to "actor"?
     @Override
-    public GroupingsServiceResult removeOwnership(String groupingPath, String ownerUsername, String ownerToRemove) {
+    public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemove) {
         logger.info("removeOwnership; grouping: "
                 + groupingPath
                 + "; username: "
-                + ownerUsername
+                + actor
                 + "; ownerToRemove: "
                 + ownerToRemove
                 + ";");
@@ -268,8 +269,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         GroupingsServiceResult ownershipResults;
         String action = "remove ownership of " + groupingPath + " from " + ownerToRemove;
 
-        if (isOwner(groupingPath, ownerUsername) || isSuperuser(ownerUsername)) {
-            WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        if (isOwner(groupingPath, actor) || isSuperuser(actor)) {
+            WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
             WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
                     groupingPath + OWNERS,
                     lookup,
@@ -278,6 +279,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
             //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
+            membershipService.updateLastModified(groupingPath + OWNERS);
 
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
