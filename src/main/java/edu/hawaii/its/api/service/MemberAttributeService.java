@@ -12,7 +12,7 @@ import java.util.Map;
 public interface MemberAttributeService {
     public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
 
-    public GroupingsServiceResult removeOwnership(String groupingPath, String username, String ownerToRemoveUsername);
+    public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemoveUsername);
 
     public boolean isMember(String groupPath, String username);
 
