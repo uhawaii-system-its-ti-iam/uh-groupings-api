@@ -803,7 +803,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals("University of Hawaii Groupings API", result.getResponse().getContentAsString());
+        assertEquals("University of Hawaii Groupings", result.getResponse().getContentAsString());
     }
 
     @Test
