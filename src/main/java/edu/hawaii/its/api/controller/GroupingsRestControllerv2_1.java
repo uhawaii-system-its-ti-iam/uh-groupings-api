@@ -100,10 +100,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity hello() {
-<<<<<<< HEAD
 
-=======
->>>>>>> master
         return ResponseEntity
                 .ok()
                 .body("University of Hawaii Groupings");
