@@ -99,8 +99,10 @@ public class GroupingsRestControllerv2_1 {
     @RequestMapping(value = "/",
             method = RequestMethod.GET)
     @ResponseBody
-    public String hello() {
-        return "University of Hawaii Groupings API";
+    public ResponseEntity hello() {
+        return ResponseEntity
+                .ok()
+                .body("University of Hawaii Groupings");
     }
 
     /**
