@@ -28,12 +28,8 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
 
     @PostConstruct
     private void checkForPw() throws IOException {
-<<<<<<< HEAD
-        Scanner fileScanner = new Scanner(new File("src/main/resources/custom.properties"));
-=======
         File resource = new ClassPathResource("custom.properties").getFile();
         Scanner fileScanner = new Scanner(resource);
->>>>>>> master
         int lineID = 0;
         List lineNumbers = new ArrayList();
         Pattern pattern =  Pattern.compile("grouperClient.webService.password");
@@ -44,10 +40,6 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
             matcher = pattern.matcher(line);
             if(matcher.find()){
                 lineNumbers.add(lineID);
-<<<<<<< HEAD
-
-=======
->>>>>>> master
             }
         }
         Assert.isTrue(lineNumbers.isEmpty(), "Please remove the password from the custom.properties file.");
