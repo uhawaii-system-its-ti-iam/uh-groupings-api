@@ -1,0 +1,7 @@
+edu.hawaii.its.api.access
+edu.hawaii.its.api.configuration
+edu.hawaii.its.api.controller
+edu.hawaii.its.api.repository
+edu.hawaii.its.api.service
+edu.hawaii.its.api.type
+edu.hawaii.its.api.util
