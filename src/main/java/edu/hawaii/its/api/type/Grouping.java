@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
