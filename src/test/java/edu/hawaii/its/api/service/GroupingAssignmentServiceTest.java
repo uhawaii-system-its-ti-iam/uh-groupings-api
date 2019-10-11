@@ -19,10 +19,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import sun.security.acl.PrincipalImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.Constants.a;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
