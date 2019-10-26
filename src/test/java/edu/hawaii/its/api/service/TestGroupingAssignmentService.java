@@ -498,68 +498,6 @@ public class TestGroupingAssignmentService {
 
         List<String> groups3 = groupingAssignmentService.getGroupPaths(usernames[1], usernames[0]);
         assertThat(groups3.size(), equalTo(0));
-
-        //        try{
-        //            groupingAssignmentService.getGroupPaths(usernames[1], usernames[0]);
-        //            fail("Shouldn't be here");
-        //        } catch (GroupingsHTTPException ghe) {
-        //            assertThat(ghe.getStatusCode(), equalTo(403));
-        //        }
-    }
-
-    @Test
-    public void grouperTest() {
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
-
-        List<String> groupings = new ArrayList<>();
-        List<String> groupings2 = new ArrayList<>();
-
-        if (groupPaths.size() > 0) {
-
-            List<WsAttributeAssign> attributes = new ArrayList<>();
-
-            for (String path : groupPaths) {
-                WsGetAttributeAssignmentsResults trioGroups = new GcGetAttributeAssignments()
-                        .addAttributeDefNameName(TRIO)
-                        .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
-                        .addOwnerGroupName(path)
-                        .execute();
-
-                if (trioGroups.getWsAttributeAssigns() != null) {
-                    Collections.addAll(attributes, trioGroups.getWsAttributeAssigns());
-                }
-            }
-
-            if (attributes.size() > 0) {
-                groupings.addAll(attributes.stream().map(WsAttributeAssign::getOwnerGroupName)
-                        .collect(Collectors.toList()));
-            }
-
-            assertNotNull(groupings);
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-            GcGetAttributeAssignments trioGroups2 = new GcGetAttributeAssignments()
-                    .addAttributeDefNameName(TRIO)
-                    .assignAttributeAssignType(ASSIGN_TYPE_GROUP);
-
-            groupPaths.forEach(trioGroups2::addOwnerGroupName);
-
-            WsGetAttributeAssignmentsResults attributeAssignmentsResults2 = trioGroups2.execute();
-
-            assertNotNull(attributeAssignmentsResults2);
-
-            WsAttributeAssign[] wsGroups2 = attributeAssignmentsResults2.getWsAttributeAssigns();
-
-            if (wsGroups2 != null && wsGroups2.length > 0) {
-                for (WsAttributeAssign grouping : wsGroups2) {
-                    groupings2.add(grouping.getOwnerGroupName());
-                }
-            }
-        }
-
-        assertNotNull(groupings2);
-
     }
 
     @Test
