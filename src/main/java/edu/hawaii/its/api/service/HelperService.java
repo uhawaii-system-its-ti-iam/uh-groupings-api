@@ -10,20 +10,22 @@ import java.util.List;
 
 public interface HelperService {
 
-    public String extractFirstMembershipID(WsGetMembershipsResults wsGetMembershipsResults);
+  public String extractFirstMembershipID(WsGetMembershipsResults wsGetMembershipsResults);
 
-    public WsGetMembershipsResults membershipsResults(String username, String group);
+  public WsGetMembershipsResults membershipsResults(String username, String group);
 
-    public List<String> extractGroupings(List<String> groupPaths);
+  public List<String> extractGroupings(List<String> groupPaths);
 
-    //todo Not complete
+  //todo Not complete
 //    public List<Grouping> extractGroupingsNew(List<String> groupPaths);
 
-    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
+  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
 
-    public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
+  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, String username);
 
-    public List<Grouping> makeGroupings(List<String> groupingPaths);
+  public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
 
-    public String parentGroupingPath(String group);
+  public List<Grouping> makeGroupings(List<String> groupingPaths);
+
+  public String parentGroupingPath(String group);
 }

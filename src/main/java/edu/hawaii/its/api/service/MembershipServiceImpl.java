@@ -828,7 +828,7 @@ public class MembershipServiceImpl implements MembershipService {
           isExcludeUpdated = true;
 
           gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-              "delete " + personToAdd.toString() + " from " + exclude));
+              "delete " + personToAdd.toString() + " from " + exclude, personToAdd.getUsername()));
         }
         //check to see if personToAdd is already in include
         if (!memberAttributeService.isMember(include, personToAdd)) {
@@ -837,7 +837,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isIncludeUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
         } else {
           //They are already in the group, so just return SUCCESS
           gsrList.add(helperService.makeGroupingsServiceResult(
@@ -857,7 +857,7 @@ public class MembershipServiceImpl implements MembershipService {
           isIncludeUpdated = true;
 
           gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-              "delete " + personToAdd.toString() + " from " + include));
+              "delete " + personToAdd.toString() + " from " + include, personToAdd.getUsername()));
         }
         //check to see if userToAdd is already in exclude
         if (!memberAttributeService.isMember(exclude, personToAdd)) {
@@ -866,7 +866,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isExcludeUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
         }
         //They are already in the group, so just return SUCCESS
         gsrList.add(helperService.makeGroupingsServiceResult(
@@ -882,7 +882,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isOwnersUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
         }
         //They are already in the group, so just return SUCCESS
         gsrList.add(helperService.makeGroupingsServiceResult(
