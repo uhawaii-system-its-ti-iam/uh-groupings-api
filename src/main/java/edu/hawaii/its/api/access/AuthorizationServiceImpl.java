@@ -19,10 +19,6 @@ import java.util.Map;
 @Service
 public class AuthorizationServiceImpl implements AuthorizationService {
 
-    //
-    // TODO: This needs to be implemented with real lookups.
-    //
-
     @Value("#{'${app.user.roles}'.split(',')}")
     private List<String> users;
 

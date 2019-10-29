@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface DatabaseSetupService {
 
-    public void initialize(
-            List<Person> users,
-            List<WsSubjectLookup> lookups,
-            List<Person> admins,
-            Group adminGroup,
-            Group appGroup);
+    void initialize(
+        List<Person> users,
+        List<WsSubjectLookup> lookups,
+        List<Person> admins,
+        Group adminGroup,
+        Group appGroup);
 
 }

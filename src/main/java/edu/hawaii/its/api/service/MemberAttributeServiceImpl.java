@@ -174,9 +174,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
     private GrouperFactoryService grouperFS;
 
     @Autowired
@@ -184,6 +181,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Autowired
     private HelperService hs;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
@@ -244,7 +244,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
             ownershipResult = hs.makeGroupingsServiceResult(amr, action);
 
-            //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
             membershipService.updateLastModified(groupingPath + OWNERS);
         } else {
@@ -255,7 +254,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     //remove ownership of a grouping from a current owner
-    //todo change ownerUsername to "actor"?
     @Override
     public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemove) {
         logger.info("removeOwnership; grouping: "
@@ -277,7 +275,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                     ownerToRemove);
             ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
 
-            //todo should we add this to the results?
             membershipService.updateLastModified(groupingPath);
             membershipService.updateLastModified(groupingPath + OWNERS);
 
@@ -396,21 +393,16 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
-    // Covered by Integration Tests
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
     public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
         String[] attributeValues = new String[5];
-        Map<String, String> mapping = new HashMap<String, String>();
+        Map<String, String> mapping = new HashMap<>();
 
-        //        if(username.equals(null)){
-        //            throw new GcWebServiceError("Error 404 Not Found");
-        //        }
         if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
                 groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-            //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
             try {
                 lookup = grouperFS.makeWsSubjectLookup(username);
                 WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);

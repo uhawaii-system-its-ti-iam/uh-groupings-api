@@ -16,7 +16,6 @@ import java.util.Map;
 @Proxy(lazy = false)
 public class Person implements Comparable<Person> {
 
-    //todo get these strings to work from a config file, or just wait until we remove the values in a week or two?
     @Transient
     private static String COMPOSITE_NAME = "cn";
     @Transient
