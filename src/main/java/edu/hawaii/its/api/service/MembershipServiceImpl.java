@@ -441,7 +441,10 @@ public class MembershipServiceImpl implements MembershipService {
     logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
         + userToAddUsername + ";");
     Person personToAdd;
-    personToAdd = new Person(null, memberAttributeService.getMemberAttribute(ownerUsername, userToAddUsername, UUID_E), userToAddUsername);
+    personToAdd = new Person(
+        memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, NAME_E),
+        memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, UUID_E),
+        userToAddUsername);
 
     return addMemberHelper(ownerUsername, groupPath, personToAdd);
   }

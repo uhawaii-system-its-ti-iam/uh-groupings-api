@@ -397,7 +397,17 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
   }
 
-  public String getMemberAttribute(String ownerUsername, String username, int val) throws GcWebServiceError {
+  /**
+   * Get attribute of username with respect to val
+   * val can be defined as USERNAME_E, NAME_E, LASTNAME_E, FIRSTNAME_E, UUID_E
+   *
+   * @param ownerUsername ownersUsername, admin privs needed to access grouper db
+   * @param username username of member to get attributes of
+   * @param val c-style enum val are listed above
+   * @return String the attribute
+   * @throws GcWebServiceError
+   */
+  public String getUserAttribute(String ownerUsername, String username, int val) throws GcWebServiceError {
     WsSubject[] subjects;
     WsSubjectLookup lookup;
     WsGetSubjectsResults results;
