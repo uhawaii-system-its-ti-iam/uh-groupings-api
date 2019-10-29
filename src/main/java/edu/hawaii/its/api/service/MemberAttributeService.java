@@ -39,4 +39,6 @@ public interface MemberAttributeService {
     public boolean isUuid(String username);
 
     public List<Person> searchMembers(String groupPath, String username);
+
+    public String getMemberAttribute(String ownerUsername, String username, int val) throws GcWebServiceError;
 }

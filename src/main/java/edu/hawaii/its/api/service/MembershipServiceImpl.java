@@ -23,6 +23,12 @@ import java.util.List;
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
 
+  private static final int USERNAME_E = 0;
+  private static final int NAME_E = 1;
+  private static final int LASTNAME_E = 2;
+  private static final int FIRSTNAME_E = 3;
+  private static final int UUID_E = 4;
+
   @Value("${groupings.api.settings}")
   private String SETTINGS;
 
@@ -435,12 +441,7 @@ public class MembershipServiceImpl implements MembershipService {
     logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
         + userToAddUsername + ";");
     Person personToAdd;
-    WsSubjectLookup lookup;
-    WsSubject[] subject;
-    lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-    WsGetSubjectsResults result = grouperFS.makeWsGetSubjectsResults(lookup);
-    subject = result.getWsSubjects();
-    personToAdd = new Person(null, null, subject[0].getAttributeValues()[0]);
+    personToAdd = new Person(null, memberAttributeService.getMemberAttribute(ownerUsername, userToAddUsername, UUID_E), userToAddUsername);
 
     return addMemberHelper(ownerUsername, groupPath, personToAdd);
   }
