@@ -6,13 +6,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -441,8 +435,12 @@ public class MembershipServiceImpl implements MembershipService {
     logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
         + userToAddUsername + ";");
     Person personToAdd;
-
-    personToAdd = new Person(null, null, userToAddUsername);
+    WsSubjectLookup lookup;
+    WsSubject[] subject;
+    lookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+    WsGetSubjectsResults result = grouperFS.makeWsGetSubjectsResults(lookup);
+    subject = result.getWsSubjects();
+    personToAdd = new Person(null, null, subject[0].getAttributeValues()[0]);
 
     return addMemberHelper(ownerUsername, groupPath, personToAdd);
   }
@@ -578,6 +576,7 @@ public class MembershipServiceImpl implements MembershipService {
       action = "add user with uuid " + newAdminUsername + " to " + GROUPING_ADMINS;
       // todo there is a test for adding an admin with a uuid, but I don't see a method to do it. Is there one?
       return new GroupingsServiceResult(FAILURE + ": adding admins with UUID is not implemented", action);
+      // Empty.
     }
 
     if (memberAttributeService.isSuperuser(currentAdminUsername)) {
@@ -828,7 +827,7 @@ public class MembershipServiceImpl implements MembershipService {
           isExcludeUpdated = true;
 
           gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-              "delete " + personToAdd.toString() + " from " + exclude, personToAdd.getUsername()));
+              "delete " + personToAdd.toString() + " from " + exclude, personToAdd));
         }
         //check to see if personToAdd is already in include
         if (!memberAttributeService.isMember(include, personToAdd)) {
@@ -837,7 +836,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isIncludeUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
         } else {
           //They are already in the group, so just return SUCCESS
           gsrList.add(helperService.makeGroupingsServiceResult(
@@ -857,7 +856,7 @@ public class MembershipServiceImpl implements MembershipService {
           isIncludeUpdated = true;
 
           gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-              "delete " + personToAdd.toString() + " from " + include, personToAdd.getUsername()));
+              "delete " + personToAdd.toString() + " from " + include, personToAdd));
         }
         //check to see if userToAdd is already in exclude
         if (!memberAttributeService.isMember(exclude, personToAdd)) {
@@ -866,7 +865,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isExcludeUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
         }
         //They are already in the group, so just return SUCCESS
         gsrList.add(helperService.makeGroupingsServiceResult(
@@ -882,7 +881,7 @@ public class MembershipServiceImpl implements MembershipService {
 
           isOwnersUpdated = true;
 
-          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd.getUsername()));
+          gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
         }
         //They are already in the group, so just return SUCCESS
         gsrList.add(helperService.makeGroupingsServiceResult(

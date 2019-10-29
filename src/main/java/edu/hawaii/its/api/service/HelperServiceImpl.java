@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -262,11 +263,12 @@ public class HelperServiceImpl implements HelperService {
     return groupingsServiceResult;
   }
 
-  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, String username) {
+  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, Person person) {
     GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
     groupingsServiceResult.setAction(action);
     groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
-    groupingsServiceResult.setUsername(username);
+    groupingsServiceResult.setPerson(person);
+
 
     if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
       throw new GroupingsServiceResultException(groupingsServiceResult);

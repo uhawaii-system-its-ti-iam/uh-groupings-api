@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
+import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 
@@ -21,7 +22,7 @@ public interface HelperService {
 
   public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
 
-  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, String username);
+  public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, Person person);
 
   public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
 
