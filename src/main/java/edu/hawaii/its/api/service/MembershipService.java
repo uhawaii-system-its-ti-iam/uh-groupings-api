@@ -22,7 +22,7 @@ public interface MembershipService {
     public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String groupPath,
             String userToAddUsername);
 
-    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    public List<List<GroupingsServiceResult>> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     public List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
             List<String> usersToAddUsername);
