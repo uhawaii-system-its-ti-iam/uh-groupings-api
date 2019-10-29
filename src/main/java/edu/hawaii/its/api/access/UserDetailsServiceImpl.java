@@ -23,7 +23,6 @@ public class UserDetailsServiceImpl extends AbstractCasAssertionUserDetailsServi
     @Override
     protected UserDetails loadUserDetails(Assertion assertion) {
         if (assertion.getPrincipal() == null) {
-            // Not sure this is possible.
             throw new UsernameNotFoundException("principal is null");
         }
 

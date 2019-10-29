@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -202,9 +201,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsIn = helperService.extractGroupings(groupPaths);
         List<Grouping> groupings = helperService.makeGroupings(groupingsIn);
 
-        // todo this may be able to be optimized by getting attributes from grouper when getting the group list
-        // rather than making individual calls to grouper. Testing will need to be done to see if the will be faster in
-        // the majority of cases or only for edge cases
         groupings.forEach(this::setGroupingAttributes);
 
         return groupings;
@@ -244,14 +240,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingsOpted(EXCLUDE, username, groupPaths);
     }
 
-    //todo This might be obsolete with getGroup methods, but refactoring may take time
-    //todo Change getMembers to getGroupMembers with appropriate exception handlers
     //fetch a grouping from Grouper or the database
     @Override
     public Grouping getGrouping(String groupingPath, String ownerUsername) {
         logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + ";");
 
-        Grouping compositeGrouping = new Grouping();
+        Grouping compositeGrouping;
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
@@ -322,7 +316,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setOwners(groups.get(owners));
 
             System.out.println("CompositeGroupingComingBack" + compositeGrouping);
-//            logger.info(compositeGrouping);
             return compositeGrouping;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
@@ -392,7 +385,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> groupingsOpted = new ArrayList<>();
 
-        // todo get the self opted memberships in one grouper call
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
@@ -437,64 +429,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupMembers;
     }
 
-    //todo Consider deleting. Is not being used in any meaningful way at the moment
-    //todo Commenting out in case this become useful later
-//        @Override
-//        public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
-//            logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-//                    "; componentId: " + componentId + ";");
-//
-//            String groupPath = parentGroupingPath + componentId;
-//            Group groupMembers = new Group();
-//
-//            if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-//                    .isSuperuser(ownerUsername)) {
-//
-//                WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-//                WsGetMembersResults membersResults;
-//
-//                ExecutorService executor = Executors.newSingleThreadExecutor();
-//                Callable<WsGetMembersResults> callable = () -> {
-//                    List<String> groupPaths = new ArrayList<>();
-//                    groupPaths.add(groupPath);
-//
-//                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
-//                            lookup,
-//                            groupPaths,
-//                            null,
-//                            null,
-//                            null,
-//                            null);
-//                };
-//
-//                Future<WsGetMembersResults> future = executor.submit(callable);
-//
-//                try {
-//                    membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
-//                } catch (TimeoutException te) {
-//                    //                te.printStackTrace();
-//                    GroupingsHTTPException ghe = new GroupingsHTTPException();
-//                    throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
-//                }
-//
-//                if (executor.isTerminated()) {
-//                    executor.shutdown();
-//                }
-//
-//                if (membersResults.getResults() != null) {
-//                    if (componentId.equals(BASIS)) {
-//                        groupMembers = makeBasisGroup(membersResults);
-//                    } else {
-//                        groupMembers = makeGroup(membersResults);
-//                    }
-//                }
-//            }
-//            else {
-//                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-//            }
-//            return groupMembers;
-//        }
-
     @Override
     public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
             Integer size,
@@ -502,9 +436,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getPaginatedMembers; ownerUsername: " + ownerUsername + "; groups: " + groupPaths +
                 "; page: " + page + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending
                 + ";");
-
-        //        List<String> groupPaths = new ArrayList<>();
-        //        groupPaths.add(groupPath);
 
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
         WsGetMembersResults members = grouperFactoryService.makeWsGetMembersResults(
@@ -544,7 +475,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                         continue;
                     }
                     Person personToAdd = makePerson(subject, attributeNames);
-                    //todo Move to propeties file name as STALE_SUBJECT_ID
                     if (group.getPath().endsWith(BASIS) && subject.getSourceId() != null
                             && subject.getSourceId().equals(STALE_SUBJECT_ID)) {
                         personToAdd.setUsername("User Not Available.");
@@ -612,8 +542,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     //returns the list of groups that the user is in, searching by username or uuid
-    //todo This returns an error code of 500 for some reason
-    //todo Changed to return empty list like AdminsGroupings does
     @Override
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
@@ -640,15 +568,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         } else {
             return new ArrayList<>();
-            //            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            //            throw new GroupingsHTTPException("User does not have proper permissions.", ghe, 403);
         }
-    }
-
-    //todo Why do we have this? It's used nowhere
-    @Override
-    public List<String> getGroupPaths(Principal principal, String username) {
-        return getGroupPaths(principal.getName(), username);
     }
 
     @Override

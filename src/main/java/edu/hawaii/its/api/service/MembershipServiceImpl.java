@@ -211,7 +211,6 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        // todo: exchange these three grouper calls with getGrouping, once getGrouping is optimized for a single call to
         // Grouper
         boolean isInBasis = memberAttributeService.isMember(basis, userToAddUsername);
         boolean isInComposite = memberAttributeService.isMember(groupingPath, userToAddUsername);
@@ -225,10 +224,9 @@ public class MembershipServiceImpl implements MembershipService {
             if (!isInBasis) {
                 gsrs.addAll(addGroupMemberByUsername(ownerUsername, include, userToAddUsername));
             } else {
-                gsrs.add(
-                        helperService
-                                .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUsername + " was in " + basis,
-                                        action));
+                gsrs.add(helperService
+                    .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUsername + " was in " + basis,
+                        action));
             }
         } else {
             gsrs.add(helperService.makeGroupingsServiceResult(
@@ -333,7 +331,6 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
-    //todo
     //finds a user by a uuid and remove them from a grouping
     @Override
     public List<GroupingsServiceResult> deleteGroupingMemberByUuid(String ownerUsername, String groupingPath,
@@ -371,8 +368,8 @@ public class MembershipServiceImpl implements MembershipService {
         //since they are not in the Grouping, do nothing, but return SUCCESS
         else {
             gsrList.add(
-                    helperService.makeGroupingsServiceResult(SUCCESS + userToDeleteUuid + " was not in " + groupingPath,
-                            action));
+                    helperService.makeGroupingsServiceResult(SUCCESS + userToDeleteUuid + " was not in " +
+                            groupingPath, action));
         }
 
         //should not be in exclude if not in basis
@@ -577,15 +574,13 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (memberAttributeService.isUuid(newAdminUsername)) {
             action = "add user with uuid " + newAdminUsername + " to " + GROUPING_ADMINS;
-            // todo there is a test for adding an admin with a uuid, but I don't see a method to do it. Is there one?
             return new GroupingsServiceResult(FAILURE + ": adding admins with UUID is not implemented", action);
         }
 
         if (memberAttributeService.isSuperuser(currentAdminUsername)) {
             if (memberAttributeService.isAdmin(newAdminUsername)) {
-                //todo replace hard coded string with value from top
                 return helperService.makeGroupingsServiceResult(
-                        "SUCCESS: " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
+                        SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
             }
             WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(
                     GROUPING_ADMINS,
@@ -607,7 +602,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (memberAttributeService.isUuid(adminToDeleteUsername)) {
 
             action = "delete user with uuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
-            // todo there is a test for deleting an admin with a uuid, but I don't see a method to do it. Is there one?
             return new GroupingsServiceResult(FAILURE + ": adding admins with UUID is not implemented", action);
         }
 

@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.service;
 
-//import org.junit.runner.RunWith;
-
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -188,7 +186,6 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         makeGroup(includeMembers, pathRoot + i + INCLUDE);
         makeGroup(ownerMembers, pathRoot + i + OWNERS);
 
-        // todo add code to update the owner group when adding and removing owners during testing
         // add all of the owners to the owner group
         Group ownerGroup = groupRepository.findByPath(GROUPING_OWNERS);
         if (ownerGroup == null) {
@@ -378,9 +375,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
                 allComposite.setOptInEnabled(true);
                 allInclude.setOptInEnabled(true);
                 allInclude.setOptOutEnabled(true);
-
             }
-
             membershipRepository.save(allComposite);
             membershipRepository.save(allExclude);
             membershipRepository.save(allInclude);
@@ -391,7 +386,6 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     // factory methods
     ///////////////////////////////////////////////////////////
 
-    //todo put strings in a config file
     private void makePerson(String name, String uuid, String username) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put("cn", name);

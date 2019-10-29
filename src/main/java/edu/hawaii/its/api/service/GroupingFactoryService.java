@@ -6,17 +6,15 @@ import java.util.List;
 
 public interface GroupingFactoryService {
 
-    public List<GroupingsServiceResult> addGrouping(
+    List<GroupingsServiceResult> addGrouping(
             String username,
             String groupingPath);
 
 
-    public List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
+    List<GroupingsServiceResult> deleteGrouping(String adminUsername, String groupingPath);
 
-    public List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath);
+    List<GroupingsServiceResult> markGroupForPurge(String adminUsername, String groupingPath);
 
-    public boolean isPathEmpty(String adminUsername, String groupingPath);
-
-    public void privilegegTets(String adminUsername, String groupingPath);
+    boolean isPathEmpty(String adminUsername, String groupingPath);
 
 }

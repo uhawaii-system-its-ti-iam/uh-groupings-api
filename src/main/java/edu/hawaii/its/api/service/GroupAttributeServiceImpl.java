@@ -234,7 +234,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
                     gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
 
-                    //todo should we return this result as well?
                     membershipService.updateLastModified(groupPath);
                 } else {
                     gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
@@ -245,7 +244,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
                     gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
 
-                    //todo should we return this result as well?
                     membershipService.updateLastModified(groupPath);
                 } else {
                     gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
@@ -279,7 +277,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     public Map<String, Boolean> getSyncDestinations(String grouping) {
         List<String> destinations = getAllSyncDestinations();
 
-        // todo: this should be done faster than a loop making individual calls
         Map<String, Boolean> syncDestinations = new HashMap<>();
 
         if (destinations != null) {
@@ -359,7 +356,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return helperService.makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
     }
 
-    // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description) {
         logger.info("updateDescription(); groupPath:" + groupPath +

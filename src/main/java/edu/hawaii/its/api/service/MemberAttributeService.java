@@ -10,33 +10,33 @@ import java.util.List;
 import java.util.Map;
 
 public interface MemberAttributeService {
-    public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
+    GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
 
-    public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemoveUsername);
+    GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemoveUsername);
 
-    public boolean isMember(String groupPath, String username);
+    boolean isMember(String groupPath, String username);
 
-    public boolean isMember(String groupPath, Person person);
+    boolean isMember(String groupPath, Person person);
 
-    public boolean isMemberUuid(String groupPath, String idnum);
+    boolean isMemberUuid(String groupPath, String idnum);
 
-    public boolean isOwner(String groupingPath, String username);
+    boolean isOwner(String groupingPath, String username);
 
-    public boolean isOwner(String username);
+    boolean isOwner(String username);
 
-    public boolean isAdmin(String username);
+    boolean isAdmin(String username);
 
-    public boolean isApp(String username);
+    boolean isApp(String username);
 
-    public boolean isSuperuser(String username);
+    boolean isSuperuser(String username);
 
-    public boolean isSelfOpted(String groupPath, String username);
+    boolean isSelfOpted(String groupPath, String username);
 
-    public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
+    WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
+    Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
 
-    public boolean isUuid(String username);
+    boolean isUuid(String username);
 
-    public List<Person> searchMembers(String groupPath, String username);
+    List<Person> searchMembers(String groupPath, String username);
 }

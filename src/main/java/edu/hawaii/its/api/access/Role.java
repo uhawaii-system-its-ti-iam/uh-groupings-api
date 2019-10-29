@@ -19,7 +19,7 @@ public enum Role {
     public static Role find(String name) {
         for (Role role : Role.values()) {
             if (role.name().equals(name)) {
-                return role; // Found it.
+                return role;
             }
         }
         return null;
