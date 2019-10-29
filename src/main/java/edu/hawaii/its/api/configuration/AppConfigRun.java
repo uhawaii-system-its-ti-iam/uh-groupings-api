@@ -7,8 +7,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-// todo change the uh-groupings-api-overrides to correct name once decided upon
-
 @Profile(value = { "localhost", "test", "integrationTest", "qa" })
 @Configuration
 @EnableAsync

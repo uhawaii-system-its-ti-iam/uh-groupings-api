@@ -14,7 +14,7 @@ public class RoleHolder {
         authorities.add(new SimpleGrantedAuthority(role.longName()));
     }
 
-    public Set<GrantedAuthority> getAuthorites() {
+    public Set<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
@@ -22,12 +22,8 @@ public class RoleHolder {
         return authorities.size();
     }
 
-    public boolean isContaining(Role role) {
-        return authorities.contains(new SimpleGrantedAuthority(role.longName()));
-    }
-
     @Override
     public String toString() {
-        return "RoleHolder [authorities=" + authorities + "]";
+        return "RoleHolder [authorities=" + getAuthorities() + "]";
     }
 }

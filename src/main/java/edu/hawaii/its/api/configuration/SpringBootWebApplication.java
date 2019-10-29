@@ -14,7 +14,6 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +40,7 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
         ArrayList<Integer> lineNumbers = new ArrayList<>();
         // Uses a string to make a pattern to compare to.
         Pattern pattern = Pattern.compile("grouperClient.webService.password");
-        Matcher matcher = null;
+        Matcher matcher;
         while(fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
             lineID++;
@@ -70,10 +69,4 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
         return new SecurityConfig();
     }
 
-//    @Bean
-//    public StrictHttpFirewall allowUrlEncodedSlashHttpFirewall() {
-//        StrictHttpFirewall firewall = new StrictHttpFirewall();
-//        firewall.setAllowUrlEncodedSlash(true);
-//        return firewall;
-//    }
 }
