@@ -188,23 +188,35 @@ public class MembershipServiceTest {
     List<GroupingsServiceResult> listGsr;
     GroupingsServiceResult gsr;
 
-    // Base test
-    // Remove person from include and composite
-    listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-        users.get(5).getUuid());
-    assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    try {
+      // Base test
+      // Remove person from include and composite
+      listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+          users.get(5).getUuid());
+      assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    } catch (GroupingsServiceResultException gsre) {
+      gsr = gsre.getGsr();
+    }
 
-    // If person is in composite and basis, add to exclude group
-    listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-        users.get(1).getUuid());
-    for (GroupingsServiceResult gsrFor : listGsr) {
-      assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
+    try {
+      // If person is in composite and basis, add to exclude group
+      listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+          users.get(1).getUuid());
+      for (GroupingsServiceResult gsrFor : listGsr) {
+        assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
+      }
+    } catch (GroupingsServiceResultException gsre) {
+      gsr = gsre.getGsr();
     }
 
     // Not in composite, do nothing but return success
-    listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-        users.get(2).getUuid());
-    assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    try {
+      listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+          users.get(2).getUuid());
+      assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    } catch (GroupingsServiceResultException gsre) {
+      gsr = gsre.getGsr();
+    }
 
     // todo Can't test with current database setup
     // Not in basis, but in exclude
@@ -215,14 +227,18 @@ public class MembershipServiceTest {
       listGsr = membershipService.deleteGroupingMemberByUuid(users.get(5).getUsername(), GROUPING_3_PATH,
           users.get(6).getUuid());
       assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-    } catch (AccessDeniedException ade) {
-      assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+    } catch (GroupingsServiceResultException gsre) {
+      gsr = gsre.getGsr();
     }
 
     // Test if user is admin
-    listGsr = membershipService.deleteGroupingMemberByUuid(ADMIN_USER, GROUPING_3_PATH,
-        users.get(6).getUuid());
-    assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    try {
+      listGsr = membershipService.deleteGroupingMemberByUuid(ADMIN_USER, GROUPING_3_PATH,
+          users.get(6).getUuid());
+      assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    } catch (GroupingsServiceResultException gsre) {
+      gsr = gsre.getGsr();
+    }
 
     // Test if path is not allowed to delete from
     try {
