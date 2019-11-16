@@ -411,7 +411,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     WsSubject[] subjects;
     WsSubjectLookup lookup;
     WsGetSubjectsResults results;
-    String attributeValue = "null";
+    String attributeValue = null;
     try {
       lookup = grouperFS.makeWsSubjectLookup(username);
       results = grouperFS.makeWsGetSubjectsResults(lookup);

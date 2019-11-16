@@ -197,7 +197,6 @@ public class MembershipServiceTest {
     } catch (GroupingsServiceResultException gsre) {
       gsr = gsre.getGsr();
     }
-
     try {
       // If person is in composite and basis, add to exclude group
       listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
@@ -208,7 +207,6 @@ public class MembershipServiceTest {
     } catch (GroupingsServiceResultException gsre) {
       gsr = gsre.getGsr();
     }
-
     // Not in composite, do nothing but return success
     try {
       listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
