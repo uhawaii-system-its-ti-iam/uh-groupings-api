@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -171,7 +172,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private MembershipService membershipService;
 
     @Override
-    public List<String> getAllSyncDestinations(String currentUsername) {
+    public List<SyncDestination> getAllSyncDestinations(String currentUsername) {
         if (memberAttributeService.isOwner(currentUsername) || memberAttributeService.isSuperuser(currentUsername)) {
             return getAllSyncDestinations();
         } else {
@@ -180,7 +181,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     @Override
-    public List<String> getAllSyncDestinations() {
+    public List<SyncDestination> getAllSyncDestinations() {
         return grouperFactoryService.getSyncDestinations();
     }
 
@@ -274,15 +275,15 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     @Override
-    public Map<String, Boolean> getSyncDestinations(String grouping) {
-        List<String> destinations = getAllSyncDestinations();
+    public Map<SyncDestination, Boolean> getSyncDestinations(String grouping) {
+        List<SyncDestination> destinations = getAllSyncDestinations();
 
-        Map<String, Boolean> syncDestinations = new HashMap<>();
+        Map<SyncDestination, Boolean> syncDestinations = new HashMap<>();
 
         if (destinations != null) {
 
-            for (String destination : destinations) {
-                syncDestinations.put(destination, isGroupAttribute(grouping, destination));
+            for (SyncDestination destination : destinations) {
+                syncDestinations.put(destination, isGroupAttribute(grouping, destination.getName()));
             }
         }
 

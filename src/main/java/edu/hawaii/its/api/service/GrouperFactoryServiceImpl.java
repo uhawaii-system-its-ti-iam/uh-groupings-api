@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -105,16 +106,17 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public List<String> getSyncDestinations() {
+    public List<SyncDestination> getSyncDestinations() {
         WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames().assignScope("uh-settings:attributes:for-groups:uh-grouping:destinations").execute();
-        List<String> syncDestinations = new ArrayList<>();
+        List<SyncDestination> syncDest = new ArrayList<>();
         for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
             if (wsAttributeDefName.getName() != null) {
-                syncDestinations.add(wsAttributeDefName.getName());
+                SyncDestination newDest = new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
+                syncDest.add(newDest);
             }
         }
-        System.out.println("getSyncDestTesting: " + syncDestinations);
-        return syncDestinations;
+        System.out.println("getSyncDestTesting: " + syncDest);
+        return syncDest;
     }
 
     @Override

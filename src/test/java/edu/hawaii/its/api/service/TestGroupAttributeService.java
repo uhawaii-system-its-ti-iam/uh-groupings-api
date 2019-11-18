@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -140,7 +141,7 @@ public class TestGroupAttributeService {
         //todo find a more specific way to test this
 
         // test with admin
-        List<String> destinations = groupAttributeService.getAllSyncDestinations(ADMIN);
+        List<SyncDestination> destinations = groupAttributeService.getAllSyncDestinations(ADMIN);
         assertTrue(destinations.size() > 0);
 
         // test with owner

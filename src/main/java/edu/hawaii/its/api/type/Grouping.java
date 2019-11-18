@@ -39,7 +39,7 @@ public class Grouping {
     private Group owners;
 
     @ElementCollection
-    private Map<String, Boolean> syncDestinations = new HashMap<>();
+    private Map<SyncDestination, Boolean> syncDestinations = new HashMap<>();
 
     @Column
     private boolean isListservOn = false;
@@ -71,11 +71,11 @@ public class Grouping {
     }
 
     @ElementCollection
-    public Map<String, Boolean> getSyncDestinations() {
+    public Map<SyncDestination, Boolean> getSyncDestinations() {
         return syncDestinations;
     }
 
-    public void setSyncDestinations(Map<String, Boolean> syncDestinations) {
+    public void setSyncDestinations(Map<SyncDestination, Boolean> syncDestinations) {
         this.syncDestinations = syncDestinations;
     }
 

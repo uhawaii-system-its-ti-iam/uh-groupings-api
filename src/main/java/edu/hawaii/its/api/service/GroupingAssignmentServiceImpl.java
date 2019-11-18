@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -534,7 +535,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setOptOutOn(isOptOutOn);
 
         // set the sync destinations map
-        Map<String, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());
+        Map<SyncDestination, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());
         System.out.println("syncDestinationMapComesBack:" + syncDestinations);
         grouping.setSyncDestinations(syncDestinations);
 

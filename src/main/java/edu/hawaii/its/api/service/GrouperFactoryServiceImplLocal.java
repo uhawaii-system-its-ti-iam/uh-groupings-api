@@ -4,10 +4,7 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.*;
 
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
@@ -171,7 +168,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     private String COMPOSITE_NAME_KEY;
 
     @Value("${groupings.api.test.sync_destinations}")
-    private List<String> SYNC_DESTINATIONS;
+    private List<SyncDestination> SYNC_DESTINATIONS;
 
     @Autowired
     private GroupingRepository groupingRepository;
@@ -190,7 +187,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public List<String> getSyncDestinations() {
+    public List<SyncDestination> getSyncDestinations() {
         return SYNC_DESTINATIONS;
     }
 
