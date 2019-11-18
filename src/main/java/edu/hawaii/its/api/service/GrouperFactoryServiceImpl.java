@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -51,6 +52,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +65,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     @Value("${groupings.api.attribute_assign_id_size}")
     private Integer ATTRIBUTES_ASSIGN_ID_SIZE;
+
+    @Value("${grouper.api.sync.destinations.location}")
+    private String SYNC_DESTINATIONS_LOCATION;
 
     @Value("${groupings.api.composite_type.complement}")
     private String COMPLEMENT;
@@ -104,17 +111,38 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         return username.matches("\\d+");
     }
 
+    /**
+     *
+     * @return a list of Sync Destinations
+     *
+     * Makes calls to grouper and gets all sync destinations in the for:groups folder.
+     */
     @Override
-    public List<String> getSyncDestinations() {
-        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames().assignScope("uh-settings:attributes:for-groups:uh-grouping:destinations").execute();
-        List<String> syncDestinations = new ArrayList<>();
+    public List<SyncDestination> getSyncDestinations() {
+
+        // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
+
+        List<SyncDestination> syncDest = new ArrayList<>();
+
+        // For each attribute, grab the name and definition and create a new SyncDestination object.
         for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
-            if (wsAttributeDefName.getName() != null) {
-                syncDestinations.add(wsAttributeDefName.getName());
+            SyncDestination newSyncDest = new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
+            if ((newSyncDest.getName() != null) && (newSyncDest.getDescription() != null)) {
+                String jsonString = newSyncDest.getDescription();
+
+                // Uses Springboot Mapper to change JSON to a Java Object. In this case a SyncDestination
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    newSyncDest = mapper.readValue(jsonString, SyncDestination.class);
+                    newSyncDest.setName(wsAttributeDefName.getName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            syncDest.add(newSyncDest);
         }
-        System.out.println("getSyncDestTesting: " + syncDestinations);
-        return syncDestinations;
+        return syncDest;
     }
 
     @Override

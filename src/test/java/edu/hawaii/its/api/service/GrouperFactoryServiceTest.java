@@ -7,6 +7,7 @@ import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -87,9 +88,6 @@ public class GrouperFactoryServiceTest {
 
     @Value("${groupings.api.test.name}")
     private String NAME;
-
-    @Value("${groupings.api.test.sync_destinations}")
-    private List<String> SYNC_DESTINATIONS;
 
     @Value("${groupings.api.test.uhuuid}")
     private String UUID;
@@ -332,7 +330,8 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void getSyncDestinationsTest() {
-        assertEquals(SYNC_DESTINATIONS, gfsl.getSyncDestinations());
+
+        assertTrue(gfsl.getSyncDestinations().size() > 0);
     }
 
     @Test

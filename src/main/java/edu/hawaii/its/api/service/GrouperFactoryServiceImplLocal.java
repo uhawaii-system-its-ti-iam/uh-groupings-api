@@ -4,10 +4,7 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.*;
 
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
@@ -88,6 +85,9 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
+
+    @Value("${groupings.api.googlegroup}")
+    private String GOOGLE_GROUP;
 
     @Value("${groupings.api.basis}")
     private String BASIS;
@@ -170,9 +170,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME_KEY;
 
-    @Value("${groupings.api.test.sync_destinations}")
-    private List<String> SYNC_DESTINATIONS;
-
     @Autowired
     private GroupingRepository groupingRepository;
 
@@ -190,8 +187,14 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    public List<String> getSyncDestinations() {
-        return SYNC_DESTINATIONS;
+    public List<SyncDestination> getSyncDestinations() {
+        List<SyncDestination> syncDestinations = new ArrayList<>();
+
+        syncDestinations.add(new SyncDestination(LISTSERV, "listserv"));
+        syncDestinations.add(new SyncDestination(RELEASED_GROUPING, "releasedGrouping"));
+        syncDestinations.add(new SyncDestination(GOOGLE_GROUP, "google-group"));
+
+        return syncDestinations;
     }
 
     @Override
@@ -637,7 +640,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
 
         Grouping grouping = groupingRepository.findByPath(group);
-        if (grouping.isListservOn()) {
+        if (grouping.isSyncDestinationOn(LISTSERV)) {
             wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, LISTSERV);
         }
         if (grouping.isOptInOn()) {
@@ -646,7 +649,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         if (grouping.isOptOutOn()) {
             wsGetAttributeAssignmentsResults = addAssignmentResults(wsGetAttributeAssignmentsResults, OPT_OUT);
         }
-        if (grouping.isReleasedGroupingOn()) {
+        if (grouping.isSyncDestinationOn(RELEASED_GROUPING)) {
             wsGetAttributeAssignmentsResults =
                     addAssignmentResults(wsGetAttributeAssignmentsResults, RELEASED_GROUPING);
         }
@@ -764,13 +767,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         if (isOnOrrOff != null) {
             if (attributeDefNameName.equals(LISTSERV)) {
-                grouping.setListservOn(isOnOrrOff);
+                grouping.changeSyncDestinationState(LISTSERV, isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_IN)) {
                 grouping.setOptInOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(OPT_OUT)) {
                 grouping.setOptOutOn(isOnOrrOff);
             } else if (attributeDefNameName.equals(RELEASED_GROUPING)) {
-                grouping.setReleasedGroupingOn(isOnOrrOff);
+                grouping.changeSyncDestinationState(RELEASED_GROUPING, isOnOrrOff);
             }
         }
 
@@ -1110,13 +1113,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     private boolean isGroupingAttributeSet(Grouping grouping, String attributeName, boolean isOn) {
         if (attributeName.equals(LISTSERV)) {
-            grouping.setListservOn(isOn);
+            grouping.changeSyncDestinationState(LISTSERV, isOn);
         } else if (attributeName.equals(OPT_IN)) {
             grouping.setOptInOn(isOn);
         } else if (attributeName.equals(OPT_OUT)) {
             grouping.setOptOutOn(isOn);
         } else if (attributeName.equals(RELEASED_GROUPING)) {
-            grouping.setReleasedGroupingOn(isOn);
+            grouping.changeSyncDestinationState(RELEASED_GROUPING, isOn);
         } else {
             return false;
         }

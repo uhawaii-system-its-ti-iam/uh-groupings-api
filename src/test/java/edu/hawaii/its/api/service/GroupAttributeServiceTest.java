@@ -126,23 +126,17 @@ public class GroupAttributeServiceTest {
     }
 
     @Test
-    public void getSyncDestinationsTest() {
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(ADMIN_USER));
-        assertEquals(SYNC_DESTINATIONS, groupAttributeService.getAllSyncDestinations(users.get(0).getUsername()));
+    public void getAllSyncDestinationsTest() {
 
-        try {
-            groupAttributeService.getAllSyncDestinations(users.get(6).getUsername());
-            fail("shouldn't be here");
-        } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
+        assertTrue(groupAttributeService.getAllSyncDestinations(ADMIN_USER, GROUPING_0_PATH).size() > 0);
+
     }
 
     @Test
     public void changeListservStatusTest() {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         try {
             groupAttributeService
@@ -152,13 +146,13 @@ public class GroupAttributeServiceTest {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOnWhenOffOwner =
                 groupAttributeService
                         .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         try {
             groupAttributeService
@@ -168,18 +162,18 @@ public class GroupAttributeServiceTest {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOnWhenOnOwner =
                 groupAttributeService
                         .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOnWhenOnAdmin =
                 groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         try {
             groupAttributeService
@@ -189,23 +183,23 @@ public class GroupAttributeServiceTest {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOffWhenOnOwner =
                 groupAttributeService
                         .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOnWhenOffAdmin =
                 groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isListservOn());
+        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOffWhenOnAdmin =
                 groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         try {
             groupAttributeService
@@ -215,18 +209,18 @@ public class GroupAttributeServiceTest {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOffWhenOffOwner =
                 groupAttributeService
                         .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         GroupingsServiceResult turnOffWhenOffAdmin =
                 groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isListservOn());
+        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
 
         assertTrue(turnOnWhenOnOwner.getResultCode().startsWith(SUCCESS));
         assertTrue(turnOnWhenOnAdmin.getResultCode().startsWith(SUCCESS));
