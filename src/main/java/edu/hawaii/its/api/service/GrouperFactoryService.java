@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -160,6 +161,6 @@ public interface GrouperFactoryService {
                                                 String leftGroupPath, String rightGroupPath);
 
     WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup);
-
-    List<String> getSyncDestinations();
+    
+    List<SyncDestination> getSyncDestinations();
 }
