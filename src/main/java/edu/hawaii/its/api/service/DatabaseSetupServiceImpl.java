@@ -8,6 +8,8 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +60,15 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
     @Value("${groupings.api.test.given_name}")
     private String GIVEN_NAME;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
+    @Value("${groupings.api.listserv}")
+    private String LISTSERV;
+
+    @Value("${groupings.api.googlegroup}")
+    private String GOOGLE_GROUP;
 
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
@@ -427,11 +438,12 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         grouping.setOwners(owners);
         grouping.setComposite(composite);
         grouping.setDescription("");
+        grouping.setSyncDestinations(buildSyncDestinations());
 
-        grouping.setListservOn(isListserveOn);
+        grouping.changeSyncDestinationState(LISTSERV, isListserveOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
-        grouping.setReleasedGroupingOn(isReleasedGroupingOn);
+        grouping.changeSyncDestinationState(RELEASED_GROUPING, isReleasedGroupingOn);
 
         groupings.add(grouping);
     }
@@ -454,6 +466,23 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         s.addAll(basis.getMembers());
 
         return new Group(new ArrayList<>(s));
+    }
+
+
+    /*
+    * Builds the sync destinations for unit testing.
+    *
+    */
+
+    private List<SyncDestination> buildSyncDestinations() {
+
+        List<SyncDestination> syncDestinations = new ArrayList<>();
+
+        syncDestinations.add(new SyncDestination(LISTSERV, "listserv"));
+        syncDestinations.add(new SyncDestination(RELEASED_GROUPING, "releasedGrouping"));
+        syncDestinations.add(new SyncDestination(GOOGLE_GROUP, "google-group"));
+
+        return syncDestinations;
     }
 
     private Group removeExcludedMembers(Group basisPlusInclude, Group exclude) {

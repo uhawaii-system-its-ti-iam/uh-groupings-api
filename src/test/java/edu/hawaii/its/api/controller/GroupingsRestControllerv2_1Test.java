@@ -142,7 +142,7 @@ public class GroupingsRestControllerv2_1Test {
         owners.addMember(new Person("o3-name", "o3-uuid", "o3-username"));
         grouping.setOwners(owners);
 
-        grouping.setListservOn(true);
+        grouping.changeSyncDestinationState(LISTSERV, true);
 
         return grouping;
     }
@@ -173,7 +173,7 @@ public class GroupingsRestControllerv2_1Test {
         owners.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
         grouping.setOwners(owners);
 
-        grouping.setListservOn(true);
+        grouping.changeSyncDestinationState(LISTSERV, true);
 
         return grouping;
     }

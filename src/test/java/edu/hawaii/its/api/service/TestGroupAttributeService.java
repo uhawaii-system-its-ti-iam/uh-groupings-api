@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -137,30 +139,24 @@ public class TestGroupAttributeService {
 
     @Test
     public void getSyncDestinationsTest() {
-        //todo find a more specific way to test this
 
         // test with admin
-        List<String> destinations = groupAttributeService.getAllSyncDestinations(ADMIN);
+        List<SyncDestination> destinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
         assertTrue(destinations.size() > 0);
 
         // test with owner
-        destinations = groupAttributeService.getAllSyncDestinations(username[0]);
+        destinations = groupAttributeService.getAllSyncDestinations(username[0], GROUPING);
         assertTrue(destinations.size() > 0);
 
-        // make sure username[6] doesn't own anything
-        List<String> ownedGroupings = membershipService.listOwned(ADMIN, username[5]);
-        for (String grouping : ownedGroupings) {
-            memberAttributeService.removeOwnership(grouping, ADMIN, username[5]);
-        }
-
+        // Test with a user who isn't an owner or admin
         try {
-            groupAttributeService.getAllSyncDestinations(username[5]);
+            groupAttributeService.getAllSyncDestinations(username[5], GROUPING);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
     }
-
+    
     @Test
     public void optOutPermissionTest() {
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
