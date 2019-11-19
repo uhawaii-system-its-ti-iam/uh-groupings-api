@@ -18,6 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -420,8 +421,9 @@ public class MembershipServiceImpl implements MembershipService {
   //each user to the specified group
   @Override
   public List<List<GroupingsServiceResult>> addGroupMembers(String ownerUsername, String groupPath,
-                                                            List<String> usersToAdd) {
+                                                            List<String> usersToAdd) throws MessagingException {
     List<List<GroupingsServiceResult>> gsrs = new ArrayList<>();
+
 
     for (String userToAdd : usersToAdd) {
       try {
@@ -436,18 +438,14 @@ public class MembershipServiceImpl implements MembershipService {
         }
       }
     }
+
+    GroupingsMailService message = new GroupingsMailService(javaMailSender, gsrs);
+    message.sendAttachmentMessage("gilbertz@hawaii.edu", "second test", "I love my java mail service", "/home/zachary/Desktop/jimby.png");
+
+
     return gsrs;
   }
 
-  public void sendSimpleMessage(String to, String subject, String text) {
-    SimpleMailMessage message = new SimpleMailMessage();
-
-    message.setTo(to);
-    message.setSubject(subject);
-    message.setText(text);
-
-    javaMailSender.send(message);
-  }
 
   //finds a user by a username and adds that user to the group
   @Override
@@ -456,14 +454,12 @@ public class MembershipServiceImpl implements MembershipService {
     logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
         + userToAddUsername + ";");
     Person personToAdd;
-    SimpleMailMessage message = new SimpleMailMessage();
 
     personToAdd = new Person(
         memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, NAME_E),
         memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, UUID_E),
         userToAddUsername);
 
-    sendSimpleMessage("gilbertz@hawaii.edu", "test", "HiHIHIHIHIHIHIHIHIHdf");
 
     return addMemberHelper(ownerUsername, groupPath, personToAdd);
   }
