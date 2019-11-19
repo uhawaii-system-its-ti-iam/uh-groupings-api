@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,9 @@ public class MembershipServiceImpl implements MembershipService {
   private static final int LASTNAME_E = 2;
   private static final int FIRSTNAME_E = 3;
   private static final int UUID_E = 4;
+
+  @Autowired
+  private JavaMailSender javaMailSender;
 
   @Value("${groupings.api.settings}")
   private String SETTINGS;
@@ -434,6 +439,16 @@ public class MembershipServiceImpl implements MembershipService {
     return gsrs;
   }
 
+  public void sendSimpleMessage(String to, String subject, String text) {
+    SimpleMailMessage message = new SimpleMailMessage();
+
+    message.setTo(to);
+    message.setSubject(subject);
+    message.setText(text);
+
+    javaMailSender.send(message);
+  }
+
   //finds a user by a username and adds that user to the group
   @Override
   public List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
@@ -441,10 +456,14 @@ public class MembershipServiceImpl implements MembershipService {
     logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
         + userToAddUsername + ";");
     Person personToAdd;
+    SimpleMailMessage message = new SimpleMailMessage();
+
     personToAdd = new Person(
         memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, NAME_E),
         memberAttributeService.getUserAttribute(ownerUsername, userToAddUsername, UUID_E),
         userToAddUsername);
+
+    sendSimpleMessage("gilbertz@hawaii.edu", "test", "HiHIHIHIHIHIHIHIHIHdf");
 
     return addMemberHelper(ownerUsername, groupPath, personToAdd);
   }
