@@ -1,10 +1,15 @@
 package edu.hawaii.its.api.type;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "syncDestinations")
 public class SyncDestination {
     // 2 variables for object
     private String name;
-
-    // Within description
     private String description;
 
     // Default Constructor
@@ -17,11 +22,22 @@ public class SyncDestination {
         this.description = description;
     }
 
-    public String getDescription() { return description; }
+    @Id
+    @Column(name = "name")
+    public String getName() {
+        return name;
+    }
 
-    public void setDescription(String description) { this.description = description; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getName() { return name; }
+    @Column(name = "description")
+    public String getDescription() {
+        return description;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }
