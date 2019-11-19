@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -421,15 +422,12 @@ public class MembershipServiceImpl implements MembershipService {
   //each user to the specified group
   @Override
   public List<List<GroupingsServiceResult>> addGroupMembers(String ownerUsername, String groupPath,
-                                                            List<String> usersToAdd) throws MessagingException {
+                                                            List<String> usersToAdd) throws MessagingException, IOException {
     List<List<GroupingsServiceResult>> gsrs = new ArrayList<>();
-
-
     for (String userToAdd : usersToAdd) {
       try {
         Integer.parseInt(userToAdd);
         gsrs.add(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
-
       } catch (Exception NumberFormatException) {
         try {
           gsrs.add(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
@@ -440,8 +438,9 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     GroupingsMailService message = new GroupingsMailService(javaMailSender, gsrs);
-    message.sendAttachmentMessage("gilbertz@hawaii.edu", "second test", "I love my java mail service", "/home/zachary/Desktop/jimby.png");
-
+    message.sendAttachmentMessage("gilbertz@hawaii.edu",
+        "second test", "I love my java mail service",
+        "/home/zachary/Desktop/jimby.png");
 
     return gsrs;
   }

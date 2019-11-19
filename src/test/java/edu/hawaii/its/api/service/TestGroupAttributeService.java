@@ -19,6 +19,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -113,7 +114,7 @@ public class TestGroupAttributeService {
     }
 
     @Before
-    public void setUp() throws MessagingException {
+    public void setUp() throws MessagingException, IOException {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);

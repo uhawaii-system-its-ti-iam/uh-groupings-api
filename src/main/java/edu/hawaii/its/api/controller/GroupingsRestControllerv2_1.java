@@ -31,6 +31,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -452,7 +453,7 @@ public class GroupingsRestControllerv2_1 {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<List<GroupingsServiceResult>>> includeMultipleMembers(
       @RequestHeader("current_user") String currentUser, @PathVariable String path,
-      @PathVariable List<String> uids) throws MessagingException {
+      @PathVariable List<String> uids) throws MessagingException, IOException {
     logger.info("Entered REST includeMultipleMembers...");
     path = path + INCLUDE;
     return ResponseEntity
@@ -492,7 +493,7 @@ public class GroupingsRestControllerv2_1 {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<List<GroupingsServiceResult>>> excludeMultipleMembers(
       @RequestHeader("current_user") String currentUser, @PathVariable String path,
-      @PathVariable List<String> uids) throws MessagingException {
+      @PathVariable List<String> uids) throws MessagingException, IOException {
     logger.info("Entered REST excludeMultipleMembers...");
     path = path + EXCLUDE;
     return ResponseEntity

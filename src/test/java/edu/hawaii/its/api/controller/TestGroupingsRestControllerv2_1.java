@@ -44,6 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -242,7 +243,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Before
-    public void setUp() throws MessagingException {
+    public void setUp() throws MessagingException, IOException {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
         grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
         grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[4]);

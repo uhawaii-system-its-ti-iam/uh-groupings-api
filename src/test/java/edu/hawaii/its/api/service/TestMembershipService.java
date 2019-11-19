@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,7 +101,7 @@ public class TestMembershipService {
   }
 
   @Before
-  public void setUp() throws MessagingException {
+  public void setUp() throws MessagingException, IOException {
     //add ownership
     memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
 
@@ -479,7 +480,7 @@ public class TestMembershipService {
   }
 
   @Test
-  public void deleteGroupingMemberByUuidTest() throws MessagingException {
+  public void deleteGroupingMemberByUuidTest() throws MessagingException, IOException {
     List<GroupingsServiceResult> lResults;
     GroupingsServiceResult results;
     String ownerUsername = username[0];
@@ -968,7 +969,7 @@ public class TestMembershipService {
   }
 
   @Test
-  public void addGroupMembersTest() throws MessagingException {
+  public void addGroupMembersTest() throws MessagingException, IOException {
     String ownerUsername = username[0];
 
     List<List<GroupingsServiceResult>> results;

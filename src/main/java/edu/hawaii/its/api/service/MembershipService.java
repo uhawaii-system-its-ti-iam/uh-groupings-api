@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.List;
 
 public interface MembershipService {
@@ -23,7 +24,7 @@ public interface MembershipService {
     public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String groupPath,
             String userToAddUsername);
 
-    public List<List<GroupingsServiceResult>> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd) throws MessagingException;
+    public List<List<GroupingsServiceResult>> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd) throws MessagingException, IOException;
 
     public List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
             List<String> usersToAddUsername);

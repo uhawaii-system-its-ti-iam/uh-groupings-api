@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class TestMemberAttributeService {
     }
 
     @Before
-    public void setUp() throws MessagingException {
+    public void setUp() throws MessagingException, IOException {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN_USER, LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, ADMIN_USER, true);
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
