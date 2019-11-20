@@ -1,8 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
@@ -179,9 +177,6 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
     @Autowired
     private HelperService helperService;
 
-    @Autowired
-    private MembershipService membershipService;
-
 
     @Override
     public List<GroupingsServiceResult> addGrouping(String adminUsername, String groupingPath) {
@@ -302,7 +297,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
 
 
-        List<String> memberLists = new ArrayList<String>();
+        List<String> memberLists = new ArrayList<>();
         // empty string is for composite
         memberLists.add("");
         memberLists.add(BASIS);
@@ -395,7 +390,7 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
                 groupingPath
         );
 
-        List<String> memberLists = new ArrayList<String>();
+        List<String> memberLists = new ArrayList<>();
         memberLists.add(BASIS);
         memberLists.add(BASIS_PLUS_INCLUDE);
         memberLists.add(EXCLUDE);
@@ -434,89 +429,9 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return purgeGroupingResults;
     }
 
-    public void privilegegTets(String adminUsername, String groupingPath){
-
-        WsSubjectLookup admin = grouperFactoryService.makeWsSubjectLookup(adminUsername);
-        WsSubjectLookup owners = grouperFactoryService.makeWsSubjectLookup(groupingPath + OWNERS);
-
-        String ownersUid = getGroupId(groupingPath + OWNERS);
-
-        List<String> memberLists = new ArrayList<String>();
-        memberLists.add(BASIS);
-        memberLists.add(BASIS_PLUS_INCLUDE);
-        memberLists.add(EXCLUDE);
-        memberLists.add(INCLUDE);
-        memberLists.add(OWNERS);
-        memberLists.add(groupingPath);
-
-
-        //        grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "admin",
-//                api, admin,true);
-
-       // grouperFactoryService.makeWsAddMemberResultsGroup(GROUPING_OWNERS, admin, ownersUid);
-
-
-        for (String group : memberLists) {
-
-            if (group == BASIS) {
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "read",
-                                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + BASIS, "view",
-                                        owners, admin,true);
-
-            } else if (group == EXCLUDE) {
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "read",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "view",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + EXCLUDE, "update",
-                        owners, admin,true);
-
-            } else if (group == INCLUDE) {
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "read",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "view",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + INCLUDE, "update",
-                        owners, admin,true);
-
-            } else if (group == OWNERS) {
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "read",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "view",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath + OWNERS, "update",
-                        owners, admin,true);
-
-            } else if (group == groupingPath) {
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "read",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "view",
-                        owners, admin,true);
-                
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrRead",
-                        owners, admin,true);
-
-                grouperFactoryService.makeWsAssignGrouperPrivilegesLiteResult(groupingPath, "groupAttrUpdate",
-                        owners, admin,true);
-            }
-        }
-
-    }
-
+  /**
+   * Used for tests do not delete
+   */
     //set of elements in list0 or list1
     private List<String> union(List<String> list0, List<String> list1) {
 
@@ -524,13 +439,16 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
             return list1 != null ? list1 : new ArrayList<>();
         }
 
-        //remove duplicatesspo
+        //remove duplicates
         Set<String> treeSet = new TreeSet<>(list0);
         treeSet.addAll(list1);
 
         return new ArrayList<>(treeSet);
     }
 
+     /**
+     * Used for tests do not delete
+     */
     //set of elements in list0, but not in list1
     private List<String> complement(List<String> list0, List<String> list1) {
         if (list0 == null) {
@@ -545,6 +463,9 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         return list0;
     }
 
+     /**
+     * Used for tests do not delete
+     */
     //set of elements in both list0 and list1
     private List<String> intersection(List<String> list0, List<String> list1) {
         if (list0 == null || list1 == null) {
@@ -554,18 +475,6 @@ public class GroupingFactoryServiceImpl implements GroupingFactoryService {
         list0.retainAll(list1);
         return new ArrayList<>(list0);
 
-    }
-
-    //returns a group of Persons that have usernames from usernames
-    //all other values will be left null
-    private Group makeGroup(String groupPath, List<String> usernames) {
-        List<Person> people = new ArrayList<>();
-
-        for (String username : usernames) {
-            people.add(new Person(null, null, username));
-        }
-
-        return new Group(groupPath, people);
     }
 
     //returns true if there is not a group at groupingPath

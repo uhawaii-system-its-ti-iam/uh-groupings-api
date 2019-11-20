@@ -14,7 +14,6 @@ import java.util.Date;
 
 public final class Dates {
 
-    public static final String DATE_FORMAT = "MMMM dd, yyyy";
     public static final String DATE_SORT_FORMAT = "yyyy-MM-dd";
 
     // Private constructor; prevent instantiation.
@@ -107,7 +106,7 @@ public final class Dates {
             formatStr = DATE_SORT_FORMAT;
         }
 
-        String result = datetime.toString();
+        String result;
 
         try {
             result = datetime.format(DateTimeFormatter.ofPattern(formatStr));
@@ -140,10 +139,6 @@ public final class Dates {
 
     public static int currentYear() {
         return LocalDate.now().getYear();
-    }
-
-    public static int yearOfDate(Date date) {
-        return toLocalDate(date).getYear();
     }
 
     public static int yearOfDate(LocalDate date) {

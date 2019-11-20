@@ -43,14 +43,6 @@ public class Group implements Comparable<Group> {
 
     public void setPath(String path) {
         this.path = path != null ? path : "";
-//        try {
-//            if(path.equals(null)){
-//                path = "";
-//            }
-//        } catch (NullPointerException npe) {
-//            path = "";
-//        }
-//        this.path = path;
     }
 
     @Id
