@@ -6,14 +6,7 @@ import edu.hawaii.its.api.type.Person;
 
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
-
 public interface MembershipRepository extends CrudRepository<Membership, String> {
-    List<Membership> findByPerson(Person person);
-
-    List<Membership> findByPersonUsername(String username);
-
-    List<Membership> findByGroup(Group group);
 
     Membership findByIdentifier(String identifier);
 

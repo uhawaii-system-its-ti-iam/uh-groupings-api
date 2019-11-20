@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface GroupRepository extends CrudRepository<Group, String> {
     Group findByPath(String path);
+
     List<Group> findByMembersUsername(String username);
-    List<Group> findByMembersUuid(String idnum);
 }

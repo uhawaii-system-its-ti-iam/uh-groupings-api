@@ -10,49 +10,44 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
 public interface GroupingAssignmentService {
 
-    public List<Grouping> groupingsIn(List<String> groupPaths);
+    List<Grouping> groupingsIn(List<String> groupPaths);
 
-    public List<Grouping> groupingsOwned(List<String> groupPaths);
+    List<Grouping> groupingsOwned(List<String> groupPaths);
 
-    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername);
+    List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername);
 
-    public List<Grouping> groupingsOptedInto(String username, List<String> groupPaths);
+    List<Grouping> groupingsOptedInto(String username, List<String> groupPaths);
 
-    public List<Grouping> groupingsOptedOutOf(String username, List<String> groupPaths);
+    List<Grouping> groupingsOptedOutOf(String username, List<String> groupPaths);
 
-    public Grouping getGrouping(String groupingPath, String ownerUsername);
+    Grouping getGrouping(String groupingPath, String ownerUsername);
 
-    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size, String sortString, Boolean isAscending);
+    Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size, String sortString,
+                                  Boolean isAscending);
 
-//    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size);
-
-    public GroupingAssignment getGroupingAssignment(String username);
+    GroupingAssignment getGroupingAssignment(String username);
 
     //get a MembershipAssignment object containing the groups that a user is in and can opt into
     MembershipAssignment getMembershipAssignment(String username, String uid);
 
-    public AdminListsHolder adminLists(String adminUsername);
+    AdminListsHolder adminLists(String adminUsername);
 
     //not to be included in the REST controller
-    public Person makePerson(WsSubject subject, String[] attributeNames);
+    Person makePerson(WsSubject subject, String[] attributeNames);
 
-    public List<String> extractGroupPaths(List<WsGroup> groups);
+    List<String> extractGroupPaths(List<WsGroup> groups);
 
-    public Map<String, Group> makeGroups(WsGetMembersResults membersResults);
+    Map<String, Group> makeGroups(WsGetMembersResults membersResults);
 
-    public List<String> getGroupPaths(String ownerUsername, String username);
+    List<String> getGroupPaths(String ownerUsername, String username);
 
-    public List<String> getGroupPaths(Principal principal, String username);
+    Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths);
 
-    public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths);
-
-//    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
-
-    public Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size, String sortString, Boolean isAscending);
+    Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size,
+                                            String sortString, Boolean isAscending);
 }

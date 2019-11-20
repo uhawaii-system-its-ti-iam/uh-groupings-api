@@ -8,24 +8,24 @@ import java.util.Map;
 
 public interface GroupAttributeService {
 
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String currentUsername, boolean isOptInOn);
+    List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String currentUsername, boolean isOptInOn);
 
-    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
+    List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String currentUsername, boolean isOptOutOn);
 
-    public boolean isGroupAttribute(String groupPath, String attribute);
+    boolean isGroupAttribute(String groupPath, String attribute);
 
-    public List<String> getAllSyncDestinations(String currentUsername);
+    List<String> getAllSyncDestinations(String currentUsername);
 
     //do not include in REST controller
-    public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
+    WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
                                                                         String attributeName);
 
-    public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
+    GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
             String attributeName, boolean turnAttributeOn);
 
-    public List<String> getAllSyncDestinations();
+    List<String> getAllSyncDestinations();
 
-    public Map<String, Boolean> getSyncDestinations(String grouping);
+    Map<String, Boolean> getSyncDestinations(String grouping);
 
-    public GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description);
+    GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description);
 }

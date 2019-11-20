@@ -8,15 +8,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @ComponentScan(basePackages = "edu.hawaii.its")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
-    protected void configure(HttpSecurity security) throws Exception
-    {
+    protected void configure(HttpSecurity security) throws Exception {
         security.httpBasic().disable();
 
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception
-    {
+    public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/api/**");
 
     }
