@@ -438,9 +438,9 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     GroupingsMailService message = new GroupingsMailService(javaMailSender, gsrs);
-    message.sendAttachmentMessage("gilbertz@hawaii.edu",
+    message.sendAttachmentMessage(message.getOwnerAddress(ownerUsername),
         "second test", "I love my java mail service",
-        "/home/zachary/Desktop/jimby.png");
+        "CSV_TEMP.csv");
 
     return gsrs;
   }

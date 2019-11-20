@@ -26,7 +26,7 @@ class GroupingsMailService {
   private JavaMailSender javaMailSender;
   private List<List<GroupingsServiceResult>> res;
 
-  public GroupingsMailService(JavaMailSender javaMailSender, List<List<GroupingsServiceResult>> res) {
+  GroupingsMailService(JavaMailSender javaMailSender, List<List<GroupingsServiceResult>> res) {
     this.javaMailSender = javaMailSender;
     this.res = res;
   }
@@ -39,7 +39,7 @@ class GroupingsMailService {
    * @param subject
    * @param text
    */
-  public void sendSimpleMessage(String addr, String subject, String text) {
+  void sendSimpleMessage(String addr, String subject, String text) {
     SimpleMailMessage message = new SimpleMailMessage();
 
     message.setTo(addr);
@@ -49,17 +49,17 @@ class GroupingsMailService {
     this.javaMailSender.send(message);
   }
 
-  public void sendAttachmentMessage(String addr, String subject, String text, String path) throws MessagingException, IOException {
+  void sendAttachmentMessage(String addr, String subject, String text, String path) throws MessagingException, IOException {
     MimeMessage message = javaMailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true);
-    File f = new File("CSV_TEST.csv");
+    File f = new File(path);
 
     helper.setTo(addr);
     helper.setSubject(subject);
     helper.setText(text);
 
 
-    FileSystemResource file = this.toCsv(this.toCsvString(this.res), f);
+    FileSystemResource file = this.toCsv(this.toCsvObj(this.res), f);
 
     helper.addAttachment(f.getPath(), file);
 
@@ -67,19 +67,15 @@ class GroupingsMailService {
     f.delete();
   }
 
-  private String parseGroupingsServiceResult(List<List<GroupingsServiceResult>> res) {
-    StringBuilder str = new StringBuilder();
-
-    for (List<GroupingsServiceResult> li : res) {
-      for (GroupingsServiceResult item : li) {
-        str.append(item.toString());
-      }
-      str.append("\n");
-    }
-    return str.toString();
-  }
-
-  private List<String[]> toCsvString(List<List<GroupingsServiceResult>> res) {
+  /**
+   * Build a CSV object using a List of String arrays.
+   * Each index of the list represents a row in the CSV file.
+   * Each String in a row represents a field or cell in the CSV file.
+   *
+   * @param res Response data
+   * @return List of string Arrays
+   */
+  private List<String[]> toCsvObj(List<List<GroupingsServiceResult>> res) {
     List<String[]> lines = new ArrayList<>();
 
     lines.add(new String[]{"username", "uuid", "firstName", "lastName", "name"});
@@ -92,6 +88,14 @@ class GroupingsMailService {
     return lines;
   }
 
+  /**
+   * Write Csv data to a file.
+   *
+   * @param data Csv data returned from toCsvObj()
+   * @param file Descriptor ro be written too.
+   * @return FileSystemResource to be sent via SMTP.
+   * @throws IOException
+   */
   private FileSystemResource toCsv(List<String[]> data, File file) throws IOException {
     FileWriter out = new FileWriter(file);
     CSVWriter writer = new CSVWriter(out);
@@ -100,6 +104,10 @@ class GroupingsMailService {
     writer.close();
 
     return new FileSystemResource(file);
+  }
+
+  public String getOwnerAddress(String ownerUsername) {
+    return new String(ownerUsername + "@hawaii.edu");
   }
 }
 
