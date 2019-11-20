@@ -229,7 +229,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     public WsStemDeleteResults deleteStem(WsSubjectLookup admin, WsStemLookup stem) {
 
         return new GcStemDelete()
-                .addGroupLookup(stem)
+                .addStemLookup(stem)
                 .assignActAsSubject(admin)
                 .execute();
     }
@@ -247,20 +247,17 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     @Override
-    //todo
     public WsAddMemberResults makeWsAddMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid) {
         return null;
     }
 
     @Override
-    //todo
     public WsFindGroupsResults makeWsFindGroupsResults(String groupPath) {
         WsFindGroupsResults groupsResults = new WsFindGroupsResults();
         WsGroup[] groups = new WsGroup[1];
 
         WsGroup group = new WsGroup();
         group.setName(groupPath);
-        //group.setDescription(groupingRepository.findByPath(groupPath).getDescription());
         groups[0] = group;
 
         groupsResults.setGroupResults(groups);
@@ -382,7 +379,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : newMembers) {
             WsResultMeta wsResultMetaData = makeWsAddMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
-                //todo Shouldn't be reached, and is not reachable anyway due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }
@@ -472,7 +468,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         for (String username : membersToDelete) {
             WsResultMeta wsResultMetaData = makeWsDeleteMemberResults(group, lookup, username).getResultMetadata();
             if (wsResultMetaData.getResultCode().equals(FAILURE)) {
-                //todo Not reachable due to exception
                 wsResultMeta = wsResultMetaData;
             }
         }
@@ -692,7 +687,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
     @Override
     public WsHasMemberResults makeWsHasMemberResults(String group, String username) {
-        Person person = new Person(null, null, null);
+        Person person;
 
         if (isUuid(username)) {
             person = personRepository.findByUuid(username);
@@ -862,7 +857,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             WsSubjectLookup lookup,
             boolean isAllowed) {
 
-        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegsLiteResult =
+        // Duplicate code is due to there being 2 individual methods one that calls admin and the other doesn't.
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult =
                 new WsAssignGrouperPrivilegesLiteResult();
         WsResultMeta wsResultMeta = new WsResultMeta();
         wsResultMeta.setResultCode(SUCCESS);
@@ -882,8 +878,8 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             throw new IllegalArgumentException("Privilege Name not acceptable");
         }
 
-        wsAssignGrouperPrivilegsLiteResult.setResultMetadata(wsResultMeta);
-        return wsAssignGrouperPrivilegsLiteResult;
+        wsAssignGrouperPrivilegesLiteResult.setResultMetadata(wsResultMeta);
+        return wsAssignGrouperPrivilegesLiteResult;
     }
 
     @Override
@@ -1002,17 +998,13 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
             List<Person> members = group.getMembers();
             List<WsSubject> subjectList = new ArrayList<>();
 
+            //As long as there are members and pages to load sort the loaded members by name in alphabetical order
             if (pageNumber != null && pageSize != null) {
                 if ("name".equals(sortString)) {
-                    //todo If we want to sort be anything other than name, we need to write modify comparator
-                    //todo Comparing by subjectId, sourceId, etc. would require rewriting the Person object
-                    //todo This functionality isn't entirely necessary for code coverage, but could be useful in the future
                     if (isAscending == null || isAscending) {
                         Collections.sort(members);
-                        //                        members.sort();
                     } else {
                         Collections.sort(members, Collections.reverseOrder());
-                        //                        members.sort(Collections.reverseOrder());
                     }
                 }
 
@@ -1308,26 +1300,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Override
     public WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
             String leftGroupPath, String rightGroupPath) {
-        //todo
         return null;
     }
 
-    @Override
-    public List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrioNew(String assignType,
-            String attributeDefNameName,
-            List<String> ownerGroupNames) {
-        //todo
-        return null;
-    }
-
-//    @Override
-    public WsGetMembershipsResults makeWsGetMembersResultsFilteredAndPaginated(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            String groupName,
-            String filterString,
-            Integer page,
-            Integer size) {
-        //todo
-        return null;
-    }
 }
