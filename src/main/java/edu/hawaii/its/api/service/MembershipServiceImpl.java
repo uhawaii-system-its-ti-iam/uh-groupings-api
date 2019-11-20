@@ -426,21 +426,19 @@ public class MembershipServiceImpl implements MembershipService {
     List<List<GroupingsServiceResult>> gsrs = new ArrayList<>();
     for (String userToAdd : usersToAdd) {
       try {
-        Integer.parseInt(userToAdd);
         gsrs.add(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
-      } catch (Exception NumberFormatException) {
-        try {
-          gsrs.add(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
-        } catch (GcWebServiceError e) {
-
-        }
+      } catch (GcWebServiceError e) {
+        System.out.println("User to add: " + userToAdd + " is invalid.\nERROR: " + e.toString());
       }
     }
-
     GroupingsMailService message = new GroupingsMailService(javaMailSender, gsrs);
     message.sendAttachmentMessage(message.getOwnerAddress(ownerUsername),
         "second test", "I love my java mail service",
         "CSV_TEMP.csv");
+/*
+    GroupingsMailService message = new GroupingsMailService(javaMailSender, gsrs);
+    message.sendSimpleMessage(message.getOwnerAddress(ownerUsername), "TEST", "HIHIHIHI");
+*/
 
     return gsrs;
   }

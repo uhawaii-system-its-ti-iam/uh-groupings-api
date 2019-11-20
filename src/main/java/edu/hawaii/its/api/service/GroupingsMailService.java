@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import com.opencsv.CSVWriter;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,21 +51,28 @@ class GroupingsMailService {
   }
 
   void sendAttachmentMessage(String addr, String subject, String text, String path) throws MessagingException, IOException {
-    MimeMessage message = javaMailSender.createMimeMessage();
-    MimeMessageHelper helper = new MimeMessageHelper(message, true);
     File f = new File(path);
+    try {
+      MimeMessage message = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-    helper.setTo(addr);
-    helper.setSubject(subject);
-    helper.setText(text);
+      helper.setTo(addr);
+      helper.setSubject(subject);
+      helper.setText(text);
 
 
-    FileSystemResource file = this.toCsv(this.toCsvObj(this.res), f);
+      FileSystemResource file = this.toCsv(this.toCsvObj(this.res), f);
 
-    helper.addAttachment(f.getPath(), file);
+      helper.addAttachment(f.getPath(), file);
 
-    javaMailSender.send(message);
-    f.delete();
+      javaMailSender.send(message);
+      f.delete();
+
+    } catch (MessagingException me) {
+      throw new MessagingException();
+    } catch (IOException ioe) {
+      throw new IOException(ioe);
+    }
   }
 
   /**
@@ -97,17 +105,22 @@ class GroupingsMailService {
    * @throws IOException
    */
   private FileSystemResource toCsv(List<String[]> data, File file) throws IOException {
-    FileWriter out = new FileWriter(file);
-    CSVWriter writer = new CSVWriter(out);
+    try {
+      FileWriter out = new FileWriter(file);
+      CSVWriter writer = new CSVWriter(out);
 
-    writer.writeAll(data);
-    writer.close();
+      writer.writeAll(data);
+      writer.close();
+
+    } catch (FileNotFoundException e) {
+      throw new IOException(e);
+    }
 
     return new FileSystemResource(file);
   }
 
-  public String getOwnerAddress(String ownerUsername) {
-    return new String(ownerUsername + "@hawaii.edu");
+  String getOwnerAddress(String ownerUsername) {
+    return ownerUsername + "@hawaii.edu";
   }
 }
 
