@@ -143,8 +143,8 @@ public class MembershipServiceImpl implements MembershipService {
     @Value("${groupings.api.stem}")
     private String STEM;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
@@ -574,7 +574,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (memberAttributeService.isUuid(newAdminUsername)) {
             action = "add user with uuid " + newAdminUsername + " to " + GROUPING_ADMINS;
-            return new GroupingsServiceResult(FAILURE + ": adding admins with UUID is not implemented", action);
+            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
         }
 
         if (memberAttributeService.isSuperuser(currentAdminUsername)) {
@@ -602,7 +602,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (memberAttributeService.isUuid(adminToDeleteUsername)) {
 
             action = "delete user with uuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
-            return new GroupingsServiceResult(FAILURE + ": adding admins with UUID is not implemented", action);
+            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
         }
 
         if (memberAttributeService.isSuperuser(adminUsername)) {

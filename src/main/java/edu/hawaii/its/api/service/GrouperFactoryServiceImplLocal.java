@@ -152,11 +152,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.test.name}")
     private String NAME;
 
-    @Value("${groupings.api.test.uuid}")
-    private String UUID;
+    @Value("${groupings.api.test.uhuuid}")
+    private String UHUUID;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID_KEY;
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID_KEY;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID_KEY;
@@ -987,7 +987,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     ) {
 
         WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
-        String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeNames = new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
         wsGetMembersResults.setSubjectAttributeNames(attributeNames);
 
         List<WsGetMembersResult> results = new ArrayList<>();
@@ -1282,7 +1282,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         Person person = personRepository.findByUsername(username);
 
         WsGetSubjectsResults results = new WsGetSubjectsResults();
-        String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeNames = new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
 
         List<WsSubject> subjectsList = new ArrayList<>();
         subjectsList.add(new WsSubject());
