@@ -158,8 +158,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.stem}")
     private String STEM;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
@@ -500,7 +500,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 attributes.put(attributeNames[i], subject.getAttributeValue(i));
             }
             //uuid is the only attribute not actually in the WsSubject attribute array
-            attributes.put(UUID, subject.getId());
+            attributes.put(UHUUID, subject.getId());
 
             return new Person(attributes);
         }

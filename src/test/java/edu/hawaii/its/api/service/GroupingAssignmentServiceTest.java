@@ -58,11 +58,11 @@ public class GroupingAssignmentServiceTest {
   @Value("${groupings.api.test.name}")
   private String NAME;
 
-  @Value("${groupings.api.test.uuid}")
-  private String UUID;
+  @Value("${groupings.api.test.uhuuid}")
+  private String UHUUID;
 
-  @Value("${groupings.api.person_attributes.uuid}")
-  private String UUID_KEY;
+  @Value("${groupings.api.person_attributes.uhuuid}")
+  private String UHUUID_KEY;
 
   @Value("${groupings.api.person_attributes.username}")
   private String UID_KEY;
@@ -471,7 +471,7 @@ public class GroupingAssignmentServiceTest {
   public void makeGroupsTest() {
 
     WsGetMembersResults getMembersResults = new WsGetMembersResults();
-    String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+    String[] attributeNames = new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
 
     // We create an array here because getMembersResults.setResults() only takes an array
     WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
@@ -517,7 +517,7 @@ public class GroupingAssignmentServiceTest {
     String id = "uuid";
     String identifier = "username";
     String[] attributeNames =
-        new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
     String[] attributeValues = new String[] { identifier, id, null, name, null };
 
     WsSubject subject = new WsSubject();
@@ -546,7 +546,7 @@ public class GroupingAssignmentServiceTest {
 
     WsGetMembersResults getMembersResults = new WsGetMembersResults();
     String[] attributeNames =
-        new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
 
     // We create an array here because getMembersResults.setResults() only takes an array
     // nullSubject... will have a null Subject Array while testSubject... will have 2 subjects with test attributes
@@ -566,7 +566,7 @@ public class GroupingAssignmentServiceTest {
     WsSubject[] list = new WsSubject[2];
     list[1] = new WsSubject();
     list[1].setName("iDontExistAnymoreName");
-    list[1].setId("iDontExistAnymoreUUID");
+    list[1].setId("iDontExistAnymoreUHUUID");
     list[1].setAttributeValues(new String[] { "iDontExistAnymoreUsername", "", "", "iDontExistAnymoreName", "" });
     list[1].setSourceId(STALE_SUBJECT_ID);
 
