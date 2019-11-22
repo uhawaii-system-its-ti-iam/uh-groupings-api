@@ -28,17 +28,17 @@ public class PersonTest {
     public void constuction() {
         assertNotNull(person);
         assertNull(person.getName());
-        assertNull(person.getUuid());
+        assertNull(person.getUhUuid());
         assertNull(person.getUsername());
 
         person = new Person("a", "b", "c");
         assertThat(person.getName(), equalTo("a"));
-        assertThat(person.getUuid(), equalTo("b"));
+        assertThat(person.getUhUuid(), equalTo("b"));
         assertThat(person.getUsername(), equalTo("c"));
 
         person2 = new Person("a", "b", "c", "d", "e");
         assertThat(person2.getName(), equalTo("a"));
-        assertThat(person2.getUuid(), equalTo("b"));
+        assertThat(person2.getUhUuid(), equalTo("b"));
         assertThat(person2.getUsername(), equalTo("c"));
         assertThat(person2.getFirstName(), equalTo("d"));
         assertThat(person2.getLastName(), equalTo("e"));
@@ -47,22 +47,22 @@ public class PersonTest {
     @Test
     public void accessors() {
         assertNull(person.getName());
-        assertNull(person.getUuid());
+        assertNull(person.getUhUuid());
         assertNull(person.getUsername());
 
         person.setName("name");
         assertThat(person.getName(), equalTo("name"));
-        assertNull(person.getUuid());
+        assertNull(person.getUhUuid());
         assertNull(person.getUsername());
 
-        person.setUuid("uuid");
+        person.setUhUuid("uuid");
         assertThat(person.getName(), equalTo("name"));
-        assertThat(person.getUuid(), equalTo("uuid"));
+        assertThat(person.getUhUuid(), equalTo("uuid"));
         assertNull(person.getUsername());
 
         person.setUsername("username");
         assertThat(person.getName(), equalTo("name"));
-        assertThat(person.getUuid(), equalTo("uuid"));
+        assertThat(person.getUhUuid(), equalTo("uuid"));
         assertThat(person.getUsername(), equalTo("username"));
     }
 
@@ -84,10 +84,10 @@ public class PersonTest {
         assertTrue(p0.equals(p1));
         assertTrue(p1.equals(p0));
 
-        p0.setUuid("uuid");
+        p0.setUhUuid("uuid");
         assertFalse(p0.equals(p1));
         assertFalse(p1.equals(p0));
-        p1.setUuid("uuid");
+        p1.setUhUuid("uuid");
         assertTrue(p0.equals(p1));
         assertTrue(p1.equals(p0));
 
@@ -102,7 +102,7 @@ public class PersonTest {
     @Test
     public void testHashCode() {
         assertThat(person.getName(), equalTo(null));
-        assertThat(person.getUuid(), equalTo(null));
+        assertThat(person.getUhUuid(), equalTo(null));
         assertThat(person.getUsername(), equalTo(null));
 
         final int prime = 31;
@@ -122,7 +122,7 @@ public class PersonTest {
         result = prime * result + 0;
         person.setName(null);
         person.setUsername("username");
-        person.setUuid(null);
+        person.setUhUuid(null);
         assertThat(person.hashCode(), equalTo(result));
 
         result = 1;
@@ -131,7 +131,7 @@ public class PersonTest {
         result = prime * result + "uuid".hashCode();
         person.setName(null);
         person.setUsername(null);
-        person.setUuid("uuid");
+        person.setUhUuid("uuid");
         assertThat(person.hashCode(), equalTo(result));
 
     }
@@ -167,10 +167,10 @@ public class PersonTest {
         assertThat(persons.get(1).getName(), equalTo(""));
         assertThat(persons.get(2).getName(), equalTo(""));
         assertThat(persons.get(3).getName(), equalTo(""));
-        assertThat(persons.get(0).getUuid(), equalTo("p"));
-        assertThat(persons.get(1).getUuid(), equalTo("o"));
-        assertThat(persons.get(2).getUuid(), equalTo("n"));
-        assertThat(persons.get(3).getUuid(), equalTo("m"));
+        assertThat(persons.get(0).getUhUuid(), equalTo("p"));
+        assertThat(persons.get(1).getUhUuid(), equalTo("o"));
+        assertThat(persons.get(2).getUhUuid(), equalTo("n"));
+        assertThat(persons.get(3).getUhUuid(), equalTo("m"));
 
         Collections.sort(persons);
 
@@ -178,10 +178,10 @@ public class PersonTest {
         assertThat(persons.get(1).getName(), equalTo(""));
         assertThat(persons.get(2).getName(), equalTo(""));
         assertThat(persons.get(3).getName(), equalTo(""));
-        assertThat(persons.get(0).getUuid(), equalTo("m"));
-        assertThat(persons.get(1).getUuid(), equalTo("n"));
-        assertThat(persons.get(2).getUuid(), equalTo("o"));
-        assertThat(persons.get(3).getUuid(), equalTo("p"));
+        assertThat(persons.get(0).getUhUuid(), equalTo("m"));
+        assertThat(persons.get(1).getUhUuid(), equalTo("n"));
+        assertThat(persons.get(2).getUhUuid(), equalTo("o"));
+        assertThat(persons.get(3).getUhUuid(), equalTo("p"));
 
         // Again.
         persons = new ArrayList<>();
