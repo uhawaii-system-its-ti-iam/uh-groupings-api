@@ -271,8 +271,8 @@ public class MemberAttributeServiceTest {
         Person person2 = users.get(2);
         Person person5 = users.get(5);
 
-        assertFalse(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person2.getUuid()));
-        assertTrue(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person5.getUuid()));
+        assertFalse(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person2.getUhUuid()));
+        assertTrue(memberAttributeService.isMemberUuid(GROUPING_0_PATH, person5.getUhUuid()));
     }
 
     @Test
@@ -314,7 +314,7 @@ public class MemberAttributeServiceTest {
 
         assertThat(attributes.get(UID), equalTo(personFive.getUsername()));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo(personFive.getName()));
-        assertThat(attributes.get(UHUUID), equalTo(personFive.getUuid()));
+        assertThat(attributes.get(UHUUID), equalTo(personFive.getUhUuid()));
         assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
         assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
 
@@ -343,7 +343,7 @@ public class MemberAttributeServiceTest {
         Person testPerson = personRepository.findByUsername(users.get(5).getUsername());
 
         assertThat(membersResults.get(0).getUsername(), equalTo(testPerson.getUsername()));
-        assertThat(membersResults.get(0).getUuid(), equalTo(testPerson.getUuid()));
+        assertThat(membersResults.get(0).getUhUuid(), equalTo(testPerson.getUhUuid()));
         assertThat(membersResults.get(0).getName(), equalTo(testPerson.getName()));
     }
 }

@@ -519,7 +519,7 @@ public class TestMemberAttributeService {
         List<Person> members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[3]);
         assertThat(members.get(0).getName(), equalTo("tst04name"));
         assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUuid(), equalTo(usernames[3]));
+        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
 
         // iamtst01 is not in the basis group (results list should be empty)
         members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[0]);
@@ -531,6 +531,6 @@ public class TestMemberAttributeService {
         members = memberAttributeService.searchMembers(GROUPING_TIMEOUT, usernames[3]);
         assertThat(members.get(0).getName(), equalTo("tst04name"));
         assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUuid(), equalTo(usernames[3]));
+        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
     }
 }

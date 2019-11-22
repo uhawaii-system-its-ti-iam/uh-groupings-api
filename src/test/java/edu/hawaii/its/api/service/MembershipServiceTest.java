@@ -169,7 +169,7 @@ public class MembershipServiceTest {
         String ownerUsername = users.get(0).getUsername();
         String groupingPath = GROUPING_3_PATH;
         String userToAdd = users.get(5).getUsername();
-        String uuidToAdd = users.get(5).getUuid();
+        String uuidToAdd = users.get(5).getUhUuid();
 
         listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, userToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
@@ -191,19 +191,19 @@ public class MembershipServiceTest {
         // Base test
         // Remove person from include and composite
         listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(5).getUuid());
+                users.get(5).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         // If person is in composite and basis, add to exclude group
         listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(1).getUuid());
+                users.get(1).getUhUuid());
         for (GroupingsServiceResult gsrFor : listGsr) {
             assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
         }
 
         // Not in composite, do nothing but return success
         listGsr = membershipService.deleteGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(2).getUuid());
+                users.get(2).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         // todo Can't test with current database setup
@@ -213,7 +213,7 @@ public class MembershipServiceTest {
         // Test if user is not an owner
         try {
             listGsr = membershipService.deleteGroupingMemberByUuid(users.get(5).getUsername(), GROUPING_3_PATH,
-                    users.get(6).getUuid());
+                    users.get(6).getUhUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
@@ -221,7 +221,7 @@ public class MembershipServiceTest {
 
         // Test if user is admin
         listGsr = membershipService.deleteGroupingMemberByUuid(ADMIN_USER, GROUPING_3_PATH,
-                users.get(6).getUuid());
+                users.get(6).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         // Test if path is not allowed to delete from
@@ -243,14 +243,14 @@ public class MembershipServiceTest {
         // Base test
         // Remove person who's not in composite from exclude and return SUCCESS
         listGsr = membershipService.addGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(3).getUuid());
+                users.get(3).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         //todo Case where !inComposite && !inBasis is impossible w/ current db
 
         // In composite
         listGsr = membershipService.addGroupingMemberByUuid(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(5).getUuid());
+                users.get(5).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         //todo Case where inBasis && inInclude is impossible w/ current db
@@ -258,7 +258,7 @@ public class MembershipServiceTest {
         // Test if user is not an owner
         try {
             listGsr = membershipService.addGroupingMemberByUuid(users.get(5).getUsername(), GROUPING_3_PATH,
-                    users.get(3).getUuid());
+                    users.get(3).getUhUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
@@ -266,7 +266,7 @@ public class MembershipServiceTest {
 
         // Test if user is admin
         listGsr = membershipService.addGroupingMemberByUuid(ADMIN_USER, GROUPING_3_PATH,
-                users.get(3).getUuid());
+                users.get(3).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
     }
 
@@ -302,7 +302,7 @@ public class MembershipServiceTest {
 
         // Test if user is admin
         listGsr = membershipService.addGroupingMemberByUsername(ADMIN_USER, GROUPING_3_PATH,
-                users.get(3).getUuid());
+                users.get(3).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
     }
@@ -338,7 +338,7 @@ public class MembershipServiceTest {
         // Test if user is not an owner
         try {
             listGsr = membershipService.deleteGroupingMemberByUsername(users.get(5).getUsername(), GROUPING_3_PATH,
-                    users.get(6).getUuid());
+                    users.get(6).getUhUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
@@ -346,7 +346,7 @@ public class MembershipServiceTest {
 
         // Test if user is admin
         listGsr = membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING_3_PATH,
-                users.get(6).getUuid());
+                users.get(6).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         //Test if wrong path is given
@@ -368,7 +368,7 @@ public class MembershipServiceTest {
         String ownerUsername = users.get(0).getUsername();
         String groupPath = GROUPING_3_INCLUDE_PATH;
         String userToAdd = users.get(2).getUsername();
-        String uuidToAdd = users.get(2).getUuid();
+        String uuidToAdd = users.get(2).getUhUuid();
 
         listGsr = membershipService.addGroupMember(ownerUsername, groupPath, userToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
@@ -391,8 +391,8 @@ public class MembershipServiceTest {
         usersToAdd.add(users.get(2).getUsername());
         usersToAdd.add(users.get(3).getUsername());
 
-        uuidsToAdd.add(users.get(2).getUuid());
-        uuidsToAdd.add(users.get(3).getUuid());
+        uuidsToAdd.add(users.get(2).getUhUuid());
+        uuidsToAdd.add(users.get(3).getUhUuid());
 
         listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, usersToAdd);
         for (int i = 0; i < listGsr.size(); i++) {
@@ -674,7 +674,7 @@ public class MembershipServiceTest {
         assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
 
         membershipService
-                .addGroupMemberByUuid(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(3).getUuid());
+                .addGroupMemberByUuid(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(3).getUhUuid());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
     }
@@ -684,7 +684,7 @@ public class MembershipServiceTest {
         //add all uuids
         List<String> uuids = new ArrayList<>();
         for (Person user : users) {
-            uuids.add(user.getUuid());
+            uuids.add(user.getUhUuid());
         }
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_3_PATH);

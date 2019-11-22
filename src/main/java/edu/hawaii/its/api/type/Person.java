@@ -23,7 +23,7 @@ public class Person implements Comparable<Person> {
     @Transient
     private static String LAST_NAME = "sn";
     @Transient
-    private static String UUID = "uuid";
+    private static String UHUUID = "uhuuid";
     @Transient
     private static String USERNAME = "uid";
 
@@ -41,16 +41,16 @@ public class Person implements Comparable<Person> {
     }
 
     // Constructor.
-    public Person(String name, String uuid, String username) {
+    public Person(String name, String uhuuid, String username) {
         this(name);
 
-        attributes.put(UUID, uuid);
+        attributes.put(UHUUID, uhuuid);
         attributes.put(USERNAME, username);
     }
 
     // Constructor.
-    public Person(String name, String uuid, String username, String firstName, String lastName) {
-        this(name, uuid, username);
+    public Person(String name, String uhuuid, String username, String firstName, String lastName) {
+        this(name, uhuuid, username);
 
         attributes.put(FIRST_NAME, firstName);
         attributes.put(LAST_NAME, lastName);
@@ -81,12 +81,12 @@ public class Person implements Comparable<Person> {
     }
 
     @Column
-    public String getUuid() {
-        return attributes.get(UUID);
+    public String getUhUuid() {
+        return attributes.get(UHUUID);
     }
 
-    public void setUuid(String uuid) {
-        attributes.put(UUID, uuid);
+    public void setUhUuid(String uhuuid) {
+        attributes.put(UHUUID, uhuuid);
     }
 
     @Column(name = "FirstName")
@@ -132,11 +132,11 @@ public class Person implements Comparable<Person> {
         int result = 1;
         String name = getName();
         String username = getUsername();
-        String uuid = getUuid();
+        String uhuuid = getUhUuid();
 
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((username == null) ? 0 : username.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = prime * result + ((uhuuid == null) ? 0 : uhuuid.hashCode());
         return result;
     }
 
@@ -144,7 +144,7 @@ public class Person implements Comparable<Person> {
     public boolean equals(Object obj) {
         String name = getName();
         String username = getUsername();
-        String uuid = getUuid();
+        String uhuuid = getUhUuid();
 
         if (this == obj)
             return true;
@@ -163,9 +163,9 @@ public class Person implements Comparable<Person> {
                 return false;
         } else if (!username.equals(other.getUsername()))
             return false;
-        if (uuid == null) {
-            return other.getUuid() == null;
-        } else return uuid.equals(other.getUuid());
+        if (uhuuid == null) {
+            return other.getUhUuid() == null;
+        } else return uhuuid.equals(other.getUhUuid());
     }
 
     @Override
@@ -183,9 +183,9 @@ public class Person implements Comparable<Person> {
             return nameComp;
         }
 
-        int uuidComp = nullSafeComparator.compare(getUuid(), person.getUuid());
-        if (uuidComp != 0) {
-            return uuidComp;
+        int uhuuidComp = nullSafeComparator.compare(getUhUuid(), person.getUhUuid());
+        if (uhuuidComp != 0) {
+            return uhuuidComp;
         }
 
         return 0;
@@ -193,7 +193,7 @@ public class Person implements Comparable<Person> {
 
     @Override
     public String toString() {
-        return "Person [name=" + getName() + ", uuid=" + getUuid() + ", username=" + getUsername() + "]";
+        return "Person [name=" + getName() + ", uhuuid=" + getUhUuid() + ", username=" + getUsername() + "]";
     }
 
 }
