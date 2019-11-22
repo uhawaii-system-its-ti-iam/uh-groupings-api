@@ -82,10 +82,10 @@ public class Group implements Comparable<Group> {
 
     @JsonIgnore
     @Transient
-    public List<String> getUuids() {
+    public List<String> getUhUuids() {
         return members
                 .parallelStream()
-                .map(Person::getUuid)
+                .map(Person::getUhUuid)
                 .collect(Collectors.toList());
     }
 

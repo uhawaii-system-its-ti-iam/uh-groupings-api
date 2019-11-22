@@ -50,8 +50,14 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     @Value("${groupings.api.owners}")
     private String OWNERS;
 
-    @Value("${groupings.api.test.uuid}")
-    private String UUID;
+    @Value("${groupings.api.test.uhuuid}")
+    private String UHUUID;
+
+    @Value("${groupings.api.test.surname}")
+    private String SN;
+
+    @Value("${groupings.api.test.given_name}")
+    private String GIVEN_NAME;
 
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
@@ -104,10 +110,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private void setUserLookups() {
         for (int i = 0; i < 100; i++) {
             String name = NAME + i;
-            String uuid = String.valueOf(i);
+            String uhuuid = String.valueOf(i);
             String username = USERNAME + i;
 
-            Person person = new Person(name, uuid, username);
+            Person person = new Person(name, uhuuid, username);
             users.add(person);
 
             WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
@@ -163,7 +169,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private void setUpPersons() {
         int numberOfPersons = 100;
         for (int i = 0; i < numberOfPersons; i++) {
-            makePerson("name" + i, String.valueOf(i), "username" + i);
+            makePerson("name" + i, Integer.toString(i), "username" + i, "surnameOf" + i, "givenNameOf" + i);
         }
     }
 
@@ -386,11 +392,13 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     // factory methods
     ///////////////////////////////////////////////////////////
 
-    private void makePerson(String name, String uuid, String username) {
+    private void makePerson(String name, String uhuuid, String username, String surname, String givenName) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put("cn", name);
-        attributes.put("uuid", uuid);
+        attributes.put("uhuuid", uhuuid);
         attributes.put("uid", username);
+        attributes.put("sn", surname);
+        attributes.put("givenName", givenName);
         persons.add(new Person(attributes));
     }
 
