@@ -138,9 +138,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.stem}")
     private String STEM;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
-
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
 

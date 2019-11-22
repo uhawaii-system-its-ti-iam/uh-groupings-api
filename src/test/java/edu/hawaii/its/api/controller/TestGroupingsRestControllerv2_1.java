@@ -167,9 +167,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.person_attributes.username}")
     private String USERNAME;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
-
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
