@@ -373,8 +373,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], adminUser);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
-        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
@@ -399,8 +399,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], uhUser01);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
-        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
@@ -1062,7 +1062,6 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-
     //    @Test
     @WithAnonymousUser
     public void enableDisablePreferencesAnonTest() throws Exception {
@@ -1080,28 +1079,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
-    }
-
-    @Test
-    public void addDeleteGroupingPassTest() throws Exception {
-        // remove grouping if it exists
-        groupingFactoryService.deleteGrouping(ADMIN, DELETE_GROUPING);
-
-        // make sure grouping does not exist
-        assertTrue(groupingFactoryService.isPathEmpty(ADMIN, DELETE_GROUPING));
-
-        // create grouping
-        mapList(API_BASE + "groupings/" + DELETE_GROUPING, "post", adminUser);
-
-        // make sure grouping does exist
-        assertFalse(groupingFactoryService.isPathEmpty(ADMIN, DELETE_GROUPING));
-
-        // add purge attribute to grouping
-        mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", adminUser);
-
-        // make sure purge attribute is added
-        assertTrue(groupAttributeService.isGroupAttribute(DELETE_GROUPING, PURGE));
-
     }
 
     @Test
