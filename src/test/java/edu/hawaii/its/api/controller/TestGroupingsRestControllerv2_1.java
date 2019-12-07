@@ -418,13 +418,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(attributes.get(COMPOSITE_NAME), equalTo(""));
         assertThat(attributes.get(LAST_NAME), equalTo(""));
 
-        //        assertThat(mapGetUserAttributes(usernames[0]).size(), equalTo(0));
-        //        try {
-        //            mapGetUserAttributes(usernames[0]);
-        //            fail("Shouldn't be here.");
-        //        } catch (GroupingsHTTPException ghe) {
-        //            assertThat(ghe.getStatusCode(), equalTo(403));
-        //        }
     }
 
     //    @Test

@@ -31,7 +31,7 @@ public class UserContextServiceTest {
 
         User user = userContextService.getCurrentUser();
         assertNotNull(user);
-        assertThat(user.getUhuuid(), equalTo("12345678L"));
+        assertThat(user.getUhUuid(), equalTo("12345678L"));
         assertThat(user.getUsername(), equalTo("admin"));
 
         userContextService.setCurrentUhuuid("87654321L");
