@@ -110,10 +110,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private void setUserLookups() {
         for (int i = 0; i < 100; i++) {
             String name = NAME + i;
-            String uhuuid = String.valueOf(i);
+            String uhUuid = String.valueOf(i);
             String username = USERNAME + i;
 
-            Person person = new Person(name, uhuuid, username);
+            Person person = new Person(name, uhUuid, username);
             users.add(person);
 
             WsSubjectLookup lookup = new WsSubjectLookup(null, null, username);
@@ -392,10 +392,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     // factory methods
     ///////////////////////////////////////////////////////////
 
-    private void makePerson(String name, String uhuuid, String username, String surname, String givenName) {
+    private void makePerson(String name, String uhUuid, String username, String surname, String givenName) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put("cn", name);
-        attributes.put("uhuuid", uhuuid);
+        attributes.put("uhUuid", uhUuid);
         attributes.put("uid", username);
         attributes.put("sn", surname);
         attributes.put("givenName", givenName);

@@ -393,7 +393,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     /*
      * Covered by Integration Tests
      *
-     * Returns a user's attributes (FirstName(givenName), LastName(sn), Composite Name(cn), Username(uid), UH User ID(uhuuid)) based on the username.
+     * Returns a user's attributes (FirstName(givenName), LastName(sn), Composite Name(cn), Username(uid), UH User ID(uhUuid)) based on the username.
      * If the requester of the information is not a superuser or owner, then the function returns a mapping with empty values.
      *
      * Not testable with Unit test as needs to connect to Grouper database to work, not mock db.
