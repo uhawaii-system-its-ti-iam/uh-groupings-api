@@ -14,10 +14,10 @@ UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise a
 [![Known Vulnerabilities](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg)](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api)
 
 ##### Build Tool
-First, you need to download and install maven (version 3.2.1+).
+First, you need to setup [Maven Wrapper](https://www.baeldung.com/maven-wrapper) which allows the use of Maven withought installing it.
 
-Be sure to set up a M2_REPO environment variable.
-
+    $ mvn -N io.takari:maven:wrapper
+    
 ##### Java
 You'll need a Java JDK to build and run the project (version 1.8).
 
@@ -27,17 +27,13 @@ available from here:
 https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api
 
 ##### Building
-Install the necessary project dependencies:
-
-    $ mvn install
-
 To run the Application from the Command Line:
 
-    $ mvn clean spring-boot:run
+    $ ./mvnw clean spring-boot:run
 
 To build a deployable war file for local development, if preferred:
 
-    $ mvn clean package
+    $ ./mvnw clean package
 
 You should have a deployable war file in the target directory.
 Deploy as usual in a servlet container, e.g. tomcat.
@@ -54,15 +50,15 @@ line arguments.
 
 To run the Unit Tests with a standard build:
 
-    $ mvn clean test
+    $ ./mvnw clean test
 
 To run a test class:
 
-    $ mvn clean test -Dtest=StringsTest
+    $ ./mvnw clean test -Dtest=StringsTest
 
 To run a single method in a test class:
 
-    $ mvn clean test -Dtest=StringsTest#trunctate
+    $ ./mvnw clean test -Dtest=StringsTest#trunctate
 
 ##### Running System Tests
 The project files include a handful of System Tests.
@@ -74,4 +70,4 @@ appropriate command line argument.
 
 To run the System Tests:
 
-    $ mvn -Dtest=*SystemTest clean test
+    $ ./mvnw -Dtest=*SystemTest clean test
