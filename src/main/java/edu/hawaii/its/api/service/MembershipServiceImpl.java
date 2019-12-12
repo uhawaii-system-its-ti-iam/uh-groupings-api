@@ -441,8 +441,7 @@ public class MembershipServiceImpl implements MembershipService {
         Person personToAdd;
 
         personToAdd = new Person(null, null, userToAddUsername);
-        personToAdd.setAttributes(memberAttributeService.getUserAttributes(ownerUsername,userToAddUsername));
-        //System.out.print(returned);
+        
       return addMemberHelper(ownerUsername, groupPath, personToAdd);
     }
 
