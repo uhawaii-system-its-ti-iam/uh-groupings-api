@@ -39,4 +39,6 @@ public interface MemberAttributeService {
     boolean isUuid(String username);
 
     List<Person> searchMembers(String groupPath, String username);
+
+  String getSpecificUserAttribute(String adminUser, String username, int attribute);
 }
