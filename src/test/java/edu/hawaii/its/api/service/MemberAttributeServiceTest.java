@@ -318,6 +318,11 @@ public class MemberAttributeServiceTest {
         assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
         assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
 
+        // Test getSpecificUserAttribute
+        //UID = 0, UHUUID = 1, LAST_NAME = 2, COMPOSITE_NAME = 3, FIRST_NAME = 4
+        String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, username, 0);
+        assertThat(attribute, equalTo(personFive.getUsername()));
+
         // Test with user that owns no groupings
         Map<String, String> emptyAttributes = memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
 
