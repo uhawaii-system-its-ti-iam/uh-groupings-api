@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
 
@@ -438,6 +440,34 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
 
     }
+
+   // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
+   // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
+   public String getSpecificUserAttribute(String ownerUsername, String username,int attribute) throws GcWebServiceError {
+     WsSubject[] subjects;
+     WsSubjectLookup lookup;
+     String[] attributeValues = new String[5];
+     Map<String, String> mapping = new HashMap<>();
+
+     if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
+         groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+       try {
+         lookup = grouperFS.makeWsSubjectLookup(username);
+         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+         subjects = results.getWsSubjects();
+
+         attributeValues = subjects[0].getAttributeValues();
+         return attributeValues[attribute];
+
+       } catch (NullPointerException npe) {
+         throw new GcWebServiceError("Error 404 Not Found");
+       }
+     } else {
+       return attributeValues[attribute];
+     }
+
+
+   }
 
     @Override
     public List<Person> searchMembers(String groupPath, String username) {
