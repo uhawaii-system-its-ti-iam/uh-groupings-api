@@ -441,8 +441,8 @@ public class MembershipServiceImpl implements MembershipService {
         Person personToAdd;
 
         personToAdd = new Person(null, null, userToAddUsername);
-
-        return addMemberHelper(ownerUsername, groupPath, personToAdd);
+        
+      return addMemberHelper(ownerUsername, groupPath, personToAdd);
     }
 
     //finds a user by a uuid and adds them to the group
