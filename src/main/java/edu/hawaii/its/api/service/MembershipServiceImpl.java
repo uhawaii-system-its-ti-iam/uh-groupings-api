@@ -107,7 +107,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Value("${groupings.api.assign_type_immediate_membership}")
     private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
 
-    @Value("${groupings.api.subject_attribute_name_uuid}")
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.operation_assign_attribute}")
@@ -176,8 +176,8 @@ public class MembershipServiceImpl implements MembershipService {
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     // returns true if username is a UH id number
-    public boolean isUuid(String username) {
-        return username.matches("\\d+");
+    public boolean isUhUuid(String naming) {
+        return naming.matches("\\d+");
     }
 
     @Override
@@ -186,7 +186,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         try {
             Integer.parseInt(userToAdd);
-            gsrs = addGroupingMemberByUuid(ownerUsername, groupingPath, userToAdd);
+            gsrs = addGroupingMemberByUhUuid(ownerUsername, groupingPath, userToAdd);
 
         } catch (Exception NumberFormatException) {
             gsrs = addGroupingMemberByUsername(ownerUsername, groupingPath, userToAdd);
@@ -242,10 +242,10 @@ public class MembershipServiceImpl implements MembershipService {
 
     //find a user by a uuid and add them to a grouping
     @Override
-    public List<GroupingsServiceResult> addGroupingMemberByUuid(String username, String groupingPath,
-            String userToAddUuid) {
+    public List<GroupingsServiceResult> addGroupingMemberByUhUuid(String username, String groupingPath,
+            String userToAddUhUuid) {
         logger.info("addGroupingMemberByUuid; user: " + username + "; grouping: " + groupingPath + "; userToAdd: "
-                + userToAddUuid + ";");
+                + userToAddUhUuid + ";");
 
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
 
@@ -254,7 +254,7 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        Person personToAdd = new Person(null, userToAddUuid, null);
+        Person personToAdd = new Person(null, userToAddUhUuid, null);
 
         boolean isInBasis = memberAttributeService.isMember(basis, personToAdd);
         boolean isInComposite = memberAttributeService.isMember(groupingPath, personToAdd);
@@ -263,22 +263,22 @@ public class MembershipServiceImpl implements MembershipService {
         //check to see if they are already in the grouping
         if (!isInComposite) {
             //get them out of the exclude
-            gsrs.add(deleteGroupMemberByUsername(username, exclude, userToAddUuid));
+            gsrs.add(deleteGroupMemberByUsername(username, exclude, userToAddUhUuid));
             //only add them to the include if they are not in the basis
             if (!isInBasis) {
-                gsrs.addAll(addGroupMemberByUsername(username, include, userToAddUuid));
+                gsrs.addAll(addGroupMemberByUsername(username, include, userToAddUhUuid));
             } else {
                 gsrs.add(helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUuid + " was in " + basis, action));
+                        .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUhUuid + " was in " + basis, action));
             }
         } else {
             gsrs.add(helperService
-                    .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUuid + " was already in " + groupingPath,
+                    .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUhUuid + " was already in " + groupingPath,
                             action));
         }
         //should only be in one or the other
         if (isInBasis && isInInclude) {
-            gsrs.add(deleteGroupMemberByUsername(username, include, userToAddUuid));
+            gsrs.add(deleteGroupMemberByUsername(username, include, userToAddUhUuid));
         }
 
         return gsrs;
@@ -332,49 +332,48 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     //finds a user by a uuid and remove them from a grouping
-    @Override
-    public List<GroupingsServiceResult> deleteGroupingMemberByUuid(String ownerUsername, String groupingPath,
-            String userToDeleteUuid) {
+    public List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
+            String userToDeleteUhUuid) {
         logger.info("deleteGroupingMemberByUuid; ownerUsername: "
                 + ownerUsername
                 + "; groupingPath: "
                 + groupingPath + "; userToDelete: "
-                + userToDeleteUuid
+                + userToDeleteUhUuid
                 + ";");
 
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
 
-        String action = ownerUsername + " deletes " + userToDeleteUuid + " from " + groupingPath;
+        String action = ownerUsername + " deletes " + userToDeleteUhUuid + " from " + groupingPath;
         String basis = groupingPath + BASIS;
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        Person personToDelete = new Person(null, userToDeleteUuid, null);
+        Person personToDelete = new Person(null, userToDeleteUhUuid, null);
 
         boolean isInBasis = memberAttributeService.isMember(basis, personToDelete);
         boolean isInComposite = memberAttributeService.isMember(groupingPath, personToDelete);
         boolean isInExclude = memberAttributeService.isMember(exclude, personToDelete);
 
         //if they are in the include group, get them out
-        gsrList.add(deleteGroupMemberByUsername(ownerUsername, include, userToDeleteUuid));
+        gsrList.add(deleteGroupMemberByUsername(ownerUsername, include, userToDeleteUhUuid));
 
         //make sure userToDelete is actually in the Grouping
         if (isInComposite) {
             //if they are not in the include group, then they are in the basis, so add them to the exclude group
             if (isInBasis) {
-                gsrList.addAll(addGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid));
+                gsrList.addAll(addGroupMemberByUsername(ownerUsername, exclude, userToDeleteUhUuid));
             }
         }
         //since they are not in the Grouping, do nothing, but return SUCCESS
         else {
             gsrList.add(
-                    helperService.makeGroupingsServiceResult(SUCCESS + userToDeleteUuid + " was not in " +
+                    helperService.makeGroupingsServiceResult(SUCCESS + userToDeleteUhUuid + " was not in " +
                             groupingPath, action));
         }
 
         //should not be in exclude if not in basis
         if (!isInBasis && isInExclude) {
-            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid    ));
+            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUhUuid));
         }
 
         return gsrList;
@@ -382,8 +381,8 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd) {
-        if (isUuid(userToAdd)) {
-            return addGroupMemberByUuid(ownerUsername, groupingPath, userToAdd);
+        if (isUhUuid(userToAdd)) {
+            return addGroupMemberByUhUuid(ownerUsername, groupingPath, userToAdd);
         } else {
             return (addGroupMemberByUsername(ownerUsername, groupingPath, userToAdd));
         }
@@ -446,12 +445,12 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     //finds a user by a uuid and adds them to the group
-    public List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String groupPath,
-            String userToAddUuid) {
+    public List<GroupingsServiceResult> addGroupMemberByUhUuid(String ownerUsername, String groupPath,
+            String userToAddUhUuid) {
         logger.info("addGroupMemberByUuid; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
-                + userToAddUuid + ";");
+                + userToAddUhUuid + ";");
 
-        Person personToAdd = new Person(null, userToAddUuid, null);
+        Person personToAdd = new Person(null, userToAddUhUuid, null);
         return addMemberHelper(ownerUsername, groupPath, personToAdd);
     }
 
@@ -471,13 +470,13 @@ public class MembershipServiceImpl implements MembershipService {
 
     //finds all the user from a list of uuids and adds them to the group
     @Override
-    public List<GroupingsServiceResult> addGroupMembersByUuid(String ownerUsername, String groupPath,
-            List<String> usersToAddUuid) {
+    public List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String groupPath,
+            List<String> usersToAddUhUuid) {
         logger.info("addGroupMembersByUuid; user: " + ownerUsername + "; groupPath: " + groupPath + "; usersToAddUuid: "
-                + usersToAddUuid + ";");
+                + usersToAddUhUuid + ";");
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        for (String userToAdd : usersToAddUuid) {
-            gsrList.addAll(addGroupMemberByUuid(ownerUsername, groupPath, userToAdd));
+        for (String userToAdd : usersToAddUhUuid) {
+            gsrList.addAll(addGroupMemberByUhUuid(ownerUsername, groupPath, userToAdd));
         }
         return gsrList;
     }
@@ -485,8 +484,8 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
             String userToDelete) {
-        if (isUuid(userToDelete)) {
-            return deleteGroupMemberByUuid(ownerUsername, groupPath, userToDelete);
+        if (isUhUuid(userToDelete)) {
+            return deleteGroupMemberByUhUuid(ownerUsername, groupPath, userToDelete);
         }
         return deleteGroupMemberByUsername(ownerUsername, groupPath, userToDelete);
     }
@@ -500,8 +499,8 @@ public class MembershipServiceImpl implements MembershipService {
                 + "; userToDelete: " + userToDeleteUsername
                 + ";");
 
-        if (isUuid(userToDeleteUsername)) {
-            return deleteGroupMemberByUuid(ownerUsername, groupPath, userToDeleteUsername);
+        if (isUhUuid(userToDeleteUsername)) {
+            return deleteGroupMemberByUhUuid(ownerUsername, groupPath, userToDeleteUsername);
         }
 
         String action = "delete " + userToDeleteUsername + " from " + groupPath;
@@ -531,15 +530,15 @@ public class MembershipServiceImpl implements MembershipService {
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
-    public GroupingsServiceResult deleteGroupMemberByUuid(String ownerUsername, String groupPath,
-            String userToDeleteUuid) {
+    public GroupingsServiceResult deleteGroupMemberByUhUuid(String ownerUsername, String groupPath,
+            String userToDeleteUhUuid) {
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
-                + "; userToDelete: " + userToDeleteUuid
+                + "; userToDelete: " + userToDeleteUhUuid
                 + ";");
 
-        String action = "delete " + userToDeleteUuid + " from " + groupPath;
-        Person personToDelete = new Person(null, userToDeleteUuid, null);
+        String action = "delete " + userToDeleteUhUuid + " from " + groupPath;
+        Person personToDelete = new Person(null, userToDeleteUhUuid, null);
 
         String composite = helperService.parentGroupingPath(groupPath);
 
@@ -556,7 +555,7 @@ public class MembershipServiceImpl implements MembershipService {
                     return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
                 }
                 return helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUuid + " was not in " + groupPath,
+                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUhUuid + " was not in " + groupPath,
                                 action);
             }
             return helperService.makeGroupingsServiceResult(
@@ -573,7 +572,7 @@ public class MembershipServiceImpl implements MembershipService {
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
         if (memberAttributeService.isUuid(newAdminUsername)) {
-            action = "add user with uuid " + newAdminUsername + " to " + GROUPING_ADMINS;
+            action = "add user with uhUuid " + newAdminUsername + " to " + GROUPING_ADMINS;
             return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
         }
 
@@ -601,7 +600,7 @@ public class MembershipServiceImpl implements MembershipService {
         action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
         if (memberAttributeService.isUuid(adminToDeleteUsername)) {
 
-            action = "delete user with uuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
+            action = "delete user with uhUuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
             return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
         }
 
@@ -961,7 +960,7 @@ public class MembershipServiceImpl implements MembershipService {
             String membershipID) {
         logger.info("assignMembershipAttributes; operation: "
                 + operationName
-                + "; uuid: "
+                + "; uhUuid: "
                 + attributeUuid
                 + "; membershipID: "
                 + membershipID
