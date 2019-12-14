@@ -226,7 +226,7 @@ public class MembershipServiceTest {
 
         // Test if path is not allowed to delete from
         try {
-            gsr = membershipService.deleteGroupMemberByUuid(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
+            gsr = membershipService.deleteGroupMemberByUhUuid(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
@@ -674,7 +674,7 @@ public class MembershipServiceTest {
         assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
 
         membershipService
-                .addGroupMemberByUuid(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(3).getUhUuid());
+                .addGroupMemberByUhUuid(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(3).getUhUuid());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
     }
@@ -693,7 +693,7 @@ public class MembershipServiceTest {
         int numberOfBasisMembers = grouping.getBasis().getMembers().size();
 
         //try to put all users into exclude group
-        membershipService.addGroupMembersByUuid(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, uuids);
+        membershipService.addGroupMembersByUhUuid(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, uuids);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
         //there should be no real members in composite, but it should still have the 'grouperAll' member
         assertEquals(1, grouping.getComposite().getMembers().size());
@@ -701,7 +701,7 @@ public class MembershipServiceTest {
         assertEquals(numberOfBasisMembers, grouping.getExclude().getMembers().size());
 
         //try to put all users into the include group
-        membershipService.addGroupMembersByUuid(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, uuids);
+        membershipService.addGroupMembersByUhUuid(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, uuids);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
         //all members should be in the group ( - 1 for 'grouperAll' in composite);
         assertEquals(uuids.size(), grouping.getComposite().getMembers().size() - 1);

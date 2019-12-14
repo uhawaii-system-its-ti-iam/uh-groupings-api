@@ -11,36 +11,36 @@ public interface MembershipService {
     List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
                                                              String userToAddUsername);
 
-    List<GroupingsServiceResult> addGroupingMemberByUuid(String ownerUsername, String groupingPath,
-                                                         String userToAddUuid);
+    List<GroupingsServiceResult> addGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
+                                                         String userToAddUhUuid);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
     List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
                                                           String userToAddUsername);
 
-    List<GroupingsServiceResult> addGroupMemberByUuid(String ownerUsername, String groupPath,
-                                                      String userToAddUsername);
+    List<GroupingsServiceResult> addGroupMemberByUhUuid(String ownerUsername, String groupPath,
+                                                      String userToAddUhUuid);
 
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
                                                            List<String> usersToAddUsername);
 
-    List<GroupingsServiceResult> addGroupMembersByUuid(String ownerUsername, String group,
-                                                       List<String> usersToAddUuid);
+    List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String group,
+                                                       List<String> usersToAddUhUuid);
 
     List<GroupingsServiceResult> deleteGroupingMemberByUsername(String ownerUsername, String groupingPath,
                                                                 String userToDeleteUsername);
 
-    List<GroupingsServiceResult> deleteGroupingMemberByUuid(String ownerUsername, String groupingPath,
-                                                            String userToDeleteUuid);
+    List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
+                                                            String userToDeleteUhUuid);
 
     GroupingsServiceResult deleteGroupMemberByUsername(String ownerUsername, String groupPath,
                                                        String userToDeleteUsername);
 
-    GroupingsServiceResult deleteGroupMemberByUuid(String ownerUsername, String groupPath,
-                                                   String userToDeleteUuid);
+    GroupingsServiceResult deleteGroupMemberByUhUuid(String ownerUsername, String groupPath,
+                                                   String userToDeleteUhUuid);
 
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
                                              String userToDelete);
