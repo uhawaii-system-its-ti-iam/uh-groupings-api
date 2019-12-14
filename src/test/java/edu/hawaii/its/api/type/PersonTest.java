@@ -55,14 +55,14 @@ public class PersonTest {
         assertNull(person.getUhUuid());
         assertNull(person.getUsername());
 
-        person.setUhUuid("uuid");
+        person.setUhUuid("uhUuid");
         assertThat(person.getName(), equalTo("name"));
-        assertThat(person.getUhUuid(), equalTo("uuid"));
+        assertThat(person.getUhUuid(), equalTo("uhUuid"));
         assertNull(person.getUsername());
 
         person.setUsername("username");
         assertThat(person.getName(), equalTo("name"));
-        assertThat(person.getUhUuid(), equalTo("uuid"));
+        assertThat(person.getUhUuid(), equalTo("uhUuid"));
         assertThat(person.getUsername(), equalTo("username"));
     }
 
@@ -84,10 +84,10 @@ public class PersonTest {
         assertTrue(p0.equals(p1));
         assertTrue(p1.equals(p0));
 
-        p0.setUhUuid("uuid");
+        p0.setUhUuid("uhUuid");
         assertFalse(p0.equals(p1));
         assertFalse(p1.equals(p0));
-        p1.setUhUuid("uuid");
+        p1.setUhUuid("uhUuid");
         assertTrue(p0.equals(p1));
         assertTrue(p1.equals(p0));
 
@@ -128,10 +128,10 @@ public class PersonTest {
         result = 1;
         result = prime * result + 0;
         result = prime * result + 0;
-        result = prime * result + "uuid".hashCode();
+        result = prime * result + "uhUuid".hashCode();
         person.setName(null);
         person.setUsername(null);
-        person.setUhUuid("uuid");
+        person.setUhUuid("uhUuid");
         assertThat(person.hashCode(), equalTo(result));
 
     }
