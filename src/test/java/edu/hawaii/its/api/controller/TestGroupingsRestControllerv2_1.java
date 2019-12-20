@@ -239,7 +239,6 @@ public class TestGroupingsRestControllerv2_1 {
         Assert.hasLength(env.getProperty("grouperClient.webService.password"),
                 "property 'grouperClient.webService.password' is required");
     }
-
     @Before
     public void setUp() {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
@@ -1085,10 +1084,15 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    @Ignore("possible feature, for now there is no way to delete a grouping.")
     @Test
     public void addDeleteGroupingPassTest() throws Exception {
         // remove grouping if it exists
-        groupingFactoryService.deleteGrouping(ADMIN, DELETE_GROUPING);
+        try {
+            groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
+        } catch (GroupingsServiceResultException gsre) {
+            logger.info("Grouping doesn't exist.");
+        }
 
         // make sure grouping does not exist
         assertTrue(groupingFactoryService.isPathEmpty(ADMIN, DELETE_GROUPING));
@@ -1125,7 +1129,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    //    @Test
+    @Ignore
     @WithAnonymousUser
     public void addDeleteGroupingAnonTest() throws Exception {
 
