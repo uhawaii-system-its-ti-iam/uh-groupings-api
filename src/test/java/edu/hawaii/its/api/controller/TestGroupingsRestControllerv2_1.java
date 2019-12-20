@@ -236,7 +236,6 @@ public class TestGroupingsRestControllerv2_1 {
         Assert.hasLength(env.getProperty("grouperClient.webService.password"),
                 "property 'grouperClient.webService.password' is required");
     }
-
     @Before
     public void setUp() {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
@@ -1074,6 +1073,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
+    @Ignore("possible feature, for now there is no way to delete a grouping.")
     @Test
     public void addDeleteGroupingFailTest() throws Exception {
 
@@ -1092,7 +1092,7 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    //    @Test
+    @Ignore
     @WithAnonymousUser
     public void addDeleteGroupingAnonTest() throws Exception {
 
