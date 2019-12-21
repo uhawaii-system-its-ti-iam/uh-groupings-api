@@ -167,9 +167,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.person_attributes.username}")
     private String USERNAME;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
-
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
@@ -375,8 +372,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], adminUser);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
-        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
@@ -401,8 +398,8 @@ public class TestGroupingsRestControllerv2_1 {
         Map attributes = mapGetUserAttributes(usernames[0], uhUser01);
 
         assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("iamtst01"));
-        assertThat(attributes.get(UHUUID), equalTo("tst01name"));
+        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
+        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
         assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
         assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
 
@@ -420,13 +417,6 @@ public class TestGroupingsRestControllerv2_1 {
         assertThat(attributes.get(COMPOSITE_NAME), equalTo(""));
         assertThat(attributes.get(LAST_NAME), equalTo(""));
 
-        //        assertThat(mapGetUserAttributes(usernames[0]).size(), equalTo(0));
-        //        try {
-        //            mapGetUserAttributes(usernames[0]);
-        //            fail("Shouldn't be here.");
-        //        } catch (GroupingsHTTPException ghe) {
-        //            assertThat(ghe.getStatusCode(), equalTo(403));
-        //        }
     }
 
     //    @Test
@@ -1064,7 +1054,6 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-
     //    @Test
     @WithAnonymousUser
     public void enableDisablePreferencesAnonTest() throws Exception {
@@ -1085,32 +1074,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Ignore("possible feature, for now there is no way to delete a grouping.")
-    @Test
-    public void addDeleteGroupingPassTest() throws Exception {
-        // remove grouping if it exists
-        try {
-            groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
-        } catch (GroupingsServiceResultException gsre) {
-            logger.info("Grouping doesn't exist.");
-        }
-
-        // make sure grouping does not exist
-        assertTrue(groupingFactoryService.isPathEmpty(ADMIN, DELETE_GROUPING));
-
-        // create grouping
-        mapList(API_BASE + "groupings/" + DELETE_GROUPING, "post", adminUser);
-
-        // make sure grouping does exist
-        assertFalse(groupingFactoryService.isPathEmpty(ADMIN, DELETE_GROUPING));
-
-        // add purge attribute to grouping
-        mapList(API_BASE + "groupings/" + DELETE_GROUPING, "delete", adminUser);
-
-        // make sure purge attribute is added
-        assertTrue(groupAttributeService.isGroupAttribute(DELETE_GROUPING, PURGE));
-
-    }
-
     @Test
     public void addDeleteGroupingFailTest() throws Exception {
 

@@ -60,11 +60,11 @@ public class HelperServiceTest {
     @Value("${groupings.api.test.name}")
     private String NAME;
 
-    @Value("${groupings.api.test.uuid}")
-    private String UUID;
+    @Value("${groupings.api.test.uhuuid}")
+    private String UHUUID;
 
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID_KEY;
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID_KEY;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID_KEY;

@@ -298,7 +298,7 @@ public class TestGroupingAssignmentService {
         List<String> uuids = new ArrayList<>();
 
         for (Person p : nonPaginatedBasisMembers) {
-            uuids.add(p.getUuid());
+            uuids.add(p.getUhUuid());
         }
 
         Collections.sort(uuids);

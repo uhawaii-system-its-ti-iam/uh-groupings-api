@@ -58,11 +58,11 @@ public class GroupingAssignmentServiceTest {
   @Value("${groupings.api.test.name}")
   private String NAME;
 
-  @Value("${groupings.api.test.uuid}")
-  private String UUID;
+  @Value("${groupings.api.test.uhuuid}")
+  private String UHUUID;
 
-  @Value("${groupings.api.person_attributes.uuid}")
-  private String UUID_KEY;
+  @Value("${groupings.api.person_attributes.uhuuid}")
+  private String UHUUID_KEY;
 
   @Value("${groupings.api.person_attributes.username}")
   private String UID_KEY;
@@ -152,7 +152,7 @@ public class GroupingAssignmentServiceTest {
 
     assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
     assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
-    assertTrue(groupingOwner.getComposite().getUuids().contains(users.get(0).getUuid()));
+    assertTrue(groupingOwner.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
     assertTrue(groupingOwner.getInclude().getNames().contains(users.get(5).getName()));
     assertTrue(groupingOwner.getExclude().getNames().contains(users.get(2).getName()));
     assertTrue(groupingOwner.getBasis().getNames().contains(users.get(4).getName()));
@@ -160,7 +160,7 @@ public class GroupingAssignmentServiceTest {
 
     assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
     assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
-    assertTrue(groupingAdmin.getComposite().getUuids().contains(users.get(0).getUuid()));
+    assertTrue(groupingAdmin.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
     assertTrue(groupingAdmin.getInclude().getNames().contains(users.get(5).getName()));
     assertTrue(groupingAdmin.getExclude().getNames().contains(users.get(2).getName()));
     assertTrue(groupingAdmin.getBasis().getNames().contains(users.get(4).getName()));
@@ -193,24 +193,24 @@ public class GroupingAssignmentServiceTest {
 
     assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
     assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
-    assertTrue(groupingOwner.getComposite().getUuids().contains(users.get(0).getUuid()));
+    assertTrue(groupingOwner.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
     assertFalse(groupingOwner.getComposite().getNames().contains(users.get(7).getName()));
     assertFalse(groupingOwner.getComposite().getUsernames().contains(users.get(7).getUsername()));
-    assertFalse(groupingOwner.getComposite().getUuids().contains(users.get(7).getUuid()));
+    assertFalse(groupingOwner.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
 
     assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(7).getName()));
     assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
-    assertTrue(groupingAdmin.getComposite().getUuids().contains(users.get(7).getUuid()));
+    assertTrue(groupingAdmin.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
     assertFalse(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
     assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
-    assertFalse(groupingAdmin.getComposite().getUuids().contains(users.get(0).getUuid()));
+    assertFalse(groupingAdmin.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
 
     assertTrue(groupingNull.getComposite().getNames().contains(users.get(0).getName()));
     assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(0).getUsername()));
-    assertTrue(groupingNull.getComposite().getUuids().contains(users.get(0).getUuid()));
+    assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
     assertTrue(groupingNull.getComposite().getNames().contains(users.get(7).getName()));
     assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(7).getUsername()));
-    assertTrue(groupingNull.getComposite().getUuids().contains(users.get(7).getUuid()));
+    assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
   }
 
   @Test
@@ -471,7 +471,7 @@ public class GroupingAssignmentServiceTest {
   public void makeGroupsTest() {
 
     WsGetMembersResults getMembersResults = new WsGetMembersResults();
-    String[] attributeNames = new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+    String[] attributeNames = new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
 
     // We create an array here because getMembersResults.setResults() only takes an array
     WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
@@ -504,8 +504,8 @@ public class GroupingAssignmentServiceTest {
     for (int i = 0; i < resultGroup.getMembers().size(); i++) {
       assertTrue(resultGroup.getMembers().get(i).getName().equals("testSubject_" + i));
       assertTrue(resultGroup.getNames().contains("testSubject_" + i));
-      assertTrue(resultGroup.getMembers().get(i).getUuid().equals("testSubject_uuid_" + i));
-      assertTrue(resultGroup.getUuids().contains("testSubject_uuid_" + i));
+      assertTrue(resultGroup.getMembers().get(i).getUhUuid().equals("testSubject_uuid_" + i));
+      assertTrue(resultGroup.getUhUuids().contains("testSubject_uuid_" + i));
       assertTrue(resultGroup.getMembers().get(i).getUsername().equals("testSubject_username_" + i));
       assertTrue(resultGroup.getUsernames().contains("testSubject_username_" + i));
     }
@@ -517,7 +517,7 @@ public class GroupingAssignmentServiceTest {
     String id = "uuid";
     String identifier = "username";
     String[] attributeNames =
-        new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
     String[] attributeValues = new String[] { identifier, id, null, name, null };
 
     WsSubject subject = new WsSubject();
@@ -528,7 +528,7 @@ public class GroupingAssignmentServiceTest {
     Person person = groupingAssignmentService.makePerson(subject, attributeNames);
 
     assertTrue(person.getName().equals(name));
-    assertTrue(person.getUuid().equals(id));
+    assertTrue(person.getUhUuid().equals(id));
     assertTrue(person.getUsername().equals(identifier));
 
     assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
@@ -546,7 +546,7 @@ public class GroupingAssignmentServiceTest {
 
     WsGetMembersResults getMembersResults = new WsGetMembersResults();
     String[] attributeNames =
-        new String[] { UID_KEY, UUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
 
     // We create an array here because getMembersResults.setResults() only takes an array
     // nullSubject... will have a null Subject Array while testSubject... will have 2 subjects with test attributes
@@ -566,7 +566,7 @@ public class GroupingAssignmentServiceTest {
     WsSubject[] list = new WsSubject[2];
     list[1] = new WsSubject();
     list[1].setName("iDontExistAnymoreName");
-    list[1].setId("iDontExistAnymoreUUID");
+    list[1].setId("iDontExistAnymoreUHUUID");
     list[1].setAttributeValues(new String[] { "iDontExistAnymoreUsername", "", "", "iDontExistAnymoreName", "" });
     list[1].setSourceId(STALE_SUBJECT_ID);
 

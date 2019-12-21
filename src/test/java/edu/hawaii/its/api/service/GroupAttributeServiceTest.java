@@ -59,8 +59,8 @@ public class GroupAttributeServiceTest {
     @Value("${groupings.api.test.name}")
     private String NAME;
 
-    @Value("${groupings.api.test.uuid}")
-    private String UUID;
+    @Value("${groupings.api.test.uhuuid}")
+    private String UHUUID;
 
     @Value("Default description.")
     private String DEFAULT_DESCRIPTION;

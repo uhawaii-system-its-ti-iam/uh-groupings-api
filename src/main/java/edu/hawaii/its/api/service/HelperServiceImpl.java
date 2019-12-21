@@ -100,7 +100,7 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.assign_type_immediate_membership}")
     private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
 
-    @Value("${groupings.api.subject_attribute_name_uuid}")
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.operation_assign_attribute}")
@@ -135,9 +135,6 @@ public class HelperServiceImpl implements HelperService {
 
     @Value("${groupings.api.stem}")
     private String STEM;
-
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
