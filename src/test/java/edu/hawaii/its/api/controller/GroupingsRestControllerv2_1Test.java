@@ -310,26 +310,26 @@ public class GroupingsRestControllerv2_1Test {
                 // basis
                 .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[0].uuid").value("b0-uuid"))
+                .andExpect(jsonPath("allGroupings[0].basis.members[0].uhUuid").value("b0-uuid"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[0].username").value("b0-username"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[1].name").value("b1-name"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[1].username").value("b1-username"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[2].uuid").value("b2-uuid"))
+                .andExpect(jsonPath("allGroupings[0].basis.members[2].uhUuid").value("b2-uuid"))
                 .andExpect(jsonPath("allGroupings[0].basis.members[2].username").value("b2-username"))
 
                 // exclude
                 .andExpect(jsonPath("allGroupings[0].exclude.members", hasSize(1)))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
                 .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("allGroupings[0].exclude.members[0].uuid").value("e0-uuid"))
+                .andExpect(jsonPath("allGroupings[0].exclude.members[0].uhUuid").value("e0-uuid"))
                 .andExpect(jsonPath("allGroupings[0].include.members", hasSize(2)))
                 .andExpect(jsonPath("allGroupings[0].include.members[1].name").value("i1-name"))
                 .andExpect(jsonPath("allGroupings[0].include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("allGroupings[0].include.members[1].uuid").value("i1-uuid"))
+                .andExpect(jsonPath("allGroupings[0].include.members[1].uhUuid").value("i1-uuid"))
                 .andExpect(jsonPath("allGroupings[0].owners.members", hasSize(4)))
                 .andExpect(jsonPath("allGroupings[0].owners.members[3].name").value("o3-name"))
-                .andExpect(jsonPath("allGroupings[0].owners.members[3].uuid").value("o3-uuid"))
+                .andExpect(jsonPath("allGroupings[0].owners.members[3].uhUuid").value("o3-uuid"))
                 .andExpect(jsonPath("allGroupings[0].owners.members[3].username").value("o3-username"))
 
                 .andExpect(jsonPath("allGroupings[1].name").value("kim"))
@@ -337,16 +337,16 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[1].listservOn").value("true"))
                 .andExpect(jsonPath("allGroupings[1].basis.members", hasSize(3)))
                 .andExpect(jsonPath("allGroupings[1].basis.members[0].name").value("b4-name"))
-                .andExpect(jsonPath("allGroupings[1].basis.members[0].uuid").value("b4-uuid"))
+                .andExpect(jsonPath("allGroupings[1].basis.members[0].uhUuid").value("b4-uuid"))
                 .andExpect(jsonPath("allGroupings[1].basis.members[0].username").value("b4-username"))
                 .andExpect(jsonPath("allGroupings[1].basis.members[1].name").value("b5-name"))
 
                 .andExpect(jsonPath("adminGroup.members[0].name").value("o4-name"))
-                .andExpect(jsonPath("adminGroup.members[0].uuid").value("o4-uuid"))
-                .andExpect(jsonPath("adminGroup.members[1].uuid").value("o5-uuid"))
+                .andExpect(jsonPath("adminGroup.members[0].uhUuid").value("o4-uuid"))
+                .andExpect(jsonPath("adminGroup.members[1].uhUuid").value("o5-uuid"))
                 .andExpect(jsonPath("adminGroup.members[1].username").value("o5-username"))
                 .andExpect(jsonPath("adminGroup.members[2].name").value("o6-name"))
-                .andExpect(jsonPath("adminGroup.members[3].uuid").value("o7-uuid"))
+                .andExpect(jsonPath("adminGroup.members[3].uhUuid").value("o7-uuid"))
                 .andExpect(jsonPath("adminGroup.members", hasSize(4)));
     }
 
@@ -458,8 +458,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
                 .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
                 .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uuid").value("o2-uuid"));
+                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
+                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
     }
 
     @Test
@@ -480,8 +480,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
                 .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
                 .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uuid").value("o2-uuid"));
+                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
+                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
     }
 
     @Ignore
@@ -821,26 +821,26 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("listservOn").value("true"))
                 .andExpect(jsonPath("basis.members", hasSize(3)))
                 .andExpect(jsonPath("basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("basis.members[0].uuid").value("b0-uuid"))
+                .andExpect(jsonPath("basis.members[0].uhUuid").value("b0-uuid"))
 
                 .andExpect(jsonPath("basis.members[0].username").value("b0-username"))
                 .andExpect(jsonPath("basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("basis.members[1].uuid").value("b1-uuid"))
+                .andExpect(jsonPath("basis.members[1].uhUuid").value("b1-uuid"))
                 .andExpect(jsonPath("basis.members[1].username").value("b1-username"))
                 .andExpect(jsonPath("basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("basis.members[2].uuid").value("b2-uuid"))
+                .andExpect(jsonPath("basis.members[2].uhUuid").value("b2-uuid"))
                 .andExpect(jsonPath("basis.members[2].username").value("b2-username"))
                 .andExpect(jsonPath("exclude.members", hasSize(1)))
                 .andExpect(jsonPath("exclude.members[0].name").value("e0-name"))
                 .andExpect(jsonPath("exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("exclude.members[0].uuid").value("e0-uuid"))
+                .andExpect(jsonPath("exclude.members[0].uhUuid").value("e0-uuid"))
                 .andExpect(jsonPath("include.members", hasSize(2)))
                 .andExpect(jsonPath("include.members[1].name").value("i1-name"))
                 .andExpect(jsonPath("include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("include.members[1].uuid").value("i1-uuid"))
+                .andExpect(jsonPath("include.members[1].uhUuid").value("i1-uuid"))
                 .andExpect(jsonPath("owners.members", hasSize(4)))
                 .andExpect(jsonPath("owners.members[3].name").value("o3-name"))
-                .andExpect(jsonPath("owners.members[3].uuid").value("o3-uuid"))
+                .andExpect(jsonPath("owners.members[3].uhUuid").value("o3-uuid"))
                 .andExpect(jsonPath("owners.members[3].username").value("o3-username"))
                 .andExpect(jsonPath("composite.members", hasSize(0)));
         System.out.println("hello");
