@@ -24,7 +24,7 @@ public class WithMockAdminSecurityContextFactory
         }
 
         User user = new User(adminUser.username(), authorities);
-        user.setUhuuid(adminUser.uhuuid());
+        user.setUhUuid(adminUser.uhUuid());
 
         final Authentication auth =
                 new UsernamePasswordAuthenticationToken(user, "pw", user.getAuthorities());

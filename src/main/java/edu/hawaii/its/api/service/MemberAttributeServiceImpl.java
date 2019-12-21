@@ -118,7 +118,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.assign_type_immediate_membership}")
     private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
 
-    @Value("${groupings.api.subject_attribute_name_uuid}")
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.operation_assign_attribute}")
@@ -153,9 +153,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Value("${groupings.api.stem}")
     private String STEM;
-
-    @Value("${groupings.api.person_attributes.uuid}")
-    private String UUID;
 
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
@@ -234,7 +231,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         String action;
         GroupingsServiceResult ownershipResult;
 
-        if (isUuid(newOwnerUsername)) {
+        if (isUhUuid(newOwnerUsername)) {
             action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
         } else {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
@@ -292,7 +289,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
 
-        if (isUuid(username)) {
+        if (isUhUuid(username)) {
             return isMemberUuid(groupPath, username);
         } else {
             WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
@@ -370,8 +367,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // returns true if username is a UH id number
     @Override
-    public boolean isUuid(String username) {
-        return username.matches("\\d+");
+    public boolean isUhUuid(String naming) {
+        return naming.matches("\\d+");
     }
 
     //checks to see if a membership has an attribute of a specific type and returns the list if it does
@@ -395,25 +392,39 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
-    // Returns a user's attributes (FirstName, LastName, etc.) based on the username
-    // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
+    /*
+     * Covered by Integration Tests
+     *
+     * Returns a user's attributes (FirstName(givenName), LastName(sn), Composite Name(cn), Username(uid), UH User ID(uhUuid)) based on the username.
+     * If the requester of the information is not a superuser or owner, then the function returns a mapping with empty values.
+     *
+     * Not testable with Unit test as needs to connect to Grouper database to work, not mock db.
+     *
+     */
     public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
-        WsSubject[] subjects;
         WsSubjectLookup lookup;
+        WsGetSubjectsResults results;
         String[] attributeValues = new String[5];
         Map<String, String> mapping = new HashMap<>();
 
+        // Checks to make sure the user requesting information of another is a superuser or the owner of the group.
         if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+            groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
             try {
-                lookup = grouperFS.makeWsSubjectLookup(username);
-                WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-                subjects = results.getWsSubjects();
 
-                attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = { UID, UHUUID, LAST_NAME, COMPOSITE_NAME, FIRST_NAME };
+                // Makes a call to GrouperClient and creates a WebService Subject Lookup of specified user.
+                lookup = grouperFS.makeWsSubjectLookup(username);
+
+                /*
+                 * Using the WebService Subject Lookup it gets the gets the WebService Subject Results.
+                 * The results returns information about the user including the user's attributes.
+                 * In the results are the attributes and attribute names.
+                 */
+                results = grouperFS.makeWsGetSubjectsResults(lookup);
+
+                // Maps the attribute to the attribute name.
                 for (int i = 0; i < attributeValues.length; i++) {
-                    mapping.put(subjectAttributeNames[i], attributeValues[i]);
+                    mapping.put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
                 }
                 return mapping;
 
