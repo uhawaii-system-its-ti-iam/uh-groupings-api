@@ -118,7 +118,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.assign_type_immediate_membership}")
     private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
 
-    @Value("${groupings.api.subject_attribute_name_uuid}")
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.operation_assign_attribute}")
@@ -231,7 +231,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         String action;
         GroupingsServiceResult ownershipResult;
 
-        if (isUuid(newOwnerUsername)) {
+        if (isUhUuid(newOwnerUsername)) {
             action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
         } else {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
@@ -289,7 +289,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
 
-        if (isUuid(username)) {
+        if (isUhUuid(username)) {
             return isMemberUuid(groupPath, username);
         } else {
             WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, username);
@@ -367,8 +367,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // returns true if username is a UH id number
     @Override
-    public boolean isUuid(String username) {
-        return username.matches("\\d+");
+    public boolean isUhUuid(String naming) {
+        return naming.matches("\\d+");
     }
 
     //checks to see if a membership has an attribute of a specific type and returns the list if it does

@@ -36,7 +36,7 @@ public interface MemberAttributeService {
 
     Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
 
-    boolean isUuid(String username);
+    boolean isUhUuid(String naming);
 
     List<Person> searchMembers(String groupPath, String username);
 
