@@ -91,7 +91,7 @@ public class GrouperFactoryServiceTest {
     @Value("${groupings.api.test.sync_destinations}")
     private List<String> SYNC_DESTINATIONS;
 
-    @Value("${groupings.api.test.uuid}")
+    @Value("${groupings.api.test.uhuuid}")
     private String UUID;
 
     private static final String PATH_ROOT = "path:to:grouping";

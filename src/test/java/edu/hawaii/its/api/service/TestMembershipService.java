@@ -393,7 +393,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //add member already in the group
-        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        results = membershipService.addGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
         //username[1] is in the composite
@@ -409,7 +409,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //add member not in the composite but in the basis
-        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[3]);
+        results = membershipService.addGroupingMemberByUhUuid(ownerUsername, GROUPING, username[3]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
         //username[3] is now in the Composite via basis
@@ -419,7 +419,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //removes username[1] from the group
-        membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
 
         //Checks to see if username[1] is not in the basis or the composite
         assertFalse(memberAttributeService.isMember(GROUPING, username[1]));
@@ -428,7 +428,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //adds to group
-        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        results = membershipService.addGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
         //Checks to make sure user is in composite and include and nothing else
@@ -447,7 +447,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //delete member from grouping
-        results = membershipService.addGroupingMemberByUuid(ownerUsername, GROUPING, username[3]);
+        results = membershipService.addGroupingMemberByUhUuid(ownerUsername, GROUPING, username[3]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
         //username[3] is in the composite, and basis
@@ -478,7 +478,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void deleteGroupingMemberByUuidTest() {
+    public void deleteGroupingMemberByUhUuidTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult results;
         String ownerUsername = username[0];
@@ -490,7 +490,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         //Checks to see if username[1] is in the grouping
@@ -500,7 +500,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //tries to remove someone who is already removed from the group
-        lResults = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         //Checks to see if username[1] is in the grouping
@@ -522,7 +522,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[3]);
+        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[3]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
@@ -540,7 +540,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[4]);
+        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[4]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         assertFalse(memberAttributeService.isMember(GROUPING, username[4]));
@@ -631,7 +631,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //removes username[1] from the group
-        membershipService.deleteGroupingMemberByUuid(ownerUsername, GROUPING, username[1]);
+        membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
 
         //Checks to see if username[1] is not in the basis or the composite
         assertFalse(memberAttributeService.isMember(GROUPING, username[1]));

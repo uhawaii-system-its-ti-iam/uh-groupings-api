@@ -44,8 +44,8 @@ public class GroupingFactoryServiceTest {
     @Value("${groupings.api.test.name}")
     private String NAME;
 
-    @Value("${groupings.api.test.uuid}")
-    private String UUID;
+    @Value("${groupings.api.test.uhuuid}")
+    private String UHUUID;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";

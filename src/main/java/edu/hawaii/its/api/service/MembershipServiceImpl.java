@@ -331,7 +331,7 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
-    //finds a user by a uuid and remove them from a grouping
+    //finds a user by a uhUuid and remove them from a grouping
     public List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
             String userToDeleteUhUuid) {
         logger.info("deleteGroupingMemberByUuid; ownerUsername: "
@@ -468,7 +468,7 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
-    //finds all the user from a list of uuids and adds them to the group
+    //finds all the user from a list of uhUuids and adds them to the group
     @Override
     public List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String groupPath,
             List<String> usersToAddUhUuid) {
@@ -571,7 +571,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
-        if (memberAttributeService.isUuid(newAdminUsername)) {
+        if (memberAttributeService.isUhUuid(newAdminUsername)) {
             action = "add user with uhUuid " + newAdminUsername + " to " + GROUPING_ADMINS;
             return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
         }
@@ -598,7 +598,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action;
         action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
-        if (memberAttributeService.isUuid(adminToDeleteUsername)) {
+        if (memberAttributeService.isUhUuid(adminToDeleteUsername)) {
 
             action = "delete user with uhUuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
             return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
