@@ -15,7 +15,7 @@ public @interface WithMockAdminUser {
     String[] roles() default {"ROLE_ADMIN"};
 
     //todo Change long to String for consistency w/ Grouper
-    String uhuuid() default "12345678L";
+    String uhUuid() default "12345678L";
 
     String name() default "UH Groupings API 2";
 }

@@ -472,16 +472,16 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("iamtst02"));
-        assertTrue(attributes.get("uhuuid").equals("tst02name"));
+        assertTrue(attributes.get("givenName").equals("tst02name"));
+        assertTrue(attributes.get("uhUuid").equals("iamtst02"));
 
         //todo Owner test
         attributes = memberAttributeService.getUserAttributes("iamtst01", useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("iamtst02"));
-        assertTrue(attributes.get("uhuuid").equals("tst02name"));
+        assertTrue(attributes.get("givenName").equals("tst02name"));
+        assertTrue(attributes.get("uhUuid").equals("iamtst02"));
 
         //todo Not an owner test
         attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
@@ -489,11 +489,7 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("cn").equals(""));
         assertTrue(attributes.get("sn").equals(""));
         assertTrue(attributes.get("givenName").equals(""));
-        assertTrue(attributes.get("uhuuid").equals(""));
-
-        //todo Implement assertThat over assertTrue/assertEquals/etc.
-        //        assertEquals("iamtst02", attributes.get("uhuuid"));
-        //        assertThat(attributes.get("uhuuid"), equalTo("iamtst02"));
+        assertTrue(attributes.get("uhUuid").equals(""));
 
         // Test with invalid username
         try {
@@ -519,7 +515,7 @@ public class TestMemberAttributeService {
         List<Person> members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[3]);
         assertThat(members.get(0).getName(), equalTo("tst04name"));
         assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUuid(), equalTo(usernames[3]));
+        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
 
         // iamtst01 is not in the basis group (results list should be empty)
         members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[0]);
@@ -531,6 +527,6 @@ public class TestMemberAttributeService {
         members = memberAttributeService.searchMembers(GROUPING_TIMEOUT, usernames[3]);
         assertThat(members.get(0).getName(), equalTo("tst04name"));
         assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUuid(), equalTo(usernames[3]));
+        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
     }
 }

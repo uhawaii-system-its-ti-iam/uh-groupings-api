@@ -31,19 +31,19 @@ public final class UserBuilder {
         }
 
         logger.debug("Adding roles start.");
-        String uhuuid = attributes.getUhUuid();
+        String uhUuid = attributes.getUhUuid();
         String username = attributes.getUid();
-        RoleHolder roleHolder = authorizationService.fetchRoles(uhuuid, username);
+        RoleHolder roleHolder = authorizationService.fetchRoles(uhUuid, username);
 
         logger.info("Adding roles. uid: " + uid + "; roles: " + roleHolder.getAuthorities());
         User user = new User(uid, roleHolder.getAuthorities());
         logger.debug("Done adding roles; uid: " + uid);
 
-        // Convert the uhuuid to a Long and record it. <-- Not doing that anymore, Grouper DB uses String
+        // Convert the uhUuid to a Long and record it. <-- Not doing that anymore, Grouper DB uses String
         // Don't move this statement above the exists call
         // above because exists implicitly checks that the
         // Long data type conversion will work okay.
-        user.setUhuuid(uhuuid);
+        user.setUhUuid(uhUuid);
 
         // Put all the attributes into the user
         // object just for the demonstration.

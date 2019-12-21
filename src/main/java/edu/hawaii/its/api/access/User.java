@@ -8,13 +8,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class User extends org.springframework.security.core.userdetails.User {
 
     public static final long serialVersionUID = 2L;
-    private String uhuuid;
+    private String uhUuid;
     private UhAttributes attributes;
 
     // Constructor.
-    public User(String username, String uhuuid, Collection<GrantedAuthority> authorities) {
+    public User(String username, String uhUuid, Collection<GrantedAuthority> authorities) {
         super(username, "", authorities);
-        setUhuuid(uhuuid);
+        setUhUuid(uhUuid);
     }
 
     // Constructor.
@@ -26,12 +26,12 @@ public class User extends org.springframework.security.core.userdetails.User {
         return getUsername();
     }
 
-    public String getUhuuid() {
-        return uhuuid;
+    public String getUhUuid() {
+        return uhUuid;
     }
 
-    public void setUhuuid(String uhuuid) {
-        this.uhuuid = uhuuid;
+    public void setUhUuid(String uhUuid) {
+        this.uhUuid = uhUuid;
     }
 
     public String getAttribute(String name) {
@@ -57,7 +57,7 @@ public class User extends org.springframework.security.core.userdetails.User {
     @Override
     public String toString() {
         return "User [uid=" + getUid()
-                + ", uhuuid=" + getUhuuid()
+                + ", uhUuid=" + getUhUuid()
                 + ", super-class: " + super.toString() + "]";
     }
 }
