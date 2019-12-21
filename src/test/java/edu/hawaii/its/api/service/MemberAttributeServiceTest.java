@@ -62,7 +62,7 @@ public class MemberAttributeServiceTest {
     @Value("${groupings.api.test.name}")
     private String NAME;
 
-    @Value("${groupings.api.test.uuid}")
+    @Value("${groupings.api.test.uhuuid}")
     private String UUID;
 
     @Value("${groupings.api.person_attributes.username}")

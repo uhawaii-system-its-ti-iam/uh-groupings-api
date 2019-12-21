@@ -54,7 +54,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     /**
      * Assigns roles to user
      *
-     * @param uhUuid   : The UH uuid of the user.
+     * @param uhUuid   : The uhUuid of the user.
      * @param username : The username of the person to find the user.
      * @return : Returns an array list of roles assigned to the user.
      */

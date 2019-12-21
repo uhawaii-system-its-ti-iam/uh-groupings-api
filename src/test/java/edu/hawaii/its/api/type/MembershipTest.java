@@ -24,7 +24,7 @@ public class MembershipTest {
         members.add(membershipHolder);
 
         for(int i = 0; i < 10; i ++) {
-            Person member = new Person("name" + i, "uuid" + i, "username" + i);
+            Person member = new Person("name" + i, "uhUuid" + i, "username" + i);
             members.add(member);
         }
 
