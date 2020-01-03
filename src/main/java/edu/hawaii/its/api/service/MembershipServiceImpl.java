@@ -180,6 +180,18 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
+    // creates/returns a user depending on the input used. for example, if input is UhUuid, user will be created using that
+    public Person createNewPerson(String userToAdd) {
+        List<GroupingsServiceResult> gsrs;
+        Person createdPerson;
+
+        if (isUhUuid(userToAdd)) {
+            return createdPerson = new Person(null, null, userToAdd);
+        } else {
+            return createdPerson = new Person(null, userToAdd, null);
+        }
+    }
+
     @Override
     public List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd) {
         List<GroupingsServiceResult> gsrs;
