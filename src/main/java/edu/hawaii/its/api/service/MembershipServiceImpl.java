@@ -449,21 +449,8 @@ public class MembershipServiceImpl implements MembershipService {
             String userIdentifier) {
         logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
                 + userIdentifier + ";");
-        Person personToAdd;
 
-        personToAdd = new Person(null, null, userIdentifier);
-        
-      return addMemberHelper(ownerUsername, groupPath, personToAdd);
-    }
-
-    //finds a user by a uuid and adds them to the group
-    public List<GroupingsServiceResult> addGroupMemberByUhUuid(String ownerUsername, String groupPath,
-            String userToAddUhUuid) {
-        logger.info("addGroupMemberByUuid; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
-                + userToAddUhUuid + ";");
-
-        Person personToAdd = new Person(null, userToAddUhUuid, null);
-        return addMemberHelper(ownerUsername, groupPath, personToAdd);
+      return addMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
     //finds all the user from a list of usernames and adds them to the group
