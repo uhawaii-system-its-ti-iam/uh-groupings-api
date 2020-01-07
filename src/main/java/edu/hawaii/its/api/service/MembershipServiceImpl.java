@@ -234,7 +234,7 @@ public class MembershipServiceImpl implements MembershipService {
             gsrs.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToAddUsername));
             // only add them to the include if they are not in the basis
             if (!isInBasis) {
-                gsrs.addAll(addGroupMemberByUsername(ownerUsername, include, userToAddUsername));
+                gsrs.addAll(addGroupMember(ownerUsername, include, userToAddUsername));
             } else {
                 gsrs.add(helperService
                     .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUsername + " was in " + basis,
@@ -278,7 +278,7 @@ public class MembershipServiceImpl implements MembershipService {
             gsrs.add(deleteGroupMemberByUsername(username, exclude, userToAddUhUuid));
             //only add them to the include if they are not in the basis
             if (!isInBasis) {
-                gsrs.addAll(addGroupMemberByUsername(username, include, userToAddUhUuid));
+                gsrs.addAll(addGroupMember(username, include, userToAddUhUuid));
             } else {
                 gsrs.add(helperService
                         .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUhUuid + " was in " + basis, action));
@@ -325,7 +325,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (inComposite) {
             //if they are not in the include group, then they are in the basis, so add them to the exclude group
             if (inBasis) {
-                gsrList.addAll(addGroupMemberByUsername(ownerUsername, exclude, userToDeleteUsername));
+                gsrList.addAll(addGroupMember(ownerUsername, exclude, userToDeleteUsername));
             }
         }
         //since they are not in the Grouping, do nothing, but return SUCCESS
@@ -373,7 +373,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (isInComposite) {
             //if they are not in the include group, then they are in the basis, so add them to the exclude group
             if (isInBasis) {
-                gsrList.addAll(addGroupMemberByUsername(ownerUsername, exclude, userToDeleteUhUuid));
+                gsrList.addAll(addGroupMember(ownerUsername, exclude, userToDeleteUhUuid));
             }
         }
         //since they are not in the Grouping, do nothing, but return SUCCESS
@@ -420,11 +420,11 @@ public class MembershipServiceImpl implements MembershipService {
         for (String userToAdd : usersToAdd) {
             try {
                 Integer.parseInt(userToAdd);
-                gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
+                gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
 
             } catch (Exception NumberFormatException) {
                 try {
-                    gsrs = addGroupMemberByUsername(ownerUsername, groupPath, userToAdd);
+                    gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
                 } catch (GcWebServiceError e) {
 
                 }
@@ -438,7 +438,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupPath,
             String userIdentifier) {
-        logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
+        logger.info("addGroupMember; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
                 + userIdentifier + ";");
 
       return addMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
@@ -453,7 +453,7 @@ public class MembershipServiceImpl implements MembershipService {
                         + usernamesToAdd + ";");
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         for (String userToAdd : usernamesToAdd) {
-            gsrList.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
+            gsrList.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
         }
         return gsrList;
     }
