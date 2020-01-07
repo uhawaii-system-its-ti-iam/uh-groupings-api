@@ -16,9 +16,6 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
-    List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
-                                                          String userToAddUsername);
-
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
