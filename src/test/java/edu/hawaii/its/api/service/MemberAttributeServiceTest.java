@@ -199,7 +199,7 @@ public class MemberAttributeServiceTest {
         }
 
         //add owner for owner to remove
-        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
+        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
                 users.get(1).getUsername());
 
         //owner tries to remove other ownership
@@ -213,7 +213,7 @@ public class MemberAttributeServiceTest {
         assertEquals(SUCCESS, ownerRemovesNonOwner.getResultCode());
 
         //add owner for admin to remove
-        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
+        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
                 users.get(1).getUsername());
 
         //admin tries to remove ownership
