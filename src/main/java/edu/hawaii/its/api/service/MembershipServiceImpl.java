@@ -391,15 +391,6 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
-    @Override
-    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd) {
-        if (isUhUuid(userToAdd)) {
-            return addGroupMemberByUhUuid(ownerUsername, groupingPath, userToAdd);
-        } else {
-            return (addGroupMemberByUsername(ownerUsername, groupingPath, userToAdd));
-        }
-    }
-
     // Takes an admin and user and returns list of groups that a user may own. An empty list will be returned if no
     // groups are owned.
     @Override
@@ -445,7 +436,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     //finds a user by a username and adds that user to the group
     @Override
-    public List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
+    public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupPath,
             String userIdentifier) {
         logger.info("addGroupMemberByUsername; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
                 + userIdentifier + ";");
