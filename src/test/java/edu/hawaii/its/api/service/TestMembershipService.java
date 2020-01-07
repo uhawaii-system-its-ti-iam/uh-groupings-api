@@ -287,7 +287,7 @@ public class TestMembershipService {
 
         //an owner adds username[3] to the include group
         List<GroupingsServiceResult> addMember =
-                membershipService.addGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[3]);
+                membershipService.addGroupMember(username[0], GROUPING_INCLUDE, username[3]);
 
         //the addition was successful
         assertTrue(addMember.get(0).getResultCode().startsWith(SUCCESS));
@@ -298,7 +298,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
         //put username[3] back in the exclude group
-        addMember = membershipService.addGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[3]);
+        addMember = membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
 
         //the addition was successful
         assertEquals(addMember.get(0).getResultCode(), SUCCESS);
@@ -309,7 +309,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
         //test adding when already in group
-        addMember = membershipService.addGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[3]);
+        addMember = membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
         //the addition was successful
         assertTrue(addMember.get(0).getResultCode().startsWith(SUCCESS));
         //username[3] is in the basis and exclude, not the composite or include
@@ -438,7 +438,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //adds username[3] to the include and removes from the exclude
-        membershipService.addGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[3]);
+        membershipService.addGroupMember(ownerUsername, GROUPING_INCLUDE, username[3]);
 
         //username[3] is in the composite, basis and include
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
@@ -650,7 +650,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //adds username[3] to the include and removes from the exclude
-        membershipService.addGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[3]);
+        membershipService.addGroupMember(ownerUsername, GROUPING_INCLUDE, username[3]);
 
         //username[3] is in the composite, basis and include
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
@@ -1055,7 +1055,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isOwner(GROUPING, ownerUsername));
 
         //adds owner back into owner group
-        membershipService.addGroupMemberByUsername(ADMIN, GROUPING_OWNERS, ownerUsername);
+        membershipService.addGroupMember(ADMIN, GROUPING_OWNERS, ownerUsername);
 
         //tests removing from include
         results = membershipService.deleteGroupMemberByUhUuid(ADMIN, GROUPING_INCLUDE, username[2]);
