@@ -601,21 +601,21 @@ public class MembershipServiceTest {
 
         assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
 
-        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
+        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
                 users.get(3).getUsername());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
         //todo Cases (inBasis && inInclude) and (!inComposite && !inBasis) not reachable w/ current DB
 
         //add existing Owner
-        membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH,
+        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH,
                 users.get(0).getUsername());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(0)));
 
         //add to basis path (not allowed)
         try {
-            listGsr = membershipService.addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
+            listGsr = membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(listGsr.get(0).getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
@@ -624,13 +624,13 @@ public class MembershipServiceTest {
 
         //add member already in group
         listGsr = membershipService
-                .addGroupMemberByUsername(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
+                .addGroupMember(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
                         users.get(5).getUsername());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         //member that is adding is not an owner (not allowed)
         try {
-            listGsr = membershipService.addGroupMemberByUsername(users.get(2).getUsername(), GROUPING_3_INCLUDE_PATH,
+            listGsr = membershipService.addGroupMember(users.get(2).getUsername(), GROUPING_3_INCLUDE_PATH,
                     users.get(3).getUsername());
             assertTrue(listGsr.get(0).getResultCode().startsWith(FAILURE));
         } catch (AccessDeniedException ade) {
@@ -666,17 +666,6 @@ public class MembershipServiceTest {
         assertEquals(usernames.size(), grouping.getComposite().getMembers().size() - 1);
         //members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups)
         assertEquals(usernames.size() - numberOfBasisMembers + 2, grouping.getInclude().getMembers().size());
-    }
-
-    @Test
-    public void addMemberByUuidTest() {
-        Grouping grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-        assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
-
-        membershipService
-                .addGroupMemberByUhUuid(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH, users.get(3).getUhUuid());
-        grouping = groupingRepository.findByPath(GROUPING_1_PATH);
-        assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
     }
 
     @Test
