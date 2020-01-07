@@ -466,7 +466,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + usersToAddUhUuid + ";");
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         for (String userToAdd : usersToAddUhUuid) {
-            gsrList.addAll(addGroupMemberByUhUuid(ownerUsername, groupPath, userToAdd));
+            gsrList.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
         }
         return gsrList;
     }
