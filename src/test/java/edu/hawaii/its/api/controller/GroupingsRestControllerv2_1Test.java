@@ -753,7 +753,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteIncludeTest() throws Exception {
-        given(membershipService.deleteGroupMemberByUsername(USERNAME, "grouping" + INCLUDE, "frylock"))
+        given(membershipService.deleteGroupMember(USERNAME, "grouping" + INCLUDE, "frylock"))
                 .willReturn(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock")
@@ -776,7 +776,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteExcludeTest() throws Exception {
-        given(membershipService.deleteGroupMemberByUsername(USERNAME, "grouping" + EXCLUDE, "carl"))
+        given(membershipService.deleteGroupMember(USERNAME, "grouping" + EXCLUDE, "carl"))
                 .willReturn(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl")
