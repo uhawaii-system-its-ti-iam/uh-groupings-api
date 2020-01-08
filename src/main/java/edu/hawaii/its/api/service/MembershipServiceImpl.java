@@ -530,31 +530,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + "; userToDelete: " + userToDeleteUhUuid
                 + ";");
 
-        String action = "delete " + userToDeleteUhUuid + " from " + groupPath;
-        Person personToDelete = new Person(null, userToDeleteUhUuid, null);
-
-        String composite = helperService.parentGroupingPath(groupPath);
-
-        if (memberAttributeService.isOwner(composite, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-            if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
-                if (memberAttributeService.isMember(groupPath, personToDelete)) {
-                    WsDeleteMemberResults deleteMemberResults =
-                            grouperFS.makeWsDeleteMemberResults(groupPath, user, personToDelete);
-
-                    updateLastModified(composite);
-                    updateLastModified(groupPath);
-                    return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
-                }
-                return helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUhUuid + " was not in " + groupPath,
-                                action);
-            }
-            return helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + ownerUsername + " may only delete from exclude, include or owner group", action);
-        }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userToDeleteUhUuid));
     }
 
     //adds a user to the admins group via username or UH id number
