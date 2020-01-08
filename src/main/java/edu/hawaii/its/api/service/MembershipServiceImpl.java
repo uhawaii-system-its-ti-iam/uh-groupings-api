@@ -234,7 +234,7 @@ public class MembershipServiceImpl implements MembershipService {
         // check to see if they are already in the grouping
         if (!isInComposite) {
             // get them out of the exclude
-            gsrs.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToAddUsername));
+            gsrs.add(deleteGroupMember(ownerUsername, exclude, userToAddUsername));
             // only add them to the include if they are not in the basis
             if (!isInBasis) {
                 gsrs.addAll(addGroupMember(ownerUsername, include, userToAddUsername));
@@ -249,7 +249,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         // should only be in one or the other
         if (isInBasis && isInInclude) {
-            gsrs.add(deleteGroupMemberByUsername(ownerUsername, include, userToAddUsername));
+            gsrs.add(deleteGroupMember(ownerUsername, include, userToAddUsername));
         }
 
         return gsrs;
@@ -278,7 +278,7 @@ public class MembershipServiceImpl implements MembershipService {
         //check to see if they are already in the grouping
         if (!isInComposite) {
             //get them out of the exclude
-            gsrs.add(deleteGroupMemberByUsername(username, exclude, userToAddUhUuid));
+            gsrs.add(deleteGroupMember(username, exclude, userToAddUhUuid));
             //only add them to the include if they are not in the basis
             if (!isInBasis) {
                 gsrs.addAll(addGroupMember(username, include, userToAddUhUuid));
@@ -293,7 +293,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         //should only be in one or the other
         if (isInBasis && isInInclude) {
-            gsrs.add(deleteGroupMemberByUsername(username, include, userToAddUhUuid));
+            gsrs.add(deleteGroupMember(username, include, userToAddUhUuid));
         }
 
         return gsrs;
@@ -322,7 +322,7 @@ public class MembershipServiceImpl implements MembershipService {
         boolean inExclude = memberAttributeService.isMember(exclude, userToDeleteUsername);
 
         //if they are in the include group, get them out
-        gsrList.add(deleteGroupMemberByUsername(ownerUsername, include, userToDeleteUsername));
+        gsrList.add(deleteGroupMember(ownerUsername, include, userToDeleteUsername));
 
         //make sure userToDelete is actually in the Grouping
         if (inComposite) {
@@ -340,7 +340,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         //should not be in exclude if not in basis
         if (!inBasis && inExclude) {
-            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUsername));
+            gsrList.add(deleteGroupMember(ownerUsername, exclude, userToDeleteUsername));
         }
 
         return gsrList;
@@ -370,7 +370,7 @@ public class MembershipServiceImpl implements MembershipService {
         boolean isInExclude = memberAttributeService.isMember(exclude, personToDelete);
 
         //if they are in the include group, get them out
-        gsrList.add(deleteGroupMemberByUsername(ownerUsername, include, userToDeleteUhUuid));
+        gsrList.add(deleteGroupMember(ownerUsername, include, userToDeleteUhUuid));
 
         //make sure userToDelete is actually in the Grouping
         if (isInComposite) {
@@ -388,7 +388,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         //should not be in exclude if not in basis
         if (!isInBasis && isInExclude) {
-            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUhUuid));
+            gsrList.add(deleteGroupMember(ownerUsername, exclude, userToDeleteUhUuid));
         }
 
         return gsrList;
@@ -476,54 +476,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
-            String userToDelete) {
-        if (isUhUuid(userToDelete)) {
-            return deleteGroupMemberByUhUuid(ownerUsername, groupPath, userToDelete);
-        }
-        return deleteGroupMemberByUsername(ownerUsername, groupPath, userToDelete);
-    }
-
-    //find a user by a username and remove them from a group
-    @Override
-    public GroupingsServiceResult deleteGroupMemberByUsername(String ownerUsername, String groupPath,
-            String userToDeleteUsername) {
-        logger.info("deleteGroupMemberByUsername; user: " + ownerUsername
-                + "; group: " + groupPath
-                + "; userToDelete: " + userToDeleteUsername
-                + ";");
-
-        if (isUhUuid(userToDeleteUsername)) {
-            return deleteGroupMemberByUhUuid(ownerUsername, groupPath, userToDeleteUsername);
-        }
-
-        String action = "delete " + userToDeleteUsername + " from " + groupPath;
-
-        String composite = helperService.parentGroupingPath(groupPath);
-
-        if (memberAttributeService.isSuperuser(ownerUsername) || memberAttributeService
-                .isOwner(composite, ownerUsername) || userToDeleteUsername
-                .equals(ownerUsername)) {
-            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-            if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
-                if (memberAttributeService.isMember(groupPath, userToDeleteUsername)) {
-                    WsDeleteMemberResults deleteMemberResults =
-                            grouperFS.makeWsDeleteMemberResults(groupPath, user, userToDeleteUsername);
-
-                    updateLastModified(composite);
-                    updateLastModified(groupPath);
-                    return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
-                }
-                return helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + userToDeleteUsername + " was not in " + groupPath,
-                                action);
-            }
-            return helperService.makeGroupingsServiceResult(
-                    FAILURE + ": " + ownerUsername + " may only delete from exclude, include or owner group", action);
-        }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-    }
-
-    public GroupingsServiceResult deleteGroupMemberByUhUuid(String ownerUsername, String groupPath,
             String userToDeleteUhUuid) {
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
