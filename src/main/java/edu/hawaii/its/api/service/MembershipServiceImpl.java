@@ -904,6 +904,34 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrList;
     }
 
+    // Logic for deleting a member.
+    public GroupingsServiceResult deleteMemberHelper(String username, String groupPath, Person personToDelete) {
+        String action = "delete " + personToDelete + " from " + groupPath;
+
+        String composite = helperService.parentGroupingPath(groupPath);
+
+        if (memberAttributeService.isOwner(composite, username) || memberAttributeService
+                .isSuperuser(username)) {
+            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
+            if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
+                if (memberAttributeService.isMember(groupPath, personToDelete)) {
+                    WsDeleteMemberResults deleteMemberResults =
+                            grouperFS.makeWsDeleteMemberResults(groupPath, user, personToDelete);
+
+                    updateLastModified(composite);
+                    updateLastModified(groupPath);
+                    return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
+                }
+                return helperService
+                        .makeGroupingsServiceResult(SUCCESS + ": " + personToDelete + " was not in " + groupPath,
+                                action);
+            }
+            return helperService.makeGroupingsServiceResult(
+                    FAILURE + ": " + username + " may only delete from exclude, include or owner group", action);
+        }
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+
     //updates the last modified attribute of the group to the current date and time
     @Override
     public GroupingsServiceResult updateLastModified(String groupPath) {
