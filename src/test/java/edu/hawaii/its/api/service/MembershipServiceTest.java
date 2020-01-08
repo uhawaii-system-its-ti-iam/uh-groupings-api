@@ -226,7 +226,7 @@ public class MembershipServiceTest {
 
         // Test if path is not allowed to delete from
         try {
-            gsr = membershipService.deleteGroupMemberByUhUuid(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
+            gsr = membershipService.deleteGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
@@ -351,7 +351,7 @@ public class MembershipServiceTest {
 
         //Test if wrong path is given
         try {
-            gsr = membershipService.deleteGroupMemberByUsername(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
+            gsr = membershipService.deleteGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {

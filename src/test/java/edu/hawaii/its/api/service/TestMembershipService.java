@@ -233,7 +233,7 @@ public class TestMembershipService {
         }
 
         //Reset ownership
-        membershipService.deleteGroupMemberByUsername(username[0], GROUPING_OWNERS, username[1]);
+        membershipService.deleteGroupMember(username[0], GROUPING_OWNERS, username[1]);
     }
 
     @Test
@@ -354,7 +354,7 @@ public class TestMembershipService {
 
         //delete username[3] from exclude
         GroupingsServiceResult deleteMember1 =
-                membershipService.deleteGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[3]);
+                membershipService.deleteGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
         //deletion was successful
         assertEquals(deleteMember1.getResultCode(), SUCCESS);
         //username[3] is no longer in the exclude
@@ -362,7 +362,7 @@ public class TestMembershipService {
 
         //delete username[2] from include
         GroupingsServiceResult deleteMember2 =
-                membershipService.deleteGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[2]);
+                membershipService.deleteGroupMember(username[0], GROUPING_INCLUDE, username[2]);
         //deletion was successful
         assertEquals(deleteMember2.getResultCode(), SUCCESS);
         //username[2] is no longer in composite or include
@@ -370,8 +370,8 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
 
         //test when not in group
-        deleteMember1 = membershipService.deleteGroupMemberByUsername(username[0], GROUPING_EXCLUDE, username[3]);
-        deleteMember2 = membershipService.deleteGroupMemberByUsername(username[0], GROUPING_INCLUDE, username[2]);
+        deleteMember1 = membershipService.deleteGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
+        deleteMember2 = membershipService.deleteGroupMember(username[0], GROUPING_INCLUDE, username[2]);
 
         //results are successful because the end result is the same
         assertTrue(deleteMember1.getResultCode().startsWith(SUCCESS));
@@ -814,7 +814,7 @@ public class TestMembershipService {
         //Checks that user is owner
         assertTrue(memberAttributeService.isOwner(GROUPING, username[2]));
 
-        membershipService.deleteGroupMemberByUhUuid(ownerUsername, GROUPING_OWNERS, username[2]);
+        membershipService.deleteGroupMember(ownerUsername, GROUPING_OWNERS, username[2]);
     }
 
     @Test
@@ -854,7 +854,7 @@ public class TestMembershipService {
         }
 
 //        for (int i = 0; i < 6; i++) {
-//            membershipService.deleteGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[i]);
+//            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
 //        }
     }
 
@@ -869,7 +869,7 @@ public class TestMembershipService {
 
         //has non owner/superuser try to delete
         try {
-            membershipService.deleteGroupMemberByUhUuid(username[4], GROUPING_EXCLUDE, username[3]);
+            membershipService.deleteGroupMember(username[4], GROUPING_EXCLUDE, username[3]);
 
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
@@ -883,7 +883,7 @@ public class TestMembershipService {
 
         //tries to delete user from basis group
         try {
-            results = membershipService.deleteGroupMemberByUhUuid(ownerUsername, GROUPING_BASIS, username[3]);
+            results = membershipService.deleteGroupMember(ownerUsername, GROUPING_BASIS, username[3]);
         } catch (GroupingsServiceResultException e) {
             results = e.getGsr();
             assertTrue(results.getResultCode().startsWith(FAILURE));
@@ -897,7 +897,7 @@ public class TestMembershipService {
 
         //tries to delete member from exclude group that isn't in the exclude
         try {
-            results = membershipService.deleteGroupMemberByUhUuid(ownerUsername, GROUPING_EXCLUDE, username[2]);
+            results = membershipService.deleteGroupMember(ownerUsername, GROUPING_EXCLUDE, username[2]);
         } catch (GroupingsServiceResultException e) {
             results = e.getGsr();
             assertTrue(results.getResultCode().startsWith(FAILURE));
@@ -910,7 +910,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
         //deletes user from exclude group
-        results = membershipService.deleteGroupMemberByUhUuid(ownerUsername, GROUPING_EXCLUDE, username[3]);
+        results = membershipService.deleteGroupMember(ownerUsername, GROUPING_EXCLUDE, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //checks to see if username[3] is apart of the group and not in the exclude
@@ -918,7 +918,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
         //tests if a superuser can remove and that a person from owners can removed
-        results = membershipService.deleteGroupMemberByUhUuid(ADMIN, GROUPING_OWNERS, ownerUsername);
+        results = membershipService.deleteGroupMember(ADMIN, GROUPING_OWNERS, ownerUsername);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //checks to see if ownerUsername is still and owner
@@ -928,7 +928,7 @@ public class TestMembershipService {
         membershipService.addGroupMember(ADMIN, GROUPING_OWNERS, ownerUsername);
 
         //tests removing from include
-        results = membershipService.deleteGroupMemberByUhUuid(ADMIN, GROUPING_INCLUDE, username[2]);
+        results = membershipService.deleteGroupMember(ADMIN, GROUPING_INCLUDE, username[2]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //checks if username[2] is still in include
