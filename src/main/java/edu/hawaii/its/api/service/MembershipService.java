@@ -30,12 +30,6 @@ public interface MembershipService {
     List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
                                                             String userToDeleteUhUuid);
 
-    GroupingsServiceResult deleteGroupMemberByUsername(String ownerUsername, String groupPath,
-                                                       String userToDeleteUsername);
-
-    GroupingsServiceResult deleteGroupMemberByUhUuid(String ownerUsername, String groupPath,
-                                                   String userToDeleteUhUuid);
-
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
                                              String userToDelete);
 
