@@ -839,7 +839,7 @@ public class MembershipServiceImpl implements MembershipService {
         String composite = helperService.parentGroupingPath(groupPath);
 
         if (memberAttributeService.isOwner(composite, username) || memberAttributeService
-                .isSuperuser(username)) {
+                .isSuperuser(username) || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
                 if (memberAttributeService.isMember(groupPath, personToDelete)) {
