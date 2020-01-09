@@ -6,13 +6,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd);
-
-    List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
-                                                             String userToAddUsername);
-
-    List<GroupingsServiceResult> addGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
-                                                         String userToAddUhUuid);
+    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
