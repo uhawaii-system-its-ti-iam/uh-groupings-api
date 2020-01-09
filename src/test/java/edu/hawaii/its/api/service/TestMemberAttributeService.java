@@ -142,8 +142,8 @@ public class TestMemberAttributeService {
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[4]);
-        membershipService.addGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[5]);
+        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[4]);
+        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[5]);
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[3]);
