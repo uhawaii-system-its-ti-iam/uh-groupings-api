@@ -180,7 +180,7 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
-    // creates/returns a user depending on the input used. for example, if input is UhUuid, user will be created using that
+    // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
     public Person createNewPerson(String userToAdd) {
         Person createdPerson;
 
@@ -258,45 +258,11 @@ public class MembershipServiceImpl implements MembershipService {
     //find a user by a uuid and add them to a grouping
     @Override
     public List<GroupingsServiceResult> addGroupingMemberByUhUuid(String username, String groupingPath,
-            String userToAddUhUuid) {
+            String userIdentifier) {
         logger.info("addGroupingMemberByUuid; user: " + username + "; grouping: " + groupingPath + "; userToAdd: "
-                + userToAddUhUuid + ";");
+                + userIdentifier + ";");
 
-        List<GroupingsServiceResult> gsrs = new ArrayList<>();
-
-        String action = "add user to " + groupingPath;
-        String basis = groupingPath + BASIS;
-        String exclude = groupingPath + EXCLUDE;
-        String include = groupingPath + INCLUDE;
-
-        Person personToAdd = new Person(null, userToAddUhUuid, null);
-
-        boolean isInBasis = memberAttributeService.isMember(basis, personToAdd);
-        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToAdd);
-        boolean isInInclude = memberAttributeService.isMember(include, personToAdd);
-
-        //check to see if they are already in the grouping
-        if (!isInComposite) {
-            //get them out of the exclude
-            gsrs.add(deleteGroupMember(username, exclude, userToAddUhUuid));
-            //only add them to the include if they are not in the basis
-            if (!isInBasis) {
-                gsrs.addAll(addGroupMember(username, include, userToAddUhUuid));
-            } else {
-                gsrs.add(helperService
-                        .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUhUuid + " was in " + basis, action));
-            }
-        } else {
-            gsrs.add(helperService
-                    .makeGroupingsServiceResult(SUCCESS + ": " + userToAddUhUuid + " was already in " + groupingPath,
-                            action));
-        }
-        //should only be in one or the other
-        if (isInBasis && isInInclude) {
-            gsrs.add(deleteGroupMember(username, include, userToAddUhUuid));
-        }
-
-        return gsrs;
+        return addGroupingMemberHelper(username, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
     //find a user by a username and remove them from the grouping
@@ -858,6 +824,43 @@ public class MembershipServiceImpl implements MembershipService {
                     FAILURE + ": " + username + " may only delete from exclude, include or owner group", action);
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+
+    // Helper method for adding a user to a grouping.
+    public List<GroupingsServiceResult> addGroupingMemberHelper(String username, String groupingPath, String userIdentifier, Person personToAdd) {
+        List<GroupingsServiceResult> gsrs = new ArrayList<>();
+
+        String action = "add user to " + groupingPath;
+        String basis = groupingPath + BASIS;
+        String exclude = groupingPath + EXCLUDE;
+        String include = groupingPath + INCLUDE;
+
+        boolean isInBasis = memberAttributeService.isMember(basis, personToAdd);
+        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToAdd);
+        boolean isInInclude = memberAttributeService.isMember(include, personToAdd);
+
+        //check to see if they are already in the grouping
+        if (!isInComposite) {
+            //get them out of the exclude
+            gsrs.add(deleteGroupMember(username, exclude, userIdentifier));
+            //only add them to the include if they are not in the basis
+            if (!isInBasis) {
+                gsrs.addAll(addGroupMember(username, include, userIdentifier));
+            } else {
+                gsrs.add(helperService
+                        .makeGroupingsServiceResult(SUCCESS + ": " + userIdentifier + " was in " + basis, action));
+            }
+        } else {
+            gsrs.add(helperService
+                    .makeGroupingsServiceResult(SUCCESS + ": " + userIdentifier + " was already in " + groupingPath,
+                            action));
+        }
+        //should only be in one or the other
+        if (isInBasis && isInInclude) {
+            gsrs.add(deleteGroupMember(username, include, userIdentifier));
+        }
+
+        return gsrs;
     }
 
     //updates the last modified attribute of the group to the current date and time
