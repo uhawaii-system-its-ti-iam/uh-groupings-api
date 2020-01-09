@@ -125,8 +125,8 @@ public class TestGroupAttributeService {
         membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMemberByUsername(username[0], GROUPING, username[5]);
+        membershipService.addGroupingMember(username[0], GROUPING, username[4]);
+        membershipService.addGroupingMember(username[0], GROUPING, username[5]);
 
         //add to exclude
         membershipService.deleteGroupingMemberByUsername(username[0], GROUPING, username[3]);
