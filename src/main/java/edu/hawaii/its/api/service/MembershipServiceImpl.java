@@ -382,13 +382,13 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
-            String userToDeleteUhUuid) {
+            String userIdentifier) {
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
-                + "; userToDelete: " + userToDeleteUhUuid
+                + "; userToDelete: " + userIdentifier
                 + ";");
 
-        return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userToDeleteUhUuid));
+        return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
     //adds a user to the admins group via username or UH id number
@@ -801,6 +801,44 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         return gsrs;
+    }
+
+    // Helper method for deleting a user from a grouping.
+    public List<GroupingsServiceResult> deleteGroupingMemberHelper(String username, String groupingPath, String userIdentifier, Person personToDelete) {
+        List<GroupingsServiceResult> gsrList = new ArrayList<>();
+
+        String action = username + " deletes " + userIdentifier + " from " + groupingPath;
+        String basis = groupingPath + BASIS;
+        String exclude = groupingPath + EXCLUDE;
+        String include = groupingPath + INCLUDE;
+
+        boolean isInBasis = memberAttributeService.isMember(basis, personToDelete);
+        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToDelete);
+        boolean isInExclude = memberAttributeService.isMember(exclude, personToDelete);
+
+        //if they are in the include group, get them out
+        gsrList.add(deleteGroupMember(username, include, userIdentifier));
+
+        //make sure userToDelete is actually in the Grouping
+        if (isInComposite) {
+            //if they are not in the include group, then they are in the basis, so add them to the exclude group
+            if (isInBasis) {
+                gsrList.addAll(addGroupMember(username, exclude, userIdentifier));
+            }
+        }
+        //since they are not in the Grouping, do nothing, but return SUCCESS
+        else {
+            gsrList.add(
+                    helperService.makeGroupingsServiceResult(SUCCESS + userIdentifier + " was not in " +
+                            groupingPath, action));
+        }
+
+        //should not be in exclude if not in basis
+        if (!isInBasis && isInExclude) {
+            gsrList.add(deleteGroupMember(username, exclude, userIdentifier));
+        }
+
+        return gsrList;
     }
 
     //updates the last modified attribute of the group to the current date and time
