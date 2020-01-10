@@ -18,11 +18,8 @@ public interface MembershipService {
     List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String group,
                                                        List<String> usersToAddUhUuid);
 
-    List<GroupingsServiceResult> deleteGroupingMemberByUsername(String ownerUsername, String groupingPath,
-                                                                String userToDeleteUsername);
-
-    List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
-                                                            String userToDeleteUhUuid);
+    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
+                                                                String userIdentifier);
 
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
                                              String userToDelete);

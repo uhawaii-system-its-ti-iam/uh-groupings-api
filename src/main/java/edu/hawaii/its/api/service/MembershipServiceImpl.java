@@ -205,18 +205,18 @@ public class MembershipServiceImpl implements MembershipService {
         return addGroupingMemberHelper(username, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
-    //find a user by a username and remove them from the grouping
+    // Finds a user by either UH username or UH ID number and deletes them from the Grouping.
     @Override
-    public List<GroupingsServiceResult> deleteGroupingMemberByUsername(String ownerUsername, String groupingPath,
-            String userToDeleteUsername) {
-        logger.info("deleteGroupingMemberByUsername; username: "
+    public List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
+            String userIdentifier) {
+        logger.info("deleteGroupingMember; username: "
                 + ownerUsername
                 + "; groupingPath: "
                 + groupingPath + "; userToDelete: "
-                + userToDeleteUsername
+                + userIdentifier
                 + ";");
 
-        return deleteGroupingMemberHelper(ownerUsername, groupingPath, userToDeleteUsername, createNewPerson(userToDeleteUsername));
+        return deleteGroupingMemberHelper(ownerUsername, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
     // Takes an admin and user and returns list of groups that a user may own. An empty list will be returned if no
@@ -456,7 +456,7 @@ public class MembershipServiceImpl implements MembershipService {
 
             switch (outOrrIn) {
                 case "out ":
-                    results.addAll(deleteGroupingMemberByUsername(username, grouping, username));
+                    results.addAll(deleteGroupingMember(username, grouping, username));
                     break;
 
                 case "in ":
