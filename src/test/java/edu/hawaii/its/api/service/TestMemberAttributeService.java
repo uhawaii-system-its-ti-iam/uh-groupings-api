@@ -142,17 +142,17 @@ public class TestMemberAttributeService {
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[4]);
-        membershipService.addGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[5]);
+        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[4]);
+        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[5]);
 
         //add to exclude
-        membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[3]);
+        membershipService.deleteGroupingMember(ADMIN_USER, GROUPING, usernames[3]);
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
 
         // Remove from Exclude
-        membershipService.addGroupMemberByUsername(ADMIN_USER, GROUPING_INCLUDE, usernames[4]);
+        membershipService.addGroupMember(ADMIN_USER, GROUPING_INCLUDE, usernames[4]);
 
         // Turn off Self-Opted flags
         //todo Tests run properly without doing a isSelfOpted check on GROUPING_INCLUDE and usernames[1] for unknown reason
@@ -299,7 +299,7 @@ public class TestMemberAttributeService {
 
         // User is not self opted because user is not in group
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));
-        membershipService.addGroupMemberByUsername(usernames[0], GROUPING_EXCLUDE, usernames[4]);
+        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[4]);
 
         // User is not self opted b/c added by owner
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));

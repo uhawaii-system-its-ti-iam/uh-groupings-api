@@ -446,7 +446,7 @@ public class GroupingAssignmentServiceTest {
     assertFalse(groupingsToOptInto.contains(GROUPING_0_PATH));
 
     // take username[1] out of GROUPING
-    membershipService.deleteGroupingMemberByUsername(username, GROUPING_0_PATH, username);
+    membershipService.deleteGroupingMember(username, GROUPING_0_PATH, username);
 
     // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
     groupingsIn = groupingAssignmentService
