@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.hawaii.its.ti.iam</groupId>
@@ -181,6 +181,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.9.8</version>
@@ -190,6 +194,11 @@
             <artifactId>assertj-swagger</artifactId>
             <version>0.8.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.6</version>
         </dependency>
         <dependency>
             <groupId>io.github.swagger2markup</groupId>
@@ -211,9 +220,9 @@
         </dependency>
         <!--Comment this out until we can figure out how to integrate the new version into our project-->
         <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-web</artifactId>-->
-            <!--<version>5.1.0.RELEASE</version>-->
+        <!--<groupId>org.springframework</groupId>-->
+        <!--<artifactId>spring-web</artifactId>-->
+        <!--<version>5.1.0.RELEASE</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -358,15 +367,18 @@
                                 <echo>Now that you have a clean project,</echo>
                                 <echo>here are some common goals for this project:</echo>
                                 <echo>$ mvn clean test</echo>
-                                <echo>$ mvn clean test -Dtest=*SystemTest </echo>
-                                <echo>$ mvn clean test -Dspring.profiles.active=test -Dtest=Test* </echo>
+                                <echo>$ mvn clean test -Dtest=*SystemTest</echo>
+                                <echo>$ mvn clean test -Dspring.profiles.active=test -Dtest=Test*</echo>
                                 <echo>$ mvn clean package</echo>
                                 <echo>$ mvn -Dmaven.test.skip=true clean package</echo>
                                 <echo>$ mvn clean test jacoco:report</echo>
-                                <echo> </echo>
+                                <echo></echo>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
-                                <echo>$ mvn -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestGroupingFactoryService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController test</echo>
-                                <echo> </echo>
+                                <echo>$ mvn
+                                    -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestGroupingFactoryService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController
+                                    test
+                                </echo>
+                                <echo></echo>
                                 <echo>To run UH Groupings locally:</echo>
                                 <echo>$ mvn clean spring-boot:run</echo>
                             </target>
@@ -427,7 +439,8 @@
                     <!--^^^ added this-->
                     <systemPropertyVariables>
                         <io.springfox.staticdocs.outputDir>${swagger.output.dir}</io.springfox.staticdocs.outputDir>
-                        <io.springfox.staticdocs.snippetsOutputDir>${swagger.snippetOutput.dir}</io.springfox.staticdocs.snippetsOutputDir>
+                        <io.springfox.staticdocs.snippetsOutputDir>${swagger.snippetOutput.dir}
+                        </io.springfox.staticdocs.snippetsOutputDir>
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/Test*.java</exclude>
@@ -459,13 +472,23 @@
                         <swagger2markup.markupLanguage>ASCIIDOC</swagger2markup.markupLanguage>
                         <swagger2markup.pathsGroupedBy>TAGS</swagger2markup.pathsGroupedBy>
 
-                        <swagger2markup.extensions.dynamicOverview.contentPath>${project.basedir}/src/docs/asciidoc/extensions/overview</swagger2markup.extensions.dynamicOverview.contentPath>
-                        <swagger2markup.extensions.dynamicDefinitions.contentPath>${project.basedir}/src/docs/asciidoc/extensions/definitions</swagger2markup.extensions.dynamicDefinitions.contentPath>
-                        <swagger2markup.extensions.dynamicPaths.contentPath>${project.basedir}/src/docs/asciidoc/extensions/paths</swagger2markup.extensions.dynamicPaths.contentPath>
-                        <swagger2markup.extensions.dynamicSecurity.contentPath>${project.basedir}src/docs/asciidoc/extensions/security/</swagger2markup.extensions.dynamicSecurity.contentPath>
+                        <swagger2markup.extensions.dynamicOverview.contentPath>
+                            ${project.basedir}/src/docs/asciidoc/extensions/overview
+                        </swagger2markup.extensions.dynamicOverview.contentPath>
+                        <swagger2markup.extensions.dynamicDefinitions.contentPath>
+                            ${project.basedir}/src/docs/asciidoc/extensions/definitions
+                        </swagger2markup.extensions.dynamicDefinitions.contentPath>
+                        <swagger2markup.extensions.dynamicPaths.contentPath>
+                            ${project.basedir}/src/docs/asciidoc/extensions/paths
+                        </swagger2markup.extensions.dynamicPaths.contentPath>
+                        <swagger2markup.extensions.dynamicSecurity.contentPath>
+                            ${project.basedir}src/docs/asciidoc/extensions/security/
+                        </swagger2markup.extensions.dynamicSecurity.contentPath>
 
-                        <swagger2markup.extensions.springRestDocs.snippetBaseUri>${swagger.snippetOutput.dir}</swagger2markup.extensions.springRestDocs.snippetBaseUri>
-                        <swagger2markup.extensions.springRestDocs.defaultSnippets>true</swagger2markup.extensions.springRestDocs.defaultSnippets>
+                        <swagger2markup.extensions.springRestDocs.snippetBaseUri>${swagger.snippetOutput.dir}
+                        </swagger2markup.extensions.springRestDocs.snippetBaseUri>
+                        <swagger2markup.extensions.springRestDocs.defaultSnippets>true
+                        </swagger2markup.extensions.springRestDocs.defaultSnippets>
                     </config>
                 </configuration>
                 <executions>
@@ -599,6 +622,6 @@
                     </execution>
                 </executions>
             </plugin>
-       </plugins>
+        </plugins>
     </build>
 </project>
