@@ -120,7 +120,7 @@ public class TestHelperService {
         assertFalse(results.getWsMemberships().equals(null));
 
         // username is not in group
-        membershipService.deleteGroupingMemberByUsername(ADMIN, GROUPING, username[3]);
+        membershipService.deleteGroupingMember(ADMIN, GROUPING, username[3]);
         try {
             results = helperService.membershipsResults(username[3], GROUPING);
             assertTrue(results.getWsMemberships().equals(null));

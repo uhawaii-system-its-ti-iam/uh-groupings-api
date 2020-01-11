@@ -280,13 +280,13 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
-        membershipService.deleteGroupMemberByUsername(usernames[0], GROUPING_INCLUDE, usernames[3]);
+        membershipService.deleteGroupMember(usernames[0], GROUPING_INCLUDE, usernames[3]);
 
         // add to exclude
         membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[3]);
 
         // remove from exclude
-        membershipService.deleteGroupMemberByUsername(usernames[0], GROUPING_EXCLUDE, usernames[2]);
+        membershipService.deleteGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[2]);
 
         // Remove admin privileges
         membershipService.deleteAdmin(ADMIN, usernames[0]);
@@ -310,13 +310,13 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Ensures users are not already in group
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_INCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[2]);
 
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMemberByUsername(usernames[4], A_EXCLUDE, tstUuid[2]);
+        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[0]);
+        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[1]);
+        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[2]);
     }
 
     @Test
