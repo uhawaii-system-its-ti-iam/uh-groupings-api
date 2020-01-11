@@ -1,6 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import java.util.List;
@@ -14,7 +16,9 @@ public interface GroupAttributeService {
 
     boolean isGroupAttribute(String groupPath, String attribute);
 
-    List<String> getAllSyncDestinations(String currentUsername);
+    List<SyncDestination> getAllSyncDestinations(String currentUsername, String path);
+
+    List<SyncDestination> getAllSyncDestinations();
 
     //do not include in REST controller
     WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
@@ -23,9 +27,7 @@ public interface GroupAttributeService {
     GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
             String attributeName, boolean turnAttributeOn);
 
-    List<String> getAllSyncDestinations();
-
-    Map<String, Boolean> getSyncDestinations(String grouping);
+    List<SyncDestination> getSyncDestinations(Grouping grouping);
 
     GroupingsServiceResult updateDescription(String groupPath, String ownerUsername, String description);
 }

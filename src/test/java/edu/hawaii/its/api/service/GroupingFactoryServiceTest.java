@@ -10,6 +10,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +109,7 @@ public class GroupingFactoryServiceTest {
     }
 
     //todo Fix later, overriding for now
+    @Ignore
     @Test(expected = UnsupportedOperationException.class)
     public void deleteGroupingTest() {
         throw new UnsupportedOperationException();
@@ -116,6 +118,7 @@ public class GroupingFactoryServiceTest {
 
     //todo fill this in after changes to addGrouping method
     // Basic test to check functionality
+    @Ignore
     @Test
     public void addGrouping() {
 

@@ -1,6 +1,8 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.SyncDestination;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -167,21 +169,37 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Autowired
     private MembershipService membershipService;
 
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
+
+    /**
+     *
+     * @param currentUsername, a string containing the username of the user.
+     * @param path, string containing the path of the grouping being accessed.
+     * @return finSyncdestList, a list of SyncDestination objects containing the sync destinations
+     *
+     * Get's all the sync destination for a specific grouping.
+     */
     @Override
-    public List<String> getAllSyncDestinations(String currentUsername) {
+    public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
         if (memberAttributeService.isOwner(currentUsername) || memberAttributeService.isSuperuser(currentUsername)) {
-            return getAllSyncDestinations();
+            Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
+            List<SyncDestination> finSyncDestList = getAllSyncDestinations();
+            for(SyncDestination dest : finSyncDestList) {
+                dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
+            }
+            return finSyncDestList;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
     }
 
     @Override
-    public List<String> getAllSyncDestinations() {
+    public List<SyncDestination> getAllSyncDestinations() {
         return grouperFactoryService.getSyncDestinations();
     }
 
-    //turn the ability for users to opt-in to a grouping on or off
+    // Turn the ability for users to opt-in to a grouping on or off.
     @Override
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername, boolean isOptInOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
@@ -195,7 +213,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         }
     }
 
-    //turn the ability for users to opt-out of a grouping on or off
+    // Turn the ability for users to opt-out of a grouping on or off.
     @Override
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
                                                            boolean isOptOutOn) {
@@ -210,8 +228,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return results;
     }
 
-    //turns the attribute on or off in a group
-    // OPT_IN, OPT_OUT, and sync destinations are allowed
+    // Turns the attribute on or off in a group.
+    // OPT_IN, OPT_OUT, and sync destinations are allowed.
     @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
                                                              String attributeName, boolean turnAttributeOn) {
@@ -252,7 +270,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return gsr;
     }
 
-    //returns true if the group has the attribute with that name
+    // Returns true if the group has the attribute with that name.
     public boolean isGroupAttribute(String groupPath, String attributeName) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = attributeAssignmentsResults(
                 ASSIGN_TYPE_GROUP,
@@ -270,23 +288,33 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return false;
     }
 
+    /**
+     *
+     * @param grouping, contains the grouping to assign sync destinations and their attributes to.
+     * @return syncDestinations, list of sync destinations related to the grouping
+     *
+     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
+     * person requesting the information is an owner or superuser as that has already been checked.
+     */
     @Override
-    public Map<String, Boolean> getSyncDestinations(String grouping) {
-        List<String> destinations = getAllSyncDestinations();
+    public List<SyncDestination> getSyncDestinations(Grouping grouping) {
+        List<SyncDestination> syncDestinations = getAllSyncDestinations();
+        
+        if (syncDestinations == null) {
 
-        Map<String, Boolean> syncDestinations = new HashMap<>();
+            return syncDestinations;
+        } else {
 
-        if (destinations != null) {
-
-            for (String destination : destinations) {
-                syncDestinations.put(destination, isGroupAttribute(grouping, destination));
+            for (SyncDestination destination : syncDestinations) {
+                destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+                destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
             }
         }
 
         return syncDestinations;
     }
 
-    //checks to see if a group has an attribute of a specific type and returns the list if it does
+    // Checks to see if a group has an attribute of a specific type and returns the list if it does.
     @Override
     public WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
                                                                         String attributeName) {
@@ -301,7 +329,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return grouperFactoryService.makeWsGetAttributeAssignmentsResultsForGroup(assignType, attributeName, groupPath);
     }
 
-    //adds, removes, updates (operationName) the attribute for the group
+    // Adds, removes, updates (operationName) the attribute for the group.
     public GroupingsServiceResult assignGroupAttributes(String attributeName, String attributeOperation,
                                                         String groupPath) {
         logger.info("assignGroupAttributes; "
