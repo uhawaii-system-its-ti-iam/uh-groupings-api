@@ -25,7 +25,7 @@ public class PersonTest {
     }
 
     @Test
-    public void constuction() {
+    public void construction() {
         assertNotNull(person);
         assertNull(person.getName());
         assertNull(person.getUhUuid());
