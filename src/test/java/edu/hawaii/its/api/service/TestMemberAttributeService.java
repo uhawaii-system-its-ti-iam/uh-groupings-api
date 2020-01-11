@@ -146,7 +146,7 @@ public class TestMemberAttributeService {
         membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[5]);
 
         //add to exclude
-        membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING, usernames[3]);
+        membershipService.deleteGroupingMember(ADMIN_USER, GROUPING, usernames[3]);
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
