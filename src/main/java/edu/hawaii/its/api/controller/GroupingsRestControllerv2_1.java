@@ -571,7 +571,7 @@ public class GroupingsRestControllerv2_1 {
     logger.info("Entered REST deleteInclude");
     return ResponseEntity
         .ok()
-        .body(membershipService.deleteGroupMemberByUsername(currentUser, path + INCLUDE, uid));
+        .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
   }
 
   /**
@@ -590,7 +590,7 @@ public class GroupingsRestControllerv2_1 {
     logger.info("Entered REST deleteExclude");
     return ResponseEntity
         .ok()
-        .body(membershipService.deleteGroupMemberByUsername(currentUser, path + EXCLUDE, uid));
+        .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
   }
 
 }

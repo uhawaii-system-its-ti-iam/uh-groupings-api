@@ -6,41 +6,14 @@ import java.util.List;
 
 public interface MembershipService {
 
-    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userToAdd);
-
-    List<GroupingsServiceResult> addGroupingMemberByUsername(String ownerUsername, String groupingPath,
-                                                             String userToAddUsername);
-
-    List<GroupingsServiceResult> addGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
-                                                         String userToAddUhUuid);
+    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
-    List<GroupingsServiceResult> addGroupMemberByUsername(String ownerUsername, String groupPath,
-                                                          String userToAddUsername);
-
-    List<GroupingsServiceResult> addGroupMemberByUhUuid(String ownerUsername, String groupPath,
-                                                      String userToAddUhUuid);
-
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
-    List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
-                                                           List<String> usersToAddUsername);
-
-    List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String group,
-                                                       List<String> usersToAddUhUuid);
-
-    List<GroupingsServiceResult> deleteGroupingMemberByUsername(String ownerUsername, String groupingPath,
-                                                                String userToDeleteUsername);
-
-    List<GroupingsServiceResult> deleteGroupingMemberByUhUuid(String ownerUsername, String groupingPath,
-                                                            String userToDeleteUhUuid);
-
-    GroupingsServiceResult deleteGroupMemberByUsername(String ownerUsername, String groupPath,
-                                                       String userToDeleteUsername);
-
-    GroupingsServiceResult deleteGroupMemberByUhUuid(String ownerUsername, String groupPath,
-                                                   String userToDeleteUhUuid);
+    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
+                                                                String userIdentifier);
 
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
                                              String userToDelete);
