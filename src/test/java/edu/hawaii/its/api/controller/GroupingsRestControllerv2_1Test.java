@@ -305,7 +305,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("allGroupings[0].name").value("bob"))
                 .andExpect(jsonPath("allGroupings[0].path").value("test:ing:me:bob"))
-                .andExpect(jsonPath("allGroupings[0].listservOn").value("true"))
+                .andExpect(jsonPath("allGroupings[0].syncDestinations").isEmpty())
+//                    .value("true"))
 
                 // basis
                 .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
@@ -334,7 +335,7 @@ public class GroupingsRestControllerv2_1Test {
 
                 .andExpect(jsonPath("allGroupings[1].name").value("kim"))
                 .andExpect(jsonPath("allGroupings[1].path").value("test:ing:me:kim"))
-                .andExpect(jsonPath("allGroupings[1].listservOn").value("true"))
+                .andExpect(jsonPath("allGroupings[1].syncDestinations").isEmpty())
                 .andExpect(jsonPath("allGroupings[1].basis.members", hasSize(3)))
                 .andExpect(jsonPath("allGroupings[1].basis.members[0].name").value("b4-name"))
                 .andExpect(jsonPath("allGroupings[1].basis.members[0].uhUuid").value("b4-uuid"))
@@ -818,7 +819,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("bob"))
                 .andExpect(jsonPath("path").value("test:ing:me:bob"))
-                .andExpect(jsonPath("listservOn").value("true"))
+                .andExpect(jsonPath("isSyncDestinationOn(LISTSERV)").value("true"))
                 .andExpect(jsonPath("basis.members", hasSize(3)))
                 .andExpect(jsonPath("basis.members[0].name").value("b0-name"))
                 .andExpect(jsonPath("basis.members[0].uhUuid").value("b0-uuid"))

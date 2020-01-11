@@ -131,7 +131,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             if ((newSyncDest.getName() != null) && (newSyncDest.getDescription() != null)) {
                 String jsonString = newSyncDest.getDescription();
 
-                // Uses Springboot Mapper to change JSON to a Java Object. In this case a SyncDestination
+                // Uses Springboot Mapper to change JSON to a Java Object, in this case a SyncDestination.
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     newSyncDest = mapper.readValue(jsonString, SyncDestination.class);
