@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -484,11 +485,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 groups.put(group.getPath(), group);
             }
         }
-        // Return empty group if for any unforeseen results
+        // Return empty group if for any unforeseen results.
         return groups;
     }
 
-    //makes a person with all attributes in attributeNames
+    // Makes a person with all attributes in attributeNames.
     @Override
     public Person makePerson(WsSubject subject, String[] attributeNames) {
         if (subject == null || subject.getAttributeValues() == null) {
@@ -499,14 +500,14 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (int i = 0; i < subject.getAttributeValues().length; i++) {
                 attributes.put(attributeNames[i], subject.getAttributeValue(i));
             }
-            //uuid is the only attribute not actually in the WsSubject attribute array
+            // uhUuid is the only attribute not actually in the WsSubject attribute array.
             attributes.put(UHUUID, subject.getId());
 
             return new Person(attributes);
         }
     }
 
-    //sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping
+    // Sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping.
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
 
@@ -533,15 +534,14 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
 
-        // set the sync destinations map
-        Map<String, Boolean> syncDestinations = groupAttributeService.getSyncDestinations(grouping.getPath());
-        System.out.println("syncDestinationMapComesBack:" + syncDestinations);
+        // Set the sync destinations.
+        List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
         grouping.setSyncDestinations(syncDestinations);
 
         return grouping;
     }
 
-    //returns the list of groups that the user is in, searching by username or uuid
+    // Returns the list of groups that the user is in, searching by username or uhUuid.
     @Override
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
