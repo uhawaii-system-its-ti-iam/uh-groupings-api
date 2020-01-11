@@ -419,7 +419,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //removes username[1] from the group
-        membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
+        membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[1]);
 
         //Checks to see if username[1] is not in the basis or the composite
         assertFalse(memberAttributeService.isMember(GROUPING, username[1]));
@@ -464,7 +464,7 @@ public class TestMembershipService {
 
         //has a non owner try to remove the owner
         try {
-            membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
+            membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
@@ -478,7 +478,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void deleteGroupingMemberByUhUuidTest() {
+    public void deleteGroupingMemberTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult results;
         String ownerUsername = username[0];
@@ -490,7 +490,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
+        lResults = membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[1]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         //Checks to see if username[1] is in the grouping
@@ -500,7 +500,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
         //tries to remove someone who is already removed from the group
-        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
+        lResults = membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[1]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         //Checks to see if username[1] is in the grouping
@@ -522,7 +522,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[3]);
+        lResults = membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[3]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
@@ -540,7 +540,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
         //delete member from grouping
-        lResults = membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[4]);
+        lResults = membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[4]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
         assertFalse(memberAttributeService.isMember(GROUPING, username[4]));
@@ -559,7 +559,7 @@ public class TestMembershipService {
 
         //has a non owner try to remove the owner
         try {
-            membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
+            membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
@@ -570,25 +570,6 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, ownerUsername));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, ownerUsername));
 
-    }
-
-    @Test
-    public void addGroupMembersByUsernameTest() {
-
-        String ownerUsername = username[0];
-
-        List<GroupingsServiceResult> results;
-        List<String> usernames = new ArrayList<>();
-
-        for (int i = 0; i < 6; i++) {
-            usernames.add(username[i]);
-        }
-
-        results = membershipService.addGroupMembersByUsername(ownerUsername, GROUPING_INCLUDE, usernames);
-
-        for (GroupingsServiceResult result : results) {
-            assertTrue(result.getResultCode().startsWith(SUCCESS));
-        }
     }
 
     @Test
@@ -631,7 +612,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
         //removes username[1] from the group
-        membershipService.deleteGroupingMemberByUhUuid(ownerUsername, GROUPING, username[1]);
+        membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[1]);
 
         //Checks to see if username[1] is not in the basis or the composite
         assertFalse(memberAttributeService.isMember(GROUPING, username[1]));
@@ -676,7 +657,7 @@ public class TestMembershipService {
 
         //has a non owner try to remove the owner
         try {
-            membershipService.deleteGroupingMemberByUsername(username[4], GROUPING, ownerUsername);
+            membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
             assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
         }
@@ -815,25 +796,6 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isOwner(GROUPING, username[2]));
 
         membershipService.deleteGroupMember(ownerUsername, GROUPING_OWNERS, username[2]);
-    }
-
-    @Test
-    public void addGroupMembersByUuidTest() {
-        String ownerUsername = username[0];
-
-        List<GroupingsServiceResult> results;
-        List<String> usernames = new ArrayList<>();
-
-        for (int i = 0; i < 6; i++) {
-            usernames.add(username[i]);
-        }
-
-        results = membershipService.addGroupMembersByUhUuid(ownerUsername, GROUPING_INCLUDE, usernames);
-
-        for (GroupingsServiceResult result : results) {
-            assertTrue(result.getResultCode().startsWith(SUCCESS));
-        }
-
     }
 
     @Test

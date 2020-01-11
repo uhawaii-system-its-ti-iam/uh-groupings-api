@@ -12,12 +12,6 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
-    List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String group,
-                                                           List<String> usersToAddUsername);
-
-    List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String group,
-                                                       List<String> usersToAddUhUuid);
-
     List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
                                                                 String userIdentifier);
 
