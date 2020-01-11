@@ -166,26 +166,26 @@ public class MembershipServiceTest {
     // Use user number not slot in array
     // Use assert to check if it worked
     @Test
-    public void deleteGroupingMemberByUhUuidTest() {
+    public void deleteGroupingMemberTest() {
         Iterable<Grouping> group = groupingRepository.findAll();
         List<GroupingsServiceResult> listGsr;
         GroupingsServiceResult gsr;
 
         // Base test
         // Remove person from include and composite
-        listGsr = membershipService.deleteGroupingMemberByUhUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(5).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
         // If person is in composite and basis, add to exclude group
-        listGsr = membershipService.deleteGroupingMemberByUhUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(1).getUhUuid());
         for (GroupingsServiceResult gsrFor : listGsr) {
             assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
         }
 
         // Not in composite, do nothing but return success
-        listGsr = membershipService.deleteGroupingMemberByUhUuid(users.get(0).getUsername(), GROUPING_3_PATH,
+        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(2).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
@@ -195,7 +195,7 @@ public class MembershipServiceTest {
 
         // Test if user is not an owner
         try {
-            listGsr = membershipService.deleteGroupingMemberByUhUuid(users.get(5).getUsername(), GROUPING_3_PATH,
+            listGsr = membershipService.deleteGroupingMember(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(6).getUhUuid());
             assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
         } catch (AccessDeniedException ade) {
@@ -203,7 +203,7 @@ public class MembershipServiceTest {
         }
 
         // Test if user is admin
-        listGsr = membershipService.deleteGroupingMemberByUhUuid(ADMIN_USER, GROUPING_3_PATH,
+        listGsr = membershipService.deleteGroupingMember(ADMIN_USER, GROUPING_3_PATH,
                 users.get(6).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
@@ -262,59 +262,6 @@ public class MembershipServiceTest {
 
         listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, uuidToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-    }
-
-    @Test
-    public void deleteGroupingMemberbyUsernameTest() {
-        Iterable<Grouping> group = groupingRepository.findAll();
-        List<GroupingsServiceResult> listGsr;
-        GroupingsServiceResult gsr;
-
-        // Base test
-        // Remove person from include and composite
-        listGsr = membershipService.deleteGroupingMemberByUsername(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(5).getUsername());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        // If person is in composite and basis, add to exclude group
-        listGsr = membershipService.deleteGroupingMemberByUsername(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(1).getUsername());
-        for (GroupingsServiceResult gsrFor : listGsr) {
-            assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
-        }
-
-        // Not in composite, do nothing but return success
-        listGsr = membershipService.deleteGroupingMemberByUsername(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(2).getUsername());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        // todo Can't test with current database setup
-        // Not in basis, but in exclude
-        // Can't happen with current database
-
-        // Test if user is not an owner
-        try {
-            listGsr = membershipService.deleteGroupingMemberByUsername(users.get(5).getUsername(), GROUPING_3_PATH,
-                    users.get(6).getUhUuid());
-            assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
-        }
-
-        // Test if user is admin
-        listGsr = membershipService.deleteGroupingMemberByUsername(ADMIN_USER, GROUPING_3_PATH,
-                users.get(6).getUhUuid());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        //Test if wrong path is given
-        try {
-            gsr = membershipService.deleteGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
-                    users.get(6).getUsername());
-            assertTrue(gsr.getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
-        }
-
     }
 
     @Test
@@ -596,7 +543,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void addMembersByUsername() {
+    public void addMembers() {
         //add all usernames
         List<String> usernames = new ArrayList<>();
         for (Person user : users) {
@@ -609,7 +556,7 @@ public class MembershipServiceTest {
         int numberOfBasisMembers = grouping.getBasis().getMembers().size();
 
         //try to put all users into exclude group
-        membershipService.addGroupMembersByUsername(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, usernames);
+        membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, usernames);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
         //there should be no real members in composite, but it should still have the 'grouperAll' member
         assertEquals(1, grouping.getComposite().getMembers().size());
@@ -617,41 +564,11 @@ public class MembershipServiceTest {
         assertEquals(numberOfBasisMembers, grouping.getExclude().getMembers().size());
 
         //try to put all users into the include group
-        membershipService.addGroupMembersByUsername(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, usernames);
+        membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, usernames);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
         //all members should be in the group ( - 1 for 'grouperAll' in composite);
         assertEquals(usernames.size(), grouping.getComposite().getMembers().size() - 1);
         //members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups)
         assertEquals(usernames.size() - numberOfBasisMembers + 2, grouping.getInclude().getMembers().size());
-    }
-
-    @Test
-    public void addMembersByUhUuid() {
-        //add all uuids
-        List<String> uuids = new ArrayList<>();
-        for (Person user : users) {
-            uuids.add(user.getUhUuid());
-        }
-
-        Grouping grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-
-        //check how many members are in the basis
-        int numberOfBasisMembers = grouping.getBasis().getMembers().size();
-
-        //try to put all users into exclude group
-        membershipService.addGroupMembersByUhUuid(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, uuids);
-        grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        //there should be no real members in composite, but it should still have the 'grouperAll' member
-        assertEquals(1, grouping.getComposite().getMembers().size());
-        //only the users in the basis should have been added to the exclude group
-        assertEquals(numberOfBasisMembers, grouping.getExclude().getMembers().size());
-
-        //try to put all users into the include group
-        membershipService.addGroupMembersByUhUuid(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, uuids);
-        grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        //all members should be in the group ( - 1 for 'grouperAll' in composite);
-        assertEquals(uuids.size(), grouping.getComposite().getMembers().size() - 1);
-        //members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups)
-        assertEquals(uuids.size() - numberOfBasisMembers + 2, grouping.getInclude().getMembers().size());
     }
 }

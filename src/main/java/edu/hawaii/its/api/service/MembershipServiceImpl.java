@@ -246,17 +246,7 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
 
         for (String userToAdd : usersToAdd) {
-            try {
-                Integer.parseInt(userToAdd);
-                gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
-
-            } catch (Exception NumberFormatException) {
-                try {
-                    gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
-                } catch (GcWebServiceError e) {
-
-                }
-            }
+            gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
         }
 
         return gsrs;
@@ -270,33 +260,6 @@ public class MembershipServiceImpl implements MembershipService {
                 + userIdentifier + ";");
 
       return addMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
-    }
-
-    //finds all the user from a list of usernames and adds them to the group
-    @Override
-    public List<GroupingsServiceResult> addGroupMembersByUsername(String ownerUsername, String groupPath,
-            List<String> usernamesToAdd) {
-        logger.info(
-                "addGroupMembersByUsername; user: " + ownerUsername + "; group: " + groupPath + "; usersToAddUsername: "
-                        + usernamesToAdd + ";");
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        for (String userToAdd : usernamesToAdd) {
-            gsrList.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
-        }
-        return gsrList;
-    }
-
-    //finds all the user from a list of uhUuids and adds them to the group
-    @Override
-    public List<GroupingsServiceResult> addGroupMembersByUhUuid(String ownerUsername, String groupPath,
-            List<String> usersToAddUhUuid) {
-        logger.info("addGroupMembersByUuid; user: " + ownerUsername + "; groupPath: " + groupPath + "; usersToAddUuid: "
-                + usersToAddUhUuid + ";");
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        for (String userToAdd : usersToAddUhUuid) {
-            gsrList.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
-        }
-        return gsrList;
     }
 
     @Override

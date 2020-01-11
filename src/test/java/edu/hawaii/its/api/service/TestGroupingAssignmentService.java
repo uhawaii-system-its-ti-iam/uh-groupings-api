@@ -164,7 +164,7 @@ public class TestGroupingAssignmentService {
         membershipService.addGroupingMember(usernames[0], GROUPING, usernames[5]);
 
         // add to exclude
-        membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[3]);
+        membershipService.deleteGroupingMember(usernames[0], GROUPING, usernames[3]);
 
     }
 
@@ -428,7 +428,7 @@ public class TestGroupingAssignmentService {
         assertFalse(groupingsToOptInto.contains(GROUPING));
 
         // take usernames[1] out of GROUPING
-        membershipService.deleteGroupingMemberByUsername(usernames[0], GROUPING, usernames[0]);
+        membershipService.deleteGroupingMember(usernames[0], GROUPING, usernames[0]);
 
         // GROUPING has OPT-IN turned on, so usernames[1] should be able to opt back into GROUPING
         groupingsIn = groupingAssignmentService
