@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -156,7 +156,7 @@ public class MemberAttributeServiceTest {
                     .assignOwnership(GROUPING_0_PATH, randomUser.getUsername(), randomUser.getUsername());
             assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
@@ -169,21 +169,21 @@ public class MemberAttributeServiceTest {
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
-        assertEquals(ownerAdds.getResultCode(), SUCCESS);
+        assertThat(SUCCESS, is(ownerAdds.getResultCode()));
 
         GroupingsServiceResult adminAdds =
                 memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, randomUser.getUsername());
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
-        assertEquals(SUCCESS, adminAdds.getResultCode());
+        assertThat(adminAdds.getResultCode(), is(SUCCESS));
 
         //Test to make sure UUID works
         GroupingsServiceResult uuidAdds = memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
-        assertEquals(SUCCESS, uuidAdds.getResultCode());
+        assertThat(uuidAdds.getResultCode(), is(SUCCESS));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class MemberAttributeServiceTest {
             randomUserRemoves = memberAttributeService
                     .removeOwnership(GROUPING_0_PATH, users.get(1).getUsername(), users.get(1).getUsername());
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //add owner for owner to remove
@@ -205,12 +205,12 @@ public class MemberAttributeServiceTest {
         //owner tries to remove other ownership
         GroupingsServiceResult ownerRemoves = memberAttributeService
                 .removeOwnership(GROUPING_0_PATH, users.get(0).getUsername(), users.get(1).getUsername());
-        assertEquals(SUCCESS, ownerRemoves.getResultCode());
+        assertThat(ownerRemoves.getResultCode(), is(SUCCESS));
 
         //try to remove ownership from user that is not an owner
         GroupingsServiceResult ownerRemovesNonOwner = memberAttributeService
                 .removeOwnership(GROUPING_0_PATH, users.get(0).getUsername(), users.get(1).getUsername());
-        assertEquals(SUCCESS, ownerRemovesNonOwner.getResultCode());
+        assertThat(ownerRemovesNonOwner.getResultCode(), is(SUCCESS));
 
         //add owner for admin to remove
         membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
@@ -219,7 +219,7 @@ public class MemberAttributeServiceTest {
         //admin tries to remove ownership
         GroupingsServiceResult adminRemoves =
                 memberAttributeService.removeOwnership(GROUPING_0_PATH, ADMIN_USER, users.get(1).getUsername());
-        assertEquals(adminRemoves.getResultCode(), SUCCESS);
+        assertThat(SUCCESS, is(adminRemoves.getResultCode()));
     }
 
     @Test

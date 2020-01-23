@@ -16,11 +16,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.*;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 @ActiveProfiles("localTest")
@@ -42,9 +42,9 @@ public class UserDetailsServiceTest {
         User user = (User) userDetailsService.loadUserDetails(assertion);
 
         // Basics.
-        assertEquals("duckart", user.getUsername());
-        assertEquals("duckart", user.getUid());
-        assertEquals("89999999", user.getUhUuid());
+        assertThat(user.getUsername(), is("duckart"));
+        assertThat(user.getUid(), is("duckart"));
+        assertThat(user.getUhUuid(), is("89999999"));
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() > 0);
@@ -62,9 +62,9 @@ public class UserDetailsServiceTest {
         assertion = new AssertionImpl(principal);
         user = (User) userDetailsService.loadUserDetails(assertion);
 
-        assertEquals("someuser", user.getUsername());
-        assertEquals("someuser", user.getUid());
-        assertEquals("10000001", user.getUhUuid());
+        assertThat(user.getUsername(), is("someuser"));
+        assertThat(user.getUid(), is("someuser"));
+        assertThat(user.getUhUuid(), is("10000001"));
 
         assertTrue(user.getAuthorities().size() > 0);
         assertTrue(user.isRole(Role.ANONYMOUS));
@@ -85,9 +85,9 @@ public class UserDetailsServiceTest {
         User user = (User) userDetailsService.loadUserDetails(assertion);
 
         // Basics.
-        assertEquals("jjcale", user.getUsername());
-        assertEquals("jjcale", user.getUid());
-        assertEquals("10000004", user.getUhUuid());
+        assertThat(user.getUsername(), is("jjcale"));
+        assertThat(user.getUid(), is("jjcale"));
+        assertThat(user.getUhUuid(), is("10000004"));
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() == 3);
@@ -106,7 +106,7 @@ public class UserDetailsServiceTest {
             userDetailsService.loadUserDetails(assertion);
             fail("Should not have reached here.");
         } catch (Exception e) {
-            assertEquals(e.getClass(), UsernameNotFoundException.class);
+            assertThat(UsernameNotFoundException.class, equalTo(e.getClass()));
             assertThat(e.getMessage(), containsString("principal is null"));
         }
     }

@@ -145,7 +145,7 @@ public class GroupingAssignmentServiceTest {
     try {
       groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(1).getUsername());
     } catch (AccessDeniedException ade) {
-      assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+      assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
     }
     Grouping groupingOwner = groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(0).getUsername());
     Grouping groupingAdmin = groupingAssignmentService.getGrouping(GROUPING_0_PATH, ADMIN_USER);
@@ -217,12 +217,12 @@ public class GroupingAssignmentServiceTest {
   public void getMyGroupingsTest() {
     GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
 
-    assertEquals(0, myGroupings.getGroupingsOwned().size());
-    assertEquals(5, myGroupings.getGroupingsIn().size());
-    assertEquals(0, myGroupings.getGroupingsOptedInTo().size());
-    assertEquals(0, myGroupings.getGroupingsOptedOutOf().size());
-    assertEquals(0, myGroupings.getGroupingsToOptInTo().size());
-    assertEquals(2, myGroupings.getGroupingsToOptOutOf().size());
+    assertThat(myGroupings.getGroupingsOwned().size(), is(0));
+    assertThat(myGroupings.getGroupingsIn().size(), is(5));
+    assertThat(myGroupings.getGroupingsOptedInTo().size(), is(0));
+    assertThat(myGroupings.getGroupingsOptedOutOf().size(), is(0));
+    assertThat(myGroupings.getGroupingsToOptInTo().size(), is(0));
+    assertThat(myGroupings.getGroupingsToOptOutOf().size(), is(2));
 
   }
 
@@ -287,27 +287,27 @@ public class GroupingAssignmentServiceTest {
     List<Grouping> groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
 
     //starts with no groupings opted into
-    assertEquals(0, groupingsOptedInto.size());
+    assertThat(groupingsOptedInto.size(), is(0));
 
     //opt into a grouping
     membershipService.optIn(user5, GROUPING_1_PATH);
     groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
-    assertEquals(1, groupingsOptedInto.size());
+    assertThat(groupingsOptedInto.size(), is(1));
 
     //opt into another grouping
     membershipService.optIn(user5, GROUPING_3_PATH);
     groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
-    assertEquals(2, groupingsOptedInto.size());
+    assertThat(groupingsOptedInto.size(),is(2));
 
     //opt out of a grouping
     membershipService.optOut(user5, GROUPING_3_PATH);
     groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
-    assertEquals(1, groupingsOptedInto.size());
+    assertThat(groupingsOptedInto.size(), is(1));
 
     //opt out of another grouping
     membershipService.optOut(user5, GROUPING_1_PATH);
     groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
-    assertEquals(0, groupingsOptedInto.size());
+    assertThat(groupingsOptedInto.size(), is(0));
   }
 
   @Test
@@ -323,7 +323,7 @@ public class GroupingAssignmentServiceTest {
     List<Grouping> groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
 
     //starts with no groupings out of
-    assertEquals(0, groupingsOptedOutOf.size());
+    assertThat(groupingsOptedOutOf.size(), is(0));
 
     //opt out of a grouping
     membershipService.optOut(user1, GROUPING_1_PATH);
@@ -333,7 +333,7 @@ public class GroupingAssignmentServiceTest {
       groupPaths.add(group.getPath());
     }
     groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
-    assertEquals(1, groupingsOptedOutOf.size());
+    assertThat(groupingsOptedOutOf.size(), is(1));
 
     //opt out of another grouping
     membershipService.optOut(user1, GROUPING_3_PATH);
@@ -343,7 +343,7 @@ public class GroupingAssignmentServiceTest {
       groupPaths.add(group.getPath());
     }
     groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
-    assertEquals(2, groupingsOptedOutOf.size());
+    assertThat(groupingsOptedOutOf.size(), is(2));
 
     //opt into a grouping
     membershipService.optIn(user1, GROUPING_3_PATH);
@@ -353,7 +353,7 @@ public class GroupingAssignmentServiceTest {
       groupPaths.add(group.getPath());
     }
     groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
-    assertEquals(1, groupingsOptedOutOf.size());
+    assertThat(groupingsOptedOutOf.size(), is(1));
 
     //opt into another grouping
     membershipService.optIn(user1, GROUPING_1_PATH);
@@ -363,20 +363,20 @@ public class GroupingAssignmentServiceTest {
       groupPaths.add(group.getPath());
     }
     groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
-    assertEquals(0, groupingsOptedOutOf.size());
+    assertThat(groupingsOptedOutOf.size(), is(0));
   }
 
   @Test
   public void adminListsTest() {
     AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN_USER);
 
-    assertEquals(adminListsHolder.getAllGroupings().size(), 5);
-    assertEquals(adminListsHolder.getAdminGroup().getMembers().size(), 1);
+    assertThat(5, is(adminListsHolder.getAllGroupings().size()));
+    assertThat(1, is(adminListsHolder.getAdminGroup().getMembers().size()));
 
     try {
       groupingAssignmentService.adminLists(users.get(1).getUsername());
     } catch (AccessDeniedException ade) {
-      assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+      assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
     }
   }
 
@@ -387,7 +387,7 @@ public class GroupingAssignmentServiceTest {
   @Test
   public void extractGroupPaths() {
     List<String> groupNames = groupingAssignmentService.extractGroupPaths(null);
-    assertEquals(0, groupNames.size());
+    assertThat(groupNames.size(), is(0));
 
     List<WsGroup> groups = new ArrayList<>();
     final int size = 300;
@@ -397,13 +397,13 @@ public class GroupingAssignmentServiceTest {
       w.setName("testName_" + i);
       groups.add(w);
     }
-    assertEquals(size, groups.size());
+    assertThat(groups.size(), is(size));
 
     groupNames = groupingAssignmentService.extractGroupPaths(groups);
     for (int i = 0; i < size; i++) {
       assertTrue(groupNames.contains("testName_" + i));
     }
-    assertEquals(size, groupNames.size());
+    assertThat(groupNames.size(), is(size));
 
     // Create some duplicates.
     groups = new ArrayList<>();
@@ -414,11 +414,11 @@ public class GroupingAssignmentServiceTest {
         groups.add(w);
       }
     }
-    assertEquals(size * 3, groups.size());
+    assertThat(groups.size(), is(size * 3));
 
     // Duplicates should not be in groupNames list.
     groupNames = groupingAssignmentService.extractGroupPaths(groups);
-    assertEquals(size, groupNames.size());
+    assertThat(groupNames.size(), is(size));
     for (int i = 0; i < size; i++) {
       assertTrue(groupNames.contains("testName_" + i));
     }
