@@ -27,7 +27,6 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -284,7 +283,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
@@ -453,11 +452,11 @@ public class GroupAttributeServiceTest {
 
         boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_OUT);
 
-        assertEquals(false, isHasPermission);
+        assertThat(isHasPermission, is(false));
 
         isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, OPT_OUT);
 
-        assertEquals(true, isHasPermission);
+        assertThat(isHasPermission, is(true));
 
     }
 
@@ -466,11 +465,11 @@ public class GroupAttributeServiceTest {
 
         boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_IN);
 
-        assertEquals(true, isHasPermission);
+        assertThat(isHasPermission, is(true));
 
         isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_2_PATH, OPT_IN);
 
-        assertEquals(false, isHasPermission);
+        assertThat(isHasPermission, is(false));
     }
 
     @Test
@@ -478,11 +477,11 @@ public class GroupAttributeServiceTest {
 
         boolean isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, LISTSERV);
 
-        assertEquals(false, isGroupingHasListserv);
+        assertThat(isGroupingHasListserv, is(false));
 
         isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_3_PATH, LISTSERV);
 
-        assertEquals(true, isGroupingHasListserv);
+        assertThat(isGroupingHasListserv,is(true));
     }
 
     @Test
@@ -514,7 +513,7 @@ public class GroupAttributeServiceTest {
             groupingsServiceResult = groupAttributeService
                     .updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Testing with admin
