@@ -31,8 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
@@ -175,7 +174,7 @@ public class TestGroupingAssignmentService {
             groupingAssignmentService.adminLists(usernames[0]);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //todo What about with admin???
@@ -199,7 +198,7 @@ public class TestGroupingAssignmentService {
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
         String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        assertEquals(dateStr, assignedValue);
+        assertThat(assignedValue, is(dateStr));
     }
 
     @Test
@@ -209,12 +208,12 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
 
-        assertEquals(grouping.getPath(), GROUPING);
+        assertThat(GROUPING, is(grouping.getPath()));
 
         // Testing for garbage uuid basis bug fix
         // List<String> list = grouping.getBasis().getUuids();
@@ -279,7 +278,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
     }
 

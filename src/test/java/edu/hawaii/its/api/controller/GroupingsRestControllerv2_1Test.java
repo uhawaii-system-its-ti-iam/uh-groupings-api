@@ -34,8 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -804,7 +805,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals("University of Hawaii Groupings", result.getResponse().getContentAsString());
+        assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
     }
 
     @Test
