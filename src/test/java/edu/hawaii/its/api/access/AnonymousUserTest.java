@@ -3,7 +3,9 @@ package edu.hawaii.its.api.access;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -19,11 +21,11 @@ public class AnonymousUserTest {
     @Test
     public void testConstructions() {
         assertNotNull(user);
-        assertEquals("anonymous", user.getUsername());
-        assertEquals("anonymous", user.getUid());
-        assertEquals(null, user.getUhUuid());
-        assertEquals("", user.getPassword());
-        assertEquals(1, user.getAuthorities().size());
+        assertThat(user.getUsername(), is("anonymous"));
+        assertThat(user.getUid(), is("anonymous"));
+        assertThat(user.getUhUuid(), equalTo((Class<Object>) null));
+        assertThat(user.getPassword(), is(""));
+        assertThat(user.getAuthorities().size(), is(1));
         assertTrue(user.isRole(Role.ANONYMOUS));
     }
 }
