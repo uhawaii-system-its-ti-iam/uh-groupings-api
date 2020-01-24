@@ -24,13 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -153,7 +152,7 @@ public class TestGroupAttributeService {
             groupAttributeService.getAllSyncDestinations(username[5], GROUPING);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
     }
     
@@ -194,7 +193,7 @@ public class TestGroupAttributeService {
         }
         attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertEquals(lastModTime, lastModTime2);
+        assertThat(lastModTime2, is(lastModTime));
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING,LISTSERV));
@@ -220,13 +219,13 @@ public class TestGroupAttributeService {
         }
         attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime4 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertEquals(lastModTime3, lastModTime4);
+        assertThat(lastModTime4, is(lastModTime3));
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,true);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
@@ -234,7 +233,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,false);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
     }
@@ -284,7 +283,7 @@ public class TestGroupAttributeService {
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], true);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
@@ -297,7 +296,7 @@ public class TestGroupAttributeService {
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], false);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
@@ -347,7 +346,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], true);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
 
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
@@ -361,7 +360,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], false);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
 
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
@@ -386,7 +385,7 @@ public class TestGroupAttributeService {
         try {
             groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
 
         //Testing with admin

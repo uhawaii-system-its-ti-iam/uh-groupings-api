@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 
@@ -177,7 +178,7 @@ public class TestMemberAttributeService {
         try {
             memberAttributeService.assignOwnership(GROUPING, usernames[1], usernames[1]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
 
@@ -205,7 +206,7 @@ public class TestMemberAttributeService {
         try {
             memberAttributeService.removeOwnership(GROUPING, usernames[2], usernames[1]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
@@ -431,7 +432,7 @@ public class TestMemberAttributeService {
 
         WsGetMembershipsResults results = helperService.membershipsResults(usernames[1], GROUPING_INCLUDE);
         String membershipID = helperService.extractFirstMembershipID(results);
-        assertEquals(0, memberAttributeService.getMembershipAttributes(type, uuid, membershipID).length);
+        assertThat(memberAttributeService.getMembershipAttributes(type, uuid, membershipID).length, is(0));
 
         membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[1]);
 

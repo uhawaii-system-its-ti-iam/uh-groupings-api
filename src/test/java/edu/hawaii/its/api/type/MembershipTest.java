@@ -6,9 +6,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 public class MembershipTest {
     Person membershipHolder = new Person("Membership Holder", "12345", "mholder");
@@ -37,19 +38,19 @@ public class MembershipTest {
     @Test
     public void idTest(){
         membership.setIdentifier(newId);
-        assertEquals(newId, membership.getIdentifier());
+        assertThat(membership.getIdentifier(), is(newId));
     }
 
     @Test
     public void PersonTest(){
         membership.setPerson(membershipHolder);
-        assertEquals(membershipHolder, membership.getPerson());
+        assertThat(membership.getPerson(), is(membershipHolder));
     }
 
     @Test
     public void GroupTest(){
         membership.setGroup(group);
-        assertEquals(group, membership.getGroup());
+        assertThat(membership.getGroup(), is(group));
     }
 
     @Test
