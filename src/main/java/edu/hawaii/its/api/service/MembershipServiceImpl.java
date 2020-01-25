@@ -243,55 +243,11 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
             List<String> usersToAdd) {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-
-        if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), ownerUsername)
-                || memberAttributeService.isSuperuser(ownerUsername)) {
-            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-            String composite = helperService.parentGroupingPath(groupPath);
-
-            String group = "";
-            String fgroup = "";
-
-            if (groupPath.endsWith(INCLUDE)) {
-                group = composite + INCLUDE;
-                fgroup = composite + EXCLUDE;
-            } else if (groupPath.endsWith(EXCLUDE)) {
-                group = composite + EXCLUDE;
-                fgroup = composite + INCLUDE;
-            } else if (groupPath.endsWith(OWNERS)) {
-                group = composite + OWNERS;
-            }
-            WsDeleteMemberResults deleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(fgroup, user, usersToAdd);
-            WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(group, user, usersToAdd);
-            gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, "Add to " + group));
-            gsrList.add(helperService.makeGroupingsServiceResult(deleteMemberResults, "Delete from " + fgroup));
-
-        } else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        List<GroupingsServiceResult> gsrs = new ArrayList<>();
+        for (String userToAdd : usersToAdd) {
+            gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
         }
-        /*
-        logger.info(
-                "addGroupMembersByUsername; user: " + ownerUsername + "; group: " + groupPath + "; usersToAddUsername: "
-                        + usernamesToAdd + ";");
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        for (String userToAdd : usernamesToAdd) {
-            try {
-                Integer.parseInt(userToAdd);
-                gsrList.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
-            } catch (NumberFormatException ne) {
-                try {
-                    gsrList.addAll(addGroupMemberByUsername(ownerUsername, groupPath, userToAdd));
-                } catch (GcWebServiceError e) {
-
-                }
-            }
-        }
-        return gsrList;
-       */
-        return gsrList;
-
+        return gsrs;
     }
 
     //finds a user by a username and adds that user to the group
@@ -571,9 +527,6 @@ public class MembershipServiceImpl implements MembershipService {
                             personToAdd);
 
                     isExcludeUpdated = true;
-
-                    gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-                            "delete " + personToAdd.toString() + " from " + exclude));
                 }
                 //check to see if personToAdd is already in include
                 if (!memberAttributeService.isMember(include, personToAdd)) {
@@ -581,12 +534,9 @@ public class MembershipServiceImpl implements MembershipService {
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(include, user, personToAdd);
 
                     isIncludeUpdated = true;
-
-                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
-                } else {
-                    //They are already in the group, so just return SUCCESS
-                    gsrList.add(helperService.makeGroupingsServiceResult(
-                            SUCCESS + ": " + personToAdd.toString() + " was already in " + groupPath, action));
+                    personToAdd.setAttributes(
+                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
                 }
             }
 
@@ -600,9 +550,6 @@ public class MembershipServiceImpl implements MembershipService {
                             personToAdd);
 
                     isIncludeUpdated = true;
-
-                    gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-                            "delete " + personToAdd.toString() + " from " + include));
                 }
                 //check to see if userToAdd is already in exclude
                 if (!memberAttributeService.isMember(exclude, personToAdd)) {
@@ -610,13 +557,11 @@ public class MembershipServiceImpl implements MembershipService {
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
                     isExcludeUpdated = true;
+                    personToAdd.setAttributes(
+                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
 
-                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
                 }
-                //They are already in the group, so just return SUCCESS
-                gsrList.add(helperService.makeGroupingsServiceResult(
-                        SUCCESS + ": " + personToAdd.toString() + " was already in " + groupPath, action));
-
             }
             //if owners check to see if the user is already in owners
             else if (groupPath.endsWith(OWNERS)) {
