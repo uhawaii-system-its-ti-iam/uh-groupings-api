@@ -361,7 +361,16 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsOptedTest() {
-        //todo
+        List<String> groupings = new ArrayList<>();
+
+        groupings.add(GROUPING_INCLUDE);
+
+        membershipService.addGroupMember(usernames[0], GROUPING_INCLUDE, usernames[0]);
+        membershipService.addSelfOpted(GROUPING_INCLUDE , usernames[0]);
+
+        List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
+        assertTrue(optedGroups.size() == 1);
+
     }
 
     @Test
