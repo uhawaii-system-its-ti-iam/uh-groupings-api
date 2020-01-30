@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.11.RELEASE</version>
+        <version>2.2.3.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,7 +23,7 @@
         <junit.version>4.12</junit.version>
         <commons-dbcp-version>2.1.1</commons-dbcp-version>
         <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
-        <hibernate.version>5.2.3.Final</hibernate.version>
+        <hibernate.version>5.4.3.Final</hibernate.version>
         <h2.version>1.4.198</h2.version>
         <org.jasig.cas.client-version>3.6.0</org.jasig.cas.client-version>
 
@@ -198,7 +198,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>4.6</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.swagger2markup</groupId>
@@ -347,7 +347,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.11.RELEASE</version>
+                <version>2.2.3.RELEASE</version>
                 <configuration>
                     <profiles>
                         <profile>localhost</profile>
