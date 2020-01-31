@@ -979,30 +979,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGetMembershipsResults;
     }
 
-    public WsGetMembershipsResults makeWsGetMembershipsResultsFast(List<String> groupNames,
-                                                               WsSubjectLookup lookup) {
-
-        Person person = personRepository.findByUsername(lookup.getSubjectIdentifier());
-        Group group = groupRepository.findByPath(groupNames.get(0));
-        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
-
-        WsGetMembershipsResults wsGetMembershipsResults = new WsGetMembershipsResults();
-        WsResultMeta wsResultMeta = new WsResultMeta();
-        wsResultMeta.setResultCode(FAILURE);
-        WsMembership[] wsMemberships = new WsMembership[1];
-        WsMembership wsMembership = new WsMembership();
-
-        if (membership != null) {
-            wsMembership.setMembershipId(membership.getIdentifier());
-            wsResultMeta.setResultCode(SUCCESS);
-        }
-
-        wsMemberships[0] = wsMembership;
-        wsGetMembershipsResults.setWsMemberships(wsMemberships);
-
-        return wsGetMembershipsResults;
-    }
-
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
