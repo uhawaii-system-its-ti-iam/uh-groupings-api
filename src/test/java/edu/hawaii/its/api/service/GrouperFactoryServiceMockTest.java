@@ -182,6 +182,12 @@ public class GrouperFactoryServiceMockTest {
 
     //todo
     @Test
+    public void makeWsGetAllMembershipsResults(){
+
+    }
+
+    //todo
+    @Test
     public void makeWsGetMembersResults() {
     }
 
