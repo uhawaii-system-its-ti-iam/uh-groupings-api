@@ -979,6 +979,11 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGetMembershipsResults;
     }
 
+    @Override public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupName,
+            List<WsSubjectLookup> lookup) {
+        return null;
+    }
+
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
