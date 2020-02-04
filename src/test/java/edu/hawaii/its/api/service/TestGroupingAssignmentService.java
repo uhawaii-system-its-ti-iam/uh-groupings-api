@@ -361,37 +361,37 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsOptedTest() {
-        //Create groupings list, then add 3 test groupings to the list
+        // Create groupings list, then add 3 test groupings to the list.
         List<String> groupings = new ArrayList<>();
         groupings.add(GROUPING_INCLUDE);
         groupings.add(GROUPING_STORE_EMPTY_INCLUDE);
         groupings.add(GROUPING_TRUE_EMPTY_INCLUDE);
 
-        //add user to individual group then set then assign the self opted attribute to user
+        // Add user to individual group then set then assign the self opted attribute to user.
         membershipService.addGroupMember(usernames[0], GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
         membershipService.addSelfOpted(GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
 
-        //add user to individual group then set then assign the self opted attribute to user
+        // Add user to individual group then set then assign the self opted attribute to user.
         membershipService.addGroupMember(usernames[0], GROUPING_INCLUDE, usernames[0]);
         membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[0]);
 
-        //add user to individual group then set then assign self opted attribute to user
+        // Add user to individual group then set then assign self opted attribute to user.
         membershipService.addGroupMember(usernames[0], GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
         membershipService.addSelfOpted(GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
 
-        //call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings
+        // Call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings.
         List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
 
-        //returned opted groups should be 3
+        // Returned opted groups, should be 3.
         assertTrue(optedGroups.size() == 3);
 
-        //Opt out one of the groups
+        // Opt out one of the groups.
         membershipService.optOut(usernames[0],GROUPING);
 
-        //call groupingsOpted once more to get refreshed list of opted groups
+        // Call groupingsOpted once more to get refreshed list of opted groups.
         optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
 
-        //amount of opted groups return should be 1 less
+        // Amount of opted groups return should be 1 less.
         assertTrue(optedGroups.size() == 2);
     }
 

@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 
@@ -691,10 +692,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .execute();
     }
 
-    //method takes in a list of group names and retrieves all membership results then returns them
-    public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames,
-                                                               List<WsSubjectLookup> lookups) {
-
+    @Override public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames, List<WsSubjectLookup> lookups) {
         List<WsGetMembershipsResults> memberResults = new ArrayList<WsGetMembershipsResults>();
         for(int i = 0; i < groupNames.size();i++){
             memberResults.add(new GcGetMemberships()
@@ -704,6 +702,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         }
         return memberResults;
     }
+
 
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
