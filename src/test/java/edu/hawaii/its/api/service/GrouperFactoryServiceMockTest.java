@@ -4,6 +4,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.Dates;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -178,12 +179,7 @@ public class GrouperFactoryServiceMockTest {
     //todo
     @Test
     public void makeWsGetMembershipsResults() {
-    }
-
-    //todo
-    @Test
-    public void makeWsGetAllMembershipsResults(){
-
+    
     }
 
     //todo

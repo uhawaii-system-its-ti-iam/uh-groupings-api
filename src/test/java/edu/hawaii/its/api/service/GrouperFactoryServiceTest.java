@@ -150,6 +150,9 @@ public class GrouperFactoryServiceTest {
     @Autowired
     private DatabaseSetupService databaseSetupService;
 
+    @Autowired
+    private GrouperFactoryServiceImpl grouperFS = new GrouperFactoryServiceImpl();
+
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
@@ -472,6 +475,19 @@ public class GrouperFactoryServiceTest {
             iae.printStackTrace();
         }
 
+    }
+    @Test
+    public void makeWsGetMembershipsResultsTest() {
+        String groupName = "";
+        WsSubjectLookup lookup = new WsSubjectLookup();
+        WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(groupName, lookup);
+    }
+
+    @Test
+    public void makeWsGetAllMembershipsResultsTest() {
+            List<String> groupNames = new ArrayList<String>();
+            List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
+            List<WsGetMembershipsResults> result = grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
     }
 
     @Test
