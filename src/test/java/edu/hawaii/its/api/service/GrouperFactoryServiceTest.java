@@ -130,6 +130,9 @@ public class GrouperFactoryServiceTest {
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
     @Autowired
+    private GrouperFactoryService grouperFS;
+
+    @Autowired
     private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
 
     @Autowired
@@ -149,9 +152,6 @@ public class GrouperFactoryServiceTest {
 
     @Autowired
     private DatabaseSetupService databaseSetupService;
-
-    @Autowired
-    private GrouperFactoryServiceImpl grouperFS = new GrouperFactoryServiceImpl();
 
     @Before
     public void setup() {
@@ -478,16 +478,26 @@ public class GrouperFactoryServiceTest {
     }
     @Test
     public void makeWsGetMembershipsResultsTest() {
-        String groupName = "";
-        WsSubjectLookup lookup = new WsSubjectLookup();
-        WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(groupName, lookup);
+        WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+
+        assertTrue(result != null);
     }
 
     @Test
     public void makeWsGetAllMembershipsResultsTest() {
-            List<String> groupNames = new ArrayList<String>();
-            List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
-            List<WsGetMembershipsResults> result = grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
+        List<String> groupNames = new ArrayList<String>();
+        groupNames.add(GROUPING_0_PATH);
+        groupNames.add(GROUPING_1_PATH);
+        groupNames.add(GROUPING_2_PATH);
+
+        List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(1).getUsername()));
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(2).getUsername()));
+
+        List<WsGetMembershipsResults> result = grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
+
+        assertTrue(result != null);
     }
 
     @Test

@@ -6,6 +6,7 @@ import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.*;
 
+import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -979,9 +980,28 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         return wsGetMembershipsResults;
     }
 
-    @Override public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupName,
-            List<WsSubjectLookup> lookup) {
-        return null;
+    @Override
+    public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames,
+            List<WsSubjectLookup> lookups) {
+        Person person = personRepository.findByUsername(lookups.getSubjectIdentifier());
+        Group group = groupRepository.findByPath(groupNames);
+        Membership membership = membershipRepository.findByPersonAndGroup(person, group);
+
+        WsGetMembershipsResults wsGetMembershipsResults = new WsGetMembershipsResults();
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(FAILURE);
+        WsMembership[] wsMemberships = new WsMembership[1];
+        WsMembership wsMembership = new WsMembership();
+
+        if (membership != null) {
+            wsMembership.setMembershipId(membership.getIdentifier());
+            wsResultMeta.setResultCode(SUCCESS);
+        }
+
+        wsMemberships[0] = wsMembership;
+        wsGetMembershipsResults.setWsMemberships(wsMemberships);
+
+        return wsGetMembershipsResults;
     }
 
     @Override
