@@ -479,18 +479,17 @@ public class GrouperFactoryServiceTest {
     @Test
     public void makeWsGetMembershipsResultsTest() {
         WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
-
         assertTrue(result != null);
     }
 
     @Test
     public void makeWsGetAllMembershipsResultsTest() {
-        List<String> groupNames = new ArrayList<String>();
+        List<String> groupNames = new ArrayList<>();
         groupNames.add(GROUPING_0_PATH);
         groupNames.add(GROUPING_1_PATH);
         groupNames.add(GROUPING_2_PATH);
 
-        List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
+        List<WsSubjectLookup> lookups = new ArrayList<>();
         lookups.add(gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
         lookups.add(gfsl.makeWsSubjectLookup(users.get(1).getUsername()));
         lookups.add(gfsl.makeWsSubjectLookup(users.get(2).getUsername()));
