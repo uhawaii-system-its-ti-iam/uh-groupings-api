@@ -6,6 +6,7 @@ import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.*;
 
+import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -976,6 +977,44 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         wsMemberships[0] = wsMembership;
         wsGetMembershipsResults.setWsMemberships(wsMemberships);
 
+        return wsGetMembershipsResults;
+    }
+
+    @Override
+    public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames,
+            List<WsSubjectLookup> lookups) {
+
+        List<Person> person = new ArrayList<>();
+        List<Group> group = new ArrayList<>();
+        List<Membership> membership = new ArrayList<>();
+
+        for(int i = 0; i < groupNames.size(); i++) {
+            person.add(personRepository.findByUsername(lookups.get(i).getSubjectIdentifier()));
+            group.add(groupRepository.findByPath(groupNames.get(i)));
+            membership.add(membershipRepository.findByPersonAndGroup(person.get(i), group.get(i)));
+        }
+
+        List<WsGetMembershipsResults> wsGetMembershipsResults = new ArrayList<WsGetMembershipsResults>();
+
+        for(int i = 0; i < groupNames.size(); i++) {
+            WsGetMembershipsResults wsGetMembershipsResultsDummy = new WsGetMembershipsResults();
+            wsGetMembershipsResults.add(wsGetMembershipsResultsDummy);
+        }
+
+        WsResultMeta wsResultMeta = new WsResultMeta();
+        wsResultMeta.setResultCode(FAILURE);
+
+        WsMembership[] wsMemberships = new WsMembership[groupNames.size()];
+        WsMembership wsMembership = new WsMembership();
+
+        for(int i = 0; i < membership.size(); i++){
+            if (membership.get(i) != null) {
+                wsMembership.setMembershipId(membership.get(i).getIdentifier());
+                wsResultMeta.setResultCode(SUCCESS);
+            }
+            wsMemberships[i] = wsMembership;
+            (wsGetMembershipsResults.get(i)).setWsMemberships(wsMemberships);
+        }
         return wsGetMembershipsResults;
     }
 

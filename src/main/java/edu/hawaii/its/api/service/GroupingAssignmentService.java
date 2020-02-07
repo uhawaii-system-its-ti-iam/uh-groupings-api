@@ -40,6 +40,8 @@ public interface GroupingAssignmentService {
     //not to be included in the REST controller
     Person makePerson(WsSubject subject, String[] attributeNames);
 
+    List<Grouping> groupingsOpted(String includeOrrExclude, String username, List<String> groupPaths);
+
     List<String> extractGroupPaths(List<WsGroup> groups);
 
     Map<String, Group> makeGroups(WsGetMembersResults membersResults);

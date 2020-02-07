@@ -3,6 +3,8 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Grouping;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +70,9 @@ public class TestHelperService {
     private String[] username;
 
     @Autowired
+    private GrouperFactoryService grouperFS;
+
+    @Autowired
     GroupAttributeService groupAttributeService;
 
     @Autowired
@@ -115,6 +120,28 @@ public class TestHelperService {
     @Test
     public void membershipResultsTest() {
         // username is in group
+        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[1]);
+        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[2]);
+        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[3]);
+        List<String> groupNames = new ArrayList<String>();
+        groupNames.add(username[1]);
+        groupNames.add(username[2]);
+        groupNames.add(username[3]);
+
+        WsSubjectLookup lookup1 = grouperFS.makeWsSubjectLookup(username[1]);
+        WsSubjectLookup lookup2 = grouperFS.makeWsSubjectLookup(username[2]);
+        WsSubjectLookup lookup3 = grouperFS.makeWsSubjectLookup(username[3]);
+        List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
+        lookups.add(lookup1);
+        lookups.add(lookup2);
+        lookups.add(lookup3);
+
+        grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
+
+
+
+
+
         membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[1]);
         WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING);
         assertFalse(results.getWsMemberships().equals(null));

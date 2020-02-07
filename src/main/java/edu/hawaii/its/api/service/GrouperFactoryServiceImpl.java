@@ -48,9 +48,11 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -690,6 +692,19 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                 .addWsSubjectLookup(lookup)
                 .execute();
     }
+
+    @Override
+    public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames, List<WsSubjectLookup> lookups) {
+        List<WsGetMembershipsResults> memberResults = new ArrayList<>();
+        for(int i = 0; i < groupNames.size(); i++){
+            memberResults.add(new GcGetMemberships()
+                    .addGroupName(groupNames.get(i))
+                    .addWsSubjectLookup(lookups.get(i))
+                    .execute());
+        }
+        return memberResults;
+    }
+
 
     @Override
     public WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
