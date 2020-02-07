@@ -695,8 +695,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     @Override
     public List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupNames, List<WsSubjectLookup> lookups) {
-        List<WsGetMembershipsResults> memberResults = new ArrayList<WsGetMembershipsResults>();
-
+        List<WsGetMembershipsResults> memberResults = new ArrayList<>();
         for(int i = 0; i < groupNames.size(); i++){
             memberResults.add(new GcGetMemberships()
                     .addGroupName(groupNames.get(i))
