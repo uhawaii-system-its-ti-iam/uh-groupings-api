@@ -245,7 +245,11 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
         for (String userToAdd : usersToAdd) {
-            gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
+            try {
+                gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
+            } catch (GcWebServiceError e) {
+
+            }
         }
         return gsrs;
     }
@@ -494,7 +498,20 @@ public class MembershipServiceImpl implements MembershipService {
                 FAILURE + ", " + username + " is not a member of " + groupPath,
                 action);
     }
+    /*
+public List<GroupingsServiceResult> add_Member_Helper(String username, String groupPath, Person personToAdd) {
+    logger.info(
+            "addMemberHelper; user: " + username + "; group: " + groupPath + "; personToAdd: " + personToAdd + ";");
+    List<GroupingsServiceResult> gsrList = new ArrayList<>();
 
+    if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
+            || memberAttributeService.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
+            .getUsername().equals(username))) {
+        String pathToAdd;
+        String pathToDelete;
+    }
+    }
+     */
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
         logger.info(
