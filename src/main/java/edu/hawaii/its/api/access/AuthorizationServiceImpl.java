@@ -21,8 +21,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private Map<String, List<Role>> userMap = new HashMap<>();
 
-    //HELLO
-
     @Autowired
     private MemberAttributeService memberAttributeService;
 
