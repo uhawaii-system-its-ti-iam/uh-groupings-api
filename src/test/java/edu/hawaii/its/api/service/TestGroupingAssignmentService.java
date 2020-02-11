@@ -170,16 +170,23 @@ public class TestGroupingAssignmentService {
     @Test
     public void adminListsTest() {
         try {
-            // try with non-admin
+            // Try with non-admin.
             groupingAssignmentService.adminLists(usernames[0]);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //todo What about with admin???
-        AdminListsHolder infoAdmin = groupingAssignmentService.adminLists(ADMIN);
-        assertNotNull(infoAdmin);
+        try {
+            // Try with admin.
+            AdminListsHolder adminList = groupingAssignmentService.adminLists(ADMIN);
+            Group adminGroup = adminList.getAdminGroup();
+
+            // Assert that admins list was retrieved.
+            assertThat(adminGroup.getUsernames().size(),is(not(0)));
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+        }
     }
 
     @Test
