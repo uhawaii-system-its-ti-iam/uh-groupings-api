@@ -498,6 +498,7 @@ public class MembershipServiceImpl implements MembershipService {
                 FAILURE + ", " + username + " is not a member of " + groupPath,
                 action);
     }
+
     /*
 public List<GroupingsServiceResult> add_Member_Helper(String username, String groupPath, Person personToAdd) {
     logger.info(
