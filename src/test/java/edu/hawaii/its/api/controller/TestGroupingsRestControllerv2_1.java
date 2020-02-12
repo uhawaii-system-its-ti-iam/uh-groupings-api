@@ -238,9 +238,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Before
     public void setUp() {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[4]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[5]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[5]);
 
         mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
