@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
@@ -161,7 +162,7 @@ public class TestMembershipService {
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
         String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        assertEquals(dateStr, assignedValue);
+        assertThat(assignedValue, is(dateStr));
     }
 
     @Test
@@ -229,7 +230,7 @@ public class TestMembershipService {
             // Tests if a non admin can access users groups owned
             membershipService.listOwned(username[0], username[1]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Reset ownership
@@ -301,7 +302,7 @@ public class TestMembershipService {
         addMember = membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
 
         //the addition was successful
-        assertEquals(addMember.get(0).getResultCode(), SUCCESS);
+        assertThat(SUCCESS, is(addMember.get(0).getResultCode()));
         //username[3] is in the basis and exclude, not the composite or include
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
@@ -356,7 +357,7 @@ public class TestMembershipService {
         GroupingsServiceResult deleteMember1 =
                 membershipService.deleteGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
         //deletion was successful
-        assertEquals(deleteMember1.getResultCode(), SUCCESS);
+        assertThat(SUCCESS, is(deleteMember1.getResultCode()));
         //username[3] is no longer in the exclude
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
@@ -364,7 +365,7 @@ public class TestMembershipService {
         GroupingsServiceResult deleteMember2 =
                 membershipService.deleteGroupMember(username[0], GROUPING_INCLUDE, username[2]);
         //deletion was successful
-        assertEquals(deleteMember2.getResultCode(), SUCCESS);
+        assertThat(SUCCESS, is(deleteMember2.getResultCode()));
         //username[2] is no longer in composite or include
         assertFalse(memberAttributeService.isMember(GROUPING, username[2]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
@@ -466,7 +467,7 @@ public class TestMembershipService {
         try {
             membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Makes sure that owner is still in the group
@@ -561,7 +562,7 @@ public class TestMembershipService {
         try {
             membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Makes sure that owner is still in the group
@@ -659,7 +660,7 @@ public class TestMembershipService {
         try {
             membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Makes sure that owner is still in the group
@@ -701,7 +702,7 @@ public class TestMembershipService {
             lResults = membershipService.addGroupMember(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //checks to make sure user is not in include
@@ -718,7 +719,7 @@ public class TestMembershipService {
             lResults = membershipService.addGroupMember(username[2], GROUPING_INCLUDE, username[3]);
             assertTrue(lResults.get(0).getResultCode().startsWith(FAILURE));
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //checks to make sure user is not in include
@@ -834,7 +835,7 @@ public class TestMembershipService {
             membershipService.deleteGroupMember(username[4], GROUPING_EXCLUDE, username[3]);
 
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //checks to make sure username[3] is still a part of the exclude
@@ -944,7 +945,7 @@ public class TestMembershipService {
         try {
             membershipService.addAdmin(username[3], username[4]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //checks to see that username[4] is NOT an admin
@@ -954,7 +955,7 @@ public class TestMembershipService {
         try {
             membershipService.deleteAdmin(username[3], username[4]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
     }
 }

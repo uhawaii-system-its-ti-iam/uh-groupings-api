@@ -16,8 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +25,7 @@ import static org.junit.Assert.fail;
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserBuilderTest {
 
     @Autowired
@@ -41,9 +40,9 @@ public class UserBuilderTest {
         User user = userBuilder.make(map);
 
         // Basics.
-        assertEquals("duckart", user.getUsername());
-        assertEquals("duckart", user.getUid());
-        assertEquals("89999999", user.getUhUuid());
+        assertThat(user.getUsername(), is("duckart"));
+        assertThat(user.getUid(), is("duckart"));
+        assertThat(user.getUhUuid(), is("89999999"));
 
         // Granted Authorities.
         assertTrue(user.getAuthorities().size() > 0);
@@ -57,9 +56,9 @@ public class UserBuilderTest {
         map.put("uhUuid", "10000001");
         user = userBuilder.make(map);
 
-        assertEquals("someuser", user.getUsername());
-        assertEquals("someuser", user.getUid());
-        assertEquals("10000001", user.getUhUuid());
+        assertThat(user.getUsername(), is("someuser"));
+        assertThat(user.getUid(), is("someuser"));
+        assertThat(user.getUhUuid(), is("10000001"));
 
         assertTrue(user.getAuthorities().size() > 0);
         assertTrue(user.isRole(Role.ANONYMOUS));
@@ -77,12 +76,12 @@ public class UserBuilderTest {
         User user = userBuilder.make(map);
 
         // Basics.
-        assertEquals("jjcale", user.getUsername());
-        assertEquals("jjcale", user.getUid());
-        assertEquals("10000004", user.getUhUuid());
+        assertThat(user.getUsername(), is("jjcale"));
+        assertThat(user.getUid(), is("jjcale"));
+        assertThat(user.getUhUuid(), is("10000004"));
 
         // Granted Authorities.
-        assertEquals(3, user.getAuthorities().size());
+        assertThat(user.getAuthorities().size(), is(3));
         assertTrue(user.isRole(Role.ANONYMOUS));
         assertTrue(user.isRole(Role.UH));
         assertTrue(user.isRole(Role.EMPLOYEE));
@@ -102,12 +101,12 @@ public class UserBuilderTest {
         User user = userBuilder.make(map);
 
         // Basics.
-        assertEquals("aaaaaaa", user.getUsername());
-        assertEquals("aaaaaaa", user.getUid());
-        assertEquals("10000003", user.getUhUuid());
+        assertThat(user.getUsername(), is("aaaaaaa"));
+        assertThat(user.getUid(), is("aaaaaaa"));
+        assertThat(user.getUhUuid(), is("10000003"));
 
         // Granted Authorities.
-        assertEquals(4, user.getAuthorities().size());
+        assertThat(user.getAuthorities().size(), is(4));
         assertTrue(user.isRole(Role.ANONYMOUS));
         assertTrue(user.isRole(Role.UH));
         assertTrue(user.isRole(Role.EMPLOYEE));
@@ -123,12 +122,12 @@ public class UserBuilderTest {
         User user = userBuilder.make(map);
 
         // Basics.
-        assertEquals("nobody", user.getUsername());
-        assertEquals("nobody", user.getUid());
-        assertEquals("10000009", user.getUhUuid());
+        assertThat(user.getUsername(), is("nobody"));
+        assertThat(user.getUid(), is("nobody"));
+        assertThat(user.getUhUuid(), is("10000009"));
 
         // Granted Authorities.
-        assertEquals(2, user.getAuthorities().size());
+        assertThat(user.getAuthorities().size(), is(2));
         assertTrue(user.isRole(Role.ANONYMOUS));
         assertTrue(user.isRole(Role.UH));
         assertFalse(user.isRole(Role.EMPLOYEE));
@@ -147,7 +146,7 @@ public class UserBuilderTest {
             userBuilder.make(map);
             fail("Should not reach here.");
         } catch (Exception e) {
-            assertEquals(e.getClass(), UsernameNotFoundException.class);
+            assertThat(e.getClass(), equalTo(UsernameNotFoundException.class));
             assertThat(e.getMessage(), containsString("uid is empty"));
         }
     }
@@ -162,7 +161,7 @@ public class UserBuilderTest {
             userBuilder.make(map);
             fail("Should not reach here.");
         } catch (Exception e) {
-            assertEquals(e.getClass(), UsernameNotFoundException.class);
+            assertThat(e.getClass(), equalTo(UsernameNotFoundException.class));
             assertThat(e.getMessage(), containsString("uid is empty"));
         }
     }

@@ -29,14 +29,15 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class HelperServiceTest {
 
     @Value("${groupings.api.grouping_admins}")
@@ -135,13 +136,13 @@ public class HelperServiceTest {
 
     @Test
     public void parentGroupingPathTest() {
-        assertEquals(GROUPING_2_PATH, helperService.parentGroupingPath(GROUPING_2_BASIS_PATH));
-        assertEquals(GROUPING_2_PATH, helperService.parentGroupingPath(GROUPING_2_PATH + BASIS_PLUS_INCLUDE));
-        assertEquals(GROUPING_2_PATH, helperService.parentGroupingPath(GROUPING_2_EXCLUDE_PATH));
-        assertEquals(GROUPING_2_PATH, helperService.parentGroupingPath(GROUPING_2_INCLUDE_PATH));
-        assertEquals(GROUPING_2_PATH, helperService.parentGroupingPath(GROUPING_2_OWNERS_PATH));
-        assertEquals(GROUPING_APPS, helperService.parentGroupingPath(GROUPING_APPS));
-        assertEquals("", helperService.parentGroupingPath(null));
+        assertThat(helperService.parentGroupingPath(GROUPING_2_BASIS_PATH), is(GROUPING_2_PATH));
+        assertThat(helperService.parentGroupingPath(GROUPING_2_PATH + BASIS_PLUS_INCLUDE), is(GROUPING_2_PATH));
+        assertThat(helperService.parentGroupingPath(GROUPING_2_EXCLUDE_PATH), is(GROUPING_2_PATH));
+        assertThat(helperService.parentGroupingPath(GROUPING_2_INCLUDE_PATH), is(GROUPING_2_PATH));
+        assertThat(helperService.parentGroupingPath(GROUPING_2_OWNERS_PATH), is(GROUPING_2_PATH));
+        assertThat(helperService.parentGroupingPath(GROUPING_APPS), is(GROUPING_APPS));
+        assertThat(helperService.parentGroupingPath(null), is(""));
     }
 
     /////////////////////////////////////////////////////
@@ -152,7 +153,7 @@ public class HelperServiceTest {
     public void toStringTest() {
         String helperString = helperService.toString();
         System.out.println(helperString);
-        assertEquals(helperString, "HelperServiceImpl [SETTINGS=uh-settings]");
+        assertThat("HelperServiceImpl [SETTINGS=uh-settings]", is(helperString));
     }
 
     @Test
@@ -167,10 +168,10 @@ public class HelperServiceTest {
                 grouping };
 
         for (String g : groups) {
-            assertEquals(grouping, helperService.parentGroupingPath(g));
+            assertThat(helperService.parentGroupingPath(g), is(grouping));
         }
 
-        assertEquals("", helperService.parentGroupingPath(null));
+        assertThat(helperService.parentGroupingPath(null), is(""));
     }
 
     @Test
@@ -183,7 +184,7 @@ public class HelperServiceTest {
         }
         mr.setWsMemberships(memberships);
 
-        assertEquals("membershipID_0", helperService.extractFirstMembershipID(mr));
+        assertThat(helperService.extractFirstMembershipID(mr), is("membershipID_0"));
     }
 
     @Test
@@ -200,8 +201,8 @@ public class HelperServiceTest {
         List<Grouping> groupings = helperService.makeGroupings(groupPaths);
 
         for (int i = 5; i < 10; i++) {
-            assertEquals("path:grouping_" + i, groupings.get(i).getPath());
-            assertEquals("grouping_" + i, groupings.get(i).getName());
+            assertThat(groupings.get(i).getPath(), is("path:grouping_" + i));
+            assertThat(groupings.get(i).getName(), is("grouping_" + i));
         }
     }
 
@@ -215,16 +216,16 @@ public class HelperServiceTest {
         gr.setResultMetadata(resultMeta);
 
         GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(gr, action);
-        assertEquals(action, gsr.getAction());
-        assertEquals(resultCode, gsr.getResultCode());
+        assertThat(gsr.getAction(), is(action));
+        assertThat(gsr.getResultCode(), is(resultCode));
 
         resultMeta.setResultCode(FAILURE);
         gr.setResultMetadata(resultMeta);
 
         try {
             gsr = helperService.makeGroupingsServiceResult(gr, action);
-            assertEquals(action, gsr.getAction());
-            assertEquals(resultCode, gsr.getResultCode());
+            assertThat(gsr.getAction(), is(action));
+            assertThat(gsr.getResultCode(), is(resultCode));
         } catch (GroupingsServiceResultException gsre) {
             gsre.printStackTrace();
         }
@@ -235,33 +236,33 @@ public class HelperServiceTest {
     public void extractFirstMembershipIDTest() {
         WsGetMembershipsResults membershipsResults = null;
         String firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "");
+        assertThat("", is(firstMembershipId));
 
         membershipsResults = new WsGetMembershipsResults();
         firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "");
+        assertThat("", is(firstMembershipId));
 
         WsMembership[] memberships = null;
         membershipsResults.setWsMemberships(memberships);
         firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "");
+        assertThat("", is(firstMembershipId));
 
         memberships = new WsMembership[] { null };
         membershipsResults.setWsMemberships(memberships);
         firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "");
+        assertThat("", is(firstMembershipId));
 
         WsMembership membership = new WsMembership();
         memberships = new WsMembership[] { membership };
         membershipsResults.setWsMemberships(memberships);
         firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "");
+        assertThat("", is(firstMembershipId));
 
         membership.setMembershipId("1234");
         memberships = new WsMembership[] { membership };
         membershipsResults.setWsMemberships(memberships);
         firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertEquals(firstMembershipId, "1234");
+        assertThat("1234", is(firstMembershipId));
     }
 }
 

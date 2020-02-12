@@ -25,7 +25,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +39,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GroupAttributeServiceTest {
 
     @Value("${groupings.api.grouping_admins}")
@@ -143,7 +144,7 @@ public class GroupAttributeServiceTest {
                     .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isSyncDestinationOn(LISTSERV));
@@ -159,7 +160,7 @@ public class GroupAttributeServiceTest {
                     .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isSyncDestinationOn(LISTSERV));
@@ -180,7 +181,7 @@ public class GroupAttributeServiceTest {
                     .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertTrue(grouping.isSyncDestinationOn(LISTSERV));
@@ -206,7 +207,7 @@ public class GroupAttributeServiceTest {
                     .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
         assertFalse(grouping.isSyncDestinationOn(LISTSERV));
@@ -249,7 +250,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
@@ -260,7 +261,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
@@ -271,7 +272,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
         assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
@@ -282,7 +283,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
         assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
@@ -296,7 +297,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOnOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
@@ -307,7 +308,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOnOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), false);
@@ -316,7 +317,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOffOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), false);
@@ -327,7 +328,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
@@ -345,19 +346,19 @@ public class GroupAttributeServiceTest {
         assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(SUCCESS));
 
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(2).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(2).getResultCode());
+        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(SUCCESS));
 
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(2).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(2).getResultCode());
+        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(), is(SUCCESS));
 
         assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(SUCCESS));
@@ -374,7 +375,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         List<GroupingsServiceResult> turnOnWhenOnOwner =
@@ -386,7 +387,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOnOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), false);
@@ -395,7 +396,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), true);
@@ -407,7 +408,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOffOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), false);
@@ -424,19 +425,19 @@ public class GroupAttributeServiceTest {
         assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(SUCCESS));
 
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnOwner.get(2).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOffWhenOnAdmin.get(2).getResultCode());
+        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(SUCCESS));
 
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffOwner.get(2).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(0).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(1).getResultCode());
-        assertEquals(SUCCESS, turnOnWhenOffAdmin.get(2).getResultCode());
+        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(1).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(),is(SUCCESS));
 
         assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(SUCCESS));
@@ -451,11 +452,11 @@ public class GroupAttributeServiceTest {
 
         boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_OUT);
 
-        assertEquals(false, isHasPermission);
+        assertThat(isHasPermission, is(false));
 
         isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, OPT_OUT);
 
-        assertEquals(true, isHasPermission);
+        assertThat(isHasPermission, is(true));
 
     }
 
@@ -464,11 +465,11 @@ public class GroupAttributeServiceTest {
 
         boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_IN);
 
-        assertEquals(true, isHasPermission);
+        assertThat(isHasPermission, is(true));
 
         isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_2_PATH, OPT_IN);
 
-        assertEquals(false, isHasPermission);
+        assertThat(isHasPermission, is(false));
     }
 
     @Test
@@ -476,11 +477,11 @@ public class GroupAttributeServiceTest {
 
         boolean isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, LISTSERV);
 
-        assertEquals(false, isGroupingHasListserv);
+        assertThat(isGroupingHasListserv, is(false));
 
         isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_3_PATH, LISTSERV);
 
-        assertEquals(true, isGroupingHasListserv);
+        assertThat(isGroupingHasListserv,is(true));
     }
 
     @Test
@@ -512,7 +513,7 @@ public class GroupAttributeServiceTest {
             groupingsServiceResult = groupAttributeService
                     .updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         //Testing with admin

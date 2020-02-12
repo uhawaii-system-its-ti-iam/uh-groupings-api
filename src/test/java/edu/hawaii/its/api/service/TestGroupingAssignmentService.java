@@ -31,8 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
@@ -171,16 +170,23 @@ public class TestGroupingAssignmentService {
     @Test
     public void adminListsTest() {
         try {
-            // try with non-admin
+            // Try with non-admin.
             groupingAssignmentService.adminLists(usernames[0]);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //todo What about with admin???
-        AdminListsHolder infoAdmin = groupingAssignmentService.adminLists(ADMIN);
-        assertNotNull(infoAdmin);
+        try {
+            // Try with admin.
+            AdminListsHolder adminList = groupingAssignmentService.adminLists(ADMIN);
+            Group adminGroup = adminList.getAdminGroup();
+
+            // Assert that admins list was retrieved.
+            assertThat(adminGroup.getUsernames().size(),is(not(0)));
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+        }
     }
 
     @Test
@@ -199,7 +205,7 @@ public class TestGroupingAssignmentService {
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
         String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        assertEquals(dateStr, assignedValue);
+        assertThat(assignedValue, is(dateStr));
     }
 
     @Test
@@ -209,12 +215,12 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
 
-        assertEquals(grouping.getPath(), GROUPING);
+        assertThat(GROUPING, is(grouping.getPath()));
 
         // Testing for garbage uuid basis bug fix
         // List<String> list = grouping.getBasis().getUuids();
@@ -279,7 +285,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
         } catch (AccessDeniedException ade) {
-            assertEquals(ade.getMessage(), INSUFFICIENT_PRIVILEGES);
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
     }
 
@@ -362,7 +368,38 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingsOptedTest() {
-        //todo
+        // Create groupings list, then add 3 test groupings to the list.
+        List<String> groupings = new ArrayList<>();
+        groupings.add(GROUPING_INCLUDE);
+        groupings.add(GROUPING_STORE_EMPTY_INCLUDE);
+        groupings.add(GROUPING_TRUE_EMPTY_INCLUDE);
+
+        // Add user to individual group then set then assign the self opted attribute to user.
+        membershipService.addGroupMember(usernames[0], GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
+        membershipService.addSelfOpted(GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
+
+        // Add user to individual group then set then assign the self opted attribute to user.
+        membershipService.addGroupMember(usernames[0], GROUPING_INCLUDE, usernames[0]);
+        membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[0]);
+
+        // Add user to individual group then set then assign self opted attribute to user.
+        membershipService.addGroupMember(usernames[0], GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
+        membershipService.addSelfOpted(GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
+
+        // Call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings.
+        List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
+
+        // Returned opted groups, should be 3.
+        assertTrue(optedGroups.size() == 3);
+
+        // Opt out one of the groups.
+        membershipService.optOut(usernames[0],GROUPING);
+
+        // Call groupingsOpted once more to get refreshed list of opted groups.
+        optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
+
+        // Amount of opted groups return should be 1 less.
+        assertTrue(optedGroups.size() == 2);
     }
 
     @Test
