@@ -133,7 +133,7 @@ public class TestMemberAttributeService {
 
         // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN_USER);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[3]);
 
         //add to include
         List<String> includeNames = new ArrayList<>();

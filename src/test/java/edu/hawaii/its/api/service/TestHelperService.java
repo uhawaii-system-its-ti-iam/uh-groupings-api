@@ -121,28 +121,6 @@ public class TestHelperService {
     public void membershipResultsTest() {
         // username is in group
         membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[1]);
-        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[2]);
-        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[3]);
-        List<String> groupNames = new ArrayList<String>();
-        groupNames.add(username[1]);
-        groupNames.add(username[2]);
-        groupNames.add(username[3]);
-
-        WsSubjectLookup lookup1 = grouperFS.makeWsSubjectLookup(username[1]);
-        WsSubjectLookup lookup2 = grouperFS.makeWsSubjectLookup(username[2]);
-        WsSubjectLookup lookup3 = grouperFS.makeWsSubjectLookup(username[3]);
-        List<WsSubjectLookup> lookups = new ArrayList<WsSubjectLookup>();
-        lookups.add(lookup1);
-        lookups.add(lookup2);
-        lookups.add(lookup3);
-
-        grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
-
-
-
-
-
-        membershipService.addGroupMember(ADMIN, GROUPING_INCLUDE, username[1]);
         WsGetMembershipsResults results = helperService.membershipsResults(username[1], GROUPING);
         assertFalse(results.getWsMemberships().equals(null));
 
