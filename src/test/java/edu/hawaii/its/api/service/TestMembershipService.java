@@ -4,11 +4,15 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +32,7 @@ import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMembershipService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -216,7 +220,6 @@ public class TestMembershipService {
     @Test
     public void listOwnedTest() {
 
-
         // Tests that when there is no groups owned, the list is empty
         assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
 
@@ -327,7 +330,7 @@ public class TestMembershipService {
 
     @Test
     public void getMembersTest() {
-        String[] groupings = {GROUPING};
+        String[] groupings = { GROUPING };
         Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
@@ -671,6 +674,7 @@ public class TestMembershipService {
     }
 
     @Test
+    @Ignore
     public void addGroupMemberTest() {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult result;
@@ -816,9 +820,9 @@ public class TestMembershipService {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
         }
 
-//        for (int i = 0; i < 6; i++) {
-//            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
-//        }
+        //        for (int i = 0; i < 6; i++) {
+        //            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
+        //        }
     }
 
     @Test
@@ -904,7 +908,6 @@ public class TestMembershipService {
     public void adminTest() {
 
         GroupingsServiceResult results;
-
 
         //checks to see that username[3] is NOT an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
