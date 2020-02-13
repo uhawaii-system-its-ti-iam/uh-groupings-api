@@ -1145,11 +1145,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Ignore
     @Test
     public void paginatedLargeGroupingTest() throws Exception {
-//        Grouping paginatedLargeGrouping = new Grouping();
-//        for (int i = 1; i <= 150; i++) {
-//            paginatedLargeGrouping = mapGrouping(GROUPING, adminUser, i, 20, "name", true);
-//        }
-
         recursionFunctionToTest(GROUPING_TIMEOUT, adminUser, 1, 20, "name", true);
     }
 
@@ -1161,6 +1156,7 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             mapGrouping(groupingPath, user, page, size, sortString, isAscending);
             recursionFunctionToTest(groupingPath, user, page + 1, size, sortString, isAscending);
+
             return;
         }
 
