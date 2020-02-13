@@ -248,6 +248,9 @@ public class MembershipServiceImpl implements MembershipService {
             try {
                 gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
             } catch (GcWebServiceError e) {
+                List<GroupingsServiceResult> temp = new ArrayList<>();
+                temp.add(new GroupingsServiceResult("FAILED", "404"));
+                gsrs.addAll(temp);
             }
         }
         return gsrs;
