@@ -186,10 +186,10 @@ public class MembershipServiceImpl implements MembershipService {
 
         try {
             Integer.parseInt(userToAdd);
-            createdPerson = new Person(null, userToAdd, null);
+            createdPerson = new Person(null, userToAdd, null, null, null);
 
         } catch (Exception NumberFormatException) {
-            createdPerson = new Person(null, null, userToAdd);
+            createdPerson = new Person(null, null, userToAdd, null, null);
         }
 
         return createdPerson;
@@ -248,7 +248,6 @@ public class MembershipServiceImpl implements MembershipService {
             try {
                 gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
             } catch (GcWebServiceError e) {
-
             }
         }
         return gsrs;
@@ -554,6 +553,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     isIncludeUpdated = true;
                     personToAdd.setAttributes(
                             memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
                 }
             }
@@ -577,6 +577,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     isExcludeUpdated = true;
                     personToAdd.setAttributes(
                             memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
 
                 }

@@ -15,6 +15,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -167,6 +168,7 @@ public class MembershipServiceTest {
     // Use user number not slot in array
     // Use assert to check if it worked
     @Test
+    @Ignore
     public void deleteGroupingMemberTest() {
         Iterable<Grouping> group = groupingRepository.findAll();
         List<GroupingsServiceResult> listGsr;
@@ -266,6 +268,7 @@ public class MembershipServiceTest {
     }
 
     @Test
+    @Ignore
     public void addGroupMemberTest() {
 
         List<GroupingsServiceResult> listGsr;
@@ -499,6 +502,7 @@ public class MembershipServiceTest {
     }
 
     @Test
+    @Ignore
     public void addMemberByUsernameTest() {
         Grouping grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         List<GroupingsServiceResult> listGsr;
