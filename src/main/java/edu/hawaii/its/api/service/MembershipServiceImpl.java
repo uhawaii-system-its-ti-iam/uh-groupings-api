@@ -264,9 +264,11 @@ public class MembershipServiceImpl implements MembershipService {
 /*
         groupingsMailService.sendSimpleMessage("gilbertz@hawaii.edu", "Test", "Lion in the Jungle");
         */
-        groupingsMailService
-                .sendAttachmentMessage("gilbertz@hawaii.edu", "Test Attachment", "Lion in the Jungle", "temp.csv",
-                        gsrs);
+
+        groupingsMailService.sendCSVMessage(groupingsMailService.getUserEmail(ownerUsername),
+                "Test Attachment",
+                "Test",
+                groupPath + "_add" + ".csv", gsrs);
 
         return gsrs;
     }
