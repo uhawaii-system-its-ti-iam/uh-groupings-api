@@ -19,9 +19,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -173,6 +176,12 @@ public class MembershipServiceImpl implements MembershipService {
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Autowired
+    private JavaMailSender javaMailSender;
+
+    @Autowired
+    private GroupingsMailService groupingsMailService;
+
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     // returns true if username is a UH id number
@@ -242,7 +251,7 @@ public class MembershipServiceImpl implements MembershipService {
     //each user to the specified group
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToAdd) {
+            List<String> usersToAdd) throws IOException, MessagingException {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
         for (String userToAdd : usersToAdd) {
             try {
@@ -250,6 +259,15 @@ public class MembershipServiceImpl implements MembershipService {
             } catch (GcWebServiceError e) {
             }
         }
+
+        groupingsMailService.setJavaMailSender(javaMailSender);
+/*
+        groupingsMailService.sendSimpleMessage("gilbertz@hawaii.edu", "Test", "Lion in the Jungle");
+        */
+        groupingsMailService
+                .sendAttachmentMessage("gilbertz@hawaii.edu", "Test Attachment", "Lion in the Jungle", "temp.csv",
+                        gsrs);
+
         return gsrs;
     }
 
