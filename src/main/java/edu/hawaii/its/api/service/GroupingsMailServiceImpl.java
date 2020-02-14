@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Create and send SMTP messages using the JavaMailSender.
+ *  Create and send SMTP messages using the JavaMailSender.
  */
 @Service("groupingsMailService")
 public class GroupingsMailServiceImpl implements GroupingsMailService {
