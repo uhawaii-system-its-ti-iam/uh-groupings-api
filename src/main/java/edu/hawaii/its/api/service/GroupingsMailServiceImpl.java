@@ -42,7 +42,7 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     @Override public void sendAttachmentMessage(String address, String subject, String text, String path,
             List<GroupingsServiceResult> res)
             throws MessagingException, IOException {
-        File f = new File(path);
+        File file = new File(path);
 
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
@@ -52,9 +52,10 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(text);
 
-            FileSystemResource fileSystemResource = this.toCsv(this.toCsvObj(res), f);
-            mimeMessageHelper.addAttachment(f.getPath(), fileSystemResource);
+            FileSystemResource fileSystemResource = this.toCsv(this.toCsvObj(res), file);
+            mimeMessageHelper.addAttachment(file.getPath(), fileSystemResource);
             javaMailSender.send(mimeMessage);
+            file.delete();
 
         } catch (MessagingException me) {
             me.printStackTrace();
@@ -77,8 +78,8 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
 
         lines.add(new String[] { "username", "uuid", "firstName", "lastName", "name" });
 
-            for (GroupingsServiceResult item : res) {
-                lines.add(item.getPerson().toCsv());
+        for (GroupingsServiceResult item : res) {
+            lines.add(item.getPerson().toCsv());
         }
         return lines;
     }
