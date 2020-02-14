@@ -214,7 +214,9 @@ public class MembershipServiceImpl implements MembershipService {
         return addGroupingMemberHelper(username, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
-    // Finds a user by either UH username or UH ID number and deletes them from the Grouping.
+    /**
+     * Delete a member of groupingPath with respect to uid or uhuuid as ownerUsername
+     */
     @Override
     public List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
             String userIdentifier) {
@@ -228,8 +230,9 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteGroupingMemberHelper(ownerUsername, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
-    // Takes an admin and user and returns list of groups that a user may own. An empty list will be returned if no
-    // groups are owned.
+    /**
+     * Get a list of groupsOwned by user as admin
+     */
     @Override
     public List<String> listOwned(String admin, String user) {
         List<String> groupsOwned = new ArrayList<>();
@@ -247,11 +250,12 @@ public class MembershipServiceImpl implements MembershipService {
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
-    //Takes the owner of the group, the path to the group, and a list of users to add. Goes through the list and adds
-    //each user to the specified group
+    /**
+     * Add a list of multiple usersToAdd to groupPath as ownerUsername
+     */
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToAdd) throws IOException, MessagingException {
+            List<String> usersToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
         for (String userToAdd : usersToAdd) {
             try {
@@ -260,20 +264,20 @@ public class MembershipServiceImpl implements MembershipService {
             }
         }
 
-        groupingsMailService.setJavaMailSender(javaMailSender);
-/*
-        groupingsMailService.sendSimpleMessage("gilbertz@hawaii.edu", "Test", "Lion in the Jungle");
-        */
-
-        groupingsMailService.sendCSVMessage(groupingsMailService.getUserEmail(ownerUsername),
-                "Test Attachment",
-                "Test",
-                groupPath + "_add" + ".csv", gsrs);
+        if (usersToAdd.size() > 100) {
+            groupingsMailService.setJavaMailSender(javaMailSender);
+            groupingsMailService.sendCSVMessage(groupingsMailService.getUserEmail(ownerUsername),
+                    "Test Attachment",
+                    "Test",
+                    groupPath + "_add" + ".csv", gsrs);
+        }
 
         return gsrs;
     }
 
-    //finds a user by a username and adds that user to the group
+    /**
+     * Authenticate userIdentifier as a valid person and add them to groupPath as ownerUsername
+     */
     @Override
     public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupPath,
             String userIdentifier) {
