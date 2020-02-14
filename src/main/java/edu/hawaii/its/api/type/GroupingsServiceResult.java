@@ -45,4 +45,5 @@ public class GroupingsServiceResult {
                 + ", person=" + this.person.toString()
                 + "]";
     }
+
 }
