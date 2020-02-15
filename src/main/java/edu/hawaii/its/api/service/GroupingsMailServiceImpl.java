@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  Create and send SMTP messages using the JavaMailSender.
+ * Create and send SMTP messages using the JavaMailSender.
  */
 @Service("groupingsMailService")
 public class GroupingsMailServiceImpl implements GroupingsMailService {
@@ -33,16 +33,18 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     }
 
     /**
-     * Send a SMTP message with no attachment
+     * Send a SMTP message with no attachment.
      *
-     * @param address - email address to be sent to
+     * @param from    - address
+     * @param to      - address
      * @param subject - email subject
      * @param text    - email text body
      */
-    @Override public void sendSimpleMessage(String address, String subject, String text) {
+    @Override public void sendSimpleMessage(String from, String to, String subject, String text) {
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setTo(address);
+        simpleMailMessage.setFrom(from);
+        simpleMailMessage.setTo(to);
         simpleMailMessage.setSubject(subject);
         simpleMailMessage.setText(text);
         this.javaMailSender.send(simpleMailMessage);
@@ -52,19 +54,20 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     /**
      * Send an SMTP message with a CSV file attachment.
      *
-     * @param address - email address to be sent to
+     * @param from    - address
+     * @param to      - address
      * @param subject - email subject
      * @param text    - email text body
      * @param path    - path or name of the temporary CSV file
      * @param res     - data to be converted to CSV
      */
-    @Override public void sendCSVMessage(String address, String subject, String text, String path,
+    @Override public void sendCSVMessage(String from, String to, String subject, String text, String path,
             List<GroupingsServiceResult> res) {
 
         File file = new File(path);
 
         try {
-            this.sendAttachmentMessage(address, subject, text, this.toCsv(this.toCsvObj(res), file), file);
+            this.sendAttachmentMessage(from, to, subject, text, this.toCsv(this.toCsvObj(res), file), file);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -73,21 +76,22 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     /**
      * Send an SMTP message with a file attachment
      *
-     * @param address            - email address to be sent to
+     * @param from               - address
+     * @param to                 - address
      * @param subject            - email subject
      * @param text               - email text body
      * @param fileSystemResource - File being sent
      * @param file               - descriptor of fil being sent
      */
-    private void sendAttachmentMessage(String address, String subject, String text,
+    private void sendAttachmentMessage(String from, String to, String subject, String text,
             FileSystemResource fileSystemResource, File file) {
 
         try {
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
-            mimeMessageHelper.setFrom(getUhSmtpAddress());
-            mimeMessageHelper.setTo(address);
+            mimeMessageHelper.setFrom(from);
+            mimeMessageHelper.setTo(to);
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(text);
 
