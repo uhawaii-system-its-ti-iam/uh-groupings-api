@@ -16,13 +16,13 @@ public interface GroupingsMailService {
     /**
      * Send a SMTP message with no attachment
      */
-    void sendSimpleMessage(String address, String subject, String text);
+    void sendSimpleMessage(String from, String to, String subject, String text);
 
     /**
      * Send an SMTP message with a CSV file attachment.
      */
     @Ignore
-    void sendCSVMessage(String address, String subject, String text, String path,
+    void sendCSVMessage(String from, String to, String subject, String text, String path,
             List<GroupingsServiceResult> res);
 
     /**

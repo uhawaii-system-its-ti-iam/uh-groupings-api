@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -215,7 +217,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Delete a member of groupingPath with respect to uid or uhuuid as ownerUsername
+     * Delete a member of groupingPath with respect to uid or uhUuid as ownerUsername.
      */
     @Override
     public List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
@@ -266,12 +268,13 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (usersToAdd.size() > 100) {
             groupingsMailService.setJavaMailSender(javaMailSender);
-            groupingsMailService.sendCSVMessage(groupingsMailService.getUserEmail(ownerUsername),
-                    "Test Attachment",
-                    "Test",
-                    groupPath + "_add" + ".csv", gsrs);
+            groupingsMailService.sendCSVMessage(
+                    "no-reply@its.hawaii.edu",
+                    groupingsMailService.getUserEmail(ownerUsername),
+                    "Groupings: Add " + groupPath,
+                    "",
+                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", gsrs);
         }
-
         return gsrs;
     }
 
