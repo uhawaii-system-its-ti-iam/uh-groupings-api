@@ -186,10 +186,10 @@ public class MembershipServiceImpl implements MembershipService {
 
         try {
             Integer.parseInt(userToAdd);
-            createdPerson = new Person(null, userToAdd, null);
+            createdPerson = new Person(null, userToAdd, null, null, null);
 
         } catch (Exception NumberFormatException) {
-            createdPerson = new Person (null, null, userToAdd);
+            createdPerson = new Person(null, null, userToAdd, null, null);
         }
 
         return createdPerson;
@@ -244,11 +244,12 @@ public class MembershipServiceImpl implements MembershipService {
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
             List<String> usersToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
-
         for (String userToAdd : usersToAdd) {
-            gsrs = addGroupMember(ownerUsername, groupPath, userToAdd);
+            try {
+                gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
+            } catch (GcWebServiceError e) {
+            }
         }
-
         return gsrs;
     }
 
@@ -259,7 +260,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addGroupMember; user: " + ownerUsername + "; groupPath: " + groupPath + "; userToAdd: "
                 + userIdentifier + ";");
 
-      return addMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
+        return addMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
     @Override
@@ -497,6 +498,20 @@ public class MembershipServiceImpl implements MembershipService {
                 action);
     }
 
+    /*
+public List<GroupingsServiceResult> add_Member_Helper(String username, String groupPath, Person personToAdd) {
+    logger.info(
+            "addMemberHelper; user: " + username + "; group: " + groupPath + "; personToAdd: " + personToAdd + ";");
+    List<GroupingsServiceResult> gsrList = new ArrayList<>();
+
+    if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
+            || memberAttributeService.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
+            .getUsername().equals(username))) {
+        String pathToAdd;
+        String pathToDelete;
+    }
+    }
+     */
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
         logger.info(
@@ -529,9 +544,6 @@ public class MembershipServiceImpl implements MembershipService {
                             personToAdd);
 
                     isExcludeUpdated = true;
-
-                    gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-                            "delete " + personToAdd.toString() + " from " + exclude));
                 }
                 //check to see if personToAdd is already in include
                 if (!memberAttributeService.isMember(include, personToAdd)) {
@@ -539,12 +551,10 @@ public class MembershipServiceImpl implements MembershipService {
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(include, user, personToAdd);
 
                     isIncludeUpdated = true;
+                    personToAdd.setAttributes(
+                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
 
-                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
-                } else {
-                    //They are already in the group, so just return SUCCESS
-                    gsrList.add(helperService.makeGroupingsServiceResult(
-                            SUCCESS + ": " + personToAdd.toString() + " was already in " + groupPath, action));
+                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
                 }
             }
 
@@ -558,9 +568,6 @@ public class MembershipServiceImpl implements MembershipService {
                             personToAdd);
 
                     isIncludeUpdated = true;
-
-                    gsrList.add(helperService.makeGroupingsServiceResult(wsDeleteMemberResults,
-                            "delete " + personToAdd.toString() + " from " + include));
                 }
                 //check to see if userToAdd is already in exclude
                 if (!memberAttributeService.isMember(exclude, personToAdd)) {
@@ -568,13 +575,12 @@ public class MembershipServiceImpl implements MembershipService {
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
                     isExcludeUpdated = true;
+                    personToAdd.setAttributes(
+                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
 
-                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action));
+                    gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
+
                 }
-                //They are already in the group, so just return SUCCESS
-                gsrList.add(helperService.makeGroupingsServiceResult(
-                        SUCCESS + ": " + personToAdd.toString() + " was already in " + groupPath, action));
-
             }
             //if owners check to see if the user is already in owners
             else if (groupPath.endsWith(OWNERS)) {
@@ -649,7 +655,8 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     // Helper method for adding a user to a grouping.
-    public List<GroupingsServiceResult> addGroupingMemberHelper(String username, String groupingPath, String userIdentifier, Person personToAdd) {
+    public List<GroupingsServiceResult> addGroupingMemberHelper(String username, String groupingPath,
+            String userIdentifier, Person personToAdd) {
         List<GroupingsServiceResult> gsrs = new ArrayList<>();
 
         String action = "add user to " + groupingPath;
@@ -686,7 +693,8 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     // Helper method for deleting a user from a grouping.
-    public List<GroupingsServiceResult> deleteGroupingMemberHelper(String username, String groupingPath, String userIdentifier, Person personToDelete) {
+    public List<GroupingsServiceResult> deleteGroupingMemberHelper(String username, String groupingPath,
+            String userIdentifier, Person personToDelete) {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
 
         String action = username + " deletes " + userIdentifier + " from " + groupingPath;
