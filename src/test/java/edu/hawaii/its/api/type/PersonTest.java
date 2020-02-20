@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,8 @@ public class PersonTest {
         assertNull(person.getName());
         assertNull(person.getUhUuid());
         assertNull(person.getUsername());
+        assertNull(person.getFirstName());
+        assertNull(person.getLastName());
 
         person = new Person("a", "b", "c");
         assertThat(person.getName(), equalTo("a"));
@@ -234,4 +237,5 @@ public class PersonTest {
         person.setAttribute("username", "a");
         assertTrue(person.getAttribute("username") == "a");
     }
+
 }
