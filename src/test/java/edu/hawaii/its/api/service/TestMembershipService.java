@@ -105,34 +105,38 @@ public class TestMembershipService {
 
     @Before
     public void setUp() {
-        //add ownership
+        //Add ownership.
         memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
-        //add to include
+        //Add to include.
         List<String> includeNames = new ArrayList<>();
         includeNames.add(username[0]);
         includeNames.add(username[1]);
         includeNames.add(username[2]);
+
         membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
-        // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
+        // Add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis).
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[3]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[4]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, username[5]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[5]);
 
-        //remove from exclude
+        //Remove from exclude.
         membershipService.addGroupingMember(username[0], GROUPING, username[4]);
         membershipService.addGroupingMember(username[0], GROUPING, username[5]);
 
-        //add to exclude
+        //Add to exclude.
         membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
 
-        //remove ownership
+        //Add to basis.
+        //membershipService.addGroupMember(username[0], GROUPING_BASIS, username[5]);
+
+        //Remove ownership.
         memberAttributeService.removeOwnership(GROUPING, username[0], username[2]);
         memberAttributeService.removeOwnership(GROUPING, username[0], username[4]);
 
@@ -171,95 +175,95 @@ public class TestMembershipService {
 
     @Test
     public void optTest() {
-        //reset group
+        //Reset group.
         membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[3]);
 
-        //tst[3] is not in the composite or include, but is in the basis and exclude
-        //tst[3] is not self opted into the exclude
+        //tst[3] is not in the composite or include, but is in the basis and exclude.
+        //tst[3] is not self opted into the exclude.
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
-        //non super user tries to opt another user in
+        //Non super user tries to opt another user in.
         assertFalse(memberAttributeService.isSuperuser(username[0]));
         membershipService.optIn(username[0], GROUPING, username[3]);
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         membershipService.optOut(username[0], GROUPING, username[3]);
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
-        //tst[3] opts in to the Grouping
+        //tst[3] opts in to the Grouping.
         membershipService.optIn(username[3], GROUPING);
-        //tst[3] should still be in the basis and now also in the Grouping
+        //tst[3] should still be in the basis and now also in the Grouping.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
         //tst[3] is no longer in the exclude, and because tst[3] is in the basis,
-        //tst[3] does not get added to the include
+        //tst[3] does not get added to the include.
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
-        //tst[3] opts out of the Grouping
+        //tst[3] opts out of the Grouping.
         membershipService.optOut(username[3], GROUPING);
-        //tst[3] is still in basis, now in exclude and not in Grouping or include
+        //tst[3] is still in basis, now in exclude and not in Grouping or include.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-        //tst[3] is now self opted into exclude
+        //tst[3] is now self opted into exclude.
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
-        //admins can opt other users
+        //Admins can opt other users.
         membershipService.optIn(ADMIN, GROUPING, username[3]);
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         membershipService.optOut(ADMIN, GROUPING, username[3]);
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
     }
 
-    //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them
+    //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them.
     @Test
     public void listOwnedTest() {
 
-        // Tests that when there is no groups owned, the list is empty
+        // Tests that when there is no groups owned, the list is empty.
         assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
 
-        // Adds user to owners of GROUPING 1
+        // Adds user to owners of GROUPING 1.
         membershipService.addGroupMember(username[0], GROUPING_OWNERS, username[1]);
 
-        // Tests that the list now contains the path to GROUPING 1 since user is now an owner
+        // Tests that the list now contains the path to GROUPING 1 since user is now an owner.
         assertTrue(membershipService.listOwned(ADMIN, username[1]).get(0).equals(GROUPING));
 
         try {
-            // Tests if a non admin can access users groups owned
+            // Tests if a non admin can access users groups owned.
             membershipService.listOwned(username[0], username[1]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //Reset ownership
+        //Reset ownership.
         membershipService.deleteGroupMember(username[0], GROUPING_OWNERS, username[1]);
     }
 
     @Test
     public void addRemoveSelfOptedTest() {
 
-        //username[2] is not in the include, but not self opted
+        //username[2] is not in the include, but not self opted.
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
 
-        //add the self opted attribute for username[2]'s membership for the include group
+        //Add the self opted attribute for username[2]'s membership for the include group.
         membershipService.addSelfOpted(GROUPING_INCLUDE, username[2]);
 
-        //username[2] should now be self opted
+        //username[2] should now be self opted.
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
 
-        //remove the self opted attribute for username[2]'s membership from the include group
+        //remove the self opted attribute for username[2]'s membership from the include group.
         membershipService.removeSelfOpted(GROUPING_INCLUDE, username[2]);
 
-        //username[2] should no longer be self opted into the include
+        //username[2] should no longer be self opted into the include.
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
 
-        //try to add self opted attribute when not in the group
+        //Try to add self opted attribute when not in the group.
         GroupingsServiceResult groupingsServiceResult;
 
         try {
@@ -283,40 +287,40 @@ public class TestMembershipService {
     @Test
     public void addMemberAsTest() {
 
-        //username[3] is in the basis and exclude, not the composite or include
+        //username[3] is in the basis and exclude, not the composite or include.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
-        //an owner adds username[3] to the include group
+        //An owner adds username[3] to the include group.
         List<GroupingsServiceResult> addMember =
                 membershipService.addGroupMember(username[0], GROUPING_INCLUDE, username[3]);
 
-        //the addition was successful
+        //The addition was successful.
         assertTrue(addMember.get(0).getResultCode().startsWith(SUCCESS));
-        //username[3] is in the basis, include and composite, not the exclude
+        //username[3] is in the basis, include and composite, not the exclude.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
-        //put username[3] back in the exclude group
+        //Put username[3] back in the exclude group.
         addMember = membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
 
-        //the addition was successful
+        //The addition was successful.
         assertThat(SUCCESS, is(addMember.get(0).getResultCode()));
-        //username[3] is in the basis and exclude, not the composite or include
+        //username[3] is in the basis and exclude, not the composite or include.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
-        //test adding when already in group
+        //Test adding when already in group.
         addMember = membershipService.addGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
-        //the addition was successful
+        //The addition was successful.
         assertTrue(addMember.get(0).getResultCode().startsWith(SUCCESS));
-        //username[3] is in the basis and exclude, not the composite or include
+        //username[3] is in the basis and exclude, not the composite or include.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
@@ -344,40 +348,40 @@ public class TestMembershipService {
 
     @Test
     public void deleteMemberAsTest() {
-        //username[2] is in composite and include, not basis or exclude
+        //username[2] is in composite and include, not basis or exclude.
         assertTrue(memberAttributeService.isMember(GROUPING, username[2]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[2]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[2]));
 
-        //username[3] is in basis and exclude, not composite or include
+        //username[3] is in basis and exclude, not composite or include.
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
-        //delete username[3] from exclude
+        //Delete username[3] from exclude.
         GroupingsServiceResult deleteMember1 =
                 membershipService.deleteGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
-        //deletion was successful
+        //Deletion was successful.
         assertThat(SUCCESS, is(deleteMember1.getResultCode()));
-        //username[3] is no longer in the exclude
+        //username[3] is no longer in the exclude.
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
 
-        //delete username[2] from include
+        //Delete username[2] from include.
         GroupingsServiceResult deleteMember2 =
                 membershipService.deleteGroupMember(username[0], GROUPING_INCLUDE, username[2]);
-        //deletion was successful
+        //Deletion was successful.
         assertThat(SUCCESS, is(deleteMember2.getResultCode()));
-        //username[2] is no longer in composite or include
+        //username[2] is no longer in composite or include.
         assertFalse(memberAttributeService.isMember(GROUPING, username[2]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
 
-        //test when not in group
+        //Test when not in group.
         deleteMember1 = membershipService.deleteGroupMember(username[0], GROUPING_EXCLUDE, username[3]);
         deleteMember2 = membershipService.deleteGroupMember(username[0], GROUPING_INCLUDE, username[2]);
 
-        //results are successful because the end result is the same
+        //Results are successful because the end result is the same.
         assertTrue(deleteMember1.getResultCode().startsWith(SUCCESS));
         assertTrue(deleteMember2.getResultCode().startsWith(SUCCESS));
     }
@@ -390,90 +394,90 @@ public class TestMembershipService {
         String ownerUsername = username[0];
         String uid = "";
 
-        //username[1] is in the composite
+        //username[1] is in the composite.
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
-        //add member already in the group
+        //Add member already in the group.
         results = membershipService.addGroupingMember(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        //username[1] is in the composite
+        //username[1] is in the composite.
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
-        //username[3] is not in the composite(in the exclude)
+        //username[3] is not in the composite(in the exclude).
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
-        //add member not in the composite but in the basis
+        //Add member not in the composite but in the basis.
         results = membershipService.addGroupingMember(ownerUsername, GROUPING, username[3]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        //username[3] is now in the Composite via basis
+        //username[3] is now in the Composite via basis.
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
-        //removes username[1] from the group
+        //Removes username[1] from the group.
         membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[1]);
 
-        //Checks to see if username[1] is not in the basis or the composite
+        //Checks to see if username[1] is not in the basis or the composite.
         assertFalse(memberAttributeService.isMember(GROUPING, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
-        //adds to group
+        //Adds to group.
         results = membershipService.addGroupingMember(ownerUsername, GROUPING, username[1]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        //Checks to make sure user is in composite and include and nothing else
+        //Checks to make sure user is in composite and include and nothing else.
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_BASIS, username[1]));
 
-        //adds username[3] to the include and removes from the exclude
+        //Adds username[3] to the include and removes from the exclude.
         membershipService.addGroupMember(ownerUsername, GROUPING_INCLUDE, username[3]);
 
-        //username[3] is in the composite, basis and include
+        //username[3] is in the composite, basis and include.
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
-        //delete member from grouping
+        //Delete member from grouping.
         results = membershipService.addGroupingMember(ownerUsername, GROUPING, username[3]);
         assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
 
-        //username[3] is in the composite, and basis
+        //username[3] is in the composite, and basis.
         assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
-        //checks to see where username 4 is in the group
+        //Checks to see where username 4 is in the group.
         assertTrue(memberAttributeService.isMember(GROUPING, username[4]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
-        //has a non owner try to remove the owner
+        //Has a non owner try to remove the owner.
         try {
             membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //Makes sure that owner is still in the group
+        //Makes sure that owner is still in the group.
         assertTrue(memberAttributeService.isMember(GROUPING, ownerUsername));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, ownerUsername));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, ownerUsername));
@@ -534,7 +538,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
 
-        //resets
+        //Resets.
         setUp();
 
         //username[4] is in the composite, basis but not the exclude and include
@@ -543,7 +547,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
-        //delete member from grouping
+        //Delete member from grouping.
         lResults = membershipService.deleteGroupingMember(ownerUsername, GROUPING, username[4]);
         assertTrue(lResults.get(0).getResultCode().startsWith(SUCCESS));
 
@@ -552,23 +556,23 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
-        //resets
+        //Resets.
         setUp();
 
-        //checks to see where username 4 is in the group
+        //Checks to see where username 4 is in the group.
         assertTrue(memberAttributeService.isMember(GROUPING, username[4]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[4]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[4]));
         assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[4]));
 
-        //has a non owner try to remove the owner
+        //Has a non owner try to remove the owner.
         try {
             membershipService.deleteGroupingMember(username[4], GROUPING, ownerUsername);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //Makes sure that owner is still in the group
+        //Makes sure that owner is still in the group.
         assertTrue(memberAttributeService.isMember(GROUPING, ownerUsername));
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, ownerUsername));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, ownerUsername));
