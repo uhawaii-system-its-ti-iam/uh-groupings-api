@@ -238,9 +238,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Before
     public void setUp() {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[3]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[4]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_EXTRA, lookup, usernames[5]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[5]);
 
         mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
@@ -804,7 +804,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
 
         mapGSR(API_BASE + "groupings/" + A_GROUPING + "/excludeMembers/" + tstUuid[1], "delete", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, usernames[1]));
+        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[1]));
     }
 
     @Test
@@ -1145,11 +1145,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Ignore
     @Test
     public void paginatedLargeGroupingTest() throws Exception {
-//        Grouping paginatedLargeGrouping = new Grouping();
-//        for (int i = 1; i <= 150; i++) {
-//            paginatedLargeGrouping = mapGrouping(GROUPING, adminUser, i, 20, "name", true);
-//        }
-
         recursionFunctionToTest(GROUPING_TIMEOUT, adminUser, 1, 20, "name", true);
     }
 
@@ -1161,6 +1156,7 @@ public class TestGroupingsRestControllerv2_1 {
         } else {
             mapGrouping(groupingPath, user, page, size, sortString, isAscending);
             recursionFunctionToTest(groupingPath, user, page + 1, size, sortString, isAscending);
+
             return;
         }
 
