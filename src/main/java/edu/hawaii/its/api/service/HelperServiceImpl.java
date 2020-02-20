@@ -3,13 +3,17 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -217,6 +221,21 @@ public class HelperServiceImpl implements HelperService {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
         groupingsServiceResult.setAction(action);
         groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
+
+        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
+            throw new GroupingsServiceResultException(groupingsServiceResult);
+        }
+
+        return groupingsServiceResult;
+    }
+
+    @Override
+    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action,
+            Person person) {
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+        groupingsServiceResult.setAction(action);
+        groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
+        groupingsServiceResult.setPerson(person);
 
         if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
             throw new GroupingsServiceResultException(groupingsServiceResult);
