@@ -804,7 +804,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
 
         mapGSR(API_BASE + "groupings/" + A_GROUPING + "/excludeMembers/" + tstUuid[1], "delete", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, usernames[1]));
+        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[1]));
     }
 
     @Test
