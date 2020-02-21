@@ -3,6 +3,8 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Grouping;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +68,9 @@ public class TestHelperService {
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    @Autowired
+    private GrouperFactoryService grouperFS;
 
     @Autowired
     GroupAttributeService groupAttributeService;

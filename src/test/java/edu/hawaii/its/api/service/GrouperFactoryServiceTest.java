@@ -45,7 +45,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 
 public class GrouperFactoryServiceTest {
 
@@ -128,6 +128,9 @@ public class GrouperFactoryServiceTest {
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
+
+    @Autowired
+    private GrouperFactoryService grouperFS;
 
     @Autowired
     private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
@@ -472,6 +475,28 @@ public class GrouperFactoryServiceTest {
             iae.printStackTrace();
         }
 
+    }
+    @Test
+    public void makeWsGetMembershipsResultsTest() {
+        WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+        assertTrue(result != null);
+    }
+
+    @Test
+    public void makeWsGetAllMembershipsResultsTest() {
+        List<String> groupNames = new ArrayList<>();
+        groupNames.add(GROUPING_0_PATH);
+        groupNames.add(GROUPING_1_PATH);
+        groupNames.add(GROUPING_2_PATH);
+
+        List<WsSubjectLookup> lookups = new ArrayList<>();
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(1).getUsername()));
+        lookups.add(gfsl.makeWsSubjectLookup(users.get(2).getUsername()));
+
+        List<WsGetMembershipsResults> result = grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
+
+        assertTrue(result != null);
     }
 
     @Test

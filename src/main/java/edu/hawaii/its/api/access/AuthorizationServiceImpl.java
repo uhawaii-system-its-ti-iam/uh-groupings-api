@@ -70,7 +70,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                 logger.info("This person is an owner");
                 return true;
             } else {
-                logger.info("This person is not owner");
+                logger.info("This person is not an owner");
             }
         } catch (Exception e) {
             logger.info("The grouping for this person is " + e.getMessage());

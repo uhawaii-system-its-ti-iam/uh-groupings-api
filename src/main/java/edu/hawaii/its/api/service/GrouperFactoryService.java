@@ -145,6 +145,8 @@ public interface GrouperFactoryService {
 
     WsGetMembershipsResults makeWsGetMembershipsResults(String groupName, WsSubjectLookup lookup);
 
+    List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupName,List<WsSubjectLookup> lookup);
+
     WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
                                                        WsSubjectLookup lookup,
                                                        List<String> groupPaths,

@@ -390,6 +390,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
 
+
         if (groupsOpted.size() > 0) {
 
             List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
