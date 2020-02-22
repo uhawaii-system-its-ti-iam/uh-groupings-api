@@ -18,6 +18,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
@@ -38,6 +39,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -162,6 +167,25 @@ public class GrouperFactoryServiceTest {
     public void addEmptyGroupTest() {
         WsGroupSaveResults results = gfsl.addEmptyGroup("username", GROUPING_3_PATH);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Test
+    public void deleteGroupTest() {
+        WsSubjectLookup usernameLookUp =  gfsl.makeWsSubjectLookup("username");
+        WsGroupLookup groupLookUp = gfsl.makeWsGroupLookup(GROUPING_0_PATH);
+        WsGroupDeleteResults results = gfsl.deleteGroup(usernameLookUp, groupLookUp);
+
+        assertEquals(results,"SUCCESS");
+    }
+
+    @Test
+    public void getDescriptionTest() {
+        String description = gfsl.getDescription(GROUPING_0_PATH);
+        assertNotNull(description);
+
+        gfsl.updateGroupDescription(GROUPING_0_PATH, "This is a description");
+        description = gfsl.getDescription(GROUPING_0_PATH);
+        assertEquals(description, "This is a description");
     }
 
     //todo This tests a non-implemented function that returns null. Should adjust once function is implemented.
