@@ -111,7 +111,7 @@ public class GroupingsRestControllerv2_1 {
    * @param uid: Username or id number of user to obtain attributes about
    * @return Map of user attributes
    */
-  @RequestMapping(value = "/members/{uid:[\\w-:.]+}",
+  @RequestMapping(value = "/members/{uid:[\\w-:.<>]+}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
