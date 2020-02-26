@@ -25,11 +25,17 @@ import java.util.List;
  */
 @Service("groupingsMailService")
 public class GroupingsMailServiceImpl implements GroupingsMailService {
-    @Autowired
     JavaMailSender javaMailSender;
+    String from = "";
 
-    public void setJavaMailSender(JavaMailSender javaMailSender) {
+    public GroupingsMailService setJavaMailSender(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
+        return this;
+    }
+
+    public GroupingsMailService setFrom(String from) {
+        this.from = from;
+        return this;
     }
 
     /**
