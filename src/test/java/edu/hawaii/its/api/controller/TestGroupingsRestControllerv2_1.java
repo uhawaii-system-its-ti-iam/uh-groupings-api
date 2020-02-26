@@ -43,6 +43,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -236,7 +238,7 @@ public class TestGroupingsRestControllerv2_1 {
                 "property 'grouperClient.webService.password' is required");
     }
     @Before
-    public void setUp() {
+    public void setUp() throws IOException, MessagingException {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
         grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[3]);
         grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[4]);

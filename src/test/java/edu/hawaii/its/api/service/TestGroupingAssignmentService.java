@@ -26,6 +26,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -140,7 +142,7 @@ public class TestGroupingAssignmentService {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException, MessagingException {
         // assign ownership
         memberAttributeService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
         memberAttributeService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);

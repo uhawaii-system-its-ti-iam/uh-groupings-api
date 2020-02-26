@@ -165,7 +165,8 @@ public class Person implements Comparable<Person> {
             return false;
         if (uhUuid == null) {
             return other.getUhUuid() == null;
-        } else return uhUuid.equals(other.getUhUuid());
+        } else
+            return uhUuid.equals(other.getUhUuid());
     }
 
     @Override
@@ -196,4 +197,14 @@ public class Person implements Comparable<Person> {
         return "Person [name=" + getName() + ", uhUuid=" + getUhUuid() + ", username=" + getUsername() + "]";
     }
 
+    public String[] toCsv() {
+        String[] data = new String[5];
+        data[0] = getUsername();
+        data[1] = getUhUuid();
+        data[2] = getFirstName();
+        data[3] = getLastName();
+        data[4] = getName();
+
+        return data;
+    }
 }
