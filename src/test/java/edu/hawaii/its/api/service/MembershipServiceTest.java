@@ -28,6 +28,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -288,7 +290,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void addGroupMembersTest() {
+    public void addGroupMembersTest() throws IOException, MessagingException {
 
         List<GroupingsServiceResult> listGsr;
         List<String> usersToAdd = new ArrayList<String>();
@@ -549,7 +551,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void addMembers() {
+    public void addMembers() throws IOException, MessagingException {
         //add all usernames
         List<String> usernames = new ArrayList<>();
         for (Person user : users) {
