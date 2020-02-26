@@ -96,6 +96,9 @@ public class GrouperFactoryServiceTest {
     @Value("${groupings.api.test.uhuuid}")
     private String UUID;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     private static final String PATH_ROOT = "path:to:grouping";
 
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
@@ -170,12 +173,24 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void deleteGroupTest() {
-        WsSubjectLookup usernameLookUp =  gfsl.makeWsSubjectLookup("username");
-        WsGroupLookup groupLookUp = gfsl.makeWsGroupLookup(GROUPING_0_PATH);
-        WsGroupDeleteResults results = gfsl.deleteGroup(usernameLookUp, groupLookUp);
+    public void makeWsSubjectLookupTest(){
+        WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username0"));
+        subjectLookup = gfsl.makeWsSubjectLookup(users.get(1).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username1"));
+        subjectLookup = gfsl.makeWsSubjectLookup(users.get(2).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username2"));
+    }
 
-        assertEquals(results,"SUCCESS");
+    //todo currently not working, host parameter is null error
+    @Test
+    public void deleteGroupTest() {
+        WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+        WsGroupLookup groupLookup = gfsl.makeWsGroupLookup(GROUPING_3_PATH);
+
+        WsGroupDeleteResults results = gfsl.deleteGroup(subjectLookup, groupLookup);
+
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
     }
 
     @Test
@@ -214,15 +229,17 @@ public class GrouperFactoryServiceTest {
     @Test
     public void makeWsStemLookupTest() {
         WsStemLookup result;
-
         result = gfsl.makeWsStemLookup("pre");
+        assertNotNull(result);
+        result = gfsl.makeWsStemLookup("pre",UUID);
+        assertNotNull(result);
     }
 
     @Test
-    public void makeWsAttributeAsignValueTest() {
+    public void makeWsAttributeAsSignValueTest() {
         WsAttributeAssignValue result;
-
         result = gfsl.makeWsAttributeAssignValue("10:30AM");
+        assertNotNull(result);
     }
 
     @Test
@@ -530,10 +547,12 @@ public class GrouperFactoryServiceTest {
         //GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]
     }
 
+
+
     @Test
     public void addCompositeGroupTest() {
+        //Not an actual test, addCompositeGroup is not implemented in GroupingFactoryServiceImpl.java
         //todo Build when main method is complete
-
         try {
             assertNull(
                     gfsl.addCompositeGroup(users.get(0).getUsername(), GROUPING_3_PATH, "type", GROUPING_3_BASIS_PATH,
