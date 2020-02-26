@@ -267,7 +267,9 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         if (usersToAdd.size() > 100) {
-            groupingsMailService.setJavaMailSender(javaMailSender);
+            groupingsMailService
+                    .setJavaMailSender(javaMailSender)
+                    .setFrom("no-reply@its.hawaii.edu");
             groupingsMailService.sendCSVMessage(
                     "no-reply@its.hawaii.edu",
                     groupingsMailService.getUserEmail(ownerUsername),
