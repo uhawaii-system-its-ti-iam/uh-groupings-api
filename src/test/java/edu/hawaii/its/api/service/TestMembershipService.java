@@ -23,6 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,8 +106,9 @@ public class TestMembershipService {
     }
 
     @Before
-    public void setUp() {
-        //Add ownership.
+    public void setUp() throws IOException, MessagingException {
+        //add ownership
+
         memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
@@ -486,7 +489,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void deleteGroupingMemberTest() {
+    public void deleteGroupingMemberTest() throws IOException, MessagingException {
         List<GroupingsServiceResult> lResults;
         GroupingsServiceResult results;
         String ownerUsername = username[0];
@@ -808,7 +811,7 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupMembersTest() {
+    public void addGroupMembersTest() throws IOException, MessagingException {
         String ownerUsername = username[0];
 
         List<GroupingsServiceResult> results;

@@ -19,12 +19,17 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -173,6 +178,12 @@ public class MembershipServiceImpl implements MembershipService {
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Autowired
+    private JavaMailSender javaMailSender;
+
+    @Autowired
+    private GroupingsMailService groupingsMailService;
+
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     // returns true if username is a UH id number
@@ -205,7 +216,9 @@ public class MembershipServiceImpl implements MembershipService {
         return addGroupingMemberHelper(username, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
-    // Finds a user by either UH username or UH ID number and deletes them from the Grouping.
+    /**
+     * Delete a member of groupingPath with respect to uid or uhUuid as ownerUsername.
+     */
     @Override
     public List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
             String userIdentifier) {
@@ -219,8 +232,9 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteGroupingMemberHelper(ownerUsername, groupingPath, userIdentifier, createNewPerson(userIdentifier));
     }
 
-    // Takes an admin and user and returns list of groups that a user may own. An empty list will be returned if no
-    // groups are owned.
+    /**
+     * Get a list of groupsOwned by user as admin
+     */
     @Override
     public List<String> listOwned(String admin, String user) {
         List<String> groupsOwned = new ArrayList<>();
@@ -238,8 +252,9 @@ public class MembershipServiceImpl implements MembershipService {
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
-    //Takes the owner of the group, the path to the group, and a list of users to add. Goes through the list and adds
-    //each user to the specified group
+    /**
+     * Add a list of multiple usersToAdd to groupPath as ownerUsername
+     */
     @Override
     public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
             List<String> usersToAdd) {
@@ -250,10 +265,24 @@ public class MembershipServiceImpl implements MembershipService {
             } catch (GcWebServiceError e) {
             }
         }
+
+        if (usersToAdd.size() > 100) {
+            groupingsMailService
+                    .setJavaMailSender(javaMailSender)
+                    .setFrom("no-reply@its.hawaii.edu");
+            groupingsMailService.sendCSVMessage(
+                    "no-reply@its.hawaii.edu",
+                    groupingsMailService.getUserEmail(ownerUsername),
+                    "Groupings: Add " + groupPath,
+                    "",
+                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", gsrs);
+        }
         return gsrs;
     }
 
-    //finds a user by a username and adds that user to the group
+    /**
+     * Authenticate userIdentifier as a valid person and add them to groupPath as ownerUsername
+     */
     @Override
     public List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupPath,
             String userIdentifier) {
