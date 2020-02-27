@@ -22,10 +22,12 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,7 +238,7 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void makeWsAttributeAsSignValueTest() {
+    public void makeWsAttributeAssignValueTest() {
         WsAttributeAssignValue result;
         result = gfsl.makeWsAttributeAssignValue("10:30AM");
         assertNotNull(result);
@@ -246,6 +248,15 @@ public class GrouperFactoryServiceTest {
     public void makeWsStemSaveResultsTest() {
         WsStemSaveResults results = gfsl.makeWsStemSaveResults("username", "stemPath");
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Test
+    public void deleteStemTest(){
+        WsSubjectLookup adminLookup = gfsl.makeWsSubjectLookup(ADMIN);
+        WsStemLookup stem = gfsl.makeWsStemLookup("testStem");
+
+        WsStemDeleteResults result = gfsl.deleteStem(adminLookup, stem);
+        System.out.print(result);
     }
 
     @Test
