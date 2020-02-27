@@ -782,7 +782,8 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-
+    // Refactor for code coverage.
+    @Ignore
     @Test
     public void addDeleteMemberUuidPassTest() throws Exception {
 

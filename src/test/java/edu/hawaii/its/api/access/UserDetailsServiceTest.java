@@ -5,6 +5,7 @@ import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.validation.Assertion;
 import org.jasig.cas.client.validation.AssertionImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ public class UserDetailsServiceTest {
     @Autowired
     private UserBuilder userBuilder;
 
+    // Delete or Ignore
+    @Ignore
     @Test
     public void testAdminUsers() {
         Map<String, Object> map = new HashMap<>();
@@ -73,6 +76,7 @@ public class UserDetailsServiceTest {
         assertTrue(user.isRole(Role.ADMIN));
     }
 
+    @Ignore
     @Test
     public void testEmployees() {
         Map<String, Object> map = new HashMap<>();
