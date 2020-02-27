@@ -298,7 +298,7 @@ public class TestMembershipService {
         //An owner adds username[3] to the include group.
         List<GroupingsServiceResult> addMember =
                 membershipService.addGroupMember(username[0], GROUPING_INCLUDE, username[3]);
-cd 
+
         //The addition was successful.
         assertTrue(addMember.get(0).getResultCode().startsWith(SUCCESS));
         //username[3] is in the basis, include and composite, not the exclude.
