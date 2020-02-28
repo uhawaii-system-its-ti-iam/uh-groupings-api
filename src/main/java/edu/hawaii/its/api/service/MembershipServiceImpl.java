@@ -581,6 +581,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
 
                     isIncludeUpdated = true;
 
+                    // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                       personToAdd.setAttributes(
                           memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
@@ -611,13 +612,14 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
                     isExcludeUpdated = true;
+
+                    // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                       personToAdd.setAttributes(
                           memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
                     } else {
                       personToAdd.setAttributes(
-                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid())
-                      );
+                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
