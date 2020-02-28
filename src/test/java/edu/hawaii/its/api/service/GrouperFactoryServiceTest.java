@@ -18,13 +18,16 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -90,6 +97,9 @@ public class GrouperFactoryServiceTest {
 
     @Value("${groupings.api.test.uhuuid}")
     private String UUID;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     private static final String PATH_ROOT = "path:to:grouping";
 
@@ -164,6 +174,38 @@ public class GrouperFactoryServiceTest {
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
     }
 
+    @Test
+    public void makeWsSubjectLookupTest(){
+        WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username0"));
+        subjectLookup = gfsl.makeWsSubjectLookup(users.get(1).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username1"));
+        subjectLookup = gfsl.makeWsSubjectLookup(users.get(2).getUsername());
+        assertTrue(subjectLookup.getSubjectIdentifier().equals("username2"));
+    }
+
+    @Ignore
+    @Test
+    //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
+    public void deleteGroupTest() {
+        WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
+        WsGroupLookup groupLookup = gfsl.makeWsGroupLookup(GROUPING_3_PATH);
+
+        WsGroupDeleteResults results = gfsl.deleteGroup(subjectLookup, groupLookup);
+
+        assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Test
+    public void getDescriptionTest() {
+        String description = gfsl.getDescription(GROUPING_0_PATH);
+        assertNotNull(description);
+
+        gfsl.updateGroupDescription(GROUPING_0_PATH, "This is a description");
+        description = gfsl.getDescription(GROUPING_0_PATH);
+        assertEquals(description, "This is a description");
+    }
+
     //todo This tests a non-implemented function that returns null. Should adjust once function is implemented.
     @Test
     public void makeWsAddMemberResultsGroupTest() {
@@ -190,21 +232,34 @@ public class GrouperFactoryServiceTest {
     @Test
     public void makeWsStemLookupTest() {
         WsStemLookup result;
-
         result = gfsl.makeWsStemLookup("pre");
+        assertNotNull(result);
+        result = gfsl.makeWsStemLookup("pre",UUID);
+        assertNotNull(result);
     }
 
     @Test
-    public void makeWsAttributeAsignValueTest() {
+    public void makeWsAttributeAssignValueTest() {
         WsAttributeAssignValue result;
-
         result = gfsl.makeWsAttributeAssignValue("10:30AM");
+        assertNotNull(result);
     }
 
     @Test
     public void makeWsStemSaveResultsTest() {
         WsStemSaveResults results = gfsl.makeWsStemSaveResults("username", "stemPath");
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
+    }
+
+    @Ignore
+    @Test
+    //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
+    public void deleteStemTest(){
+        WsSubjectLookup adminLookup = gfsl.makeWsSubjectLookup(ADMIN);
+        WsStemLookup stem = gfsl.makeWsStemLookup("testStem");
+
+        WsStemDeleteResults result = gfsl.deleteStem(adminLookup, stem);
+        System.out.print(result);
     }
 
     @Test
@@ -506,10 +561,12 @@ public class GrouperFactoryServiceTest {
         //GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]
     }
 
+    @Ignore
     @Test
+    //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
     public void addCompositeGroupTest() {
+        //Not an actual test, addCompositeGroup is not implemented in GroupingFactoryServiceImpl.java
         //todo Build when main method is complete
-
         try {
             assertNull(
                     gfsl.addCompositeGroup(users.get(0).getUsername(), GROUPING_3_PATH, "type", GROUPING_3_BASIS_PATH,
