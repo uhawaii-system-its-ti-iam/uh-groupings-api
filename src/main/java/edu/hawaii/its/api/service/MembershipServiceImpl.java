@@ -580,8 +580,16 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(include, user, personToAdd);
 
                     isIncludeUpdated = true;
-                    personToAdd.setAttributes(
-                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+
+                    // Set person's attributes whether it's with username or Uuid.
+                    if (personToAdd.getUsername() != null) {
+                      personToAdd.setAttributes(
+                          memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                    } else {
+                      personToAdd.setAttributes(
+                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                    }
+
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
                 }
@@ -604,8 +612,15 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
                     isExcludeUpdated = true;
-                    personToAdd.setAttributes(
-                            memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+
+                    // Set person's attributes whether it's with username or Uuid.
+                    if (personToAdd.getUsername() != null) {
+                      personToAdd.setAttributes(
+                          memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                    } else {
+                      personToAdd.setAttributes(
+                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                    }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
 
