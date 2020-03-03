@@ -113,7 +113,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid: Username or id number of user to obtain attributes about
      * @return Map of user attributes
      */
-    @RequestMapping(value = "/members/{uid}",
+    @RequestMapping(value = "/members/{uid:[\\w-:.<>]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -130,7 +130,7 @@ public class GroupingsRestControllerv2_1 {
      *
      * @return List of members grouping memberships
      */
-    @RequestMapping(value = "/members/{uid}/groupings",
+    @RequestMapping(value = "/members/{uid:[\\w-:.]+}/groupings",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -148,8 +148,8 @@ public class GroupingsRestControllerv2_1 {
      * @param uid: Username of owner to get list of groupings they own
      * @return List of owner's owned groupings
      */
-    @GetMapping("/owners/{uid}/groupings")
-    @RequestMapping(value = "/owners/{uid}/groupings",
+    @GetMapping("/owners/{uid:[\\w-:.]+}/groupings")
+    @RequestMapping(value = "/owners/{uid:[\\w-:.]+}/groupings",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -171,7 +171,7 @@ public class GroupingsRestControllerv2_1 {
      * @param isAscending: Page of grouping to retrieve (starts at 1)
      * @return Grouping found at specified path
      */
-    @RequestMapping(value = "/groupings/{path}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -192,7 +192,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the list of sync destinations
      */
-    @RequestMapping(value = "/groupings/{path}/syncDestinations",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -210,7 +210,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid: uid of admin to add
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/admins/{uid}",
+    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
@@ -228,7 +228,7 @@ public class GroupingsRestControllerv2_1 {
      * @param path: String containing the path of grouping
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> addNewGrouping(
@@ -246,7 +246,7 @@ public class GroupingsRestControllerv2_1 {
      * @param dtoString: new description to be updated
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}/description",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/description",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
@@ -265,7 +265,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid/uuid of new owner to add
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}/owners/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
@@ -284,7 +284,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of member to add to include
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
@@ -306,7 +306,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid  : the uid of the user that will be opted in
      * @return information about the success of opting in
      */
-    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}/self",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
@@ -325,7 +325,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uids: uids or uuids of members to add to include
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/groupings/{path}/includeMultipleMembers/{uids}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
@@ -345,7 +345,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of member to add to exclude
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(
@@ -365,7 +365,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uids: uids or uuids of members to add to exclude
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/groupings/{path}/excludeMultipleMembers/{uids}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
@@ -387,7 +387,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid  : the uid of the user that will be opted out
      * @return information about the success of opting out
      */
-    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}/self",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
@@ -406,7 +406,7 @@ public class GroupingsRestControllerv2_1 {
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/enable",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
@@ -437,7 +437,7 @@ public class GroupingsRestControllerv2_1 {
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/preferences/{preferenceId}/disable",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
@@ -468,7 +468,7 @@ public class GroupingsRestControllerv2_1 {
      * @param syncDestName: name of syncDest to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/syncDests/{syncDestName}/enable",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/enable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> enableSyncDest(
@@ -487,7 +487,7 @@ public class GroupingsRestControllerv2_1 {
      * @param syncDestName: name of syncDest to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path}/syncDests/{syncDestName}/disable",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> disableSyncDest(
@@ -505,7 +505,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid: uid or uuid of admin to delete
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/admins/{uid}",
+    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
@@ -523,7 +523,7 @@ public class GroupingsRestControllerv2_1 {
      * @param path: path of grouping to delete
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> deleteNewGrouping(
@@ -542,7 +542,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of owner to delete
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}/owners/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
@@ -561,7 +561,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of grouping include member to remove
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}/includeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
@@ -580,7 +580,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of grouping exclude member to remove
      * @return Information about results of operation
      */
-    @RequestMapping(value = "/groupings/{path}/excludeMembers/{uid}",
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
