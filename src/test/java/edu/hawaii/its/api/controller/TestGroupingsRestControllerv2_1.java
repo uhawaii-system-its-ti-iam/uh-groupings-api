@@ -742,7 +742,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR(API_BASE + "groupings//owners//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
     }
 
@@ -899,7 +899,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings//includeMembers//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
 
         try {
@@ -913,7 +913,7 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings//excludeMembers//", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
+            assertThat(ghe.getStatusCode(), equalTo(405));
         }
     }
 
