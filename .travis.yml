@@ -13,7 +13,7 @@ script:
   - mvn -Denv=dev clean test
 
 after_success:
-  - mvn jacoco:report coveralls:report
+  - mvn clean test jacoco:report coveralls:report
 
 notifications:
   email:
