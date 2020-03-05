@@ -14,6 +14,12 @@ public class GroupingsServiceResult {
         this.action = action;
     }
 
+    public GroupingsServiceResult(String resultCode, String action, Person person) {
+        this.resultCode = resultCode;
+        this.action = action;
+        this.person = person;
+    }
+
     public String getResultCode() {
         return resultCode;
     }

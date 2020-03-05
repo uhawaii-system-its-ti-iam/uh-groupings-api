@@ -16,10 +16,13 @@ public interface MembershipService {
             throws IOException, MessagingException;
 
     List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
-                                                                String userIdentifier);
+            String userIdentifier);
 
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
-                                             String userToDelete);
+            String userToDelete);
+
+    List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
+            List<String> usersToDelete);
 
     List<String> listOwned(String adminUsername, String username);
 
