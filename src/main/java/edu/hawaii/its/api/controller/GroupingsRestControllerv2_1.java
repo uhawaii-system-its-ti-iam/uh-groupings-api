@@ -592,4 +592,17 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
     }
 
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids:[\\w-:.]+}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteMultipleExcludeMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String uids) {
+        logger.info("Entered REST deleteExclude");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uids));
+    }
+
 }
