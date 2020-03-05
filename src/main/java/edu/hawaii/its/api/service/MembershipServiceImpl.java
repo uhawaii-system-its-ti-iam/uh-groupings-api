@@ -624,6 +624,9 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
 
+                } else {
+                  gsrList.add(helperService.makeGroupingsServiceResult(
+                      SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
                 }
             }
             //if owners check to see if the user is already in owners
