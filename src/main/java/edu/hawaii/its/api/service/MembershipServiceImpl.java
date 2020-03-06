@@ -303,6 +303,23 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
+    @Override
+    public List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
+            List<String> usersToDelete) {
+        logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
+                + "; group: " + groupPath
+                + "; usersToDelete: " + usersToDelete
+                + ";");
+        List<GroupingsServiceResult> gsrs = new ArrayList<>();
+        for (String userToDelete : usersToDelete) {
+            try {
+                gsrs.add(new GroupingsServiceResult("Success!", "Delete!", new Person("noName", userToDelete)));
+            } catch (GcWebServiceError e) {
+            }
+        }
+        return gsrs;
+    }
+
     //adds a user to the admins group via username or UH id number
     @Override
     public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
@@ -583,13 +600,12 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
 
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
-                      personToAdd.setAttributes(
-                          memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                        personToAdd.setAttributes(
+                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
                     } else {
-                      personToAdd.setAttributes(
-                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                        personToAdd.setAttributes(
+                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
                     }
-
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
                 }
@@ -615,18 +631,18 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
 
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
-                      personToAdd.setAttributes(
-                          memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                        personToAdd.setAttributes(
+                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
                     } else {
-                      personToAdd.setAttributes(
-                          memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                        personToAdd.setAttributes(
+                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
 
                 } else {
-                  gsrList.add(helperService.makeGroupingsServiceResult(
-                      SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
+                    gsrList.add(helperService.makeGroupingsServiceResult(
+                            SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
                 }
             }
             //if owners check to see if the user is already in owners

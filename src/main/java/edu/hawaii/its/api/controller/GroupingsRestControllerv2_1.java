@@ -573,6 +573,19 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
     }
 
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleIncludeMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteInclude");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMembers(currentUser, path + INCLUDE, uids));
+    }
+
     /**
      * Remove grouping exclude member
      *
@@ -592,4 +605,16 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
     }
 
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteExclude");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
+    }
 }
