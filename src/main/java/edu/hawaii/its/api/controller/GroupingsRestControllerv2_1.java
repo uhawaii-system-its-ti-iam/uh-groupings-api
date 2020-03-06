@@ -313,6 +313,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
     }
 
+    /**
+     * Remove the uids from the include list of grouping at path, as current user.
+     *
+     * @param currentUser Owner/Current user.
+     * @param path        grouping path.
+     * @param uids        list of uids.
+     * @return GroupingsServiceResult
+     */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -345,6 +353,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
     }
 
+    /**
+     * Remove the uids from the exclude list of grouping at path, as current user.
+     *
+     * @param currentUser Owner/Current user.
+     * @param path        grouping path.
+     * @param uids        list of uids.
+     * @return GroupingsServiceResult
+     */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)

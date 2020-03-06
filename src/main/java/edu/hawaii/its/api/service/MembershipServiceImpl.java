@@ -304,6 +304,14 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
+    /**
+     * Delete usersToDelete from groupPath as ownerUserName.
+     *
+     * @param ownerUsername uid of the current user/owner.
+     * @param groupPath     path of grouping.
+     * @param usersToDelete list of members uids.
+     * @return GroupingServiceResult
+     */
     @Override
     public GroupingsServiceResult deleteGroupMembers(String ownerUsername, String groupPath,
             List<String> usersToDelete) {
