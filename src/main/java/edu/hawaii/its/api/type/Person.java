@@ -48,6 +48,12 @@ public class Person implements Comparable<Person> {
         attributes.put(USERNAME, username);
     }
 
+    public Person(String name, String username) {
+        this(name);
+
+        attributes.put(USERNAME, username);
+    }
+
     // Constructor.
     public Person(String name, String uhUuid, String username, String firstName, String lastName) {
         this(name, uhUuid, username);
