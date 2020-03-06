@@ -27,6 +27,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -304,20 +305,26 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
+    public GroupingsServiceResult deleteGroupMembers(String ownerUsername, String groupPath,
             List<String> usersToDelete) {
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
                 + "; usersToDelete: " + usersToDelete
                 + ";");
-        List<GroupingsServiceResult> gsrs = new ArrayList<>();
-        for (String userToDelete : usersToDelete) {
-            try {
-                gsrs.add(new GroupingsServiceResult("Success!", "Delete!", new Person("noName", userToDelete)));
-            } catch (GcWebServiceError e) {
-            }
+        String action = "delete " + usersToDelete.toString() + " from " + groupPath;
+
+        String composite = helperService.parentGroupingPath(groupPath);
+        if (memberAttributeService.isOwner(composite, ownerUsername) || memberAttributeService
+                .isSuperuser(ownerUsername)) {
+            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
+            WsDeleteMemberResults deleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(groupPath, user, usersToDelete);
+
+            updateLastModified(composite);
+            updateLastModified(groupPath);
+            return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
         }
-        return gsrs;
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
     //adds a user to the admins group via username or UH id number
