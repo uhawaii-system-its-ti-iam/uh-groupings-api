@@ -319,7 +319,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + "; group: " + groupPath
                 + "; usersToDelete: " + usersToDelete
                 + ";");
-        String action = "delete " + usersToDelete.toString() + " from " + groupPath;
+        String action = "delete:\n" + usersToDelete.toString() + " from " + groupPath;
 
         String composite = helperService.parentGroupingPath(groupPath);
         if (memberAttributeService.isOwner(composite, ownerUsername) || memberAttributeService
@@ -559,20 +559,6 @@ public class MembershipServiceImpl implements MembershipService {
                 action);
     }
 
-    /*
-public List<GroupingsServiceResult> add_Member_Helper(String username, String groupPath, Person personToAdd) {
-    logger.info(
-            "addMemberHelper; user: " + username + "; group: " + groupPath + "; personToAdd: " + personToAdd + ";");
-    List<GroupingsServiceResult> gsrList = new ArrayList<>();
-
-    if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
-            || memberAttributeService.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
-            .getUsername().equals(username))) {
-        String pathToAdd;
-        String pathToDelete;
-    }
-    }
-     */
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
         logger.info(

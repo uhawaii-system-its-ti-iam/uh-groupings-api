@@ -5,6 +5,10 @@ public class GroupingsServiceResult {
     private String resultCode = "null";
     private Person person = null;
 
+    public GroupingsServiceResult() {
+
+    }
+
     public GroupingsServiceResult(String resultCode, String action) {
         this.resultCode = resultCode;
         this.action = action;
