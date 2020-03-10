@@ -75,7 +75,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
-        em.setPersistenceUnitName("holidayPersistenceUnit");
+        em.setPersistenceUnitName("groupingsPersistenceUnit");
         em.setPersistenceProviderClass(HibernatePersistenceProvider.class);
         em.setPackagesToScan("edu.hawaii.its.api.type");
 
