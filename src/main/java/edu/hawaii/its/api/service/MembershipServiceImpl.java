@@ -622,7 +622,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
 
                     isIncludeUpdated = true;
                 }
-                //check to see if userToAdd is already in exclude
+                //check to see if userToAdd is not in exclude
                 if (!memberAttributeService.isMember(exclude, personToAdd)) {
                     //add to exclude
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
@@ -639,7 +639,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
-
+                //if userToAdd is already in exclude
                 } else {
                     gsrList.add(helperService.makeGroupingsServiceResult(
                             SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
