@@ -307,32 +307,71 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Delete usersToDelete from groupPath as ownerUserName.
      *
-     * @param ownerUsername uid of the current user/owner.
-     * @param groupPath     path of grouping.
-     * @param usersToDelete list of members uids.
+     * @param ownerUsername          uid of the current user/owner.
+     * @param groupPath              path of grouping.
+     * @param potentialUsersToDelete list of members uids.
      * @return GroupingServiceResult
      */
     @Override
     public GroupingsServiceResult deleteGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToDelete) {
+            List<String> potentialUsersToDelete) {
+        String action;
+        String composite = helperService.parentGroupingPath(groupPath);
+        String path;
+        List<String> usersToDelete;
+
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
-                + "; usersToDelete: " + usersToDelete
+                + "; usersToDelete: " + potentialUsersToDelete
                 + ";");
-        String action = "delete:\n" + usersToDelete.toString() + " from " + groupPath;
 
-        String composite = helperService.parentGroupingPath(groupPath);
         if (memberAttributeService.isOwner(composite, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
+
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
+
+            // MultiDelete only checks for Include and Exclude.
+            if (groupPath.endsWith(INCLUDE))
+                path = composite + INCLUDE;
+            else
+                path = composite + EXCLUDE;
+
+            usersToDelete = unionOfGroupingAtPath(path, potentialUsersToDelete);
+
+            action = "delete:" + "(" + usersToDelete.toString() + " U " + potentialUsersToDelete.toString() + " )"
+                    + " from "
+                    + groupPath;
+
+            // Make deletion.
             WsDeleteMemberResults deleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(groupPath, user, usersToDelete);
+                    grouperFS.makeWsDeleteMemberResults(path, user, usersToDelete);
 
             updateLastModified(composite);
             updateLastModified(groupPath);
             return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+
+    /**
+     * Return the union of members and grouping at path.
+     *
+     * @param path    grouping path.
+     * @param members list of potential members.
+     * @return List{String} result.
+     */
+    private List<String> unionOfGroupingAtPath(String path, List<String> members) {
+        List<String> result = new ArrayList<>();
+        for (String member : members) {
+            try {
+                if (memberAttributeService.isMember(path, member)) {
+                    result.add(member);
+                }
+            } catch (GcWebServiceError e) {
+                logger.info("\"" + member + "\"********************************************************************************************************** " + "is invalid for deletion", e);
+            }
+        }
+        return result;
     }
 
     //adds a user to the admins group via username or UH id number
