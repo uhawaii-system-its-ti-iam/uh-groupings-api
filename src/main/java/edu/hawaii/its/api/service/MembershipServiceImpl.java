@@ -204,8 +204,7 @@ public class MembershipServiceImpl implements MembershipService {
         strList.add("World");
 
         GenericServiceResult genericServiceResult = new GenericServiceResult();
-        genericServiceResult.add(strList);
-        genericServiceResult.add(groupingsServiceResult);
+        genericServiceResult.addList(strList, groupingsServiceResult);
 
         return genericServiceResult;
     }

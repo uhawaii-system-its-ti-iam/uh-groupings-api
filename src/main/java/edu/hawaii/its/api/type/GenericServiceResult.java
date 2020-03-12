@@ -19,6 +19,12 @@ public class GenericServiceResult {
         return this.data;
     }
 
+    public ArrayList<Object> addList(Object... objs) {
+        for (Object obj : objs)
+            this.add(obj);
+        return this.data;
+    }
+
     public ArrayList<Object> getData() {
         return this.data;
     }
