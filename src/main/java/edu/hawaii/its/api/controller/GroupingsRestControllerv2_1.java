@@ -178,18 +178,15 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String sortString,
-            @RequestParam(required = false) Boolean isAscending) {
+    public ResponseEntity<Map<String, Group>> getGrouping(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path
+    ) {
         logger.info("Entered REST getGrouping...");
 
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService
-                        .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
+                        .getPaginatedGrouping(path, currentUser));
     }
 
     /**
@@ -402,17 +399,16 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.optOut(currentUser, path, uid));
     }
 
-    @RequestMapping(value = "/admins/{path:[\\w-:.]+}/{uid:[\\w-:.]+}",
+    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> checkInBasis(
+    public ResponseEntity<List<Membership>> getMembershipResults(
             @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST checkInBasis");
         return ResponseEntity
                 .ok()
-                .body(membershipService.checkMemberInBasis(currentUser, path + BASIS, uid));
+                .body(membershipService.getMemberShipResults(currentUser, uid));
     }
 
     /**

@@ -283,12 +283,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     // sortString sorts the database by whichever sortString category is given (e.g. "uid" will sort list by uid) before returning page
     // isAscending puts the database in ascending or descending order before returning page
     @Override
-    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size,
-            String sortString, Boolean isAscending) {
+    public Map<String, Group> getPaginatedGrouping(String groupingPath, String ownerUsername) {
+        /*
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
 
+         */
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
@@ -299,14 +300,16 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             String exclude = groupingPath + EXCLUDE;
             String owners = groupingPath + OWNERS;
 
-            String[] paths = { include,
-                    exclude,
-                    basis,
-                    groupingPath,
-                    owners };
-            Map<String, Group> groups =
-                    getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
+            List<String> paths = new ArrayList<>();
+            paths.add(include);
+            paths.add(exclude);
+            paths.add(basis);
+            paths.add(groupingPath);
+            paths.add(owners);
+            return getMembers(ownerUsername, paths);
+            //  getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
 
+            /*
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
             compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
@@ -317,7 +320,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setOwners(groups.get(owners));
 
             System.out.println("CompositeGroupingComingBack" + compositeGrouping);
-            return compositeGrouping;
+
+             */
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -389,7 +393,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
-
 
         if (groupsOpted.size() > 0) {
 

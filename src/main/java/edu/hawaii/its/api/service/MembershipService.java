@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    GroupingsServiceResult checkMemberInBasis(String ownerUsername, String groupingPath, String uid);
+    List<Membership> getMemberShipResults(String ownerUsername, String uid);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 

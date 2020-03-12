@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
@@ -319,26 +322,45 @@ public class MembershipServiceImpl implements MembershipService {
         }
         return gsrs;
     }
-    @Override public GroupingsServiceResult checkMemberInBasis(String ownerUsername, String groupingPath, String uid) {
-        String action = "GET: " + uid + "is in Basis?;"
-                + "; group: " + groupingPath;
 
-        String composite = helperService.parentGroupingPath(groupingPath);
-        String path = composite + BASIS;
+    @Override
+    public List<Membership> getMemberShipResults(String ownerUsername, String uid) {
+        String action = "GET: " + uid + "Memberships;";
 
+        List<Membership> memberships = new ArrayList<>();
         logger.info(action);
-        if ((memberAttributeService.isOwner(composite, ownerUsername)
-                || memberAttributeService.isSuperuser(ownerUsername))
-                && groupingPath.endsWith(BASIS)) {
-            try {
-                if (memberAttributeService.isMember(path, uid)) {
-                    return helperService.makeGroupingsServiceResult("SUCCESS", action);
+        if (memberAttributeService.isSuperuser(ownerUsername)) {
+            List<String> groupPaths = groupingAssignmentService.getGroupPaths(ownerUsername, uid);
+
+            for (String groupPath : groupPaths) {
+                boolean hasMembership = false;
+
+                Membership membership = new Membership();
+                if (groupPath.endsWith(INCLUDE)) {
+                    membership.setInInclude(true);
+                    hasMembership = true;
                 }
-            } catch (GcWebServiceError e) {
-                return helperService.makeGroupingsServiceResult("FAILURE", action);
+                if (groupPath.endsWith(BASIS)) {
+                    membership.setInBasis(true);
+                    hasMembership = true;
+                }
+                if (groupPath.endsWith(EXCLUDE)) {
+                    membership.setInExclude(true);
+                    hasMembership = true;
+                }
+                if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
+                    membership.setInBasisAndInclude(true);
+                    hasMembership = true;
+                }
+                if (hasMembership) {
+                    membership.setPath(groupPath);
+                    memberships.add(membership);
+                }
             }
+            return memberships;
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+
     }
 
     //adds a user to the admins group via username or UH id number
@@ -660,7 +682,7 @@ public List<GroupingsServiceResult> add_Member_Helper(String username, String gr
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
-                //if userToAdd is already in exclude
+                    //if userToAdd is already in exclude
                 } else {
                     gsrList.add(helperService.makeGroupingsServiceResult(
                             SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
