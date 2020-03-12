@@ -319,6 +319,27 @@ public class MembershipServiceImpl implements MembershipService {
         }
         return gsrs;
     }
+    @Override public GroupingsServiceResult checkMemberInBasis(String ownerUsername, String groupingPath, String uid) {
+        String action = "GET: " + uid + "is in Basis?;"
+                + "; group: " + groupingPath;
+
+        String composite = helperService.parentGroupingPath(groupingPath);
+        String path = composite + BASIS;
+
+        logger.info(action);
+        if ((memberAttributeService.isOwner(composite, ownerUsername)
+                || memberAttributeService.isSuperuser(ownerUsername))
+                && groupingPath.endsWith(BASIS)) {
+            try {
+                if (memberAttributeService.isMember(path, uid)) {
+                    return helperService.makeGroupingsServiceResult("SUCCESS", action);
+                }
+            } catch (GcWebServiceError e) {
+                return helperService.makeGroupingsServiceResult("FAILURE", action);
+            }
+        }
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
 
     //adds a user to the admins group via username or UH id number
     @Override

@@ -28,6 +28,9 @@ public class Membership implements Comparable<Membership> {
     @Column
     private boolean isOptOutEnabled = false;
 
+    private boolean inBasis = false;
+    private boolean inInclude = false;
+
     public Membership() {
 
     }
