@@ -48,9 +48,6 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.include}")
     private String INCLUDE;
 
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
     @Value("${groupings.api.opt_in}")
     private String OPT_IN;
 
@@ -160,8 +157,37 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get a list of a groupings a user is in and can opt into
+     * <p>
+     * <<<<<<< HEAD
      *
-     * @return List of members grouping memberships
+     * @param path:        Path of specific grouping
+     * @param page:        Page of grouping to retrieve (starts at 1)
+     * @param size:        Size of page of grouping to retrieve
+     * @param sortString:  Page of grouping to retrieve
+     * @param isAscending: Page of grouping to retrieve (starts at 1)
+     * @return Grouping found at specified path
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String sortString,
+            @RequestParam(required = false) Boolean isAscending) {
+        logger.info("Entered REST getGrouping...");
+
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService
+                        .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
+    }
+
+    /**
+     * Get the list of sync destinations
+     * >>>>>>> Attempt to speed up getGrouping
      */
     @RequestMapping(value = "/members/{uid:[\\w-:.]+}/groupings",
             method = RequestMethod.GET,
@@ -316,19 +342,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
     }
 
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleIncludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteInclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + INCLUDE, uids));
-    }
-
     /**
      * Remove grouping exclude member
      *
@@ -416,34 +429,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.removeOwnership(path, currentUser, uid));
-    }
-
-    /**
-     * Get a specific grouping with potential for page, size, sortstring, or ascending/descending
-     *
-     * @param path:        Path of specific grouping
-     * @param page:        Page of grouping to retrieve (starts at 1)
-     * @param size:        Size of page of grouping to retrieve
-     * @param sortString:  Page of grouping to retrieve
-     * @param isAscending: Page of grouping to retrieve (starts at 1)
-     * @return Grouping found at specified path
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String sortString,
-            @RequestParam(required = false) Boolean isAscending) {
-        logger.info("Entered REST getGrouping...");
-
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService
-                        .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
     /**
