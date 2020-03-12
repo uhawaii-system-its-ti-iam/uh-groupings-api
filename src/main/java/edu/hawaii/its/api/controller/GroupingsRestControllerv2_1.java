@@ -49,9 +49,6 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.include}")
     private String INCLUDE;
 
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
     @Value("${groupings.api.opt_in}")
     private String OPT_IN;
 
@@ -178,15 +175,18 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Map<String, Group>> getGrouping(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path
-    ) {
+    public ResponseEntity<Grouping> getGrouping(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String sortString,
+            @RequestParam(required = false) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
 
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService
-                        .getPaginatedGrouping(path, currentUser));
+                        .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
     /**
@@ -397,18 +397,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.optOut(currentUser, path, uid));
-    }
-
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Membership>> getMembershipResults(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST checkInBasis");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.getMemberShipResults(currentUser, uid));
     }
 
     /**

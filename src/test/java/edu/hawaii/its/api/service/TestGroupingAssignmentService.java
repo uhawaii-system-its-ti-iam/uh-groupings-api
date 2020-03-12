@@ -7,18 +7,15 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,7 +40,7 @@ import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -188,7 +185,7 @@ public class TestGroupingAssignmentService {
             Group adminGroup = adminList.getAdminGroup();
 
             // Assert that admins list was retrieved.
-            assertThat(adminGroup.getUsernames().size(), is(not(0)));
+            assertThat(adminGroup.getUsernames().size(),is(not(0)));
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
@@ -250,19 +247,17 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    @Ignore
     public void getPaginatedGroupingTest() {
-/*
+
         // Paging starts at 1 D:
         // Page 1 contains 3 stale subjects, should return 17
-       // Grouping paginatedGroupingPage1 =
-            //    groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
-        //        // Page 2 contains 1 stale subject, should return 19
-     //   Grouping paginatedGroupingPage2 =
-             //   groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
+        Grouping paginatedGroupingPage1 =
+                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
+//        // Page 2 contains 1 stale subject, should return 19
+        Grouping paginatedGroupingPage2 =
+                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
 
-        Grouping normalGrouping =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
+        Grouping normalGrouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));
@@ -294,8 +289,6 @@ public class TestGroupingAssignmentService {
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
-
- */
     }
 
     // Testing why getting a grouping returns different results for a page of the size of the entire grouping
@@ -305,7 +298,6 @@ public class TestGroupingAssignmentService {
     @Ignore
     @Test
     public void paginatedVersusNonpaginatedTest() {
-        /*
         Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
         groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369, null, null);
 
@@ -318,19 +310,14 @@ public class TestGroupingAssignmentService {
         }
 
         Collections.sort(uuids);
-
-         */
     }
 
     @Test
     public void paginatedLargeGroupingTest() {
-        /*
 
         for (int i = 1; i <= 150; i++) {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], i, 20, "name", true);
         }
-
-         */
     }
 
     @Test
@@ -402,16 +389,16 @@ public class TestGroupingAssignmentService {
         membershipService.addSelfOpted(GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
 
         // Call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings.
-        List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include", usernames[0], groupings);
+        List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
 
         // Returned opted groups, should be 3.
         assertTrue(optedGroups.size() == 3);
 
         // Opt out one of the groups.
-        membershipService.optOut(usernames[0], GROUPING);
+        membershipService.optOut(usernames[0],GROUPING);
 
         // Call groupingsOpted once more to get refreshed list of opted groups.
-        optedGroups = groupingAssignmentService.groupingsOpted("include", usernames[0], groupings);
+        optedGroups = groupingAssignmentService.groupingsOpted("include",usernames[0], groupings);
 
         // Amount of opted groups return should be 1 less.
         assertTrue(optedGroups.size() == 2);

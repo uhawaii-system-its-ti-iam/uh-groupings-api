@@ -283,13 +283,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     // sortString sorts the database by whichever sortString category is given (e.g. "uid" will sort list by uid) before returning page
     // isAscending puts the database in ascending or descending order before returning page
     @Override
-    public Map<String, Group> getPaginatedGrouping(String groupingPath, String ownerUsername) {
-        /*
+    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size,
+            String sortString,
+            Boolean isAscending) {
+
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
-
-         */
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
@@ -306,10 +306,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             paths.add(basis);
             paths.add(groupingPath);
             paths.add(owners);
-            return getMembers(ownerUsername, paths);
-            //  getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
+            Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
 
-            /*
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
             compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
@@ -321,7 +319,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
             System.out.println("CompositeGroupingComingBack" + compositeGrouping);
 
-             */
+            return compositeGrouping;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }

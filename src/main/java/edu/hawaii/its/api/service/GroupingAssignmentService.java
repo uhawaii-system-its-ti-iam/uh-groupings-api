@@ -6,7 +6,6 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -28,7 +27,8 @@ public interface GroupingAssignmentService {
 
     Grouping getGrouping(String groupingPath, String ownerUsername);
 
-    Map<String, Group> getPaginatedGrouping(String groupingPath, String ownerUsername);
+    Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size, String sortString,
+                                  Boolean isAscending);
 
     GroupingAssignment getGroupingAssignment(String username);
 
@@ -50,6 +50,6 @@ public interface GroupingAssignmentService {
 
     Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths);
 
-    Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
-            String sortString, Boolean isAscending);
+    Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size,
+                                            String sortString, Boolean isAscending);
 }
