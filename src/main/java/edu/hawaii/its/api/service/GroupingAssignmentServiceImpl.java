@@ -322,7 +322,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
     }
-
     //get a GroupingAssignment object containing the groups that a user is in and can opt into
     @Override
     public GroupingAssignment getGroupingAssignment(String username) {
@@ -389,7 +388,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
-
 
         if (groupsOpted.size() > 0) {
 
