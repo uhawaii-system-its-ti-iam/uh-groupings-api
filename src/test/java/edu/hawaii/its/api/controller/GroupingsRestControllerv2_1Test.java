@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,7 +48,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("localTest")
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class GroupingsRestControllerv2_1Test {
 
     @Value("${app.iam.request.form}")
@@ -304,7 +303,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("allGroupings[0].name").value("bob"))
                 .andExpect(jsonPath("allGroupings[0].path").value("test:ing:me:bob"))
                 .andExpect(jsonPath("allGroupings[0].syncDestinations").isEmpty())
-                //                    .value("true"))
+//                    .value("true"))
 
                 // basis
                 .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
@@ -668,7 +667,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false))
-                .willReturn(gsrListserv());
+                        .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
@@ -808,7 +807,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void getGrouping() throws Exception {
-/*
+
         given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, null, null, null, null))
                 .willReturn(grouping());
 
@@ -842,8 +841,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("owners.members[3].uhUuid").value("o3-uuid"))
                 .andExpect(jsonPath("owners.members[3].username").value("o3-username"))
                 .andExpect(jsonPath("composite.members", hasSize(0)));
-
- */
     }
 
     @Test
@@ -923,6 +920,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 >>>>>>> Improve add speed
 
+
     @Test
     @WithMockUhUser
     public void descriptionCheck() throws Exception {
@@ -953,6 +951,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
     }
+
 
     @Ignore
     @Test
@@ -1045,20 +1044,18 @@ public class GroupingsRestControllerv2_1Test {
         Grouping groupingTest = grouping();
 
         // Check that regular member cannot change description
-        MvcResult memberDescriptionResult =
-                mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
-                        .header(CURRENT_USER, "abc"))
-                        .andDo(print())
-                        .andExpect(status().is4xxClientError())
-                        .andReturn();
+        MvcResult memberDescriptionResult = mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+                .header(CURRENT_USER, "abc"))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andReturn();
 
         // Admin should be able to change description
-        MvcResult adminDescriptionResult =
-                mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
-                        .header(CURRENT_USER, "admin"))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andReturn();
+        MvcResult adminDescriptionResult = mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
+                .header(CURRENT_USER, "admin"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
     }
 
     @Test
@@ -1067,11 +1064,11 @@ public class GroupingsRestControllerv2_1Test {
         Grouping test = groupingTwo();
 
         mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
-                .header("current_user", "o6-username")
-                .header("accept", "application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                        .header("current_user", "o6-username")
+                        .header("accept", "application/json"))
+                       .andDo(print())
+                       .andExpect(status().isOk())
+                       .andReturn();
 
         mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
                 .header("current_user", "o6-username")
@@ -1094,5 +1091,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
     }
+
 
 }
