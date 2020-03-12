@@ -5,11 +5,13 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.*;
+import io.swagger.models.auth.In;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +91,8 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @RequestMapping(value = "/generic",
-            method = RequestMethod.GET)
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<GenericServiceResult> generic() {
         return ResponseEntity
@@ -187,7 +191,6 @@ public class GroupingsRestControllerv2_1 {
             @RequestParam(required = false) String sortString,
             @RequestParam(required = false) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
-
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService

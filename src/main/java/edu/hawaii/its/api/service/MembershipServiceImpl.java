@@ -199,12 +199,16 @@ public class MembershipServiceImpl implements MembershipService {
     public GenericServiceResult generic() {
         List<String> strList = new ArrayList<>();
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("SUCCESS", "Made a Generic enitity");
+        List<Person> list = new ArrayList<>();
+        list.add(createNewPerson("gilbertz"));
+        Membership membership = new Membership(createNewPerson("gilbertz"), new Group(list));
+        Grouping grouping = new Grouping("Grouping Path");
+        strList.add("groupingsServiceResult");
+        strList.add("membership");
+        strList.add("grouping");
 
-        strList.add("HEELO");
-        strList.add("World");
-
-        GenericServiceResult genericServiceResult = new GenericServiceResult();
-        genericServiceResult.addList(strList, groupingsServiceResult);
+        GenericServiceResult genericServiceResult =
+                new GenericServiceResult(strList, groupingsServiceResult, membership, grouping);
 
         return genericServiceResult;
     }
