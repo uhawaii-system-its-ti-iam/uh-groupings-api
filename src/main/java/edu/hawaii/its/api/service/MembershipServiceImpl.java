@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -192,6 +193,21 @@ public class MembershipServiceImpl implements MembershipService {
     // returns true if username is a UH id number
     public boolean isUhUuid(String naming) {
         return naming.matches("\\d+");
+    }
+
+    @Override
+    public GenericServiceResult generic() {
+        List<String> strList = new ArrayList<>();
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("SUCCESS", "Made a Generic enitity");
+
+        strList.add("HEELO");
+        strList.add("World");
+
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
+        genericServiceResult.add(strList);
+        genericServiceResult.add(groupingsServiceResult);
+
+        return genericServiceResult;
     }
 
     // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
