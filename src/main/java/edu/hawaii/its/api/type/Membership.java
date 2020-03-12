@@ -20,6 +20,9 @@ public class Membership implements Comparable<Membership> {
     private Group group;
 
     @Column
+    private String path;
+
+    @Column
     private boolean isSelfOpted = false;
 
     @Column
@@ -28,8 +31,17 @@ public class Membership implements Comparable<Membership> {
     @Column
     private boolean isOptOutEnabled = false;
 
+    @Column
     private boolean inBasis = false;
+
+    @Column
     private boolean inInclude = false;
+
+    @Column
+    private boolean inExclude = false;
+
+    @Column
+    private boolean inBasisAndInclude = false;
 
     public Membership() {
 
@@ -88,6 +100,46 @@ public class Membership implements Comparable<Membership> {
         this.isOptOutEnabled = isOptOutEnabled;
     }
 
+    public void setInBasis(boolean inBasis) {
+        this.inBasis = inBasis;
+    }
+
+    public boolean isInBasis() {
+        return inBasis;
+    }
+
+    public void setInInclude(boolean inInclude) {
+        this.inInclude = inInclude;
+    }
+
+    public boolean isInInclude() {
+        return inInclude;
+    }
+
+    public void setInExclude(boolean inExclude) {
+        this.inExclude = inExclude;
+    }
+
+    public boolean isInExclude() {
+        return inExclude;
+    }
+
+    public void setInBasisAndInclude(boolean inBasisAndInclude) {
+        this.inBasisAndInclude = inBasisAndInclude;
+    }
+
+    public boolean isInBasisAndInclude() {
+        return inBasisAndInclude;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
     @Override
     public boolean equals(Object o) {
         return ((compareTo((Membership) o) == 0 && o instanceof Membership));
@@ -95,8 +147,9 @@ public class Membership implements Comparable<Membership> {
 
     @Override
     public int compareTo(Membership membership) {
-        if(membership != null) {
-            int idComp = membership.getIdentifier() != null ? getIdentifier().compareTo(membership.getIdentifier()) : -1;
+        if (membership != null) {
+            int idComp =
+                    membership.getIdentifier() != null ? getIdentifier().compareTo(membership.getIdentifier()) : -1;
             int personComp = membership.getPerson() != null ? getPerson().compareTo(membership.getPerson()) : -1;
             int groupComp = membership.getGroup() != null ? getGroup().compareTo(membership.getGroup()) : -1;
 
