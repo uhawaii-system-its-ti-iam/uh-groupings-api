@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface MembershipService {
 
+    GroupingsServiceResult checkMemberInBasis(String ownerUsername, String groupingPath, String uid);
+
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);

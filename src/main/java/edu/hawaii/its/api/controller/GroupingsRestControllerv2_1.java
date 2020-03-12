@@ -48,6 +48,9 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.include}")
     private String INCLUDE;
 
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
     @Value("${groupings.api.opt_in}")
     private String OPT_IN;
 
@@ -498,6 +501,19 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
             .ok()
             .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
+    }
+
+    @RequestMapping(value = "/admins/{path:[\\w-:.]+}/{uid:[\\w-:.]+}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> checkInBasis(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable String uid) {
+        logger.info("Entered REST checkInBasis");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.checkMemberInBasis(currentUser, path + BASIS, uid));
     }
 
     /**
