@@ -889,38 +889,6 @@ public class GroupingsRestControllerv2_1Test {
 
     }
 
-    @Test
-    @WithMockUhUser
-    public void getAddGrouping() throws Exception {
-        List<GroupingsServiceResult> results = new ArrayList<>();
-        results.add(new GroupingsServiceResult(SUCCESS, "add grouping"));
-
-        given(groupingFactoryService.addGrouping(USERNAME, GROUPING))
-                .willReturn(results);
-
-        mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING)
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("add grouping"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void getDeleteGrouping() throws Exception {
-        List<GroupingsServiceResult> results = new ArrayList<>();
-        results.add(new GroupingsServiceResult(SUCCESS, "delete grouping"));
-
-        given(groupingFactoryService.markGroupForPurge(USERNAME, GROUPING))
-                .willReturn(results);
-
-        mockMvc.perform(delete(API_BASE + "/groupings/" + GROUPING)
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("delete grouping"));
-    }
-
 
     @Test
     @WithMockUhUser
