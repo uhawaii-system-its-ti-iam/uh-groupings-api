@@ -108,6 +108,40 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Create a new admin
+     *
+     * @param uid: uid of admin to add
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
+        @PathVariable String uid) {
+        logger.info("Entered REST addNewAdmin...");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.addAdmin(currentUser, uid));
+    }
+
+    /**
+     * Delete an admin
+     *
+     * @param uid: uid or uuid of admin to delete
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
+        @PathVariable String uid) {
+        logger.info("Entered REST deleteNewAdmin...");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.deleteAdmin(currentUser, uid));
+    }
+
+    /**
      * Get a member's attributes based off username or id number
      *
      * @param uid: Username or id number of user to obtain attributes about
@@ -143,6 +177,192 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * if the user is allowed to opt into the grouping
+     * this will add them to the include group of that grouping
+     * if the user is in the exclude group, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting in
+     * @param uid  : the uid of the user that will be opted in
+     * @return information about the success of opting in
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST optIn...");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.optIn(currentUser, path, uid));
+    }
+
+    /**
+     * if the user is allowed to opt out of the grouping
+     * this will add them to the exclude group of that grouping
+     * if the user is in the include group of that Grouping, they will be removed from it
+     *
+     * @param path : the path to the grouping where the user will be opting out
+     * @param uid  : the uid of the user that will be opted out
+     * @return information about the success of opting out
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST optOut...");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.optOut(currentUser, path, uid));
+    }
+
+    /**
+     * Update grouping to add new include member
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid or uuid of member to add to include
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
+        @RequestHeader("current_user") String currentUser, @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST includeMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+            .ok()
+            .body(membershipService.addGroupMember(currentUser, path, uid));
+    }
+
+    /**
+     * Update grouping to add include multiple members
+     *
+     * @param path: path of grouping to update
+     * @param uids: uids or uuids of members to add to include
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
+        @RequestHeader("current_user") String currentUser, @PathVariable String path,
+        @PathVariable List<String> uids) throws IOException, MessagingException {
+        logger.info("Entered REST includeMultipleMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+            .ok()
+            .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    /**
+     * Update grouping to add new exclude member
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid or uuid of member to add to exclude
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(
+        @RequestHeader("current_user") String currentUser, @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST excludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+            .ok()
+            .body(membershipService.addGroupMember(currentUser, path, uid));
+    }
+
+    /**
+     * Update grouping to add exclude multiple members
+     *
+     * @param path: path of grouping to update
+     * @param uids: uids or uuids of members to add to exclude
+     * @return Information about results of the operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
+        @RequestHeader("current_user") String currentUser, @PathVariable String path,
+        @PathVariable List<String> uids) throws IOException, MessagingException {
+        logger.info("Entered REST excludeMultipleMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+            .ok()
+            .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    /**
+     * Remove grouping include member
+     *
+     * @param path: path of grouping to modify
+     * @param uid:  uid or uuid of grouping include member to remove
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST deleteInclude");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
+    }
+
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleIncludeMembers(
+        @RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteInclude");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.deleteGroupMembers(currentUser, path + INCLUDE, uids));
+    }
+
+    /**
+     * Remove grouping exclude member
+     *
+     * @param path: path of grouping to modify
+     * @param uid:  uid or uuid of grouping exclude member to remove
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST deleteExclude");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
+    }
+
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
+        @RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteExclude");
+        return ResponseEntity
+            .ok()
+            .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
+    }
+
+    /**
      * Get an owner's owned groupings by username or UH id number
      *
      * @param uid: Username of owner to get list of groupings they own
@@ -159,6 +379,44 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.restGroupingsOwned(currentUser, uid));
+    }
+
+    /**
+     * Update grouping to add a new owner
+     *
+     * @param path: path of grouping to update
+     * @param uid:  uid/uuid of new owner to add
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST addOwner...");
+        return ResponseEntity
+            .ok()
+            .body(memberAttributeService.assignOwnership(path, currentUser, uid));
+    }
+
+    /**
+     * Delete a grouping owner
+     *
+     * @param path: path of grouping to modify
+     * @param uid:  uid or uuid of owner to delete
+     * @return Information about results of operation
+     */
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String uid) {
+        logger.info("Entered REST deleteOwner");
+        return ResponseEntity
+            .ok()
+            .body(memberAttributeService.removeOwnership(path, currentUser, uid));
     }
 
     /**
@@ -190,56 +448,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path) throws Exception {
-        logger.info("Entered REST getAllSyncDestinations...");
-        return ResponseEntity
-                .ok()
-                .body(groupAttributeService.getAllSyncDestinations(currentUser, path));
-    }
-
-    /**
-     * Create a new admin
-     *
-     * @param uid: uid of admin to add
-     * @return Information about results of the operation
-     */
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST addNewAdmin...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.addAdmin(currentUser, uid));
-    }
-
-    /**
-     * Create a new grouping
-     * Not implemented fully
-     *
-     * @param path: String containing the path of grouping
-     * @return Information about results of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> addNewGrouping(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path) {
-        logger.info("Entered REST addNewGrouping");
-        return ResponseEntity
-                .ok()
-                .body(groupingFactoryService.addGrouping(currentUser, path));
-    }
-
-    /**
      * Update grouping description
      *
      * @param path:      path of grouping to update
@@ -247,156 +455,53 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/description",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupingsServiceResult> updateDescription(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @RequestBody(required = false) String dtoString) {
+        @PathVariable String path,
+        @RequestBody(required = false) String dtoString) {
         logger.info("Entered REST updateDescription");
         return ResponseEntity
-                .ok()
-                .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
+            .ok()
+            .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
     }
 
     /**
-     * Update grouping to add a new owner
+     * Update grouping to enable given preference
      *
-     * @param path: path of grouping to update
-     * @param uid:  uid/uuid of new owner to add
-     * @return Information about results of operation
+     * @param path:         path of grouping to update
+     * @param syncDestName: name of syncDest to update
+     * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST addOwner...");
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/enable",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> enableSyncDest(
+        @RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String syncDestName) {
         return ResponseEntity
-                .ok()
-                .body(memberAttributeService.assignOwnership(path, currentUser, uid));
+            .ok()
+            .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, true));
     }
 
     /**
-     * Update grouping to add new include member
+     * Update grouping to disable given preference
      *
-     * @param path: path of grouping to update
-     * @param uid:  uid or uuid of member to add to include
-     * @return Information about results of the operation
+     * @param path:         path of grouping to update
+     * @param syncDestName: name of syncDest to update
+     * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST includeMembers...");
-        path = path + INCLUDE;
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/disable",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GroupingsServiceResult> disableSyncDest(
+        @RequestHeader("current_user") String currentUser,
+        @PathVariable String path,
+        @PathVariable String syncDestName) {
         return ResponseEntity
-                .ok()
-                .body(membershipService.addGroupMember(currentUser, path, uid));
-    }
-
-    /**
-     * if the user is allowed to opt into the grouping
-     * this will add them to the include group of that grouping
-     * if the user is in the exclude group, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting in
-     * @param uid  : the uid of the user that will be opted in
-     * @return information about the success of opting in
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST optIn...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.optIn(currentUser, path, uid));
-    }
-
-    /**
-     * Update grouping to add include multiple members
-     *
-     * @param path: path of grouping to update
-     * @param uids: uids or uuids of members to add to include
-     * @return Information about results of the operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable List<String> uids) throws IOException, MessagingException {
-        logger.info("Entered REST includeMultipleMembers...");
-        path = path + INCLUDE;
-        return ResponseEntity
-                .ok()
-                .body(membershipService.addGroupMembers(currentUser, path, uids));
-    }
-
-    /**
-     * Update grouping to add new exclude member
-     *
-     * @param path: path of grouping to update
-     * @param uid:  uid or uuid of member to add to exclude
-     * @return Information about results of the operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST excludeMembers...");
-        path = path + EXCLUDE;
-        return ResponseEntity
-                .ok()
-                .body(membershipService.addGroupMember(currentUser, path, uid));
-    }
-
-    /**
-     * Update grouping to add exclude multiple members
-     *
-     * @param path: path of grouping to update
-     * @param uids: uids or uuids of members to add to exclude
-     * @return Information about results of the operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable List<String> uids) throws IOException, MessagingException {
-        logger.info("Entered REST excludeMultipleMembers...");
-        path = path + EXCLUDE;
-        return ResponseEntity
-                .ok()
-                .body(membershipService.addGroupMembers(currentUser, path, uids));
-    }
-
-    /**
-     * if the user is allowed to opt out of the grouping
-     * this will add them to the exclude group of that grouping
-     * if the user is in the include group of that Grouping, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting out
-     * @param uid  : the uid of the user that will be opted out
-     * @return information about the success of opting out
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST optOut...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.optOut(currentUser, path, uid));
+            .ok()
+            .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
     }
 
     /**
@@ -462,159 +567,17 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param syncDestName: name of syncDest to update
-     * @return Information about result of operation
+     * Get the list of sync destinations
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/enable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> enableSyncDest(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String syncDestName) {
+    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader("current_user") String currentUser,
+        @PathVariable String path) throws Exception {
+        logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity
-                .ok()
-                .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, true));
-    }
-
-    /**
-     * Update grouping to disable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param syncDestName: name of syncDest to update
-     * @return Information about result of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/disable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> disableSyncDest(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String syncDestName) {
-        return ResponseEntity
-                .ok()
-                .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
-    }
-
-    /**
-     * Delete an admin
-     *
-     * @param uid: uid or uuid of admin to delete
-     * @return Information about results of the operation
-     */
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST deleteNewAdmin...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteAdmin(currentUser, uid));
-    }
-
-    /**
-     * Delete a grouping
-     * Not implemented yet, even REST API controller function might not be doable at this stage
-     *
-     * @param path: path of grouping to delete
-     * @return Information about results of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteNewGrouping(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path) {
-        logger.info("Entered REST deleteNewGrouping");
-        return ResponseEntity
-                .ok()
-                .body(groupingFactoryService.markGroupForPurge(currentUser, path));
-    }
-
-    /**
-     * Delete a grouping owner
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of owner to delete
-     * @return Information about results of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST deleteOwner");
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.removeOwnership(path, currentUser, uid));
-    }
-
-    /**
-     * Remove grouping include member
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of grouping include member to remove
-     * @return Information about results of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST deleteInclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
-    }
-
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleIncludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteInclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + INCLUDE, uids));
-    }
-
-    /**
-     * Remove grouping exclude member
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of grouping exclude member to remove
-     * @return Information about results of operation
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST deleteExclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
-    }
-
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}",
-            method = RequestMethod.DELETE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteExclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
+            .ok()
+            .body(groupAttributeService.getAllSyncDestinations(currentUser, path));
     }
 }
