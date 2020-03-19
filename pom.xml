@@ -385,7 +385,7 @@
                                 <echo></echo>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
                                 <echo>$ mvn
-                                    -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestGroupingFactoryService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController
+                                    -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController
                                     test
                                 </echo>
                                 <echo></echo>
