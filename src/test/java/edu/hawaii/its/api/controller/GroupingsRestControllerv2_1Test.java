@@ -3,7 +3,6 @@ package edu.hawaii.its.api.controller;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingFactoryService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
@@ -87,9 +86,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockBean
     private GroupingAssignmentService groupingAssignmentService;
-
-    @MockBean
-    private GroupingFactoryService groupingFactoryService;
 
     @MockBean
     private HelperService helperService;
