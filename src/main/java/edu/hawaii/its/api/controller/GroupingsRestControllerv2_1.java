@@ -2,7 +2,6 @@ package edu.hawaii.its.api.controller;
 
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingFactoryService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.*;
@@ -66,9 +65,6 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private GroupingFactoryService groupingFactoryService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;
