@@ -561,22 +561,6 @@ public class GrouperFactoryServiceTest {
         //GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]
     }
 
-    @Ignore
-    @Test
-    //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
-    public void addCompositeGroupTest() {
-        //Not an actual test, addCompositeGroup is not implemented in GroupingFactoryServiceImpl.java
-        //todo Build when main method is complete
-        try {
-            assertNull(
-                    gfsl.addCompositeGroup(users.get(0).getUsername(), GROUPING_3_PATH, "type", GROUPING_3_BASIS_PATH,
-                            GROUPING_3_INCLUDE_PATH));
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-
-    }
-
     @Test
     public void makeEmptyWsAttributeAssignArrayTest() {
         WsAttributeAssign[] testArray;

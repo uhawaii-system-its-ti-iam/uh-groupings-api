@@ -8,7 +8,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GrouperFactoryService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingFactoryService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
@@ -193,9 +192,6 @@ public class TestGroupingsRestControllerv2_1 {
     private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
-    private GroupingFactoryService groupingFactoryService;
-
-    @Autowired
     private HelperService helperService;
 
     @Autowired
@@ -303,13 +299,6 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], RELEASED_GROUPING, false);
 
-        // Delete grouping if it exists
-        try {
-            groupingFactoryService.deleteGrouping(ADMIN, "hawaii.edu:custom:test:ksanidad:bw-test");
-        } catch (GroupingsServiceResultException gsre) {
-            logger.info("Grouping doesn't exist.");
-        }
-
         // Ensures users are not already in group
         membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[0]);
         membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[1]);
@@ -324,7 +313,6 @@ public class TestGroupingsRestControllerv2_1 {
     public void testConstruction() {
         assertNotNull(groupAttributeService);
         assertNotNull(groupingAssignmentService);
-        assertNotNull(groupingFactoryService);
         assertNotNull(helperService);
         assertNotNull(memberAttributeService);
         assertNotNull(membershipService);
