@@ -1057,5 +1057,21 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
     }
 
+  @Test
+  @WithMockUhUser
+  public void regexTest() throws Exception {
+    // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
+    mockMvc.perform(get(API_BASE + "/owners/" + "[" + "/groupings")
+        .header(CURRENT_USER, USERNAME))
+        .andExpect(status().is4xxClientError());
+
+    mockMvc.perform(get(API_BASE + "/owners/" + "^" + "/groupings")
+        .header(CURRENT_USER, USERNAME))
+        .andExpect(status().is4xxClientError());
+
+    mockMvc.perform(get(API_BASE + "/owners/" + "}" + "/groupings")
+        .header(CURRENT_USER, USERNAME))
+        .andExpect(status().is4xxClientError());
+  }
 
 }
