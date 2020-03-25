@@ -322,7 +322,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
                 + "; group: " + groupPath
-                + "; usersToDelete: " + potentialUsersToDelete
+                + "; potentialUsersToDelete: " + potentialUsersToDelete
                 + ";");
 
         if (memberAttributeService.isOwner(composite, ownerUsername) || memberAttributeService
@@ -338,9 +338,7 @@ public class MembershipServiceImpl implements MembershipService {
 
             usersToDelete = unionOfGroupingAtPath(path, potentialUsersToDelete);
 
-            action = "delete:" + "(" + usersToDelete.toString() + " U " + potentialUsersToDelete.toString() + " )"
-                    + " from "
-                    + groupPath;
+            action = "DELETE: " + usersToDelete + " from " + groupPath;
 
             // Make deletion.
             WsDeleteMemberResults deleteMemberResults =
@@ -679,7 +677,7 @@ public class MembershipServiceImpl implements MembershipService {
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
-                //if userToAdd is already in exclude
+                    //if userToAdd is already in exclude
                 } else {
                     gsrList.add(helperService.makeGroupingsServiceResult(
                             SUCCESS + ": " + personToAdd.getUsername() + " was already in " + groupPath, action));
