@@ -354,7 +354,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Return the union of members and grouping at path.
+     * Return a result of all valid members at grouping path from the passed list of members.
      *
      * @param path    grouping path.
      * @param members list of potential members.
@@ -368,7 +368,7 @@ public class MembershipServiceImpl implements MembershipService {
                     result.add(member);
                 }
             } catch (GcWebServiceError e) {
-                logger.info("\"" + member + "\"********************************************************************************************************** " + "is invalid for deletion", e);
+                logger.info("\"" + member + "\"" + " is invalid for deletion", e);
             }
         }
         return result;

@@ -331,6 +331,21 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void deleteGroupMembersTest() {
+
+        List<String> userNamesToDelete = new ArrayList<>();
+        for (int i = 4; i < 7; i++)
+            userNamesToDelete.add(users.get(i).getUsername());
+
+        GroupingsServiceResult groupingsServiceResult =
+                membershipService.deleteGroupMembers(ADMIN_USER, GROUPING_3_PATH, userNamesToDelete);
+
+        assertTrue(groupingsServiceResult.getResultCode().startsWith(SUCCESS));
+        assertFalse(groupingsServiceResult.getResultCode().contains(NOT_IN_GROUP));
+
+    }
+
+    @Test
     public void addAdminTest() {
 
         try {
