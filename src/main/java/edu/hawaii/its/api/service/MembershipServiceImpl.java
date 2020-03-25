@@ -321,6 +321,12 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     //adds a user to the admins group via username or UH id number
+
+
+
+
+
+    
     @Override
     public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
         logger.info("addAdmin; username: " + currentAdminUsername + "; newAdmin: " + newAdminUsername + ";");
