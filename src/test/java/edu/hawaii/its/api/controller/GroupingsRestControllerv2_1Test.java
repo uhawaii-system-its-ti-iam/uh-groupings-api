@@ -1069,11 +1069,11 @@ public class GroupingsRestControllerv2_1Test {
         .header(CURRENT_USER, USERNAME))
         .andExpect(status().is4xxClientError());
 
-    mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "}" + "/groupings")
+    mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
         .header(CURRENT_USER, USERNAME))
         .andExpect(status().is4xxClientError());
 
-    mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "@" + "/groupings")
+    mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
         .header(CURRENT_USER, USERNAME))
         .andExpect(status().is4xxClientError());
 
