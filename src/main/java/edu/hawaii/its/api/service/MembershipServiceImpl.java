@@ -336,7 +336,7 @@ public class MembershipServiceImpl implements MembershipService {
             else
                 path = composite + EXCLUDE;
 
-            usersToDelete = unionOfGroupingAtPath(path, potentialUsersToDelete);
+            usersToDelete = getValidMembers(path, potentialUsersToDelete);
 
             action = "DELETE: " + usersToDelete + " from " + groupPath;
 
@@ -358,7 +358,7 @@ public class MembershipServiceImpl implements MembershipService {
      * @param members list of potential members.
      * @return List{String} result.
      */
-    private List<String> unionOfGroupingAtPath(String path, List<String> members) {
+    private List<String> getValidMembers(String path, List<String> members) {
         List<String> result = new ArrayList<>();
         for (String member : members) {
             try {
