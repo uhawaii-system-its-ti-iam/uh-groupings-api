@@ -31,6 +31,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -197,18 +198,13 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public GenericServiceResult generic() {
-        List<String> strList = new ArrayList<>();
-        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("SUCCESS", "Made a Generic enitity");
-        List<Person> list = new ArrayList<>();
-        list.add(createNewPerson("gilbertz"));
-        Membership membership = new Membership(createNewPerson("gilbertz"), new Group(list));
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("SUCCESS", "Made a Generic entity");
+        Membership membership = new Membership(createNewPerson("gilbertz"), null);
         Grouping grouping = new Grouping("Grouping Path");
-        strList.add("groupingsServiceResult");
-        strList.add("membership");
-        strList.add("grouping");
 
         GenericServiceResult genericServiceResult =
-                new GenericServiceResult(strList, groupingsServiceResult, membership, grouping);
+                new GenericServiceResult(Arrays.asList("groupingsServiceResult", "membership", "grouping"),
+                        groupingsServiceResult, membership, grouping);
 
         return genericServiceResult;
     }
