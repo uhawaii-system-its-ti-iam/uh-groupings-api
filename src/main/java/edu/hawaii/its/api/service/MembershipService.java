@@ -12,7 +12,6 @@ public interface MembershipService {
 
     List<Membership> getMemberShipResults(String ownerUsername, String uid);
 
-    GenericServiceResult generic();
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
