@@ -240,8 +240,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info(action);
         if ((memberAttributeService.isAdmin(ownerUsername) || memberAttributeService.isSuperuser(ownerUsername))
                 && (0 != restGroupingsOwned(ownerUsername, username).size()))
-            return new GroupingsServiceResult(action, SUCCESS);
-        return new GroupingsServiceResult(action, FAILURE);
+            return new GroupingsServiceResult(SUCCESS, action);
+        return new GroupingsServiceResult(FAILURE, action);
     }
 
     //returns a list of all of the groupings corresponding to the include groups in groupPaths that have the self-opted attribute
