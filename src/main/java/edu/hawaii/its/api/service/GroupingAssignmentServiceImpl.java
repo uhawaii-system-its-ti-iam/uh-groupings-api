@@ -4,6 +4,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -227,6 +228,22 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return helperService.makeGroupings(ownedGroupings);
     }
 
+    /**
+     * Check if username is an owner of any grouping.
+     *
+     * @param ownerUsername
+     * @param username
+     * @return
+     */
+    public GroupingsServiceResult isOwner(String ownerUsername, String username) {
+        String action = "isOwner: " + username + ";";
+        logger.info(action);
+        if ((memberAttributeService.isAdmin(ownerUsername) || memberAttributeService.isSuperuser(ownerUsername))
+                && (0 != restGroupingsOwned(ownerUsername, username).size()))
+            return new GroupingsServiceResult(action, SUCCESS);
+        return new GroupingsServiceResult(action, FAILURE);
+    }
+
     //returns a list of all of the groupings corresponding to the include groups in groupPaths that have the self-opted attribute
     //set in the membership
     @Override
@@ -288,7 +305,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
-
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
@@ -389,7 +405,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
-
 
         if (groupsOpted.size() > 0) {
 
