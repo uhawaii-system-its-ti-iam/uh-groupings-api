@@ -90,15 +90,16 @@ public class GroupingsRestControllerv2_1 {
                 .body("University of Hawaii Groupings");
     }
 
-    @RequestMapping(value = "/generic",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<GenericServiceResult> generic() {
-        return ResponseEntity
-                .ok()
-                .body(membershipService.generic());
-    }
+    /**
+     @RequestMapping(value = "/generic",
+     method = RequestMethod.GET,
+     produces = MediaType.APPLICATION_JSON_VALUE)
+     @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
+     return ResponseEntity
+     .ok()
+     .body(membershipService.generic());
+     }
+     */
 
     /**
      * Get all admins and groupings

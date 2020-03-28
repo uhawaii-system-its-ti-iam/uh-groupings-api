@@ -4,7 +4,6 @@ public class GroupingsServiceResult {
     private String action = "null";
     private String resultCode = "null";
     private Person person = null;
-    private Membership membership;
 
     public GroupingsServiceResult() {
         // Empty.
