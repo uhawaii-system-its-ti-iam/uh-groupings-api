@@ -196,18 +196,6 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
-    @Override
-    public GenericServiceResult generic() {
-        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("SUCCESS", "Made a Generic entity");
-        Membership membership = new Membership(createNewPerson("gilbertz"), null);
-        Grouping grouping = new Grouping("Grouping Path");
-
-        GenericServiceResult genericServiceResult =
-                new GenericServiceResult(Arrays.asList("groupingsServiceResult", "membership", "grouping"),
-                        groupingsServiceResult, membership, grouping);
-
-        return genericServiceResult;
-    }
 
     // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
     public Person createNewPerson(String userToAdd) {
