@@ -289,7 +289,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
 
-
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
 
@@ -299,14 +298,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             String exclude = groupingPath + EXCLUDE;
             String owners = groupingPath + OWNERS;
 
-            String[] paths = { include,
-                    exclude,
-                    basis,
-                    groupingPath,
-                    owners };
-            Map<String, Group> groups =
-                    getPaginatedMembers(ownerUsername, Arrays.asList(paths), page, size, sortString, isAscending);
-
+            List<String> paths = new ArrayList<>();
+            paths.add(include);
+            paths.add(exclude);
+            paths.add(basis);
+            paths.add(groupingPath);
+            paths.add(owners);
+            Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
             compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
@@ -389,7 +387,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
                 && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
-
 
         if (groupsOpted.size() > 0) {
 
