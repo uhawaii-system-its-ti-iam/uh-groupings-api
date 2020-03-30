@@ -99,7 +99,6 @@ public class GroupingsRestControllerv2_1 {
      .ok()
      .body(membershipService.generic());
      }
-     */
 
     /**
      * Get all admins and groupings
