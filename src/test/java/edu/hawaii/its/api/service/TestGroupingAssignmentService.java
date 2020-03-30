@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
@@ -170,6 +171,13 @@ public class TestGroupingAssignmentService {
         // add to exclude
         membershipService.deleteGroupingMember(usernames[0], GROUPING, usernames[3]);
 
+    }
+
+    @Test
+    public void personTesting(){
+        MembershipAssignment membership = groupingAssignmentService.getMembershipAssignment("kahlin", "kahlin");
+
+        System.out.println("Hello");
     }
 
     @Test

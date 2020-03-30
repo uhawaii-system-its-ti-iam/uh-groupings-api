@@ -342,9 +342,39 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public MembershipAssignment getMembershipAssignment(String username, String uid) {
         MembershipAssignment membershipAssignment = new MembershipAssignment();
         List<String> groupPaths = getGroupPaths(username, uid);
+        List<Grouping> memeberships = groupingsIn(groupPaths);
+        List<Grouping> ownerships = groupingsOwned(groupPaths);
 
-        membershipAssignment.setGroupingsIn(groupingsIn(groupPaths));
+        membershipAssignment.setGroupingsIn(memeberships);
         membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
+        membershipAssignment.setGroupingsOwned(ownerships);
+        for (Grouping grouping:memeberships) {
+            membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+
+            if(membershipAssignment.isInBasis(grouping.getName())) {
+                membershipAssignment.addInInclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+                if (membershipAssignment.isInInclude(grouping.getName())) {
+                    membershipAssignment.addInExclude(grouping.getName(), false);
+                } else {
+                    membershipAssignment.addInExclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+                }
+            } else {
+                if (memberAttributeService.isMember(grouping.getPath() + ":include", uid)) {
+                    membershipAssignment.addInInclude(grouping.getName(), true);
+                    membershipAssignment.addInExclude(grouping.getName(), false);
+                } else {
+                    membershipAssignment.addInInclude(grouping.getName(), false);
+                    membershipAssignment.addInExclude(grouping.getName(), true);
+                }
+            }
+        }
+
+        for (Grouping grouping:ownerships) {
+            membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+            membershipAssignment.addInInclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+            membershipAssignment.addInExclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+        }
+
 
         return membershipAssignment;
     }
