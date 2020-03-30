@@ -91,19 +91,18 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     @RequestMapping(value = "/generic",
-     method = RequestMethod.GET,
-     produces = MediaType.APPLICATION_JSON_VALUE)
-     @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
-     return ResponseEntity
-     .ok()
-     .body(membershipService.generic());
-     }
-
-    /**
-     * Get all admins and groupings
-     *
      * @return List of all admins and all groupings
+     * @RequestMapping(value = "/generic",
+     * method = RequestMethod.GET,
+     * produces = MediaType.APPLICATION_JSON_VALUE)
+     * @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
+     * return ResponseEntity
+     * .ok()
+     * .body(membershipService.generic());
+     * }
+     * <p>
+     * /**
+     * Get all admins and groupings
      */
     @RequestMapping(value = "/adminsGroupings",
             method = RequestMethod.GET,
@@ -588,4 +587,20 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupAttributeService.getAllSyncDestinations(currentUser, path));
     }
+
+    /**
+     * Get a response containing all user privileges.
+     */
+    @RequestMapping(value = "/owner/{uid:[\\w-:.]+}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> getUserPrivileges(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST getAllSyncDestinations...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getUserPrivileges(currentUser, uid));
+    }
+
 }

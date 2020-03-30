@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -41,4 +42,6 @@ public interface MemberAttributeService {
     List<Person> searchMembers(String groupPath, String username);
 
   String getSpecificUserAttribute(String adminUser, String username, int attribute);
+
+  GenericServiceResult getUserPrivileges(String currentUser, String usernameInQuestion);
 }

@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -23,8 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,6 +198,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isOwner(String username) {
         return isMember(OWNERS_GROUP, username);
     }
+
+
 
     //return true if the membership between the group and user has the self-opted attribute, false otherwise
     @Override
@@ -488,5 +495,27 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             }
         }
         return members;
+    }
+    public GenericServiceResult getUserPrivileges(String currentUser, String usernameInQuestion)
+    {
+        logger.info("getUserPrivileges: " +"currentUser: " + currentUser + ";" +
+                "usernameInQuestion: " + usernameInQuestion + ";");
+
+       GenericServiceResult genericServiceResult = new GenericServiceResult();
+        if(isSuperuser(currentUser) || isAdmin(currentUser)) {
+            /*
+            genericServiceResult.add(Collections.singletonList("isOwner"),
+                    (0 == (groupingAssignmentService.groupingsIn(
+                            groupingAssignmentService.getGroupPaths(currentUser, usernameInQuestion)).size())));
+             */
+            List<String> l = new ArrayList<>();
+            l.add("Hello");
+            List<Integer> i = new ArrayList<>();
+            i.add(1);
+            genericServiceResult.add(Arrays.asList("Strings", "Integers"), l, i);
+
+        }
+        return genericServiceResult;
+
     }
 }
