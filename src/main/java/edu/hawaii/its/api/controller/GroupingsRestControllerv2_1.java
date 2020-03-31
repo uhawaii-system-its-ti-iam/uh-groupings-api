@@ -589,18 +589,18 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * GET a response containing whether a user is an admin and/or an owner,
+     * GET a response which specifies whether uid is an owner or not,
      */
     @RequestMapping(value = "/owner/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<GenericServiceResult> getUserPrivileges(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GenericServiceResult> getIsOwner(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getUserPrivileges(currentUser, uid));
+                .body(memberAttributeService.getIsOwner(currentUser, uid));
     }
 
 }

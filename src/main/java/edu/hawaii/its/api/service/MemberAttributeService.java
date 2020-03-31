@@ -41,7 +41,7 @@ public interface MemberAttributeService {
 
     List<Person> searchMembers(String groupPath, String username);
 
-  String getSpecificUserAttribute(String adminUser, String username, int attribute);
+    String getSpecificUserAttribute(String adminUser, String username, int attribute);
 
-  GenericServiceResult getUserPrivileges(String currentUser, String usernameInQuestion);
+    GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion);
 }
