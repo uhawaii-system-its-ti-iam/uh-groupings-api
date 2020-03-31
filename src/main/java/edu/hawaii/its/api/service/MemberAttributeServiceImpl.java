@@ -496,29 +496,29 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool, isAdmin: bool},
-     * which helps authenticate a user that is attempting to login on the UI side.
+     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool},
+     * which tells whether usernameInQuestion is an owner or not.
      *
      * @param currentUser        - current owner.
      * @param usernameInQuestion - user to be authenticated.
      * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool, isAdmin: bool}.
      */
-    public GenericServiceResult getUserPrivileges(String currentUser, String usernameInQuestion) {
-        String action = "getUserPrivileges: " + "currentUser: " + currentUser + ";, " +
+    @Override
+    public GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion) {
+        String action = "getIsOwner: " + "currentUser: " + currentUser + ";, " +
                 "usernameInQuestion: " + usernameInQuestion + ";";
         logger.info(action);
 
         if (isSuperuser(currentUser) || isAdmin(currentUser)) {
             try {
-                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner", "isAdmin"),
+                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner"),
                         new GroupingsServiceResult(SUCCESS, action),
                         (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
-                                currentUser, usernameInQuestion)).size() > 0),
-                        isAdmin(usernameInQuestion));
+                                currentUser, usernameInQuestion)).size() > 0));
             } catch (GcWebServiceError e) {
                 logger.error(action, e);
                 return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
-                        new GroupingsServiceResult(FAILURE, action + ";, "  + e.getMessage()));
+                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
             }
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
