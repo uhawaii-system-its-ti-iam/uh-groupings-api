@@ -502,7 +502,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (isSuperuser(currentUser) || isAdmin(currentUser)) {
             try {
                 return new GenericServiceResult(Arrays.asList("isOwner", "isAdmin"),
-                        (groupingAssignmentService.getGroupPaths( currentUser, usernameInQuestion).size() > 0), // isOwner?
+                        (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
+                                currentUser, usernameInQuestion)).size() > 0), // isOwner?
                         isAdmin(usernameInQuestion)); //isAdmin?
             } catch (GcWebServiceError e) {
                 logger.error(e, e);
