@@ -589,7 +589,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a response containing all user privileges.
+     * GET a response containing whether a user is an admin and/or an owner,
      */
     @RequestMapping(value = "/owner/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,

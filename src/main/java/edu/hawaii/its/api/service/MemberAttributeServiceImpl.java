@@ -495,19 +495,30 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return members;
     }
 
+    /**
+     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool, isAdmin: bool},
+     * which helps authenticate a user that is attempting to login on the UI side.
+     *
+     * @param currentUser        - current owner.
+     * @param usernameInQuestion - user to be authenticated.
+     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool, isAdmin: bool}.
+     */
     public GenericServiceResult getUserPrivileges(String currentUser, String usernameInQuestion) {
-        logger.info("getUserPrivileges: " + "currentUser: " + currentUser + ";" +
-                "usernameInQuestion: " + usernameInQuestion + ";");
+        String action = "getUserPrivileges: " + "currentUser: " + currentUser + ";, " +
+                "usernameInQuestion: " + usernameInQuestion + ";";
+        logger.info(action);
 
         if (isSuperuser(currentUser) || isAdmin(currentUser)) {
             try {
-                return new GenericServiceResult(Arrays.asList("isOwner", "isAdmin"),
+                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner", "isAdmin"),
+                        new GroupingsServiceResult(SUCCESS, action),
                         (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
-                                currentUser, usernameInQuestion)).size() > 0), // isOwner?
-                        isAdmin(usernameInQuestion)); //isAdmin?
+                                currentUser, usernameInQuestion)).size() > 0),
+                        isAdmin(usernameInQuestion));
             } catch (GcWebServiceError e) {
-                logger.error(e, e);
-                return new GenericServiceResult(Collections.singletonList("Error"), e.getMessage());
+                logger.error(action, e);
+                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                        new GroupingsServiceResult(FAILURE, action + ";, "  + e.getMessage()));
             }
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
