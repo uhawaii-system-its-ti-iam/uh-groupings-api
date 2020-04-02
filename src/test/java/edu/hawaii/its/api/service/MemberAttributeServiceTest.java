@@ -5,6 +5,8 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -13,9 +15,11 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +35,9 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -135,14 +141,11 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getIsOwnerTest() {
-
-    }
-    @Test
     public void construction() {
         //autowired
         assertNotNull(memberAttributeService);
     }
+
 
     @Test
     public void assignOwnershipTest() {
@@ -328,7 +331,8 @@ public class MemberAttributeServiceTest {
         assertThat(attribute, equalTo(personFive.getUsername()));
 
         // Test with user that owns no groupings
-        Map<String, String> emptyAttributes = memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
+        Map<String, String> emptyAttributes =
+                memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
 
         assertThat(emptyAttributes.get(UID), equalTo(""));
         assertThat(emptyAttributes.get(COMPOSITE_NAME), equalTo(""));
@@ -337,7 +341,7 @@ public class MemberAttributeServiceTest {
         assertThat(emptyAttributes.get(LAST_NAME), equalTo(""));
 
         // Test with null username
-        try{
+        try {
             Map<String, String> nullPersonAttributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
