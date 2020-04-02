@@ -523,4 +523,24 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
+
+    @Override
+    public GenericServiceResult getIsAdmin(String currentUser, String usernameInQuestion) {
+        String action = "getIsAdmin: " + "currentUser: " + currentUser + ";, " +
+                "usernameInQuestion: " + usernameInQuestion + ";";
+        logger.info(action);
+        if (isSuperuser(currentUser) || isAdmin(currentUser)) {
+            try {
+                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isAdmin"),
+                        new GroupingsServiceResult(SUCCESS, action),
+                        (groupingAssignmentService.adminLists(
+                                usernameInQuestion).getAdminGroup().getMembers().size() > 0));
+            } catch (AccessDeniedException | GcWebServiceError e) {
+                logger.error(action, e);
+                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+            }
+        }
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
 }

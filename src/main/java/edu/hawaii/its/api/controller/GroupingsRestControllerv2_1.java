@@ -603,4 +603,19 @@ public class GroupingsRestControllerv2_1 {
                 .body(memberAttributeService.getIsOwner(currentUser, uid));
     }
 
+    /**
+     * GET a response which specifies whether uid is an owner or not,
+     */
+    @RequestMapping(value = "/admin/{uid:[\\w-:.]+}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> getIsAdmin(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST getAllSyncDestinations...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getIsAdmin(currentUser, uid));
+    }
+
 }
