@@ -501,7 +501,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      *
      * @param currentUser        - current owner.
      * @param usernameInQuestion - user to be authenticated.
-     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool, isAdmin: bool}.
+     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool }.
      */
     @Override
     public GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion) {
