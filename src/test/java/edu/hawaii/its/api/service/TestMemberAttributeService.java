@@ -1,16 +1,20 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,10 +36,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 
-
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMemberAttributeService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -163,6 +166,23 @@ public class TestMemberAttributeService {
         if (memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4])) {
             membershipService.removeSelfOpted(GROUPING_EXCLUDE, usernames[4]);
         }
+    }
+
+    @Test
+    public void getIsOwnerTest() {
+        //Test Success
+        GenericServiceResult resSuccess = memberAttributeService.getIsOwner(ADMIN_USER, usernames[0]);
+        //getIsOwner at index 0 is a GroupingsServiceResult.
+        GroupingsServiceResult gsrSuccess = (GroupingsServiceResult) resSuccess.getData().get(0);
+        assertEquals("SUCCESS", gsrSuccess.getResultCode());
+
+        //Test Failure
+        GenericServiceResult resFailure = memberAttributeService.getIsOwner(ADMIN_USER, "zz");
+        //getIsOwner at index 0 is a GroupingsServiceResult.
+        GroupingsServiceResult gsrFailure = (GroupingsServiceResult) resFailure.getData().get(0);
+        gsrFailure.setPerson(null);
+        System.out.println("---------------------------" + gsrFailure.getResultCode());
+        assertEquals(FAILURE, gsrFailure.getResultCode());
     }
 
     @Test
