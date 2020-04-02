@@ -135,6 +135,10 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
+    public void getIsOwnerTest() {
+
+    }
+    @Test
     public void construction() {
         //autowired
         assertNotNull(memberAttributeService);
