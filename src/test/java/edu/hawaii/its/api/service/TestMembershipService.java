@@ -815,19 +815,29 @@ public class TestMembershipService {
 
     @Test
     public void addGroupMembersTest() throws IOException, MessagingException {
+        // Tes
         String ownerUsername = username[0];
 
-        List<GroupingsServiceResult> results;
-        List<String> usernames = new ArrayList<>();
+        List<GroupingsServiceResult> validResults;
+        List<String> validUsernames = new ArrayList<>();
 
         for (int i = 0; i < 6; i++) {
-            usernames.add(username[i]);
+            validUsernames.add(username[i]);
+            System.out.println(username[i]);
         }
 
-        results = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, usernames);
+        validResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
 
-        for (GroupingsServiceResult result : results) {
+        for (GroupingsServiceResult result : validResults) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
+        }
+        List<GroupingsServiceResult> invalidResults;
+        List<String> invalidUsernames = Arrays.asList(" ", "dfsdsd", "zzz");
+
+        invalidResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+
+        for (GroupingsServiceResult result : invalidResults) {
+            assertTrue(result.getResultCode().startsWith(FAILURE));
         }
 
         //        for (int i = 0; i < 6; i++) {
