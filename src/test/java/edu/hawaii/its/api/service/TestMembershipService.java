@@ -8,10 +8,13 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import com.google.common.collect.Iterables;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.thymeleaf.util.ListUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -815,34 +818,46 @@ public class TestMembershipService {
 
     @Test
     public void addGroupMembersTest() throws IOException, MessagingException {
-        // Tes
         String ownerUsername = username[0];
+        List<String> validResultCodes = new ArrayList<>();
+        List<String> invalidResultCodes = new ArrayList<>();
 
+        // Test add valid user names.
         List<GroupingsServiceResult> validResults;
         List<String> validUsernames = new ArrayList<>();
 
         for (int i = 0; i < 6; i++) {
             validUsernames.add(username[i]);
-            System.out.println(username[i]);
         }
-
         validResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
-
         for (GroupingsServiceResult result : validResults) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
+            validResultCodes.add(result.getResultCode().substring(0, 6));
         }
+
+        // Test add invalid user names.
         List<GroupingsServiceResult> invalidResults;
         List<String> invalidUsernames = Arrays.asList(" ", "dfsdsd", "zzz");
 
         invalidResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
-
         for (GroupingsServiceResult result : invalidResults) {
             assertTrue(result.getResultCode().startsWith(FAILURE));
+            invalidResultCodes.add(result.getResultCode().substring(0, 6));
         }
 
-        //        for (int i = 0; i < 6; i++) {
-        //            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
-        //        }
+        // Test a list of valid and invalid
+        List<GroupingsServiceResult> mixedResults;
+        List<String> mixedUsernames = Lists.newArrayList(Iterables.concat(validUsernames, invalidUsernames));
+        List<String> expectedResults = Lists.newArrayList(Iterables.concat(validResultCodes, invalidResultCodes));
+
+        mixedResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, mixedUsernames);
+        for (GroupingsServiceResult result : mixedResults) {
+            System.out.println("RESULT: " + result.getResultCode().substring(0, 6) +
+                    "CHECK: " + expectedResults.get(mixedResults.indexOf(result)));
+            assertEquals(result.getResultCode().substring(0, 6),
+                    expectedResults.get(mixedResults.indexOf(result)));
+        }
+
     }
 
     @Test
