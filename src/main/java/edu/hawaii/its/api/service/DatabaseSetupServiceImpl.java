@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.APIConfig;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -12,7 +13,6 @@ import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,51 +24,6 @@ import java.util.TreeSet;
 
 @Service("databaseSetupService")
 public class DatabaseSetupServiceImpl implements DatabaseSetupService {
-
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.test.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.test.name}")
-    private String NAME;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.test.surname}")
-    private String SN;
-
-    @Value("${groupings.api.test.given_name}")
-    private String GIVEN_NAME;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.googlegroup}")
-    private String GOOGLE_GROUP;
 
     private static final String ADMIN_USER = "admin";
     private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
@@ -87,6 +42,9 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private List<Person> persons = new ArrayList<>();
     private List<Group> groups = new ArrayList<>();
     private List<Grouping> groupings = new ArrayList<>();
+
+    @Autowired
+    private APIConfig config;
 
     @Autowired
     private GroupingRepository groupingRepository;
@@ -120,9 +78,9 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
     private void setUserLookups() {
         for (int i = 0; i < 100; i++) {
-            String name = NAME + i;
+            String name = config.getNAME() + i;
             String uhUuid = String.valueOf(i);
-            String username = USERNAME + i;
+            String username = config.getUSERNAME() + i;
 
             Person person = new Person(name, uhUuid, username);
             users.add(person);
@@ -136,13 +94,13 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
         admins.add(ADMIN_PERSON);
         adminGroup.setMembers(admins);
-        adminGroup.setPath(GROUPING_ADMINS);
+        adminGroup.setPath(config.getGROUPING_ADMINS());
         personRepository.save(ADMIN_PERSON);
         groupRepository.save(adminGroup);
 
         apps.add(APP_PERSON);
         appGroup.setMembers(apps);
-        appGroup.setPath(GROUPING_APPS);
+        appGroup.setPath(config.getGROUPING_APPS());
         personRepository.save(APP_PERSON);
         groupRepository.save(appGroup);
     }
@@ -198,15 +156,15 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
                             List<Person> includeMembers,
                             List<Person> ownerMembers) {
 
-        makeGroup(basisMembers, pathRoot + i + BASIS);
-        makeGroup(excludeMembers, pathRoot + i + EXCLUDE);
-        makeGroup(includeMembers, pathRoot + i + INCLUDE);
-        makeGroup(ownerMembers, pathRoot + i + OWNERS);
+        makeGroup(basisMembers, pathRoot + i + config.getBasis());
+        makeGroup(excludeMembers, pathRoot + i + config.getEXCLUDE());
+        makeGroup(includeMembers, pathRoot + i + config.getINCLUDE());
+        makeGroup(ownerMembers, pathRoot + i + config.getOWNERS());
 
         // add all of the owners to the owner group
-        Group ownerGroup = groupRepository.findByPath(GROUPING_OWNERS);
+        Group ownerGroup = groupRepository.findByPath(config.getGROUPING_OWNERS());
         if (ownerGroup == null) {
-            ownerGroup = new Group(GROUPING_OWNERS);
+            ownerGroup = new Group(config.getGROUPING_OWNERS());
         }
         ownerMembers.forEach(ownerGroup::addMember);
         groupRepository.save(ownerGroup);
@@ -440,10 +398,10 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
         grouping.setDescription("");
         grouping.setSyncDestinations(buildSyncDestinations());
 
-        grouping.changeSyncDestinationState(LISTSERV, isListserveOn);
+        grouping.changeSyncDestinationState(config.getLISTSERV(), isListserveOn);
         grouping.setOptInOn(isOptInOn);
         grouping.setOptOutOn(isOptOutOn);
-        grouping.changeSyncDestinationState(RELEASED_GROUPING, isReleasedGroupingOn);
+        grouping.changeSyncDestinationState(config.getRELEASED_GROUPING(), isReleasedGroupingOn);
 
         groupings.add(grouping);
     }
@@ -478,9 +436,9 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
 
         List<SyncDestination> syncDestinations = new ArrayList<>();
 
-        syncDestinations.add(new SyncDestination(LISTSERV, "listserv"));
-        syncDestinations.add(new SyncDestination(RELEASED_GROUPING, "releasedGrouping"));
-        syncDestinations.add(new SyncDestination(GOOGLE_GROUP, "google-group"));
+        syncDestinations.add(new SyncDestination(config.getLISTSERV(), "listserv"));
+        syncDestinations.add(new SyncDestination(config.getRELEASED_GROUPING(), "releasedGrouping"));
+        syncDestinations.add(new SyncDestination(config.getGOOGLE_GROUP(), "google-group"));
 
         return syncDestinations;
     }

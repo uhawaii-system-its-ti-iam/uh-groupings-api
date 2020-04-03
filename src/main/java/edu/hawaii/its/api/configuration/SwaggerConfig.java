@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -15,6 +16,7 @@ import java.util.Collections;
 
 
 @Configuration
+@EnableConfigurationProperties(APIConfig.class)
 @EnableSwagger2
 public class SwaggerConfig {
 

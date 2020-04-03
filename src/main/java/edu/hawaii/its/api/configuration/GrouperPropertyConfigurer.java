@@ -3,12 +3,14 @@ package edu.hawaii.its.api.configuration;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 @Configuration
+@EnableConfigurationProperties(APIConfig.class)
 public class GrouperPropertyConfigurer {
 
     @Autowired
