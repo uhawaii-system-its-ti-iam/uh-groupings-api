@@ -108,7 +108,6 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
         } catch (MessagingException me) {
             me.printStackTrace();
         }
-
     }
 
     /**

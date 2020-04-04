@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
@@ -818,6 +819,11 @@ public class TestMembershipService {
 
     @Test
     public void addGroupMembersTest() throws IOException, MessagingException {
+        addGroupMembersTestHelper(GROUPING_INCLUDE);
+        addGroupMembersTestHelper(GROUPING_EXCLUDE);
+    }
+
+    private void addGroupMembersTestHelper(String path) throws IOException, MessagingException {
         String ownerUsername = username[0];
         List<String> validResultCodes = new ArrayList<>();
         List<String> invalidResultCodes = new ArrayList<>();
@@ -829,7 +835,7 @@ public class TestMembershipService {
         for (int i = 0; i < 6; i++) {
             validUsernames.add(username[i]);
         }
-        validResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
+        validResults = membershipService.addGroupMembers(ownerUsername, path, validUsernames);
         for (GroupingsServiceResult result : validResults) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
             validResultCodes.add(result.getResultCode().substring(0, 6));
@@ -839,7 +845,7 @@ public class TestMembershipService {
         List<GroupingsServiceResult> invalidResults;
         List<String> invalidUsernames = Arrays.asList(" ", "dfsdsd", "zzz");
 
-        invalidResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+        invalidResults = membershipService.addGroupMembers(ownerUsername, path, invalidUsernames);
         for (GroupingsServiceResult result : invalidResults) {
             assertTrue(result.getResultCode().startsWith(FAILURE));
             invalidResultCodes.add(result.getResultCode().substring(0, 6));
@@ -850,7 +856,7 @@ public class TestMembershipService {
         List<String> mixedUsernames = Lists.newArrayList(Iterables.concat(validUsernames, invalidUsernames));
         List<String> expectedResults = Lists.newArrayList(Iterables.concat(validResultCodes, invalidResultCodes));
 
-        mixedResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, mixedUsernames);
+        mixedResults = membershipService.addGroupMembers(ownerUsername, path, mixedUsernames);
         for (GroupingsServiceResult result : mixedResults) {
             System.out.println("RESULT: " + result.getResultCode().substring(0, 6) +
                     "CHECK: " + expectedResults.get(mixedResults.indexOf(result)));
