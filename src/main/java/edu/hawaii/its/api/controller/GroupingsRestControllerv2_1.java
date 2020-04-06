@@ -606,7 +606,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * GET a response which specifies whether uid is an owner or not,
      */
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
+    @RequestMapping(value = "/admin/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
