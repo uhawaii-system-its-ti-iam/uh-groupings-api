@@ -16,7 +16,7 @@ import java.util.Collections;
 
 
 @Configuration
-@EnableConfigurationProperties(APIConfig.class)
+@EnableConfigurationProperties(GroupingsAPIConfig.class)
 @EnableSwagger2
 public class SwaggerConfig {
 

@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.APIConfig;
+import edu.hawaii.its.api.configuration.GroupingsAPIConfig;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
@@ -44,7 +44,7 @@ public class DatabaseSetupServiceImpl implements DatabaseSetupService {
     private List<Grouping> groupings = new ArrayList<>();
 
     @Autowired
-    private APIConfig config;
+    private GroupingsAPIConfig config;
 
     @Autowired
     private GroupingRepository groupingRepository;

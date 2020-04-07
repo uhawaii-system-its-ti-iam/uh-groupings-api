@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(APIConfig.class)
+@EnableConfigurationProperties(GroupingsAPIConfig.class)
 @EnableCaching
 public class CachingConfig {
 

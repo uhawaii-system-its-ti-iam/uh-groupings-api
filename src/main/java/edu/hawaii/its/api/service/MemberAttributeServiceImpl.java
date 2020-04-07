@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.GroupingsAPIConfig;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -33,144 +34,8 @@ import java.util.Map;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
-
-    @Value("${groupings.api.settings}")
-    private String SETTINGS;
-
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
-
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_superusers}")
-    private String GROUPING_SUPERUSERS;
-
-    @Value("${groupings.api.attributes}")
-    private String ATTRIBUTES;
-
-    @Value("${groupings.api.for_groups}")
-    private String FOR_GROUPS;
-
-    @Value("${groupings.api.for_memberships}")
-    private String FOR_MEMBERSHIPS;
-
-    @Value("${groupings.api.last_modified}")
-    private String LAST_MODIFIED;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.uhgrouping}")
-    private String UHGROUPING;
-
-    @Value("${groupings.api.destinations}")
-    private String DESTINATIONS;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.purge_grouping}")
-    private String PURGE_GROUPING;
-
-    @Value("${groupings.api.self_opted}")
-    private String SELF_OPTED;
-
-    @Value("${groupings.api.anyone_can}")
-    private String ANYONE_CAN;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String OWNERS_GROUP;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.assign_type_immediate_membership}")
-    private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
-
-    @Value("${groupings.api.operation_assign_attribute}")
-    private String OPERATION_ASSIGN_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_remove_attribute}")
-    private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_replace_values}")
-    private String OPERATION_REPLACE_VALUES;
-
-    @Value("${groupings.api.privilege_opt_out}")
-    private String PRIVILEGE_OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
-
-    @Value("${groupings.api.every_entity}")
-    private String EVERY_ENTITY;
-
-    @Value("${groupings.api.is_member}")
-    private String IS_MEMBER;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.success_allowed}")
-    private String SUCCESS_ALLOWED;
-
-    @Value("${groupings.api.stem}")
-    private String STEM;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String UID;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
+    @Autowired
+    private GroupingsAPIConfig config;
 
     @Autowired
     private GrouperFactoryService grouperFS;
@@ -191,7 +56,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Override
     public boolean isOwner(String username) {
-        return isMember(OWNERS_GROUP, username);
+        return isMember(config.getOWNERS_GROUP(), username);
     }
 
     //return true if the membership between the group and user has the self-opted attribute, false otherwise
@@ -204,11 +69,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             String membershipID = hs.extractFirstMembershipID(wsGetMembershipsResults);
 
             WsAttributeAssign[] wsAttributes =
-                    getMembershipAttributes(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, membershipID);
+                    getMembershipAttributes(config.getASSIGN_TYPE_IMMEDIATE_MEMBERSHIP(), config.getSELF_OPTED(), membershipID);
 
             for (WsAttributeAssign att : wsAttributes) {
                 if (att.getAttributeDefNameName() != null) {
-                    if (att.getAttributeDefNameName().equals(SELF_OPTED)) {
+                    if (att.getAttributeDefNameName().equals(config.getSELF_OPTED())) {
                         return true;
                     }
                 }
@@ -239,14 +104,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         if (isOwner(groupingPath, ownerUsername) || isSuperuser(ownerUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-            WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
+            WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + config.getOWNERS(), user, newOwnerUsername);
 
             ownershipResult = hs.makeGroupingsServiceResult(amr, action);
 
             membershipService.updateLastModified(groupingPath);
-            membershipService.updateLastModified(groupingPath + OWNERS);
+            membershipService.updateLastModified(groupingPath + config.getOWNERS());
         } else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException(config.getINSUFFICIENT_PRIVILEGES());
         }
 
         return ownershipResult;
@@ -269,16 +134,16 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (isOwner(groupingPath, actor) || isSuperuser(actor)) {
             WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
             WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
-                    groupingPath + OWNERS,
+                    groupingPath + config.getOWNERS(),
                     lookup,
                     ownerToRemove);
             ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
 
             membershipService.updateLastModified(groupingPath);
-            membershipService.updateLastModified(groupingPath + OWNERS);
+            membershipService.updateLastModified(groupingPath + config.getOWNERS());
 
         } else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException(config.getINSUFFICIENT_PRIVILEGES());
         }
 
         return ownershipResults;
@@ -297,7 +162,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
             for (WsHasMemberResult hasMember : memberResultArray) {
-                if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                if (hasMember.getResultMetadata().getResultCode().equals(config.getIS_MEMBER())) {
                     return true;
                 }
             }
@@ -317,7 +182,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
         for (WsHasMemberResult hasMember : memberResultArray) {
-            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+            if (hasMember.getResultMetadata().getResultCode().equals(config.getIS_MEMBER())) {
                 return true;
             }
         }
@@ -334,7 +199,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
         for (WsHasMemberResult hasMember : memberResultArray) {
-            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+            if (hasMember.getResultMetadata().getResultCode().equals(config.getIS_MEMBER())) {
                 return true;
             }
         }
@@ -344,19 +209,19 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     //returns true if the user is in the owner group of the grouping
     @Override
     public boolean isOwner(String groupingPath, String username) {
-        return isMember(groupingPath + OWNERS, username);
+        return isMember(groupingPath + config.getOWNERS(), username);
     }
 
     //returns true if the user is in the admins group
     @Override
     public boolean isAdmin(String username) {
-        return isMember(GROUPING_ADMINS, username);
+        return isMember(config.getGROUPING_ADMINS(), username);
     }
 
     //returns true if the user is in the apps group
     @Override
     public boolean isApp(String username) {
-        return isMember(GROUPING_APPS, username);
+        return isMember(config.getGROUPING_APPS(), username);
     }
 
     //returns true if the user is in the superusers group
@@ -409,7 +274,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         // Checks to make sure the user requesting information of another is a superuser or the owner of the group.
         if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-            groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
             try {
 
                 // Makes a call to GrouperClient and creates a WebService Subject Lookup of specified user.
@@ -432,7 +297,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 throw new GcWebServiceError("Error 404 Not Found");
             }
         } else {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+            String[] subjectAttributeNames = { config.getUID(), config.getCOMPOSITE_NAME(), config.getLAST_NAME(), config.getFIRST_NAME(), config.getUHUUID() };
             for (int i = 0; i < attributeValues.length; i++) {
                 mapping.put(subjectAttributeNames[i], "");
             }
@@ -441,33 +306,33 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
-   // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
-   // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
-   public String getSpecificUserAttribute(String ownerUsername, String username,int attribute) throws GcWebServiceError {
-     WsSubject[] subjects;
-     WsSubjectLookup lookup;
-     String[] attributeValues = new String[5];
-     Map<String, String> mapping = new HashMap<>();
+    // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
+    // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
+    public String getSpecificUserAttribute(String ownerUsername, String username,int attribute) throws GcWebServiceError {
+        WsSubject[] subjects;
+        WsSubjectLookup lookup;
+        String[] attributeValues = new String[5];
+        Map<String, String> mapping = new HashMap<>();
 
-     if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-         groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-       try {
-         lookup = grouperFS.makeWsSubjectLookup(username);
-         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-         subjects = results.getWsSubjects();
+        if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
+                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+            try {
+                lookup = grouperFS.makeWsSubjectLookup(username);
+                WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+                subjects = results.getWsSubjects();
 
-         attributeValues = subjects[0].getAttributeValues();
-         return attributeValues[attribute];
+                attributeValues = subjects[0].getAttributeValues();
+                return attributeValues[attribute];
 
-       } catch (NullPointerException npe) {
-         throw new GcWebServiceError("Error 404 Not Found");
-       }
-     } else {
-       return attributeValues[attribute];
-     }
+            } catch (NullPointerException npe) {
+                throw new GcWebServiceError("Error 404 Not Found");
+            }
+        } else {
+            return attributeValues[attribute];
+        }
 
 
-   }
+    }
 
     @Override
     public List<Person> searchMembers(String groupPath, String username) {
@@ -479,7 +344,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         for (WsHasMemberResult hasMember : memberResultArray) {
 
-            if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+            if (hasMember.getResultMetadata().getResultCode().equals(config.getIS_MEMBER())) {
                 String memberName = hasMember.getWsSubject().getName();
                 String memberUuid = hasMember.getWsSubject().getId();
                 String memberUsername = hasMember.getWsSubject().getIdentifierLookup();

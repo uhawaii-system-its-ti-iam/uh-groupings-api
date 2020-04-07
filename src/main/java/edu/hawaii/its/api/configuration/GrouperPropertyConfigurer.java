@@ -10,7 +10,7 @@ import org.springframework.core.env.Environment;
 import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 @Configuration
-@EnableConfigurationProperties(APIConfig.class)
+@EnableConfigurationProperties(GroupingsAPIConfig.class)
 public class GrouperPropertyConfigurer {
 
     @Autowired

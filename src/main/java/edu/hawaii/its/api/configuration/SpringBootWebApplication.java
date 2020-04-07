@@ -19,7 +19,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@EnableConfigurationProperties(APIConfig.class)
+@EnableConfigurationProperties(GroupingsAPIConfig.class)
 @SpringBootApplication
 public class SpringBootWebApplication extends SpringBootServletInitializer {
 

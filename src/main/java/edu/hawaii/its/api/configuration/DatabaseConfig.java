@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.Assert;
 
 @Configuration
-@EnableConfigurationProperties(APIConfig.class)
+@EnableConfigurationProperties(GroupingsAPIConfig.class)
 @EnableJpaRepositories(basePackages = {
         "edu.hawaii.its.api.repository"
 })
