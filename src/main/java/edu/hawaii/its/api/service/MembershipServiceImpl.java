@@ -600,6 +600,7 @@ public class MembershipServiceImpl implements MembershipService {
         genericServiceResult.add("hello", hello);
         genericServiceResult.add("fbb", fbb);
         genericServiceResult.add(Arrays.asList("groupingsServiceResult", "boolean"), groupingsServiceResult, true);
+        genericServiceResult.add("int", 1);
 
         return genericServiceResult;
     }
