@@ -12,7 +12,6 @@ public interface MembershipService {
 
     List<Membership> getMemberShipResults(String ownerUsername, String uid);
 
-
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
@@ -53,4 +52,6 @@ public interface MembershipService {
     GroupingsServiceResult addSelfOpted(String groupPath, String username);
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
+
+    GenericServiceResult generic();
 }
