@@ -284,6 +284,11 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>${hibernate-jpa.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.0.16.Final</version>
+        </dependency>
         <!--Uses an old dom4j:dom4j dependency, not the new org.dom4j:dom4j-->
         <dependency>
             <groupId>org.hibernate</groupId>

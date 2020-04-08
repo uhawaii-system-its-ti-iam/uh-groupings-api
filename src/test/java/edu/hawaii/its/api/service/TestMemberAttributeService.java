@@ -488,11 +488,11 @@ public class TestMemberAttributeService {
 
         //todo Not an owner test
         attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
-        assertTrue(attributes.get("uid").equals(""));
-        assertTrue(attributes.get("cn").equals(""));
-        assertTrue(attributes.get("sn").equals(""));
-        assertTrue(attributes.get("givenName").equals(""));
-        assertTrue(attributes.get("uhUuid").equals(""));
+        assertTrue(attributes.get("${groupings.api.person_attributes.last_name}").equals(""));
+        assertTrue(attributes.get("${groupings.api.test.uhuuid}").equals(""));
+        assertTrue(attributes.get("${groupings.api.person_attributes.composite_name}").equals(""));
+        assertTrue(attributes.get("${groupings.api.person_attributes.username}").equals(""));
+        assertTrue(attributes.get("${groupings.api.person_attributes.first_name}").equals(""));
 
         // Test with invalid username
         try {
