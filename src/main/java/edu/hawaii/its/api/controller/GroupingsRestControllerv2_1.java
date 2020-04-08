@@ -90,15 +90,14 @@ public class GroupingsRestControllerv2_1 {
                 .body("University of Hawaii Groupings");
     }
 
-    /**
-     @RequestMapping(value = "/generic",
-     method = RequestMethod.GET,
-     produces = MediaType.APPLICATION_JSON_VALUE)
-     @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
-     return ResponseEntity
-     .ok()
-     .body(membershipService.generic());
-     }
+    @RequestMapping(value = "/generic",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
+        return ResponseEntity
+                .ok()
+                .body(membershipService.generic());
+    }
 
     /**
      * Get all admins and groupings
@@ -529,15 +528,13 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST enablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId)) {
+        if (OPT_IN.equals(preferenceId))
+            results = groupAttributeService.changeOptInStatus(path, currentUser, true);
+        else if (OPT_OUT.equals(preferenceId))
+            results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
+        else
             throw new UnsupportedOperationException();
-        } else {
-            if (OPT_IN.equals(preferenceId)) {
-                results = groupAttributeService.changeOptInStatus(path, currentUser, true);
-            } else if (OPT_OUT.equals(preferenceId)) {
-                results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
-            }
-        }
+
         return ResponseEntity
                 .ok()
                 .body(results);
@@ -560,18 +557,15 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST disablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!OPT_IN.equals(preferenceId) && !OPT_OUT.equals(preferenceId)) {
+        if (OPT_IN.equals(preferenceId))
+            results = groupAttributeService.changeOptInStatus(path, currentUser, false);
+        else if (OPT_OUT.equals(preferenceId))
+            results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
+        else
             throw new UnsupportedOperationException();
-        } else {
-            if (OPT_IN.equals(preferenceId)) {
-                results = groupAttributeService.changeOptInStatus(path, currentUser, false);
-            } else if (OPT_OUT.equals(preferenceId)) {
-                results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
-            }
-        }
         return ResponseEntity
                 .ok()
-                .body(results);
+                . body(results);
     }
 
     /**
@@ -581,7 +575,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader("current_user") String
+            currentUser,
             @PathVariable String path) throws Exception {
         logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity

@@ -3,6 +3,7 @@ package edu.hawaii.its.api.type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -13,21 +14,33 @@ public class GenericServiceResult {
     ArrayList<Object> data;
     // Storage of names and indices of each objects added.
     HashMap<String, Integer> map;
+    int size;
 
     public GenericServiceResult() {
         this.data = new ArrayList<>();
         this.map = new HashMap<>();
+        this.size = 0;
     }
 
     /**
-     * Initialize map and object list then call add.
+     * Initialize and add first object.
+     *
+     * @param prop
+     * @param object
+     */
+    public GenericServiceResult(String prop, Object object) {
+        this();
+        this.add(prop, object);
+    }
+
+    /**
+     * Initialize and add multiple objects.
      *
      * @param props   - list of corresponding name values.
      * @param objects - a variable amount of arbitrary objects.
      */
     public GenericServiceResult(List<String> props, Object... objects) {
-        this.data = new ArrayList<>();
-        this.map = new HashMap<>();
+        this();
         this.add(props, objects);
     }
 
@@ -36,17 +49,28 @@ public class GenericServiceResult {
      * Example:
      * new GenericServiceResult(Arrays.asList("objA", "objB", "objC"), objA, objB, objC );
      *
-     * @param props   - list of corresponding name values.
+     * @param keys    - list of corresponding name values.
      * @param objects - a variable amount of arbitrary objects.
      */
-    public ArrayList<Object> add(List<String> props, Object... objects) {
-        int i = 0;
+    public void add(List<String> keys, Object... objects) {
+        Iterator<String> iter = keys.iterator();
         for (Object object : objects) {
-            this.map.put(props.get(i), i);
+            this.map.put(iter.next(), this.size);
             this.data.add(object);
-            i++;
+            this.size++;
         }
-        return this.data;
+    }
+
+    /**
+     * Add a single object and key to response.
+     *
+     * @param key    a single key.
+     * @param object a single arbitrary object.
+     */
+    public void add(String key, Object object) {
+        this.data.add(object);
+        this.map.put(key, this.size);
+        this.size++;
     }
 
     public ArrayList<Object> getData() {

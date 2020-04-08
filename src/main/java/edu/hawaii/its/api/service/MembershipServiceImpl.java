@@ -196,7 +196,6 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
-
     // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
     public Person createNewPerson(String userToAdd) {
         Person createdPerson;
@@ -588,6 +587,21 @@ public class MembershipServiceImpl implements MembershipService {
         return helperService.makeGroupingsServiceResult(
                 FAILURE + ", " + username + " is not a member of " + groupPath,
                 action);
+    }
+
+    @Override public GenericServiceResult generic() {
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
+
+        String hello = "HelloWorld!";
+        GroupingsServiceResult groupingsServiceResult =
+                new GroupingsServiceResult(SUCCESS, "Testing: GenericServiceResult");
+        List<String> fbb = Arrays.asList("foo", "bar", "baz");
+
+        genericServiceResult.add("hello", hello);
+        genericServiceResult.add("fbb", fbb);
+        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "boolean"), groupingsServiceResult, true);
+
+        return genericServiceResult;
     }
 
     /*
