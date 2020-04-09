@@ -1,6 +1,8 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -23,13 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
@@ -409,7 +413,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         // Checks to make sure the user requesting information of another is a superuser or the owner of the group.
         if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-            groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
             try {
 
                 // Makes a call to GrouperClient and creates a WebService Subject Lookup of specified user.
@@ -424,7 +428,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
                 // Maps the attribute to the attribute name.
                 for (int i = 0; i < attributeValues.length; i++) {
-                    mapping.put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
+                    mapping.put(results.getSubjectAttributeNames()[i],
+                            results.getWsSubjects()[0].getAttributeValues()[i]);
                 }
                 return mapping;
 
@@ -441,33 +446,33 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
-   // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
-   // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
-   public String getSpecificUserAttribute(String ownerUsername, String username,int attribute) throws GcWebServiceError {
-     WsSubject[] subjects;
-     WsSubjectLookup lookup;
-     String[] attributeValues = new String[5];
-     Map<String, String> mapping = new HashMap<>();
+    // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
+    // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
+    public String getSpecificUserAttribute(String ownerUsername, String username, int attribute)
+            throws GcWebServiceError {
+        WsSubject[] subjects;
+        WsSubjectLookup lookup;
+        String[] attributeValues = new String[5];
+        Map<String, String> mapping = new HashMap<>();
 
-     if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-         groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-       try {
-         lookup = grouperFS.makeWsSubjectLookup(username);
-         WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-         subjects = results.getWsSubjects();
+        if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
+                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
+            try {
+                lookup = grouperFS.makeWsSubjectLookup(username);
+                WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+                subjects = results.getWsSubjects();
 
-         attributeValues = subjects[0].getAttributeValues();
-         return attributeValues[attribute];
+                attributeValues = subjects[0].getAttributeValues();
+                return attributeValues[attribute];
 
-       } catch (NullPointerException npe) {
-         throw new GcWebServiceError("Error 404 Not Found");
-       }
-     } else {
-       return attributeValues[attribute];
-     }
+            } catch (NullPointerException npe) {
+                throw new GcWebServiceError("Error 404 Not Found");
+            }
+        } else {
+            return attributeValues[attribute];
+        }
 
-
-   }
+    }
 
     @Override
     public List<Person> searchMembers(String groupPath, String username) {
@@ -488,5 +493,54 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             }
         }
         return members;
+    }
+
+    /**
+     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool},
+     * which tells whether usernameInQuestion is an owner or not.
+     *
+     * @param currentUser        - current owner.
+     * @param usernameInQuestion - user to be authenticated.
+     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool }.
+     */
+    @Override
+    public GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion) {
+        String action = "getIsOwner: " + "currentUser: " + currentUser + ";, " +
+                "usernameInQuestion: " + usernameInQuestion + ";";
+        logger.info(action);
+
+        if (isSuperuser(currentUser) || isAdmin(currentUser)) {
+            try {
+                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner"),
+                        new GroupingsServiceResult(SUCCESS, action),
+                        (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
+                                currentUser, usernameInQuestion)).size() > 0));
+            } catch (GcWebServiceError e) {
+                logger.error(action, e);
+                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+            }
+        }
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+
+    @Override
+    public GenericServiceResult getIsAdmin(String currentUser, String usernameInQuestion) {
+        String action = "getIsAdmin: " + "currentUser: " + currentUser + ";, " +
+                "usernameInQuestion: " + usernameInQuestion + ";";
+        logger.info(action);
+        if (isSuperuser(currentUser) || isAdmin(currentUser)) {
+            try {
+                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isAdmin"),
+                        new GroupingsServiceResult(SUCCESS, action),
+                        (groupingAssignmentService.adminLists(
+                                usernameInQuestion).getAdminGroup().getMembers().size() > 0));
+            } catch (AccessDeniedException | GcWebServiceError e) {
+                logger.error(action, e);
+                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+            }
+        }
+        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 }
