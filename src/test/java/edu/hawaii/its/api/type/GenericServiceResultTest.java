@@ -5,20 +5,10 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
-<<<<<<< HEAD
-=======
-import java.util.Set;
->>>>>>> Add GenericServiceResultTest.java
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-<<<<<<< HEAD
-=======
 import static org.junit.Assert.assertTrue;
->>>>>>> Add GenericServiceResultTest.java
 
 public class GenericServiceResultTest {
     GenericServiceResult genericServiceResult;
@@ -34,12 +24,6 @@ public class GenericServiceResultTest {
 
     @Test
     public void construction() {
-<<<<<<< HEAD
-        assertNotNull(genericServiceResult);
-        assertEquals(this.string, genericServiceResult.get("string"));
-        assertEquals(this.integer, genericServiceResult.get("integer"));
-        assertEquals(this.floats, genericServiceResult.get("floats"));
-=======
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("TEST", "adding single objects");
 
         assertNotNull(genericServiceResult);
@@ -57,6 +41,14 @@ public class GenericServiceResultTest {
         assertEquals(true, genericServiceResult.get("isTest"));
         assertTrue(checkIndices(4, "this"));
         assertTrue(checkIndices(5, "isTest"));
+
+        constructionHelper(genericServiceResult);
+    }
+
+    @Test
+    public void addTest() {
+        this.genericServiceResult.add("boolean", true);
+        assertEquals(true, this.genericServiceResult.get("boolean"));
     }
 
     /**
@@ -78,24 +70,5 @@ public class GenericServiceResultTest {
      */
     private boolean checkIndices(int i, String key) {
         return i == genericServiceResult.getMap().get(key);
->>>>>>> Add GenericServiceResultTest.java
-    }
-
-    @Test
-    public void addTest() {
-<<<<<<< HEAD
-        genericServiceResult.add("boolean", true);
-        assertEquals(true, genericServiceResult.get("boolean"));
-    }
-    public void removeTest() {
-        
-=======
-        this.genericServiceResult.add("boolean", true);
-        assertEquals(true, this.genericServiceResult.get("boolean"));
-    }
-
-    public void removeTest() {
-
->>>>>>> Add GenericServiceResultTest.java
     }
 }
