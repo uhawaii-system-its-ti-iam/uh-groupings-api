@@ -73,6 +73,16 @@ public class GenericServiceResult {
         this.map.put(key, this.data.indexOf(object));
     }
 
+    /**
+     * Get a object by key.
+     *
+     * @param key which was assigned, when object was added.
+     * @return object that was added with key.
+     */
+    public Object get(String key) {
+        return this.data.get(this.map.get(key));
+    }
+
     public List<Object> getData() {
         return Collections.unmodifiableList(this.data);
     }
@@ -81,11 +91,4 @@ public class GenericServiceResult {
         return Collections.unmodifiableMap(this.map);
     }
 
-    public Object get(String key) {
-        try {
-            return getData().get(getMap().get(key));
-        } catch (IndexOutOfBoundsException e) {
-            throw new IndexOutOfBoundsException(e.getMessage());
-        }
-    }
 }
