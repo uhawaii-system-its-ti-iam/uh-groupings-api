@@ -1,10 +1,13 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Hydrate an object as you see fit. GenericServiceResult is a class which will build a collection of arbitrary objects.
@@ -53,6 +56,7 @@ public class GenericServiceResult {
      * @param objects - a variable amount of arbitrary objects.
      */
     public void add(List<String> keys, Object... objects) {
+
         Iterator<String> iter = keys.iterator();
         for (Object object : objects) {
             this.map.put(iter.next(), this.size);
@@ -77,7 +81,15 @@ public class GenericServiceResult {
         return this.data;
     }
 
-    public HashMap<String, Integer> getMap() {
+    public HashMap<String, Integer> getKeys() {
         return this.map;
+    }
+
+    public Object get(String key) {
+        try {
+            return getData().get(getKeys().get(key));
+        } catch (IndexOutOfBoundsException e) {
+            throw new IndexOutOfBoundsException(e.getMessage());
+        }
     }
 }
