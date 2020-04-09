@@ -82,7 +82,7 @@ public class GenericServiceResult {
     }
 
     public HashMap<String, Integer> getKeys() {
-        return this.keys;
+        return this.map;
     }
 
     public Object get(String key) {
