@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +17,9 @@ public class GenericServiceResult {
     // Storage of names and indices of each objects added.
     Map<String, Integer> map;
 
+    /**
+     * Empty Constructor.
+     */
     public GenericServiceResult() {
         this.data = new ArrayList<>();
         this.map = new HashMap<>();
@@ -27,23 +28,23 @@ public class GenericServiceResult {
     /**
      * Initialize and add first object.
      *
-     * @param prop
-     * @param object
+     * @param key    of object.
+     * @param object to add.
      */
-    public GenericServiceResult(String prop, Object object) {
+    public GenericServiceResult(String key, Object object) {
         this();
-        this.add(prop, object);
+        this.add(key, object);
     }
 
     /**
      * Initialize and add multiple objects.
      *
-     * @param props   - list of corresponding name values.
+     * @param keys    - list of corresponding name values.
      * @param objects - a variable amount of arbitrary objects.
      */
-    public GenericServiceResult(List<String> props, Object... objects) {
+    public GenericServiceResult(List<String> keys, Object... objects) {
         this();
-        this.add(props, objects);
+        this.add(keys, objects);
     }
 
     /**
@@ -55,7 +56,6 @@ public class GenericServiceResult {
      * @param objects - a variable amount of arbitrary objects.
      */
     public void add(List<String> keys, Object... objects) {
-
         Iterator<String> iter = keys.iterator();
         for (Object object : objects) {
             this.add(iter.next(), object);
