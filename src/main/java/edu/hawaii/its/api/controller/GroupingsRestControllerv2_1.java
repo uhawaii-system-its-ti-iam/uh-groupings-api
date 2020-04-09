@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -121,9 +122,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uid: uid of admin to add
      * @return Information about results of the operation
      */
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admins/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST addNewAdmin...");
@@ -499,6 +498,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
     }
 
+    /*
     @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -509,6 +509,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.getMemberShipResults(currentUser, uid));
+    }
+    */
+
+    /**
+     * GET a response which specifies whether uid is an owner or not,
+     */
+    @GetMapping(value = "/admins/{uid:[\\w-:.]+}")
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> getIsAdmin(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST getAllSyncDestinations...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getIsAdmin(currentUser, uid));
     }
 
     /**
@@ -565,7 +579,7 @@ public class GroupingsRestControllerv2_1 {
             throw new UnsupportedOperationException();
         return ResponseEntity
                 .ok()
-                . body(results);
+                .body(results);
     }
 
     /**
@@ -597,21 +611,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getIsOwner(currentUser, uid));
-    }
-
-    /**
-     * GET a response which specifies whether uid is an owner or not,
-     */
-    @RequestMapping(value = "/admin/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<GenericServiceResult> getIsAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST getAllSyncDestinations...");
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.getIsAdmin(currentUser, uid));
     }
 
 }
