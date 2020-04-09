@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootWebApplication.class})
-@WebAppConfiguration
 public class GrouperFactoryServiceMockTest {
 
     GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();

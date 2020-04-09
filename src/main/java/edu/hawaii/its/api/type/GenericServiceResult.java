@@ -16,17 +16,28 @@ public class GenericServiceResult {
     // Storage of arbitrary objects.
     ArrayList<Object> data;
     // Storage of names and indices of each objects added.
-    HashMap<String, Integer> keys;
+    HashMap<String, Integer> map;
     int size;
 
     public GenericServiceResult() {
         this.data = new ArrayList<>();
-        this.keys = new HashMap<>();
+        this.map = new HashMap<>();
         this.size = 0;
     }
 
     /**
-     * Initialize map and object list then call add.
+     * Initialize and add first object.
+     *
+     * @param prop
+     * @param object
+     */
+    public GenericServiceResult(String prop, Object object) {
+        this();
+        this.add(prop, object);
+    }
+
+    /**
+     * Initialize and add multiple objects.
      *
      * @param props   - list of corresponding name values.
      * @param objects - a variable amount of arbitrary objects.
@@ -45,8 +56,10 @@ public class GenericServiceResult {
      * @param objects - a variable amount of arbitrary objects.
      */
     public void add(List<String> keys, Object... objects) {
+
+        Iterator<String> iter = keys.iterator();
         for (Object object : objects) {
-            this.keys.put(keys.get(this.size), this.size);
+            this.map.put(iter.next(), this.size);
             this.data.add(object);
             this.size++;
         }
@@ -60,38 +73,8 @@ public class GenericServiceResult {
      */
     public void add(String key, Object object) {
         this.data.add(object);
-        this.keys.put(key, this.size);
+        this.map.put(key, this.size);
         this.size++;
-    }
-
-    public boolean remove(String key) {
-        return this.data.remove(this.keys.remove(key));
-    }
-
-    public int size() {
-        return this.size;
-    }
-
-    public String prettyString() {
-        String str = "";
-        Set<String> keys = this.keys.keySet();
-        for (String temp : keys) {
-            str += temp + "=" + this.data.get(this.keys.get(temp)) + ", ";
-        }
-        return str;
-    }
-
-    @Override
-    public String toString() {
-        String str = "GenericServiceResult{data=[";
-
-        for (Object object : this.data) {
-            str += object.toString();
-        }
-        str += "], keys={" + this.keys.toString() + "}}, "
-                + "ParsedGenericServiceResult{"
-                + this.prettyString() + "}";
-        return str;
     }
 
     public ArrayList<Object> getData() {
