@@ -858,8 +858,6 @@ public class TestMembershipService {
 
         mixedResults = membershipService.addGroupMembers(ownerUsername, path, mixedUsernames);
         for (GroupingsServiceResult result : mixedResults) {
-            System.out.println("RESULT: " + result.getResultCode().substring(0, 6) +
-                    "CHECK: " + expectedResults.get(mixedResults.indexOf(result)));
             assertEquals(result.getResultCode().substring(0, 6),
                     expectedResults.get(mixedResults.indexOf(result)));
         }
