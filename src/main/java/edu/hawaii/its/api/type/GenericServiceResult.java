@@ -12,14 +12,11 @@ import java.util.Map;
  * which will build a collection of arbitrary objects.
  */
 public class GenericServiceResult {
-    // Storage of arbitrary objects.
+    /** Storage of arbitrary objects. */
     List<Object> data;
-    // Storage of names and indices of each objects added.
+    /** Storage of names and indices of each objects added. */
     Map<String, Integer> map;
 
-    /**
-     * Empty Constructor.
-     */
     public GenericServiceResult() {
         this.data = new ArrayList<>();
         this.map = new HashMap<>();
@@ -83,12 +80,13 @@ public class GenericServiceResult {
         return this.data.get(this.map.get(key));
     }
 
+    /** @return List<Object>data */
     public List<Object> getData() {
         return Collections.unmodifiableList(this.data);
     }
 
+    /** @return Map<String, Integer>map */
     public Map<String, Integer> getMap() {
         return Collections.unmodifiableMap(this.map);
     }
-
 }
