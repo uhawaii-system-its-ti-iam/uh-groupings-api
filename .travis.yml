@@ -1,5 +1,6 @@
 language: java
-install: true
+install:
+  - mvn test-compile -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 jdk:
   - oraclejdk8
 
@@ -11,9 +12,10 @@ branches:
 
 script:
   - mvn -Denv=dev clean test
+  - mvn test jacoco:report
 
 after_success:
-  - mvn jacoco:report coveralls:report
+  - mvn coveralls:report
 
 notifications:
   email:
