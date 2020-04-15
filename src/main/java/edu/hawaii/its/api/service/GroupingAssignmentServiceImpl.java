@@ -212,6 +212,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingsOwned(getGroupPaths(actingUsername, ownerUsername));
     }
 
+    @Override
+    public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername) {
+        return excludeGroups(getGroupPaths(actingUsername, ownerUsername));
+    }
+
     //returns a list of groupings that corresponds to all of the owner groups in groupPaths
     @Override
     public List<Grouping> groupingsOwned(List<String> groupPaths) {
@@ -223,6 +228,19 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         // make sure the owner group actually correspond to a grouping
         List<String> ownedGroupings = helperService.extractGroupings(ownerGroups);
+
+        return helperService.makeGroupings(ownedGroupings);
+    }
+    @Override
+    public List<Grouping> excludeGroups(List<String> groupPaths) {
+        List<String> excludeGroups = groupPaths
+            .stream()
+            .filter(groupPath -> groupPath.endsWith(EXCLUDE))
+            .map(groupPath -> groupPath.substring(0, groupPath.length() - EXCLUDE.length()))
+            .collect(Collectors.toList());
+
+        // make sure the owner group actually correspond to a grouping
+        List<String> ownedGroupings = helperService.extractGroupings(excludeGroups);
 
         return helperService.makeGroupings(ownedGroupings);
     }
@@ -344,10 +362,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupPaths = getGroupPaths(username, uid);
         List<Grouping> memeberships = groupingsIn(groupPaths);
         List<Grouping> ownerships = groupingsOwned(groupPaths);
+        List<Grouping> excludes = excludeGroups(groupPaths);
+
 
         membershipAssignment.setGroupingsIn(memeberships);
         membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
         membershipAssignment.setGroupingsOwned(ownerships);
+        membershipAssignment.setGroupingsExcluded(excludes);
         for (Grouping grouping:memeberships) {
             membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
 
@@ -373,6 +394,14 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
             membershipAssignment.addInInclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
             membershipAssignment.addInExclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+
+        }
+
+        for (Grouping grouping : excludes){
+            membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + "basis",uid));
+            membershipAssignment.addInExclude(grouping.getName(), true);
+            membershipAssignment.addInInclude(grouping.getName(), false);
+
         }
 
 

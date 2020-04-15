@@ -175,9 +175,9 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void personTesting(){
-        MembershipAssignment membership = groupingAssignmentService.getMembershipAssignment("kahlin", "kahlin");
+        List<Grouping>  membership = groupingAssignmentService.restGroupingsExclude("kahlin", "kahlin");
 
-        System.out.println("Hello");
+        System.out.println(membership);
     }
 
     @Test
