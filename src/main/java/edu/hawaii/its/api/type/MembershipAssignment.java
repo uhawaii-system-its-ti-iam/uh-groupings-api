@@ -7,6 +7,7 @@ import java.util.HashMap;
 public class MembershipAssignment {
     private List<Grouping> groupingsIn;
     private List<Grouping> groupingsOwned;
+    private List<Grouping> groupingsExcluded;
     private List<Grouping> groupingsToOptInTo;
     private Map<String, Boolean> inBasis = new HashMap<>();
     private Map<String, Boolean> inInclude = new HashMap<>();
@@ -26,6 +27,14 @@ public class MembershipAssignment {
 
     public void setGroupingsOwned(List<Grouping> groupingsOwned) {
         this.groupingsOwned = groupingsOwned;
+    }
+
+    public List<Grouping> getGroupingsExcluded() {
+        return groupingsExcluded;
+    }
+
+    public void setGroupingsExcluded(List<Grouping> groupingsExcluded) {
+        this.groupingsExcluded = groupingsExcluded;
     }
 
     public List<Grouping> getGroupingsToOptInTo() {
