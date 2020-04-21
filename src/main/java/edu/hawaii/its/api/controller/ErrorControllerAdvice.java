@@ -15,6 +15,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
+
 @ControllerAdvice
 public class ErrorControllerAdvice {
 
@@ -59,6 +62,11 @@ public class ErrorControllerAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<GroupingsHTTPException> handleException(Exception exception) {
         return exceptionResponse("Exception", exception, 500);
+    }
+
+    @ExceptionHandler({MessagingException.class, IOException.class})
+    public ResponseEntity<GroupingsHTTPException> handleMessagingException(Exception e) {
+      return exceptionResponse("Mail service exception", e, 500);
     }
 
     @ExceptionHandler(GroupingsServiceResultException.class)
