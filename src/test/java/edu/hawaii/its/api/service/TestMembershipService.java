@@ -931,6 +931,14 @@ public class TestMembershipService {
 
     }
 
+    @Test
+    public void deleteGroupMembersTest() {
+        List<String> includeNames = Arrays.asList(username[0], username[1], username[2]);
+        GenericServiceResult genericServiceResult =
+                membershipService.deleteGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
+        System.out.println(genericServiceResult);
+    }
+
     //Add admin and delete admin in one test
     @Test
     public void adminTest() {
