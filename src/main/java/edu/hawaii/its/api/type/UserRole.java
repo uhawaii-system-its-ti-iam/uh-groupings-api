@@ -3,11 +3,8 @@ package edu.hawaii.its.api.type;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity
 @Table(name = "role")
 public class UserRole implements Serializable {
 
@@ -17,7 +14,6 @@ public class UserRole implements Serializable {
     private Integer version;
     private String authority;
 
-    @Id
     @Column(name = "id")
     public Integer getId() {
         return id;

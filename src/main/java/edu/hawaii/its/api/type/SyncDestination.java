@@ -1,14 +1,11 @@
 package edu.hawaii.its.api.type;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-@Entity
 @Table(name = "syncDestinations")
 public class SyncDestination {
     // 3 variables for object
@@ -29,7 +26,6 @@ public class SyncDestination {
         this.isSynced = null;
     }
 
-    @Id
     @Column(name = "name")
     public String getName() {
         return name;
