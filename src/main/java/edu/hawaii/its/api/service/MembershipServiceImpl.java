@@ -311,10 +311,21 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public GenericServiceResult deleteGroupMembers(String currentUser, String groupPath,
             List<String> usersToDelete) {
-        String action;
 
-        return new GenericServiceResult(Arrays.asList("currentUser", "groupPath", "usersToDelete"), currentUser,
-                groupPath, usersToDelete);
+        String compostie = helperService.parentGroupingPath(groupPath);
+        if ((!memberAttributeService.isSuperuser(currentUser) &&
+                (!memberAttributeService.isAdmin(currentUser)) && !memberAttributeService
+                .isOwner(compostie, currentUser))) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
+        String action = "deleteGroupMembers; currentUser: " + currentUser + "; " +
+                "groupPath: " + groupPath + "; " +
+                "usersToDelete: " + usersToDelete.toString() + ";";
+        logger.info(action);
+        List<String> membersToDelete;
+
     }
 
     @Override
