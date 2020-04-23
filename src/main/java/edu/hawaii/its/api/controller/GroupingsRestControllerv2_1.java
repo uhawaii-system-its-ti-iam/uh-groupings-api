@@ -310,6 +310,27 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Delete, as the currentUser all valid uids from group at grouping.
+     *
+     * @param currentUser - Admin or superuser who is initiating the deletion.
+     * @param grouping    - Path of the grouping.
+     * @param group       - Name of the group being deleted from.
+     * @param uids        - List of potential usernames to be deleted.
+     * @return GenericServiceResult containing all successfully deleted members.
+     */
+    @DeleteMapping(value = "/groupings/{grouping:[\\w-:.]+}/groups/{group:[\\w-:.]+}/deleteMultipleMembers/{uids:[\\w-:.]+}")
+    public ResponseEntity<GenericServiceResult> deleteMultipleMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String grouping,
+            @PathVariable String group,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteMembers");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMembers(currentUser, grouping + ":" + group, uids));
+    }
+
+    /**
      * Remove grouping include member
      *
      * @param path: path of grouping to modify
@@ -341,25 +362,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
-    }
-
-    /**
-     * Delete all valid members in uids from path as currentUser.
-     *
-     * @param currentUser
-     * @param path
-     * @param uids
-     * @return
-     */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
-    public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteExclude");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
     }
 
     /**
