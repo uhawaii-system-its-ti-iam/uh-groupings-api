@@ -313,7 +313,8 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToDelete) {
         String action;
 
-        return new GenericServiceResult("test", "this is a test");
+        return new GenericServiceResult(Arrays.asList("currentUser", "groupPath", "usersToDelete"), currentUser,
+                groupPath, usersToDelete);
     }
 
     @Override

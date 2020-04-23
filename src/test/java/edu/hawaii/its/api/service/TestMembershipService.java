@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -911,6 +912,14 @@ public class TestMembershipService {
         //checks if username[2] is still in include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
 
+    }
+
+    @Test
+    public void deleteGroupMembersTest() {
+        List<String> includeNames = Arrays.asList(username[0], username[1], username[2]);
+        GenericServiceResult genericServiceResult =
+                membershipService.deleteGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
+        System.out.println(genericServiceResult);
     }
 
     //Add admin and delete admin in one test
