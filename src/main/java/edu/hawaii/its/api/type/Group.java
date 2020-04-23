@@ -7,14 +7,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-@Entity
 @Table(name = "groups")
 public class Group implements Comparable<Group> {
     private List<Person> members = new ArrayList<>();
@@ -45,7 +42,6 @@ public class Group implements Comparable<Group> {
         this.path = path != null ? path : "";
     }
 
-    @Id
     @Column(name = "path")
     public String getPath() {
         return path;
