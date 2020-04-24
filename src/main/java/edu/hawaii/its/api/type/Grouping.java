@@ -7,7 +7,9 @@ import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -16,9 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Entity
 @Table(name = "grouping")
 public class Grouping {
 
+    @Id
     @Column(name = "path")
     private String path;
 
@@ -104,7 +108,6 @@ public class Grouping {
 
     }
 
-
     public String getName() {
         return name;
     }
@@ -185,7 +188,6 @@ public class Grouping {
     public void setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
     }
-
 
     @Override
     public String toString() {
