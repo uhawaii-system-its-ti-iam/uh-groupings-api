@@ -176,20 +176,6 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void personTesting(){
-        MembershipAssignment membership = groupingAssignmentService.getMembershipAssignment("kahlin", "kahlin");
-
-        Map<String, Boolean> noVal = new HashMap<>();
-        noVal.put("kahlin", true);
-
-
-        System.out.println(noVal.get("kahlin"));
-
-        noVal.put("kahlin", false);
-        System.out.println(noVal.get("kahlin"));
-    }
-
-    @Test
     public void adminListsTest() {
         try {
             // Try with non-admin.
@@ -507,6 +493,26 @@ public class TestGroupingAssignmentService {
 
         assertFalse(groupingsIn.contains(GROUPING));
         assertTrue(groupingsToOptInto.contains(GROUPING));
+
+        MembershipAssignment membershipAssignment;
+
+        // Test getting the attributes inInclude, inExclude, inOwner, and inBasis.
+        membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, ADMIN);
+
+        assertTrue(membershipAssignment.isInOwner(GROUPING));
+        assertFalse(membershipAssignment.isInBasis(GROUPING));
+        assertFalse(membershipAssignment.isInInclude(GROUPING));
+        assertFalse(membershipAssignment.isInExclude(GROUPING));
+
+        // Try to get the memberships for a user that doesn't exist.
+        try {
+            membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, "somenamethatNoexist");
+
+        }catch (Exception e) {
+            System.out.println("User doesn't exist.");
+        }
+
+
     }
 
     @Test

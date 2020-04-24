@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
@@ -426,44 +427,62 @@ public class GroupingAssignmentServiceTest {
   @Test
   public void getMembershipAssignmentTest() {
     String username = users.get(0).getUsername();
-    // username should already be in GROUPING_0_PATH
-    List<String> groupingsIn = groupingAssignmentService
-        .getMembershipAssignment(username, username)
-        .getGroupingsIn()
-        .stream()
-        .map(Grouping::getPath)
-        .collect(Collectors.toList());
+//    // username should already be in GROUPING_0_PATH
+//    List<String> groupingsIn = groupingAssignmentService
+//        .getMembershipAssignment(username, username)
+//        .getGroupingsIn()
+//        .stream()
+//        .map(Grouping::getPath)
+//        .collect(Collectors.toList());
+//
+//    List<String> groupingsToOptInto = groupingAssignmentService
+//        .getMembershipAssignment(username, username)
+//        .getGroupingsToOptInTo()
+//        .stream()
+//        .map(Grouping::getPath)
+//        .collect(Collectors.toList());
+//
+//    assertTrue(groupingsIn.contains(GROUPING_0_PATH));
+//    assertFalse(groupingsToOptInto.contains(GROUPING_0_PATH));
+//
+//    // take username[1] out of GROUPING
+//    membershipService.deleteGroupingMember(username, GROUPING_0_PATH, username);
+//
+//    // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
+//    groupingsIn = groupingAssignmentService
+//        .getMembershipAssignment(username, username)
+//        .getGroupingsIn()
+//        .stream()
+//        .map(Grouping::getPath)
+//        .collect(Collectors.toList());
+//
+//    groupingsToOptInto = groupingAssignmentService
+//        .getMembershipAssignment(username, username)
+//        .getGroupingsToOptInTo()
+//        .stream()
+//        .map(Grouping::getPath)
+//        .collect(Collectors.toList());
+//
+//    assertFalse(groupingsIn.contains(GROUPING_0_PATH));
+//    assertTrue(groupingsToOptInto.contains(GROUPING_0_PATH));
 
-    List<String> groupingsToOptInto = groupingAssignmentService
-        .getMembershipAssignment(username, username)
-        .getGroupingsToOptInTo()
-        .stream()
-        .map(Grouping::getPath)
-        .collect(Collectors.toList());
+    MembershipAssignment membershipAssignment;
 
-    assertTrue(groupingsIn.contains(GROUPING_0_PATH));
-    assertFalse(groupingsToOptInto.contains(GROUPING_0_PATH));
+    // Test getting the attributes inInclude, inExclude, inOwner, and inBasis.
+    membershipAssignment = groupingAssignmentService.getMembershipAssignment(username, username);
 
-    // take username[1] out of GROUPING
-    membershipService.deleteGroupingMember(username, GROUPING_0_PATH, username);
+    assertTrue(membershipAssignment.isInOwner(GROUPING_0_PATH));
+    assertTrue(membershipAssignment.isInBasis(GROUPING_0_PATH));
+    assertFalse(membershipAssignment.isInInclude(GROUPING_0_PATH));
+    assertFalse(membershipAssignment.isInExclude(GROUPING_0_PATH));
 
-    // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
-    groupingsIn = groupingAssignmentService
-        .getMembershipAssignment(username, username)
-        .getGroupingsIn()
-        .stream()
-        .map(Grouping::getPath)
-        .collect(Collectors.toList());
+    // Try to get the memberships for a user that doesn't exist.
+    try {
+      membershipAssignment = groupingAssignmentService.getMembershipAssignment(username, "somenamethatNoexist");
 
-    groupingsToOptInto = groupingAssignmentService
-        .getMembershipAssignment(username, username)
-        .getGroupingsToOptInTo()
-        .stream()
-        .map(Grouping::getPath)
-        .collect(Collectors.toList());
-
-    assertFalse(groupingsIn.contains(GROUPING_0_PATH));
-    assertTrue(groupingsToOptInto.contains(GROUPING_0_PATH));
+    }catch (Exception e) {
+      System.out.println("User doesn't exist.");
+    }
   }
 
   @Test
