@@ -312,10 +312,11 @@ public class MembershipServiceImpl implements MembershipService {
     public GenericServiceResult deleteGroupMembers(String currentUser, String groupPath,
             List<String> usersToDelete) {
 
-        String compostie = helperService.parentGroupingPath(groupPath);
+        String composite = helperService.parentGroupingPath(groupPath);
+
         if ((!memberAttributeService.isSuperuser(currentUser) &&
                 (!memberAttributeService.isAdmin(currentUser)) && !memberAttributeService
-                .isOwner(compostie, currentUser))) {
+                .isOwner(composite, currentUser))) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
@@ -324,8 +325,31 @@ public class MembershipServiceImpl implements MembershipService {
                 "groupPath: " + groupPath + "; " +
                 "usersToDelete: " + usersToDelete.toString() + ";";
         logger.info(action);
-        List<String> membersToDelete;
+        List<String> membersToDelete = getValidMembers(groupPath, usersToDelete);
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
+        WsDeleteMemberResults deleteMemberResults = grouperFS
+                .makeWsDeleteMemberResults(groupPath, wsSubjectLookup, membersToDelete);
 
+        updateLastModified(composite);
+        updateLastModified(groupPath);
+
+        GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(deleteMemberResults, action);
+        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "membersDeleted"), gsr, membersToDelete);
+        return genericServiceResult;
+    }
+
+    private List<String> getValidMembers(String path, List<String> members) {
+        List<String> result = new ArrayList<>();
+        for (String member : members) {
+            try {
+                if (memberAttributeService.isMember(path, member)) {
+                    result.add(member);
+                }
+            } catch (GcWebServiceError e) {
+                logger.info("\"" + member + "\"" + " is invalid for deletion", e);
+            }
+        }
+        return result;
     }
 
     @Override

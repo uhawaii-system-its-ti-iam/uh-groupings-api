@@ -318,7 +318,7 @@ public class GroupingsRestControllerv2_1 {
      * @param uids        - List of potential usernames to be deleted.
      * @return GenericServiceResult containing all successfully deleted members.
      */
-    @DeleteMapping(value = "/groupings/{grouping:[\\w-:.]+}/groups/{group:[\\w-:.]+}/deleteMultipleMembers/{uids:[\\w-:.]+}")
+    @DeleteMapping(value = "/groupings/{grouping:[\\w-:.]+}/groups/{group:[\\w-:.]+}/deleteMultipleMembers/{uids}")
     public ResponseEntity<GenericServiceResult> deleteMultipleMembers(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String grouping,
