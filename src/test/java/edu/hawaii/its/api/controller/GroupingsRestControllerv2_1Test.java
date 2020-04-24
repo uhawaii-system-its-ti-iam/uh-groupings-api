@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -1169,16 +1170,6 @@ public class GroupingsRestControllerv2_1Test {
         System.out.println(group.getOwners());
 
         mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
-                .header("current_user", "o6-username"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-    }
-
-    @Test
-    @WithMockUhUser
-    public void genericTest() throws Exception {
-        mockMvc.perform(get(API_BASE + "/generic")
                 .header("current_user", "o6-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
