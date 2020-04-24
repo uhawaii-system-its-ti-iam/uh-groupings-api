@@ -34,7 +34,9 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -175,9 +177,16 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void personTesting(){
-        List<Grouping>  membership = groupingAssignmentService.restGroupingsExclude("kahlin", "kahlin");
+        MembershipAssignment membership = groupingAssignmentService.getMembershipAssignment("kahlin", "kahlin");
 
-        System.out.println(membership);
+        Map<String, Boolean> noVal = new HashMap<>();
+        noVal.put("kahlin", true);
+
+
+        System.out.println(noVal.get("kahlin"));
+
+        noVal.put("kahlin", false);
+        System.out.println(noVal.get("kahlin"));
     }
 
     @Test
