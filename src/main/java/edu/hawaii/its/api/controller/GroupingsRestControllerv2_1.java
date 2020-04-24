@@ -310,24 +310,41 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Delete, as the currentUser all valid uids from group at grouping.
+     * Delete, as the currentUser all valid uids from exclude group at grouping.
      *
      * @param currentUser - Admin or superuser who is initiating the deletion.
-     * @param grouping    - Path of the grouping.
-     * @param group       - Name of the group being deleted from.
+     * @param path        - path.
      * @param uids        - List of potential usernames to be deleted.
      * @return GenericServiceResult containing all successfully deleted members.
      */
-    @DeleteMapping(value = "/groupings/{grouping:[\\w-:.]+}/groups/{group:[\\w-:.]+}/deleteMultipleMembers/{uids}")
-    public ResponseEntity<GenericServiceResult> deleteMultipleMembers(
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeGroup/{uids}")
+    public ResponseEntity<GenericServiceResult> removeExcludeMembers(
             @RequestHeader("current_user") String currentUser,
-            @PathVariable String grouping,
-            @PathVariable String group,
+            @PathVariable String path,
             @PathVariable List<String> uids) {
         logger.info("Entered REST deleteMembers");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, grouping + ":" + group, uids));
+                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
+    }
+
+    /**
+     * Delete, as the currentUser all valid uids from include group at grouping.
+     *
+     * @param currentUser - Admin or superuser who is initiating the deletion.
+     * @param path        - path.
+     * @param uids        - List of potential usernames to be deleted.
+     * @return GenericServiceResult containing all successfully deleted members.
+     */
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeGroup/{uids}")
+    public ResponseEntity<GenericServiceResult> removeIncludeMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String path,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteMembers");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
     }
 
     /**
