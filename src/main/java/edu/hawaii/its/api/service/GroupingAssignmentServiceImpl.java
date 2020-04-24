@@ -240,9 +240,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             .collect(Collectors.toList());
 
         // make sure the owner group actually correspond to a grouping
-        List<String> ownedGroupings = helperService.extractGroupings(excludeGroups);
+        List<String> excludeGroupings = helperService.extractGroupings(excludeGroups);
 
-        return helperService.makeGroupings(ownedGroupings);
+        return helperService.makeGroupings(excludeGroupings);
     }
 
     //returns a list of all of the groupings corresponding to the include groups in groupPaths that have the self-opted attribute
@@ -394,7 +394,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         // Goes through all the groupings in memberships and adds them to appropriate attributes.
         for (Grouping grouping:memeberships) {
             // Adds the grouping name to the duplicate checker list.
-            duplicateChecker.add(grouping.getName());
+            duplicateChecker.add(grouping.getPath());
 
             /*
                 The inOwner, inBasis, inInclude, and inExlcude attributes of MembershipAssignment are hash maps that
@@ -409,32 +409,32 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     key value pair <"test-grouping", true>, otherwise it adds <"test-grouping", false>.
 
              */
-            membershipAssignment.addInOwner(grouping.getName(), false);
-            membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+            membershipAssignment.addInOwner(grouping.getPath(), false);
+            membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
 
             // Checks if they are in the basis or not to determine which logic to use.
-            if(membershipAssignment.isInBasis(grouping.getName())) {
+            if(membershipAssignment.isInBasis(grouping.getPath())) {
                 // If they are in the basis, they can be in the exclude, include, or neither so we must check both.
 
-                membershipAssignment.addInInclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+                membershipAssignment.addInInclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
 
                 // Checks if the user is in the include, if they are in the include group add to the inExclude
                 // attribute the key-value <grouping-name, false>.
-                if (membershipAssignment.isInInclude(grouping.getName())) {
-                    membershipAssignment.addInExclude(grouping.getName(), false);
+                if (membershipAssignment.isInInclude(grouping.getPath())) {
+                    membershipAssignment.addInExclude(grouping.getPath(), false);
                 } else {
                     // If they aren't in the include, check if they are in the exclude and add the key-value pair.
-                    membershipAssignment.addInExclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+                    membershipAssignment.addInExclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
                 }
             } else {
                 // If they aren't in the basis but in the memberships groupings, they must either be in the
                 // exclude or include, not both.
                 if (memberAttributeService.isMember(grouping.getPath() + ":include", uid)) {
-                    membershipAssignment.addInInclude(grouping.getName(), true);
-                    membershipAssignment.addInExclude(grouping.getName(), false);
+                    membershipAssignment.addInInclude(grouping.getPath(), true);
+                    membershipAssignment.addInExclude(grouping.getPath(), false);
                 } else {
-                    membershipAssignment.addInInclude(grouping.getName(), false);
-                    membershipAssignment.addInExclude(grouping.getName(), true);
+                    membershipAssignment.addInInclude(grouping.getPath(), false);
+                    membershipAssignment.addInExclude(grouping.getPath(), true);
                 }
             }
         }
@@ -442,11 +442,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         // Groupings in the excludes list are never in the memberships list. They are also never in the include.
         // We only need to check for the basis.
         for (Grouping grouping : excludes){
-            duplicateChecker.add(grouping.getName());
-            membershipAssignment.addInOwner(grouping.getName(), false);
-            membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis",uid));
-            membershipAssignment.addInExclude(grouping.getName(), true);
-            membershipAssignment.addInInclude(grouping.getName(), false);
+            duplicateChecker.add(grouping.getPath());
+            membershipAssignment.addInOwner(grouping.getPath(), false);
+            membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis",uid));
+            membershipAssignment.addInExclude(grouping.getPath(), true);
+            membershipAssignment.addInInclude(grouping.getPath(), false);
 
         }
 
@@ -455,15 +455,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         for (Grouping grouping:ownerships) {
             // If they are not in the duplicate checker list, add the grouping to the combined list and the respective
             // MembershipAssignment attributes.
-            if (!duplicateChecker.contains(grouping.getName())){
+            if (!duplicateChecker.contains(grouping.getPath())){
                 combinedGroupings.add(grouping);
-                membershipAssignment.addInBasis(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-                membershipAssignment.addInInclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
-                membershipAssignment.addInExclude(grouping.getName(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+                membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+                membershipAssignment.addInInclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+                membershipAssignment.addInExclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
             }
 
             // Update the owner attribute for all groupings in the ownerships list.
-            membershipAssignment.addInOwner(grouping.getName(), true);
+            membershipAssignment.addInOwner(grouping.getPath(), true);
         }
 
         // Set the combined groupings attribute.
