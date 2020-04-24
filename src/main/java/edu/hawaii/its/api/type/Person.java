@@ -5,11 +5,14 @@ import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Transient;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+@Entity
 @Proxy(lazy = false)
 public class Person implements Comparable<Person> {
 
@@ -64,6 +67,7 @@ public class Person implements Comparable<Person> {
         this.attributes = attributes;
     }
 
+    @Id
     @Column
     public String getUsername() {
         return attributes.get(USERNAME);
