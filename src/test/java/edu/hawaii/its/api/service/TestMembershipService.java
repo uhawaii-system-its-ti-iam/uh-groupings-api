@@ -919,6 +919,13 @@ public class TestMembershipService {
         List<String> includeNames = Arrays.asList(username[0], username[1], username[2]);
         GenericServiceResult genericServiceResult =
                 membershipService.deleteGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[0]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
+
+        assertEquals(includeNames, genericServiceResult.get("membersDeleted"));
+        assertEquals(SUCCESS,
+                ((GroupingsServiceResult) genericServiceResult.get("groupingsServiceResult")).getResultCode());
     }
 
     //Add admin and delete admin in one test

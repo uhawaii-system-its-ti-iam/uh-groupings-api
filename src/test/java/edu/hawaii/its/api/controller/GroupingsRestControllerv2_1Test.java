@@ -7,6 +7,7 @@ import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
@@ -31,6 +32,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -1058,26 +1060,26 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
     }
 
-  @Test
-  @WithMockUhUser
-  public void regexTest() throws Exception {
-    // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
-    mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
-        .header(CURRENT_USER, USERNAME))
-        .andExpect(status().is4xxClientError());
+    @Test
+    @WithMockUhUser
+    public void regexTest() throws Exception {
+        // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
+        mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().is4xxClientError());
 
-    mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "^" + "/groupings")
-        .header(CURRENT_USER, USERNAME))
-        .andExpect(status().is4xxClientError());
+        mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "^" + "/groupings")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().is4xxClientError());
 
-    mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
-        .header(CURRENT_USER, USERNAME))
-        .andExpect(status().is4xxClientError());
+        mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().is4xxClientError());
 
-    mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
-        .header(CURRENT_USER, USERNAME))
-        .andExpect(status().is4xxClientError());
+        mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().is4xxClientError());
 
-  }
+    }
 
 }
