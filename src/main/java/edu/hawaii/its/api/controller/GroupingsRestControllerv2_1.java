@@ -191,7 +191,8 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/resetGroup")
-    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner,
+            @PathVariable String path,
             @PathVariable List<String> include, @PathVariable List<String> exclude) {
         logger.info("Entered REST resetGroups...");
         return ResponseEntity
@@ -218,6 +219,8 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get a list of a groupings a user is in and can opt into
+     * <p>
+     * <<<<<<< HEAD
      *
      * @param path:        Path of specific grouping
      * @param page:        Page of grouping to retrieve (starts at 1)
@@ -242,7 +245,8 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a List of memberships as which uid has.
+     * Get the list of sync destinations
+     * >>>>>>> Attempt to speed up getGrouping
      */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
@@ -314,7 +318,7 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of the operation
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
-    public ResponseEntity<List<GroupingsServiceResult>> addIncludeMember(
+    public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST includeMembers...");
@@ -327,18 +331,19 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to add include multiple members
      *
-     * @param path: path of grouping to update.
-     * @param uids: list of uids.
+     * @param path: path of grouping to update
+     * @param uids: uids or uuids of members to add to include
      * @return Information about results of the operation
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uids}")
-    public ResponseEntity<List<GroupingsServiceResult>> addIncludeMembers(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}")
+    public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) throws IOException, MessagingException {
         logger.info("Entered REST includeMultipleMembers...");
+        path = path + INCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMembers(currentUser, path + INCLUDE, uids));
+                .body(membershipService.addGroupMembers(currentUser, path, uids));
     }
 
     /**
@@ -366,14 +371,36 @@ public class GroupingsRestControllerv2_1 {
      * @param uids: uids or uuids of members to add to exclude
      * @return Information about results of the operation
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uids}")
-    public ResponseEntity<List<GroupingsServiceResult>> addExcludeMembers(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
+    public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) throws IOException, MessagingException {
         logger.info("Entered REST excludeMultipleMembers...");
+        path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMembers(currentUser, path + EXCLUDE, uids));
+                .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    /**
+     * Delete, as the currentUser all valid uids from group at grouping.
+     *
+     * @param currentUser - Admin or superuser who is initiating the deletion.
+     * @param grouping    - Path of the grouping.
+     * @param group       - Name of the group being deleted from.
+     * @param uids        - List of potential usernames to be deleted.
+     * @return GenericServiceResult containing all successfully deleted members.
+     */
+    @DeleteMapping(value = "/groupings/{grouping:[\\w-:.]+}/groups/{group:[\\w-:.]+}/deleteMultipleMembers/{uids}")
+    public ResponseEntity<GenericServiceResult> deleteMultipleMembers(
+            @RequestHeader("current_user") String currentUser,
+            @PathVariable String grouping,
+            @PathVariable String group,
+            @PathVariable List<String> uids) {
+        logger.info("Entered REST deleteMembers");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.deleteGroupMembers(currentUser, grouping + ":" + group, uids));
     }
 
     /**
@@ -384,7 +411,7 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> removeIncludeMember(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST deleteInclude");
@@ -401,51 +428,13 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> removeExcludeMember(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
-    }
-    
-    /**
-     * Delete, as the currentUser all valid uids from include group at path.
-     *
-     * @param currentUser - Admin or superuser who is initiating the deletion.
-     * @param path        - Grouping path.
-     * @param uids        - List of potential usernames to be deleted.
-     * @return GenericServiceResult containing all successfully deleted members.
-     */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uids}")
-    public ResponseEntity<GenericServiceResult> removeIncludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteMembers");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + INCLUDE, uids));
-    }
-
-    /**
-     * Delete, as the currentUser all valid uids from exclude group at path.
-     *
-     * @param currentUser - Admin or superuser who is initiating the deletion.
-     * @param path        - Grouping path.
-     * @param uids        - List of potential usernames to be deleted.
-     * @return GenericServiceResult containing all successfully deleted members.
-     */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uids}")
-    public ResponseEntity<GenericServiceResult> removeExcludeMembers(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uids) {
-        logger.info("Entered REST deleteMembers");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
     }
 
     /**
