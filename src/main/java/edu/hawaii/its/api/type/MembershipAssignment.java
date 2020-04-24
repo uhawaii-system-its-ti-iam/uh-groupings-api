@@ -6,12 +6,12 @@ import java.util.HashMap;
 
 public class MembershipAssignment {
     private List<Grouping> groupingsIn;
-    private List<Grouping> groupingsOwned;
-    private List<Grouping> groupingsExcluded;
+    private List<Grouping> combinedGroupings;
     private List<Grouping> groupingsToOptInTo;
     private Map<String, Boolean> inBasis = new HashMap<>();
     private Map<String, Boolean> inInclude = new HashMap<>();
     private Map<String, Boolean> inExclude = new HashMap<>();
+    private Map<String, Boolean> inOwner = new HashMap<>();
 
     public List<Grouping> getGroupingsIn() {
         return groupingsIn;
@@ -21,20 +21,12 @@ public class MembershipAssignment {
         this.groupingsIn = groupingsIn;
     }
 
-    public List<Grouping> getGroupingsOwned() {
-        return groupingsOwned;
+    public List<Grouping> getCombinedGroupings() {
+        return combinedGroupings;
     }
 
-    public void setGroupingsOwned(List<Grouping> groupingsOwned) {
-        this.groupingsOwned = groupingsOwned;
-    }
-
-    public List<Grouping> getGroupingsExcluded() {
-        return groupingsExcluded;
-    }
-
-    public void setGroupingsExcluded(List<Grouping> groupingsExcluded) {
-        this.groupingsExcluded = groupingsExcluded;
+    public void setCombinedGroupings(List<Grouping> combinedGroupings) {
+        this.combinedGroupings = combinedGroupings;
     }
 
     public List<Grouping> getGroupingsToOptInTo() {
@@ -81,5 +73,15 @@ public class MembershipAssignment {
 
     public Map<String, Boolean> getInExclude() {
         return inExclude;
+    }
+
+    public Map<String, Boolean> getInOwner() {
+        return inOwner;
+    }
+
+    public void addInOwner(String key, Boolean value) { inOwner.put(key,value); }
+
+    public boolean isInOwner(String key) {
+        return inOwner.get(key);
     }
 }
