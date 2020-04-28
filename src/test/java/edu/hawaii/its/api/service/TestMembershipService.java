@@ -911,7 +911,6 @@ public class TestMembershipService {
 
         //checks if username[2] is still in include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
-
     }
 
     @Test

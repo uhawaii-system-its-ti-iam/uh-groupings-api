@@ -314,28 +314,24 @@ public class MembershipServiceImpl implements MembershipService {
 
         String composite = helperService.parentGroupingPath(groupPath);
 
-        if ((!memberAttributeService.isSuperuser(currentUser) &&
-                (!memberAttributeService.isAdmin(currentUser)) && !memberAttributeService
-                .isOwner(composite, currentUser))) {
+        if (!memberAttributeService.isOwner(composite, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        GenericServiceResult genericServiceResult = new GenericServiceResult();
         String action = "deleteGroupMembers; currentUser: " + currentUser + "; " +
                 "groupPath: " + groupPath + "; " +
                 "usersToDelete: " + usersToDelete.toString() + ";";
         logger.info(action);
         List<String> membersToDelete = getValidMembers(groupPath, usersToDelete);
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         WsDeleteMemberResults deleteMemberResults = grouperFS
-                .makeWsDeleteMemberResults(groupPath, wsSubjectLookup, membersToDelete);
+                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
 
         updateLastModified(composite);
         updateLastModified(groupPath);
 
-        GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(deleteMemberResults, action);
-        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "membersDeleted"), gsr, membersToDelete);
-        return genericServiceResult;
+        return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "membersDeleted"),
+                helperService.makeGroupingsServiceResult(deleteMemberResults, action),
+                membersToDelete);
     }
 
     private List<String> getValidMembers(String path, List<String> members) {
