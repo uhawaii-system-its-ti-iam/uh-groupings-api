@@ -6,15 +6,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Hydrate an object as you see fit. GenericServiceResult is a class
  * which will build a collection of arbitrary objects.
  */
 public class GenericServiceResult {
-    /** Storage of arbitrary objects. */
+    /**
+     * Storage of arbitrary objects.
+     */
     List<Object> data;
-    /** Storage of names and indices of each objects added. */
+    /**
+     * Storage of names and indices of each objects added.
+     */
     Map<String, Integer> map;
 
     public GenericServiceResult() {
@@ -80,13 +85,29 @@ public class GenericServiceResult {
         return this.data.get(this.map.get(key));
     }
 
-    /** @return List<Object>data */
+    /**
+     * @return List<Object>data
+     */
     public List<Object> getData() {
         return Collections.unmodifiableList(this.data);
     }
 
-    /** @return Map<String, Integer>map */
+    /**
+     * @return Map<String, Integer>map
+     */
     public Map<String, Integer> getMap() {
         return Collections.unmodifiableMap(this.map);
+    }
+
+    public String toString() {
+        Set<String> keys = this.map.keySet();
+        Iterator<String> iter = keys.iterator();
+        String str = "[ ";
+        while (iter.hasNext()) {
+            String key = iter.next();
+            str += key + ": " + this.get(key) + "; ";
+        }
+        str += " ]";
+        return str;
     }
 }
