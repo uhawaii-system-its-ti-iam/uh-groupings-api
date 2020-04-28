@@ -19,6 +19,13 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +37,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -132,6 +141,9 @@ public class MembershipServiceTest {
 
     @Autowired
     private DatabaseSetupService databaseSetupService;
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -267,12 +279,6 @@ public class MembershipServiceTest {
             System.out.println(e);
             assertTrue(e != null);
         }
-    }
-
-    @Test
-    public void genericTest() {
-        GenericServiceResult result = membershipService.generic();
-        assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
 
     @Test
