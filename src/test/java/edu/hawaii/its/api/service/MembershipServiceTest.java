@@ -5,6 +5,7 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -16,7 +17,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -127,6 +132,9 @@ public class MembershipServiceTest {
     @Autowired
     private DatabaseSetupService databaseSetupService;
 
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
     @Before
     public void setup() {
 
@@ -218,6 +226,43 @@ public class MembershipServiceTest {
             assertTrue(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
             gsr = gsre.getGsr();
+        }
+    }
+
+    @Test
+    public void deleteGroupMembersTest() {
+        GenericServiceResult includeResult = new GenericServiceResult();
+        GenericServiceResult excludeResult = new GenericServiceResult();
+        GenericServiceResult invalidResult = new GenericServiceResult();
+
+        List<String> deleteInclude = new ArrayList<>();
+        List<String> deleteExclude = new ArrayList<>();
+        List<String> invalidList = Arrays.asList("zzzz", "qqqq");
+        for (int i = 2; i < 5; i++) {
+            deleteExclude.add(users.get(i).getUsername());
+            deleteInclude.add(users.get(i + 3).getUsername());
+        }
+        includeResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
+        excludeResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude);
+        invalidResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
+
+        System.out.println(invalidResult.toString());
+        System.out.println(includeResult.toString());
+        System.out.println(excludeResult.toString());
+
+        assertEquals(((GroupingsServiceResult) includeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) excludeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode(), FAILURE);
+
+        Iterator<String> iteratorExcludeList = deleteExclude.iterator();
+        Iterator<String> iteratorIncludeList = deleteInclude.iterator();
+
+        while (iteratorExcludeList.hasNext() && iteratorIncludeList.hasNext()) {
+            assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, iteratorIncludeList.next()));
+            assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));
         }
     }
 

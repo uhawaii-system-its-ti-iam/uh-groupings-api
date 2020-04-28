@@ -313,39 +313,35 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToDelete) {
 
         String composite = helperService.parentGroupingPath(groupPath);
-
-        if (!memberAttributeService.isOwner(composite, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-
-        List<String> membersToDelete = getValidMembers(groupPath, usersToDelete);
+        List<String> membersToDelete;
         GenericServiceResult genericServiceResult = new GenericServiceResult();
         String action = "deleteGroupMembers; currentUser: " + currentUser + "; " +
                 "groupPath: " + groupPath + "; " +
                 "usersToDelete: " + usersToDelete.toString() + ";";
         logger.info(action);
-       
-        if (membersToDelete.isEmpty()) {
+
+        if (!memberAttributeService.isOwner(composite, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        if ((membersToDelete = getValidMembers(groupPath, usersToDelete)).isEmpty()) {
             genericServiceResult.add(Arrays.asList("groupingsServiceResult", "usersToDelete"),
-                    new GroupingsServiceResult(action + " Error Message: no valid members in usersToDelete", FAILURE),
+                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in usersToDelete"),
                     usersToDelete);
             return genericServiceResult;
         }
 
-        try {
-            WsDeleteMemberResults deleteMemberResults = grouperFS
-                    .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
-            updateLastModified(composite);
-            updateLastModified(groupPath);
+        action += " membersToDelete: " + membersToDelete + "; ";
+        logger.info(action);
 
-            genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
-                    usersToDelete, helperService.makeGroupingsServiceResult(deleteMemberResults, action),
-                    membersToDelete);
-        } catch (GcWebServiceError e) {
-            genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
-                    new GroupingsServiceResult(e.getMessage(), FAILURE), usersToDelete, membersToDelete);
-        }
+        WsDeleteMemberResults deleteMemberResults = grouperFS
+                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
 
+        updateLastModified(composite);
+        updateLastModified(groupPath);
+
+        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
+                helperService.makeGroupingsServiceResult(deleteMemberResults, action), usersToDelete, membersToDelete);
         return genericServiceResult;
     }
 
