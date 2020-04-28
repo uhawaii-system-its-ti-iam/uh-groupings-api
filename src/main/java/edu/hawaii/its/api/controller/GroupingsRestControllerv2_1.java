@@ -92,7 +92,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @GetMapping(value = "/generic")
-    @ResponseBody public ResponseEntity<GenericServiceResult> generic() {
+    public ResponseEntity<GenericServiceResult> generic() {
         return ResponseEntity
                 .ok()
                 .body(membershipService.generic());
