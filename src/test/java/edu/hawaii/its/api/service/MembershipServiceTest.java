@@ -238,10 +238,15 @@ public class MembershipServiceTest {
         List<String> deleteInclude = new ArrayList<>();
         List<String> deleteExclude = new ArrayList<>();
         List<String> invalidList = Arrays.asList("zzzz", "qqqq");
+
         for (int i = 2; i < 5; i++) {
             deleteExclude.add(users.get(i).getUsername());
             deleteInclude.add(users.get(i + 3).getUsername());
         }
+
+        deleteExclude.add("zzzz");
+        deleteInclude.add("gggg");
+        
         includeResult = membershipService
                 .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
         excludeResult = membershipService
@@ -249,14 +254,7 @@ public class MembershipServiceTest {
         invalidResult = membershipService
                 .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
 
-        System.out.println(invalidResult.toString());
-        System.out.println(includeResult.toString());
-        System.out.println(excludeResult.toString());
-
-        assertEquals(((GroupingsServiceResult) includeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
-        assertEquals(((GroupingsServiceResult) excludeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
-        assertEquals(((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode(), FAILURE);
-
+        // Check actual grouping
         Iterator<String> iteratorExcludeList = deleteExclude.iterator();
         Iterator<String> iteratorIncludeList = deleteInclude.iterator();
 
@@ -264,6 +262,11 @@ public class MembershipServiceTest {
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, iteratorIncludeList.next()));
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));
         }
+
+        // Check results
+        assertEquals(((GroupingsServiceResult) includeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) excludeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode(), FAILURE);
     }
 
     @Test

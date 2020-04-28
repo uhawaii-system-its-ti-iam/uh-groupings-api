@@ -340,7 +340,7 @@ public class MembershipServiceImpl implements MembershipService {
         updateLastModified(composite);
         updateLastModified(groupPath);
 
-        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
+        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "usersToDelete", "membersDeleted"),
                 helperService.makeGroupingsServiceResult(deleteMemberResults, action), usersToDelete, membersToDelete);
         return genericServiceResult;
     }
