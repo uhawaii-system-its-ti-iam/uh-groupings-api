@@ -318,20 +318,35 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
+        List<String> membersToDelete = getValidMembers(groupPath, usersToDelete);
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
         String action = "deleteGroupMembers; currentUser: " + currentUser + "; " +
                 "groupPath: " + groupPath + "; " +
                 "usersToDelete: " + usersToDelete.toString() + ";";
         logger.info(action);
-        List<String> membersToDelete = getValidMembers(groupPath, usersToDelete);
-        WsDeleteMemberResults deleteMemberResults = grouperFS
-                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
+       
+        if (membersToDelete.isEmpty()) {
+            genericServiceResult.add(Arrays.asList("groupingsServiceResult", "usersToDelete"),
+                    new GroupingsServiceResult(action + " Error Message: no valid members in usersToDelete", FAILURE),
+                    usersToDelete);
+            return genericServiceResult;
+        }
 
-        updateLastModified(composite);
-        updateLastModified(groupPath);
+        try {
+            WsDeleteMemberResults deleteMemberResults = grouperFS
+                    .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
+            updateLastModified(composite);
+            updateLastModified(groupPath);
 
-        return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "membersDeleted"),
-                helperService.makeGroupingsServiceResult(deleteMemberResults, action),
-                membersToDelete);
+            genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
+                    usersToDelete, helperService.makeGroupingsServiceResult(deleteMemberResults, action),
+                    membersToDelete);
+        } catch (GcWebServiceError e) {
+            genericServiceResult.add(Arrays.asList("groupingsServiceResult", "uidsQueuedForDeletion", "membersDeleted"),
+                    new GroupingsServiceResult(e.getMessage(), FAILURE), usersToDelete, membersToDelete);
+        }
+
+        return genericServiceResult;
     }
 
     private List<String> getValidMembers(String path, List<String> members) {
