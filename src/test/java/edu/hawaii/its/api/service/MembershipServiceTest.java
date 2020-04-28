@@ -229,8 +229,9 @@ public class MembershipServiceTest {
         }
     }
 
+    // Test the multi-remove function.
     @Test
-    public void deleteGroupMembersTest() {
+    public void removeGroupMembersTest() {
         GenericServiceResult includeResult = new GenericServiceResult();
         GenericServiceResult excludeResult = new GenericServiceResult();
         GenericServiceResult invalidResult = new GenericServiceResult();
@@ -239,25 +240,27 @@ public class MembershipServiceTest {
         List<String> deleteExclude = new ArrayList<>();
         List<String> invalidList = Arrays.asList("zzzz", "qqqq");
 
+        // Set up results.
         for (int i = 2; i < 5; i++) {
             deleteExclude.add(users.get(i).getUsername());
             deleteInclude.add(users.get(i + 3).getUsername());
         }
 
+        // Add invalid users.
         deleteExclude.add("zzzz");
         deleteInclude.add("gggg");
-        
+
+        // Get Results
         includeResult = membershipService
-                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
         excludeResult = membershipService
-                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude);
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude);
         invalidResult = membershipService
-                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
 
         // Check actual grouping
         Iterator<String> iteratorExcludeList = deleteExclude.iterator();
         Iterator<String> iteratorIncludeList = deleteInclude.iterator();
-
         while (iteratorExcludeList.hasNext() && iteratorIncludeList.hasNext()) {
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, iteratorIncludeList.next()));
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));

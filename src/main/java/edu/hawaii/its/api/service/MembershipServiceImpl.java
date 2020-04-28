@@ -308,8 +308,18 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
+    /**
+     * Remove the valid members contained in usersToDelete from groupPath as currentUser.
+     *
+     * @param currentUser   - Must be an admin and owner of grouping at groupPath.
+     * @param groupPath     - Full path of group at grouping.
+     * @param usersToDelete - List of potential members to be deleted.
+     * @return - FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
+     * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not
+     * an admin and an owner of grouping at groupPath.
+     */
     @Override
-    public GenericServiceResult deleteGroupMembers(String currentUser, String groupPath,
+    public GenericServiceResult removeGroupMembers(String currentUser, String groupPath,
             List<String> usersToDelete) {
 
         String composite = helperService.parentGroupingPath(groupPath);
