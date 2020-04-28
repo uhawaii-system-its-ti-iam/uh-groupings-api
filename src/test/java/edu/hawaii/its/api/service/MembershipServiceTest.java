@@ -254,31 +254,42 @@ public class MembershipServiceTest {
 
     @Test
     public void deleteGroupMembersTest() {
-        List<GroupingsServiceResult> result;
+        GenericServiceResult includeResult = new GenericServiceResult();
+        GenericServiceResult excludeResult = new GenericServiceResult();
+        GenericServiceResult invalidResult = new GenericServiceResult();
 
-        String ownerUsername = users.get(0).getUsername();
-        String groupPath = GROUPING_3_PATH;
-        List<String> usersToDelete = new ArrayList<>();
-        usersToDelete.add(users.get(1).getUsername());
-        usersToDelete.add(users.get(2).getUsername());
-        usersToDelete.add(users.get(3).getUsername());
-        result = membershipService.deleteGroupMembers(ownerUsername, groupPath, usersToDelete);
-        for (int i = 0; i < result.size(); i++) {
-            assertTrue(result.get(i).getResultCode().startsWith("Success!"));
+        List<String> deleteInclude = new ArrayList<>();
+        List<String> deleteExclude = new ArrayList<>();
+        List<String> invalidList = Arrays.asList("zzzz", "qqqq");
+
+        for (int i = 2; i < 5; i++) {
+            deleteExclude.add(users.get(i).getUsername());
+            deleteInclude.add(users.get(i + 3).getUsername());
         }
 
-    }
+        deleteExclude.add("zzzz");
+        deleteInclude.add("gggg");
+        
+        includeResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
+        excludeResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude);
+        invalidResult = membershipService
+                .deleteGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
 
-    @Test
-    public void getMembershipResultsTest() {
-        try {
-            String ownerUsername = ADMIN;
-            String uid = "iamtst01";
-            List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
-        } catch (Exception e) {
-            System.out.println(e);
-            assertTrue(e != null);
+        // Check actual grouping
+        Iterator<String> iteratorExcludeList = deleteExclude.iterator();
+        Iterator<String> iteratorIncludeList = deleteInclude.iterator();
+
+        while (iteratorExcludeList.hasNext() && iteratorIncludeList.hasNext()) {
+            assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, iteratorIncludeList.next()));
+            assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));
         }
+
+        // Check results
+        assertEquals(((GroupingsServiceResult) includeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) excludeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
+        assertEquals(((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode(), FAILURE);
     }
 
     @Test
