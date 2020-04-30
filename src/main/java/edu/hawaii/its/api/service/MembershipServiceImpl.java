@@ -325,7 +325,8 @@ public class MembershipServiceImpl implements MembershipService {
         String composite = helperService.parentGroupingPath(groupPath);
         List<String> membersToDelete;
         GenericServiceResult genericServiceResult = new GenericServiceResult();
-        String action = "deleteGroupMembers; currentUser: " + currentUser + "; " +
+        String action = "deleteGroupMembers; " +
+                "currentUser: " + currentUser + "; " +
                 "groupPath: " + groupPath + "; " +
                 "usersToDelete: " + usersToDelete.toString() + ";";
         logger.info(action);
@@ -355,18 +356,25 @@ public class MembershipServiceImpl implements MembershipService {
         return genericServiceResult;
     }
 
-    private List<String> getValidMembers(String path, List<String> members) {
-        List<String> result = new ArrayList<>();
-        for (String member : members) {
+    /**
+     * From a list of potentialMembers returns a list of members from grouping at path.
+     *
+     * @param path             - Path of grouping and group.
+     * @param potentialMembers - A list of usernames to be test for membership
+     * @return - A list of valid members.
+     */
+    public List<String> getValidMembers(String path, List<String> potentialMembers) {
+        List<String> members = new ArrayList<>();
+        for (String potentialMember : potentialMembers) {
             try {
-                if (memberAttributeService.isMember(path, member)) {
-                    result.add(member);
+                if (memberAttributeService.isMember(path, potentialMember)) {
+                    members.add(potentialMember);
                 }
             } catch (GcWebServiceError e) {
-                logger.info("\"" + member + "\"" + " is invalid for deletion", e);
+                logger.info("\"" + potentialMember + "\"" + " is invalid for deletion", e);
             }
         }
-        return result;
+        return members;
     }
 
     @Override

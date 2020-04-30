@@ -28,6 +28,8 @@ public interface MembershipService {
     GenericServiceResult removeGroupMembers(String currentUser, String groupingPath,
             List<String> usersToDelete);
 
+    List<String> getValidMembers(String path, List<String> potentialMembers);
+
     List<String> listOwned(String adminUsername, String username);
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
