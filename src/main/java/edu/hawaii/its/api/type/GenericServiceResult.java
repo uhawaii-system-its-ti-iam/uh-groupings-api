@@ -13,13 +13,9 @@ import java.util.Set;
  * which will build a collection of arbitrary objects.
  */
 public class GenericServiceResult {
-    /**
-     * Storage of arbitrary objects.
-     */
+    /* Storage of arbitrary objects. */
     List<Object> data;
-    /**
-     * Storage of names and indices of each objects added.
-     */
+    /* Storage of names and indices of each objects added. */
     Map<String, Integer> map;
 
     public GenericServiceResult() {
@@ -102,12 +98,11 @@ public class GenericServiceResult {
     public String toString() {
         Set<String> keys = this.map.keySet();
         Iterator<String> iter = keys.iterator();
-        String str = "[ ";
+        List<String> strs = new ArrayList<>();
         while (iter.hasNext()) {
             String key = iter.next();
-            str += key + ": " + this.get(key) + "; ";
+            strs.add(key + ": " + this.get(key) + "; ");
         }
-        str += " ]";
-        return str;
+        return strs.toString();
     }
 }

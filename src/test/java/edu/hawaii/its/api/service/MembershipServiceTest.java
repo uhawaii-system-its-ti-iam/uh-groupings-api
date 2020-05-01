@@ -232,13 +232,9 @@ public class MembershipServiceTest {
     // Test the multi-remove function.
     @Test
     public void removeGroupMembersTest() {
-        GenericServiceResult includeResult = new GenericServiceResult();
-        GenericServiceResult excludeResult = new GenericServiceResult();
-        GenericServiceResult invalidResult = new GenericServiceResult();
-
         List<String> deleteInclude = new ArrayList<>();
         List<String> deleteExclude = new ArrayList<>();
-        List<String> invalidList = Arrays.asList("zzzz", "qqqq");
+        List<String> invalidList = new ArrayList<>(Arrays.asList("zzzz", "qqqq"));
 
         // Set up results.
         for (int i = 2; i < 5; i++) {
@@ -250,15 +246,18 @@ public class MembershipServiceTest {
         deleteExclude.add("zzzz");
         deleteInclude.add("gggg");
 
-        // Get Results
-        includeResult = membershipService
-                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude);
-        excludeResult = membershipService
-                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude);
-        invalidResult = membershipService
-                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList);
+        // Check response messages
+        assertEquals(SUCCESS, ((GroupingsServiceResult) membershipService
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude)
+                .get("groupingsServiceResult")).getResultCode());
+        assertEquals(SUCCESS, ((GroupingsServiceResult) membershipService
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude)
+                .get("groupingsServiceResult")).getResultCode());
+        assertEquals(FAILURE, ((GroupingsServiceResult) membershipService
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList)
+                .get("groupingsServiceResult")).getResultCode());
 
-        // Check actual grouping
+        // Check if members were actually deleted
         Iterator<String> iteratorExcludeList = deleteExclude.iterator();
         Iterator<String> iteratorIncludeList = deleteInclude.iterator();
         while (iteratorExcludeList.hasNext() && iteratorIncludeList.hasNext()) {
@@ -266,10 +265,6 @@ public class MembershipServiceTest {
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));
         }
 
-        // Check results
-        assertEquals(((GroupingsServiceResult) includeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
-        assertEquals(((GroupingsServiceResult) excludeResult.get("groupingsServiceResult")).getResultCode(), SUCCESS);
-        assertEquals(((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode(), FAILURE);
     }
 
     @Test

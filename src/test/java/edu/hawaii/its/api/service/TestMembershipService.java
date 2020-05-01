@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.checkerframework.checker.nullness.qual.AssertNonNullIfNonNull;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -915,16 +917,45 @@ public class TestMembershipService {
 
     @Test
     public void deleteGroupMembersTest() {
-        List<String> includeNames = Arrays.asList(username[0], username[1], username[2]);
+        // Remove from include
+        List<String> includeNames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         GenericServiceResult genericServiceResult =
                 membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[0]));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[1]));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
 
-        assertEquals(includeNames, genericServiceResult.get("membersDeleted"));
+        // Check Result Code
         assertEquals(SUCCESS,
                 ((GroupingsServiceResult) genericServiceResult.get("groupingsServiceResult")).getResultCode());
+
+        // Check list
+        for (int i = 0; i < 3; i++) {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[i]));
+        }
+        // Check result membersDeleted list
+        assertNotEquals(includeNames, genericServiceResult.get("membersDeleted"));
+        for (int i = 3; i < 6; i++) {
+            includeNames.remove(username[i]);
+        }
+        assertEquals(includeNames, genericServiceResult.get("membersDeleted"));
+
+        // Remove from exclude and check singleton deletion.
+        List<String> singletonRemoval = new ArrayList<>(Collections.singletonList(username[3]));
+        GenericServiceResult singletonResult =
+                membershipService.removeGroupMembers(ADMIN, GROUPING_EXCLUDE, singletonRemoval);
+
+        // Check list
+        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, singletonRemoval.get(0)));
+        // Check Result Code
+        assertEquals(SUCCESS, ((GroupingsServiceResult) singletonResult.get("groupingsServiceResult")).getResultCode());
+        // Check result membersDeleted list
+        assertEquals(singletonRemoval, singletonResult.get("membersDeleted"));
+
+
+        // Check invalid list
+        List<String> invalidList = new ArrayList<>(Arrays.asList("zzz", "a"));
+        GenericServiceResult invalidResult = membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, invalidList);
+        assertEquals(FAILURE,
+                ((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode());
+
     }
 
     //Add admin and delete admin in one test
