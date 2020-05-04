@@ -301,6 +301,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
             for (WsHasMemberResult hasMember : memberResultArray) {
+                System.out.println(hasMember.toString());
                 if (hasMember.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
                     return true;
                 }

@@ -35,6 +35,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -264,6 +265,17 @@ public class MembershipServiceTest {
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, iteratorIncludeList.next()));
             assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + EXCLUDE, iteratorExcludeList.next()));
         }
+
+        // Test Singleton
+        List<String> singletonList = new ArrayList<>(Collections.singleton(users.get(9).getUsername()));
+
+        // Check result
+        assertEquals(SUCCESS, ((GroupingsServiceResult) (membershipService
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, singletonList))
+                .get("groupingsServiceResult")).getResultCode());
+
+        // Check Group
+        assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, users.get(9).getUsername()));
 
     }
 
