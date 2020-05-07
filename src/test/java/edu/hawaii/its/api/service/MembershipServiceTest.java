@@ -173,63 +173,6 @@ public class MembershipServiceTest {
 
     }
 
-    // Debug statement to look at contents of database
-    // Delete user from include group to remove them
-    // Use user number not slot in array
-    // Use assert to check if it worked
-    @Test
-    @Ignore
-    public void deleteGroupingMemberTest() {
-        Iterable<Grouping> group = groupingRepository.findAll();
-        List<GroupingsServiceResult> listGsr;
-        GroupingsServiceResult gsr;
-
-        // Base test
-        // Remove person from include and composite
-        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(5).getUhUuid());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        // If person is in composite and basis, add to exclude group
-        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(1).getUhUuid());
-        for (GroupingsServiceResult gsrFor : listGsr) {
-            assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
-        }
-
-        // Not in composite, do nothing but return success
-        listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
-                users.get(2).getUhUuid());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        // todo Can't test with current database setup
-        // Not in basis, but in exclude
-        // Can't happen with current database
-
-        // Test if user is not an owner
-        try {
-            listGsr = membershipService.deleteGroupingMember(users.get(5).getUsername(), GROUPING_3_PATH,
-                    users.get(6).getUhUuid());
-            assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-
-        // Test if user is admin
-        listGsr = membershipService.deleteGroupingMember(ADMIN_USER, GROUPING_3_PATH,
-                users.get(6).getUhUuid());
-        assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
-
-        // Test if path is not allowed to delete from
-        try {
-            gsr = membershipService.deleteGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
-                    users.get(6).getUsername());
-            assertTrue(gsr.getResultCode().startsWith(FAILURE));
-        } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
-        }
-    }
-
     // Test the multi-remove function.
     @Test
     public void removeGroupMembersTest() {
@@ -371,20 +314,6 @@ public class MembershipServiceTest {
         for (int i = 0; i < listGsr.size(); i++) {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
         }
-    }
-
-    @Test
-    public void deleteGroupMemberTest() {
-
-        // Passes even though 1234 is not a person
-        GroupingsServiceResult gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, "1234");
-        assertTrue(gsr.getResultCode().startsWith(SUCCESS));
-        assertTrue(gsr.getResultCode().contains(NOT_IN_GROUP));
-
-        GroupingsServiceResult gsr2 =
-                membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, users.get(5).getUsername());
-        assertTrue(gsr2.getResultCode().startsWith(SUCCESS));
-        assertFalse(gsr2.getResultCode().contains(NOT_IN_GROUP));
     }
 
     @Test
