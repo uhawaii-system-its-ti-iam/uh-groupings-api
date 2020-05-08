@@ -191,15 +191,15 @@ public class MembershipServiceTest {
         deleteInclude.add("gggg");
 
         // Check response messages
-        assertEquals(SUCCESS, ((GroupingsServiceResult) membershipService
+        assertEquals(SUCCESS, membershipService
                 .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, deleteInclude)
-                .get("groupingsServiceResult")).getResultCode());
-        assertEquals(SUCCESS, ((GroupingsServiceResult) membershipService
+                .getGroupingsServiceResult().getResultCode());
+        assertEquals(SUCCESS, membershipService
                 .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, deleteExclude)
-                .get("groupingsServiceResult")).getResultCode());
-        assertEquals(FAILURE, ((GroupingsServiceResult) membershipService
+                .getGroupingsServiceResult().getResultCode());
+        assertEquals(FAILURE, membershipService
                 .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + EXCLUDE, invalidList)
-                .get("groupingsServiceResult")).getResultCode());
+                .getGroupingsServiceResult().getResultCode());
 
         // Check if members were actually deleted
         Iterator<String> iteratorExcludeList = deleteExclude.iterator();
@@ -213,9 +213,9 @@ public class MembershipServiceTest {
         List<String> singletonList = new ArrayList<>(Collections.singleton(users.get(9).getUsername()));
 
         // Check result
-        assertEquals(SUCCESS, ((GroupingsServiceResult) (membershipService
-                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, singletonList))
-                .get("groupingsServiceResult")).getResultCode());
+        assertEquals(SUCCESS, membershipService
+                .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, singletonList)
+                .getGroupingsServiceResult().getResultCode());
 
         // Check Group
         assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, users.get(9).getUsername()));
