@@ -476,7 +476,6 @@ public class TestMembershipService {
 
     }
 
-
     @Test
     public void addGroupingMemberTest() {
         List<GroupingsServiceResult> results;
@@ -726,7 +725,6 @@ public class TestMembershipService {
         //        }
     }
 
-
     @Test
     public void removeGroupMembersTest() {
         // Remove from include
@@ -735,8 +733,7 @@ public class TestMembershipService {
                 membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
 
         // Check Result Code
-        assertEquals(SUCCESS,
-                ((GroupingsServiceResult) genericServiceResult.get("groupingsServiceResult")).getResultCode());
+        assertEquals(SUCCESS, genericServiceResult.getGroupingsServiceResult().getResultCode());
 
         // Check list
         for (int i = 0; i < 3; i++) {
@@ -757,15 +754,14 @@ public class TestMembershipService {
         // Check list
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, singletonRemoval.get(0)));
         // Check Result Code
-        assertEquals(SUCCESS, ((GroupingsServiceResult) singletonResult.get("groupingsServiceResult")).getResultCode());
+        assertEquals(SUCCESS, singletonResult.getGroupingsServiceResult().getResultCode());
         // Check result membersDeleted list
         assertEquals(singletonRemoval, singletonResult.get("membersDeleted"));
 
         // Check invalid list
         List<String> invalidList = new ArrayList<>(Arrays.asList("zzz", "a"));
         GenericServiceResult invalidResult = membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, invalidList);
-        assertEquals(FAILURE,
-                ((GroupingsServiceResult) invalidResult.get("groupingsServiceResult")).getResultCode());
+        assertEquals(FAILURE, invalidResult.getGroupingsServiceResult().getResultCode());
 
     }
 
