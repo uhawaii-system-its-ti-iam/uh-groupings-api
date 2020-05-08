@@ -51,11 +51,6 @@ public class GenericServiceResultTest {
         assertEquals(true, this.genericServiceResult.get("boolean"));
     }
 
-    @Test
-    public void toStringTest() {
-        assertEquals(this.genericServiceResult.toString(), "[ floats: [1.0, 1.1, 1.2]; string: STRING; integer: 300;  ]" );
-    }
-
     /**
      * Check if added objects are accessible by string value.
      */
