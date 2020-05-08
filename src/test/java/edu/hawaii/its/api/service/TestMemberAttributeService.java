@@ -173,24 +173,19 @@ public class TestMemberAttributeService {
         // Valid username is an owner
         GenericServiceResult resIsOwner = memberAttributeService.getIsOwner(ADMIN_USER, usernames[0]);
         //resIsOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrIsOwner = (GroupingsServiceResult) resIsOwner.getData().get(0);
-        Boolean isOwner = (Boolean) resIsOwner.getData().get(1);
-        assertEquals(SUCCESS, gsrIsOwner.getResultCode()); // Check Validity
-        assertTrue(isOwner);
+        assertEquals(SUCCESS, resIsOwner.getGroupingsServiceResult().getResultCode());
+        assertTrue((Boolean) resIsOwner.get("isOwner"));
 
         // Valid username is not an owner
         GenericServiceResult resNotOwner = memberAttributeService.getIsOwner(ADMIN_USER, usernames[1]);
         //resNotOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrNotOwner = (GroupingsServiceResult) resNotOwner.getData().get(0);
-        Boolean notOwner = (Boolean) resNotOwner.getData().get(1);
-        assertEquals(SUCCESS, gsrNotOwner.getResultCode()); // Check Validity
-        assertFalse(notOwner);
+        assertEquals(SUCCESS, resNotOwner.getGroupingsServiceResult().getResultCode());
+        assertFalse((Boolean) resNotOwner.get("isOwner"));
 
         //  Invalid username
         GenericServiceResult resNotValid = memberAttributeService.getIsOwner(ADMIN_USER, "zzz");
         //resNotOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrNotValid = (GroupingsServiceResult) resNotValid.getData().get(0);
-        assertEquals(FAILURE, gsrNotValid.getResultCode()); // Check Validity
+        assertEquals(FAILURE, resNotValid.getGroupingsServiceResult().getResultCode()); // Check Validity
     }
 
     @Test
