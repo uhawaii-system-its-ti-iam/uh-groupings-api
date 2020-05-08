@@ -17,31 +17,37 @@ public class GenericServiceResult {
     List<Object> data;
     /* Storage of names and indices of each objects added. */
     Map<String, Integer> map;
+    GroupingsServiceResult groupingsServiceResult;
 
     public GenericServiceResult() {
         this.data = new ArrayList<>();
         this.map = new HashMap<>();
+        this.groupingsServiceResult = new GroupingsServiceResult();
     }
 
-    /**
-     * Initialize and add first object.
-     *
-     * @param key    of object.
-     * @param object to add.
-     */
+    public GenericServiceResult(GroupingsServiceResult groupingsServiceResult) {
+        this.data = new ArrayList<>();
+        this.map = new HashMap<>();
+        this.groupingsServiceResult = groupingsServiceResult;
+    }
+
     public GenericServiceResult(String key, Object object) {
         this();
         this.add(key, object);
     }
 
-    /**
-     * Initialize and add multiple objects.
-     *
-     * @param keys    - list of corresponding name values.
-     * @param objects - a variable amount of arbitrary objects.
-     */
+    public GenericServiceResult(GroupingsServiceResult groupingsServiceResult, String key, Object object) {
+        this(groupingsServiceResult);
+        this.add(key, object);
+    }
+
     public GenericServiceResult(List<String> keys, Object... objects) {
         this();
+        this.add(keys, objects);
+    }
+
+    public GenericServiceResult(GroupingsServiceResult groupingsServiceResult, List<String> keys, Object... objects) {
+        this(groupingsServiceResult);
         this.add(keys, objects);
     }
 
@@ -95,6 +101,11 @@ public class GenericServiceResult {
         return Collections.unmodifiableMap(this.map);
     }
 
+    public GroupingsServiceResult getGroupingsServiceResult() {
+        return groupingsServiceResult;
+    }
+
+    @Override
     public String toString() {
         Set<String> keys = this.map.keySet();
         Iterator<String> iter = keys.iterator();
