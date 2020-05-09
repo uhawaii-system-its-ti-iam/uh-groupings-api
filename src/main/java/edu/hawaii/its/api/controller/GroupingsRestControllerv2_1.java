@@ -314,18 +314,18 @@ public class GroupingsRestControllerv2_1 {
      *
      * @param currentUser - Admin or superuser who is initiating the deletion.
      * @param path        - path.
-     * @param uids        - List of potential usernames to be deleted.
+     * @param uid         - List of potential usernames to be deleted.
      * @return GenericServiceResult containing all successfully deleted members.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uids}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid}")
     public ResponseEntity<GenericServiceResult> removeExcludeMembers(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable List<String> uids) {
+            @PathVariable List<String> uid) {
         logger.info("Entered REST deleteMembers");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeGroupMembers(currentUser, path + EXCLUDE, uids));
+                .body(membershipService.removeGroupMembers(currentUser, path + EXCLUDE, uid));
     }
 
     /**
@@ -333,18 +333,18 @@ public class GroupingsRestControllerv2_1 {
      *
      * @param currentUser - Admin or superuser who is initiating the deletion.
      * @param path        - path.
-     * @param uids        - List of potential usernames to be deleted.
+     * @param uid         - List of potential usernames to be deleted.
      * @return GenericServiceResult containing all successfully deleted members.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uids}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid}")
     public ResponseEntity<GenericServiceResult> removeIncludeMembers(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable List<String> uids) {
+            @PathVariable List<String> uid) {
         logger.info("Entered REST deleteMembers");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeGroupMembers(currentUser, path + INCLUDE, uids));
+                .body(membershipService.removeGroupMembers(currentUser, path + INCLUDE, uid));
     }
 
     /**
