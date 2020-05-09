@@ -14,6 +14,7 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -754,15 +755,18 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteIncludeTest() throws Exception {
-        given(membershipService.deleteGroupMember(USERNAME, "grouping" + INCLUDE, "frylock"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"));
+        List<String> frylock = new ArrayList<>();
+        frylock.add("frylock");
+        given(membershipService.removeGroupMembers(USERNAME, "grouping" + INCLUDE, frylock)).willReturn(
+                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"),
+                        Arrays.asList("usersToDelete", "membersToDelete"), frylock, frylock));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted frylock from include"));
+                .andExpect(jsonPath("groupingsServiceResult.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("groupingsServiceResult.action").value("deleted frylock from include"));
 
     }
 
@@ -777,16 +781,18 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void deleteExcludeTest() throws Exception {
-        given(membershipService.deleteGroupMember(USERNAME, "grouping" + EXCLUDE, "carl"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"));
+        List<String> carl = new ArrayList<>();
+        carl.add("carl");
+        given(membershipService.removeGroupMembers(USERNAME, "grouping" + EXCLUDE, carl)).willReturn(
+                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"),
+                        Arrays.asList("usersToDelete", "membersToDelete"), carl, carl));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl")
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted carl from exclude"));
-
+                .andExpect(jsonPath("groupingsServiceResult.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("groupingsServiceResult.action").value("deleted carl from exclude"));
     }
 
     @Ignore
