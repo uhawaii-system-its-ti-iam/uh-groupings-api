@@ -13,9 +13,7 @@ import java.util.Set;
  * which will build a collection of arbitrary objects.
  */
 public class GenericServiceResult {
-    /* Storage of arbitrary objects. */
     List<Object> data;
-    /* Storage of names and indices of each objects added. */
     Map<String, Integer> map;
     GroupingsServiceResult groupingsServiceResult;
 
@@ -68,35 +66,20 @@ public class GenericServiceResult {
 
     /**
      * Add a single object and key to response.
-     *
-     * @param key    a single key.
-     * @param object a single arbitrary object.
      */
     public void add(String key, Object object) {
         this.data.add(object);
         this.map.put(key, this.data.indexOf(object));
     }
 
-    /**
-     * Get a object by key.
-     *
-     * @param key which was assigned, when object was added.
-     * @return object that was added with key.
-     */
     public Object get(String key) {
         return this.data.get(this.map.get(key));
     }
 
-    /**
-     * @return List<Object>data
-     */
     public List<Object> getData() {
         return Collections.unmodifiableList(this.data);
     }
 
-    /**
-     * @return Map<String, Integer>map
-     */
     public Map<String, Integer> getMap() {
         return Collections.unmodifiableMap(this.map);
     }

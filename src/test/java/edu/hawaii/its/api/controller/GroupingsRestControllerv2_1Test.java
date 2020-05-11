@@ -877,8 +877,7 @@ public class GroupingsRestControllerv2_1Test {
         List<String> frylock = new ArrayList<>();
         frylock.add("frylock");
         given(membershipService.removeGroupMembers(USERNAME, "grouping" + INCLUDE, frylock)).willReturn(
-                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"),
-                        Arrays.asList("usersToDelete", "membersToDelete"), frylock, frylock));
+                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted frylock from include")));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock")
                 .with(csrf())
@@ -903,8 +902,7 @@ public class GroupingsRestControllerv2_1Test {
         List<String> carl = new ArrayList<>();
         carl.add("carl");
         given(membershipService.removeGroupMembers(USERNAME, "grouping" + EXCLUDE, carl)).willReturn(
-                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"),
-                        Arrays.asList("usersToDelete", "membersToDelete"), carl, carl));
+                new GenericServiceResult(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude")));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl")
                 .with(csrf())

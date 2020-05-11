@@ -97,12 +97,6 @@ public class GroupingsRestControllerv2_1 {
                 .body("University of Hawaii Groupings");
     }
 
-    @GetMapping(value = "/generic")
-    public ResponseEntity<GenericServiceResult> generic() {
-        return ResponseEntity
-                .ok()
-                .body(membershipService.generic());
-    }
 
     @GetMapping(value = "/swagger/toString/{path}")
     @ResponseBody
