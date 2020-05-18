@@ -91,7 +91,6 @@ public class GroupingsRestControllerv2_1 {
                 .body("University of Hawaii Groupings");
     }
 
-
     /**
      * Get all admins and groupings
      *
@@ -442,20 +441,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
     }
 
-    /*
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Membership>> getMembershipResults(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST checkInBasis");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.getMemberShipResults(currentUser, uid));
-    }
-    */
-
     /**
      * GET a response which specifies whether uid is an owner or not,
      */
@@ -476,9 +461,7 @@ public class GroupingsRestControllerv2_1 {
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable")
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
@@ -505,9 +488,7 @@ public class GroupingsRestControllerv2_1 {
      * @param preferenceId: id of preference to update
      * @return Information about result of operation
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/disable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/disable")
     public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
@@ -529,9 +510,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the list of sync destinations
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations")
     @ResponseBody
     public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader("current_user") String
             currentUser,
@@ -545,9 +524,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * GET a response which specifies whether uid is an owner or not,
      */
-    @RequestMapping(value = "/owners/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/owners/{uid:[\\w-:.]+}")
     @ResponseBody
     public ResponseEntity<GenericServiceResult> getIsOwner(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
