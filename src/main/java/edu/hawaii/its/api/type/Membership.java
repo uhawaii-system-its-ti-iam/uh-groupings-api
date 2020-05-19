@@ -104,33 +104,21 @@ public class Membership implements Comparable<Membership> {
         this.inBasis = inBasis;
     }
 
-    public boolean isInBasis() {
-        return inBasis;
-    }
-
     public void setInInclude(boolean inInclude) {
         this.inInclude = inInclude;
     }
 
-    public boolean isInInclude() {
-        return inInclude;
-    }
+    public void setInExclude(boolean inExclude) {this.inExclude = inExclude; }
 
-    public void setInExclude(boolean inExclude) {
-        this.inExclude = inExclude;
-    }
+    public void setInBasisAndInclude(boolean inBasisAndInclude) { this.inBasisAndInclude = inBasisAndInclude;}
 
-    public boolean isInExclude() {
-        return inExclude;
-    }
+    public boolean getInBasis(){return inBasis;}
 
-    public void setInBasisAndInclude(boolean inBasisAndInclude) {
-        this.inBasisAndInclude = inBasisAndInclude;
-    }
+    public boolean getInInclude(){return inInclude;}
 
-    public boolean isInBasisAndInclude() {
-        return inBasisAndInclude;
-    }
+    public boolean getInExclude(){return inExclude;}
+
+    public boolean getInBasisAndInclude(){return inBasisAndInclude;}
 
     public void setPath(String path) {
         this.path = path;
