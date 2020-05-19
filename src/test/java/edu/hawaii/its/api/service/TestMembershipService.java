@@ -710,14 +710,11 @@ public class TestMembershipService {
         GenericServiceResult genericServiceResult =
                 membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
 
-        // Check Result Code
         assertEquals(SUCCESS, genericServiceResult.getGroupingsServiceResult().getResultCode());
 
-        // Check list
         for (int i = 0; i < 3; i++) {
             assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[i]));
         }
-        // Check result membersDeleted list
         assertNotEquals(includeNames, genericServiceResult.get("membersDeleted"));
         for (int i = 3; i < 6; i++) {
             includeNames.remove(username[i]);
