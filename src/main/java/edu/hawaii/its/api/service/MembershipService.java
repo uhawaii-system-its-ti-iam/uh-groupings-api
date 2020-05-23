@@ -34,6 +34,8 @@ public interface MembershipService {
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
+    GroupingsServiceResult removeFromGroups(String adminUsername, String userToRemove, String GroupPaths);
+
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
     List<GroupingsServiceResult> optIn(String username, String groupingPath);

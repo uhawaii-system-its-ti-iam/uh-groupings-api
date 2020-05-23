@@ -469,6 +469,13 @@ public class MembershipServiceImpl implements MembershipService {
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
+    @Override
+    public GroupingsServiceResult removeFromGroups(String adminUsername, String userToRemove, String GroupPaths) {
+        System.out.println("HERE HERE HERE");
+        System.out.println(GroupPaths);
+        System.out.println("HERE HERE HERE");
+        return null;
+    }
     //user adds them self to the group if they have permission
     @Override
     public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
