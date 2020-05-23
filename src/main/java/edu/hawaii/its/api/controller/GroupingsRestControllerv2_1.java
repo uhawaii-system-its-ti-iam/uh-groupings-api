@@ -143,6 +143,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Delete a user from multiple groupings
+     *
+     * @param paths: path of groupings to modify
+     * @param uid:  uid or uuid of user to delete
+     * @return Information about results of operation
+     */
+    @DeleteMapping(value = "/admins/{path:[\\w-:.]+}/{uid:[\\w-:.]+}")
+    public ResponseEntity<GroupingsServiceResult> removeFromGroups(@RequestHeader("current_user") String currentUser,
+            @PathVariable String paths,
+            @PathVariable String uid) {
+        logger.info("Entered REST removeFromGroups...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.removeFromGroups(currentUser, uid, paths));
+    }
+
+    /**
      * Get a member's attributes based off username or id number
      *
      * @param uid: Username or id number of user to obtain attributes about
