@@ -211,7 +211,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!memberAttributeService.isOwner(ownerUsername)) {
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
@@ -229,7 +229,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (!memberAttributeService.isOwner(ownerUsername)) {
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
@@ -255,7 +255,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
-        if (!memberAttributeService.isOwner(ownerUsername)) {
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
