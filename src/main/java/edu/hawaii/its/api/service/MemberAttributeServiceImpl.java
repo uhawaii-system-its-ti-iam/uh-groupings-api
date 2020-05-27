@@ -241,7 +241,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
         }
 
-        if (!isOwner(groupingPath, ownerUsername)) {
+        if (!isOwner(groupingPath, ownerUsername) && !isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
