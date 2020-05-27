@@ -304,8 +304,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             paths.add(basis);
             paths.add(groupingPath);
             paths.add(owners);
-            Map<String, Group> groups = getMembers(ownerUsername, paths);
-            //Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
+            Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
             compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
@@ -449,7 +448,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         Map<String, Group> groupMembers = new HashMap<>();
         if (members.getResults() != null) {
-
             groupMembers = makeGroups(members);
         }
 
@@ -460,6 +458,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
         Map<String, Group> groups = new HashMap<>();
+        
         if (membersResults.getResults().length > 0) {
             String[] attributeNames = membersResults.getSubjectAttributeNames();
 

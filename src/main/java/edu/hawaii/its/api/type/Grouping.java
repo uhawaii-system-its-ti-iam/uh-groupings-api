@@ -138,56 +138,63 @@ public class Grouping {
         return basis;
     }
 
-    public void setBasis(Group basis) {
+    public Grouping setBasis(Group basis) {
         this.basis = basis != null ? basis : new EmptyGroup();
+        return this;
     }
 
     public Group getExclude() {
         return exclude;
     }
 
-    public void setExclude(Group exclude) {
+    public Grouping setExclude(Group exclude) {
         this.exclude = exclude != null ? exclude : new EmptyGroup();
+        return this;
     }
 
     public Group getInclude() {
         return include;
     }
 
-    public void setInclude(Group include) {
+    public Grouping setInclude(Group include) {
         this.include = include != null ? include : new EmptyGroup();
+        return this;
     }
 
     public Group getComposite() {
         return composite;
     }
 
-    public void setComposite(Group composite) {
+    public Grouping setComposite(Group composite) {
         this.composite = composite != null ? composite : new EmptyGroup();
+        return this;
     }
 
     public Group getOwners() {
         return owners;
     }
 
-    public void setOwners(Group owners) {
+    public Grouping setOwners(Group owners) {
         this.owners = owners != null ? owners : new EmptyGroup();
+        return this;
     }
 
     public boolean isOptInOn() {
         return isOptInOn;
     }
 
-    public void setOptInOn(boolean isOptInOn) {
+    public Grouping setOptInOn(boolean isOptInOn) {
         this.isOptInOn = isOptInOn;
+        return this;
     }
 
     public boolean isOptOutOn() {
         return isOptOutOn;
     }
 
-    public void setOptOutOn(boolean isOptOutOn) {
+    public Grouping setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
+        return this;
     }
 
     @Override
