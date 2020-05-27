@@ -185,6 +185,16 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
+    @GetMapping(value = "groupings/{path:[\\w-:.]+}/metaData")
+    @ResponseBody
+    public ResponseEntity<Grouping> getGroupingMetaData(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path) {
+        logger.info("Entering REST getGroupingMetaData...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getGroupingMetaData(currentUser, path));
+    }
+
     /**
      * Get the list of sync destinations
      * >>>>>>> Attempt to speed up getGrouping

@@ -101,13 +101,12 @@ public class Grouping {
         syncDestinationsState.replace(key, boo);
 
         for (SyncDestination destination : syncDestinations) {
-            if(destination.getName().equals(key)) {
+            if (destination.getName().equals(key)) {
                 destination.setIsSynced(boo);
             }
         }
 
     }
-
 
     public String getName() {
         return name;
@@ -126,8 +125,9 @@ public class Grouping {
         }
     }
 
-    public void setDescription(String description) {
+    public Grouping setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public String getDescription() {
@@ -189,7 +189,6 @@ public class Grouping {
     public void setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
     }
-
 
     @Override
     public String toString() {

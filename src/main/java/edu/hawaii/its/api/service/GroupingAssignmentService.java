@@ -54,4 +54,7 @@ public interface GroupingAssignmentService {
 
     Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
             String sortString, Boolean isAscending);
+
+    Grouping getGroupingMetaData(String currentUser, String path);
+
 }

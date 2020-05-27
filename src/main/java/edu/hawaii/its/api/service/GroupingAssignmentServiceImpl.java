@@ -304,7 +304,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             paths.add(basis);
             paths.add(groupingPath);
             paths.add(owners);
-            Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
+            Map<String, Group> groups = getMembers(ownerUsername, paths);
+            //Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
             compositeGrouping = setGroupingAttributes(compositeGrouping);
 
             compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
@@ -662,4 +663,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return helperService.makeGroupings(opts);
     }
 
+    @Override
+    public Grouping getGroupingMetaData(String currentUser, String path) {
+        if (!memberAttributeService.isOwner(path, currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        return setGroupingAttributes(new Grouping(path)
+                .setDescription(grouperFactoryService.getDescription(path))
+        );
+    }
 }
