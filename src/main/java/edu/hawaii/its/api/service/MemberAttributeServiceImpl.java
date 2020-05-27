@@ -241,17 +241,17 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             action = "give " + newOwnerUsername + " ownership of " + groupingPath;
         }
 
-        if (isOwner(groupingPath, ownerUsername) || isSuperuser(ownerUsername)) {
-            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-            WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
-
-            ownershipResult = hs.makeGroupingsServiceResult(amr, action);
-
-            membershipService.updateLastModified(groupingPath);
-            membershipService.updateLastModified(groupingPath + OWNERS);
-        } else {
+        if (!isOwner(groupingPath, ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
+        WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
+
+        ownershipResult = hs.makeGroupingsServiceResult(amr, action);
+
+        membershipService.updateLastModified(groupingPath);
+        membershipService.updateLastModified(groupingPath + OWNERS);
 
         return ownershipResult;
     }
