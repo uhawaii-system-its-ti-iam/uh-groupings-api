@@ -270,20 +270,19 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         GroupingsServiceResult ownershipResults;
         String action = "remove ownership of " + groupingPath + " from " + ownerToRemove;
 
-        if (isOwner(groupingPath, actor) || isSuperuser(actor)) {
-            WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
-            WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
-                    groupingPath + OWNERS,
-                    lookup,
-                    ownerToRemove);
-            ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
-
-            membershipService.updateLastModified(groupingPath);
-            membershipService.updateLastModified(groupingPath + OWNERS);
-
-        } else {
+        if (!isOwner(groupingPath, actor) && !isAdmin(actor)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
+        WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
+                groupingPath + OWNERS,
+                lookup,
+                ownerToRemove);
+        ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
+
+        membershipService.updateLastModified(groupingPath);
+        membershipService.updateLastModified(groupingPath + OWNERS);
 
         return ownershipResults;
     }
@@ -509,19 +508,20 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 "usernameInQuestion: " + usernameInQuestion + ";";
         logger.info(action);
 
-        if (isSuperuser(currentUser) || isAdmin(currentUser)) {
-            try {
-                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner"),
-                        new GroupingsServiceResult(SUCCESS, action),
-                        (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
-                                currentUser, usernameInQuestion)).size() > 0));
-            } catch (GcWebServiceError e) {
-                logger.error(action, e);
-                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
-                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
-            }
+        if (!isOwner(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+
+        try {
+            return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner"),
+                    new GroupingsServiceResult(SUCCESS, action),
+                    (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
+                            currentUser, usernameInQuestion)).size() > 0));
+        } catch (GcWebServiceError e) {
+            logger.error(action, e);
+            return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                    new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+        }
     }
 
     @Override
@@ -529,18 +529,19 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         String action = "getIsAdmin: " + "currentUser: " + currentUser + ";, " +
                 "usernameInQuestion: " + usernameInQuestion + ";";
         logger.info(action);
-        if (isSuperuser(currentUser) || isAdmin(currentUser)) {
-            try {
-                return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isAdmin"),
-                        new GroupingsServiceResult(SUCCESS, action),
-                        (groupingAssignmentService.adminLists(
-                                usernameInQuestion).getAdminGroup().getMembers().size() > 0));
-            } catch (AccessDeniedException | GcWebServiceError e) {
-                logger.error(action, e);
-                return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
-                        new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
-            }
+        if (!isAdmin(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+
+        try {
+            return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isAdmin"),
+                    new GroupingsServiceResult(SUCCESS, action),
+                    (groupingAssignmentService.adminLists(
+                            usernameInQuestion).getAdminGroup().getMembers().size() > 0));
+        } catch (AccessDeniedException | GcWebServiceError e) {
+            logger.error(action, e);
+            return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
+                    new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+        }
     }
 }
