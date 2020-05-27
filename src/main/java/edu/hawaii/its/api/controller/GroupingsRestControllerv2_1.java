@@ -160,8 +160,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get a list of a groupings a user is in and can opt into
-     * <p>
-     * <<<<<<< HEAD
      *
      * @param path:        Path of specific grouping
      * @param page:        Page of grouping to retrieve (starts at 1)
@@ -185,6 +183,12 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
+    /**
+     * Get a grouping object with the grouping at paths attributes and description.
+     * @param currentUser owner uid
+     * @param path to grouping`
+     * @return
+     */
     @GetMapping(value = "groupings/{path:[\\w-:.]+}/metaData")
     @ResponseBody
     public ResponseEntity<Grouping> getGroupingMetaData(@RequestHeader("current_user") String currentUser,
@@ -197,7 +201,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get the list of sync destinations
-     * >>>>>>> Attempt to speed up getGrouping
      */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
