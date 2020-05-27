@@ -314,7 +314,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         compositeGrouping.setComposite(groups.get(groupingPath));
         compositeGrouping.setOwners(groups.get(owners));
 
-        System.out.println("CompositeGroupingComingBack" + compositeGrouping);
         return compositeGrouping;
     }
 
