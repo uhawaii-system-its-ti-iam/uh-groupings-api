@@ -142,9 +142,9 @@ public class GroupingsRestControllerv2_1 {
      * @param uid:  uid or uuid of user to delete
      * @return Information about results of operation
      */
-    @DeleteMapping(value = "/admins/{path:[\\w-:.]+}/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> removeFromGroups(@RequestHeader("current_user") String currentUser,
-            @PathVariable String paths,
+    @DeleteMapping(value = "/admins/{paths}/{uid}")
+    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(@RequestHeader("current_user") String currentUser,
+            @PathVariable List<String> paths,
             @PathVariable String uid) {
         logger.info("Entered REST removeFromGroups...");
         return ResponseEntity

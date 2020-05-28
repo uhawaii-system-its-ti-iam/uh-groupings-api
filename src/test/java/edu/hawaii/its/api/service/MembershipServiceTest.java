@@ -363,6 +363,19 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void removeFromGroupsTest(){
+        String userToRemove = users.get(0).getUsername();
+        List<String> GroupPaths = new ArrayList<String>();
+        GroupPaths.add(GROUPING_1_PATH);
+        GroupPaths.add(GROUPING_2_PATH);
+        GroupPaths.add(GROUPING_3_PATH);
+        List<GroupingsServiceResult> gsr = membershipService.removeFromGroups(ADMIN_USER, userToRemove, GroupPaths);
+        assertThat(gsr.get(0).getResultCode(), is(SUCCESS));
+        assertThat(gsr.get(1).getResultCode(), is(SUCCESS));
+        assertThat(gsr.get(2).getResultCode(), is(SUCCESS));
+    }
+
+    @Test
     public void optInTest() {
         List<GroupingsServiceResult> optInResults;
 
