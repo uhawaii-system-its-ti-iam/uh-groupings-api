@@ -420,12 +420,18 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public GroupingsServiceResult removeFromGroups(String adminUsername, String userToRemove, String GroupPaths) {
-        System.out.println("HERE HERE HERE");
-        System.out.println(GroupPaths);
-        System.out.println("HERE HERE HERE");
-        return null;
+    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths) {
+
+        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+
+        for(int i = 0; i < GroupPaths.size();i++) {
+            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
+            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), userToRemove);
+            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+        }
+        return result;
     }
+
     //user adds them self to the group if they have permission
     @Override
     public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
