@@ -425,8 +425,10 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
 
         for(int i = 0; i < GroupPaths.size();i++) {
+            System.out.println("Removing " + userToRemove + " from Group " + i +  ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), userToRemove);
+            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
+            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
             result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
         }
         return result;
