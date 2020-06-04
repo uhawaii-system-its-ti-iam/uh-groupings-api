@@ -54,4 +54,7 @@ public interface GroupingAssignmentService {
 
     Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
             String sortString, Boolean isAscending);
+
+    public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername);
+    public List<Grouping> excludeGroups(List<String> groupPaths);
 }
