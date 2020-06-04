@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
@@ -33,7 +34,9 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -490,6 +493,26 @@ public class TestGroupingAssignmentService {
 
         assertFalse(groupingsIn.contains(GROUPING));
         assertTrue(groupingsToOptInto.contains(GROUPING));
+
+        MembershipAssignment membershipAssignment;
+
+        // Test getting the attributes inInclude, inExclude, inOwner, and inBasis.
+        membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, ADMIN);
+
+        assertTrue(membershipAssignment.isInOwner(GROUPING));
+        assertFalse(membershipAssignment.isInBasis(GROUPING));
+        assertFalse(membershipAssignment.isInInclude(GROUPING));
+        assertFalse(membershipAssignment.isInExclude(GROUPING));
+
+        // Try to get the memberships for a user that doesn't exist.
+        try {
+            membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, "somenamethatNoexist");
+
+        }catch (Exception e) {
+            System.out.println("User doesn't exist.");
+        }
+
+
     }
 
     @Test
