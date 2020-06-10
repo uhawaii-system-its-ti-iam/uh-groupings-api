@@ -108,7 +108,6 @@ public class Grouping {
 
     }
 
-
     public String getName() {
         return name;
     }
@@ -189,7 +188,6 @@ public class Grouping {
     public void setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
     }
-
 
     @Override
     public String toString() {
