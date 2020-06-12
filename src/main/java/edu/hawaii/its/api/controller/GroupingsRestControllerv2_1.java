@@ -139,11 +139,12 @@ public class GroupingsRestControllerv2_1 {
      * Delete a user from multiple groupings
      *
      * @param paths: path of groupings to modify
-     * @param uid:  uid or uuid of user to delete
+     * @param uid:   uid or uuid of user to delete
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
-    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
+            @RequestHeader("current_user") String currentUser,
             @PathVariable List<String> paths,
             @PathVariable String uid) {
         logger.info("Entered REST removeFromGroups...");
@@ -196,18 +197,34 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
-     * >>>>>>> Attempt to speed up getGrouping
+     * Get a list of memberships.
+     *
+     * @param currentUser
+     * @param uid
+     * @return
      */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
-    @ResponseBody
-    public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GenericServiceResult> getMembershipResults(
+            @RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST memberGroupings...");
+        logger.info("Entered REST checkInBasis");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
+                .body(membershipService.getMembershipResults(currentUser, uid));
     }
+
+    /**
+     * Get the list of sync destinations
+     * >>>>>>> Attempt to speed up getGrouping
+     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
+     @ResponseBody public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
+     @PathVariable String uid) {
+     logger.info("Entered REST memberGroupings...");
+     return ResponseEntity
+     .ok()
+     .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
+     }
+     */
 
     /**
      * if the user is allowed to opt into the grouping

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    List<Membership> getMemberShipResults(String ownerUsername, String uid);
+    GenericServiceResult getMembershipResults(String ownerUsername, String uid);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 

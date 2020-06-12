@@ -375,45 +375,6 @@ public class MembershipServiceImpl implements MembershipService {
         return members;
     }
 
-    @Override
-    public List<Membership> getMemberShipResults(String ownerUsername, String uid) {
-        String action = "GET: " + uid + "Memberships;";
-
-        List<Membership> memberships = new ArrayList<>();
-        logger.info(action);
-        if (memberAttributeService.isSuperuser(ownerUsername)) {
-            List<String> groupPaths = groupingAssignmentService.getGroupPaths(ownerUsername, uid);
-
-            for (String groupPath : groupPaths) {
-                boolean hasMembership = false;
-
-                Membership membership = new Membership();
-                if (groupPath.endsWith(INCLUDE)) {
-                    membership.setInInclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS)) {
-                    membership.setInBasis(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(EXCLUDE)) {
-                    membership.setInExclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
-                    membership.setInBasisAndInclude(true);
-                    hasMembership = true;
-                }
-                if (hasMembership) {
-                    membership.setPath(groupPath);
-                    memberships.add(membership);
-                }
-            }
-            return memberships;
-        }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-
-    }
 
     //adds a user to the admins group via username or UH id number
     @Override
@@ -440,6 +401,51 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+    /**
+     * Return a list of memberships with respect to uid as currentUser.
+     *
+     * @param currentUser - owner.
+     * @param uid         - member to be queried.
+     * @return GenericServiceResult containing a list of memberships.
+     */
+    @Override
+    public GenericServiceResult getMembershipResults(String currentUser, String uid) {
+        String action = "GET: " + uid + "Memberships;";
+        logger.info(action);
+        if (!memberAttributeService.isAdmin(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        List<String> groupPaths;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
+        } catch (GcWebServiceError e) {
+            return new GenericServiceResult(FAILURE, e);
+        }
+        if (groupPaths.size() == 0) {
+            return new GenericServiceResult(SUCCESS, uid + " has no memberships");
+        }
+
+        List<GenericServiceResult> memberships = new ArrayList<>();
+        for (String groupPath : groupPaths) {
+
+            Boolean inInclude = groupPath.endsWith(INCLUDE);
+            Boolean inBasis = groupPath.endsWith(BASIS);
+            Boolean inExclude = groupPath.endsWith(EXCLUDE);
+            Boolean inOwner = groupPath.endsWith(OWNERS);
+
+            if (!inInclude && !inBasis && !inExclude && !inOwner) {
+                continue;
+            }
+            String groupingPath = helperService.parentGroupingPath(groupPath);
+            String groupingName = groupingPath.substring(groupingPath.lastIndexOf(':') + 1);
+
+            memberships.add(new GenericServiceResult(
+                    Arrays.asList("name", "path", "inInclude", "inBasis", "inExclude", "inOwner"),
+                    groupingName, groupingPath, inInclude, inBasis, inExclude, inOwner));
+        }
+        return new GenericServiceResult("memberships", memberships);
     }
 
     //removes a user from the admins group
