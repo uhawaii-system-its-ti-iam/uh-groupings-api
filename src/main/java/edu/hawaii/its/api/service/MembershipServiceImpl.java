@@ -304,8 +304,8 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Remove the valid members contained in usersToDelete from groupPath as currentUser.
      *
-     * @param currentUser   Must be an admin and owner of grouping at groupPath.
-     * @param groupPath     Full path of group at grouping.
+     * @param currentUser     Must be an admin and owner of grouping at groupPath.
+     * @param groupPath       Full path of group at grouping.
      * @param membersToRemove List of potential members to be deleted.
      * @return FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
      * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not
@@ -411,7 +411,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         List<String> groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
         if (groupPaths.size() == 0) {
-            return new GenericServiceResult(SUCCESS, uid + " has no memberships");
+            return new GenericServiceResult(new GroupingsServiceResult(FAILURE, action + "; has no memberships"));
         }
 
         List<GenericServiceResult> memberships = new ArrayList<>();
@@ -432,7 +432,7 @@ public class MembershipServiceImpl implements MembershipService {
                     Arrays.asList("name", "path", "inInclude", "inBasis", "inExclude", "inOwner"),
                     groupingName, groupingPath, inInclude, inBasis, inExclude, inOwner));
         }
-        return new GenericServiceResult("memberships", memberships);
+        return new GenericServiceResult(new GroupingsServiceResult(SUCCESS, action), "memberships", memberships);
     }
 
     //removes a user from the admins group
