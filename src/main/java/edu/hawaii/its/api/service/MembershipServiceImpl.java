@@ -320,7 +320,7 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override
     public GenericServiceResult removeGroupMembers(String currentUser, String groupPath,
-            List<String> usersToDelete) {
+            List<String> membersToRemove) {
 
         String composite = helperService.parentGroupingPath(groupPath);
 
@@ -328,30 +328,30 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        List<String> membersToDelete;
-        String action = "deleteGroupMembers; " +
+        List<String> membersRemoved;
+        String action = "removeGroupMembers; " +
                 "currentUser: " + currentUser + "; " +
                 "groupPath: " + groupPath + "; " +
-                "usersToDelete: " + usersToDelete.toString() + ";";
+                "membersToRemove: " + membersToRemove.toString() + ";";
         logger.info(action);
 
-        if ((membersToDelete = getValidMembers(groupPath, usersToDelete)).isEmpty()) {
+        if ((membersRemoved = getValidMembers(groupPath, membersToRemove)).isEmpty()) {
             return new GenericServiceResult(
-                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in usersToDelete"),
-                    "usersToDelete", usersToDelete);
+                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in membersToRemove"),
+                    "membersToRemove", membersToRemove);
         }
 
-        action += " membersToDelete: " + membersToDelete + "; ";
+        action += " membersRemoved: " + membersRemoved + "; ";
         logger.info(action);
 
-        WsDeleteMemberResults deleteMemberResults = grouperFS
-                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersToDelete);
+        WsDeleteMemberResults removeMemberResults = grouperFS
+                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersRemoved);
 
         updateLastModified(composite);
         updateLastModified(groupPath);
 
-        return new GenericServiceResult(helperService.makeGroupingsServiceResult(deleteMemberResults, action),
-                Arrays.asList("usersToDelete", "membersDeleted"), usersToDelete, membersToDelete);
+        return new GenericServiceResult(helperService.makeGroupingsServiceResult(removeMemberResults, action),
+                Arrays.asList("membersToRemove", "membersRemoved"), membersToRemove, membersRemoved);
     }
 
     /**
