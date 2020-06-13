@@ -1,11 +1,8 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
@@ -27,14 +24,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -417,12 +410,7 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        List<String> groupPaths;
-        try {
-            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
-        } catch (GcWebServiceError e) {
-            return new GenericServiceResult(FAILURE, e);
-        }
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
         if (groupPaths.size() == 0) {
             return new GenericServiceResult(SUCCESS, uid + " has no memberships");
         }
