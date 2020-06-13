@@ -214,19 +214,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
-     * >>>>>>> Attempt to speed up getGrouping
-     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
-     @ResponseBody public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
-     @PathVariable String uid) {
-     logger.info("Entered REST memberGroupings...");
-     return ResponseEntity
-     .ok()
-     .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
-     }
-     */
-
-    /**
      * if the user is allowed to opt into the grouping
      * this will add them to the include group of that grouping
      * if the user is in the exclude group, they will be removed from it
