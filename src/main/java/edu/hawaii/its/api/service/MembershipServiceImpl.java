@@ -375,7 +375,6 @@ public class MembershipServiceImpl implements MembershipService {
         return members;
     }
 
-
     //adds a user to the admins group via username or UH id number
     @Override
     public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
@@ -402,6 +401,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
+
     /**
      * Return a list of memberships with respect to uid as currentUser.
      *
@@ -476,15 +476,17 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths) {
+    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
+            List<String> GroupPaths) {
 
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
 
-        for(int i = 0; i < GroupPaths.size();i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i +  ":" + GroupPaths.get(i));
+        for (int i = 0; i < GroupPaths.size(); i++) {
+            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
             WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+            WsDeleteMemberResults deleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
             result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
         }
         return result;

@@ -387,44 +387,25 @@ public class GroupingsRestControllerv2_1Test {
     public void memberGroupingsAdminTest() throws Exception {
         final String uid = "grouping";
         final String admin = "bobo";
-        MembershipAssignment membershipAssignment = new MembershipAssignment();
 
-        membershipAssignment.setGroupingsIn(groupingStringList()
-                .stream()
-                .map(Grouping::new)
-                .collect(Collectors.toList()));
-
-        given(groupingAssignmentService.getMembershipAssignment(admin, uid))
-                .willReturn(membershipAssignment);
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
+        given(membershipService.getMembershipResults(admin, uid)).willReturn(genericServiceResult);
 
         mockMvc.perform(get(API_BASE + "/members/" + uid + "/groupings")
-                .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("groupingsIn[0]['path']").value("g0-gName"))
-                .andExpect(jsonPath("groupingsIn[1]['path']").value("g1-gName"))
-                .andExpect(jsonPath("groupingsIn[2]['path']").value("g2-gName"));
+                .header(CURRENT_USER, uid))
+                .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUhUser(username = "grouping")
     public void memberGroupingsMyselfTest() throws Exception {
         final String uid = "grouping";
-        MembershipAssignment membershipAssignment = new MembershipAssignment();
-
-        membershipAssignment.setGroupingsIn(groupingStringList()
-                .stream()
-                .map(Grouping::new)
-                .collect(Collectors.toList()));
-
-        given(groupingAssignmentService.getMembershipAssignment(uid, uid))
-                .willReturn(membershipAssignment);
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
+        given(membershipService.getMembershipResults(uid, uid)).willReturn(genericServiceResult);
 
         mockMvc.perform(get(API_BASE + "/members/" + uid + "/groupings")
                 .header(CURRENT_USER, uid))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("groupingsIn[0]['path']").value("g0-gName"))
-                .andExpect(jsonPath("groupingsIn[1]['path']").value("g1-gName"))
-                .andExpect(jsonPath("groupingsIn[2]['path']").value("g2-gName"));
+                .andExpect(status().isOk());
     }
 
     //todo This user owns nothing
