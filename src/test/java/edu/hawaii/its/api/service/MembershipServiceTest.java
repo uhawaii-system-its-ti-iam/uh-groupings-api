@@ -32,10 +32,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.mail.MessagingException;
+import javax.swing.text.StyledEditorKit;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -363,7 +365,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void removeFromGroupsTest(){
+    public void removeFromGroupsTest() {
         String userToRemove = users.get(0).getUsername();
         List<String> GroupPaths = new ArrayList<String>();
         GroupPaths.add(GROUPING_1_PATH);
@@ -577,5 +579,76 @@ public class MembershipServiceTest {
         assertThat(grouping.getComposite().getMembers().size() - 1, is(usernames.size()));
         //members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups)
         assertThat(grouping.getInclude().getMembers().size(), is(usernames.size() - numberOfBasisMembers + 2));
+    }
+
+    @Test
+    /**
+     * Test getMembershipResults: Note, a good way to comprehend the following test is to un comment the print statements
+     * in the loops.
+     *     1.) Returns all memberships of user at index 5 which should have all memberships be of inInclude and no
+     *         memberships in exclude.
+     *     2.) Returns all memberships of user at index 3 which has all memberships in Exclude but is also in the basis
+     *         group of every membership. Since group paths only return as...
+     *              a. grouping-path:include
+     *              b. grouping-path:exclude
+     *              c. grouping-path:basis
+     *              d. grouping-path:owners
+     *         If a member is in multiple groups of that grouping then multiple paths will be returned, thus a member
+     *         who is in basis and exclude will have two memberships return for that grouping.
+     *              I. grouping-path:exclude
+     *              II. grouping-path:basis
+     *         Thus we can test our function by using result.inExclude xored with result.inBasis which will always
+     *         return true for user at index 3.
+     *     3.) Same as #2 but with basis and owner.
+     *
+     */
+    public void getMembershipResultsTest() {
+        // 1
+        GenericServiceResult testInInclude =
+                membershipService.getMembershipResults(ADMIN_USER, users.get(5).getUsername());
+        assertEquals(SUCCESS, testInInclude.getGroupingsServiceResult().getResultCode());
+        List<GenericServiceResult> testInIncludeResultList =
+                (List<GenericServiceResult>) testInInclude.get("memberships");
+        for (GenericServiceResult res : testInIncludeResultList) {
+            Boolean inInclude = (Boolean) res.get("inInclude");
+            Boolean inExclude = (Boolean) res.get("inExclude");
+            Boolean inBasis = (Boolean) res.get("inBasis");
+            Boolean inOwner = (Boolean) res.get("inOwner");
+            assertTrue(inInclude);
+            assertTrue(!inExclude && !inBasis && !inOwner);
+            //System.err.println(res.toString());
+        }
+
+        // 2
+        GenericServiceResult testInExcludeAndBasis =
+                membershipService.getMembershipResults(ADMIN_USER, users.get(3).getUsername());
+        assertEquals(SUCCESS, testInInclude.getGroupingsServiceResult().getResultCode());
+        List<GenericServiceResult> testInExcludeAndBasisList =
+                (List<GenericServiceResult>) testInExcludeAndBasis.get("memberships");
+        for (GenericServiceResult res : testInExcludeAndBasisList) {
+            Boolean inInclude = (Boolean) res.get("inInclude");
+            Boolean inExclude = (Boolean) res.get("inExclude");
+            Boolean inBasis = (Boolean) res.get("inBasis");
+            Boolean inOwner = (Boolean) res.get("inOwner");
+            assertTrue(inBasis ^ inExclude);
+            assertTrue(!inOwner && !inInclude);
+            //System.err.println(res.toString());
+        }
+
+        // 3
+        GenericServiceResult testOwner =
+                membershipService.getMembershipResults(ADMIN_USER, users.get(0).getUsername());
+        assertEquals(SUCCESS, testOwner.getGroupingsServiceResult().getResultCode());
+        List<GenericServiceResult> testOwnerList =
+                (List<GenericServiceResult>) testOwner.get("memberships");
+        for (GenericServiceResult res : testOwnerList) {
+            Boolean inInclude = (Boolean) res.get("inInclude");
+            Boolean inExclude = (Boolean) res.get("inExclude");
+            Boolean inBasis = (Boolean) res.get("inBasis");
+            Boolean inOwner = (Boolean) res.get("inOwner");
+            assertTrue(inBasis ^ inOwner);
+            assertTrue(!inInclude && !inExclude);
+            //System.err.println(res.toString());
+        }
     }
 }
