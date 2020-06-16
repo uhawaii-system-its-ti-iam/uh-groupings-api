@@ -13,6 +13,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.junit.Before;
@@ -600,7 +601,7 @@ public class MembershipServiceTest {
      *         Thus we can test our function by using result.inExclude xored with result.inBasis which will always
      *         return true for user at index 3.
      *     3.) Same as #2 but with basis and owner.
-     *
+     *     4.) Check if user is not admin
      */
     public void getMembershipResultsTest() {
         // 1
@@ -649,6 +650,13 @@ public class MembershipServiceTest {
             assertTrue(inBasis ^ inOwner);
             assertTrue(!inInclude && !inExclude);
             //System.err.println(res.toString());
+        }
+
+        // 4
+        try {
+            membershipService.getMembershipResults(users.get(4).getUsername(), users.get(4).getUsername());
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
     }
 }

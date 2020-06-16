@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -97,6 +98,9 @@ public class TestMembershipService {
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
+
+    @Autowired
+    private HelperService helperService;
 
     @PostConstruct
     public void init() {
@@ -796,6 +800,23 @@ public class TestMembershipService {
             membershipService.deleteAdmin(username[3], username[4]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+        }
+    }
+
+    @Test
+    public void getMembershipResults() {
+        List<GenericServiceResult> successResults = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            successResults.add(membershipService.getMembershipResults(ADMIN, username[i]));
+        }
+        for (GenericServiceResult res : successResults) {
+            assertEquals(SUCCESS, res.getGroupingsServiceResult().getResultCode());
+        }
+        //Check no admin guard
+        try {
+            membershipService.getMembershipResults(username[4], username[4]);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
     }
 }
