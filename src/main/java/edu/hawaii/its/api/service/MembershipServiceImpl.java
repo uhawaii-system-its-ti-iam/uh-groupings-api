@@ -339,7 +339,7 @@ public class MembershipServiceImpl implements MembershipService {
      *
      * @param currentUser   Must be an admin and owner of grouping at groupPath.
      * @param groupPath     Full path of group at grouping.
-     * @param usersToDelete List of potential members to be deleted.
+     * @param membersToRemove List of potential members to be deleted.
      * @return FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
      * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not
      * an admin and an owner of grouping at groupPath.
