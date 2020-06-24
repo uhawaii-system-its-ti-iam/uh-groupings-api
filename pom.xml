@@ -445,7 +445,7 @@
                 <version>3.0.0-M1</version>
                 <configuration>
                     <!--added this-->
-                    <forkMode>never</forkMode>
+                    <!--forkMode>never</forkMode-->
                     <!--^^^ added this-->
                     <systemPropertyVariables>
                         <io.springfox.staticdocs.outputDir>${swagger.output.dir}</io.springfox.staticdocs.outputDir>
