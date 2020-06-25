@@ -207,7 +207,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<GenericServiceResult> getMembershipResults(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST checkInBasis");
+        logger.info("Entered REST getMembershipResults");
         return ResponseEntity
                 .ok()
                 .body(membershipService.getMembershipResults(currentUser, uid));
