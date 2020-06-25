@@ -29,10 +29,65 @@ public class GrouperFactoryServiceMockTest {
 
     GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
 
-    //todo
     @Test
     public void addEmptyGroupTest() {
+        try {
+            gfs.addEmptyGroup("", "");
+        }catch(Exception e){
+            System.out.println(e);
+            String result = e.toString();
+            assertThat(result, is("java.lang.IllegalArgumentException: host parameter is null"));
+        }
+    }
 
+    @Test
+    public void getSyncDestinationsTest() {
+        try {
+            gfs.getSyncDestinations();
+        }catch(Exception e){
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
+    }
+
+    @Test
+    public void deleteGroupTest(){
+        try{
+            WsSubjectLookup subjectLookup = null;
+            WsGroupLookup path = null;
+            gfs.deleteGroup(subjectLookup,path);
+        }catch(Exception e){
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
+    }
+    @Test
+    public void getDescriptionTest() {
+        try {
+            gfs.getDescription("");
+        }catch(Exception e){
+            System.out.println(e);
+            String result = e.toString();
+            assertThat(result, is("java.lang.IllegalArgumentException: host parameter is null"));
+        }
+    }
+
+    @Test
+    public void addCompositeGroupTest(){
+        try{
+            String username = "username";
+            String parentGroupPath = "";
+            String compositeType = "";
+            String leftGroupPath = "path:to:grouping1";
+            String rightGroupPath = "path:to:grouping2";
+            gfs.addCompositeGroup(username,parentGroupPath,compositeType,leftGroupPath,rightGroupPath);
+        }catch(Exception e){
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
     }
 
     @Test

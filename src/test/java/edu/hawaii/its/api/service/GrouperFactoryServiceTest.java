@@ -138,8 +138,8 @@ public class GrouperFactoryServiceTest {
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
-    @Autowired
-    private GrouperFactoryService grouperFS;
+
+    private GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
 
     @Autowired
     private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
@@ -165,6 +165,11 @@ public class GrouperFactoryServiceTest {
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+       assertTrue(gfsl.getSyncDestinations().size() > 0);
     }
 
     @Test
@@ -385,12 +390,6 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void getSyncDestinationsTest() {
-
-        assertTrue(gfsl.getSyncDestinations().size() > 0);
-    }
-
-    @Test
     public void makeWsGetAttributeAssignmentsResultsForGroupDefNameTest() {
         WsGetAttributeAssignmentsResults results;
 
@@ -532,7 +531,7 @@ public class GrouperFactoryServiceTest {
     }
     @Test
     public void makeWsGetMembershipsResultsTest() {
-        WsGetMembershipsResults result = grouperFS.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+        WsGetMembershipsResults result = gfsl.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
         assertTrue(result != null);
     }
 
@@ -548,7 +547,7 @@ public class GrouperFactoryServiceTest {
         lookups.add(gfsl.makeWsSubjectLookup(users.get(1).getUsername()));
         lookups.add(gfsl.makeWsSubjectLookup(users.get(2).getUsername()));
 
-        List<WsGetMembershipsResults> result = grouperFS.makeWsGetAllMembershipsResults(groupNames, lookups);
+        List<WsGetMembershipsResults> result = gfsl.makeWsGetAllMembershipsResults(groupNames, lookups);
 
         assertTrue(result != null);
     }
