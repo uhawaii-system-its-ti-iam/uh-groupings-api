@@ -4,6 +4,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
+import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
@@ -429,9 +430,18 @@ public class GrouperFactoryServiceMockTest {
     public void makeWsGetAttributeAssignmentsResultsTrioWithTwoAttributeDefNamesTest() {
     }
 
-    //todo
     @Test
     public void makeWsGetAttributeAssignmentsResultsForMembershipTest() {
+        try {
+            String assignType = "";
+            String attributeDefNameName = "";
+            String membershipId = "";
+            gfs.makeWsGetAttributeAssignmentsResultsForMembership(assignType, attributeDefNameName, membershipId);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
     }
 
     //todo
@@ -568,7 +578,7 @@ public class GrouperFactoryServiceMockTest {
         try {
             String groupName = "";
             String privilegeName = "";
-            WsSubjectLookup admin = null ;
+            WsSubjectLookup admin = null;
             WsSubjectLookup lookup = null;
             boolean isAllowed = false;
             gfs.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeName, lookup, admin, isAllowed);
@@ -595,7 +605,7 @@ public class GrouperFactoryServiceMockTest {
     }
 
     @Test
-    public void makeWsGetGrouperPrivilegesLiteResultTest(){
+    public void makeWsGetGrouperPrivilegesLiteResultTest() {
         try {
             String groupName = "";
             String privilegeName = "";
@@ -608,14 +618,13 @@ public class GrouperFactoryServiceMockTest {
         }
     }
 
-
     @Test
     public void makeWsGetMembershipsResultsTest() {
-        try{
+        try {
             String groupName = "";
             WsSubjectLookup lookup = null;
             gfs.makeWsGetMembershipsResults(groupName, lookup);
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
             String result = e.toString();
             assertTrue(result != null);
@@ -623,8 +632,8 @@ public class GrouperFactoryServiceMockTest {
     }
 
     @Test
-    public void makeWsGetAllMembershipsResultsTest(){
-        try{
+    public void makeWsGetAllMembershipsResultsTest() {
+        try {
             List<String> groupNames = new ArrayList<>();
             groupNames.add("username1");
             groupNames.add("username2");
@@ -636,7 +645,7 @@ public class GrouperFactoryServiceMockTest {
             lookups.add(lookup1);
             lookups.add(lookup2);
             lookups.add(lookup3);
-            gfs.makeWsGetAllMembershipsResults(groupNames,lookups);
+            gfs.makeWsGetAllMembershipsResults(groupNames, lookups);
         } catch (Exception e) {
             System.out.println(e);
             String result = e.toString();
@@ -644,14 +653,76 @@ public class GrouperFactoryServiceMockTest {
         }
     }
 
-    //todo
     @Test
-    public void makeWsGetMembersResults() {
+    public void makeWsGetMembersResultsTest() {
+        try {
+            String subjectAttributeName = "";
+            WsSubjectLookup lookup = null;
+            List<String> groupPaths = new ArrayList<>();
+            groupPaths.add("path:to:grouping1");
+            groupPaths.add("path:to:grouping2");
+            groupPaths.add("path:to:grouping3");
+            Integer pageNumber = 0;
+            Integer pageSize = 0;
+            String sortString = "";
+            Boolean isAscending = false;
+            gfs.makeWsGetMembersResults(subjectAttributeName, lookup, groupPaths, pageNumber, pageSize, sortString,
+                    isAscending);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
     }
 
-    //todo
     @Test
-    public void makeWsGetGroupsResults() {
+    public void makeWsGetGroupsResultsTest() {
+        try {
+            String username = "";
+            WsStemLookup stemLookup = null;
+            StemScope stemScope = null;
+            gfs.makeWsGetGroupsResults(username, stemLookup, stemScope);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
+
+        try {
+            String username = "0000";
+            WsStemLookup stemLookup = null;
+            StemScope stemScope = null;
+            gfs.makeWsGetGroupsResults(username, stemLookup, stemScope);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
+    }
+
+    @Test
+    public void makeWsGetSubjectsResultsTest() {
+        try {
+            WsSubjectLookup lookup = null;
+            gfs.makeWsGetSubjectsResults(lookup);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
+    }
+
+    @Test
+    public void updateGroupDescriptionTest() {
+        try {
+            String groupPath = "path:to:grouping1";
+            String description = "a path to a grouping";
+            gfs.updateGroupDescription(groupPath, description);
+        } catch (Exception e) {
+            System.out.println(e);
+            String result = e.toString();
+            assertTrue(result != null);
+        }
     }
 
     @Test
