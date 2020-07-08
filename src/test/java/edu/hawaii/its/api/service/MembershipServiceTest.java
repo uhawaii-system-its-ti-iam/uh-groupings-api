@@ -141,6 +141,18 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void isUhUuidTest(){
+        //invalid UhUuid
+        Boolean result;
+        result = membershipService.isUhUuid("username");
+        assertThat(result, is(false));
+
+        //valid UhUuid
+        result = membershipService.isUhUuid("0000");
+        assertThat(result, is(true));
+    }
+
+    @Test
     public void listOwnedTest() {
 
         // Tests that when there is no groups owned, the list is empty
@@ -219,6 +231,23 @@ public class MembershipServiceTest {
         } catch (GroupingsServiceResultException gsre) {
             gsr = gsre.getGsr();
         }
+    }
+
+    @Test
+    public void deleteGroupMembersTest(){
+        List<GroupingsServiceResult> result;
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupPath = GROUPING_3_PATH;
+        List<String> usersToDelete = new ArrayList<>();
+        usersToDelete.add(users.get(1).getUsername());
+        usersToDelete.add(users.get(2).getUsername());
+        usersToDelete.add(users.get(3).getUsername());
+        result = membershipService.deleteGroupMembers(ownerUsername, groupPath, usersToDelete);
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue(result.get(i).getResultCode().startsWith("Success!"));
+        }
+
     }
 
     @Test
@@ -312,6 +341,20 @@ public class MembershipServiceTest {
         listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd);
         for (int i = 0; i < listGsr.size(); i++) {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+        }
+
+        //Creating list larger than 100 will fail because of invalid address
+        List<String> userToAddList = new ArrayList<>();
+        for(int i = 0; i <= 100; i++){
+            userToAddList.add("username" + i);
+        }
+        try {
+            listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, userToAddList);
+            for (int i = 0; i < listGsr.size(); i++) {
+                assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+            }
+        }catch(Exception e){
+            assertTrue(e != null);
         }
     }
 
