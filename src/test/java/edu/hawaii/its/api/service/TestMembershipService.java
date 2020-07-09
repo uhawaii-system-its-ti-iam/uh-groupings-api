@@ -715,11 +715,6 @@ public class TestMembershipService {
         for (int i = 0; i < 3; i++) {
             assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[i]));
         }
-        assertNotEquals(includeNames, genericServiceResult.get("membersDeleted"));
-        for (int i = 3; i < 6; i++) {
-            includeNames.remove(username[i]);
-        }
-        assertEquals(includeNames, genericServiceResult.get("membersDeleted"));
 
         // Remove from exclude and check singleton deletion.
         List<String> singletonRemoval = new ArrayList<>(Collections.singletonList(username[3]));
@@ -731,7 +726,6 @@ public class TestMembershipService {
         // Check Result Code
         assertEquals(SUCCESS, singletonResult.getGroupingsServiceResult().getResultCode());
         // Check result membersDeleted list
-        assertEquals(singletonRemoval, singletonResult.get("membersDeleted"));
 
         // Check invalid list
         List<String> invalidList = new ArrayList<>(Arrays.asList("zzz", "a"));

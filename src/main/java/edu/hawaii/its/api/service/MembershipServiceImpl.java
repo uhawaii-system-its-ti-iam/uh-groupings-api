@@ -313,7 +313,7 @@ public class MembershipServiceImpl implements MembershipService {
      *
      * @param currentUser   Must be an admin and owner of grouping at groupPath.
      * @param groupPath     Full path of group at grouping.
-     * @param usersToDelete List of potential members to be deleted.
+     * @param membersToRemove List of potential members to be deleted.
      * @return FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
      * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not
      * an admin and an owner of grouping at groupPath.
@@ -344,14 +344,19 @@ public class MembershipServiceImpl implements MembershipService {
         action += " membersRemoved: " + membersRemoved + "; ";
         logger.info(action);
 
-        WsDeleteMemberResults removeMemberResults = grouperFS
-                .makeWsDeleteMemberResults(groupPath, grouperFS.makeWsSubjectLookup(currentUser), membersRemoved);
+        List<GroupingsServiceResult> groupingsServiceResultList = new ArrayList<>();
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(currentUser);
 
+        for (String memberToRemove : membersRemoved) {
+            groupingsServiceResultList.add(helperService
+                    .makeGroupingsServiceResult(grouperFS.makeWsDeleteMemberResults(groupPath, lookup, memberToRemove),
+                            action));
+        }
         updateLastModified(composite);
         updateLastModified(groupPath);
 
-        return new GenericServiceResult(helperService.makeGroupingsServiceResult(removeMemberResults, action),
-                Arrays.asList("membersToRemove", "membersRemoved"), membersToRemove, membersRemoved);
+        return new GenericServiceResult(helperService.makeGroupingsServiceResult(SUCCESS, action), "results",
+                groupingsServiceResultList);
     }
 
     /**
