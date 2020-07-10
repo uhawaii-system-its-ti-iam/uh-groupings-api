@@ -321,32 +321,20 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public GenericServiceResult removeGroupMembers(String currentUser, String groupPath,
             List<String> membersToRemove) {
-
         String composite = helperService.parentGroupingPath(groupPath);
-
         if (!memberAttributeService.isOwner(composite, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        List<String> membersRemoved;
         String action = "removeGroupMembers; " + "currentUser: " + currentUser + "; " + "groupPath: " + groupPath + "; "
                 + "membersToRemove: " + membersToRemove.toString() + ";";
         logger.info(action);
-
-        if ((membersRemoved = getValidMembers(groupPath, membersToRemove)).isEmpty()) {
-            GroupingsServiceResult groupingsServiceResult =
-                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in membersToRemove");
-            return new GenericServiceResult(groupingsServiceResult, "membersToRemove", membersToRemove);
-        }
-
-        action += " membersRemoved: " + membersRemoved + "; ";
-        logger.info(action);
-
         List<GroupingsServiceResult> groupingsServiceResultList = new ArrayList<>();
-
-        for (String memberToRemove : membersRemoved) {
+        
+        for (String memberToRemove : membersToRemove) {
             WsDeleteMemberResults rawResult = grouperFS.makeWsDeleteMemberResults(groupPath, memberToRemove);
             String str = "memberRemoved: " + memberToRemove + ";";
+            logger.info(str);
             GroupingsServiceResult groupingsServiceResult =
                     helperService.makeGroupingsServiceResult(rawResult, str);
             groupingsServiceResultList.add(groupingsServiceResult);
@@ -355,8 +343,8 @@ public class MembershipServiceImpl implements MembershipService {
         updateLastModified(groupPath);
         GroupingsServiceResult finalResult = new GroupingsServiceResult(SUCCESS, action);
 
-        return new GenericServiceResult(finalResult, Arrays.asList("results", "membersRemoved"),
-                groupingsServiceResultList, membersRemoved);
+        return new GenericServiceResult(finalResult, Arrays.asList("results", "membersToRemove"),
+                groupingsServiceResultList, membersToRemove);
     }
 
     /**
