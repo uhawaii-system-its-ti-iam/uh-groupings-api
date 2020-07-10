@@ -18,7 +18,7 @@ import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
-import org.checkerframework.checker.units.qual.A;
+import edu.hawaii.its.api.type.SyncDestination;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

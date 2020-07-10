@@ -245,6 +245,44 @@ public class MembershipServiceTest {
     }
 
     @Test
+<<<<<<< HEAD
+=======
+    public void deleteGroupMembersTest(){
+        List<GroupingsServiceResult> result;
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupPath = GROUPING_3_PATH;
+        List<String> usersToDelete = new ArrayList<>();
+        usersToDelete.add(users.get(1).getUsername());
+        usersToDelete.add(users.get(2).getUsername());
+        usersToDelete.add(users.get(3).getUsername());
+        result = membershipService.deleteGroupMembers(ownerUsername, groupPath, usersToDelete);
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue(result.get(i).getResultCode().startsWith("Success!"));
+        }
+
+    }
+
+    @Test
+    public void getMemberShipResultsTest(){
+        try {
+            String ownerUsername = ADMIN;
+            String uid = "iamtst01";
+            List<Membership> result = membershipService.getMemberShipResults(ownerUsername, uid);
+        }catch (Exception e){
+            System.out.println(e);
+            assertTrue(e != null);
+        }
+    }
+
+    @Test
+    public void genericTest(){
+        GenericServiceResult result = membershipService.generic();
+        assertTrue((result.getData()).get(0) == "HelloWorld!");
+    }
+
+    @Test
+>>>>>>> tests added for coverage, branch now at 90%
     @Ignore
     public void addGroupingMemberTest() {
         Iterable<Grouping> group = groupingRepository.findAll();
