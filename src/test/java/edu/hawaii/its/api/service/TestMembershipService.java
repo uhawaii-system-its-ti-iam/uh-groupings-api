@@ -1,9 +1,11 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Membership;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -149,6 +151,21 @@ public class TestMembershipService {
     public void groupOptInPermissionTest() {
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+    }
+
+    @Test
+    public void getMemberShipResultsTest(){
+        String ownerUsername = ADMIN;
+        String uid = username[4];
+
+        List<Membership> result =  membershipService.getMemberShipResults(ownerUsername, uid);
+        assertTrue(result.size() > 0);
+    }
+
+    @Test
+    public void genericTest(){
+        GenericServiceResult result = membershipService.generic();
+        assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
 
     @Test

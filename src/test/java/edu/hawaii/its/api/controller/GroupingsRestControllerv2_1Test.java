@@ -7,12 +7,14 @@ import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -231,6 +233,12 @@ public class GroupingsRestControllerv2_1Test {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         gsrList.add(new GroupingsServiceResult(SUCCESS, "delete member from include group"));
         return gsrList;
+    }
+
+    private List<SyncDestination> sdList() {
+        List<SyncDestination> sdList = new ArrayList<>();
+        sdList.add(new SyncDestination(SUCCESS, "retrieved new sync destinations"));
+        return sdList;
     }
 
     //Test data (2.1 API).
@@ -561,6 +569,78 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].action").value("add users to grouping"));
     }
 
+    @Test
+    @WithMockUhUser
+    public void deleteMultipleExcludeMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.deleteGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
+                .willReturn(gsrList());
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void getIsAdminTest() throws Exception {
+
+        given(memberAttributeService.getIsAdmin(USERNAME, "tst04name"))
+                .willReturn(new GenericServiceResult(SUCCESS, "getIsAdmin: " + "currentUser: " + USERNAME + ";, " +
+                        "usernameInQuestion: " + "tst04name" + ";"));
+
+        mockMvc.perform(get(API_BASE + "/admins/tst04name")
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void getIsOwnerTest() throws Exception {
+        given(memberAttributeService.getIsOwner(USERNAME, "tst04name"))
+                .willReturn(new GenericServiceResult(SUCCESS, "getIsAdmin: " + "currentUser: " + USERNAME + ";, " +
+                        "usernameInQuestion: " + "tst04name" + ";"));
+
+        mockMvc.perform(get(API_BASE + "/owners/tst04name")
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void getSyncDestinationsTest() throws Exception {
+        given(groupAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
+                .willReturn(sdList());
+
+        mockMvc.perform(get(API_BASE + "/groupings/grouping/syncDestinations")
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @WithMockUhUser
+    public void includeMultipleMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addGroupMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+                .willReturn(gsrList());
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMultipleMembers/" + usersToAdd)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
     @Ignore
     @Test
     @WithAnonymousUser
@@ -581,6 +661,22 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("delete member from include group"));
+    }
+
+    @Test
+    @WithMockUhUser
+    public void excludeMultipleMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
+                .willReturn(gsrList());
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
     }
 
     @Ignore
@@ -715,6 +811,23 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted admin"));
 
+    }
+
+    @Test
+    @WithMockUhUser
+    public void removeFromGroupsTest() throws Exception {
+        List<String> paths = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            paths.add("grouping" + i);
+        }
+        String userToRemove = "homerSimpson";
+        /*given(membershipService.deleteAdmin(ADMIN, ))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "delete admin"));*/
+
+        mockMvc.perform(delete(API_BASE + "/admins/" + paths + "/" + userToRemove)
+                .with(csrf())
+                .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk());
     }
 
     @Ignore
@@ -1052,6 +1165,16 @@ public class GroupingsRestControllerv2_1Test {
         System.out.println(group.getOwners());
 
         mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
+                .header("current_user", "o6-username"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUhUser
+    public void genericTest() throws Exception {
+        mockMvc.perform(get(API_BASE + "/generic")
                 .header("current_user", "o6-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
