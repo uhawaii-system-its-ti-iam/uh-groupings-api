@@ -5,6 +5,7 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -56,6 +57,9 @@ public class MembershipServiceTest {
 
     @Value("${groupings.api.test.username}")
     private String USERNAME;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.name}")
     private String NAME;
@@ -248,6 +252,24 @@ public class MembershipServiceTest {
             assertTrue(result.get(i).getResultCode().startsWith("Success!"));
         }
 
+    }
+
+    @Test
+    public void getMemberShipResultsTest(){
+        try {
+            String ownerUsername = ADMIN;
+            String uid = "iamtst01";
+            List<Membership> result = membershipService.getMemberShipResults(ownerUsername, uid);
+        }catch (Exception e){
+            System.out.println(e);
+            assertTrue(e != null);
+        }
+    }
+
+    @Test
+    public void genericTest(){
+        GenericServiceResult result = membershipService.generic();
+        assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
 
     @Test
