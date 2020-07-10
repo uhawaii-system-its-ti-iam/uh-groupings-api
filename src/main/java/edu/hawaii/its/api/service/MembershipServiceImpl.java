@@ -311,8 +311,8 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Remove the valid members contained in usersToDelete from groupPath as currentUser.
      *
-     * @param currentUser   Must be an admin and owner of grouping at groupPath.
-     * @param groupPath     Full path of group at grouping.
+     * @param currentUser     Must be an admin and owner of grouping at groupPath.
+     * @param groupPath       Full path of group at grouping.
      * @param membersToRemove List of potential members to be deleted.
      * @return FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
      * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not
@@ -329,34 +329,34 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         List<String> membersRemoved;
-        String action = "removeGroupMembers; " +
-                "currentUser: " + currentUser + "; " +
-                "groupPath: " + groupPath + "; " +
-                "membersToRemove: " + membersToRemove.toString() + ";";
+        String action = "removeGroupMembers; " + "currentUser: " + currentUser + "; " + "groupPath: " + groupPath + "; "
+                + "membersToRemove: " + membersToRemove.toString() + ";";
         logger.info(action);
 
         if ((membersRemoved = getValidMembers(groupPath, membersToRemove)).isEmpty()) {
-            return new GenericServiceResult(
-                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in membersToRemove"),
-                    "membersToRemove", membersToRemove);
+            GroupingsServiceResult groupingsServiceResult =
+                    new GroupingsServiceResult(FAILURE, action + " Error Message: no valid members in membersToRemove");
+            return new GenericServiceResult(groupingsServiceResult, "membersToRemove", membersToRemove);
         }
 
         action += " membersRemoved: " + membersRemoved + "; ";
         logger.info(action);
 
         List<GroupingsServiceResult> groupingsServiceResultList = new ArrayList<>();
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(currentUser);
 
         for (String memberToRemove : membersRemoved) {
-            groupingsServiceResultList.add(helperService
-                    .makeGroupingsServiceResult(grouperFS.makeWsDeleteMemberResults(groupPath, lookup, memberToRemove),
-                            action));
+            WsDeleteMemberResults rawResult = grouperFS.makeWsDeleteMemberResults(groupPath, memberToRemove);
+            String str = "memberRemoved: " + memberToRemove + ";";
+            GroupingsServiceResult groupingsServiceResult =
+                    helperService.makeGroupingsServiceResult(rawResult, str);
+            groupingsServiceResultList.add(groupingsServiceResult);
         }
         updateLastModified(composite);
         updateLastModified(groupPath);
+        GroupingsServiceResult finalResult = new GroupingsServiceResult(SUCCESS, action);
 
-        return new GenericServiceResult(helperService.makeGroupingsServiceResult(SUCCESS, action), "results",
-                groupingsServiceResultList);
+        return new GenericServiceResult(finalResult, Arrays.asList("results", "membersRemoved"),
+                groupingsServiceResultList, membersRemoved);
     }
 
     /**
