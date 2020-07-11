@@ -5,6 +5,7 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -56,6 +57,9 @@ public class MembershipServiceTest {
 
     @Value("${groupings.api.test.username}")
     private String USERNAME;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.name}")
     private String NAME;
@@ -141,6 +145,18 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void isUhUuidTest(){
+        //invalid UhUuid
+        Boolean result;
+        result = membershipService.isUhUuid("username");
+        assertThat(result, is(false));
+
+        //valid UhUuid
+        result = membershipService.isUhUuid("0000");
+        assertThat(result, is(true));
+    }
+
+    @Test
     public void listOwnedTest() {
 
         // Tests that when there is no groups owned, the list is empty
@@ -219,6 +235,41 @@ public class MembershipServiceTest {
         } catch (GroupingsServiceResultException gsre) {
             gsr = gsre.getGsr();
         }
+    }
+
+    @Test
+    public void deleteGroupMembersTest(){
+        List<GroupingsServiceResult> result;
+
+        String ownerUsername = users.get(0).getUsername();
+        String groupPath = GROUPING_3_PATH;
+        List<String> usersToDelete = new ArrayList<>();
+        usersToDelete.add(users.get(1).getUsername());
+        usersToDelete.add(users.get(2).getUsername());
+        usersToDelete.add(users.get(3).getUsername());
+        result = membershipService.deleteGroupMembers(ownerUsername, groupPath, usersToDelete);
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue(result.get(i).getResultCode().startsWith("Success!"));
+        }
+
+    }
+
+    @Test
+    public void getMemberShipResultsTest(){
+        try {
+            String ownerUsername = ADMIN;
+            String uid = "iamtst01";
+            List<Membership> result = membershipService.getMemberShipResults(ownerUsername, uid);
+        }catch (Exception e){
+            System.out.println(e);
+            assertTrue(e != null);
+        }
+    }
+
+    @Test
+    public void genericTest(){
+        GenericServiceResult result = membershipService.generic();
+        assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
 
     @Test
@@ -312,6 +363,20 @@ public class MembershipServiceTest {
         listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd);
         for (int i = 0; i < listGsr.size(); i++) {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+        }
+
+        //Creating list larger than 100 will fail because of invalid address
+        List<String> userToAddList = new ArrayList<>();
+        for(int i = 0; i <= 100; i++){
+            userToAddList.add("username" + i);
+        }
+        try {
+            listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, userToAddList);
+            for (int i = 0; i < listGsr.size(); i++) {
+                assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
+            }
+        }catch(Exception e){
+            assertTrue(e != null);
         }
     }
 
