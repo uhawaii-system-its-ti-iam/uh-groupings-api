@@ -70,12 +70,11 @@ public class SyncDestination {
         String result;
 
         try {
-             result = desc.replaceFirst(regex, replace);
+            result = desc.replaceFirst(regex, replace);
         } catch(PatternSyntaxException e) {
             result = desc;
             e.printStackTrace();
         }
-
 
         return result;
     }

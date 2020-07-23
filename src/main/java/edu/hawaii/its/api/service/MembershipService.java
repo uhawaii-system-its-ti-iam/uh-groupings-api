@@ -34,6 +34,8 @@ public interface MembershipService {
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
+    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
+
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
     List<GroupingsServiceResult> optIn(String username, String groupingPath);
@@ -56,4 +58,6 @@ public interface MembershipService {
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
     GenericServiceResult generic();
+
+    boolean isUhUuid(String username);
 }
