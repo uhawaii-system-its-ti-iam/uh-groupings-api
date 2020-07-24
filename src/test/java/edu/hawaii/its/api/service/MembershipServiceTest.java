@@ -238,23 +238,6 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void deleteGroupMembersTest(){
-        List<GroupingsServiceResult> result;
-
-        String ownerUsername = users.get(0).getUsername();
-        String groupPath = GROUPING_3_PATH;
-        List<String> usersToDelete = new ArrayList<>();
-        usersToDelete.add(users.get(1).getUsername());
-        usersToDelete.add(users.get(2).getUsername());
-        usersToDelete.add(users.get(3).getUsername());
-        result = membershipService.deleteGroupMembers(ownerUsername, groupPath, usersToDelete);
-        for (int i = 0; i < result.size(); i++) {
-            assertTrue(result.get(i).getResultCode().startsWith("Success!"));
-        }
-
-    }
-
-    @Test
     public void getMemberShipResultsTest(){
         try {
             String ownerUsername = ADMIN;

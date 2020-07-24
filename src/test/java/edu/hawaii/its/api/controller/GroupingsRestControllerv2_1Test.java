@@ -577,8 +577,8 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.deleteGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
-                .willReturn(gsrList());
+        given(membershipService.removeGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
+                .willReturn(new GenericServiceResult());
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
                 .with(csrf())
