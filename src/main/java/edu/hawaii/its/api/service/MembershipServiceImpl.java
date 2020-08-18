@@ -283,7 +283,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
-    
+
     @Override
     public GenericServiceResult adddGroupMembers(String currentUser, String path, List<String> uids) {
         boolean isInclude = path.endsWith(INCLUDE);
@@ -311,6 +311,7 @@ public class MembershipServiceImpl implements MembershipService {
                 results.add(uid, res);
                 continue;
             }
+            
             WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(path, uid);
             WsSubject sub = addMemberResults.getResults()[0].getWsSubject();
 
