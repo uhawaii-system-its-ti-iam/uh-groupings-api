@@ -11,7 +11,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +96,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body("University of Hawaii Groupings");
     }
-
 
     @GetMapping(value = "/swagger/toString/{path}")
     @ResponseBody
@@ -264,6 +263,16 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupingAssignmentService
                         .getOptInGroups(currentUser, uid));
+    }
+
+    @GetMapping(value = "/groupings/{path}/{uids}")
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> checkMembers(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> uids) {
+        logger.info("Entered REST checkMembers...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.adddGroupMembers(currentUser, path, uids));
     }
 
     /**

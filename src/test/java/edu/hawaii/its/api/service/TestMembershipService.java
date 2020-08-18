@@ -14,12 +14,6 @@ import edu.hawaii.its.api.type.Membership;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.checkerframework.checker.nullness.qual.AssertNonNullIfNonNull;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -167,7 +161,6 @@ public class TestMembershipService {
         String uid = username[4];
 
         List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
-        assertTrue(result.size() > 0);
     }
 
     @Test
@@ -707,22 +700,21 @@ public class TestMembershipService {
     public void addGroupMembersTest() throws IOException, MessagingException {
         String ownerUsername = username[0];
 
-        List<GroupingsServiceResult> results;
+        GenericServiceResult results;
         List<String> usernames = new ArrayList<>();
 
         for (int i = 0; i < 6; i++) {
             usernames.add(username[i]);
         }
-
-        results = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, usernames);
-
-        for (GroupingsServiceResult result : results) {
-            assertTrue(result.getResultCode().startsWith(SUCCESS));
+        membershipService.adddGroupMembers(ownerUsername, GROUPING_INCLUDE, usernames);
+        for (String uid : usernames) {
+            assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
         }
-
-        //        for (int i = 0; i < 6; i++) {
-        //            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
-        //        }
+        membershipService.adddGroupMembers(ownerUsername, GROUPING_EXCLUDE, usernames);
+        for (String uid : usernames) {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
+            assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        }
     }
 
     @Test

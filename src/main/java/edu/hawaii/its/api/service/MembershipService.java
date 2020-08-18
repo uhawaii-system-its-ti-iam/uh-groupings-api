@@ -18,6 +18,7 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
+    GenericServiceResult adddGroupMembers(String currentUser, String path, List<String> uids);
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)
             throws IOException, MessagingException;
 

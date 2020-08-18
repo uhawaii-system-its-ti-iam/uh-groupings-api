@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 
@@ -56,10 +57,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -124,8 +122,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public List<SyncDestination> getSyncDestinations() {
 
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
-            WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                    new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults =
+                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 

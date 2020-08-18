@@ -19,8 +19,6 @@ public interface MemberAttributeService {
 
     boolean isMember(String groupPath, Person person);
 
-    boolean isMemberUuid(String groupPath, String idnum);
-
     boolean isOwner(String groupingPath, String username);
 
     boolean isOwner(String username);
@@ -32,6 +30,8 @@ public interface MemberAttributeService {
     boolean isSuperuser(String username);
 
     boolean isSelfOpted(String groupPath, String username);
+
+    boolean isSubject(String uid);
 
     WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
@@ -46,4 +46,6 @@ public interface MemberAttributeService {
     GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion);
 
     GenericServiceResult getIsAdmin(String currentUser, String usernameInQuestion);
+
+
 }

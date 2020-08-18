@@ -18,6 +18,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -281,6 +282,49 @@ public class MembershipServiceImpl implements MembershipService {
             return groupsOwned;
         }
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+    
+    @Override
+    public GenericServiceResult adddGroupMembers(String currentUser, String path, List<String> uids) {
+        boolean isInclude = path.endsWith(INCLUDE);
+        boolean isExclude = path.endsWith(EXCLUDE);
+
+        if ((!memberAttributeService.isAdmin(currentUser) && !memberAttributeService.isOwner(currentUser)) || (
+                !isExclude && !isInclude)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        GenericServiceResult results = new GenericServiceResult();
+        String delPath;
+        String composite = helperService.parentGroupingPath(path);
+        if (isInclude) {
+            delPath = composite + EXCLUDE;
+        } else {
+            delPath = composite + INCLUDE;
+        }
+
+        for (String uid : uids) {
+            GenericServiceResult res = new GenericServiceResult();
+            String action = "Not Found";
+            if (!memberAttributeService.isSubject(uid)) {
+                res.add(Arrays.asList("subject", "action"), null, action);
+                results.add(uid, res);
+                continue;
+            }
+            WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(path, uid);
+            WsSubject sub = addMemberResults.getResults()[0].getWsSubject();
+
+            action = "Added";
+            res = new GenericServiceResult("subject", sub);
+
+            if (memberAttributeService.isMember(delPath, uid)) {
+                action = "Moved";
+                grouperFS.makeWsDeleteMemberResults(delPath, uid);
+            }
+            res.add("action", action);
+            results.add(uid, res);
+        }
+        return results;
     }
 
     /**
