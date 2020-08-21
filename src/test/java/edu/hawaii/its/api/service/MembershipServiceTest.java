@@ -2,7 +2,13 @@ package edu.hawaii.its.api.service;
 
 import org.junit.Before;
 import org.junit.Ignore;
+<<<<<<< HEAD
 import org.junit.Test;
+=======
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+>>>>>>> Fix merge conflicts
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
@@ -18,13 +24,6 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +42,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+<<<<<<< HEAD
+=======
+import static org.junit.Assert.assertEquals;
+>>>>>>> Fix merge conflicts
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -245,8 +248,6 @@ public class MembershipServiceTest {
     }
 
     @Test
-<<<<<<< HEAD
-=======
     public void deleteGroupMembersTest(){
         List<GroupingsServiceResult> result;
 
@@ -264,6 +265,8 @@ public class MembershipServiceTest {
     }
 
     @Test
+=======
+>>>>>>> Fix merge conflicts
     public void getMemberShipResultsTest(){
         try {
             String ownerUsername = ADMIN;

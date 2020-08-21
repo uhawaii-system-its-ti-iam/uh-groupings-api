@@ -19,10 +19,6 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +33,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -583,11 +578,12 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void deleteMultipleExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
+        GenericServiceResult genericServiceResult = new GenericServiceResult();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.deleteGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
-                .willReturn(gsrList());
+        given(membershipService.removeGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
+                .willReturn(genericServiceResult);
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
                 .with(csrf())

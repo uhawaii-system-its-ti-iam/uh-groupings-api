@@ -311,7 +311,7 @@ public class MembershipServiceImpl implements MembershipService {
                 results.add(uid, res);
                 continue;
             }
-            
+
             WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(path, uid);
             WsSubject sub = addMemberResults.getResults()[0].getWsSubject();
 
@@ -382,8 +382,8 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Remove the valid members contained in usersToDelete from groupPath as currentUser.
      *
-     * @param currentUser   Must be an admin and owner of grouping at groupPath.
-     * @param groupPath     Full path of group at grouping.
+     * @param currentUser     Must be an admin and owner of grouping at groupPath.
+     * @param groupPath       Full path of group at grouping.
      * @param membersToRemove List of potential members to be deleted.
      * @return FAILURE if none of the usersToDelete are valid members of groupPath, otherwise return SUCCESS with
      * response containing the members which were deleted. Throws AccessDeniedException if currentUser is not

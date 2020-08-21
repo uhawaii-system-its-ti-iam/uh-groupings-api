@@ -32,7 +32,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -723,7 +725,6 @@ public class TestMembershipService {
         List<String> includeNames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         GenericServiceResult genericServiceResult =
                 membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, includeNames);
-
         assertEquals(SUCCESS, genericServiceResult.getGroupingsServiceResult().getResultCode());
 
         for (int i = 0; i < 3; i++) {
