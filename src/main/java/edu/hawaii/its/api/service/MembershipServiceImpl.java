@@ -293,7 +293,6 @@ public class MembershipServiceImpl implements MembershipService {
                 !isExclude && !isInclude)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         GenericServiceResult results = new GenericServiceResult();
         String delPath;
         String composite = helperService.parentGroupingPath(path);
