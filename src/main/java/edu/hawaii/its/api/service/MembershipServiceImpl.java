@@ -351,7 +351,7 @@ public class MembershipServiceImpl implements MembershipService {
             }
             if (hasMembership) {
                 membership.setPath(groupPath);
-                membership.setName(helperService.parentGroupingPath(membership.getPath()));
+                membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
         }

@@ -7,7 +7,6 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 
-import java.time.Period;
 import java.util.List;
 
 public interface HelperService {
@@ -19,12 +18,15 @@ public interface HelperService {
     List<String> extractGroupings(List<String> groupPaths);
 
     GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
-    GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action, Person person);
+
+    GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action,
+            Person person);
 
     GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
-
 
     List<Grouping> makeGroupings(List<String> groupingPaths);
 
     String parentGroupingPath(String group);
+
+    String nameGroupingPath(String group);
 }
