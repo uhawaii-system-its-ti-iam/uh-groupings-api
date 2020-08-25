@@ -591,6 +591,7 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
+<<<<<<< HEAD
     @Override
     public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier) {
@@ -642,41 +643,37 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     //user adds them self to the group if they have permission
+=======
+>>>>>>> Remove uneeded functions
     @Override
     public List<GroupingsServiceResult> optIn(String currentUser, String groupingPath, String uid) {
-        String outOrrIn = "in ";
-        String preposition = "to ";
-        String addGroup = groupingPath + INCLUDE;
-
-        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
-            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
-        } else {
+       
+        if (!memberAttributeService.isAdmin(currentUser) && !isGroupCanOptIn(currentUser, groupingPath)) {
             GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
                     FAILURE + currentUser + " cannot opt " + uid + " into " + groupingPath,
                     currentUser + " opts " + uid + " into " + groupingPath);
             List<GroupingsServiceResult> list = new ArrayList<>();
             list.add(groupingsServiceResult);
             return list;
+
         }
+        return addGroupingMemberHelper(currentUser, groupingPath + INCLUDE, uid, createNewPerson(uid));
     }
 
     //user removes them self from the group if they have permission
     @Override
     public List<GroupingsServiceResult> optOut(String currentUser, String groupingPath, String uid) {
-        String outOrrIn = "out ";
-        String preposition = "from ";
-        String addGroup = groupingPath + EXCLUDE;
 
-        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
-            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
-        } else {
+        if (!memberAttributeService.isAdmin(currentUser) && !isGroupCanOptOut(currentUser, uid)) {
             GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
-                    FAILURE + currentUser + " cannot opt " + uid + " out of " + groupingPath,
-                    currentUser + " opts " + uid + " out of " + groupingPath);
+                    FAILURE + currentUser + " cannot opt " + uid + " into " + groupingPath,
+                    currentUser + " opts " + uid + " into " + groupingPath);
             List<GroupingsServiceResult> list = new ArrayList<>();
             list.add(groupingsServiceResult);
             return list;
+
         }
+        return deleteGroupingMemberHelper(currentUser, groupingPath + EXCLUDE, uid, createNewPerson(uid));
     }
 
     //returns true if the group allows that user to opt out
@@ -702,41 +699,6 @@ public class MembershipServiceImpl implements MembershipService {
                 .getResultMetadata()
                 .getResultCode()
                 .equals(SUCCESS_ALLOWED);
-    }
-
-    public List<GroupingsServiceResult> opt(String username, String grouping, String addGroup, String outOrrIn,
-            String preposition) {
-
-        List<GroupingsServiceResult> results = new ArrayList<>();
-
-        if (isGroupCanOptIn(username, addGroup)) {
-
-            switch (outOrrIn) {
-                case "out ":
-                    results.addAll(deleteGroupingMember(username, grouping, username));
-                    break;
-
-                case "in ":
-                    results.addAll(addGroupingMember(username, grouping, username));
-                    break;
-            }
-
-            if (memberAttributeService.isMember(addGroup, username)) {
-                results.add(addSelfOpted(addGroup, username));
-            }
-        } else {
-
-            String action = "opt " + outOrrIn + username + " " + preposition + grouping;
-            String failureResult = FAILURE
-                    + ": "
-                    + username
-                    + " does not have permission to opt "
-                    + outOrrIn
-                    + preposition
-                    + grouping;
-            results.add(helperService.makeGroupingsServiceResult(failureResult, action));
-        }
-        return results;
     }
 
     //adds the self-opted attribute to the membership between the group and user
@@ -789,22 +751,6 @@ public class MembershipServiceImpl implements MembershipService {
         return helperService.makeGroupingsServiceResult(
                 FAILURE + ", " + username + " is not a member of " + groupPath,
                 action);
-    }
-
-    @Override public GenericServiceResult generic() {
-        GenericServiceResult genericServiceResult = new GenericServiceResult();
-
-        String hello = "HelloWorld!";
-        GroupingsServiceResult groupingsServiceResult =
-                new GroupingsServiceResult(SUCCESS, "Testing: GenericServiceResult");
-        List<String> fbb = Arrays.asList("foo", "bar", "baz");
-
-        genericServiceResult.add("hello", hello);
-        genericServiceResult.add("fbb", fbb);
-        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "boolean"), groupingsServiceResult, true);
-        genericServiceResult.add("int", 1);
-
-        return genericServiceResult;
     }
 
     //logic for adding a member

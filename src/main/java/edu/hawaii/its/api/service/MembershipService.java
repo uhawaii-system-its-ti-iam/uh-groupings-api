@@ -19,6 +19,7 @@ public interface MembershipService {
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
     GenericServiceResult adddGroupMembers(String currentUser, String path, List<String> uids);
+
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)
             throws IOException, MessagingException;
 
@@ -44,10 +45,6 @@ public interface MembershipService {
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
-    List<GroupingsServiceResult> optIn(String username, String groupingPath);
-
-    List<GroupingsServiceResult> optOut(String username, String groupingPath);
-
     List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
 
     List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
@@ -62,8 +59,6 @@ public interface MembershipService {
     GroupingsServiceResult addSelfOpted(String groupPath, String username);
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
-
-    GenericServiceResult generic();
 
     boolean isUhUuid(String username);
 
