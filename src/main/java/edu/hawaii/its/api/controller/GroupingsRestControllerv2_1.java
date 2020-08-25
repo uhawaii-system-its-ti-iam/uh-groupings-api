@@ -1,17 +1,20 @@
 package edu.hawaii.its.api.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.*;
-import io.swagger.models.auth.In;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -31,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -146,11 +148,12 @@ public class GroupingsRestControllerv2_1 {
      * Delete a user from multiple groupings
      *
      * @param paths: path of groupings to modify
-     * @param uid:  uid or uuid of user to delete
+     * @param uid:   uid or uuid of user to delete
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
-    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
+            @RequestHeader("current_user") String currentUser,
             @PathVariable List<String> paths,
             @PathVariable String uid) {
         logger.info("Entered REST removeFromGroups...");
@@ -204,16 +207,15 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get the list of sync destinations
-     * >>>>>>> Attempt to speed up getGrouping
      */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<Membership>> memberGroupings(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
+                .body(membershipService.getMemberShipResults(currentUser, uid));
     }
 
     /**

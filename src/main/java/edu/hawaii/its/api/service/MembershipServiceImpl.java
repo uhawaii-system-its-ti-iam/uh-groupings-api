@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
@@ -18,23 +18,16 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLit
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -331,38 +324,37 @@ public class MembershipServiceImpl implements MembershipService {
 
         List<Membership> memberships = new ArrayList<>();
         logger.info(action);
-        if (memberAttributeService.isSuperuser(ownerUsername)) {
-            List<String> groupPaths = groupingAssignmentService.getGroupPaths(ownerUsername, uid);
-
-            for (String groupPath : groupPaths) {
-                boolean hasMembership = false;
-
-                Membership membership = new Membership();
-                if (groupPath.endsWith(INCLUDE)) {
-                    membership.setInInclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS)) {
-                    membership.setInBasis(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(EXCLUDE)) {
-                    membership.setInExclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
-                    membership.setInBasisAndInclude(true);
-                    hasMembership = true;
-                }
-                if (hasMembership) {
-                    membership.setPath(groupPath);
-                    memberships.add(membership);
-                }
-            }
-            return memberships;
+        if (!memberAttributeService.isAdmin(ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ownerUsername, uid);
 
+        for (String groupPath : groupPaths) {
+            boolean hasMembership = false;
+
+            Membership membership = new Membership();
+            if (groupPath.endsWith(INCLUDE)) {
+                membership.setInInclude(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(BASIS)) {
+                membership.setInBasis(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(EXCLUDE)) {
+                membership.setInExclude(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
+                membership.setInBasisAndInclude(true);
+                hasMembership = true;
+            }
+            if (hasMembership) {
+                membership.setPath(groupPath);
+                memberships.add(membership);
+            }
+        }
+        return memberships;
     }
 
     //adds a user to the admins group via username or UH id number
@@ -420,15 +412,17 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths) {
+    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
+            List<String> GroupPaths) {
 
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
 
-        for(int i = 0; i < GroupPaths.size();i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i +  ":" + GroupPaths.get(i));
+        for (int i = 0; i < GroupPaths.size(); i++) {
+            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
             WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+            WsDeleteMemberResults deleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
             result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
         }
         return result;
