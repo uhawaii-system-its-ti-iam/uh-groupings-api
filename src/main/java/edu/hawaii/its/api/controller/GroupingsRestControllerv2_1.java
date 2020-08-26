@@ -129,6 +129,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
+    @PostMapping(value = "/newAdd/{path}/{uids}")
+    public ResponseEntity<GenericServiceResult> addGroupMemberr(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> uids) {
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
+    }
+
     /**
      * Delete an admin
      *

@@ -56,5 +56,7 @@ public interface GroupingAssignmentService {
             String sortString, Boolean isAscending);
 
     public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername);
+
     public List<Grouping> excludeGroups(List<String> groupPaths);
+
 }
