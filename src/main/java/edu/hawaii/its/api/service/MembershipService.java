@@ -14,6 +14,8 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
+    GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids);
+
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)
@@ -58,4 +60,6 @@ public interface MembershipService {
     GenericServiceResult generic();
 
     boolean isUhUuid(String username);
+
+    boolean setIsOptOnOff(String groupPath, String optFlag);
 }

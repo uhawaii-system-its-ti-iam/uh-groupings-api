@@ -13,7 +13,9 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -189,6 +191,25 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
+    @Override public boolean setIsOptOnOff(String groupPath, String optFlag) {
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults = grouperFS
+                .makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP,
+                        groupPath);
+        WsAttributeDefName[] attributeDefNames = attributeAssignmentsResults.getWsAttributeDefNames();
+
+        boolean isOpt = false;
+        if (null == attributeDefNames || attributeDefNames.length == 0) {
+            return false;
+        }
+        for (WsAttributeDefName wsAttributeDefName : attributeDefNames) {
+            String defName = wsAttributeDefName.getName();
+            if (defName.equals(optFlag)) {
+                isOpt = true;
+            }
+        }
+        return isOpt;
+    }
+
     // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
     public Person createNewPerson(String userToAdd) {
         Person createdPerson;
@@ -202,6 +223,37 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         return createdPerson;
+    }
+
+    @Override
+    public GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
+        String removalPath = null;
+        boolean isInclude = groupPath.endsWith(INCLUDE);
+        if (isInclude) {
+            removalPath = helperService.parentGroupingPath(groupPath) + EXCLUDE;
+        }
+        if (!isInclude) {
+            removalPath = helperService.parentGroupingPath(groupPath) + INCLUDE;
+        }
+        List<String> failedAdds = new ArrayList<>();
+        GenericServiceResult result = new GenericServiceResult();
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        for (String uid : uids) {
+            try {
+                WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, uid);
+                WsDeleteMemberResults del = grouperFS.makeWsDeleteMemberResults(removalPath, uid);
+                result.add("addResult: " + uid, add);
+                result.add("delResult: " + uid, del);
+
+            } catch (GcWebServiceError e) {
+                failedAdds.add(uid);
+            }
+        }
+        return result;
+        /*
+        return new GenericServiceResult(Arrays.asList("addResults", "removalResults", "failedResults"),
+                wsAddMemberResults, wsDeleteMemberResults, failedAdds);
+         */
     }
 
     // Adds a member to a Grouping from either UH username or UH ID number.
