@@ -191,25 +191,6 @@ public class MembershipServiceImpl implements MembershipService {
         return naming.matches("\\d+");
     }
 
-    @Override public boolean setIsOptOnOff(String groupPath, String optFlag) {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults = grouperFS
-                .makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP,
-                        groupPath);
-        WsAttributeDefName[] attributeDefNames = attributeAssignmentsResults.getWsAttributeDefNames();
-
-        boolean isOpt = false;
-        if (null == attributeDefNames || attributeDefNames.length == 0) {
-            return false;
-        }
-        for (WsAttributeDefName wsAttributeDefName : attributeDefNames) {
-            String defName = wsAttributeDefName.getName();
-            if (defName.equals(optFlag)) {
-                isOpt = true;
-            }
-        }
-        return isOpt;
-    }
-
     // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
     public Person createNewPerson(String userToAdd) {
         Person createdPerson;
@@ -403,11 +384,38 @@ public class MembershipServiceImpl implements MembershipService {
             }
             if (hasMembership) {
                 membership.setPath(groupPath);
+                boolean canOpt = canOpt(helperService.parentGroupingPath(groupPath));
+                membership.setOptOutEnabled(canOpt);
+                membership.setOptInEnabled(canOpt);
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
         }
         return memberships;
+    }
+
+    /**
+     * Check if opting is enabled for the grouping at path.
+     */
+    @Override
+    public boolean canOpt(String path) {
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
+                        ASSIGN_TYPE_GROUP,
+                        path);
+
+        WsAttributeDefName[] attributeDefNames = wsGetAttributeAssignmentsResults.getWsAttributeDefNames();
+        if (attributeDefNames != null && attributeDefNames.length > 0) {
+            for (WsAttributeDefName defName : attributeDefNames) {
+                String name = defName.getName();
+                if (name.endsWith(OPT_IN) || name.endsWith(OPT_OUT)) {
+                    logger.info("isOpt; path: " + path + ";   " + true + ";");
+                    return true;
+                }
+            }
+        }
+        logger.info("isOpt; path: " + path + ";   " + false + ";");
+        return false;
     }
 
     //adds a user to the admins group via username or UH id number

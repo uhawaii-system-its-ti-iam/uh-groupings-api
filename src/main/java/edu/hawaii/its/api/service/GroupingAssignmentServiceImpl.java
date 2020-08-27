@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -20,9 +22,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -644,7 +643,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (attributeDefNames != null && attributeDefNames.length > 0) {
             for (WsAttributeDefName defName : attributeDefNames) {
                 String name = defName.getName();
-                if (name.equals(OPT_IN)) {
+                if(name.equals(OPT_IN)) {
                     isOptInOn = true;
                 } else if (name.equals(OPT_OUT)) {
                     isOptOutOn = true;
