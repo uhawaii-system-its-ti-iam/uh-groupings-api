@@ -30,5 +30,6 @@ public interface HelperService {
     String parentGroupingPath(String group);
 
     String nameGroupingPath(String group);
+
     GenericServiceResult swaggerToString(String currentUser, String path);
 }

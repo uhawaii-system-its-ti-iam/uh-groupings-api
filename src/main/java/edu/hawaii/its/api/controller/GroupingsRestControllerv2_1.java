@@ -240,6 +240,17 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.getMemberShipResults(currentUser, uid));
     }
 
+    @GetMapping(value = "/groupings/optInGroups/{uid:[\\w-:.]+}")
+    @ResponseBody
+    public ResponseEntity<List<String>> getOptInGroups(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST optInGroups...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService
+                        .getOptInGroups(currentUser, uid));
+    }
+
     /**
      * if the user is allowed to opt into the grouping
      * this will add them to the include group of that grouping
