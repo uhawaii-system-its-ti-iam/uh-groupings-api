@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -29,4 +30,5 @@ public interface HelperService {
     String parentGroupingPath(String group);
 
     String nameGroupingPath(String group);
+    GenericServiceResult swaggerToString(String currentUser, String path);
 }

@@ -270,5 +270,6 @@ public class HelperServiceTest {
     public void nameGroupingPathTest() {
         assertEquals("grouping-test-path", helperService.nameGroupingPath("test:grouping-test-path:include"));
     }
+
 }
 

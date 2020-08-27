@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
@@ -80,6 +81,9 @@ public class GroupingsRestControllerv2_1 {
     @Autowired
     private MembershipService membershipService;
 
+    @Autowired
+    private HelperService helperService;
+
     @PostConstruct
     public void init() {
         Assert.hasLength(uuid, "Property 'app.groupings.controller.uuid' is required.");
@@ -98,6 +102,16 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.generic());
+    }
+
+    @GetMapping(value = "/swagger/toString/{path}")
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser,
+            String path) {
+        logger.info("Entered REST swaggerToString");
+        return ResponseEntity
+                .ok()
+                .body(helperService.swaggerToString(currentUser, path));
     }
 
     /**

@@ -61,5 +61,5 @@ public interface MembershipService {
 
     boolean isUhUuid(String username);
 
-    boolean setIsOptOnOff(String groupPath, String optFlag);
+    boolean canOpt(String path);
 }
