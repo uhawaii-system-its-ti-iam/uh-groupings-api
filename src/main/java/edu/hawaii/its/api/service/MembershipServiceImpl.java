@@ -491,6 +491,28 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
+    @Override
+    public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> basisIdentifier,
+            List<String> includeIdentifier, List<String> excludeIdentifier) {
+
+        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+        String excludePath = path + EXCLUDE;
+        String includePath = path + INCLUDE;
+        String basisPath = path + BASIS;
+
+        for(int i = 0; i < basisIdentifier.size(); i++) {
+            result.add(deleteMemberHelper(ownerUsername, basisPath, createNewPerson(basisIdentifier.get(i))));
+        }
+        for(int i = 0; i < includeIdentifier.size(); i++) {
+            result.add(deleteMemberHelper(ownerUsername, includePath, createNewPerson(includeIdentifier.get(i))));
+        }
+        for(int i = 0; i < excludeIdentifier.size(); i++) {
+            result.add(deleteMemberHelper(ownerUsername, excludePath, createNewPerson(excludeIdentifier.get(i))));
+        }
+
+        return result;
+    }
+
     //user adds them self to the group if they have permission
     @Override
     public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
