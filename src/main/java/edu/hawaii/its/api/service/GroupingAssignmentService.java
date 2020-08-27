@@ -59,4 +59,7 @@ public interface GroupingAssignmentService {
 
     public List<Grouping> excludeGroups(List<String> groupPaths);
 
+    public List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths);
+
+    public List<String> getOptInGroups(String owner, String optInUid);
 }
