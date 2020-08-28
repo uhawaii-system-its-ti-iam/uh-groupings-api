@@ -237,10 +237,10 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getMemberShipResults(currentUser, uid));
+                .body(membershipService.getMembershipResults(currentUser, uid));
     }
 
-    @GetMapping(value = "/groupings/optInGroups/{uid:[\\w-:.]+}")
+    @GetMapping(value = "/groupings/optInGroups/{uid}")
     @ResponseBody
     public ResponseEntity<List<String>> getOptInGroups(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {

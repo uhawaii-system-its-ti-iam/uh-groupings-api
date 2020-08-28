@@ -231,6 +231,19 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return helperService.makeGroupings(ownedGroupings);
     }
 
+    //returns a list of groupings that corresponds to all of the owner groups in groupPaths
+    @Override
+    public List<String> groupingsOwnedPaths(List<String> groupPaths) {
+        List<String> ownerGroups = groupPaths
+                .stream()
+                .filter(groupPath -> groupPath.endsWith(OWNERS))
+                .map(groupPath -> groupPath.substring(0, groupPath.length() - OWNERS.length()))
+                .collect(Collectors.toList());
+
+        // make sure the owner group actually correspond to a grouping
+        return helperService.extractGroupings(ownerGroups);
+    }
+
     @Override
     public List<Grouping> excludeGroups(List<String> groupPaths) {
         List<String> excludeGroups = groupPaths
@@ -715,8 +728,52 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     @Override
+    public List<String> getOptOutGroups(String owner, String optOutUid) {
+        logger.info("getOptOutGroups; owner: " + owner + "; optOutUid: " + optOutUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optOutUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_OUT);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        String name = assign.getOwnerGroupName();
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
+                        String name = assign.getOwnerGroupName();
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            //opts intersection trios
+            opts.retainAll(trios);
+            //excludes intersection opts
+            excludes.retainAll(opts);
+            //opts - (opts intersection groupPaths)
+            //opts union excludes
+        }
+        //get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
+    /**
+     * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
+     */
+    @Override
     public List<String> getOptInGroups(String owner, String optInUid) {
-        logger.info("optInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
+        logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
 
         List<String> groupPaths = getGroupPaths(owner, optInUid);
         List<String> trios = new ArrayList<>();
@@ -744,7 +801,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     }
                 }
             }
-
             //opts intersection trios
             opts.retainAll(trios);
             //excludes intersection opts
@@ -753,9 +809,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             opts.removeAll(groupPaths);
             //opts union excludes
             opts.addAll(excludes);
-
         }
-
         //get rid of duplicates
         return new ArrayList<>(new HashSet<>(opts));
     }
