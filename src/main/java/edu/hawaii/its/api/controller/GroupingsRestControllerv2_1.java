@@ -191,9 +191,10 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/groupings/{path}/{basis}/{include}/{exclude}/resetGroup")
-    public ResponseEntity<List<GroupingsServiceResult>> resetGroups(@RequestHeader("current_user") String owner, @PathVariable String path,@PathVariable List<String> basis,
+    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner, @PathVariable String path,@PathVariable List<String> basis,
             @PathVariable List<String> include, @PathVariable List<String> exclude) {
         logger.info("Entered REST resetGroups...");
+        logger.info("SCATTMAN'S WORLD: " + owner);
         return ResponseEntity
                 .ok()
                 .body(membershipService.resetGroup(owner, path, basis,
