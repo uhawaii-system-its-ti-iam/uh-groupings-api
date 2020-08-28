@@ -494,20 +494,40 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> basisIdentifier,
             List<String> includeIdentifier, List<String> excludeIdentifier) {
-
+        logger.info("SCATTMAN'S WORLD: " + ownerUsername);
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
         String basisPath = path + BASIS;
 
-        for(int i = 0; i < basisIdentifier.size(); i++) {
-            result.add(deleteMemberHelper(ownerUsername, basisPath, createNewPerson(basisIdentifier.get(i))));
+        logger.info("SCATTMAN'S LAND: " + basisIdentifier.get(0));
+
+        if(!basisIdentifier.get(0).equals("empty")){
+            for(int i = 0; i < basisIdentifier.size(); i++) {
+                System.out.println("Removing " + basisIdentifier.get(i) + " from Group " + i +  ":" + basisPath);
+                String action = "delete " + basisIdentifier.get(i) + " from " + basisPath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(basisPath, ownerLookup, basisIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
         }
-        for(int i = 0; i < includeIdentifier.size(); i++) {
-            result.add(deleteMemberHelper(ownerUsername, includePath, createNewPerson(includeIdentifier.get(i))));
+        if(!includeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < includeIdentifier.size(); i++) {
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
+                String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
         }
-        for(int i = 0; i < excludeIdentifier.size(); i++) {
-            result.add(deleteMemberHelper(ownerUsername, excludePath, createNewPerson(excludeIdentifier.get(i))));
+        if(!excludeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < excludeIdentifier.size(); i++) {
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
+                String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
         }
 
         return result;
