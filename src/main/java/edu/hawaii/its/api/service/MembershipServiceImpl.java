@@ -355,18 +355,18 @@ public class MembershipServiceImpl implements MembershipService {
      * Get a list of memberships pertaining to uid.
      *
      * @param owner Must be an owner.
-     * @param uid           Checked by owner
+     * @param uid   Checked by owner
      */
     @Override
-    public List<Membership> getMemberShipResults(String owner, String uid) {
-        String action = "GET: " + uid + "Memberships;";
+    public List<Membership> getMembershipResults(String owner, String uid) {
+        String action = "getMember";
 
         List<Membership> memberships = new ArrayList<>();
-        logger.info(action);
         if (!memberAttributeService.isAdmin(owner)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+        List<String> optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
 
         for (String groupPath : groupPaths) {
             boolean hasMembership = false;
@@ -390,9 +390,7 @@ public class MembershipServiceImpl implements MembershipService {
             }
             if (hasMembership) {
                 membership.setPath(groupPath);
-                boolean canOpt = canOpt(helperService.parentGroupingPath(groupPath));
-                membership.setOptOutEnabled(canOpt);
-                membership.setOptInEnabled(canOpt);
+                membership.setOptOutEnabled(optOutList.contains(helperService.parentGroupingPath(groupPath)));
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
