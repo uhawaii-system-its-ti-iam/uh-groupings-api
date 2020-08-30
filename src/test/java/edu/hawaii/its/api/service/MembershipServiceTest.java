@@ -258,11 +258,11 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void getMemberShipResultsTest() {
+    public void getMembershipResultsTest() {
         try {
             String ownerUsername = ADMIN;
             String uid = "iamtst01";
-            List<Membership> result = membershipService.getMemberShipResults(ownerUsername, uid);
+            List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         } catch (Exception e) {
             System.out.println(e);
             assertTrue(e != null);

@@ -353,16 +353,14 @@ public class MembershipServiceImpl implements MembershipService {
 
     /**
      * Get a list of memberships pertaining to uid.
-     *
-     * @param owner Must be an owner.
-     * @param uid   Checked by owner
      */
     @Override
     public List<Membership> getMembershipResults(String owner, String uid) {
-        String action = "getMember";
+        String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
+        logger.info(action);
 
         List<Membership> memberships = new ArrayList<>();
-        if (!memberAttributeService.isAdmin(owner)) {
+        if (!memberAttributeService.isAdmin(owner) && !memberAttributeService.isOwner(owner)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
@@ -394,6 +392,7 @@ public class MembershipServiceImpl implements MembershipService {
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
+            logger.info(action + " groupPath: " + groupPath + "; " + hasMembership);
         }
         return memberships;
     }
