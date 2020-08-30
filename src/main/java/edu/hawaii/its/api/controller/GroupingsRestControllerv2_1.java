@@ -227,12 +227,9 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
-    /**
-     * Get the list of sync destinations
-     */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<List<Membership>> memberGroupings(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<Membership>> membershipResults(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
