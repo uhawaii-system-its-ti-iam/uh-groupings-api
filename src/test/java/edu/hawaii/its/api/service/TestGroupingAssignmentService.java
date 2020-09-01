@@ -1,5 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
@@ -9,16 +15,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,15 +31,18 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -412,6 +412,18 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getOptInGroupsTest() {
+        List<List<String>> optInPathsLists = new ArrayList<List<String>>();
+        for (int i = 0; i < 6; i++) {
+            optInPathsLists.add(new ArrayList<>(
+                    groupingAssignmentService.getOptInGroups(usernames[0], usernames[1])));
+        }
+        for (List<String> list : optInPathsLists) {
+            assertTrue(list.contains(GROUPING));
+        }
+    }
+
+    @Test
     public void groupingsToOptTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[0]);
 
@@ -508,10 +520,9 @@ public class TestGroupingAssignmentService {
         try {
             membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, "somenamethatNoexist");
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("User doesn't exist.");
         }
-
 
     }
 
