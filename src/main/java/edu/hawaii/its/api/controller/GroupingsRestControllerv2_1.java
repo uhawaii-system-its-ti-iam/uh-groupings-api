@@ -234,7 +234,7 @@ public class GroupingsRestControllerv2_1 {
     @ResponseBody
     public ResponseEntity<List<Membership>> membershipResults(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST memberGroupings...");
+        logger.info("Entered REST membershipResults...");
         return ResponseEntity
                 .ok()
                 .body(membershipService.getMembershipResults(currentUser, uid));
