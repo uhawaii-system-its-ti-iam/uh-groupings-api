@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface MembershipService {
 
-    List<Membership> getMemberShipResults(String ownerUsername, String uid);
+    List<Membership> getMembershipResults(String owner, String uid);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
+
+    GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids);
 
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
@@ -58,4 +60,6 @@ public interface MembershipService {
     GenericServiceResult generic();
 
     boolean isUhUuid(String username);
+
+    boolean canOpt(String path);
 }
