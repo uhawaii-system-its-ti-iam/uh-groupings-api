@@ -1,17 +1,21 @@
 package edu.hawaii.its.api.controller;
 
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.*;
-import io.swagger.models.auth.In;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.HelperService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -31,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +81,9 @@ public class GroupingsRestControllerv2_1 {
     @Autowired
     private MembershipService membershipService;
 
+    @Autowired
+    private HelperService helperService;
+
     @PostConstruct
     public void init() {
         Assert.hasLength(uuid, "Property 'app.groupings.controller.uuid' is required.");
@@ -96,6 +102,16 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.generic());
+    }
+
+    @GetMapping(value = "/swagger/toString/{path}")
+    @ResponseBody
+    public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser,
+            String path) {
+        logger.info("Entered REST swaggerToString");
+        return ResponseEntity
+                .ok()
+                .body(helperService.swaggerToString(currentUser, path));
     }
 
     /**
@@ -127,6 +143,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
+    @PostMapping(value = "/newAdd/{path}/{uids}")
+    public ResponseEntity<GenericServiceResult> addGroupMemberr(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> uids) {
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
+    }
+
     /**
      * Delete an admin
      *
@@ -146,11 +170,12 @@ public class GroupingsRestControllerv2_1 {
      * Delete a user from multiple groupings
      *
      * @param paths: path of groupings to modify
-     * @param uid:  uid or uuid of user to delete
+     * @param uid:   uid or uuid of user to delete
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
-    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
+            @RequestHeader("current_user") String currentUser,
             @PathVariable List<String> paths,
             @PathVariable String uid) {
         logger.info("Entered REST removeFromGroups...");
@@ -203,17 +228,30 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
-     * >>>>>>> Attempt to speed up getGrouping
+     * Get a List of memberships as which uid has.
      */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<MembershipAssignment> memberGroupings(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<Membership>> membershipResults(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST memberGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.getMembershipAssignment(currentUser, uid));
+                .body(membershipService.getMembershipResults(currentUser, uid));
+    }
+
+    /**
+     * Get a list of all the paths associated with the groupings which uid as the ability top opt into.
+     */
+    @GetMapping(value = "/groupings/optInGroups/{uid}")
+    @ResponseBody
+    public ResponseEntity<List<String>> getOptInGroups(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST optInGroups...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService
+                        .getOptInGroups(currentUser, uid));
     }
 
     /**
