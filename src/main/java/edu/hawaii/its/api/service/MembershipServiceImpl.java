@@ -392,7 +392,6 @@ public class MembershipServiceImpl implements MembershipService {
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
-            logger.info(action + " groupPath: " + groupPath + "; " + hasMembership);
         }
         return memberships;
     }
