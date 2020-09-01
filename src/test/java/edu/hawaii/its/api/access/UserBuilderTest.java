@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.access;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.controller.WithMockUhUser;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,107 +32,14 @@ public class UserBuilderTest {
     @Autowired
     private UserBuilder userBuilder;
 
-    @Ignore
+    @Autowired
+    private UserContextService userContextService;
+
     @Test
+    @WithMockUhUser(username = "admin", roles = { "ROLE_ADMIN" })
     public void testAdminUsers() {
-        Map<String, String> map = new HashMap<>();
-        map.put("uid", "duckart");
-        map.put("uhUuid", "89999999");
-        User user = userBuilder.make(map);
-
-        // Basics.
-        assertThat(user.getUsername(), is("duckart"));
-        assertThat(user.getUid(), is("duckart"));
-        assertThat(user.getUhUuid(), is("89999999"));
-
-        // Granted Authorities.
-        assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.isRole(Role.ANONYMOUS));
-        assertTrue(user.isRole(Role.UH));
-        assertTrue(user.isRole(Role.EMPLOYEE));
+        User user = userContextService.getCurrentUser();
         assertTrue(user.isRole(Role.ADMIN));
-
-        map = new HashMap<>();
-        map.put("uid", "someuser");
-        map.put("uhUuid", "10000001");
-        user = userBuilder.make(map);
-
-        assertThat(user.getUsername(), is("someuser"));
-        assertThat(user.getUid(), is("someuser"));
-        assertThat(user.getUhUuid(), is("10000001"));
-
-        assertTrue(user.getAuthorities().size() > 0);
-        assertTrue(user.isRole(Role.ANONYMOUS));
-        assertTrue(user.isRole(Role.UH));
-        assertTrue(user.isRole(Role.EMPLOYEE));
-        assertTrue(user.isRole(Role.ADMIN));
-    }
-
-    @Ignore
-    @Test
-    public void testEmployees() {
-        Map<String, String> map = new HashMap<>();
-        map.put("uid", "jjcale");
-        map.put("uhUuid", "10000004");
-        User user = userBuilder.make(map);
-
-        // Basics.
-        assertThat(user.getUsername(), is("jjcale"));
-        assertThat(user.getUid(), is("jjcale"));
-        assertThat(user.getUhUuid(), is("10000004"));
-
-        // Granted Authorities.
-        assertThat(user.getAuthorities().size(), is(3));
-        assertTrue(user.isRole(Role.ANONYMOUS));
-        assertTrue(user.isRole(Role.UH));
-        assertTrue(user.isRole(Role.EMPLOYEE));
-
-        assertFalse(user.isRole(Role.ADMIN));
-    }
-
-    @Ignore
-    @Test
-    public void testEmployeesWithMultivalueUid() {
-        Map<String, Object> map = new HashMap<>();
-        ArrayList<Object> uids = new ArrayList<>();
-        uids.add("aaaaaaa");
-        uids.add("bbbbbbb");
-        map.put("uid", uids);
-        map.put("uhUuid", "10000003");
-        User user = userBuilder.make(map);
-
-        // Basics.
-        assertThat(user.getUsername(), is("aaaaaaa"));
-        assertThat(user.getUid(), is("aaaaaaa"));
-        assertThat(user.getUhUuid(), is("10000003"));
-
-        // Granted Authorities.
-        assertThat(user.getAuthorities().size(), is(4));
-        assertTrue(user.isRole(Role.ANONYMOUS));
-        assertTrue(user.isRole(Role.UH));
-        assertTrue(user.isRole(Role.EMPLOYEE));
-        assertTrue(user.isRole(Role.ADMIN));
-    }
-
-    @Ignore
-    @Test
-    public void testNotAnEmployee() {
-        Map<String, String> map = new HashMap<>();
-        map.put("uid", "nobody");
-        map.put("uhUuid", "10000009");
-        User user = userBuilder.make(map);
-
-        // Basics.
-        assertThat(user.getUsername(), is("nobody"));
-        assertThat(user.getUid(), is("nobody"));
-        assertThat(user.getUhUuid(), is("10000009"));
-
-        // Granted Authorities.
-        assertThat(user.getAuthorities().size(), is(2));
-        assertTrue(user.isRole(Role.ANONYMOUS));
-        assertTrue(user.isRole(Role.UH));
-        assertFalse(user.isRole(Role.EMPLOYEE));
-        assertFalse(user.isRole(Role.ADMIN));
     }
 
     @Ignore

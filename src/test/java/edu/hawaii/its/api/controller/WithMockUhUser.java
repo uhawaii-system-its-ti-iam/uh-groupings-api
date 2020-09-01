@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import org.springframework.security.test.context.support.WithSecurityContext;
 
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
