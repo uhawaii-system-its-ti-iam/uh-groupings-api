@@ -227,6 +227,9 @@ public class GroupingsRestControllerv2_1 {
                         .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
+    /**
+     * Get a List of memberships as which uid has.
+     */
     @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
     public ResponseEntity<List<Membership>> membershipResults(@RequestHeader("current_user") String currentUser,
@@ -237,6 +240,9 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.getMembershipResults(currentUser, uid));
     }
 
+    /**
+     * Get a list of all the paths associated with the groupings which uid as the ability top opt into.
+     */
     @GetMapping(value = "/groupings/optInGroups/{uid}")
     @ResponseBody
     public ResponseEntity<List<String>> getOptInGroups(@RequestHeader("current_user") String currentUser,
