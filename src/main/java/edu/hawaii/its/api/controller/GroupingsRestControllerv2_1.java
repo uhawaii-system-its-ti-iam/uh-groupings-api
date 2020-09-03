@@ -96,9 +96,7 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body("University of Hawaii Groupings");
     }
-
-<<<<<<< HEAD
-=======
+    
     @GetMapping(value = "/generic")
     public ResponseEntity<GenericServiceResult> generic() {
         return ResponseEntity
@@ -116,7 +114,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(helperService.swaggerToString(currentUser, path));
     }
 
->>>>>>> master
     /**
      * Get all admins and groupings
      *
@@ -151,7 +148,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path, @PathVariable List<String> uids) {
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
+                .body(membershipService.addGroupMember(currentUser, path + INCLUDE, uids));
     }
 
     /**
