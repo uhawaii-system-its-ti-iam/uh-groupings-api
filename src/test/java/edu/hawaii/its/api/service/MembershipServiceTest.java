@@ -1,5 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.junit.rules.ExpectedException;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -15,13 +21,6 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +28,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -40,7 +38,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -153,7 +156,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void isUhUuidTest(){
+    public void isUhUuidTest() {
         //invalid UhUuid
         Boolean result;
         result = membershipService.isUhUuid("username");
@@ -231,26 +234,36 @@ public class MembershipServiceTest {
         assertEquals(SUCCESS, membershipService
                 .removeGroupMembers(users.get(0).getUsername(), GROUPING_3_PATH + INCLUDE, singletonList)
                 .getGroupingsServiceResult().getResultCode());
-
-        // Check Group
-        assertFalse(memberAttributeService.isMember(GROUPING_3_PATH + INCLUDE, users.get(9).getUsername()));
-
     }
 
     @Test
-    public void getMemberShipResultsTest(){
+    public void deleteGroupMembersTest() {
+            GenericServiceResult result;
+
+            String ownerUsername = users.get(0).getUsername();
+            String groupPath = GROUPING_3_PATH;
+            List<String> usersToDelete = new ArrayList<>();
+            usersToDelete.add(users.get(1).getUsername());
+            usersToDelete.add(users.get(2).getUsername());
+            usersToDelete.add(users.get(3).getUsername());
+            result = membershipService.removeGroupMembers(ownerUsername, groupPath, usersToDelete);
+            assertEquals(result.getGroupingsServiceResult().getResultCode(), "success");
+        }
+
+    @Test
+    public void getMembershipResultsTest() {
         try {
             String ownerUsername = ADMIN;
             String uid = "iamtst01";
-            List<Membership> result = membershipService.getMemberShipResults(ownerUsername, uid);
-        }catch (Exception e){
+            List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
+        } catch (Exception e) {
             System.out.println(e);
             assertTrue(e != null);
         }
     }
 
     @Test
-    public void genericTest(){
+    public void genericTest() {
         GenericServiceResult result = membershipService.generic();
         assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
@@ -350,7 +363,7 @@ public class MembershipServiceTest {
 
         //Creating list larger than 100 will fail because of invalid address
         List<String> userToAddList = new ArrayList<>();
-        for(int i = 0; i <= 100; i++){
+        for (int i = 0; i <= 100; i++) {
             userToAddList.add("username" + i);
         }
         try {
@@ -358,7 +371,7 @@ public class MembershipServiceTest {
             for (int i = 0; i < listGsr.size(); i++) {
                 assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             assertTrue(e != null);
         }
     }
@@ -410,7 +423,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void removeFromGroupsTest(){
+    public void removeFromGroupsTest() {
         String userToRemove = users.get(0).getUsername();
         List<String> GroupPaths = new ArrayList<String>();
         GroupPaths.add(GROUPING_1_PATH);

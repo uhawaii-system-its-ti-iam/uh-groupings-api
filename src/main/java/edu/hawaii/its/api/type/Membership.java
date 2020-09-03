@@ -23,6 +23,9 @@ public class Membership implements Comparable<Membership> {
     private String path;
 
     @Column
+    private String name;
+
+    @Column
     private boolean isSelfOpted = false;
 
     @Column
@@ -128,6 +131,14 @@ public class Membership implements Comparable<Membership> {
         return path;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
     @Override
     public boolean equals(Object o) {
         return ((compareTo((Membership) o) == 0 && o instanceof Membership));
@@ -154,4 +165,5 @@ public class Membership implements Comparable<Membership> {
         }
         return -1;
     }
+
 }

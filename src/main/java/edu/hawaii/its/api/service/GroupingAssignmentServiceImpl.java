@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -20,9 +22,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -231,13 +230,27 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         return helperService.makeGroupings(ownedGroupings);
     }
+
+    //returns a list of groupings that corresponds to all of the owner groups in groupPaths
+    @Override
+    public List<String> groupingsOwnedPaths(List<String> groupPaths) {
+        List<String> ownerGroups = groupPaths
+                .stream()
+                .filter(groupPath -> groupPath.endsWith(OWNERS))
+                .map(groupPath -> groupPath.substring(0, groupPath.length() - OWNERS.length()))
+                .collect(Collectors.toList());
+
+        // make sure the owner group actually correspond to a grouping
+        return helperService.extractGroupings(ownerGroups);
+    }
+
     @Override
     public List<Grouping> excludeGroups(List<String> groupPaths) {
         List<String> excludeGroups = groupPaths
-            .stream()
-            .filter(groupPath -> groupPath.endsWith(EXCLUDE))
-            .map(groupPath -> groupPath.substring(0, groupPath.length() - EXCLUDE.length()))
-            .collect(Collectors.toList());
+                .stream()
+                .filter(groupPath -> groupPath.endsWith(EXCLUDE))
+                .map(groupPath -> groupPath.substring(0, groupPath.length() - EXCLUDE.length()))
+                .collect(Collectors.toList());
 
         // make sure the owner group actually correspond to a grouping
         List<String> excludeGroupings = helperService.extractGroupings(excludeGroups);
@@ -356,11 +369,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     /**
-     *
      * @param username: A string with the username of acting user
-     * @param uid: A string with the username of the user being acted upon
+     * @param uid:      A string with the username of the user being acted upon
      * @return membershipAssigment: A MembershipAssignment object with the membership
-     *
+     * <p>
      * Function call that makes calls to grouper in order to get the groupings a user is a member of and a list of
      * groupings a user can opt into.
      */
@@ -386,13 +398,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         // Appends the excludes list to the combined.
         combinedGroupings.addAll(excludes);
 
-
         // Sets the groupings in and the groupings available to opt into attribute.
         membershipAssignment.setGroupingsIn(memeberships);
         membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
 
         // Goes through all the groupings in memberships and adds them to appropriate attributes.
-        for (Grouping grouping:memeberships) {
+        for (Grouping grouping : memeberships) {
             // Adds the grouping name to the duplicate checker list.
             duplicateChecker.add(grouping.getPath());
 
@@ -410,13 +421,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
              */
             membershipAssignment.addInOwner(grouping.getPath(), false);
-            membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+            membershipAssignment.addInBasis(grouping.getPath(),
+                    memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
 
             // Checks if they are in the basis or not to determine which logic to use.
-            if(membershipAssignment.isInBasis(grouping.getPath())) {
+            if (membershipAssignment.isInBasis(grouping.getPath())) {
                 // If they are in the basis, they can be in the exclude, include, or neither so we must check both.
 
-                membershipAssignment.addInInclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+                membershipAssignment.addInInclude(grouping.getPath(),
+                        memberAttributeService.isMember(grouping.getPath() + ":include", uid));
 
                 // Checks if the user is in the include, if they are in the include group add to the inExclude
                 // attribute the key-value <grouping-name, false>.
@@ -424,7 +437,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     membershipAssignment.addInExclude(grouping.getPath(), false);
                 } else {
                     // If they aren't in the include, check if they are in the exclude and add the key-value pair.
-                    membershipAssignment.addInExclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+                    membershipAssignment.addInExclude(grouping.getPath(),
+                            memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
                 }
             } else {
                 // If they aren't in the basis but in the memberships groupings, they must either be in the
@@ -441,10 +455,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         // Groupings in the excludes list are never in the memberships list. They are also never in the include.
         // We only need to check for the basis.
-        for (Grouping grouping : excludes){
+        for (Grouping grouping : excludes) {
             duplicateChecker.add(grouping.getPath());
             membershipAssignment.addInOwner(grouping.getPath(), false);
-            membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis",uid));
+            membershipAssignment.addInBasis(grouping.getPath(),
+                    memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
             membershipAssignment.addInExclude(grouping.getPath(), true);
             membershipAssignment.addInInclude(grouping.getPath(), false);
 
@@ -452,14 +467,17 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         // If the person is an owner of a grouping, they could also be in basis, include, and exclude groups.
         // We must check the duplicate checker to see if the grouping is already in the combined list.
-        for (Grouping grouping:ownerships) {
+        for (Grouping grouping : ownerships) {
             // If they are not in the duplicate checker list, add the grouping to the combined list and the respective
             // MembershipAssignment attributes.
-            if (!duplicateChecker.contains(grouping.getPath())){
+            if (!duplicateChecker.contains(grouping.getPath())) {
                 combinedGroupings.add(grouping);
-                membershipAssignment.addInBasis(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-                membershipAssignment.addInInclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":include", uid));
-                membershipAssignment.addInExclude(grouping.getPath(), memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
+                membershipAssignment.addInBasis(grouping.getPath(),
+                        memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
+                membershipAssignment.addInInclude(grouping.getPath(),
+                        memberAttributeService.isMember(grouping.getPath() + ":include", uid));
+                membershipAssignment.addInExclude(grouping.getPath(),
+                        memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
             }
 
             // Update the owner attribute for all groupings in the ownerships list.
@@ -706,7 +724,98 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return names.stream().collect(Collectors.toList());
     }
 
+    /**
+     * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
+     */
+    @Override
+    public List<String> getOptOutGroups(String owner, String optOutUid) {
+        logger.info("getOptOutGroups; owner: " + owner + "; optOutUid: " + optOutUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optOutUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_OUT);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        String name = assign.getOwnerGroupName();
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
+                        String name = assign.getOwnerGroupName();
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            //opts intersection trios
+            opts.retainAll(trios);
+            //excludes intersection opts
+            excludes.retainAll(opts);
+            //opts - (opts intersection groupPaths)
+            //opts union excludes
+        }
+        //get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
+    /**
+     * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
+     */
+    @Override
+    public List<String> getOptInGroups(String owner, String optInUid) {
+        logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optInUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_IN);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        String name = assign.getOwnerGroupName();
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
+                        String name = assign.getOwnerGroupName();
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            //opts intersection trios
+            opts.retainAll(trios);
+            //excludes intersection opts
+            excludes.retainAll(opts);
+            //opts - (opts intersection groupPaths)
+            opts.removeAll(groupPaths);
+            //opts union excludes
+            opts.addAll(excludes);
+        }
+        //get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
     //returns the list of groupings that the user is allowed to opt-in to
+    @Override
     public List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths) {
         logger.info("groupingsToOptInto; username: " + optInUsername + "; groupPaths : " + groupPaths + ";");
 

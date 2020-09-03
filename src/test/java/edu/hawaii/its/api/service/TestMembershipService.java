@@ -1,5 +1,9 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
@@ -9,12 +13,6 @@ import edu.hawaii.its.api.type.Membership;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.checkerframework.checker.nullness.qual.AssertNonNullIfNonNull;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +32,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -156,16 +157,16 @@ public class TestMembershipService {
     }
 
     @Test
-    public void getMemberShipResultsTest(){
+    public void getMembershipResultsTest() {
         String ownerUsername = ADMIN;
         String uid = username[4];
 
-        List<Membership> result =  membershipService.getMemberShipResults(ownerUsername, uid);
+        List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         assertTrue(result.size() > 0);
     }
 
     @Test
-    public void genericTest(){
+    public void genericTest() {
         GenericServiceResult result = membershipService.generic();
         assertTrue((result.getData()).get(0) == "HelloWorld!");
     }
