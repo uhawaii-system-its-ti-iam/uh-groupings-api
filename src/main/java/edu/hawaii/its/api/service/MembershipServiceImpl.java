@@ -492,25 +492,13 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> basisIdentifier,
+    public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier) {
-        logger.info("SCATTMAN'S WORLD: " + ownerUsername);
+
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
-        String basisPath = path + BASIS;
 
-        logger.info("SCATTMAN'S LAND: " + basisIdentifier.get(0));
-
-        if(!basisIdentifier.get(0).equals("empty")){
-            for(int i = 0; i < basisIdentifier.size(); i++) {
-                System.out.println("Removing " + basisIdentifier.get(i) + " from Group " + i +  ":" + basisPath);
-                String action = "delete " + basisIdentifier.get(i) + " from " + basisPath;
-                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(basisPath, ownerLookup, basisIdentifier.get(i));
-                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
-            }
-        }
         if(!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
                 System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
