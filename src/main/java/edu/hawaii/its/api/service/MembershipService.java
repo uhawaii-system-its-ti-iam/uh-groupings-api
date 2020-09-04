@@ -36,7 +36,7 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 
-    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> basisIdentifier,
+    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier);
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
