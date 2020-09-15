@@ -185,6 +185,22 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Reset a grouping by removing all members from basis, include, exclude
+     *
+     * @param path: path of grouping to reset
+     * @return Information about results of operation
+     */
+    @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/resetGroup")
+    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner, @PathVariable String path,
+            @PathVariable List<String> include, @PathVariable List<String> exclude) {
+        logger.info("Entered REST resetGroups...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.resetGroup(owner, path,
+                        include, exclude));
+    }
+
+    /**
      * Get a member's attributes based off username or id number
      *
      * @param uid: Username or id number of user to obtain attributes about
