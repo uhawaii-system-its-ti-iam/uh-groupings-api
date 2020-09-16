@@ -6,12 +6,12 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 public class AddResult {
-    private boolean added;
-    private boolean moved;
-    private String code;
     private String name;
     private String uid;
     private String uhUuid;
+    private String code;
+    private boolean added;
+    private boolean moved;
 
     String identifier;
 
@@ -93,5 +93,16 @@ public class AddResult {
 
     public void setUhUuid(String uhUuid) {
         this.uhUuid = uhUuid;
+    }
+
+    @Override
+    public String toString() {
+        return "name: " + name + "; " +
+                "uid: " + uid + "; " +
+                "uhUuid: " + uhUuid + "; " +
+                "code: " + code + "; " +
+                "added: " + added + "; " +
+                "moved: " + moved + "; " +
+                "identifier: " + identifier + ";";
     }
 }
