@@ -546,6 +546,36 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
+    @Override
+    public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
+            List<String> includeIdentifier, List<String> excludeIdentifier) {
+
+        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+        String excludePath = path + EXCLUDE;
+        String includePath = path + INCLUDE;
+
+        if(!includeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < includeIdentifier.size(); i++) {
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
+                String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
+        }
+        if(!excludeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < excludeIdentifier.size(); i++) {
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
+                String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
+        }
+
+        return result;
+    }
+
     //user adds them self to the group if they have permission
     @Override
     public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
