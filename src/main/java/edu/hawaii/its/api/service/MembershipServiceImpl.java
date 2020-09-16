@@ -2,7 +2,9 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.type.AddResult;
 import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
@@ -206,6 +208,62 @@ public class MembershipServiceImpl implements MembershipService {
         return createdPerson;
     }
 
+    @Override
+    public List<AddResult> addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
+        GroupPath addPath = new GroupPath(groupPath);
+        GroupPath removalPath = null;
+        boolean isInclude = addPath.getPath().endsWith(INCLUDE);
+        if (isInclude) {
+            removalPath = new GroupPath(addPath.getParentPath() + EXCLUDE);
+        }
+        if (!isInclude) {
+            removalPath = new GroupPath(addPath.getParentPath() + INCLUDE);
+        }
+        List<AddResult> results = new ArrayList<>();
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        for (String uid : uids) {
+            try {
+                WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, uid);
+                WsDeleteMemberResults del = grouperFS.makeWsDeleteMemberResults(removalPath.getPath(), uid);
+                AddResult res = new AddResult(uid, add.getResults(), del.getResults());
+                logger.info("addGroupMember; groupPath: " + groupPath + "; uid: " + uid + "; added=" + res.isAdded()
+                        + "; moved=" + res.isMoved());
+                results.add(res);
+            } catch (GcWebServiceError e) {
+                results.add(new AddResult(uid));
+                logger.info("addGroupMember; groupPath: " + groupPath + "; uid: " + uid + "; " + "ERROR;");
+            }
+        }
+        return results;
+    }
+
+    /*
+    @Override
+    public GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
+        String removalPath = null;
+        boolean isInclude = groupPath.endsWith(INCLUDE);
+        if (isInclude) {
+            removalPath = helperService.parentGroupingPath(groupPath) + EXCLUDE;
+        }
+        if (!isInclude) {
+            removalPath = helperService.parentGroupingPath(groupPath) + INCLUDE;
+        }
+        List<String> failedAdds = new ArrayList<>();
+        GenericServiceResult result = new GenericServiceResult();
+        List<GenericServiceResult> addResults = new ArrayList<>();
+        List<GenericServiceResult> removalResults = new ArrayList<>();
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        for (String uid : uids) {
+            WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, uid);
+            WsDeleteMemberResults del = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, uid);
+            addResults.add(new GenericServiceResult("add", add));
+            removalResults.add(new GenericServiceResult("del", del));
+        }
+        return new GenericServiceResult(Arrays.asList("addResults", "removalResults", "failedResults"),
+                addResults, removalResults, failedAdds);
+    }
+     */
+>>>>>>> Endpoint is working on both ends
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
@@ -470,21 +528,23 @@ public class MembershipServiceImpl implements MembershipService {
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
 
-        if(!includeIdentifier.get(0).equals("empty")) {
+        if (!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
-        if(!excludeIdentifier.get(0).equals("empty")) {
+        if (!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }

@@ -7,6 +7,7 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
@@ -142,6 +143,17 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
+<<<<<<< HEAD
+=======
+    @PutMapping(value = "/groupings/{path}/includeGroup/{uids}")
+    public ResponseEntity<List<AddResult>> addToIncludeGroup(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> uids) {
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
+    }
+
+>>>>>>> Endpoint is working on both ends
     /**
      * Delete an admin.
      */

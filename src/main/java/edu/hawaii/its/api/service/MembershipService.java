@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.AddResult;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
@@ -14,6 +15,11 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
+<<<<<<< HEAD
+=======
+    List<AddResult>addGroupMemberr(String ownerUsername, String groupPath, List<String> uids);
+
+>>>>>>> Endpoint is working on both ends
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)

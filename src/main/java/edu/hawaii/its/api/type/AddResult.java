@@ -1,51 +1,94 @@
 package edu.hawaii.its.api.type;
 
-public class AddResult {
-    GroupPath addPath;
-    GroupPath delPath;
-    Boolean wasMoved;
-    Person person;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-    public AddResult(GroupPath addPath, GroupPath delPath, Person person) {
-        this.addPath = addPath;
-        this.delPath = delPath;
-        this.person = person;
-        if (null != delPath) {
-            this.wasMoved = true;
+public class AddResult {
+    private boolean added;
+    private boolean moved;
+    private String name;
+    private String uid;
+    private String uhUuid;
+
+    String identifier;
+
+    public AddResult(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public AddResult(String identifier, WsAddMemberResult[] addMemberResults,
+            WsDeleteMemberResult[] deleteMemberResults) {
+        this.identifier = identifier;
+        setAddData(addMemberResults, deleteMemberResults);
+    }
+
+    private void setAddData(WsAddMemberResult[] addMemberResults, WsDeleteMemberResult[] deleteMemberResults) {
+
+        if (null != addMemberResults[0]) {
+            WsSubject addSubject = addMemberResults[0].getWsSubject();
+            WsResultMeta addMeta = addMemberResults[0].getResultMetadata();
+            this.name = addSubject.getName();
+            this.uid = addSubject.getId();
+            this.uhUuid = addSubject.getIdentifierLookup();
+            this.added = "SUCCESS".equals(addMeta.getResultCode());
+        }
+        if (null != deleteMemberResults[0]) {
+            WsResultMeta delMeta = deleteMemberResults[0].getResultMetadata();
+            this.moved = "SUCCESS".equals(delMeta.getResultCode());
         }
     }
 
-    /* Getters */
-    public Boolean getWasMoved() {
-        return wasMoved;
+    // Getters
+
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public GroupPath getAddPath() {
-        return addPath;
+    public String getUid() {
+        return uid;
     }
 
-    public GroupPath getDelPath() {
-        return delPath;
+    public String getUhUuid() {
+        return uhUuid;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getName() {
+        return name;
     }
 
-    /* Setters */
-    public void setAddPath(GroupPath addPath) {
-        this.addPath = addPath;
+    public boolean isAdded() {
+        return added;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public boolean isMoved() {
+        return moved;
     }
 
-    public void setDelPath(GroupPath delPath) {
-        this.delPath = delPath;
+    // Setters
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
-    public void setWasMoved(Boolean wasMoved) {
-        this.wasMoved = wasMoved;
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAdded(boolean added) {
+        this.added = added;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
+    }
+
+    public void setUhUuid(String uhUuid) {
+        this.uhUuid = uhUuid;
     }
 }
