@@ -143,17 +143,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
-<<<<<<< HEAD
-=======
-    @PutMapping(value = "/groupings/{path}/includeGroup/{uids}")
+    @PutMapping(value = "/groupings/{path}/group/{uids}")
     public ResponseEntity<List<AddResult>> addToIncludeGroup(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> uids) {
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
+                .body(membershipService.addGroupMemberr(currentUser, path, uids));
     }
 
->>>>>>> Endpoint is working on both ends
     /**
      * Delete an admin.
      */

@@ -8,6 +8,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 public class AddResult {
     private boolean added;
     private boolean moved;
+    private String code;
     private String name;
     private String uid;
     private String uhUuid;
@@ -16,6 +17,7 @@ public class AddResult {
 
     public AddResult(String identifier) {
         this.identifier = identifier;
+        this.code = "ERROR";
     }
 
     public AddResult(String identifier, WsAddMemberResult[] addMemberResults,
@@ -33,6 +35,7 @@ public class AddResult {
             this.uid = addSubject.getId();
             this.uhUuid = addSubject.getIdentifierLookup();
             this.added = "SUCCESS".equals(addMeta.getResultCode());
+            this.code = addMeta.getResultCode();
         }
         if (null != deleteMemberResults[0]) {
             WsResultMeta delMeta = deleteMemberResults[0].getResultMetadata();
