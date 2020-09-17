@@ -143,6 +143,22 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     e.printStackTrace();
                 }
             }
+            System.out.println("WERE NOT IN HERE");
+            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh")){
+                newSyncDest.setDescription("Syncs group to the refresh destination");
+                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding REFRESH list, which will be created as needed.");
+                System.out.println("WERE IN HERE BOYS 1");
+            }
+            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
+                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding DEPROVISION list, which will be created as needed.");
+                System.out.println("WERE IN HERE BOYS 2");
+            }
+            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:google-group")){
+                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding GOOGLE-GROUP list, which will be created as needed.");
+                System.out.println("WERE IN HERE BOYS 3");
+
+            }
+            System.out.println("WERE STILL NOT IN HERE");
             syncDest.add(newSyncDest);
         }
         return syncDest;
