@@ -124,7 +124,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
             WsFindAttributeDefNamesResults findAttributeDefNamesResults =
                     new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
-
+        System.out.println("RIGHTHERERIGHTHERE");
+        System.out.println(findAttributeDefNamesResults);
+        System.out.println("RIGHTHERERIGHTHERE");
         List<SyncDestination> syncDest = new ArrayList<>();
 
         // For each attribute, grab the name and definition and create a new SyncDestination object.
@@ -143,23 +145,22 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     e.printStackTrace();
                 }
             }
-            System.out.println("WERE NOT IN HERE");
-            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh")){
+            /*if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh")){
                 newSyncDest.setDescription("Syncs group to the refresh destination");
                 newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding REFRESH list, which will be created as needed.");
-                System.out.println("WERE IN HERE BOYS 1");
             }
             if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
                 newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding DEPROVISION list, which will be created as needed.");
-                System.out.println("WERE IN HERE BOYS 2");
-            }
+            }*/
+
             if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:google-group")){
                 newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding GOOGLE-GROUP list, which will be created as needed.");
-                System.out.println("WERE IN HERE BOYS 3");
-
             }
-            System.out.println("WERE STILL NOT IN HERE");
-            syncDest.add(newSyncDest);
+
+            if(!newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh") && !newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
+                syncDest.add(newSyncDest);
+            }
+
         }
         return syncDest;
     }
