@@ -72,6 +72,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Value("${grouper.api.sync.destinations.location}")
     private String SYNC_DESTINATIONS_LOCATION;
 
+    @Value("${uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes}")
+    private String SYNC_DESTINATIONS_CHECKBOXES;
+
     @Value("${groupings.api.composite_type.complement}")
     private String COMPLEMENT;
 
@@ -124,9 +127,9 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
             WsFindAttributeDefNamesResults findAttributeDefNamesResults =
                     new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
-        System.out.println("RIGHTHERERIGHTHERE");
-        System.out.println(findAttributeDefNamesResults);
-        System.out.println("RIGHTHERERIGHTHERE");
+        /* WsFindAttributeDefNamesResults findAttributeDefNamesResults =
+                new GcFindAttributeDefNames().assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();*/
+
         List<SyncDestination> syncDest = new ArrayList<>();
 
         // For each attribute, grab the name and definition and create a new SyncDestination object.
@@ -160,6 +163,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             if(!newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh") && !newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
                 syncDest.add(newSyncDest);
             }
+            //syncDest.add(newSyncDest);
 
         }
         return syncDest;
