@@ -266,7 +266,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * if the user is allowed to opt out of the grouping
+     * If the user is allowed to opt out of the grouping
      * this will add them to the exclude group of that grouping
      * if the user is in the include group of that Grouping, they will be removed from it
      */
