@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -144,7 +145,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @PutMapping(value = "/groupings/{path}/group/{uids}")
-    public ResponseEntity<List<AddResult>> addToIncludeGroup(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<AddResult>> addMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> uids) {
         return ResponseEntity
                 .ok()
@@ -245,8 +246,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST optInGroups...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService
-                        .getOptInGroups(currentUser, uid));
+                .body(groupingAssignmentService.getOptInGroups(currentUser, uid));
     }
 
     /**
@@ -255,13 +255,14 @@ public class GroupingsRestControllerv2_1 {
      * if the user is in the exclude group, they will be removed from it
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<AddResult>> optIn(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST optIn...");
+        List<String> identifier = Collections.singletonList(uid);
         return ResponseEntity
                 .ok()
-                .body(membershipService.optIn(currentUser, path, uid));
+                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, identifier));
     }
 
     /**
@@ -270,13 +271,14 @@ public class GroupingsRestControllerv2_1 {
      * if the user is in the include group of that Grouping, they will be removed from it
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<AddResult>> optOut(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST optOut...");
+        List<String> identifier = Collections.singletonList(uid);
         return ResponseEntity
                 .ok()
-                .body(membershipService.optOut(currentUser, path, uid));
+                .body(membershipService.addGroupMemberr(currentUser, path+ EXCLUDE, identifier));
     }
 
     /**

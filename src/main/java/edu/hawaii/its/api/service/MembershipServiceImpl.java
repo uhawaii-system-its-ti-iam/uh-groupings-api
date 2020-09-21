@@ -210,17 +210,19 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<AddResult> addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
+
+        List<AddResult> results = new ArrayList<>();
         GroupPath addPath = new GroupPath(groupPath);
         GroupPath removalPath = null;
         boolean isInclude = addPath.getPath().endsWith(INCLUDE);
+
         if (isInclude) {
             removalPath = new GroupPath(addPath.getParentPath() + EXCLUDE);
         }
         if (!isInclude) {
             removalPath = new GroupPath(addPath.getParentPath() + INCLUDE);
         }
-        List<AddResult> results = new ArrayList<>();
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+
         for (String uid : uids) {
             try {
                 WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, uid);
@@ -236,34 +238,6 @@ public class MembershipServiceImpl implements MembershipService {
         }
         return results;
     }
-
-    /*
-    @Override
-    public GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
-        String removalPath = null;
-        boolean isInclude = groupPath.endsWith(INCLUDE);
-        if (isInclude) {
-            removalPath = helperService.parentGroupingPath(groupPath) + EXCLUDE;
-        }
-        if (!isInclude) {
-            removalPath = helperService.parentGroupingPath(groupPath) + INCLUDE;
-        }
-        List<String> failedAdds = new ArrayList<>();
-        GenericServiceResult result = new GenericServiceResult();
-        List<GenericServiceResult> addResults = new ArrayList<>();
-        List<GenericServiceResult> removalResults = new ArrayList<>();
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        for (String uid : uids) {
-            WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, uid);
-            WsDeleteMemberResults del = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, uid);
-            addResults.add(new GenericServiceResult("add", add));
-            removalResults.add(new GenericServiceResult("del", del));
-        }
-        return new GenericServiceResult(Arrays.asList("addResults", "removalResults", "failedResults"),
-                addResults, removalResults, failedAdds);
-    }
-     */
->>>>>>> Endpoint is working on both ends
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
