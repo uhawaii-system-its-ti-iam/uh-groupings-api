@@ -770,6 +770,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
+    // todo needs test
     @Override
     public List<String> getOptInGroups(String owner, String optInUid) {
         logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");

@@ -15,9 +15,7 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -236,6 +234,19 @@ public class MembershipServiceImpl implements MembershipService {
                 logger.info("addGroupMember; groupPath: " + groupPath + "; uid: " + uid + "; " + "ERROR;");
             }
         }
+        /*
+        if (uids.size() > 100) {
+            groupingsMailService
+                    .setJavaMailSender(javaMailSender)
+                    .setFrom("no-reply@its.hawaii.edu");
+            groupingsMailService.sendCSVMessage(
+                    "no-reply@its.hawaii.edu",
+                    groupingsMailService.getUserEmail(ownerUsername),
+                    "Groupings: Add " + groupPath,
+                    "",
+                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", gsrs);
+                    }
+         */
         return results;
     }
 
@@ -402,7 +413,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     /**
      * Check if opting is enabled for the grouping at path.
-     */
     @Override
     public boolean canOpt(String path) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
@@ -423,6 +433,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("isOpt; path: " + path + ";   " + false + ";");
         return false;
     }
+     */
 
     //adds a user to the admins group via username or UH id number
     @Override
@@ -527,7 +538,7 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
-    //user adds them self to the group if they have permission
+    /*
     @Override
     public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
         String outOrrIn = "in ";
@@ -536,9 +547,9 @@ public class MembershipServiceImpl implements MembershipService {
 
         return opt(optInUsername, groupingPath, addGroup, outOrrIn, preposition);
     }
+     */
 
-    //user removes them self from the group if they have permission
-    @Override
+    /* @Override
     public List<GroupingsServiceResult> optOut(String optOutUsername, String groupingPath) {
         String outOrrIn = "out ";
         String preposition = "from ";
@@ -546,8 +557,9 @@ public class MembershipServiceImpl implements MembershipService {
 
         return opt(optOutUsername, groupingPath, addGroup, outOrrIn, preposition);
     }
+     */
 
-    //user adds them self to the group if they have permission
+    /*
     @Override
     public List<GroupingsServiceResult> optIn(String currentUser, String groupingPath, String uid) {
         String outOrrIn = "in ";
@@ -565,8 +577,9 @@ public class MembershipServiceImpl implements MembershipService {
             return list;
         }
     }
+     */
 
-    //user removes them self from the group if they have permission
+    /*
     @Override
     public List<GroupingsServiceResult> optOut(String currentUser, String groupingPath, String uid) {
         String outOrrIn = "out ";
@@ -584,6 +597,7 @@ public class MembershipServiceImpl implements MembershipService {
             return list;
         }
     }
+     */
 
     //returns true if the group allows that user to opt out
     @Override
@@ -970,6 +984,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     //checks to see if the user has the privilege in that group
+    @Override
     public WsGetGrouperPrivilegesLiteResult getGrouperPrivilege(String username, String privilegeName,
             String groupPath) {
         logger.info("getGrouperPrivilege; username: "

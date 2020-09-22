@@ -194,6 +194,8 @@ public class TestMembershipService {
         assertThat(assignedValue, is(dateStr));
     }
 
+
+   /* HELLO
     @Test
     public void optTest() {
         //Reset group.
@@ -240,6 +242,7 @@ public class TestMembershipService {
         membershipService.optOut(ADMIN, GROUPING, username[3]);
         assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
     }
+    */
 
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them.
     @Test

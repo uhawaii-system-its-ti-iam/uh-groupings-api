@@ -239,7 +239,6 @@ public class MembershipServiceTest {
         }
     }
 
-
     @Test
     public void deleteGroupMembersTest() {
         List<GroupingsServiceResult> result;
@@ -456,6 +455,8 @@ public class MembershipServiceTest {
         assertThat(gsr.get(2).getResultCode(), is(SUCCESS));
     }
 
+    /*
+
     @Test
     public void optInTest() {
         List<GroupingsServiceResult> optInResults;
@@ -495,7 +496,9 @@ public class MembershipServiceTest {
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
     }
+     */
 
+    /*
     @Test
     public void optOutTest() {
         List<GroupingsServiceResult> optOutResults;
@@ -537,6 +540,7 @@ public class MembershipServiceTest {
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertThat(optOutResults.size(), is(1));
     }
+     */
 
     @Test
     public void selfOptedTest() {

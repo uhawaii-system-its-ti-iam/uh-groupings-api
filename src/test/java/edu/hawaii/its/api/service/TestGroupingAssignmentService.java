@@ -375,6 +375,7 @@ public class TestGroupingAssignmentService {
         assertFalse(isGroupingOwner);
     }
 
+    /*
     @Test
     public void groupingsOptedTest() {
         // Create groupings list, then add 3 test groupings to the list.
@@ -410,6 +411,7 @@ public class TestGroupingAssignmentService {
         // Amount of opted groups return should be 1 less.
         assertTrue(optedGroups.size() == 2);
     }
+     */
 
     @Test
     public void getOptInGroupsTest() {

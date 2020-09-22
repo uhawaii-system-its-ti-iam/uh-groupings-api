@@ -294,6 +294,7 @@ public class GroupingAssignmentServiceTest {
         }
     }
 
+   /* HELLO
     @Test
     public void groupingsOptedIntoTest() {
         String user5 = users.get(5).getUsername();
@@ -329,7 +330,9 @@ public class GroupingAssignmentServiceTest {
         groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
         assertThat(groupingsOptedInto.size(), is(0));
     }
+    */
 
+   /* HELLO
     @Test
     public void groupingsOptedOutOfTest() {
         String user1 = users.get(1).getUsername();
@@ -385,6 +388,7 @@ public class GroupingAssignmentServiceTest {
         groupingsOptedOutOf = groupingAssignmentService.groupingsOptedOutOf(user1, groupPaths);
         assertThat(groupingsOptedOutOf.size(), is(0));
     }
+    */
 
     @Test
     public void adminListsTest() {

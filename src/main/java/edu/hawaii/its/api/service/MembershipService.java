@@ -5,6 +5,8 @@ import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
@@ -15,12 +17,10 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
-<<<<<<< HEAD
-=======
     List<AddResult>addGroupMemberr(String ownerUsername, String groupPath, List<String> uids);
-
->>>>>>> Endpoint is working on both ends
+    
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
+
 
     List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)
             throws IOException, MessagingException;
@@ -45,13 +45,13 @@ public interface MembershipService {
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
-    List<GroupingsServiceResult> optIn(String username, String groupingPath);
+    //List<GroupingsServiceResult> optIn(String username, String groupingPath);
 
-    List<GroupingsServiceResult> optOut(String username, String groupingPath);
+    // List<GroupingsServiceResult> optOut(String username, String groupingPath);
 
-    List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
+    // List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
 
-    List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
+    // List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
 
     boolean isGroupCanOptIn(String username, String groupPath);
 
@@ -68,5 +68,7 @@ public interface MembershipService {
 
     boolean isUhUuid(String username);
 
-    boolean canOpt(String path);
+    WsGetGrouperPrivilegesLiteResult getGrouperPrivilege(String username, String privilegeName, String groupPath);
+
+    // boolean canOpt(String path);
 }
