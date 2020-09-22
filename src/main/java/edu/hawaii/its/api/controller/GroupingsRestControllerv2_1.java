@@ -279,7 +279,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addGroupMemberr(currentUser, path + EXCLUDE, identifier));
     }
 
-
     /**
      * Remove grouping include member.
      */
