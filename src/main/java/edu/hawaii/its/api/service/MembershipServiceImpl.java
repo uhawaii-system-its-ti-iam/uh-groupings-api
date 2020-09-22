@@ -392,7 +392,7 @@ public class MembershipServiceImpl implements MembershipService {
             if (hasMembership) {
                 membership.setPath(groupPath);
                 membership.setOptOutEnabled(
-                        optOutList.contains(helperService.parentGroupingPath(groupPath)) && !membership.isInExclude());
+                        optOutList.contains(helperService.parentGroupingPath(groupPath)));
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
