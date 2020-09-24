@@ -309,10 +309,14 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
+        return new GenericServiceResult("result", grouperFS.getSyncDestinations());
+    }
+
+    /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         WsGetGrouperPrivilegesLiteResult result =
                 grouperFS.makeWsGetGrouperPrivilegesLiteResult(path, PRIVILEGE_OPT_IN, wsSubjectLookup);
         return new GenericServiceResult("result", result);
-    }
+    }*/
 }
 
