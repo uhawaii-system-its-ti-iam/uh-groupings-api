@@ -127,7 +127,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
             WsFindAttributeDefNamesResults findAttributeDefNamesResults =
                     new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
-        /* WsFindAttributeDefNamesResults findAttributeDefNamesResults =
+        /* WsFindAttributeDefNamesResults findm getting thanksAttributeDefNamesResults =
                 new GcFindAttributeDefNames().assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();*/
 
         List<SyncDestination> syncDest = new ArrayList<>();
