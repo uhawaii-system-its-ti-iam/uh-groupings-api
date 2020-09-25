@@ -72,7 +72,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Value("${grouper.api.sync.destinations.location}")
     private String SYNC_DESTINATIONS_LOCATION;
 
-    @Value("${uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes}")
+    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
 
     @Value("${groupings.api.composite_type.complement}")
@@ -125,10 +125,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public List<SyncDestination> getSyncDestinations() {
 
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
-            WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                    new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).execute();
-        /* WsFindAttributeDefNamesResults findm getting thanksAttributeDefNamesResults =
-                new GcFindAttributeDefNames().assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();*/
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults =
+                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 
@@ -148,23 +146,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     e.printStackTrace();
                 }
             }
-            /*if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh")){
-                newSyncDest.setDescription("Syncs group to the refresh destination");
-                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding REFRESH list, which will be created as needed.");
-            }
-            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
-                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding DEPROVISION list, which will be created as needed.");
-            }*/
-
-            if(newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:google-group")){
-                newSyncDest.setTooltip("Synchronize the grouping's membership with a corresponding GOOGLE-GROUP list, which will be created as needed.");
-            }
-
-            if(!newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:refresh") && !newSyncDest.getName().equals("uh-settings:attributes:for-groups:uh-grouping:destinations:deprovision")){
                 syncDest.add(newSyncDest);
-            }
-            //syncDest.add(newSyncDest);
-
         }
         return syncDest;
     }
