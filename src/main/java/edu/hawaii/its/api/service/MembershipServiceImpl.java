@@ -360,9 +360,6 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info(action);
 
         List<Membership> memberships = new ArrayList<>();
-        if (!memberAttributeService.isAdmin(owner) && !memberAttributeService.isOwner(owner)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
         List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
         List<String> optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
 
