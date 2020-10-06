@@ -206,36 +206,6 @@ public class MembershipServiceImpl implements MembershipService {
         return createdPerson;
     }
 
-    @Override
-    public GenericServiceResult addGroupMemberr(String ownerUsername, String groupPath, List<String> uids) {
-        String removalPath = null;
-        boolean isInclude = groupPath.endsWith(INCLUDE);
-        if (isInclude) {
-            removalPath = helperService.parentGroupingPath(groupPath) + EXCLUDE;
-        }
-        if (!isInclude) {
-            removalPath = helperService.parentGroupingPath(groupPath) + INCLUDE;
-        }
-        List<String> failedAdds = new ArrayList<>();
-        GenericServiceResult result = new GenericServiceResult();
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-        for (String uid : uids) {
-            try {
-                WsAddMemberResults add = grouperFS.makeWsAddMemberResults(groupPath, uid);
-                WsDeleteMemberResults del = grouperFS.makeWsDeleteMemberResults(removalPath, uid);
-                result.add("addResult: " + uid, add);
-                result.add("delResult: " + uid, del);
-
-            } catch (GcWebServiceError e) {
-                failedAdds.add(uid);
-            }
-        }
-        return result;
-        /*
-        return new GenericServiceResult(Arrays.asList("addResults", "removalResults", "failedResults"),
-                wsAddMemberResults, wsDeleteMemberResults, failedAdds);
-         */
-    }
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override

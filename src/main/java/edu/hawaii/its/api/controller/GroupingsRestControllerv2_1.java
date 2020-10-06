@@ -143,14 +143,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
-    @PostMapping(value = "/newAdd/{path}/{uids}")
-    public ResponseEntity<GenericServiceResult> addGroupMemberr(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path, @PathVariable List<String> uids) {
-        return ResponseEntity
-                .ok()
-                .body(membershipService.addGroupMemberr(currentUser, path + INCLUDE, uids));
-    }
-
     /**
      * Delete an admin
      *
@@ -191,7 +183,8 @@ public class GroupingsRestControllerv2_1 {
      * @return Information about results of operation
      */
     @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/resetGroup")
-    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner, @PathVariable String path,
+    public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner,
+            @PathVariable String path,
             @PathVariable List<String> include, @PathVariable List<String> exclude) {
         logger.info("Entered REST resetGroups...");
         return ResponseEntity
