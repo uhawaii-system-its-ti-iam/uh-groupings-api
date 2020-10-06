@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 
@@ -54,10 +55,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -218,8 +216,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     /**
-     * @param username: username of user to be looked up
-     * @return a WsSubjectLookup with username as the subject identifier
+     * Check if the subject pertaining to username exists in the grouper database.
      */
     @Override
     public WsSubjectLookup makeWsSubjectLookup(String username) {
@@ -230,12 +227,11 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         } else {
             wsSubjectLookup.setSubjectIdentifier(username);
         }
-
         return wsSubjectLookup;
     }
 
     /**
-     * @param group: group to be looked up
+     * @param group Group to be looked up
      * @return a WsGroupLookup with group as the group name
      */
     @Override
