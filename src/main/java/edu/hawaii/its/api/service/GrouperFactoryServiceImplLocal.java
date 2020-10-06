@@ -273,7 +273,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     /**
-     * @param username: username of user to be looked up
+     * @param username of subject to be looked up
      * @return a WsSubjectLookup with username as the subject identifier
      */
     @Override
@@ -304,7 +304,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     /**
-     * @param group: group to be looked up
+     * @param group to be looked up
      * @return a WsGroupLookup with group as the group name
      */
     @Override
