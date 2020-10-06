@@ -6,12 +6,8 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +15,7 @@ import java.util.Map;
 @Service
 public class AuthorizationServiceImpl implements AuthorizationService {
 
-    private Map<String, List<Role>> userMap = new HashMap<>();
+    private final Map<String, List<Role>> userMap = new HashMap<>();
 
     @Autowired
     private MemberAttributeService memberAttributeService;

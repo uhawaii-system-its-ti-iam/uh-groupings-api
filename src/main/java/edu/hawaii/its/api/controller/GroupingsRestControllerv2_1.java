@@ -104,6 +104,10 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.generic());
     }
 
+    /**
+     * Return a GenericServiceResult to be viewed on swagger, a great helper for observing the contents of a grouper
+     * object.
+     */
     @GetMapping(value = "/swagger/toString/{path}")
     @ResponseBody
     public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser,
@@ -116,8 +120,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Get all admins and groupings
-     *
-     * @return List of all admins and all groupings
      */
     @GetMapping(value = "/adminsGroupings")
     @ResponseBody
@@ -129,10 +131,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Create a new admin
-     *
-     * @param uid: uid of admin to add
-     * @return Information about results of the operation
+     * Create a new admin.
      */
     @PostMapping(value = "/admins/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
@@ -144,10 +143,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Delete an admin
-     *
-     * @param uid: uid or uuid of admin to delete
-     * @return Information about results of the operation
+     * Delete an admin.
      */
     @DeleteMapping(value = "/admins/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
@@ -160,10 +156,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Delete a user from multiple groupings
-     *
-     * @param paths: path of groupings to modify
-     * @param uid:   uid or uuid of user to delete
-     * @return Information about results of operation
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
     public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
@@ -191,10 +183,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off username or id number
-     *
-     * @param uid: Username or id number of user to obtain attributes about
-     * @return Map of user attributes
+     * Get a member's attributes based off username or id number.
      */
     @GetMapping(value = "/members/{uid:[\\w-:.<>]+}")
     @ResponseBody
@@ -207,16 +196,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of a groupings a user is in and can opt into
-     * <p>
-     * <<<<<<< HEAD
-     *
-     * @param path:        Path of specific grouping
-     * @param page:        Page of grouping to retrieve (starts at 1)
-     * @param size:        Size of page of grouping to retrieve
-     * @param sortString:  Page of grouping to retrieve
-     * @param isAscending: Page of grouping to retrieve (starts at 1)
-     * @return Grouping found at specified path
+     * Get a list of a groupings a user is in and can opt into.
      */
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}")
     @ResponseBody
@@ -264,10 +244,6 @@ public class GroupingsRestControllerv2_1 {
      * if the user is allowed to opt into the grouping
      * this will add them to the include group of that grouping
      * if the user is in the exclude group, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting in
-     * @param uid  : the uid of the user that will be opted in
-     * @return information about the success of opting in
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self")
     public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
@@ -283,10 +259,6 @@ public class GroupingsRestControllerv2_1 {
      * if the user is allowed to opt out of the grouping
      * this will add them to the exclude group of that grouping
      * if the user is in the include group of that Grouping, they will be removed from it
-     *
-     * @param path : the path to the grouping where the user will be opting out
-     * @param uid  : the uid of the user that will be opted out
-     * @return information about the success of opting out
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self")
     public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
@@ -300,10 +272,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Update grouping to add new include member
-     *
-     * @param path: path of grouping to update
-     * @param uid:  uid or uuid of member to add to include
-     * @return Information about results of the operation
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
@@ -317,11 +285,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add include multiple members
-     *
-     * @param path: path of grouping to update
-     * @param uids: uids or uuids of members to add to include
-     * @return Information about results of the operation
+     * Update grouping to add include multiple members.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
@@ -335,11 +299,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add new exclude member
-     *
-     * @param path: path of grouping to update
-     * @param uid:  uid or uuid of member to add to exclude
-     * @return Information about results of the operation
+     * Update grouping to add new exclude member.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(
@@ -353,11 +313,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add exclude multiple members
-     *
-     * @param path: path of grouping to update
-     * @param uids: uids or uuids of members to add to exclude
-     * @return Information about results of the operation
+     * Update grouping to add exclude multiple members.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
@@ -371,11 +327,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove grouping include member
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of grouping include member to remove
-     * @return Information about results of operation
+     * Remove grouping include member.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
@@ -388,11 +340,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove grouping exclude member
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of grouping exclude member to remove
-     * @return Information about results of operation
+     * Remove grouping exclude member.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
@@ -406,11 +354,6 @@ public class GroupingsRestControllerv2_1 {
 
     /**
      * Delete all valid members in uids from path as currentUser.
-     *
-     * @param currentUser
-     * @param path
-     * @param uids
-     * @return
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
@@ -424,10 +367,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings by username or UH id number
-     *
-     * @param uid: Username of owner to get list of groupings they own
-     * @return List of owner's owned groupings
+     * Get an owner's owned groupings by username or UH id number.
      */
     @GetMapping("/owners/{uid:[\\w-:.]+}/groupings")
     public ResponseEntity<List<Grouping>> ownerGroupings(@RequestHeader("current_user") String currentUser,
@@ -439,11 +379,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add a new owner
-     *
-     * @param path: path of grouping to update
-     * @param uid:  uid/uuid of new owner to add
-     * @return Information about results of operation
+     * Update grouping to add a new owner.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
@@ -456,11 +392,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Delete a grouping owner
-     *
-     * @param path: path of grouping to modify
-     * @param uid:  uid or uuid of owner to delete
-     * @return Information about results of operation
+     * Delete a grouping owner.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
@@ -473,11 +405,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping description
-     *
-     * @param path:      path of grouping to update
-     * @param dtoString: new description to be updated
-     * @return Information about results of operation
+     * Update grouping description.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/description")
     public ResponseEntity<GroupingsServiceResult> updateDescription(
@@ -491,11 +419,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param syncDestName: name of syncDest to update
-     * @return Information about result of operation
+     * Update grouping to enable given preference.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/enable")
     public ResponseEntity<GroupingsServiceResult> enableSyncDest(
@@ -508,11 +432,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to disable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param syncDestName: name of syncDest to update
-     * @return Information about result of operation
+     * Update grouping to disable given preference.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/syncDests/{syncDestName:[\\w-:.]+}/disable")
     public ResponseEntity<GroupingsServiceResult> disableSyncDest(
@@ -523,20 +443,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
     }
-
-    /*
-    @RequestMapping(value = "/admins/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Membership>> getMembershipResults(
-            @RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST checkInBasis");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.getMemberShipResults(currentUser, uid));
-    }
-    */
 
     /**
      * GET a response which specifies whether uid is an owner or not,
@@ -552,11 +458,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param preferenceId: id of preference to update
-     * @return Information about result of operation
+     * Update grouping to enable given preference.
      */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable",
             method = RequestMethod.PUT,
@@ -581,11 +483,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to disable given preference
-     *
-     * @param path:         path of grouping to update
-     * @param preferenceId: id of preference to update
-     * @return Information about result of operation
+     * Update grouping to disable given preference.
      */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/disable",
             method = RequestMethod.PUT,
