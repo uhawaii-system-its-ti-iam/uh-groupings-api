@@ -177,10 +177,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Reset a grouping by removing all members from basis, include, exclude
-     *
-     * @param path: path of grouping to reset
-     * @return Information about results of operation
+     * Reset a grouping  of path owned by owner.  Removes all members from basis, include, exclude.
      */
     @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/resetGroup")
     public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner,
