@@ -133,10 +133,10 @@ public class Group implements Comparable<Group> {
         if (pathComp != 0) {
             return pathComp;
         }
-        Integer size0 = getMembers().size();
-        Integer size1 = group.getMembers().size();
-        if (0 != size0.compareTo(size1)) {
-            return size0.compareTo(size1);
+        int size0 = getMembers().size();
+        int size1 = group.getMembers().size();
+        if (size0 != size1) {
+            return Integer.compare(size0, size1);
         }
 
         for (int i = 0; i < size0; i++) {
