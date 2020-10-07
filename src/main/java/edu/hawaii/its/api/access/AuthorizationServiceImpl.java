@@ -8,14 +8,8 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Service
 public class AuthorizationServiceImpl implements AuthorizationService {
-
-    private final Map<String, List<Role>> userMap = new HashMap<>();
 
     @Autowired
     private MemberAttributeService memberAttributeService;
@@ -28,9 +22,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     /**
      * Assigns roles to user
      *
-     * @param uhUuid   : The uhUuid of the user.
-     * @param username : The username of the person to find the user.
-     * @return : Returns an array list of roles assigned to the user.
+     * @param uhUuid   The uhUuid of the user.
+     * @param username The username of the person to find the user.
+     * @return Returns an array list of roles assigned to the user.
      */
     @Override
     public RoleHolder fetchRoles(String uhUuid, String username) {
@@ -38,21 +32,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         roleHolder.add(Role.ANONYMOUS);
         roleHolder.add(Role.UH);
 
-        //Determines if user is an owner.
         if (isOwner(username)) {
             roleHolder.add(Role.OWNER);
         }
 
-        //Determines if a user is an admin.
         if (isAdmin(username)) {
             roleHolder.add(Role.ADMIN);
-        }
-
-        List<Role> roles = userMap.get(uhUuid);
-        if (roles != null) {
-            for (Role role : roles) {
-                roleHolder.add(role);
-            }
         }
         return roleHolder;
     }
@@ -60,7 +45,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     /**
      * Determines if a user is an owner of any grouping.
      *
-     * @param username - self-explanitory
+     * @param username self-explanitory
      * @return true if the person has groupings that they own, otherwise false.
      */
     public boolean isOwner(String username) {
@@ -81,12 +66,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     /**
      * Determines if a user is an admin in grouping admin.
      *
-     * @param username - self-explanitory
+     * @param username  self-explanitory
      * @return true if the person gets pass the grouping admins check by checking if they can get all the groupings.
      */
     public boolean isAdmin(String username) {
         logger.info("//////////////////////////////");
         try {
+
             if (memberAttributeService.isAdmin(username)) {
                 logger.info("this person is an admin");
                 return true;
