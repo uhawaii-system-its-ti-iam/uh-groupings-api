@@ -369,10 +369,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     /**
-     * @param username: A string with the username of acting user
-     * @param uid:      A string with the username of the user being acted upon
+     * @param username A string with the username of acting user
+     * @param uid      A string with the username of the user being acted upon
      * @return membershipAssigment: A MembershipAssignment object with the membership
-     * <p>
      * Function call that makes calls to grouper in order to get the groupings a user is a member of and a list of
      * groupings a user can opt into.
      */
