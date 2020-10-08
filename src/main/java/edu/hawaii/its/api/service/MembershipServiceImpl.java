@@ -353,12 +353,20 @@ public class MembershipServiceImpl implements MembershipService {
                 membership.setInBasisAndInclude(true);
                 hasMembership = true;
             }
+            if (groupPath.endsWith(OWNERS)) {
+                membership.setInOwner(true);
+                hasMembership = true;
+            }
             if (hasMembership) {
                 membership.setPath(groupPath);
                 membership.setOptOutEnabled(optOutList.contains(helperService.parentGroupingPath(groupPath)));
                 membership.setName(helperService.nameGroupingPath(groupPath));
                 memberships.add(membership);
             }
+        }
+        System.out.println("HEREHEREHERE");
+        for(int i = 0; i < memberships.size();i++) {
+            System.out.println(memberships.get(i));
         }
         return memberships;
     }

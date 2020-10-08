@@ -44,6 +44,9 @@ public class Membership implements Comparable<Membership> {
     private boolean inExclude = false;
 
     @Column
+    private boolean inOwner = false;
+
+    @Column
     private boolean inBasisAndInclude = false;
 
     public Membership() {
@@ -107,8 +110,16 @@ public class Membership implements Comparable<Membership> {
         this.inBasis = inBasis;
     }
 
+    public void setInOwner(boolean inOwner) {
+        this.inOwner = inOwner;
+    }
+
     public boolean isInBasis() {
         return inBasis;
+    }
+
+    public boolean isInOwner() {
+        return inOwner;
     }
 
     public void setInInclude(boolean inInclude) {
