@@ -364,10 +364,6 @@ public class MembershipServiceImpl implements MembershipService {
                 memberships.add(membership);
             }
         }
-        System.out.println("HEREHEREHERE");
-        for(int i = 0; i < memberships.size();i++) {
-            System.out.println(memberships.get(i));
-        }
         return memberships;
     }
 
