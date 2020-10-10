@@ -353,6 +353,10 @@ public class MembershipServiceImpl implements MembershipService {
                 membership.setInBasisAndInclude(true);
                 hasMembership = true;
             }
+            if (groupPath.endsWith(OWNERS)) {
+                membership.setInOwner(true);
+                hasMembership = true;
+            }
             if (hasMembership) {
                 membership.setPath(groupPath);
                 membership.setOptOutEnabled(optOutList.contains(helperService.parentGroupingPath(groupPath)));
