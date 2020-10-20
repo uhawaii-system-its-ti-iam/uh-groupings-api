@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -447,20 +449,61 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
-            List<String> GroupPaths) {
+            List<String> GroupPaths) throws InterruptedException {
 
-        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+        List<GroupingsServiceResult> result = Collections.synchronizedList(new ArrayList<GroupingsServiceResult>());
+        synchronized (result) {
+            class MyRunnable implements Runnable {
+                private boolean exit;
+                private final int i;
+                private final String adminUsername;
+                private final String userToRemove;
+                private final List<String> GroupPaths;
 
-        for (int i = 0; i < GroupPaths.size(); i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
-            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-            WsDeleteMemberResults deleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
-            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+                public MyRunnable(int iT, String adminUsernameT, String userToRemoveT, List<String> GroupPathsT) {
+                    i = iT;
+                    adminUsername = adminUsernameT;
+                    userToRemove = userToRemoveT;
+                    GroupPaths = GroupPathsT;
+                    exit = false;
+                }
+
+                public void run() {
+                    System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+                    String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
+                    WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
+                    WsDeleteMemberResults deleteMemberResults =
+                            grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+                    result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+                    System.out.println("Thread Done");
+                    try {
+                        return;
+                    } catch (Exception e) {
+                        System.out.println("Thread Failed");
+                    }
+                }
+                public void stop() {
+                    exit = true;
+                }
+            }
+            for (int i = 0; i < GroupPaths.size(); i++) {
+                MyRunnable fast = new MyRunnable(i, adminUsername, userToRemove, GroupPaths);
+                Thread curr = new Thread(fast);
+                curr.start();
+
+                if(i == GroupPaths.size() - 1){
+                    curr.join();
+                }
+
+            }
         }
+        System.out.println("HEREHEREHERE");
+        System.out.println(result);
+        System.out.println(result.size());
         return result;
     }
+
+
 
     @Override
     public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
