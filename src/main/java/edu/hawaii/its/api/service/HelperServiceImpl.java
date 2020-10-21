@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -8,11 +11,9 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -156,6 +157,8 @@ public class HelperServiceImpl implements HelperService {
 
     @Autowired
     private GrouperFactoryService grouperFS;
+    @Autowired
+    private MembershipService membershipService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
@@ -294,4 +297,26 @@ public class HelperServiceImpl implements HelperService {
         return "";
     }
 
+    /**
+     * Get the name of a grouping from groupPath.
+     */
+    @Override public String nameGroupingPath(String groupPath) {
+        String parentPath = parentGroupingPath(groupPath);
+        if ("".equals(parentPath)) {
+            return "";
+        }
+        return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
+    }
+
+    @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
+        return new GenericServiceResult("result", grouperFS.getSyncDestinations());
+    }
+
+    /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
+        WsGetGrouperPrivilegesLiteResult result =
+                grouperFS.makeWsGetGrouperPrivilegesLiteResult(path, PRIVILEGE_OPT_IN, wsSubjectLookup);
+        return new GenericServiceResult("result", result);
+    }*/
 }
+

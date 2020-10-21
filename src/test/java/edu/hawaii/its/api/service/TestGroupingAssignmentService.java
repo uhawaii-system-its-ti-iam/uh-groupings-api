@@ -1,23 +1,21 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MembershipAssignment;
+import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +34,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -409,6 +412,18 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getOptInGroupsTest() {
+        List<List<String>> optInPathsLists = new ArrayList<List<String>>();
+        for (int i = 0; i < 6; i++) {
+            optInPathsLists.add(new ArrayList<>(
+                    groupingAssignmentService.getOptInGroups(usernames[0], usernames[1])));
+        }
+        for (List<String> list : optInPathsLists) {
+            assertTrue(list.contains(GROUPING));
+        }
+    }
+
+    @Test
     public void groupingsToOptTest() {
         GroupingAssignment groupingAssignment = groupingAssignmentService.getGroupingAssignment(usernames[0]);
 
@@ -490,6 +505,25 @@ public class TestGroupingAssignmentService {
 
         assertFalse(groupingsIn.contains(GROUPING));
         assertTrue(groupingsToOptInto.contains(GROUPING));
+
+        MembershipAssignment membershipAssignment;
+
+        // Test getting the attributes inInclude, inExclude, inOwner, and inBasis.
+        membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, ADMIN);
+
+        assertTrue(membershipAssignment.isInOwner(GROUPING));
+        assertFalse(membershipAssignment.isInBasis(GROUPING));
+        assertFalse(membershipAssignment.isInInclude(GROUPING));
+        assertFalse(membershipAssignment.isInExclude(GROUPING));
+
+        // Try to get the memberships for a user that doesn't exist.
+        try {
+            membershipAssignment = groupingAssignmentService.getMembershipAssignment(ADMIN, "somenamethatNoexist");
+
+        } catch (Exception e) {
+            System.out.println("User doesn't exist.");
+        }
+
     }
 
     @Test

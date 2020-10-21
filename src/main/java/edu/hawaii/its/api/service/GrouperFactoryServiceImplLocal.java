@@ -4,15 +4,48 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.*;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 
-import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGroupDelete;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcStemDelete;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
-
-import edu.internet2.middleware.grouperClient.ws.beans.*;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDetail;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -240,7 +273,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     /**
-     * @param username: username of user to be looked up
+     * @param username of subject to be looked up
      * @return a WsSubjectLookup with username as the subject identifier
      */
     @Override
@@ -271,7 +304,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     }
 
     /**
-     * @param group: group to be looked up
+     * @param group to be looked up
      * @return a WsGroupLookup with group as the group name
      */
     @Override
@@ -989,7 +1022,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         List<Group> group = new ArrayList<>();
         List<Membership> membership = new ArrayList<>();
 
-        for(int i = 0; i < groupNames.size(); i++) {
+        for (int i = 0; i < groupNames.size(); i++) {
             person.add(personRepository.findByUsername(lookups.get(i).getSubjectIdentifier()));
             group.add(groupRepository.findByPath(groupNames.get(i)));
             membership.add(membershipRepository.findByPersonAndGroup(person.get(i), group.get(i)));
@@ -997,7 +1030,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
         List<WsGetMembershipsResults> wsGetMembershipsResults = new ArrayList<WsGetMembershipsResults>();
 
-        for(int i = 0; i < groupNames.size(); i++) {
+        for (int i = 0; i < groupNames.size(); i++) {
             WsGetMembershipsResults wsGetMembershipsResultsDummy = new WsGetMembershipsResults();
             wsGetMembershipsResults.add(wsGetMembershipsResultsDummy);
         }
@@ -1008,7 +1041,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         WsMembership[] wsMemberships = new WsMembership[groupNames.size()];
         WsMembership wsMembership = new WsMembership();
 
-        for(int i = 0; i < membership.size(); i++){
+        for (int i = 0; i < membership.size(); i++) {
             if (membership.get(i) != null) {
                 wsMembership.setMembershipId(membership.get(i).getIdentifier());
                 wsResultMeta.setResultCode(SUCCESS);
@@ -1052,7 +1085,7 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
                     }
                 }
 
-                Integer offset = pageNumber - 1;
+                int offset = pageNumber - 1;
                 if (members.size() >= pageSize) {
                     members = members.subList(offset * pageSize, (offset + 1) * pageSize);
                 }
@@ -1363,7 +1396,6 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
         groupToSave.setWsGroup(group);
         groupToSave.setWsGroupLookup(groupLookup);
         group.setDetail(wsGroupDetail);
-
 
         WsSubjectLookup lookup = makeWsSubjectLookup(username);
 

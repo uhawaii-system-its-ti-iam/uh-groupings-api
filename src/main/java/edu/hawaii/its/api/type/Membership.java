@@ -23,6 +23,9 @@ public class Membership implements Comparable<Membership> {
     private String path;
 
     @Column
+    private String name;
+
+    @Column
     private boolean isSelfOpted = false;
 
     @Column
@@ -39,6 +42,9 @@ public class Membership implements Comparable<Membership> {
 
     @Column
     private boolean inExclude = false;
+
+    @Column
+    private boolean inOwner = false;
 
     @Column
     private boolean inBasisAndInclude = false;
@@ -104,8 +110,16 @@ public class Membership implements Comparable<Membership> {
         this.inBasis = inBasis;
     }
 
+    public void setInOwner(boolean inOwner) {
+        this.inOwner = inOwner;
+    }
+
     public boolean isInBasis() {
         return inBasis;
+    }
+
+    public boolean isInOwner() {
+        return inOwner;
     }
 
     public void setInInclude(boolean inInclude) {
@@ -140,9 +154,26 @@ public class Membership implements Comparable<Membership> {
         return path;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
     @Override
     public boolean equals(Object o) {
         return ((compareTo((Membership) o) == 0 && o instanceof Membership));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((person == null) ? 0 : person.hashCode());
+        result = prime * result + ((group == null) ? 0 : group.hashCode());
+        return result;
     }
 
     @Override
@@ -166,4 +197,5 @@ public class Membership implements Comparable<Membership> {
         }
         return -1;
     }
+
 }
