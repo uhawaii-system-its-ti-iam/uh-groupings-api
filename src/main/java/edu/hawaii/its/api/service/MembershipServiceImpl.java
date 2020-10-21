@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -207,6 +205,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         return createdPerson;
     }
+
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
@@ -448,55 +447,17 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
-            List<String> GroupPaths) throws InterruptedException {
+            List<String> GroupPaths) {
 
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
 
-        // Runnable class which threads will use to perform deletes
-        class MyRunnable implements Runnable {
-            private final int i;
-            private final String adminUsername;
-            private final String userToRemove;
-            private final List<String> GroupPaths;
-
-            public MyRunnable(int iT, String adminUsernameT, String userToRemoveT, List<String> GroupPathsT) {
-                i = iT;
-                adminUsername = adminUsernameT;
-                userToRemove = userToRemoveT;
-                GroupPaths = GroupPathsT;
-            }
-
-            public void run() {
-
-                System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
-                String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-                WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
-                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
-                try {
-                    return;
-                } catch (Exception e) {
-                    System.out.println("Thread Failed");
-                }
-            }
-        }
-
-        // Creating a thread list which is populated with a thread for each removal that needs to be done.
-        List<Thread> threads = new ArrayList<Thread>();
         for (int i = 0; i < GroupPaths.size(); i++) {
-            //creating runnable object containing the data needed for each individual delete.
-            MyRunnable master = new MyRunnable(i, adminUsername, userToRemove, GroupPaths);
-            Thread curr = new Thread(master);
-            threads.add(curr);
-        }
-        // Starting all of the created threads.
-        for (int i = 0; i < threads.size(); i++) {
-            threads.get(i).start();
-        }
-        // Waiting to return result until every thread in the list has completed running.
-        for (int i = 0; i < threads.size(); i++) {
-            threads.get(i).join();
+            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
+            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
+            WsDeleteMemberResults deleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
         }
         return result;
     }
@@ -509,23 +470,21 @@ public class MembershipServiceImpl implements MembershipService {
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
 
-        if (!includeIdentifier.get(0).equals("empty")) {
+        if(!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
-        if (!excludeIdentifier.get(0).equals("empty")) {
+        if(!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
