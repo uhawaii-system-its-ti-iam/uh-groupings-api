@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.GroupingsServiceResult;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -19,9 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
@@ -204,11 +204,12 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return grouperFactoryService.getSyncDestinations();
     }
 
-    // Turn the ability for users to opt-in to a grouping on or off.
+    /**
+     * Turn the ability for users to opt-in to a grouping on or off.
+     */
     @Override
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername,
             boolean isOptInOn) {
-        
         List<GroupingsServiceResult> results = new ArrayList<>();
 
         if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
@@ -222,7 +223,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return results;
     }
 
-    // Turn the ability for users to opt-out of a grouping on or off.
+    /**
+     * Turn the ability for users to opt-out of a grouping on or off.
+     */
     @Override
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
             boolean isOptOutOn) {
@@ -245,7 +248,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
             String attributeName, boolean turnAttributeOn) {
-
         GroupingsServiceResult gsr;
 
         String verb = "removed from ";
@@ -408,7 +410,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
 
-        if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService
+                .isAdmin(ownerUsername)) {
 
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }

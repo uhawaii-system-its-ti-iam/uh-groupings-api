@@ -2,10 +2,6 @@ package edu.hawaii.its.api.type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "groups")
@@ -69,7 +68,6 @@ public class Group implements Comparable<Group> {
     public boolean isMember(Person person) {
         return members.contains(person);
     }
-
 
     @JsonIgnore
     @Transient
@@ -135,13 +133,10 @@ public class Group implements Comparable<Group> {
         if (pathComp != 0) {
             return pathComp;
         }
-
         int size0 = getMembers().size();
         int size1 = group.getMembers().size();
         if (size0 != size1) {
-            Integer i0 = size0;
-            Integer i1 = size1;
-            return i0.compareTo(i1);
+            return Integer.compare(size0, size1);
         }
 
         for (int i = 0; i < size0; i++) {
