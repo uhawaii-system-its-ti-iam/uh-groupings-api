@@ -495,7 +495,12 @@ public class MembershipServiceImpl implements MembershipService {
         }
         // Waiting to return result until every thread in the list has completed running.
         for (int i = 0; i < threads.size(); i++) {
-            threads.get(i).join();
+            try {
+                threads.get(i).join();
+            }
+            catch(InterruptedException e){
+                System.out.println("Thread Interrupted.");
+            }
         }
         return result;
     }
