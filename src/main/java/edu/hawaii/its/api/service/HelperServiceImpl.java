@@ -11,7 +11,6 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -309,22 +308,7 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-<<<<<<< HEAD
         return new GenericServiceResult("result", grouperFS.getSyncDestinations());
     }
-
-    /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
-=======
->>>>>>> Comment out copius amounts of code
-        WsGetGrouperPrivilegesLiteResult result =
-                membershipService.getGrouperPrivilege(currentUser, PRIVILEGE_OPT_OUT, path);
-        return new GenericServiceResult("result", result);
-<<<<<<< HEAD
-    }*/
-=======
-
-    }
->>>>>>> Comment out copius amounts of code
 }
 

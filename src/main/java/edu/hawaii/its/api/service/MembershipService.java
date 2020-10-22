@@ -18,7 +18,7 @@ public interface MembershipService {
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
     List<AddResult>addGroupMemberr(String ownerUsername, String groupPath, List<String> uids);
-    
+
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
 
