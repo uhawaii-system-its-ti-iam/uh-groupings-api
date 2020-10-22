@@ -32,7 +32,8 @@ public interface MembershipService {
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
-    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
+    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths)
+            throws InterruptedException;
 
     List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier);

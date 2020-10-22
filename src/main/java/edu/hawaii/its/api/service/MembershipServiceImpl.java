@@ -447,17 +447,55 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
-            List<String> GroupPaths) {
+            List<String> GroupPaths) throws InterruptedException {
 
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
 
+        // Runnable class which threads will use to perform deletes
+        class MyRunnable implements Runnable {
+            private final int i;
+            private final String adminUsername;
+            private final String userToRemove;
+            private final List<String> GroupPaths;
+
+            public MyRunnable(int iT, String adminUsernameT, String userToRemoveT, List<String> GroupPathsT) {
+                i = iT;
+                adminUsername = adminUsernameT;
+                userToRemove = userToRemoveT;
+                GroupPaths = GroupPathsT;
+            }
+
+            public void run() {
+
+                System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+                String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
+                WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
+                WsDeleteMemberResults deleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+                try {
+                    return;
+                } catch (Exception e) {
+                    System.out.println("Thread Failed.");
+                }
+            }
+        }
+
+        // Creating a thread list which is populated with a thread for each removal that needs to be done.
+        List<Thread> threads = new ArrayList<Thread>();
         for (int i = 0; i < GroupPaths.size(); i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
-            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-            WsDeleteMemberResults deleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
-            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            //creating runnable object containing the data needed for each individual delete.
+            MyRunnable master = new MyRunnable(i, adminUsername, userToRemove, GroupPaths);
+            Thread curr = new Thread(master);
+            threads.add(curr);
+        }
+        // Starting all of the created threads.
+        for (int i = 0; i < threads.size(); i++) {
+            threads.get(i).start();
+        }
+        // Waiting to return result until every thread in the list has completed running.
+        for (int i = 0; i < threads.size(); i++) {
+            threads.get(i).join();
         }
         return result;
     }
