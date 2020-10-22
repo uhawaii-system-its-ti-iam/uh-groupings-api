@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -207,6 +205,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         return createdPerson;
     }
+
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
@@ -477,7 +476,7 @@ public class MembershipServiceImpl implements MembershipService {
                 try {
                     return;
                 } catch (Exception e) {
-                    System.out.println("Thread Failed");
+                    System.out.println("Thread Failed.");
                 }
             }
         }
@@ -509,23 +508,21 @@ public class MembershipServiceImpl implements MembershipService {
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
 
-        if (!includeIdentifier.get(0).equals("empty")) {
+        if(!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
-        if (!excludeIdentifier.get(0).equals("empty")) {
+        if(!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }

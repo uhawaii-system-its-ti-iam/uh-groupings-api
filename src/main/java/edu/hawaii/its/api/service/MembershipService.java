@@ -44,7 +44,7 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> optOut(String username, String groupingPath);
 
-    List<GroupingsServiceResult> optIn(String username, String grouyoutubegPath, String uid);
+    List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
 
     List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
 
