@@ -12,6 +12,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -173,20 +176,27 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private GroupingAssignmentService groupingAssignmentService;
 
     /**
-     * As owner get all sync-destinations of grouping at path.
+     * @param currentUsername, a string containing the username of the user.
+     * @param path,            string containing the path of the grouping being accessed.
+     * @return finSyncdestList, a list of SyncDestination objects containing the sync destinations
+     * <p>
+     * Get's all the sync destination for a specific grouping.
      */
     @Override
-    public List<SyncDestination> getAllSyncDestinations(String owner, String path) {
-        if (memberAttributeService.isOwner(owner) || memberAttributeService.isSuperuser(owner)) {
-            Grouping grouping = groupingAssignmentService.getGrouping(path, owner);
-            List<SyncDestination> finSyncDestList = getAllSyncDestinations();
-            for (SyncDestination dest : finSyncDestList) {
-                dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
-            }
-            return finSyncDestList;
-        } else {
+    public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
+
+        if (!memberAttributeService.isAdmin(currentUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
+        List<SyncDestination> finSyncDestList = getAllSyncDestinations();
+
+        for (SyncDestination dest : finSyncDestList) {
+            dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
+        }
+
+        return finSyncDestList;
     }
 
     @Override
@@ -201,15 +211,16 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername,
             boolean isOptInOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
-            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
-            return results;
-        } else {
+
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
+        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
+        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
+
+        return results;
     }
 
     /**
@@ -218,15 +229,17 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
             boolean isOptOutOn) {
+
         List<GroupingsServiceResult> results = new ArrayList<>();
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOutOn));
-            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
-            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
-        } else {
+
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOutOn));
+        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
+        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
+
         return results;
     }
 
@@ -241,37 +254,39 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         if (turnAttributeOn) {
             verb = "added to ";
         }
+
         String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
 
-        if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
-            boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
-            if (turnAttributeOn) {
-                if (!isHasAttribute) {
-                    assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
-
-                    gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
-
-                    membershipService.updateLastModified(groupPath);
-                } else {
-                    gsr = helperService
-                            .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
-                }
-            } else {
-                if (isHasAttribute) {
-                    assignGroupAttributes(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupPath);
-
-                    gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
-
-                    membershipService.updateLastModified(groupPath);
-                } else {
-                    gsr = helperService
-                            .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
-                }
-            }
-        } else {
+        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
+
+        if (turnAttributeOn) {
+            if (!isHasAttribute) {
+                assignGroupAttributes(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupPath);
+
+                gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
+
+                membershipService.updateLastModified(groupPath);
+            } else {
+                gsr = helperService
+                        .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
+            }
+        } else {
+            if (isHasAttribute) {
+                assignGroupAttributes(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupPath);
+
+                gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
+
+                membershipService.updateLastModified(groupPath);
+            } else {
+                gsr = helperService
+                        .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
+            }
+        }
+
         return gsr;
     }
 
@@ -294,7 +309,11 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     /**
-     * Get all sync-destinations of grouping.
+     * @param grouping, contains the grouping to assign sync destinations and their attributes to.
+     * @return syncDestinations, list of sync destinations related to the grouping
+     * <p>
+     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
+     * person requesting the information is an owner or superuser as that has already been checked.
      */
     @Override
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
@@ -391,13 +410,15 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
 
-        if (memberAttributeService.isOwner(groupPath, ownerUsername) || memberAttributeService.isAdmin(ownerUsername)) {
-            grouperFactoryService.updateGroupDescription(groupPath, description);
+        if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService
+                .isAdmin(ownerUsername)) {
 
-            gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
-        } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+
+        grouperFactoryService.updateGroupDescription(groupPath, description);
+
+        gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
 
         return gsr;
     }

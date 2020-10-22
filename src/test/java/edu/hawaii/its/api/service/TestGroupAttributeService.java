@@ -274,6 +274,7 @@ public class TestGroupAttributeService {
             optInFail = new ArrayList<>();
             optInFail.add(gsre.getGsr());
         }
+
         assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
