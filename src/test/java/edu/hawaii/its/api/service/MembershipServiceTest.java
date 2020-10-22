@@ -444,7 +444,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void removeFromGroupsTest() {
+    public void removeFromGroupsTest() throws InterruptedException {
         String userToRemove = users.get(0).getUsername();
         List<String> GroupPaths = new ArrayList<String>();
         GroupPaths.add(GROUPING_1_PATH);
