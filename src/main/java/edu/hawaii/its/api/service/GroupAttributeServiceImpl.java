@@ -12,9 +12,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -176,11 +173,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private GroupingAssignmentService groupingAssignmentService;
 
     /**
-     * @param currentUsername, a string containing the username of the user.
-     * @param path,            string containing the path of the grouping being accessed.
-     * @return finSyncdestList, a list of SyncDestination objects containing the sync destinations
-     * <p>
-     * Get's all the sync destination for a specific grouping.
+     * Get all the sync destination for a specific grouping.
      */
     @Override
     public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
@@ -309,9 +302,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     /**
-     * @param grouping, contains the grouping to assign sync destinations and their attributes to.
-     * @return syncDestinations, list of sync destinations related to the grouping
-     * <p>
      * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
      * person requesting the information is an owner or superuser as that has already been checked.
      */
