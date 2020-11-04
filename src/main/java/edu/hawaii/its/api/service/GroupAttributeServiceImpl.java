@@ -173,7 +173,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private GroupingAssignmentService groupingAssignmentService;
 
     /**
-     * Get all the sync destination for a specific grouping.
+     * Get all the sync destinations for a specific grouping.
      */
     @Override
     public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
