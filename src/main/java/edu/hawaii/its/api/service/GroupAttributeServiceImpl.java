@@ -310,16 +310,12 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         List<SyncDestination> syncDestinations = getAllSyncDestinations();
 
         if (syncDestinations == null) {
-
-            return syncDestinations;
-        } else {
-
-            for (SyncDestination destination : syncDestinations) {
-                destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-                destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
-            }
+            return null;
         }
-
+        for (SyncDestination destination : syncDestinations) {
+            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
+        }
         return syncDestinations;
     }
 
