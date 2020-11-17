@@ -70,19 +70,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @return true if the person gets pass the grouping admins check by checking if they can get all the groupings.
      */
     public boolean isAdmin(String username) {
-        logger.info("//////////////////////////////");
-        try {
-
-            if (memberAttributeService.isAdmin(username)) {
-                logger.info("this person is an admin");
-                return true;
-            } else {
-                logger.info("this person is not an admin");
-            }
-        } catch (Exception e) {
-            logger.info("Error in getting admin info. Error message: " + e.getMessage());
-        }
-        logger.info("//////////////////////////////");
-        return false;
+        logger.info("isAdmin; username: " + username + ";");
+        return memberAttributeService.isAdmin(username);
     }
 }
