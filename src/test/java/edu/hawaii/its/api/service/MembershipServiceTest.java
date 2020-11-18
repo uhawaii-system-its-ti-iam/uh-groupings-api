@@ -148,14 +148,12 @@ public class MembershipServiceTest {
 
     @Test
     public void isUhUuidTest() {
-        //invalid UhUuid
-        Boolean result;
-        result = membershipService.isUhUuid("username");
-        assertThat(result, is(false));
-
-        //valid UhUuid
-        result = membershipService.isUhUuid("0000");
-        assertThat(result, is(true));
+        // Invalid UhUuid.
+        assertThat(membershipService.isUhUuid("username"), is(false));
+        // Valid UhUuid.
+        assertThat(membershipService.isUhUuid("0000"), is(true));
+        // Null.
+        assertThat(membershipService.isUhUuid(null), is(false));
     }
 
     @Test
@@ -238,7 +236,6 @@ public class MembershipServiceTest {
             gsr = gsre.getGsr();
         }
     }
-
 
     @Test
     public void deleteGroupMembersTest() {
