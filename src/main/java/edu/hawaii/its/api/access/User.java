@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.access;
 
-import java.util.Collection;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
 
 public class User extends org.springframework.security.core.userdetails.User {
 
@@ -11,13 +11,11 @@ public class User extends org.springframework.security.core.userdetails.User {
     private String uhUuid;
     private UhAttributes attributes;
 
-    // Constructor.
     public User(String username, String uhUuid, Collection<GrantedAuthority> authorities) {
         super(username, "", authorities);
         setUhUuid(uhUuid);
     }
 
-    // Constructor.
     public User(String username, Collection<GrantedAuthority> authorities) {
         this(username, null, authorities);
     }
