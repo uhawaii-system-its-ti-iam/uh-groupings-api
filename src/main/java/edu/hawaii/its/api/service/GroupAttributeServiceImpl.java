@@ -173,7 +173,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private GroupingAssignmentService groupingAssignmentService;
 
     /**
-     * Get all the sync destination for a specific grouping.
+     * Get all the sync destinations for a specific grouping.
      */
     @Override
     public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
@@ -310,16 +310,12 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         List<SyncDestination> syncDestinations = getAllSyncDestinations();
 
         if (syncDestinations == null) {
-
-            return syncDestinations;
-        } else {
-
-            for (SyncDestination destination : syncDestinations) {
-                destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-                destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
-            }
+            return null;
         }
-
+        for (SyncDestination destination : syncDestinations) {
+            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
+        }
         return syncDestinations;
     }
 
