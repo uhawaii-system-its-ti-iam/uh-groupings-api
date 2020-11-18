@@ -161,7 +161,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
             @RequestHeader("current_user") String currentUser,
             @PathVariable List<String> paths,
-            @PathVariable String uid) throws InterruptedException {
+            @PathVariable String uid) {
         logger.info("Entered REST removeFromGroups...");
         return ResponseEntity
                 .ok()
