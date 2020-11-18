@@ -497,7 +497,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
+     * Get the list of sync destinations.
      */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
             method = RequestMethod.GET,
@@ -513,7 +513,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * GET a response which specifies whether uid is an owner or not,
+     * Ger a response which specifies whether uid is an owner or not,
      */
     @RequestMapping(value = "/owners/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,
