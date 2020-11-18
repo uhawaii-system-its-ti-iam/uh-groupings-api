@@ -398,6 +398,11 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
+        if (memberAttributeService.isUhUuid(newAdminUsername)) {
+            action = "add user with uhUuid " + newAdminUsername + " to " + GROUPING_ADMINS;
+            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
+        }
+
         if (memberAttributeService.isSuperuser(currentAdminUsername)) {
             if (memberAttributeService.isAdmin(newAdminUsername)) {
                 return helperService.makeGroupingsServiceResult(
@@ -420,6 +425,11 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action;
         action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
+        if (memberAttributeService.isUhUuid(adminToDeleteUsername)) {
+
+            action = "delete user with uhUuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
+            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
+        }
 
         if (memberAttributeService.isSuperuser(adminUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
@@ -462,9 +472,7 @@ public class MembershipServiceImpl implements MembershipService {
                 WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
                 WsDeleteMemberResults deleteMemberResults =
                         grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
-                synchronized(result) {
-                    result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
-                }
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
                 try {
                     return;
                 } catch (Exception e) {
@@ -475,7 +483,6 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Creating a thread list which is populated with a thread for each removal that needs to be done.
         List<Thread> threads = new ArrayList<Thread>();
-
         for (int i = 0; i < GroupPaths.size(); i++) {
             //creating runnable object containing the data needed for each individual delete.
             MyRunnable master = new MyRunnable(i, adminUsername, userToRemove, GroupPaths);
