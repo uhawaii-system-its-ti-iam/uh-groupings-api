@@ -13,17 +13,14 @@ public class UhCasAttributes implements UhAttributes {
     private final String username; // CAS login username.
     private final Map<?, ?> map; // Original CAS results.
 
-    // Constructor.
     public UhCasAttributes() {
         this(new HashMap<>());
     }
 
-    // Constructor.
     public UhCasAttributes(Map<?, ?> map) {
         this("", map);
     }
 
-    // Constructor.
     public UhCasAttributes(String username, Map<?, ?> map) {
         this.username = username != null ? username : "";
         this.map = map;
@@ -62,28 +59,22 @@ public class UhCasAttributes implements UhAttributes {
     @Override
     public String getUid() {
         List<String> values = uhAttributeMap.get("uid");
-        if (values != null) {
-            // Check expected case first.
-            if (values.size() == 1) {
-                return values.get(0); // We are done.
-            }
-
-            if (values.size() > 1) {
-                // More than one uid in the results.
-                // Try to match up with the username.
-                for (String s : values) {
-                    if (s.equals(getUsername())) {
-                        return s;
-                    }
+        if (null == values) {
+            return "";
+        }
+        if (values.size() == 1) {
+            return values.get(0);
+        }
+        // If theres more than one uid in the results, try to match one with username.
+        if (values.size() > 1) {
+            for (String s : values) {
+                if (s.equals(getUsername())) {
+                    return s;
                 }
-
-                // Couldn't match up username with uid,
-                // so just return first value.
-                return values.get(0); // We are done.
             }
         }
-
-        return ""; // Didn't find anything.
+        // If couldn't match up username with uid, just return the first value.
+        return values.get(0);
     }
 
     @Override
