@@ -386,6 +386,55 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
+    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> GroupPaths, String userToRemove) {
+
+        List<WsDeleteMemberResults> result= new ArrayList<WsDeleteMemberResults>();
+        class MyRunnable implements Runnable {
+            private final int currGroup;
+            private final String userToRemove;
+            private final List<String> GroupPaths;
+
+            public MyRunnable(int currGroupT, String userToRemoveT, List<String> GroupPathsT) {
+                currGroup = currGroupT;
+                userToRemove = userToRemoveT;
+                GroupPaths = GroupPathsT;
+            }
+            public void run() {
+                try {
+                    synchronized (result) {
+                        result.add(makeWsDeleteMemberResults(GroupPaths.get(currGroup), userToRemove));
+                    }
+                } catch (Exception e) {
+                    System.out.println("Thread Failed.");
+                }
+            }
+        }
+
+        // Creating a thread list which is populated with a thread for each removal that needs to be done.
+        List<Thread> threads = new ArrayList<Thread>();
+        for (int currGroup = 0; currGroup < GroupPaths.size(); currGroup++) {
+            //creating runnable object containing the data needed for each individual delete.
+            MyRunnable master = new MyRunnable(currGroup, userToRemove, GroupPaths);
+            Thread curr = new Thread(master);
+            threads.add(curr);
+            System.out.println("Thread " + currGroup + " created.");
+        }
+        // Starting all of the created threads.
+        for (int i = 0; i < threads.size(); i++) {
+            threads.get(i).start();
+        }
+        // Waiting to return result until every thread in the list has completed running.
+        for (int i = 0; i < threads.size(); i++) {
+            try {
+                threads.get(i).join();
+            } catch (InterruptedException e) {
+                System.out.println("Thread Interrupted.");
+            }
+        }
+        return result;
+    }
+
+    @Override
     public WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
             String memberToDelete) {
         if (isUuid(memberToDelete)) {
