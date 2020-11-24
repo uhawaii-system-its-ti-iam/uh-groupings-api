@@ -175,8 +175,10 @@ public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    //-------------------------------------------------------------
     @Value("${groupings.api.success_allowed}")
     private String SUCCESS_ALLOWED;
+    //-------------------------------------------------------------
 
     @Value("$groupings.api.stem}")
     private String STEM;
