@@ -66,12 +66,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     @Value("${groupings.api.attribute_assign_id_size}")
     private Integer ATTRIBUTES_ASSIGN_ID_SIZE;
-
+/*------------------------------------------------------------- */
     @Value("${grouper.api.sync.destinations.location}")
     private String SYNC_DESTINATIONS_LOCATION;
 
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
+/* ---------------------------------------------------------------- */
 
     @Value("${groupings.api.composite_type.complement}")
     private String COMPLEMENT;
