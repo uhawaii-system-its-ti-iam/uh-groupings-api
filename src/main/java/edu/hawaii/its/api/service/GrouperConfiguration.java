@@ -19,6 +19,8 @@ public class GrouperConfiguration {
         return api;
     }
 
+
+
     @Value("${groupings.api.attributes}") private String ATTRIBUTES;
     public String getAttributes() {
         return api.get("attributes");

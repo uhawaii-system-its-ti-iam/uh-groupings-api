@@ -1,14 +1,16 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.SyncDestination;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,89 +22,37 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
-import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupAttributeService {
 
-    @Value("${groupings.api.test.grouping_many}")
-    private String GROUPING;
-    @Value("${groupings.api.test.grouping_many_basis}")
-    private String GROUPING_BASIS;
-    @Value("${groupings.api.test.grouping_many_include}")
-    private String GROUPING_INCLUDE;
-    @Value("${groupings.api.test.grouping_many_exclude}")
-    private String GROUPING_EXCLUDE;
-    @Value("${groupings.api.test.grouping_many_owners}")
-    private String GROUPING_OWNERS;
+    @Value("${groupings.api.test.grouping_many}") private String GROUPING;
+    @Value("${groupings.api.test.grouping_many_include}") private String GROUPING_INCLUDE;
+    @Value("${groupings.api.test.grouping_many_exclude}") private String GROUPING_EXCLUDE;
+    @Value("${groupings.api.test.usernames}") private String[] username;
 
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
-    @Value("Test Many Groups In Basis")
-    private String DEFAULT_DESCRIPTION;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
-    @Value("${groupings.api.test.usernames}")
-    private String[] username;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
-
-    @Autowired
-    private GrouperFactoryService grouperFactoryService;
-
-    @Autowired
-    private GroupAttributeService groupAttributeService;
-
-    @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    public Environment env; // Just for the settings check.
+    @Autowired private GrouperConfiguration grouperConfiguration;
+    @Autowired private GrouperFactoryService grouperFactoryService;
+    @Autowired private GroupAttributeService groupAttributeService;
+    @Autowired private MembershipService membershipService;
+    @Autowired private MemberAttributeService memberAttributeService;
+    @Autowired public Environment env; // Just for the settings check.
 
     @PostConstruct
     public void init() {
@@ -116,7 +66,8 @@ public class TestGroupAttributeService {
 
     @Before
     public void setUp() throws IOException, MessagingException {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
+        groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, username[0], grouperConfiguration.getListserv(), true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
@@ -141,51 +92,59 @@ public class TestGroupAttributeService {
     @Test
     public void getSyncDestinationsTest() {
 
-        // test with admin
-        List<SyncDestination> destinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
+        // test with grouperConfiguration.getTestAdminUser()
+
+        List<SyncDestination> destinations =
+                groupAttributeService.getAllSyncDestinations(grouperConfiguration.getTestAdminUser()
+                        , GROUPING);
         assertTrue(destinations.size() > 0);
 
         // test with owner
         destinations = groupAttributeService.getAllSyncDestinations(username[0], GROUPING);
         assertTrue(destinations.size() > 0);
 
-        // Test with a user who isn't an owner or admin
+        // Test with a user who isn't an owner or grouperConfiguration.getTestAdminUser()
+
         try {
             groupAttributeService.getAllSyncDestinations(username[5], GROUPING);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
     }
-    
+
     @Test
     public void optOutPermissionTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
     }
 
     @Test
     public void optInPermissionTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
     }
 
     @Test
     public void hasListservTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
     }
 
     @Test
     public void changeListServStatusTest() {
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
 
         //get last modified time
-        WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        WsGetAttributeAssignmentsResults attributes =
+                groupAttributeService.attributeAssignmentsResults(grouperConfiguration.getAssignTypeGroup()
+                        , GROUPING, grouperConfiguration.getYyyymmddthhmm()
+                );
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
+        groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, username[0], grouperConfiguration.getListserv(), true);
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
 
         //get last modified time and make sure that it hasn't changed
         try {
@@ -193,12 +152,15 @@ public class TestGroupAttributeService {
         } catch (InterruptedException e) {
             fail();
         }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        attributes = groupAttributeService.attributeAssignmentsResults(grouperConfiguration.getAssignTypeGroup()
+                , GROUPING, grouperConfiguration.getYyyymmddthhmm()
+        );
         String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertThat(lastModTime2, is(lastModTime));
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING,LISTSERV));
+        groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, username[0], grouperConfiguration.getListserv(), false);
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
 
         //todo get last modified time and make sure that it has changed
         try {
@@ -206,12 +168,15 @@ public class TestGroupAttributeService {
         } catch (InterruptedException e) {
             fail();
         }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        attributes = groupAttributeService.attributeAssignmentsResults(grouperConfiguration.getAssignTypeGroup()
+                , GROUPING, grouperConfiguration.getYyyymmddthhmm()
+        );
         String lastModTime3 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertNotEquals(lastModTime2, lastModTime3);
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, username[0], grouperConfiguration.getListserv(), false);
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
 
         //todo get last modified time and make sure that it hasn't changed
         try {
@@ -219,25 +184,32 @@ public class TestGroupAttributeService {
         } catch (InterruptedException e) {
             fail();
         }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        attributes = groupAttributeService.attributeAssignmentsResults(grouperConfiguration.getAssignTypeGroup()
+                , GROUPING, grouperConfiguration.getYyyymmddthhmm()
+        );
         String lastModTime4 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertThat(lastModTime4, is(lastModTime3));
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,true);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING, username[1], grouperConfiguration.getListserv(), true);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
+        groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, username[0], grouperConfiguration.getListserv(), true);
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,false);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING, username[1], grouperConfiguration.getListserv(), false);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv()));
     }
 
     @Test
@@ -254,17 +226,17 @@ public class TestGroupAttributeService {
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
@@ -275,10 +247,11 @@ public class TestGroupAttributeService {
             optInFail.add(gsre.getGsr());
         }
 
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
+        assertTrue(optInFail.get(0).getResultCode().startsWith(grouperConfiguration.getFailure()
+        ));
         assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
         groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
 
@@ -286,23 +259,27 @@ public class TestGroupAttributeService {
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], true);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(optInFail.get(0).getResultCode().startsWith(grouperConfiguration.getFailure()
+        ));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
         try {
             optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], false);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertTrue(optInFail.get(0).getResultCode().startsWith(grouperConfiguration.getFailure()
+        ));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptIn()));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
     }
@@ -316,17 +293,17 @@ public class TestGroupAttributeService {
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -337,10 +314,11 @@ public class TestGroupAttributeService {
             optOutFail.add(gsre.getGsr());
         }
 
-        assertTrue(optOutFail.get(0).getResultCode().startsWith(FAILURE));
+        assertTrue(optOutFail.get(0).getResultCode().startsWith(grouperConfiguration.getFailure()
+        ));
         assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
@@ -349,62 +327,73 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], true);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
 
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
         try {
             groupAttributeService.changeOptOutStatus(GROUPING, username[1], false);
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
 
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getOptOut()));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
 
     }
 
     @Test
-    public void updateDescriptionTest(){
+    public void updateDescriptionTest() {
 
         GroupingsServiceResult groupingsServiceResult;
 
         // Sets the description to the default
-        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+        String defaultDescription = "Test Many Groups In Basis";
+        groupAttributeService.updateDescription(GROUPING, grouperConfiguration.getTestAdminUser()
+                , defaultDescription);
 
         //Test to make sure description is set to the default.
         String description = grouperFactoryService.getDescription(GROUPING);
-        assertThat(DEFAULT_DESCRIPTION, containsString(description));
+        assertThat(defaultDescription, containsString(description));
 
-        //Try to update grouping while user isn't owner or admin
+        //Try to update grouping while user isn't owner or grouperConfiguration.getTestAdminUser()
+
         try {
-            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
+            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], defaultDescription
+                    + " modified");
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
 
-        //Testing with admin
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        //Testing with grouperConfiguration.getTestAdminUser()
+
+        groupingsServiceResult = groupAttributeService
+                .updateDescription(GROUPING, grouperConfiguration.getTestAdminUser(), defaultDescription + " modified");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         //Testing with owner
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        groupingsServiceResult =
+                groupAttributeService.updateDescription(GROUPING, username[0], defaultDescription + " modifiedTwo");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         // Test with empty string
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        groupingsServiceResult =
+                groupAttributeService.updateDescription(GROUPING, grouperConfiguration.getTestAdminUser(), "");
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         //Revert any changes
-        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+        groupAttributeService.updateDescription(GROUPING, grouperConfiguration.getTestAdminUser(), defaultDescription);
 
     }
 
@@ -412,9 +401,11 @@ public class TestGroupAttributeService {
     @Ignore
     @Test
     public void changeGroupAttributeStatusTest() {
-        boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
-        boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
+        boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv());
+        GroupingsServiceResult gsr = groupAttributeService
+                .changeGroupAttributeStatus(GROUPING, grouperConfiguration.getTestAdminUser(),
+                        grouperConfiguration.getListserv(), true);
+        boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, grouperConfiguration.getListserv());
         assertTrue(true);
     }
 }
