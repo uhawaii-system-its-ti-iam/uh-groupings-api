@@ -81,7 +81,7 @@ public class GrouperConfiguration {
     
     @Value("${groupings.api.yyyymmddThhmm}") private String YYYYMMDDTHHMM;
     public String getYyyymmddthhmm() {
-        return api.get("yyyymmddthhmm");
+        return api.get("yyyymmddThhmm");
     }
     
     @Value("${groupings.api.uhgrouping}") private String UHGROUPING;
