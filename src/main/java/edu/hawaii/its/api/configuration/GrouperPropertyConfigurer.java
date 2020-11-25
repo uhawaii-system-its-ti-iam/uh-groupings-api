@@ -1,17 +1,18 @@
 package edu.hawaii.its.api.configuration;
 
-import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
+import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 @Configuration
 public class GrouperPropertyConfigurer {
 
-    @Autowired private Environment env;
+    @Autowired
+    private Environment env;
 
     @PostConstruct
     public void init() {

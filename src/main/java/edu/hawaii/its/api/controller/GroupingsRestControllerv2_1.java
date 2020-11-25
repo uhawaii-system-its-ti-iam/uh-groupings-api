@@ -45,12 +45,24 @@ import java.util.Map;
 public class GroupingsRestControllerv2_1 {
 
     private static final Log logger = LogFactory.getLog(GroupingsRestControllerv2_1.class);
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private GroupAttributeService groupAttributeService;
-    @Autowired private GroupingAssignmentService groupingAssignmentService;
-    @Autowired private MemberAttributeService memberAttributeService;
-    @Autowired private MembershipService membershipService;
-    @Autowired private HelperService helperService;
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
+
+    @Autowired
+    private GroupAttributeService groupAttributeService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private MemberAttributeService memberAttributeService;
+
+    @Autowired
+    private MembershipService membershipService;
+
+    @Autowired
+    private HelperService helperService;
+
     @Value("${app.groupings.controller.uuid}")
     private String uuid;
 
@@ -325,7 +337,8 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + grouperConfiguration.getExclude(), uids));
+                .body(membershipService
+                        .deleteGroupMembers(currentUser, path + grouperConfiguration.getExclude(), uids));
     }
 
     /**

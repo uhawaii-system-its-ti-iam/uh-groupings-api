@@ -63,12 +63,21 @@ import java.util.stream.Collectors;
 @Profile(value = { "default", "dev", "localTest" })
 public class GrouperFactoryServiceImplLocal implements GrouperFactoryService {
 
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private GroupingRepository groupingRepository;
-    @Autowired private GroupRepository groupRepository;
-    @Autowired private MembershipRepository membershipRepository;
-    @Autowired private PersonRepository personRepository;
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
 
+    @Autowired
+    private GroupingRepository groupingRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private MembershipRepository membershipRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
+   
     public boolean isUuid(String username) {
         return username.matches("\\d+");
     }

@@ -5,9 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -22,7 +19,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
@@ -38,6 +34,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -50,75 +47,25 @@ import static org.junit.Assert.fail;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GroupingAssignmentServiceTest {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.test.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.test.name}")
-    private String NAME;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID_KEY;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String UID_KEY;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME_KEY;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME_KEY;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME_KEY;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
-    @Value("${groupings.api.stale_subject_id}")
-    private String STALE_SUBJECT_ID;
-
     private static final String PATH_ROOT = "path:to:grouping";
-
     private static final String BASIS = ":basis";
-
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
     private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
 
     private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
-
-    private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
-
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
     @Autowired
-    private GroupingRepository groupingRepository;
-
+    private GrouperConfiguration grouperConfiguration;
+   
     @Autowired
     private GroupRepository groupRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
@@ -127,20 +74,15 @@ public class GroupingAssignmentServiceTest {
     private MembershipService membershipService;
 
     @Autowired
-    private GrouperFactoryService grouperFS;
-
-    @Autowired
     private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
-
     }
 
     @Test
     public void construction() {
-        //autowired
         assertNotNull(groupingAssignmentService);
     }
 
@@ -149,7 +91,7 @@ public class GroupingAssignmentServiceTest {
         try {
             groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(1).getUsername());
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         Grouping groupingOwner = groupingAssignmentService.getGrouping(GROUPING_0_PATH, users.get(0).getUsername());
         Grouping groupingAdmin = groupingAssignmentService.getGrouping(GROUPING_0_PATH, ADMIN_USER);
@@ -175,11 +117,12 @@ public class GroupingAssignmentServiceTest {
     public void getPaginatedGroupingTest() {
 
         try {
-            Grouping groupingRandom = groupingAssignmentService
+            groupingAssignmentService
                     .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 4, "name", true);
             fail("Shouldn't be here.");
         } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            assertThat(ade.getMessage(), equalTo(grouperConfiguration.getInsufficientPrivileges()
+            ));
         }
 
         Grouping groupingOwner = groupingAssignmentService
@@ -203,10 +146,10 @@ public class GroupingAssignmentServiceTest {
         assertFalse(groupingOwner.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
 
         assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(7).getName()));
-       // assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        // assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
         assertTrue(groupingAdmin.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
         assertFalse(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
-      //  assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        //  assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertFalse(groupingAdmin.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
 
         assertTrue(groupingNull.getComposite().getNames().contains(users.get(0).getName()));
@@ -234,7 +177,6 @@ public class GroupingAssignmentServiceTest {
     public void groupingsToOptTest() {
         GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
         //todo finish
-
     }
 
     @Test
@@ -242,14 +184,13 @@ public class GroupingAssignmentServiceTest {
 
         Iterable<Group> groupsIn = groupRepository.findByMembersUsername(users.get(6).getUsername());
         List<String> groupPaths = new ArrayList<>();
-        List<String> supposedGroupings = new ArrayList<>();
 
         for (Group group : groupsIn) {
             groupPaths.add(group.getPath());
         }
-        supposedGroupings
-                .addAll(groupPaths.stream().filter(groupPath -> groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*"))
-                        .collect(Collectors.toList()));
+        List<String> supposedGroupings =
+                groupPaths.stream().filter(groupPath -> groupPath.matches("[a-zA-Z0-9:]*grouping[0-9]*"))
+                        .collect(Collectors.toList());
 
         List<Grouping> groupingsIn = groupingAssignmentService.groupingsIn(groupPaths);
         List<String> groupingPaths = groupingsIn.stream().map(Grouping::getPath).collect(Collectors.toList());
@@ -264,7 +205,7 @@ public class GroupingAssignmentServiceTest {
 
     @Test
     public void getOptInGroupsTest() {
-        List<List<String>> optInPathsLists = new ArrayList<List<String>>();
+        List<List<String>> optInPathsLists = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             optInPathsLists.add(new ArrayList<>(
                     groupingAssignmentService.getOptInGroups(users.get(0).getUsername(), users.get(i).getUsername())));
@@ -290,7 +231,7 @@ public class GroupingAssignmentServiceTest {
         List<Grouping> groupingsOwned = groupingAssignmentService.groupingsOwned(groupPaths);
 
         for (int i = 0; i < groupingsOwned.size(); i++) {
-            assertTrue(groupingsOwned.get(i).getPath().equals(PATH_ROOT + i));
+            assertEquals(groupingsOwned.get(i).getPath(), PATH_ROOT + i);
         }
     }
 
@@ -396,7 +337,9 @@ public class GroupingAssignmentServiceTest {
         try {
             groupingAssignmentService.adminLists(users.get(1).getUsername());
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges()
+
+                    , is(ade.getMessage()));
         }
     }
 
@@ -498,7 +441,7 @@ public class GroupingAssignmentServiceTest {
 
         // Try to get the memberships for a user that doesn't exist.
         try {
-            membershipAssignment = groupingAssignmentService.getMembershipAssignment(username, "somenamethatNoexist");
+            groupingAssignmentService.getMembershipAssignment(username, "somenamethatNoexist");
 
         } catch (Exception e) {
             System.out.println("User doesn't exist.");
@@ -509,8 +452,11 @@ public class GroupingAssignmentServiceTest {
     public void makeGroupsTest() {
 
         WsGetMembersResults getMembersResults = new WsGetMembersResults();
-        String[] attributeNames =
-                new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeNames = new String[] { grouperConfiguration.getPersonAttributesUsername(),
+                grouperConfiguration.getPersonAttributesUhuuid(),
+                grouperConfiguration.getPersonAttributesLastName(),
+                grouperConfiguration.getPersonAttributesCompositeName(),
+                grouperConfiguration.getPersonAttributesFirstName() };
 
         // We create an array here because getMembersResults.setResults() only takes an array
         WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
@@ -541,11 +487,11 @@ public class GroupingAssignmentServiceTest {
         Group resultGroup = groups.get(GROUPING_0_PATH);
 
         for (int i = 0; i < resultGroup.getMembers().size(); i++) {
-            assertTrue(resultGroup.getMembers().get(i).getName().equals("testSubject_" + i));
+            assertEquals(resultGroup.getMembers().get(i).getName(), "testSubject_" + i);
             assertTrue(resultGroup.getNames().contains("testSubject_" + i));
-            assertTrue(resultGroup.getMembers().get(i).getUhUuid().equals("testSubject_uuid_" + i));
+            assertEquals(resultGroup.getMembers().get(i).getUhUuid(), "testSubject_uuid_" + i);
             assertTrue(resultGroup.getUhUuids().contains("testSubject_uuid_" + i));
-            assertTrue(resultGroup.getMembers().get(i).getUsername().equals("testSubject_username_" + i));
+            assertEquals(resultGroup.getMembers().get(i).getUsername(), "testSubject_username_" + i);
             assertTrue(resultGroup.getUsernames().contains("testSubject_username_" + i));
         }
     }
@@ -555,8 +501,11 @@ public class GroupingAssignmentServiceTest {
         String name = "name";
         String id = "uuid";
         String identifier = "username";
-        String[] attributeNames =
-                new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeNames = new String[] { grouperConfiguration.getPersonAttributesUsername(),
+                grouperConfiguration.getPersonAttributesUhuuid(),
+                grouperConfiguration.getPersonAttributesLastName(),
+                grouperConfiguration.getPersonAttributesCompositeName(),
+                grouperConfiguration.getPersonAttributesFirstName() };
         String[] attributeValues = new String[] { identifier, id, null, name, null };
 
         WsSubject subject = new WsSubject();
@@ -566,9 +515,9 @@ public class GroupingAssignmentServiceTest {
 
         Person person = groupingAssignmentService.makePerson(subject, attributeNames);
 
-        assertTrue(person.getName().equals(name));
-        assertTrue(person.getUhUuid().equals(id));
-        assertTrue(person.getUsername().equals(identifier));
+        assertEquals(person.getName(), name);
+        assertEquals(person.getUhUuid(), id);
+        assertEquals(person.getUsername(), identifier);
 
         assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
     }
@@ -576,16 +525,18 @@ public class GroupingAssignmentServiceTest {
     //todo Finish this test for setGroupingAttributes
     @Test
     public void setGroupingAttributesTest() {
-        Grouping grouping = new Grouping();
-        grouping = groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
+        groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
     }
 
     @Test
     public void makeGroupsNullValuesTest() {
 
         WsGetMembersResults getMembersResults = new WsGetMembersResults();
-        String[] attributeNames =
-                new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeNames = new String[] { grouperConfiguration.getPersonAttributesUsername(),
+                grouperConfiguration.getPersonAttributesUhuuid(),
+                grouperConfiguration.getPersonAttributesLastName(),
+                grouperConfiguration.getPersonAttributesCompositeName(),
+                grouperConfiguration.getPersonAttributesFirstName() };
 
         // We create an array here because getMembersResults.setResults() only takes an array
         // nullSubject... will have a null Subject Array while testSubject... will have 2 subjects with test attributes
@@ -601,13 +552,13 @@ public class GroupingAssignmentServiceTest {
         wsGroup1.setName(GROUPING_3_BASIS_PATH);
         testSubjectsGetMembersResult.setWsGroup(wsGroup1);
 
-        // Set up subjects: one null, one with STALE_SUBJECT_ID
+        // Set up subjects: one null, one with grouperConfiguration.getStaleSubjectId()
         WsSubject[] list = new WsSubject[2];
         list[1] = new WsSubject();
         list[1].setName("iDontExistAnymoreName");
         list[1].setId("iDontExistAnymoreUHUUID");
         list[1].setAttributeValues(new String[] { "iDontExistAnymoreUsername", "", "", "iDontExistAnymoreName", "" });
-        list[1].setSourceId(STALE_SUBJECT_ID);
+        list[1].setSourceId(grouperConfiguration.getStaleSubjectId());
 
         // Push to array and set results
         nullSubjectArrayGetMembersResult.setWsSubjects(null);

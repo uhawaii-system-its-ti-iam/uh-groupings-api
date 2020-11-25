@@ -14,7 +14,9 @@ import java.util.Map;
 public final class UserBuilder {
 
     private static final Log logger = LogFactory.getLog(UserBuilder.class);
-    @Autowired private AuthorizationService authorizationService;
+   
+    @Autowired
+    private AuthorizationService authorizationService;
 
     public final User make(Map<String, ?> map) {
         return make(new UhCasAttributes(map));

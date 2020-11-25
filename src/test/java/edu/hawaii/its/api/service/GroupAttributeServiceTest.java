@@ -52,10 +52,17 @@ public class GroupAttributeServiceTest {
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private GroupAttributeService groupAttributeService;
-    @Autowired private GroupingRepository groupingRepository;
-    @Autowired private DatabaseSetupService databaseSetupService;
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
+   
+    @Autowired
+    private GroupAttributeService groupAttributeService;
+
+    @Autowired
+    private GroupingRepository groupingRepository;
+
+    @Autowired
+    private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {

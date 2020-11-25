@@ -45,11 +45,17 @@ import static org.junit.Assert.assertTrue;
 
 public class GrouperFactoryServiceTest {
 
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private final GrouperFactoryServiceImplLocal grouperFactoryServiceImplLocal =
-            new GrouperFactoryServiceImplLocal();
-    @Autowired private HelperService hs;
-    @Autowired private DatabaseSetupService databaseSetupService;
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
+
+    @Autowired
+    private final GrouperFactoryServiceImplLocal grouperFactoryServiceImplLocal = new GrouperFactoryServiceImplLocal();
+   
+    @Autowired
+    private HelperService hs;
+
+    @Autowired
+    private DatabaseSetupService databaseSetupService;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;

@@ -42,17 +42,35 @@ import static org.junit.Assert.fail;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupAttributeService {
 
-    @Value("${groupings.api.test.grouping_many}") private String GROUPING;
-    @Value("${groupings.api.test.grouping_many_include}") private String GROUPING_INCLUDE;
-    @Value("${groupings.api.test.grouping_many_exclude}") private String GROUPING_EXCLUDE;
-    @Value("${groupings.api.test.usernames}") private String[] username;
+    @Value("${groupings.api.test.grouping_many}")
+    private String GROUPING;
 
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private GrouperFactoryService grouperFactoryService;
-    @Autowired private GroupAttributeService groupAttributeService;
-    @Autowired private MembershipService membershipService;
-    @Autowired private MemberAttributeService memberAttributeService;
-    @Autowired public Environment env; // Just for the settings check.
+    @Value("${groupings.api.test.grouping_many_include}")
+    private String GROUPING_INCLUDE;
+
+    @Value("${groupings.api.test.grouping_many_exclude}")
+    private String GROUPING_EXCLUDE;
+
+    @Value("${groupings.api.test.usernames}")
+    private String[] username;
+
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
+
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
+    @Autowired
+    private GroupAttributeService groupAttributeService;
+
+    @Autowired
+    private MembershipService membershipService;
+
+    @Autowired
+    private MemberAttributeService memberAttributeService;
+
+    @Autowired
+    public Environment env; // Just for the settings check.
 
     @PostConstruct
     public void init() {

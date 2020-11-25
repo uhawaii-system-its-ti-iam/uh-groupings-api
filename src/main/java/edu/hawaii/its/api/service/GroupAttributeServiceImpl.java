@@ -23,12 +23,23 @@ import java.util.List;
 public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     public static final Log logger = LogFactory.getLog(GroupAttributeServiceImpl.class);
-    @Autowired private GrouperConfiguration grouperConfiguration;
-    @Autowired private GrouperFactoryService grouperFactoryService;
-    @Autowired private HelperService helperService;
-    @Autowired private MemberAttributeService memberAttributeService;
-    @Autowired private MembershipService membershipService;
-    @Autowired private GroupingAssignmentService groupingAssignmentService;
+    @Autowired
+    private GrouperConfiguration grouperConfiguration;
+   
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+
+    @Autowired
+    private HelperService helperService;
+
+    @Autowired
+    private MemberAttributeService memberAttributeService;
+
+    @Autowired
+    private MembershipService membershipService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     /**
      * Get all the sync destinations for a specific grouping.
@@ -67,9 +78,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             throw new AccessDeniedException(grouperConfiguration.getInsufficientPrivileges());
         }
 
-        results.add(assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptIn(), groupingPath + grouperConfiguration.getInclude(), isOptInOn));
-        results.add(assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptOut(), groupingPath + grouperConfiguration.getExclude(), isOptInOn));
-        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, grouperConfiguration.getOptIn(), isOptInOn));
+        results.add(
+                assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptIn(),
+                        groupingPath + grouperConfiguration.getInclude(), isOptInOn));
+        results.add(
+                assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptOut(),
+                        groupingPath + grouperConfiguration.getExclude(), isOptInOn));
+        results.add(
+                changeGroupAttributeStatus(groupingPath, ownerUsername, grouperConfiguration.getOptIn(), isOptInOn));
 
         return results;
     }
@@ -87,9 +103,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             throw new AccessDeniedException(grouperConfiguration.getInsufficientPrivileges());
         }
 
-        results.add(assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptIn(), groupingPath + grouperConfiguration.getExclude(), isOptOutOn));
-        results.add(assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptOut(), groupingPath + grouperConfiguration.getInclude(), isOptOutOn));
-        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, grouperConfiguration.getOptOut(), isOptOutOn));
+        results.add(
+                assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptIn(),
+                        groupingPath + grouperConfiguration.getExclude(), isOptOutOn));
+        results.add(
+                assignGrouperPrivilege(grouperConfiguration.getEveryEntity(), grouperConfiguration.getPrivilegeOptOut(),
+                        groupingPath + grouperConfiguration.getInclude(), isOptOutOn));
+        results.add(
+                changeGroupAttributeStatus(groupingPath, ownerUsername, grouperConfiguration.getOptOut(), isOptOutOn));
 
         return results;
     }
@@ -123,7 +144,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 membershipService.updateLastModified(groupPath);
             } else {
                 gsr = helperService
-                        .makeGroupingsServiceResult(grouperConfiguration.getSuccess() + ", " + attributeName + " already existed", action);
+                        .makeGroupingsServiceResult(
+                                grouperConfiguration.getSuccess() + ", " + attributeName + " already existed", action);
             }
         } else {
             if (isHasAttribute) {
@@ -134,7 +156,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 membershipService.updateLastModified(groupPath);
             } else {
                 gsr = helperService
-                        .makeGroupingsServiceResult(grouperConfiguration.getSuccess() + ", " + attributeName + " did not exist", action);
+                        .makeGroupingsServiceResult(
+                                grouperConfiguration.getSuccess() + ", " + attributeName + " did not exist", action);
             }
         }
 
@@ -262,7 +285,8 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         grouperFactoryService.updateGroupDescription(groupPath, description);
 
-        gsr = helperService.makeGroupingsServiceResult(grouperConfiguration.getSuccess() + ", description updated", action);
+        gsr = helperService
+                .makeGroupingsServiceResult(grouperConfiguration.getSuccess() + ", description updated", action);
 
         return gsr;
     }
