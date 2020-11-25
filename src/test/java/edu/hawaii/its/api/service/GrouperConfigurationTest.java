@@ -77,7 +77,6 @@ public class GrouperConfigurationTest {
     @Value("${groupings.api.composite_type.intersection}") private String COMPOSITE_TYPE_INTERSECTION;
     @Value("${groupings.api.composite_type.union}") private String COMPOSITE_TYPE_UNION;
 
-
     @Test public void grouperConfigurationTest() {
         assertNotNull(grouperConfiguration.getApi());
     }

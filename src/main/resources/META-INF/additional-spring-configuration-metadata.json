@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "groupings.api.person_attributes.composite_name",
+      "type": "java.lang.String",
+      "description": "Description for groupings.api.person_attributes.composite_name."
+  }
+] }
