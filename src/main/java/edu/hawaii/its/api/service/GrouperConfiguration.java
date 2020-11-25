@@ -33,6 +33,10 @@ public class GrouperConfiguration {
     public String getForMemberships() {
         return api.get("for_memberships");
     }
+    @Value("${groupings.api.current_user}") private String CURRENT_USER;
+    public String getCurrentUser() {
+        return api.get("current_user");
+    }
 
     @Value("${groupings.api.settings}") private String SETTINGS;
     public String getSettings() {

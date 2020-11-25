@@ -1,22 +1,20 @@
 package edu.hawaii.its.api.access;
 
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.util.Strings;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import edu.hawaii.its.api.util.Strings;
+import java.util.Map;
 
 @Service
 public final class UserBuilder {
 
     private static final Log logger = LogFactory.getLog(UserBuilder.class);
-
-    @Autowired
-    private AuthorizationService authorizationService;
+    @Autowired private AuthorizationService authorizationService;
 
     public final User make(Map<String, ?> map) {
         return make(new UhCasAttributes(map));

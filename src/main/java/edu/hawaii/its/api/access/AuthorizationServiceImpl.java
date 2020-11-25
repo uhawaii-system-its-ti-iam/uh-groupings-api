@@ -11,12 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthorizationServiceImpl implements AuthorizationService {
 
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
-
+    @Autowired private MemberAttributeService memberAttributeService;
+    @Autowired private GroupingAssignmentService groupingAssignmentService;
     private static final Log logger = LogFactory.getLog(AuthorizationServiceImpl.class);
 
     /**

@@ -3,6 +3,7 @@ package edu.hawaii.its.api.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GrouperConfiguration;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -44,45 +45,14 @@ import java.util.Map;
 public class GroupingsRestControllerv2_1 {
 
     private static final Log logger = LogFactory.getLog(GroupingsRestControllerv2_1.class);
-
+    @Autowired private GrouperConfiguration grouperConfiguration;
+    @Autowired private GroupAttributeService groupAttributeService;
+    @Autowired private GroupingAssignmentService groupingAssignmentService;
+    @Autowired private MemberAttributeService memberAttributeService;
+    @Autowired private MembershipService membershipService;
+    @Autowired private HelperService helperService;
     @Value("${app.groupings.controller.uuid}")
     private String uuid;
-
-    @Value("${app.iam.request.form}")
-    private String requestForm;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
-    @Autowired
-    private GroupAttributeService groupAttributeService;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
-    private HelperService helperService;
 
     @PostConstruct
     public void init() {
@@ -270,7 +240,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST includeMembers...");
-        path = path + INCLUDE;
+        path = path + grouperConfiguration.getInclude();
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMember(currentUser, path, uid));
@@ -284,7 +254,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) throws IOException, MessagingException {
         logger.info("Entered REST includeMultipleMembers...");
-        path = path + INCLUDE;
+        path = path + grouperConfiguration.getInclude();
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMembers(currentUser, path, uids));
@@ -298,7 +268,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable String uid) {
         logger.info("Entered REST excludeMembers...");
-        path = path + EXCLUDE;
+        path = path + grouperConfiguration.getExclude();
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMember(currentUser, path, uid));
@@ -312,7 +282,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) throws IOException, MessagingException {
         logger.info("Entered REST excludeMultipleMembers...");
-        path = path + EXCLUDE;
+        path = path + grouperConfiguration.getExclude();
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMembers(currentUser, path, uids));
@@ -328,7 +298,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteInclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMember(currentUser, path + INCLUDE, uid));
+                .body(membershipService.deleteGroupMember(currentUser, path + grouperConfiguration.getInclude(), uid));
     }
 
     /**
@@ -341,7 +311,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
+                .body(membershipService.deleteGroupMember(currentUser, path + grouperConfiguration.getExclude(), uid));
     }
 
     /**
@@ -355,7 +325,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST deleteExclude");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
+                .body(membershipService.deleteGroupMembers(currentUser, path + grouperConfiguration.getExclude(), uids));
     }
 
     /**
@@ -460,9 +430,9 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST enablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (OPT_IN.equals(preferenceId))
+        if (grouperConfiguration.getOptIn().equals(preferenceId))
             results = groupAttributeService.changeOptInStatus(path, currentUser, true);
-        else if (OPT_OUT.equals(preferenceId))
+        else if (grouperConfiguration.getOptOut().equals(preferenceId))
             results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
         else
             throw new UnsupportedOperationException();
@@ -485,9 +455,9 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST disablePreference");
         List<GroupingsServiceResult> results = new ArrayList<>();
 
-        if (OPT_IN.equals(preferenceId))
+        if (grouperConfiguration.getOptIn().equals(preferenceId))
             results = groupAttributeService.changeOptInStatus(path, currentUser, false);
-        else if (OPT_OUT.equals(preferenceId))
+        else if (grouperConfiguration.getOptOut().equals(preferenceId))
             results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
         else
             throw new UnsupportedOperationException();

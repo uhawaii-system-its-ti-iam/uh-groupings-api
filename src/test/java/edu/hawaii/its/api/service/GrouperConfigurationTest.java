@@ -18,6 +18,7 @@ public class GrouperConfigurationTest {
 
     @Autowired GrouperConfiguration grouperConfiguration;
 
+    @Value("${groupings.api.current_user}") private String CURRENT_USER;
     @Value("${groupings.api.attributes}") private String ATTRIBUTES;
     @Value("${groupings.api.for_groups}") private String FOR_GROUPS;
     @Value("${groupings.api.for_memberships}") private String FOR_MEMBERSHIPS;
@@ -83,6 +84,9 @@ public class GrouperConfigurationTest {
 
     @Test public void getAttributesTest() {
         assertEquals(ATTRIBUTES, grouperConfiguration.getAttributes());
+    }
+    @Test public void getCurrentUserTest() {
+        assertEquals(CURRENT_USER, grouperConfiguration.getCurrentUser());
     }
 
     @Test public void getForGroupsTest() {
