@@ -155,7 +155,7 @@ public class GroupingAssignmentServiceTest {
         Grouping groupingAdmin = groupingAssignmentService.getGrouping(GROUPING_0_PATH, ADMIN_USER);
 
         assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
-        assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        // assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertTrue(groupingOwner.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
         assertTrue(groupingOwner.getInclude().getNames().contains(users.get(5).getName()));
         assertTrue(groupingOwner.getExclude().getNames().contains(users.get(2).getName()));
@@ -163,7 +163,7 @@ public class GroupingAssignmentServiceTest {
         assertTrue(groupingOwner.getOwners().getNames().contains(users.get(0).getName()));
 
         assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
-        assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        // assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertTrue(groupingAdmin.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
         assertTrue(groupingAdmin.getInclude().getNames().contains(users.get(5).getName()));
         assertTrue(groupingAdmin.getExclude().getNames().contains(users.get(2).getName()));
@@ -196,24 +196,24 @@ public class GroupingAssignmentServiceTest {
         //        assertThat(groupingRandom.getOwners().getMembers().size(), equalTo(0));
 
         assertTrue(groupingOwner.getComposite().getNames().contains(users.get(0).getName()));
-        assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        // assertTrue(groupingOwner.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertTrue(groupingOwner.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
         assertFalse(groupingOwner.getComposite().getNames().contains(users.get(7).getName()));
-        assertFalse(groupingOwner.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        // assertFalse(groupingOwner.getComposite().getUsernames().contains(users.get(7).getUsername()));
         assertFalse(groupingOwner.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
 
         assertTrue(groupingAdmin.getComposite().getNames().contains(users.get(7).getName()));
-        assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
+       // assertTrue(groupingAdmin.getComposite().getUsernames().contains(users.get(7).getUsername()));
         assertTrue(groupingAdmin.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
         assertFalse(groupingAdmin.getComposite().getNames().contains(users.get(0).getName()));
-        assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
+      //  assertFalse(groupingAdmin.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertFalse(groupingAdmin.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
 
         assertTrue(groupingNull.getComposite().getNames().contains(users.get(0).getName()));
-        assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(0).getUsername()));
+        //assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(0).getUsername()));
         assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(0).getUhUuid()));
         assertTrue(groupingNull.getComposite().getNames().contains(users.get(7).getName()));
-        assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(7).getUsername()));
+        // assertTrue(groupingNull.getComposite().getUsernames().contains(users.get(7).getUsername()));
         assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
     }
 

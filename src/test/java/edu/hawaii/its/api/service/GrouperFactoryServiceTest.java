@@ -32,7 +32,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -52,35 +51,6 @@ import static org.junit.Assert.assertTrue;
 
 public class GrouperFactoryServiceTest {
 
-    @Value("${groupings.api.settings}")
-    private String SETTINGS;
-
-    @Value("${groupings.api.operation_assign_attribute}")
-    private String OPERATION_ASSIGN_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_remove_attribute}")
-    private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_out}")
-    private String PRIVILEGE_OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UUID;
-
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
 
     private static final String PATH_ROOT = "path:to:grouping";
 
@@ -122,27 +92,15 @@ public class GrouperFactoryServiceTest {
 
 
     private GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
-
-    @Autowired
-    private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
-
-    @Autowired
-    private HelperService hs;
-
-    @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
-
-    @Autowired
-    private DatabaseSetupService databaseSetupService;
+    
+    @Autowired private GrouperConfiguration grouperConfiguration;
+    @Autowired private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
+    @Autowired private HelperService hs;
+    @Autowired private GroupingRepository groupingRepository;
+    @Autowired private GroupRepository groupRepository;
+    @Autowired private PersonRepository personRepository;
+    @Autowired private MembershipRepository membershipRepository;
+    @Autowired private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {
@@ -220,7 +178,7 @@ public class GrouperFactoryServiceTest {
         WsStemLookup result;
         result = gfsl.makeWsStemLookup("pre");
         assertNotNull(result);
-        result = gfsl.makeWsStemLookup("pre",UUID);
+        result = gfsl.makeWsStemLookup("pre",grouperConfiguration.getTestUhuuid());
         assertNotNull(result);
     }
 
@@ -241,7 +199,7 @@ public class GrouperFactoryServiceTest {
     @Test
     //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
     public void deleteStemTest(){
-        WsSubjectLookup adminLookup = gfsl.makeWsSubjectLookup(ADMIN);
+        WsSubjectLookup adminLookup = gfsl.makeWsSubjectLookup(grouperConfiguration.getTestAdminUser());
         WsStemLookup stem = gfsl.makeWsStemLookup("testStem");
 
         WsStemDeleteResults result = gfsl.deleteStem(adminLookup, stem);
@@ -311,8 +269,8 @@ public class GrouperFactoryServiceTest {
 
         String assignType = "placeholder";
         String attributeDefNameName0 = "palceholder";
-        String attributeDefNameName1In = OPT_IN;
-        String attributeDefNameName1Out = OPT_OUT;
+        String attributeDefNameName1In = grouperConfiguration.getOptIn();
+        String attributeDefNameName1Out = grouperConfiguration.getOptOut();
 
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0,
                 attributeDefNameName1In);
@@ -327,8 +285,8 @@ public class GrouperFactoryServiceTest {
 
         List<String> ownerGroupNames = new ArrayList<>();
         String attributeDefNameName0 = "palceholder";
-        String attributeDefNameName1In = OPT_IN;
-        String attributeDefNameName1Out = OPT_OUT;
+        String attributeDefNameName1In = grouperConfiguration.getOptIn();
+        String attributeDefNameName1Out = grouperConfiguration.getOptOut();
 
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0,
                 attributeDefNameName1In, ownerGroupNames);
@@ -399,15 +357,15 @@ public class GrouperFactoryServiceTest {
     public void makeWsAssignAttributesResultsTest() {
         WsAssignAttributesResults results;
 
-        results = gfsl.makeWsAssignAttributesResults("type", OPERATION_REMOVE_ATTRIBUTE, GROUPING_3_PATH, LISTSERV, "",
+        results = gfsl.makeWsAssignAttributesResults("type", grouperConfiguration.getOperationRemoveAttribute(), GROUPING_3_PATH, grouperConfiguration.getListserv(), "",
                 null);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
-        results = gfsl.makeWsAssignAttributesResults("type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING_3_PATH, OPT_IN, "",
+        results = gfsl.makeWsAssignAttributesResults("type", grouperConfiguration.getOperationAssignAttribute(), GROUPING_3_PATH, grouperConfiguration.getOptIn(), "",
                 null);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
-        results = gfsl.makeWsAssignAttributesResults("type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING_3_PATH, OPT_OUT, "",
+        results = gfsl.makeWsAssignAttributesResults("type", grouperConfiguration.getOperationAssignAttribute(), GROUPING_3_PATH, grouperConfiguration.getOptOut(), "",
                 null);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
@@ -419,10 +377,10 @@ public class GrouperFactoryServiceTest {
         WsGetMembershipsResults getResults = hs.membershipsResults(users.get(0).getUsername(), GROUPING_3_PATH);
         String ownerID = hs.extractFirstMembershipID(getResults);
 
-        results = gfsl.makeWsAssignAttributesResultsForMembership("type", OPERATION_ASSIGN_ATTRIBUTE, "name", ownerID);
+        results = gfsl.makeWsAssignAttributesResultsForMembership("type", grouperConfiguration.getOperationAssignAttribute(), "name", ownerID);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
-        results = gfsl.makeWsAssignAttributesResultsForMembership("type", OPERATION_REMOVE_ATTRIBUTE, "name", ownerID);
+        results = gfsl.makeWsAssignAttributesResultsForMembership("type", grouperConfiguration.getOperationRemoveAttribute(), "name", ownerID);
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
     }
 
@@ -432,11 +390,11 @@ public class GrouperFactoryServiceTest {
         WsAssignAttributesResults results;
 
         String assignType = "type";
-        String assignOperation = OPERATION_ASSIGN_ATTRIBUTE;
-        String removeOperation = OPERATION_REMOVE_ATTRIBUTE;
-        String defName = LISTSERV;
-        String defName2 = OPT_IN;
-        String defName3 = OPT_OUT;
+        String assignOperation = grouperConfiguration.getOperationAssignAttribute();
+        String removeOperation = grouperConfiguration.getOperationRemoveAttribute();
+        String defName = grouperConfiguration.getListserv();
+        String defName2 = grouperConfiguration.getOptIn();
+        String defName3 = grouperConfiguration.getOptOut();
         String groupName = GROUPING_3_PATH;
 
         results = gfsl.makeWsAssignAttributesResultsForGroup(assignType, assignOperation, defName, groupName);
@@ -463,11 +421,11 @@ public class GrouperFactoryServiceTest {
         WsSubjectLookup lookup2 = gfsl.makeWsSubjectLookup(users.get(3).getUsername());
 
         String assignType = "type";
-        String assignOperation = OPERATION_ASSIGN_ATTRIBUTE;
-        String removeOperation = OPERATION_REMOVE_ATTRIBUTE;
-        String defName = LISTSERV;
-        String defName2 = OPT_IN;
-        String defName3 = OPT_OUT;
+        String assignOperation = grouperConfiguration.getOperationAssignAttribute();
+        String removeOperation = grouperConfiguration.getOperationRemoveAttribute();
+        String defName = grouperConfiguration.getListserv();
+        String defName2 = grouperConfiguration.getOptIn();
+        String defName3 = grouperConfiguration.getOptOut();
         String groupName = GROUPING_3_PATH;
 
         results = gfsl.makeWsAssignAttributesResultsForGroup(lookup, assignType, assignOperation, defName, groupName);
@@ -483,8 +441,8 @@ public class GrouperFactoryServiceTest {
 
         WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
 
-        String privilegeNameIn = PRIVILEGE_OPT_IN;
-        String privilegeNameOut = PRIVILEGE_OPT_OUT;
+        String privilegeNameIn = grouperConfiguration.getPrivilegeOptIn();
+        String privilegeNameOut = grouperConfiguration.getPrivilegeOptOut();
         String groupName = GROUPING_3_PATH;
         Boolean isAllowed = true;
 
@@ -537,8 +495,8 @@ public class GrouperFactoryServiceTest {
     @Test
     public void toStringTest() {
         String str = gfsl.toString();
-        assertTrue(str.equals("GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]"));
-        //GrouperFactoryServiceImplLocal [SETTINGS=" + SETTINGS + "]
+        assertTrue(str.equals("GrouperFactoryServiceImplLocal [grouperConfiguration.getSettings()=" + grouperConfiguration.getSettings() + "]"));
+        //GrouperFactoryServiceImplLocal [grouperConfiguration.getSettings()=" + grouperConfiguration.getSettings() + "]
     }
 
     @Test
