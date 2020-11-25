@@ -51,6 +51,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -64,52 +65,12 @@ import java.util.List;
 @Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
 public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
-    @Value("${groupings.api.attribute_assign_id_size}")
-    private Integer ATTRIBUTES_ASSIGN_ID_SIZE;
-/*------------------------------------------------------------- */
-    @Value("${grouper.api.sync.destinations.location}")
-    private String SYNC_DESTINATIONS_LOCATION;
+    @Value("${grouper.api.sync.destinations.location}") private String SYNC_DESTINATIONS_LOCATION;
+    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes") private String
+            SYNC_DESTINATIONS_CHECKBOXES;
+    @Autowired private GrouperConfiguration grouperConfiguration;
 
-    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
-    private String SYNC_DESTINATIONS_CHECKBOXES;
-/* ---------------------------------------------------------------- */
-
-    @Value("${groupings.api.composite_type.complement}")
-    private String COMPLEMENT;
-
-    @Value("${groupings.api.composite_type.intersection}")
-    private String INTERSECTION;
-
-    @Value("${groupings.api.composite_type.union}")
-    private String UNION;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.trio}")
-    private String IS_TRIO;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    // Constructor.
     public GrouperFactoryServiceImpl() {
-        // Empty.
     }
 
     public boolean isUuid(String username) {
@@ -125,7 +86,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
         WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
+                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION)
+                        .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 
@@ -145,7 +107,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     e.printStackTrace();
                 }
             }
-                syncDest.add(newSyncDest);
+            syncDest.add(newSyncDest);
         }
         return syncDest;
     }
@@ -331,7 +293,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     .assignActAsSubject(lookup)
                     .addSubjectIdentifier(personToAdd.getUsername())
                     .assignGroupName(group)
-                    .addSubjectAttributeName(personToAdd.getAttribute(UHUUID))
+                    .addSubjectAttributeName(personToAdd.getAttribute(grouperConfiguration.getPersonAttributesUhuuid()))
                     .execute();
         }
 
@@ -472,12 +434,12 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         List<WsGetAttributeAssignmentsResults> attributeAssignmentsResultList = new ArrayList<>();
         Iterator iterator = ownerGroupNames.iterator();
 
-        for (int i = 0; i < ownerGroupNames.size(); i += ATTRIBUTES_ASSIGN_ID_SIZE) {
+        for (int i = 0; i < ownerGroupNames.size(); i += grouperConfiguration.getAttributesAssignIdSize()) {
             GcGetAttributeAssignments attributeAssignments = new GcGetAttributeAssignments()
                     .addAttributeDefNameName(attributeDefNameName)
                     .assignAttributeAssignType(assignType);
 
-            for (int j = 0; j < ATTRIBUTES_ASSIGN_ID_SIZE; j++) {
+            for (int j = 0; j < grouperConfiguration.getAttributesAssignIdSize(); j++) {
                 if (iterator.hasNext()) {
                     attributeAssignments.addOwnerGroupName(iterator.next().toString());
                 } else {
@@ -498,13 +460,13 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
         List<WsGetAttributeAssignmentsResults> attributeAssignmentsResultList = new ArrayList<>();
         Iterator iterator = ownerGroupNames.iterator();
 
-        for (int i = 0; i < ownerGroupNames.size(); i += ATTRIBUTES_ASSIGN_ID_SIZE) {
+        for (int i = 0; i < ownerGroupNames.size(); i += grouperConfiguration.getAttributesAssignIdSize()) {
             GcGetAttributeAssignments attributeAssignments = new GcGetAttributeAssignments()
                     .addAttributeDefNameName(attributeDefNameName0)
                     .addAttributeDefNameName(attributeDefNameName1)
                     .assignAttributeAssignType(assignType);
 
-            for (int j = 0; j < ATTRIBUTES_ASSIGN_ID_SIZE; j++) {
+            for (int j = 0; j < grouperConfiguration.getAttributesAssignIdSize(); j++) {
                 if (iterator.hasNext()) {
                     attributeAssignments.addOwnerGroupName(iterator.next().toString());
                 } else {
@@ -757,11 +719,11 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     public WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup) {
 
         return new GcGetSubjects()
-                .addSubjectAttributeName(USERNAME)
-                .addSubjectAttributeName(COMPOSITE_NAME)
-                .addSubjectAttributeName(LAST_NAME)
-                .addSubjectAttributeName(FIRST_NAME)
-                .addSubjectAttributeName(UHUUID)
+                .addSubjectAttributeName(grouperConfiguration.getPersonAttributesUhuuid())
+                .addSubjectAttributeName(grouperConfiguration.getPersonAttributesCompositeName())
+                .addSubjectAttributeName(grouperConfiguration.getPersonAttributesLastName())
+                .addSubjectAttributeName(grouperConfiguration.getPersonAttributesFirstName())
+                .addSubjectAttributeName(grouperConfiguration.getPersonAttributesUhuuid())
                 .addWsSubjectLookup(lookup)
                 .execute();
     }

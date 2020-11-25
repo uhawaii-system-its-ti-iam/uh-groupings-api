@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.type.Group;
@@ -9,31 +12,24 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -41,78 +37,25 @@ import static org.junit.Assert.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GroupAttributeServiceTest {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.test.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.test.name}")
-    private String NAME;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UHUUID;
-
-    @Value("Default description.")
-    private String DEFAULT_DESCRIPTION;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
-    @Value("${groupings.api.test.sync_destinations}")
-    private List<String> SYNC_DESTINATIONS;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
     private static final String PATH_ROOT = "path:to:grouping";
-
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_2_PATH = PATH_ROOT + 2;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
     private static final String GROUPING_4_PATH = PATH_ROOT + 4;
-
     private static final String ADMIN_USER = "admin";
+    private static final String DEFAULT_DESCRIPTION = "Default description.";
+
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
-
     private Group appGroup = new Group();
-
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
-    @Autowired
-    private GroupAttributeService groupAttributeService;
-
-    @Autowired
-    private GrouperFactoryService grouperFactoryService;
-
-    private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
-    private DatabaseSetupService databaseSetupService;
+    @Autowired private GrouperConfiguration grouperConfiguration;
+    @Autowired private GroupAttributeService groupAttributeService;
+    @Autowired private GroupingRepository groupingRepository;
+    @Autowired private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {
@@ -136,103 +79,119 @@ public class GroupAttributeServiceTest {
     public void changeListservStatusTest() {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         try {
             groupAttributeService
-                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, true);
+                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(),
+                            grouperConfiguration.getListserv(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOnWhenOffOwner =
                 groupAttributeService
-                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, true);
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(),
+                                grouperConfiguration.getListserv(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         try {
             groupAttributeService
-                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, true);
+                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(),
+                            grouperConfiguration.getListserv(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOnWhenOnOwner =
                 groupAttributeService
-                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, true);
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(),
+                                grouperConfiguration.getListserv(), true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOnWhenOnAdmin =
-                groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, true);
+                groupAttributeService
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, grouperConfiguration.getListserv(),
+                                true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         try {
             groupAttributeService
-                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, false);
+                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(),
+                            grouperConfiguration.getListserv(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOffWhenOnOwner =
                 groupAttributeService
-                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, false);
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(),
+                                grouperConfiguration.getListserv(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOnWhenOffAdmin =
-                groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, true);
+                groupAttributeService
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, grouperConfiguration.getListserv(),
+                                true);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertTrue(grouping.isSyncDestinationOn(LISTSERV));
+        assertTrue(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOffWhenOnAdmin =
-                groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, false);
+                groupAttributeService
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, grouperConfiguration.getListserv(),
+                                false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         try {
             groupAttributeService
-                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(), LISTSERV, false);
+                    .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(1).getUsername(),
+                            grouperConfiguration.getListserv(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOffWhenOffOwner =
                 groupAttributeService
-                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(), LISTSERV, false);
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, users.get(0).getUsername(),
+                                grouperConfiguration.getListserv(), false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
         GroupingsServiceResult turnOffWhenOffAdmin =
-                groupAttributeService.changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, LISTSERV, false);
+                groupAttributeService
+                        .changeGroupAttributeStatus(GROUPING_4_PATH, ADMIN_USER, grouperConfiguration.getListserv(),
+                                false);
         grouping = groupingRepository.findByPath(GROUPING_4_PATH);
-        assertFalse(grouping.isSyncDestinationOn(LISTSERV));
+        assertFalse(grouping.isSyncDestinationOn(grouperConfiguration.getListserv()));
 
-        assertTrue(turnOnWhenOnOwner.getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOnWhenOnOwner.getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.getResultCode().startsWith(grouperConfiguration.getSuccess()));
 
-        assertTrue(turnOffWhenOnOwner.getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOnAdmin.getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOffWhenOnOwner.getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOnAdmin.getResultCode().startsWith(grouperConfiguration.getSuccess()));
 
-        assertTrue(turnOnWhenOffOwner.getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOffAdmin.getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOnWhenOffOwner.getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOffAdmin.getResultCode().startsWith(grouperConfiguration.getSuccess()));
 
-        assertTrue(turnOffWhenOffOwner.getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOffWhenOffOwner.getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.getResultCode().startsWith(grouperConfiguration.getSuccess()));
     }
 
     @Test
@@ -242,51 +201,65 @@ public class GroupAttributeServiceTest {
         String owner = users.get(0).getUsername(); // username0
 
         //starts ON
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping()));
 
         // ON to ON
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING_0_PATH, user, grouperConfiguration.getReleasedGrouping(),
+                            true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
-        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
-        assertTrue(results.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
+        results.add(groupAttributeService
+                .changeGroupAttributeStatus(GROUPING_0_PATH, owner, grouperConfiguration.getReleasedGrouping(), true));
+        assertTrue(results.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping()));
 
         //ON to OFF
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING_0_PATH, user, grouperConfiguration.getReleasedGrouping(),
+                            false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
-        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
-        assertTrue(results.get(1).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
+        results.add(groupAttributeService
+                .changeGroupAttributeStatus(GROUPING_0_PATH, owner, grouperConfiguration.getReleasedGrouping(), false));
+        assertTrue(results.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertFalse(
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping()));
 
         // OFF to OFF
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, false);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING_0_PATH, user, grouperConfiguration.getReleasedGrouping(),
+                            false);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
-        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, false));
-        assertTrue(results.get(2).getResultCode().startsWith(SUCCESS));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
+        results.add(groupAttributeService
+                .changeGroupAttributeStatus(GROUPING_0_PATH, owner, grouperConfiguration.getReleasedGrouping(), false));
+        assertTrue(results.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertFalse(
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping()));
 
         // OFF to ON
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, user, RELEASED_GROUPING, true);
+            groupAttributeService
+                    .changeGroupAttributeStatus(GROUPING_0_PATH, user, grouperConfiguration.getReleasedGrouping(),
+                            true);
             fail("Shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
-        results.add(groupAttributeService.changeGroupAttributeStatus(GROUPING_0_PATH, owner, RELEASED_GROUPING, true));
-        assertTrue(results.get(3).getResultCode().startsWith(SUCCESS));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING));
+        results.add(groupAttributeService
+                .changeGroupAttributeStatus(GROUPING_0_PATH, owner, grouperConfiguration.getReleasedGrouping(), true));
+        assertTrue(results.get(3).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping()));
     }
 
     @Test
@@ -296,7 +269,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOnOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
@@ -307,7 +280,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOnOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), false);
@@ -316,7 +289,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOffOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), false);
@@ -327,7 +300,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, users.get(0).getUsername(), true);
@@ -338,33 +311,33 @@ public class GroupAttributeServiceTest {
         List<GroupingsServiceResult> turnOnWhenOffAdmin =
                 groupAttributeService.changeOptInStatus(GROUPING_0_PATH, ADMIN_USER, true);
 
-        assertTrue(turnOnWhenOnOwner.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnOwner.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnOwner.get(2).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOnWhenOnOwner.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnOwner.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnOwner.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
 
-        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
 
-        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffOwner.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffOwner.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
 
-        assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffOwner.get(2).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(2).getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffOwner.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
     }
 
     @Test
@@ -374,7 +347,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
 
         List<GroupingsServiceResult> turnOnWhenOnOwner =
@@ -387,7 +360,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOnOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), false);
@@ -396,7 +369,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), true);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOnWhenOffOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), true);
@@ -408,7 +381,7 @@ public class GroupAttributeServiceTest {
             groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(1).getUsername(), false);
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
         List<GroupingsServiceResult> turnOffWhenOffOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), false);
@@ -418,43 +391,44 @@ public class GroupAttributeServiceTest {
         List<GroupingsServiceResult> turnOnWhenOffAdmin =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, ADMIN_USER, true);
 
-        assertTrue(turnOnWhenOnOwner.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnOwner.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnOwner.get(2).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOnWhenOnOwner.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnOwner.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnOwner.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOnWhenOnAdmin.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
 
-        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(SUCCESS));
-        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(SUCCESS));
+        assertThat(turnOffWhenOnOwner.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnOwner.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnOwner.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
 
-        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffOwner.get(1).getResultCode(),is(SUCCESS));
-        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(),is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(),is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffOwner.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(), is(grouperConfiguration.getSuccess()));
+        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(), is(grouperConfiguration.getSuccess()));
 
-        assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffOwner.get(2).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(turnOffWhenOffAdmin.get(2).getResultCode().startsWith(SUCCESS));
+        assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffOwner.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(0).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(1).getResultCode().startsWith(grouperConfiguration.getSuccess()));
+        assertTrue(turnOffWhenOffAdmin.get(2).getResultCode().startsWith(grouperConfiguration.getSuccess()));
     }
 
     @Test
     public void optOutPermissionTest() {
 
-        boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_OUT);
+        boolean isHasPermission =
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getOptOut());
 
         assertThat(isHasPermission, is(false));
 
-        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, OPT_OUT);
+        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, grouperConfiguration.getOptOut());
 
         assertThat(isHasPermission, is(true));
 
@@ -463,11 +437,12 @@ public class GroupAttributeServiceTest {
     @Test
     public void optInPermissionTest() {
 
-        boolean isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, OPT_IN);
+        boolean isHasPermission =
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getOptIn());
 
         assertThat(isHasPermission, is(true));
 
-        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_2_PATH, OPT_IN);
+        isHasPermission = groupAttributeService.isGroupAttribute(GROUPING_2_PATH, grouperConfiguration.getOptIn());
 
         assertThat(isHasPermission, is(false));
     }
@@ -475,13 +450,15 @@ public class GroupAttributeServiceTest {
     @Test
     public void hasListservTest() {
 
-        boolean isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, LISTSERV);
+        boolean isGroupingHasListserv =
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getListserv());
 
         assertThat(isGroupingHasListserv, is(false));
 
-        isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_3_PATH, LISTSERV);
+        isGroupingHasListserv =
+                groupAttributeService.isGroupAttribute(GROUPING_3_PATH, grouperConfiguration.getListserv());
 
-        assertThat(isGroupingHasListserv,is(true));
+        assertThat(isGroupingHasListserv, is(true));
     }
 
     @Test
@@ -489,11 +466,13 @@ public class GroupAttributeServiceTest {
 
         groupingRepository.findByPath(GROUPING_0_PATH);
 
-        boolean isHasReleasedGrouping = groupAttributeService.isGroupAttribute(GROUPING_0_PATH, RELEASED_GROUPING);
+        boolean isHasReleasedGrouping =
+                groupAttributeService.isGroupAttribute(GROUPING_0_PATH, grouperConfiguration.getReleasedGrouping());
         assertTrue(isHasReleasedGrouping);
 
         groupingRepository.findByPath(GROUPING_1_PATH);
-        isHasReleasedGrouping = groupAttributeService.isGroupAttribute(GROUPING_1_PATH, RELEASED_GROUPING);
+        isHasReleasedGrouping =
+                groupAttributeService.isGroupAttribute(GROUPING_1_PATH, grouperConfiguration.getReleasedGrouping());
         assertFalse(isHasReleasedGrouping);
 
     }
@@ -513,23 +492,23 @@ public class GroupAttributeServiceTest {
             groupingsServiceResult = groupAttributeService
                     .updateDescription(GROUPING_0_PATH, users.get(4).getUsername(), DEFAULT_DESCRIPTION + " modified");
         } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            assertThat(grouperConfiguration.getInsufficientPrivileges(), is(ade.getMessage()));
         }
 
         //Testing with admin
         groupingsServiceResult = groupAttributeService
                 .updateDescription(GROUPING_0_PATH, ADMIN_USER, DEFAULT_DESCRIPTION + " modifiedbyadmin1");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         //Testing with owner
         groupingsServiceResult = groupAttributeService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(),
                 DEFAULT_DESCRIPTION + " modifiedbyowner2");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         // Test with empty string
         groupingsServiceResult =
                 groupAttributeService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), "");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        assertThat(groupingsServiceResult.getResultCode(), startsWith(grouperConfiguration.getSuccess()));
 
         //Revert any changes
         groupAttributeService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION);

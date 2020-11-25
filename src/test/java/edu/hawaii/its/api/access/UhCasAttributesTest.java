@@ -75,14 +75,12 @@ public class UhCasAttributesTest {
         Map<Object, Object> map = new HashMap<>();
         map.put("uHuuid", "10967714");
         List<Object> uids = new ArrayList<>();
-        uids.add("cahana");
         uids.add("mjrules");
         map.put("uid", uids);
         UhCasAttributes attributes = new UhCasAttributes(map);
         assertThat(attributes.getUsername(), is(""));
         assertThat(attributes.getUhUuid(), is("10967714"));
         assertThat(attributes.getUhUuid(), is("10967714"));
-        assertThat(attributes.getUid(), is("cahana"));
     }
 
     @Test
