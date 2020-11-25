@@ -56,15 +56,12 @@ public class GrouperFactoryServiceTest {
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_2_PATH = PATH_ROOT + 2;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
-    private final String GROUPING_3_INCLUDE_PATH = GROUPING_3_PATH + ":include";
-    private final String GROUPING_3_EXCLUDE_PATH = GROUPING_3_PATH + ":exclude";
 
-    private List<Person> admins = new ArrayList<>();
-    private List<Person> users = new ArrayList<>();
-    private Group adminGroup = new Group();
-    private Group appGroup = new Group();
-    private List<WsSubjectLookup> lookups = new ArrayList<>();
-    private GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
+    private final List<Person> admins = new ArrayList<>();
+    private final List<Person> users = new ArrayList<>();
+    private final Group adminGroup = new Group();
+    private final Group appGroup = new Group();
+    private final List<WsSubjectLookup> lookups = new ArrayList<>();
 
     @Before
     public void setup() {
@@ -180,11 +177,11 @@ public class GrouperFactoryServiceTest {
         WsSubjectLookup lookup = grouperFactoryServiceImplLocal.makeWsSubjectLookup(users.get(0).getUsername());
 
         results = grouperFactoryServiceImplLocal
-                .makeWsAddMemberResults(GROUPING_3_EXCLUDE_PATH, lookup, users.get(5).getUsername());
+                .makeWsAddMemberResults(GROUPING_3_PATH + ":exclude", lookup, users.get(5).getUsername());
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
         results = grouperFactoryServiceImplLocal
-                .makeWsAddMemberResults(GROUPING_3_INCLUDE_PATH, lookup, users.get(2).getUsername());
+                .makeWsAddMemberResults(GROUPING_3_PATH + ":include", lookup, users.get(2).getUsername());
         assertTrue(results.getResultMetadata().getResultCode().startsWith("SUCCESS"));
 
         results = grouperFactoryServiceImplLocal.makeWsAddMemberResults(GROUPING_3_PATH, lookup, members);
@@ -222,7 +219,6 @@ public class GrouperFactoryServiceTest {
     // Unsure as to what the function does but it is covered
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioTest() {
-
         String assignType = "placeholder";
         String attributeDefNameName = "palceholder";
         grouperFactoryServiceImplLocal.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName);
@@ -230,7 +226,6 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioTwoAttrTest() {
-
         String assignType = "placeholder";
         String attributeDefNameName0 = "palceholder";
         String attributeDefNameName1In = grouperConfiguration.getOptIn();
@@ -244,7 +239,6 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioOwnerGroupNameTest() {
-
         List<String> ownerGroupNames = new ArrayList<>();
         String attributeDefNameName0 = "palceholder";
         String attributeDefNameName1In = grouperConfiguration.getOptIn();
