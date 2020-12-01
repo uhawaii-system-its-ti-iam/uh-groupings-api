@@ -193,6 +193,27 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
+    public void getIsOwnerTest() {
+        // Valid username is an Owner
+            try {
+                GenericServiceResult result = memberAttributeService.getIsOwner(ADMIN_USER, users.get(0).getUsername());
+                String test = result.getData().get(0).toString();
+                assertTrue(test.contains(SUCCESS));
+            }catch(Exception e){
+                System.out.println(e);
+                assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+            }
+    }
+
+    @Test
+    public void getIsAdminTest() {
+        // Invalid username is not an Admin
+        GenericServiceResult result = memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername());
+        String test = result.getData().get(0).toString();
+        assertTrue(test.contains(FAILURE));
+    }
+
+    @Test
     public void removeOwnershipTest() {
         GroupingsServiceResult randomUserRemoves;
 

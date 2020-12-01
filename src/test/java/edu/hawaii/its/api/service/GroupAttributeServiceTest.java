@@ -379,6 +379,7 @@ public class GroupAttributeServiceTest {
 
         List<GroupingsServiceResult> turnOnWhenOnOwner =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, users.get(0).getUsername(), true);
+
         List<GroupingsServiceResult> turnOnWhenOnAdmin =
                 groupAttributeService.changeOptOutStatus(GROUPING_1_PATH, ADMIN_USER, true);
 

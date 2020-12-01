@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    List<Membership> getMemberShipResults(String ownerUsername, String uid);
+    List<Membership> getMembershipResults(String owner, String uid);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
@@ -31,6 +31,11 @@ public interface MembershipService {
     List<String> listOwned(String adminUsername, String username);
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
+
+    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
+
+    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
+            List<String> includeIdentifier, List<String> excludeIdentifier);
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
@@ -54,4 +59,8 @@ public interface MembershipService {
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
     GenericServiceResult generic();
+
+    boolean isUhUuid(String username);
+
+    boolean canOpt(String path);
 }

@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
@@ -13,13 +13,12 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,14 +26,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -211,6 +206,7 @@ public class MembershipServiceImpl implements MembershipService {
         return createdPerson;
     }
 
+
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
     public List<GroupingsServiceResult> addGroupingMember(String username, String groupingPath,
@@ -325,44 +321,74 @@ public class MembershipServiceImpl implements MembershipService {
         return gsrs;
     }
 
+    /**
+     * Get a list of memberships pertaining to uid.
+     */
     @Override
-    public List<Membership> getMemberShipResults(String ownerUsername, String uid) {
-        String action = "GET: " + uid + "Memberships;";
+    public List<Membership> getMembershipResults(String owner, String uid) {
+        String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
+        logger.info(action);
 
         List<Membership> memberships = new ArrayList<>();
-        logger.info(action);
-        if (memberAttributeService.isSuperuser(ownerUsername)) {
-            List<String> groupPaths = groupingAssignmentService.getGroupPaths(ownerUsername, uid);
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+        List<String> optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
 
-            for (String groupPath : groupPaths) {
-                boolean hasMembership = false;
+        for (String groupPath : groupPaths) {
+            boolean hasMembership = false;
 
-                Membership membership = new Membership();
-                if (groupPath.endsWith(INCLUDE)) {
-                    membership.setInInclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS)) {
-                    membership.setInBasis(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(EXCLUDE)) {
-                    membership.setInExclude(true);
-                    hasMembership = true;
-                }
-                if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
-                    membership.setInBasisAndInclude(true);
-                    hasMembership = true;
-                }
-                if (hasMembership) {
-                    membership.setPath(groupPath);
-                    memberships.add(membership);
+            Membership membership = new Membership();
+            if (groupPath.endsWith(INCLUDE)) {
+                membership.setInInclude(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(BASIS)) {
+                membership.setInBasis(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(EXCLUDE)) {
+                membership.setInExclude(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
+                membership.setInBasisAndInclude(true);
+                hasMembership = true;
+            }
+            if (groupPath.endsWith(OWNERS)) {
+                membership.setInOwner(true);
+                hasMembership = true;
+            }
+            if (hasMembership) {
+                membership.setPath(groupPath);
+                membership.setOptOutEnabled(optOutList.contains(helperService.parentGroupingPath(groupPath)));
+                membership.setName(helperService.nameGroupingPath(groupPath));
+                memberships.add(membership);
+            }
+        }
+        return memberships;
+    }
+
+    /**
+     * Check if opting is enabled for the grouping at path.
+     */
+    @Override
+    public boolean canOpt(String path) {
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                grouperFS.makeWsGetAttributeAssignmentsResultsForGroup(
+                        ASSIGN_TYPE_GROUP,
+                        path);
+
+        WsAttributeDefName[] attributeDefNames = wsGetAttributeAssignmentsResults.getWsAttributeDefNames();
+        if (attributeDefNames != null && attributeDefNames.length > 0) {
+            for (WsAttributeDefName defName : attributeDefNames) {
+                String name = defName.getName();
+                if (name.endsWith(OPT_IN) || name.endsWith(OPT_OUT)) {
+                    logger.info("isOpt; path: " + path + ";   " + true + ";");
+                    return true;
                 }
             }
-            return memberships;
         }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-
+        logger.info("isOpt; path: " + path + ";   " + false + ";");
+        return false;
     }
 
     //adds a user to the admins group via username or UH id number
@@ -371,11 +397,6 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addAdmin; username: " + currentAdminUsername + "; newAdmin: " + newAdminUsername + ";");
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
-
-        if (memberAttributeService.isUhUuid(newAdminUsername)) {
-            action = "add user with uhUuid " + newAdminUsername + " to " + GROUPING_ADMINS;
-            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
-        }
 
         if (memberAttributeService.isSuperuser(currentAdminUsername)) {
             if (memberAttributeService.isAdmin(newAdminUsername)) {
@@ -399,11 +420,6 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action;
         action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
-        if (memberAttributeService.isUhUuid(adminToDeleteUsername)) {
-
-            action = "delete user with uhUuid " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
-            return new GroupingsServiceResult(FAILURE + ": adding admins with UHUUID is not implemented", action);
-        }
 
         if (memberAttributeService.isSuperuser(adminUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
@@ -417,6 +433,51 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    }
+
+    @Override
+    public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
+            List<String> GroupPaths){
+        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+        for (int i = 0; i < GroupPaths.size(); i++) {
+            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
+            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
+            WsDeleteMemberResults deleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
+            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+        }
+        return result;
+    }
+
+    @Override
+    public List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
+            List<String> includeIdentifier, List<String> excludeIdentifier) {
+
+        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
+        String excludePath = path + EXCLUDE;
+        String includePath = path + INCLUDE;
+
+        if(!includeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < includeIdentifier.size(); i++) {
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
+                String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
+        }
+        if(!excludeIdentifier.get(0).equals("empty")) {
+            for (int i = 0; i < excludeIdentifier.size(); i++) {
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
+                String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
+                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            }
+        }
+
+        return result;
     }
 
     //user adds them self to the group if they have permission
@@ -600,24 +661,11 @@ public class MembershipServiceImpl implements MembershipService {
         genericServiceResult.add("hello", hello);
         genericServiceResult.add("fbb", fbb);
         genericServiceResult.add(Arrays.asList("groupingsServiceResult", "boolean"), groupingsServiceResult, true);
+        genericServiceResult.add("int", 1);
 
         return genericServiceResult;
     }
 
-    /*
-public List<GroupingsServiceResult> add_Member_Helper(String username, String groupPath, Person personToAdd) {
-    logger.info(
-            "addMemberHelper; user: " + username + "; group: " + groupPath + "; personToAdd: " + personToAdd + ";");
-    List<GroupingsServiceResult> gsrList = new ArrayList<>();
-
-    if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
-            || memberAttributeService.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
-            .getUsername().equals(username))) {
-        String pathToAdd;
-        String pathToDelete;
-    }
-    }
-     */
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
         logger.info(

@@ -20,6 +20,8 @@ public interface GroupingAssignmentService {
 
     List<Grouping> groupingsOwned(List<String> groupPaths);
 
+    List<String> groupingsOwnedPaths(List<String> groupPaths);
+
     List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername);
 
     List<Grouping> groupingsOptedInto(String username, List<String> groupPaths);
@@ -54,4 +56,14 @@ public interface GroupingAssignmentService {
 
     Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
             String sortString, Boolean isAscending);
+
+    public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername);
+
+    public List<Grouping> excludeGroups(List<String> groupPaths);
+
+    public List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths);
+
+    public List<String> getOptInGroups(String owner, String optInUid);
+
+    public List<String> getOptOutGroups(String owner, String optOutUid);
 }
