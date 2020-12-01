@@ -388,7 +388,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> GroupPaths, String userToRemove) {
 
-        List<WsDeleteMemberResults> result= new ArrayList<WsDeleteMemberResults>();
+        List<WsDeleteMemberResults> result = new ArrayList<WsDeleteMemberResults>();
         class MyRunnable implements Runnable {
             private final int currGroup;
             private final String userToRemove;
