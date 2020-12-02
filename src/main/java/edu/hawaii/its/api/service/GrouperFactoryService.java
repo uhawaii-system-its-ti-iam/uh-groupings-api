@@ -68,8 +68,6 @@ public interface GrouperFactoryService {
 
     WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, Person personToDelete);
 
-    List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groups, String memberToDelete);
-
     WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
                                                            List<String> membersToDelete);
 

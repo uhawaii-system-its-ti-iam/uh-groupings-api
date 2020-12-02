@@ -170,6 +170,9 @@ public class MembershipServiceImpl implements MembershipService {
     private GrouperFactoryService grouperFS;
 
     @Autowired
+    private GrouperFactoryThreading grouperFT;
+
+    @Autowired
     GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
@@ -434,7 +437,7 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> GroupPaths) {
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
         List<WsDeleteMemberResults> deleteMemberResults =
-                grouperFS.makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
+                grouperFT.makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
         for (int i = 0; i < deleteMemberResults.size(); i++) {
             System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
