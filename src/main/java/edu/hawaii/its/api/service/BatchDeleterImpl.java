@@ -13,14 +13,10 @@ import java.util.concurrent.FutureTask;
 
 @Service("grouperFactoryThreading")
 @Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
-public class GrouperFactoryThreadingImpl implements GrouperFactoryThreading {
+public class BatchDeleterImpl implements BatchDeleter {
 
-    // Constructor.
-    public GrouperFactoryThreadingImpl() {
-        // Empty.
-    }
-
-    class MyCallable implements Callable {
+    /*Constructor for the Callable class used by makeWsBatchDeleteMemberResults*/
+    public class MyCallable implements Callable {
         private final int currGroup;
         private final String userToRemove;
         private final List<String> groupPaths;
@@ -32,11 +28,14 @@ public class GrouperFactoryThreadingImpl implements GrouperFactoryThreading {
             this.groupPaths = groupPaths;
             this.gfs = gfs;
         }
+
         public WsDeleteMemberResults call(){
                 WsDeleteMemberResults result = gfs.makeWsDeleteMemberResults(groupPaths.get(currGroup), userToRemove);
                 return result;
         }
     }
+
+
 
     @Override
     public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> GroupPaths, String userToRemove){
