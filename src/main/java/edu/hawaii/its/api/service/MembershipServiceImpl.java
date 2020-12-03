@@ -30,9 +30,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 @Service("membershipService")
-public class MembershipServiceImpl implements MembershipService {
+public class MembershipServiceImpl implements MembershipService{
 
     @Value("${groupings.api.settings}")
     private String SETTINGS;
@@ -168,9 +171,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Autowired
     private GrouperFactoryService grouperFS;
-
-    @Autowired
-    private BatchDeleter batchDeleter;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
@@ -437,13 +437,46 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> GroupPaths) {
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
         List<WsDeleteMemberResults> deleteMemberResults =
-                batchDeleter.makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
+                makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
         for (int i = 0; i < deleteMemberResults.size(); i++) {
             System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
             result.add(helperService.makeGroupingsServiceResult(deleteMemberResults.get(i), action));
         }
         return result;
+    }
+
+    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
+        List<WsDeleteMemberResults> results = new ArrayList<>();
+        // Creating a thread list which is populated with a thread for each removal that needs to be done.
+        List<Thread> threads = new ArrayList<Thread>();
+        List<FutureTask<WsDeleteMemberResults>> tasks = new ArrayList<>();
+        for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
+            //creating runnable object containing the data needed for each individual delete.
+            Callable<WsDeleteMemberResults> master = new BatchDeleterTask(currGroup, userToRemove, groupPaths, grouperFS);
+            System.out.println("FutureTask " + currGroup + " created.");
+            FutureTask<WsDeleteMemberResults> task = new FutureTask<>(master);
+            tasks.add(task);
+            Thread curr = new Thread(task);
+            threads.add(curr);
+            System.out.println("Thread " + currGroup + " created.");
+        }
+        // Starting all of the created threads.
+        for (int i = 0; i < threads.size(); i++) {
+            threads.get(i).start();
+        }
+        // Waiting to return result until every thread in the list has completed running.
+        for (int i = 0; i < threads.size(); i++) {
+            try {
+                System.out.println("Getting result from FutureTask " + i + ".");
+                results.add((tasks.get(i)).get());
+                System.out.println("Added result from FutureTask " + i + " to results list.");
+                threads.get(i).join();
+            } catch (InterruptedException | ExecutionException e) {
+                System.out.println("Thread Interrupted.");
+            }
+        }
+        return results;
     }
 
     @Override
@@ -942,6 +975,10 @@ public class MembershipServiceImpl implements MembershipService {
 
         return grouperFS.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, operationName,
                 attributeUuid, membershipID);
+    }
+
+    public void setGrouperFactoryService(GrouperFactoryService grouperFactoryService) {
+        this.grouperFS = grouperFactoryService;
     }
 
 }
