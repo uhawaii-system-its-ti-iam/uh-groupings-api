@@ -1,10 +1,13 @@
 package edu.hawaii.its.api.service;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Test;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 public class MembershipServiceUnitTest {
 
@@ -35,7 +38,7 @@ public class MembershipServiceUnitTest {
         assertTrue(memberResults.size() == 25);
 
         //Validates that every returned result is a memberResult, proving all of the threads are working properly.
-        memberResults.forEach(result->assertTrue((result.toString()).contains("edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults@")));
-
+        memberResults.forEach(
+                result -> assertTrue((result.toString()).contains("edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults@")));
     }
 }
