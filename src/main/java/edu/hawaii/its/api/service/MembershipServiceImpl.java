@@ -454,24 +454,26 @@ public class MembershipServiceImpl implements MembershipService{
         for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
             //creating runnable object containing the data needed for each individual delete.
             Callable<WsDeleteMemberResults> master = new BatchDeleterTask(currGroup, userToRemove, groupPaths, grouperFS);
-            System.out.println("FutureTask " + currGroup + " created.");
+            //System.out.println("FutureTask " + currGroup + " created.");
             FutureTask<WsDeleteMemberResults> task = new FutureTask<>(master);
             tasks.add(task);
             Thread curr = new Thread(task);
             threads.add(curr);
-            System.out.println("Thread " + currGroup + " created.");
+            //System.out.println("Thread " + currGroup + " created.");
         }
         // Starting all of the created threads.
         for (int i = 0; i < threads.size(); i++) {
+            System.out.println("Thread " + i + " started.");
             threads.get(i).start();
         }
         // Waiting to return result until every thread in the list has completed running.
         for (int i = 0; i < threads.size(); i++) {
             try {
-                System.out.println("Getting result from FutureTask " + i + ".");
+                //System.out.println("Getting result from FutureTask " + i + ".");
                 results.add((tasks.get(i)).get());
-                System.out.println("Added result from FutureTask " + i + " to results list.");
+                //System.out.println("Added result from FutureTask " + i + " to results list.");
                 threads.get(i).join();
+                System.out.println("Thread " + threads.get(i) + " finished.");
             } catch (InterruptedException | ExecutionException e) {
                 System.out.println("Thread Interrupted.");
             }
