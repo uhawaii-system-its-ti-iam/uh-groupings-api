@@ -38,77 +38,14 @@ import java.util.Map;
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
 
-    @Value("${groupings.api.settings}")
-    private String SETTINGS;
-
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
-
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
     @Value("${groupings.api.grouping_apps}")
     private String GROUPING_APPS;
 
-    @Value("${groupings.api.grouping_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_superusers}")
-    private String GROUPING_SUPERUSERS;
-
-    @Value("${groupings.api.attributes}")
-    private String ATTRIBUTES;
-
-    @Value("${groupings.api.for_groups}")
-    private String FOR_GROUPS;
-
-    @Value("${groupings.api.for_memberships}")
-    private String FOR_MEMBERSHIPS;
-
-    @Value("${groupings.api.last_modified}")
-    private String LAST_MODIFIED;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.uhgrouping}")
-    private String UHGROUPING;
-
-    @Value("${groupings.api.destinations}")
-    private String DESTINATIONS;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.purge_grouping}")
-    private String PURGE_GROUPING;
-
     @Value("${groupings.api.self_opted}")
     private String SELF_OPTED;
-
-    @Value("${groupings.api.anyone_can}")
-    private String ANYONE_CAN;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
 
     @Value("${groupings.api.owners}")
     private String OWNERS;
@@ -116,32 +53,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.grouping_owners}")
     private String OWNERS_GROUP;
 
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
     @Value("${groupings.api.assign_type_immediate_membership}")
     private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
-
-    @Value("${groupings.api.operation_assign_attribute}")
-    private String OPERATION_ASSIGN_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_remove_attribute}")
-    private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_replace_values}")
-    private String OPERATION_REPLACE_VALUES;
-
-    @Value("${groupings.api.privilege_opt_out}")
-    private String PRIVILEGE_OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
-
-    @Value("${groupings.api.every_entity}")
-    private String EVERY_ENTITY;
 
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
@@ -151,12 +64,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
-
-    @Value("${groupings.api.success_allowed}")
-    private String SUCCESS_ALLOWED;
-
-    @Value("${groupings.api.stem}")
-    private String STEM;
 
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
@@ -184,9 +91,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Autowired
     private HelperService hs;
-
-    @Autowired
-    private PersonRepository personRepository;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
