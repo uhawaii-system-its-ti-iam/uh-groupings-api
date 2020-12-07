@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -471,12 +472,16 @@ public class MembershipServiceImpl implements MembershipService{
             try {
                 //System.out.println("Getting result from FutureTask " + i + ".");
                 results.add((tasks.get(i)).get());
+                System.out.println((tasks.get(i)).get());
                 //System.out.println("Added result from FutureTask " + i + " to results list.");
                 threads.get(i).join();
                 System.out.println("Thread " + threads.get(i) + " finished.");
             } catch (InterruptedException | ExecutionException e) {
                 System.out.println("Thread Interrupted.");
             }
+        }
+        for (int i = 0; i < results.size(); i++) {
+            System.out.println("An object: " + ReflectionToStringBuilder.toString(results.get(i).getWsGroup()));
         }
         return results;
     }
