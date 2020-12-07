@@ -13,17 +13,14 @@ public class UhCasAttributes implements UhAttributes {
     private final String username; // CAS login username.
     private final Map<?, ?> map; // Original CAS results.
 
-    // Constructor.
     public UhCasAttributes() {
         this(new HashMap<>());
     }
 
-    // Constructor.
     public UhCasAttributes(Map<?, ?> map) {
         this("", map);
     }
 
-    // Constructor.
     public UhCasAttributes(String username, Map<?, ?> map) {
         this.username = username != null ? username : "";
         this.map = map;

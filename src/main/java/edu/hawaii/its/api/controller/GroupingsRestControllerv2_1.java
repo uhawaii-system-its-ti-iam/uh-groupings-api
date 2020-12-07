@@ -90,6 +90,9 @@ public class GroupingsRestControllerv2_1 {
         logger.info("GroupingsRestController started.");
     }
 
+    /**
+     * Get a hello string, this is a test endpoint.
+     */
     @GetMapping(value = "/")
     @ResponseBody public ResponseEntity hello() {
         return ResponseEntity
@@ -97,15 +100,8 @@ public class GroupingsRestControllerv2_1 {
                 .body("University of Hawaii Groupings");
     }
 
-    @GetMapping(value = "/generic")
-    public ResponseEntity<GenericServiceResult> generic() {
-        return ResponseEntity
-                .ok()
-                .body(membershipService.generic());
-    }
-
     /**
-     * Return a GenericServiceResult to be viewed on swagger, a great helper for observing the contents of a grouper
+     * Get a GenericServiceResult to be viewed on swagger, a great helper for observing the contents of a grouper
      * object.
      */
     @GetMapping(value = "/swagger/toString/{path}")
@@ -119,7 +115,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get all admins and groupings
+     * Get all admins and groupings.
      */
     @GetMapping(value = "/adminsGroupings")
     @ResponseBody
@@ -155,7 +151,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Delete a user from multiple groupings
+     * Delete a user from multiple groupings.
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
     public ResponseEntity<List<GroupingsServiceResult>> removeFromGroups(
@@ -169,7 +165,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Reset a grouping  of path owned by owner.  Removes all members from basis, include, exclude.
+     * Remove all members from basis, include, exclude.
      */
     @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/resetGroup")
     public ResponseEntity<List<GroupingsServiceResult>> resetGroup(@RequestHeader("current_user") String owner,
@@ -241,9 +237,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * if the user is allowed to opt into the grouping
-     * this will add them to the include group of that grouping
-     * if the user is in the exclude group, they will be removed from it
+     * Make a user of uid a member of the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self")
     public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
@@ -256,9 +250,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * if the user is allowed to opt out of the grouping
-     * this will add them to the exclude group of that grouping
-     * if the user is in the include group of that Grouping, they will be removed from it
+     * Make a user of uid a member of the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self")
     public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
@@ -271,7 +263,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add new include member
+     * Add user with uid as a new include member to grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> includeMembers(
@@ -285,7 +277,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add include multiple members.
+     * Add multiple users with a list of uids to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> includeMultipleMembers(
@@ -299,7 +291,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add new exclude member.
+     * Add user with uid as a new exclude member to grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> excludeMembers(
@@ -313,7 +305,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add exclude multiple members.
+     * Add multiple users with a list of uids to the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> excludeMultipleMembers(
@@ -327,7 +319,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove grouping include member.
+     * Remove member with uid from include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteInclude(@RequestHeader("current_user") String currentUser,
@@ -340,7 +332,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove grouping exclude member.
+     * Remove member with uid from exclude group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}")
     public ResponseEntity<GroupingsServiceResult> deleteExclude(@RequestHeader("current_user") String currentUser,
@@ -353,7 +345,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Delete all valid members in uids from path as currentUser.
+     * Remove multiple members pertaining to the uids list from exclude grouping of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
@@ -445,7 +437,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * GET a response which specifies whether uid is an owner or not,
+     * Get a response which specifies whether uid is an owner or not.
      */
     @GetMapping(value = "/admins/{uid:[\\w-:.]+}")
     @ResponseBody
@@ -460,9 +452,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to enable given preference.
      */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preferences/{preferenceId:[\\w-:.]+}/enable")
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
             @RequestHeader("current_user") String currentUser,
             @PathVariable String path,
@@ -507,7 +497,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations
+     * Get the list of sync destinations.
      */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/syncDestinations",
             method = RequestMethod.GET,
@@ -523,7 +513,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * GET a response which specifies whether uid is an owner or not,
+     * Ger a response which specifies whether uid is an owner or not,
      */
     @RequestMapping(value = "/owners/{uid:[\\w-:.]+}",
             method = RequestMethod.GET,

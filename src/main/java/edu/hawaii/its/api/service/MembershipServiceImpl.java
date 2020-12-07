@@ -188,24 +188,18 @@ public class MembershipServiceImpl implements MembershipService {
 
     // returns true if username is a UH id number
     public boolean isUhUuid(String naming) {
-        return naming.matches("\\d+");
+        return naming != null && naming.matches("\\d+");
     }
 
-    // Creates a Person depending on the input used. For example, if input is UhUuid, user will be created using that.
+    /**
+     * Create a person class with ether a uid ofr a uhuuid.
+     */
     public Person createNewPerson(String userToAdd) {
-        Person createdPerson;
-
-        try {
-            Integer.parseInt(userToAdd);
-            createdPerson = new Person(null, userToAdd, null, null, null);
-
-        } catch (Exception NumberFormatException) {
-            createdPerson = new Person(null, null, userToAdd, null, null);
+        if (isUhUuid(userToAdd)) {
+            return new Person(null, userToAdd, null, null, null);
         }
-
-        return createdPerson;
+        return new Person(null, null, userToAdd, null, null);
     }
-
 
     // Adds a member to a Grouping from either UH username or UH ID number.
     @Override
@@ -437,7 +431,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
-            List<String> GroupPaths){
+            List<String> GroupPaths) {
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
         for (int i = 0; i < GroupPaths.size(); i++) {
             System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
@@ -458,21 +452,23 @@ public class MembershipServiceImpl implements MembershipService {
         String excludePath = path + EXCLUDE;
         String includePath = path + INCLUDE;
 
-        if(!includeIdentifier.get(0).equals("empty")) {
+        if (!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i +  ":" + includePath);
+                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
-        if(!excludeIdentifier.get(0).equals("empty")) {
+        if (!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i +  ":" + excludePath);
+                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
-                WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
+                WsDeleteMemberResults deleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
                 result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
             }
         }
