@@ -1,9 +1,12 @@
 package edu.hawaii.its.api.service;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,73 @@ public class MembershipServiceUnitTest {
         memberResults.forEach(
                 result -> assertTrue((result.toString())
                         .contains("edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults@")));
+    }
+
+    private class DeleteTestRunnerTwo extends Thread {
+        private final int id;
+        private final MembershipServiceImpl membershipService;
+        public DeleteTestRunnerTwo(int id, MembershipServiceImpl membershipService) {
+            this.id = id;
+            this.membershipService = membershipService;
+        }
+        @Override
+        public void run() {
+            try {
+                System.out.println("Running " + id);
+                List<String> groupPaths = Arrays.asList("groupPath-" + id);
+                String userToRemove = "userToRemove-" + id;
+                membershipService.makeWsBatchDeleteMemberResults(groupPaths, userToRemove);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    @Test
+    public void batchDeleteThree() {
+        final int TEST_RUNS = 30;
+        final Map<String, String> mapControl = new HashMap<>(0);
+        final Map<String, String> map = new HashMap<>(0);
+        GrouperFactoryService grouperService = new GrouperFactoryServiceImpl() {
+            public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
+                System.out.println("DELETING " + memberToDelete + " from " + group);
+                synchronized (map) {
+                    map.put(group, memberToDelete);
+                }
+                return new WsDeleteMemberResults();
+            }
+        };
+        MembershipServiceImpl membershipService = new MembershipServiceImpl();
+        membershipService.setGrouperFactoryService(grouperService);
+        Thread[] serviceThreads = new DeleteTestRunnerTwo[TEST_RUNS];
+        for (int i = 0; i < TEST_RUNS; i++) {
+            serviceThreads[i] = new DeleteTestRunnerTwo(i, membershipService);
+            serviceThreads[i].start();
+        }
+        // Wait on the threads to finish.
+        pollUntilFinished(TEST_RUNS, serviceThreads);
+        assertThat(map.size(), equalTo(TEST_RUNS));
+        // Check the results.
+        // TODO: check the group and memberToDelete values.
+
+        int expectedGroup = 0;
+        int expectedMember = 0;
+        for (Map.Entry<String, String> e : map.entrySet()) {
+            System.out.println("map.entry; key: " + e.getKey() + ", value: " + e.getValue());
+            int i = 0;
+            for (Map.Entry<String, String> d : map.entrySet()) {
+                if(e.getValue().equals("userToRemove-" + i)){
+                    expectedMember++;
+                }
+                if(e.getKey().equals("groupPath-" + i)){
+                    expectedGroup++;
+                }
+                i++;
+            }
+        }
+        //Verifying that all the expected results are within the hash map.
+        assertEquals(map.size(), expectedGroup);
+        assertEquals(map.size(), expectedMember);
     }
 
     @Test
