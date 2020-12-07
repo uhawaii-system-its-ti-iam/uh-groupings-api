@@ -59,22 +59,28 @@ public class UhCasAttributes implements UhAttributes {
     @Override
     public String getUid() {
         List<String> values = uhAttributeMap.get("uid");
-        if (null == values) {
-            return "";
-        }
-        if (values.size() == 1) {
-            return values.get(0);
-        }
-        // If theres more than one uid in the results, try to match one with username.
-        if (values.size() > 1) {
-            for (String s : values) {
-                if (s.equals(getUsername())) {
-                    return s;
+        if (values != null) {
+            // Check expected case first.
+            if (values.size() == 1) {
+                return values.get(0); // We are done.
+            }
+
+            if (values.size() > 1) {
+                // More than one uid in the results.
+                // Try to match up with the username.
+                for (String s : values) {
+                    if (s.equals(getUsername())) {
+                        return s;
+                    }
                 }
+
+                // Couldn't match up username with uid,
+                // so just return first value.
+                return values.get(0); // We are done.
             }
         }
-        // If couldn't match up username with uid, just return the first value.
-        return values.get(0);
+
+        return ""; // Didn't find anything.
     }
 
     @Override
