@@ -1177,16 +1177,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void genericTest() throws Exception {
-        mockMvc.perform(get(API_BASE + "/generic")
-                .header("current_user", "o6-username"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-    }
-
-    @Test
-    @WithMockUhUser
     public void regexTest() throws Exception {
         // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
         mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
