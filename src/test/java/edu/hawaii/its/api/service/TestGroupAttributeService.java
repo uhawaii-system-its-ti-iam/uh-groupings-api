@@ -1,14 +1,18 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,9 +24,9 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
-import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +40,7 @@ import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupAttributeService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -116,7 +120,7 @@ public class TestGroupAttributeService {
 
     @Before
     public void setUp() throws IOException, MessagingException {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
         groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
 
@@ -139,7 +143,7 @@ public class TestGroupAttributeService {
     }
 
     @Test
-    public void getSyncDestinationsTest() {
+    public void getAllSyncDestinationsTest() {
 
         // test with admin
         List<SyncDestination> destinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
@@ -157,7 +161,16 @@ public class TestGroupAttributeService {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
     }
-    
+
+    @Test public void getSyncDestinationsTest() {
+        Grouping grouping = new Grouping();
+        grouping.setPath(GROUPING);
+        grouping.setName("test-grouping");
+        List<SyncDestination> destinations = groupAttributeService.getSyncDestinations(grouping);
+        assertTrue(destinations.size() > 0);
+        assertNotNull(grouping);
+    }
+
     @Test
     public void optOutPermissionTest() {
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
@@ -180,12 +193,12 @@ public class TestGroupAttributeService {
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
         //get last modified time
-        WsGetAttributeAssignmentsResults attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        WsGetAttributeAssignmentsResults attributes =
+                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
 
         //get last modified time and make sure that it hasn't changed
         try {
@@ -197,8 +210,8 @@ public class TestGroupAttributeService {
         String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertThat(lastModTime2, is(lastModTime));
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING,LISTSERV));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
         //todo get last modified time and make sure that it has changed
         try {
@@ -210,7 +223,7 @@ public class TestGroupAttributeService {
         String lastModTime3 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertNotEquals(lastModTime2, lastModTime3);
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
         //todo get last modified time and make sure that it hasn't changed
@@ -225,15 +238,15 @@ public class TestGroupAttributeService {
 
         assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV, true);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV,true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV,false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV, false);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
@@ -373,7 +386,7 @@ public class TestGroupAttributeService {
     }
 
     @Test
-    public void updateDescriptionTest(){
+    public void updateDescriptionTest() {
 
         GroupingsServiceResult groupingsServiceResult;
 
@@ -386,17 +399,20 @@ public class TestGroupAttributeService {
 
         //Try to update grouping while user isn't owner or admin
         try {
-            groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
+            groupingsServiceResult =
+                    groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
 
         //Testing with admin
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
+        groupingsServiceResult =
+                groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
         assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
 
         //Testing with owner
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
+        groupingsServiceResult =
+                groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
         assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
 
         // Test with empty string
@@ -416,5 +432,25 @@ public class TestGroupAttributeService {
         GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
         boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
         assertTrue(true);
+    }
+
+    /**
+     * Check by sync destination name if the proper destinations were received from grouper.
+     */
+    private boolean testGetSynDestinationsHelper(List<SyncDestination> destinations) {
+        List<String> supposedDestinationNames = new ArrayList<>();
+        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:google-group");
+        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:listserv");
+        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:uhReleasedGrouping");
+
+        Iterator<SyncDestination> syncDestinationIterator = destinations.iterator();
+        Iterator<String> supposedDestinationNamesIterator = supposedDestinationNames.iterator();
+
+        while (supposedDestinationNamesIterator.hasNext() && syncDestinationIterator.hasNext()) {
+            if (!supposedDestinationNamesIterator.next().equals(syncDestinationIterator.next().getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 }
