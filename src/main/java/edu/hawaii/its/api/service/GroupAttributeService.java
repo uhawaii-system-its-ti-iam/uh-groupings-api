@@ -18,8 +18,6 @@ public interface GroupAttributeService {
 
     List<SyncDestination> getAllSyncDestinations(String currentUsername, String path);
 
-    List<SyncDestination> getAllSyncDestinations();
-
     //do not include in REST controller
     WsGetAttributeAssignmentsResults attributeAssignmentsResults(String assignType, String groupPath,
                                                                         String attributeName);

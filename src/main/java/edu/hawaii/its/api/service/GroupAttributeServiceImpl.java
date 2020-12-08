@@ -183,7 +183,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         }
 
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
-        List<SyncDestination> finSyncDestList = getAllSyncDestinations();
+        List<SyncDestination> finSyncDestList = grouperFactoryService.getSyncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
             dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
@@ -192,9 +192,22 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return finSyncDestList;
     }
 
+    /**
+     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
+     * person requesting the information is an owner or superuser as that has already been checked.
+     */
     @Override
-    public List<SyncDestination> getAllSyncDestinations() {
-        return grouperFactoryService.getSyncDestinations();
+    public List<SyncDestination> getSyncDestinations(Grouping grouping) {
+        List<SyncDestination> syncDestinations = grouperFactoryService.getSyncDestinations();
+
+        if (syncDestinations == null) {
+            return null;
+        }
+        for (SyncDestination destination : syncDestinations) {
+            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
+        }
+        return syncDestinations;
     }
 
     /**
@@ -299,24 +312,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             }
         }
         return false;
-    }
-
-    /**
-     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
-     * person requesting the information is an owner or superuser as that has already been checked.
-     */
-    @Override
-    public List<SyncDestination> getSyncDestinations(Grouping grouping) {
-        List<SyncDestination> syncDestinations = getAllSyncDestinations();
-
-        if (syncDestinations == null) {
-            return null;
-        }
-        for (SyncDestination destination : syncDestinations) {
-            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
-        }
-        return syncDestinations;
     }
 
     // Checks to see if a group has an attribute of a specific type and returns the list if it does.
