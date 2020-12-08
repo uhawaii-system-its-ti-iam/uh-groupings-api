@@ -449,12 +449,15 @@ public class MembershipServiceImpl implements MembershipService{
 
     public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
         List<WsDeleteMemberResults> results = new ArrayList<>();
+
         // Creating a thread list which is populated with a thread for each removal that needs to be done.
         List<Thread> threads = new ArrayList<Thread>();
         List<FutureTask<WsDeleteMemberResults>> tasks = new ArrayList<>();
+
         for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
+
             //creating runnable object containing the data needed for each individual delete.
-            Callable<WsDeleteMemberResults> master = new BatchDeleterTask(currGroup, userToRemove, groupPaths, grouperFS);
+            Callable<WsDeleteMemberResults> master = new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
             //System.out.println("FutureTask " + currGroup + " created.");
             FutureTask<WsDeleteMemberResults> task = new FutureTask<>(master);
             tasks.add(task);
@@ -462,11 +465,13 @@ public class MembershipServiceImpl implements MembershipService{
             threads.add(curr);
             //System.out.println("Thread " + currGroup + " created.");
         }
+
         // Starting all of the created threads.
         for (int i = 0; i < threads.size(); i++) {
             System.out.println("Thread " + i + " started.");
             threads.get(i).start();
         }
+
         // Waiting to return result until every thread in the list has completed running.
         for (int i = 0; i < threads.size(); i++) {
             try {
@@ -480,9 +485,10 @@ public class MembershipServiceImpl implements MembershipService{
                 System.out.println("Thread Interrupted.");
             }
         }
-        for (int i = 0; i < results.size(); i++) {
+
+        /*for (int i = 0; i < results.size(); i++) {
             System.out.println("An object: " + ReflectionToStringBuilder.toString(results.get(i).getWsGroup()));
-        }
+        }*/
         return results;
     }
 
