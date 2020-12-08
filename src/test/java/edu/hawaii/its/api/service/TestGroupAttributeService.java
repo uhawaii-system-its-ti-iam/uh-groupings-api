@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -158,6 +159,14 @@ public class TestGroupAttributeService {
             fail("shouldn't be here");
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+        }
+    }
+
+    @Test public void getSyncDestinationsTest() {
+        Grouping grouping = new Grouping();
+        List<SyncDestination> destinations = groupAttributeService.getSyncDestinations(grouping);
+        for (SyncDestination destination : destinations) {
+            System.err.println(destination.toString());
         }
     }
 
