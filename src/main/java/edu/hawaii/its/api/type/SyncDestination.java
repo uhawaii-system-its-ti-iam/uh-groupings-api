@@ -71,11 +71,18 @@ public class SyncDestination {
 
         try {
             result = desc.replaceFirst(regex, replace);
-        } catch(PatternSyntaxException e) {
+        } catch (PatternSyntaxException e) {
             result = desc;
             e.printStackTrace();
         }
 
         return result;
+    }
+
+    public String toString() {
+        return "name: " + this.name +
+                "; description: " + this.description +
+                "; tooltip: " + this.tooltip +
+                "; isSynced: " + this.isSynced + ";";
     }
 }
