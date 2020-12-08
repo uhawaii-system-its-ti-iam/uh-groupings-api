@@ -178,7 +178,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
 
-        if (!memberAttributeService.isAdmin(currentUsername)) {
+        if (!memberAttributeService.isAdmin(currentUsername) && !memberAttributeService.isOwner(currentUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
