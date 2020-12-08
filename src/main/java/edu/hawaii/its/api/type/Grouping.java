@@ -101,7 +101,7 @@ public class Grouping {
         syncDestinationsState.replace(key, boo);
 
         for (SyncDestination destination : syncDestinations) {
-            if(destination.getName().equals(key)) {
+            if (destination.getName().equals(key)) {
                 destination.setIsSynced(boo);
             }
         }
@@ -110,6 +110,10 @@ public class Grouping {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPath() {
