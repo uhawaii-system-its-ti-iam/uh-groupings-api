@@ -145,7 +145,6 @@ public class MemberAttributeServiceTest {
         assertNotNull(memberAttributeService);
     }
 
-
     @Test
     public void assignOwnershipTest() {
         //expect this to fail
@@ -194,23 +193,14 @@ public class MemberAttributeServiceTest {
 
     @Test
     public void getIsOwnerTest() {
-        // Valid username is an Owner
-            try {
-                GenericServiceResult result = memberAttributeService.getIsOwner(ADMIN_USER, users.get(0).getUsername());
-                String test = result.getData().get(0).toString();
-                assertTrue(test.contains(SUCCESS));
-            }catch(Exception e){
-                System.out.println(e);
-                assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
-            }
+        assertTrue(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(0).getUsername()));
+        assertFalse(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(1).getUsername()));
     }
 
     @Test
     public void getIsAdminTest() {
-        // Invalid username is not an Admin
-        GenericServiceResult result = memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername());
-        String test = result.getData().get(0).toString();
-        assertTrue(test.contains(FAILURE));
+        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
+        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername()));
     }
 
     @Test

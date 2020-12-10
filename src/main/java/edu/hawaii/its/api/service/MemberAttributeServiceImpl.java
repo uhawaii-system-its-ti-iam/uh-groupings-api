@@ -503,45 +503,33 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool }.
      */
     @Override
-    public GenericServiceResult getIsOwner(String currentUser, String usernameInQuestion) {
-        String action = "getIsOwner: " + "currentUser: " + currentUser + ";, " +
-                "usernameInQuestion: " + usernameInQuestion + ";";
-        logger.info(action);
+    public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
+        logger.info("getIsOwner: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
+                + ";");
 
         if (!isOwner(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         try {
-            return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isOwner"),
-                    new GroupingsServiceResult(SUCCESS, action),
-                    (groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(
-                            currentUser, usernameInQuestion)).size() > 0));
+            return groupingAssignmentService
+                    .groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, usernameInQuestion)).size()
+                    > 0;
         } catch (GcWebServiceError e) {
-            logger.error(action, e);
-            return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
-                    new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+            return false;
         }
     }
 
     @Override
-    public GenericServiceResult getIsAdmin(String currentUser, String usernameInQuestion) {
-        String action = "getIsAdmin: " + "currentUser: " + currentUser + ";, " +
-                "usernameInQuestion: " + usernameInQuestion + ";";
-        logger.info(action);
+    public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
+        logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
+                + ";");
         if (!isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         try {
-            return new GenericServiceResult(Arrays.asList("groupingsServiceResult", "isAdmin"),
-                    new GroupingsServiceResult(SUCCESS, action),
-                    (groupingAssignmentService.adminLists(
-                            usernameInQuestion).getAdminGroup().getMembers().size() > 0));
+            return groupingAssignmentService.adminLists(usernameInQuestion).getAdminGroup().getMembers().size() > 0;
         } catch (AccessDeniedException | GcWebServiceError e) {
-            logger.error(action, e);
-            return new GenericServiceResult(Collections.singletonList("groupingsServiceResult"),
-                    new GroupingsServiceResult(FAILURE, action + ";, " + e.getMessage()));
+            return false;
         }
     }
 }

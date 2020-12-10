@@ -436,7 +436,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, syncDestName, false));
     }
 
-
     /**
      * Update grouping to enable given preference.
      */
@@ -501,28 +500,26 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Ger a response which specifies whether uid is an owner or not,
+     * Get a response which specifies whether uid is an owner or not,
      */
-    @RequestMapping(value = "/owners/{uid:[\\w-:.]+}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/owners/{uid:[\\w-:.]+}")
     @ResponseBody
-    public ResponseEntity<GenericServiceResult> getIsOwner(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<Boolean> getIsOwner(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST getAllSyncDestinations...");
+        logger.info("Entered REST getIsOwner...");
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getIsOwner(currentUser, uid));
     }
-    
+
     /**
      * Get a response which specifies whether uid is an owner or not.
      */
     @GetMapping(value = "/admins/{uid:[\\w-:.]+}")
     @ResponseBody
-    public ResponseEntity<GenericServiceResult> getIsAdmin(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<Boolean> getIsAdmin(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST getAllSyncDestinations...");
+        logger.info("Entered REST getIsAdmin...");
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getIsAdmin(currentUser, uid));
