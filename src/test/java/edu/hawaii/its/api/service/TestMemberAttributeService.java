@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -11,6 +12,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -173,27 +175,40 @@ public class TestMemberAttributeService {
 
     @Test
     public void getIsOwnerTest() {
-        // Valid username is an owner
-        GenericServiceResult resIsOwner = memberAttributeService.getIsOwner(ADMIN_USER, usernames[0]);
-        //resIsOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrIsOwner = (GroupingsServiceResult) resIsOwner.getData().get(0);
-        Boolean isOwner = (Boolean) resIsOwner.getData().get(1);
-        assertEquals(SUCCESS, gsrIsOwner.getResultCode()); // Check Validity
-        assertTrue(isOwner);
+        assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
 
-        // Valid username is not an owner
-        GenericServiceResult resNotOwner = memberAttributeService.getIsOwner(ADMIN_USER, usernames[1]);
-        //resNotOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrNotOwner = (GroupingsServiceResult) resNotOwner.getData().get(0);
-        Boolean notOwner = (Boolean) resNotOwner.getData().get(1);
-        assertEquals(SUCCESS, gsrNotOwner.getResultCode()); // Check Validity
-        assertFalse(notOwner);
+        Boolean[] assumptions = new Boolean[] { true, false, false, false, true, false };
+        for (int i = 0; i < 6; i++) {
+            assertEquals(assumptions[i], memberAttributeService.getIsOwner(ADMIN_USER, usernames[i]));
+        }
 
-        //  Invalid username
-        GenericServiceResult resNotValid = memberAttributeService.getIsOwner(ADMIN_USER, "zzz");
-        //resNotOwner at index 0 is a GroupingsServiceResult.
-        GroupingsServiceResult gsrNotValid = (GroupingsServiceResult) resNotValid.getData().get(0);
-        assertEquals(FAILURE, gsrNotValid.getResultCode()); // Check Validity
+        try {
+            memberAttributeService.getIsOwner("zzzz", usernames[0]);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void getIsAdminTest() {
+        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
+        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, "zzz"));
+
+        if (memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0])) {
+            membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
+        }
+        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+
+        membershipService.addAdmin(ADMIN_USER, usernames[0]);
+        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+        membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
+        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+
+        try {
+            memberAttributeService.getIsAdmin("zzzz", usernames[0]);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
     }
 
     @Test
