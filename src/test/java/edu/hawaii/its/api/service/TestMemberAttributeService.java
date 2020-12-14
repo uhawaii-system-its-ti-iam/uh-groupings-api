@@ -178,6 +178,8 @@ public class TestMemberAttributeService {
     public void getIsOwnerTest() {
         assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
 
+        assertTrue(memberAttributeService.isOwner(ADMIN_USER));
+        assertFalse(memberAttributeService.isOwner("zzzz"));
         Boolean[] assumptions = new Boolean[] { true, false, false, false, true, false };
         for (int i = 0; i < 6; i++) {
             assertEquals(assumptions[i], memberAttributeService.getIsOwner(ADMIN_USER, usernames[i]));
@@ -187,6 +189,12 @@ public class TestMemberAttributeService {
             memberAttributeService.getIsOwner("zzzz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        try {
+            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
+        } catch (AccessDeniedException |GcWebServiceError e) {
+            fail(e.getMessage());
         }
     }
 
@@ -209,6 +217,12 @@ public class TestMemberAttributeService {
             memberAttributeService.getIsAdmin("zzzz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        try {
+            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
+        } catch (AccessDeniedException |GcWebServiceError e) {
+            fail(e.getMessage());
         }
     }
 
@@ -582,7 +596,6 @@ public class TestMemberAttributeService {
 
     @Test
     public void getOwnedGroupingsTest() {
-        List<GroupPath> paths = memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[1]);
         assertTrue(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[0]).size() > 0);
         assertFalse(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[1]).size() > 0);
 

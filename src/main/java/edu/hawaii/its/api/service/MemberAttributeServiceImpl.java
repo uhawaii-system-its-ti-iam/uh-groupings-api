@@ -510,7 +510,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             return groupingAssignmentService
                     .groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, usernameInQuestion)).size()
                     > 0;
-        } catch (GcWebServiceError e) {
+        } catch (AccessDeniedException | GcWebServiceError e) {
             return false;
         }
     }
@@ -530,6 +530,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         } catch (AccessDeniedException | GcWebServiceError e) {
             return false;
         }
+
     }
 
     /**

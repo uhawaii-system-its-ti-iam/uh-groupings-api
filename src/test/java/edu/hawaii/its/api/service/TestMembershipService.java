@@ -161,6 +161,9 @@ public class TestMembershipService {
 
         List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         assertTrue(result.size() > 0);
+        for(Membership res : result) {
+            System.err.println(res);
+        }
     }
 
     @Test
