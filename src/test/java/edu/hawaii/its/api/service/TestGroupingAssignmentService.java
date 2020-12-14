@@ -545,6 +545,14 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getGroupPathsTest() {
+        List<String> paths = groupingAssignmentService.getGroupPaths(ADMIN, "gilbertz");
+        for (String path : paths) {
+            System.err.println(path);
+        }
+    }
+
+    @Test
     public void getGroupNames() {
         List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
 

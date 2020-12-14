@@ -8,11 +8,16 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -297,6 +302,9 @@ public class HelperServiceImpl implements HelperService {
         return "";
     }
 
+    @Autowired
+    GroupingAssignmentService groupingAssignmentService;
+
     /**
      * Get the name of a grouping from groupPath.
      */
@@ -309,7 +317,22 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result", grouperFS.getSyncDestinations());
+        WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
+        WsGetGroupsResults wsGetGroupsResults;
+
+        wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
+                currentUser,
+                stemLookup,
+                StemScope.ALL_IN_SUBTREE
+        );
+        WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
+
+        List<WsGroup> groups = new ArrayList<>();
+
+        if (groupResults.getWsGroups() != null) {
+            groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
+        }
+        return new GenericServiceResult("result", groupingAssignmentService.extractGroupPaths(groups));
     }
 
     /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {

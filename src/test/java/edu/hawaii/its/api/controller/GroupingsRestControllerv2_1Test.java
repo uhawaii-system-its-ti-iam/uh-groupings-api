@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -453,6 +455,28 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser(username = "bobo")
+    public void getGroupingsOwnedAdminTest() throws Exception {
+        final String uid = "grouping";
+        final String admin = "bobo";
+
+        String parentPath = "path:to:grouping";
+        String path = parentPath + ":include";
+
+        List<GroupPath> groupPathList = new ArrayList<>();
+        groupPathList.add(new GroupPath(path));
+
+        given(memberAttributeService.getOwnedGroupings(admin, uid))
+                .willReturn(groupPathList);
+        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+                .header(CURRENT_USER, admin)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].path").value(path))
+                .andExpect(jsonPath("$[0].parentPath").value(parentPath))
+                .andExpect(jsonPath("$[0].name").value("grouping"));
+    }
+
+    /*
+    @Test
+    @WithMockUhUser(username = "bobo")
     public void ownerGroupingsAdminTest() throws Exception {
         final String uid = "grouping";
         final String admin = "bobo";
@@ -495,6 +519,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
                 .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
     }
+     */
 
     @Ignore
     @Test

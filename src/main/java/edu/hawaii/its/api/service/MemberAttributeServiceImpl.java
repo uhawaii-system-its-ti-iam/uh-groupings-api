@@ -496,12 +496,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool},
-     * which tells whether usernameInQuestion is an owner or not.
-     *
-     * @param currentUser        - current owner.
-     * @param usernameInQuestion - user to be authenticated.
-     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool }.
+     * Return true if usernameInQuestion is an owner, otherwise return false.
      */
     @Override
     public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
@@ -520,6 +515,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
+    /**
+     * Return true if usernameInQuestion is an admin, otherwise return false.
+     */
     @Override
     public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
         logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
@@ -534,6 +532,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
+    /**
+     * Get a list of GroupPaths the user owns.
+     */
     @Override
     public List<GroupPath> getOwnedGroupings(String currentUser, String user) {
         List<GroupPath> groupPaths = new ArrayList<>();
