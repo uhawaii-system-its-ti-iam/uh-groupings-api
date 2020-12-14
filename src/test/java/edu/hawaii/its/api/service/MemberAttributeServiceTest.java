@@ -8,6 +8,7 @@ import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
@@ -368,5 +369,18 @@ public class MemberAttributeServiceTest {
         assertThat(membersResults.get(0).getUsername(), equalTo(testPerson.getUsername()));
         assertThat(membersResults.get(0).getUhUuid(), equalTo(testPerson.getUhUuid()));
         assertThat(membersResults.get(0).getName(), equalTo(testPerson.getName()));
+    }
+
+    @Test
+    public void getOwnedGroupingsTest() {
+        assertTrue(memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(0).getUsername()).size() > 0);
+        assertFalse(memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(1).getUsername()).size() > 0);
+
+        try {
+            memberAttributeService.getOwnedGroupings(users.get(1).getUsername(), users.get(0).getUsername());
+        } catch (AccessDeniedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
