@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -577,5 +578,18 @@ public class TestMemberAttributeService {
         assertThat(members.get(0).getName(), equalTo("tst04name"));
         assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
         assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
+    }
+
+    @Test
+    public void getOwnedGroupingsTest() {
+        List<GroupPath> paths = memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[1]);
+        assertTrue(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[0]).size() > 0);
+        assertFalse(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[1]).size() > 0);
+
+        try {
+            memberAttributeService.getOwnedGroupings(usernames[1], usernames[0]);
+        } catch (AccessDeniedException e) {
+            e.printStackTrace();
+        }
     }
 }
