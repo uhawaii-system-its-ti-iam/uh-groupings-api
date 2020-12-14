@@ -33,12 +33,38 @@ public class GroupPathTest {
 
     @Test
     public void getParentPathTest() {
-        assertEquals(include.parentPath, PATH_ROOT);
+        assertEquals(PATH_ROOT, include.parentPath);
+    }
+
+    @Test
+    public void setParentPathTest() {
+        GroupPath path = new GroupPath(INCLUDE);
+        path.setParentPath("Parent");
+        assertEquals("Parent", path.getParentPath());
     }
 
     @Test
     public void getNameTest() {
-        assertEquals(include.name, "grouping");
+        assertEquals("grouping", include.name );
+    }
+
+    @Test
+    public void setNameTest() {
+        GroupPath path = new GroupPath(INCLUDE);
+        path.setName("Name");
+        assertEquals("Name", path.name);
+    }
+
+    @Test
+    public void getPathTest() {
+        assertEquals(INCLUDE, include.path);
+    }
+
+    @Test
+    public void setPathTest() {
+        GroupPath path = new GroupPath(INCLUDE);
+        path.setPath("path");
+        assertEquals("path", path.path);
     }
 
 }

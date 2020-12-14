@@ -207,11 +207,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     }
 
     @Override
-    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername) {
-        return groupingsOwned(getGroupPaths(actingUsername, ownerUsername));
-    }
-
-    @Override
     public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername) {
         return excludeGroups(getGroupPaths(actingUsername, ownerUsername));
     }
@@ -685,12 +680,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getGroupPaths; username: " + username + ";");
 
         if (ownerUsername.equals(username) || memberAttributeService.isSuperuser(ownerUsername)) {
-            WsStemLookup stemLookup = grouperFactoryService.makeWsStemLookup(STEM);
             WsGetGroupsResults wsGetGroupsResults;
 
             wsGetGroupsResults = grouperFactoryService.makeWsGetGroupsResults(
                     username,
-                    stemLookup,
+                    grouperFactoryService.makeWsStemLookup(STEM),
                     StemScope.ALL_IN_SUBTREE
             );
 
@@ -701,6 +695,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             if (groupResults.getWsGroups() != null) {
                 groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
             }
+
 
             return extractGroupPaths(groups);
 
@@ -720,7 +715,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     .collect(Collectors.toSet());
 
         }
-        return names.stream().collect(Collectors.toList());
+        return new ArrayList<>(names);
     }
 
     /**

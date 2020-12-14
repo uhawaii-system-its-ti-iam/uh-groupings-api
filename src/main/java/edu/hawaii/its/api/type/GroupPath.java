@@ -10,9 +10,6 @@ public class GroupPath {
     String parentPath;
     String name;
 
-    public GroupPath() {
-    }
-
     public GroupPath(String path) {
         this.path = path;
         this.parentPath = makeParentPath();
@@ -49,21 +46,11 @@ public class GroupPath {
                 "name: " + name + ";";
     }
 
-    public Boolean equals(GroupPath obj) {
-        return (obj.parentPath.equals(this.parentPath) && obj.name.equals(this.name) && obj.path.equals(this.path));
-    }
-
     private String makeParentPath() {
-        if (null == path) {
-            return "";
-        }
         return path.substring(0, path.lastIndexOf(":"));
     }
 
     private String makeName() {
-        if (null == parentPath) {
-            return "";
-        }
-        return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
+        return parentPath.substring(parentPath.lastIndexOf(":") + 1);
     }
 }
