@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -531,5 +532,18 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         } catch (AccessDeniedException | GcWebServiceError e) {
             return false;
         }
+    }
+
+    @Override
+    public List<GroupPath> getOwnedGroupings(String currentUser, String user) {
+        List<GroupPath> groupPaths = new ArrayList<>();
+        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, user);
+
+        for (String path : pathStrings) {
+            if (path.endsWith(OWNERS)) {
+                groupPaths.add(new GroupPath(path));
+            }
+        }
+        return groupPaths;
     }
 }
