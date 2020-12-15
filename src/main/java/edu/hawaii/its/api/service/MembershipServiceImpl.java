@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 @Service("membershipService")
-public class MembershipServiceImpl implements MembershipService{
+public class MembershipServiceImpl implements MembershipService {
 
     @Value("${groupings.api.settings}")
     private String SETTINGS;
@@ -458,38 +458,28 @@ public class MembershipServiceImpl implements MembershipService{
         for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
 
             //creating runnable object containing the data needed for each individual delete.
-            Callable<WsDeleteMemberResults> master = new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
-            //System.out.println("FutureTask " + currGroup + " created.");
+            Callable<WsDeleteMemberResults> master =
+                    new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
             FutureTask<WsDeleteMemberResults> task = new FutureTask<>(master);
             tasks.add(task);
             Thread curr = new Thread(task);
             threads.add(curr);
-            //System.out.println("Thread " + currGroup + " created.");
         }
 
         // Starting all of the created threads.
         for (int i = 0; i < threads.size(); i++) {
-            System.out.println("Thread " + i + " started.");
             threads.get(i).start();
         }
 
         // Waiting to return result until every thread in the list has completed running.
         for (int i = 0; i < threads.size(); i++) {
             try {
-                //System.out.println("Getting result from FutureTask " + i + ".");
                 results.add((tasks.get(i)).get());
-                System.out.println((tasks.get(i)).get());
-                //System.out.println("Added result from FutureTask " + i + " to results list.");
                 threads.get(i).join();
-                System.out.println("Thread " + threads.get(i) + " finished.");
             } catch (InterruptedException | ExecutionException e) {
-                System.out.println("Thread Interrupted.");
+                System.out.println("Thread Interrupted: " + e);
             }
         }
-
-        /*for (int i = 0; i < results.size(); i++) {
-            System.out.println("An object: " + ReflectionToStringBuilder.toString(results.get(i).getWsGroup()));
-        }*/
         return results;
     }
 
@@ -552,7 +542,7 @@ public class MembershipServiceImpl implements MembershipService{
         String preposition = "to ";
         String addGroup = groupingPath + INCLUDE;
 
-        System.out.println("START TIME");
+        System.out.println("OPTIN START TIME");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         System.out.println(dtf.format(now));
@@ -645,7 +635,7 @@ public class MembershipServiceImpl implements MembershipService{
                     + grouping;
             results.add(helperService.makeGroupingsServiceResult(failureResult, action));
         }
-        System.out.println("FINISH TIME");
+        System.out.println("OPTIN FINISH TIME");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         System.out.println(dtf.format(now));
@@ -707,20 +697,35 @@ public class MembershipServiceImpl implements MembershipService{
 
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
-
-        System.out.println("addMemberHelper Start.");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
-
         logger.info(
                 "addMemberHelper; user: " + username + "; group: " + groupPath + "; personToAdd: " + personToAdd + ";");
 
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         String action = "add users to " + groupPath;
 
-        if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
-                || memberAttributeService.isAdmin(username) || (personToAdd.getUsername() != null && personToAdd
+        Callable<Boolean> inOwnerThread = new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService);
+        Callable<Boolean> isSuperUserThread = new BatchIsSuperUserTask(username, memberAttributeService);
+        FutureTask<Boolean> taskOwner = new FutureTask<>(inOwnerThread);
+        FutureTask<Boolean> taskSuper = new FutureTask<>(isSuperUserThread);
+        Thread threadOwner = new Thread(taskOwner);
+        Thread threadSuper = new Thread(taskSuper);
+        threadOwner.start();
+        threadSuper.start();
+        boolean inOwner = false;
+        boolean isSuper = false;
+
+        try {
+            inOwner = taskOwner.get();
+            threadOwner.join();
+            isSuper = taskSuper.get();
+            threadSuper.join();
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.print("Thread Interrupted : " + e);
+        }
+
+
+
+        if (inOwner || isSuper || (personToAdd.getUsername() != null && personToAdd
                 .getUsername().equals(username))) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = helperService.parentGroupingPath(groupPath);
@@ -743,7 +748,6 @@ public class MembershipServiceImpl implements MembershipService{
             Thread thread2 = new Thread(task2);
             Thread thread3 = new Thread(task3);
 
-            System.out.println("THREADS STARTED");
             thread1.start();
             thread2.start();
             thread3.start();
@@ -758,11 +762,9 @@ public class MembershipServiceImpl implements MembershipService{
                 thread2.join();
                 inOwners = task3.get();
                 thread3.join();
-                System.out.println("THREADS FINISHED");
             } catch (InterruptedException | ExecutionException e) {
-                System.out.println("Thread Interrupted.");
+                System.out.println("Thread Interrupted: " + e);
             }
-
 
             //check to see if it is the include, exclude or owners
             if (groupPath.endsWith(INCLUDE)) {
@@ -869,12 +871,6 @@ public class MembershipServiceImpl implements MembershipService{
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
-        System.out.println("addMemberHelper Finish.");
-        dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
-
         return gsrList;
     }
 
@@ -884,11 +880,37 @@ public class MembershipServiceImpl implements MembershipService{
 
         String composite = helperService.parentGroupingPath(groupPath);
 
-        if (memberAttributeService.isOwner(composite, username) || memberAttributeService
-                .isAdmin(username) || username.equals(personToDelete.getUsername())) {
+        Callable<Boolean> inOwnerThread = new BatchIsOwnerTask(composite, username, memberAttributeService);
+        Callable<Boolean> isSuperThread = new BatchIsSuperUserTask(username, memberAttributeService);
+        Callable<Boolean> isMemberThread = new BatchIsMemberTask(groupPath, personToDelete, memberAttributeService);
+        FutureTask<Boolean> taskOwner = new FutureTask<>(inOwnerThread);
+        FutureTask<Boolean> taskSuper = new FutureTask<>(isSuperThread);
+        FutureTask<Boolean> taskMember = new FutureTask<>(isMemberThread);
+        Thread threadOwner = new Thread(taskOwner);
+        Thread threadSuper = new Thread(taskSuper);
+        Thread threadMember = new Thread(taskMember);
+        threadOwner.start();
+        threadSuper.start();
+        threadMember.start();
+        boolean inOwner = false;
+        boolean isSuper = false;
+        boolean isMember = false;
+
+        try {
+            inOwner = taskOwner.get();
+            threadOwner.join();
+            isSuper = taskSuper.get();
+            threadSuper.join();
+            isMember = taskMember.get();
+            threadMember.join();
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.println("Thread Interrupted: " + e);
+        }
+
+        if (inOwner || isSuper || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
-                if (memberAttributeService.isMember(groupPath, personToDelete)) {
+                if (isMember) {
                     WsDeleteMemberResults deleteMemberResults =
                             grouperFS.makeWsDeleteMemberResults(groupPath, user, personToDelete);
 
@@ -903,6 +925,7 @@ public class MembershipServiceImpl implements MembershipService{
             return helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + username + " may only delete from exclude, include or owner group", action);
         }
+
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
@@ -927,7 +950,6 @@ public class MembershipServiceImpl implements MembershipService{
         Thread thread2 = new Thread(task2);
         Thread thread3 = new Thread(task3);
 
-        System.out.println("THREADS STARTED");
         thread1.start();
         thread2.start();
         thread3.start();
@@ -941,14 +963,9 @@ public class MembershipServiceImpl implements MembershipService{
             thread2.join();
             isInInclude = task1.get();
             thread3.join();
-            System.out.println("THREADS FINISHED");
         } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Thread Interrupted.");
+            System.out.println("Thread Interrupted: " + e);
         }
-
-        //boolean isInBasis = memberAttributeService.isMember(basis, personToAdd);
-        //boolean isInComposite = memberAttributeService.isMember(groupingPath, personToAdd);
-        //boolean isInInclude = memberAttributeService.isMember(include, personToAdd);
 
         //check to see if they are already in the grouping
         if (!isInComposite) {
