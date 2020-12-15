@@ -278,6 +278,10 @@ public class HelperServiceImpl implements HelperService {
         return groupings;
     }
 
+    /**
+     * Take a list of grouping path strings and return a list of GroupingPath objects.
+     */
+    @Override
     public List<GroupingPath> makePaths(List<String> groupingPaths) {
         List<GroupingPath> paths = new ArrayList<>();
         if (groupingPaths.size() > 0) {
@@ -306,9 +310,6 @@ public class HelperServiceImpl implements HelperService {
         return "";
     }
 
-    @Autowired
-    GroupingAssignmentService groupingAssignmentService;
-
     /**
      * Get the name of a grouping from groupPath.
      */
@@ -320,24 +321,9 @@ public class HelperServiceImpl implements HelperService {
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
-    @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
-                        ASSIGN_TYPE_GROUP,
-                        TRIO);
-
-        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
-
-        List<String> groupPaths = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
-
-        return new GenericServiceResult("result", makePaths(groupPaths));
+    @Override
+    public GenericServiceResult swaggerToString(String currentUser, String path) {
+        return new GenericServiceResult("result", "result");
     }
-
-    /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
-        WsGetGrouperPrivilegesLiteResult result =
-                grouperFS.makeWsGetGrouperPrivilegesLiteResult(path, PRIVILEGE_OPT_IN, wsSubjectLookup);
-        return new GenericServiceResult("result", result);
-    }*/
 }
 
