@@ -181,25 +181,6 @@ public class GroupingsRestControllerv2_1Test {
         return grouping;
     }
 
-    // Test data.
-    private AdminListsHolder mockAdminListsHolder() {
-        AdminListsHolder holder = new AdminListsHolder();
-        List<Grouping> mockAllGroupings = new ArrayList<>();
-        Group mockAdminGroup = new Group();
-
-        mockAllGroupings.add(grouping());
-        mockAllGroupings.add(groupingTwo());
-        holder.setAllGroupings(mockAllGroupings);
-
-        mockAdminGroup.addMember(new Person("o4-name", "o4-uuid", "o4-username"));
-        mockAdminGroup.addMember(new Person("o5-name", "o5-uuid", "o5-username"));
-        mockAdminGroup.addMember(new Person("o6-name", "o6-uuid", "o6-username"));
-        mockAdminGroup.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
-        holder.setAdminGroup(mockAdminGroup);
-
-        return holder;
-    }
-
     // Test data (2.1 API).
     private List<String> groupingStringList() {
         List<String> mockGroupingList = new ArrayList<>();
@@ -302,6 +283,7 @@ public class GroupingsRestControllerv2_1Test {
         return mg;
     }
 
+    /*
     @Test
     @WithMockUhUser(username = "bobo")
     public void adminsGroupingsTest() throws Exception {
@@ -359,6 +341,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[3].uhUuid").value("o7-uuid"))
                 .andExpect(jsonPath("adminGroup.members", hasSize(4)));
     }
+     */
 
     @Ignore
     @Test
