@@ -1,9 +1,6 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -13,7 +10,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

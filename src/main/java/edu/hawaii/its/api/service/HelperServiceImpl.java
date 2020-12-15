@@ -4,20 +4,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,6 +278,14 @@ public class HelperServiceImpl implements HelperService {
         return groupings;
     }
 
+    public List<GroupingPath> makePaths(List<String> groupingPaths) {
+        List<GroupingPath> paths = new ArrayList<>();
+        if (groupingPaths.size() > 0) {
+            paths = groupingPaths.stream().map(GroupingPath::new).collect(Collectors.toList());
+        }
+        return paths;
+    }
+
     //removes one of the words (:exclude, :include, :owners ...) from the end of the string
     @Override
     public String parentGroupingPath(String group) {
@@ -317,22 +321,16 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        WsStemLookup stemLookup = grouperFS.makeWsStemLookup(STEM);
-        WsGetGroupsResults wsGetGroupsResults;
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
+                grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO);
 
-        wsGetGroupsResults = grouperFS.makeWsGetGroupsResults(
-                currentUser,
-                stemLookup,
-                StemScope.ALL_IN_SUBTREE
-        );
-        WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
+        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
 
-        List<WsGroup> groups = new ArrayList<>();
+        List<String> groupPaths = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
 
-        if (groupResults.getWsGroups() != null) {
-            groups = new ArrayList<>(Arrays.asList(groupResults.getWsGroups()));
-        }
-        return new GenericServiceResult("result", groupingAssignmentService.extractGroupPaths(groups));
+        return new GenericServiceResult("result", makePaths(groupPaths));
     }
 
     /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
