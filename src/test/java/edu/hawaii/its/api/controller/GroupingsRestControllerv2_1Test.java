@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.controller;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,11 +11,10 @@ import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
@@ -459,18 +457,16 @@ public class GroupingsRestControllerv2_1Test {
         final String uid = "grouping";
         final String admin = "bobo";
 
-        String parentPath = "path:to:grouping";
-        String path = parentPath + ":include";
+        String path = "path:to:grouping";
 
-        List<GroupPath> groupPathList = new ArrayList<>();
-        groupPathList.add(new GroupPath(path));
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        groupingPathList.add(new GroupingPath(path));
 
         given(memberAttributeService.getOwnedGroupings(admin, uid))
-                .willReturn(groupPathList);
+                .willReturn(groupingPathList);
         mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
                 .header(CURRENT_USER, admin)).andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].path").value(path))
-                .andExpect(jsonPath("$[0].parentPath").value(parentPath))
                 .andExpect(jsonPath("$[0].name").value("grouping"));
     }
 

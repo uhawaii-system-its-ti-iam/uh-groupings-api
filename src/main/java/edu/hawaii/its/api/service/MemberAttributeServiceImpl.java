@@ -1,9 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.GroupPath;
-import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -26,12 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -537,13 +531,13 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * Get a list of GroupPaths the user owns.
      */
     @Override
-    public List<GroupPath> getOwnedGroupings(String currentUser, String user) {
-        List<GroupPath> groupPaths = new ArrayList<>();
+    public List<GroupingPath> getOwnedGroupings(String currentUser, String user) {
+        List<GroupingPath> groupPaths = new ArrayList<>();
         List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, user);
 
         for (String path : pathStrings) {
             if (path.endsWith(OWNERS)) {
-                groupPaths.add(new GroupPath(path));
+                groupPaths.add(new GroupingPath(hs.parentGroupingPath(path)));
             }
         }
         return groupPaths;

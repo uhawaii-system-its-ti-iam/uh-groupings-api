@@ -9,8 +9,8 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.GroupPath;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -363,7 +363,7 @@ public class GroupingsRestControllerv2_1 {
      * Get an owner's owned groupings by username or UH id number.
      */
     @GetMapping("/owners/{uid:[\\w-:.]+}/groupings")
-    public ResponseEntity<List<GroupPath>> ownerGroupings(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<List<GroupingPath>> ownerGroupings(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
