@@ -422,52 +422,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].name").value("grouping"));
     }
 
-    /*
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void ownerGroupingsAdminTest() throws Exception {
-        final String uid = "grouping";
-        final String admin = "bobo";
-
-        given(groupingAssignmentService.restGroupingsOwned(admin, uid))
-                .willReturn(groupingList());
-
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("grouping0"))
-                .andExpect(jsonPath("$[1].name").value("grouping1"))
-                .andExpect(jsonPath("$[2].name").value("grouping2"))
-                .andExpect(jsonPath("$[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
-    }
-
-    @Test
-    @WithMockUhUser(username = "grouping")
-    public void ownerGroupingsMyselfTest() throws Exception {
-        final String uid = "grouping";
-
-        given(groupingAssignmentService.restGroupingsOwned(uid, uid))
-                .willReturn(groupingList());
-
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                .header(CURRENT_USER, uid))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("grouping0"))
-                .andExpect(jsonPath("$[1].name").value("grouping1"))
-                .andExpect(jsonPath("$[2].name").value("grouping2"))
-                .andExpect(jsonPath("$[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
-    }
-     */
 
     @Ignore
     @Test
