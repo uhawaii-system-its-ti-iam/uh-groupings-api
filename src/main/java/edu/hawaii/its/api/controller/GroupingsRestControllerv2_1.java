@@ -116,7 +116,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get all admins and groupings.
+     * Get a list of all admins and a list of all groupings.
      */
     @GetMapping(value = "/adminsGroupings")
     @ResponseBody

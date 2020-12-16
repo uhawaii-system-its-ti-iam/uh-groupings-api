@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.controller;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -846,6 +845,7 @@ public class GroupingsRestControllerv2_1Test {
 
         assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
     }
+
 
     @Test
     @WithMockUhUser
