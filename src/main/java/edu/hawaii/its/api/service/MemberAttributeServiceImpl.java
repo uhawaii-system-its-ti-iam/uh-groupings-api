@@ -532,14 +532,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      */
     @Override
     public List<GroupingPath> getOwnedGroupings(String currentUser, String user) {
-        List<GroupingPath> groupPaths = new ArrayList<>();
         List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, user);
+        List<GroupingPath> groupingPaths = new ArrayList<>();
 
         for (String path : pathStrings) {
             if (path.endsWith(OWNERS)) {
-                groupPaths.add(new GroupingPath(hs.parentGroupingPath(path)));
+                groupingPaths.add(new GroupingPath(hs.parentGroupingPath(path)));
             }
         }
-        return groupPaths;
+        return groupingPaths;
     }
 }
