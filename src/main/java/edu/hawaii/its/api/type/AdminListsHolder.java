@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdminListsHolder {
-    List<Grouping> allGroupings = new ArrayList<>();
+    List<GroupingPath> allGroupingPaths = new ArrayList<>();
     Group adminGroup = new EmptyGroup();
 
     public AdminListsHolder() {
         //empty
     }
 
-    public AdminListsHolder(List<Grouping> allGroupings, Group adminGroup) {
-        this.allGroupings = allGroupings;
+    public AdminListsHolder(List<GroupingPath> allGroupingPaths, Group adminGroup) {
+        this.allGroupingPaths = allGroupingPaths;
         this.adminGroup = adminGroup;
     }
 
-    public List<Grouping> getAllGroupings() {
-        return allGroupings;
+    public List<GroupingPath> getAllGroupingPaths() {
+        return allGroupingPaths;
     }
 
-    public void setAllGroupings(List<Grouping> allGroupings) {
-        this.allGroupings = allGroupings;
+    public void setAllGroupingPaths(List<GroupingPath> allGroupingPaths) {
+        this.allGroupingPaths = allGroupingPaths;
     }
 
     public Group getAdminGroup() {

@@ -400,7 +400,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.0</version>
+                <version>0.8.6</version>
                 <configuration>
                     <excludes>
                         <exclude>edu/hawaii/its/groupings/configuration/SpringBootWebApplication.class</exclude>
@@ -441,7 +441,7 @@
                 <version>3.0.0-M1</version>
                 <configuration>
                     <!--added this-->
-                    <forkMode>never</forkMode>
+                    <forkCount>1</forkCount>
                     <!--^^^ added this-->
                     <systemPropertyVariables>
                         <io.springfox.staticdocs.outputDir>${swagger.output.dir}</io.springfox.staticdocs.outputDir>

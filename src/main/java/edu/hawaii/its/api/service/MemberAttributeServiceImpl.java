@@ -1,8 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -25,12 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -495,12 +490,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a GenericServiceResult{groupingsServiceResult: GroupingsServiceResult, isOwner: bool},
-     * which tells whether usernameInQuestion is an owner or not.
-     *
-     * @param currentUser        - current owner.
-     * @param usernameInQuestion - user to be authenticated.
-     * @return - GenericServiceResult {groupingsServiceResult: GroupingsServiceResult, isOwner: bool }.
+     * Return true if usernameInQuestion is an owner, otherwise return false.
      */
     @Override
     public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
@@ -514,11 +504,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             return groupingAssignmentService
                     .groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, usernameInQuestion)).size()
                     > 0;
-        } catch (GcWebServiceError e) {
+        } catch (AccessDeniedException | GcWebServiceError e) {
             return false;
         }
     }
 
+    /**
+     * Return true if usernameInQuestion is an admin, otherwise return false.
+     */
     @Override
     public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
         logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
@@ -531,5 +524,22 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         } catch (AccessDeniedException | GcWebServiceError e) {
             return false;
         }
+
+    }
+
+    /**
+     * Get a list of GroupPaths the user owns.
+     */
+    @Override
+    public List<GroupingPath> getOwnedGroupings(String currentUser, String user) {
+        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, user);
+        List<GroupingPath> groupingPaths = new ArrayList<>();
+
+        for (String path : pathStrings) {
+            if (path.endsWith(OWNERS)) {
+                groupingPaths.add(new GroupingPath(hs.parentGroupingPath(path)));
+            }
+        }
+        return groupingPaths;
     }
 }

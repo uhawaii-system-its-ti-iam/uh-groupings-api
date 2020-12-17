@@ -18,7 +18,9 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.MembershipAssignment;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hamcrest.core.IsEqual;
@@ -26,6 +28,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -63,7 +66,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingsRestControllerv2_1 {
 
     private static final Log logger = LogFactory.getLog(TestGroupingsRestControllerv2_1.class);
@@ -233,6 +236,7 @@ public class TestGroupingsRestControllerv2_1 {
         Assert.hasLength(env.getProperty("grouperClient.webService.password"),
                 "property 'grouperClient.webService.password' is required");
     }
+
     @Before
     public void setUp() throws IOException, MessagingException {
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
@@ -338,12 +342,12 @@ public class TestGroupingsRestControllerv2_1 {
 
         // ADMIN can be replaced with any account username that has admin access
         assertTrue(listHolderPass.getAdminGroup().getUsernames().contains(ADMIN));
-        assertThat(listHolderPass.getAllGroupings().size(), not(0));
+        assertThat(listHolderPass.getAllGroupingPaths().size(), not(0));
 
     }
 
     // Anonymous user (not logged in)
-//    @Test
+    //    @Test
     @WithAnonymousUser
     public void adminsGroupingsAnonTest() throws Exception {
 
@@ -471,13 +475,6 @@ public class TestGroupingsRestControllerv2_1 {
         try {
             mapList(API_BASE + "owners/bob-jones/groupings", "get", adminUser);
             fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
-
-        try {
-            mapList(API_BASE + "owners//groupings", "get", adminUser);
-            fail("Shouldn't be here");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
@@ -630,14 +627,6 @@ public class TestGroupingsRestControllerv2_1 {
             assertFalse(listHolderPass.getAdminGroup().getUsernames().contains("bob-jones"));
         }
 
-        try {
-            mapGSR(API_BASE + "admins//", "post", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            listHolderPass = mapAdminListsHolder(adminUser);
-            assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(""));
-        }
-
         GroupingsServiceResult gsr = mapGSR(API_BASE + "admins/bob-jones/", "delete", adminUser);
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
     }
@@ -716,7 +705,8 @@ public class TestGroupingsRestControllerv2_1 {
             list.contains("someGrouping");
         }
 
-        GroupingsServiceResult gsr = mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/bob-jones", "delete", uhUser01);
+        GroupingsServiceResult gsr =
+                mapGSR(API_BASE + "groupings/" + GROUPING + "/owners/bob-jones", "delete", uhUser01);
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
 
         try {
@@ -1127,7 +1117,9 @@ public class TestGroupingsRestControllerv2_1 {
         String componentId = "basis";
         String uid = "iamtst04";
 
-        List<LinkedHashMap> searchResults = mapList(API_BASE + "groupings/" + path + "/components/" + componentId + "/members/" + uid, "get", adminUser);
+        List<LinkedHashMap> searchResults =
+                mapList(API_BASE + "groupings/" + path + "/components/" + componentId + "/members/" + uid, "get",
+                        adminUser);
         assertThat(searchResults.get(0).get("name"), IsEqual.equalTo("tst04name"));
         assertThat(searchResults.get(0).get("username"), IsEqual.equalTo("iamtst04"));
         assertThat(searchResults.get(0).get("uuid"), IsEqual.equalTo("iamtst04"));
@@ -1141,7 +1133,8 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // Helper function for paginatedLargeGroupingTest
-    private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
+    private void recursionFunctionToTest(String groupingPath, User user, Integer page, Integer size, String sortString,
+            Boolean isAscending) throws Exception {
 
         if (page > 150) {
             return;
@@ -1169,7 +1162,6 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(user(annotationUser))
                 .with(csrf()))
                 .andReturn();
-
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Map.class);
@@ -1217,24 +1209,29 @@ public class TestGroupingsRestControllerv2_1 {
 
     //todo Fix for sortString and isAscending
     // Mapping of getGrouping and getPaginatedGrouping call
-    private Grouping mapGrouping(String groupingPath, User currentUser, Integer page, Integer size, String sortString, Boolean isAscending) throws Exception {
+    private Grouping mapGrouping(String groupingPath, User currentUser, Integer page, Integer size, String sortString,
+            Boolean isAscending) throws Exception {
 
         // Base uri string with no parameters
         String baseUri = API_BASE + "groupings/" + groupingPath + "?";
 
         // Add parameters based off what is or isn't null (null is non-existent param
         String params = "";
-        if (page != null) params = params + "page=" + page;
+        if (page != null)
+            params = params + "page=" + page;
         if (size != null) {
-            if (!params.equals("")) params = params + "&";
+            if (!params.equals(""))
+                params = params + "&";
             params = params + "size=" + size;
         }
         if (sortString != null) {
-            if (!params.equals("")) params = params + "&";
+            if (!params.equals(""))
+                params = params + "&";
             params = params + "sortString=" + sortString;
         }
         if (isAscending != null) {
-            if (!params.equals("")) params = params + "&";
+            if (!params.equals(""))
+                params = params + "&";
             params = params + "isAscending=" + isAscending;
         }
 
@@ -1261,11 +1258,12 @@ public class TestGroupingsRestControllerv2_1 {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MvcResult result = mockMvc.perform(get(API_BASE + "groupings/" + parentGroupingPath + "/components/" + componentId)
-                .header(CURRENT_USER, currentUser.getUsername())
-                .with(user(currentUser))
-                .with(csrf()))
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(get(API_BASE + "groupings/" + parentGroupingPath + "/components/" + componentId)
+                        .header(CURRENT_USER, currentUser.getUsername())
+                        .with(user(currentUser))
+                        .with(csrf()))
+                        .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
@@ -1322,7 +1320,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     //todo May or may not need this; saving in case
-//     Mapping of call that returns a group object asynchronously
+    //     Mapping of call that returns a group object asynchronously
     private Group mapAsyncGroup(String uri, User user) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();

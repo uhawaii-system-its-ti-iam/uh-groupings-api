@@ -390,7 +390,7 @@ public class GroupingAssignmentServiceTest {
     public void adminListsTest() {
         AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN_USER);
 
-        assertThat(5, is(adminListsHolder.getAllGroupings().size()));
+        assertThat(5, is(adminListsHolder.getAllGroupingPaths().size()));
         assertThat(1, is(adminListsHolder.getAdminGroup().getMembers().size()));
 
         try {

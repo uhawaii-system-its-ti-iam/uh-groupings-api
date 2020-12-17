@@ -5,8 +5,6 @@ import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -27,7 +25,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -195,12 +192,34 @@ public class MemberAttributeServiceTest {
     public void getIsOwnerTest() {
         assertTrue(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(0).getUsername()));
         assertFalse(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(1).getUsername()));
+
+        try {
+            memberAttributeService.getIsOwner("zzzz", users.get(0).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+        try {
+            memberAttributeService.getIsOwner(users.get(0).getUsername(), "zzzz");
+        } catch (AccessDeniedException | GcWebServiceError e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
     public void getIsAdminTest() {
         assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
         assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername()));
+
+        try {
+            memberAttributeService.getIsAdmin("zzzz", users.get(0).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+        try {
+            memberAttributeService.getIsAdmin(ADMIN_USER, "zzzz");
+        } catch (AccessDeniedException | GcWebServiceError e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
@@ -368,5 +387,18 @@ public class MemberAttributeServiceTest {
         assertThat(membersResults.get(0).getUsername(), equalTo(testPerson.getUsername()));
         assertThat(membersResults.get(0).getUhUuid(), equalTo(testPerson.getUhUuid()));
         assertThat(membersResults.get(0).getName(), equalTo(testPerson.getName()));
+    }
+
+    @Test
+    public void getOwnedGroupingsTest() {
+        assertTrue(memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(0).getUsername()).size() > 0);
+        assertFalse(memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(1).getUsername()).size() > 0);
+
+        try {
+            memberAttributeService.getOwnedGroupings(users.get(1).getUsername(), users.get(0).getUsername());
+        } catch (AccessDeniedException e) {
+            e.printStackTrace();
+        }
+
     }
 }

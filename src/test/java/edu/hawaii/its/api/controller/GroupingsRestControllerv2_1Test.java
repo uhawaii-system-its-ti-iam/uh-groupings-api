@@ -11,10 +11,10 @@ import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
@@ -181,25 +181,6 @@ public class GroupingsRestControllerv2_1Test {
         return grouping;
     }
 
-    // Test data.
-    private AdminListsHolder mockAdminListsHolder() {
-        AdminListsHolder holder = new AdminListsHolder();
-        List<Grouping> mockAllGroupings = new ArrayList<>();
-        Group mockAdminGroup = new Group();
-
-        mockAllGroupings.add(grouping());
-        mockAllGroupings.add(groupingTwo());
-        holder.setAllGroupings(mockAllGroupings);
-
-        mockAdminGroup.addMember(new Person("o4-name", "o4-uuid", "o4-username"));
-        mockAdminGroup.addMember(new Person("o5-name", "o5-uuid", "o5-username"));
-        mockAdminGroup.addMember(new Person("o6-name", "o6-uuid", "o6-username"));
-        mockAdminGroup.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
-        holder.setAdminGroup(mockAdminGroup);
-
-        return holder;
-    }
-
     // Test data (2.1 API).
     private List<String> groupingStringList() {
         List<String> mockGroupingList = new ArrayList<>();
@@ -305,60 +286,30 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "bobo")
     public void adminsGroupingsTest() throws Exception {
-        final String admin = "bobo";
+        List<GroupingPath> groupingPaths = new ArrayList<>();
+        List<Person> admins = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            groupingPaths.add(new GroupingPath("path:to:grouping" + i));
+            admins.add(new Person("admin" + i));
+        }
+        Group adminGroup = new Group(admins);
+        AdminListsHolder adminListsHolder = new AdminListsHolder(groupingPaths, adminGroup);
 
-        given(groupingAssignmentService.adminLists("bobo")).willReturn(mockAdminListsHolder());
-
+        given(groupingAssignmentService.adminLists("bobo")).willReturn(adminListsHolder);
         mockMvc.perform(get(API_BASE + "/adminsGroupings")
-                .header(CURRENT_USER, admin))
+                .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("allGroupings[0].name").value("bob"))
-                .andExpect(jsonPath("allGroupings[0].path").value("test:ing:me:bob"))
-                .andExpect(jsonPath("allGroupings[0].syncDestinations").isEmpty())
-                //                    .value("true"))
-
-                // basis
-                .andExpect(jsonPath("allGroupings[0].basis.members", hasSize(3)))
-                .andExpect(jsonPath("allGroupings[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[0].uhUuid").value("b0-uuid"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[0].username").value("b0-username"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[1].username").value("b1-username"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[2].uhUuid").value("b2-uuid"))
-                .andExpect(jsonPath("allGroupings[0].basis.members[2].username").value("b2-username"))
-
-                // exclude
-                .andExpect(jsonPath("allGroupings[0].exclude.members", hasSize(1)))
-                .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("allGroupings[0].exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("allGroupings[0].exclude.members[0].uhUuid").value("e0-uuid"))
-                .andExpect(jsonPath("allGroupings[0].include.members", hasSize(2)))
-                .andExpect(jsonPath("allGroupings[0].include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("allGroupings[0].include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("allGroupings[0].include.members[1].uhUuid").value("i1-uuid"))
-                .andExpect(jsonPath("allGroupings[0].owners.members", hasSize(4)))
-                .andExpect(jsonPath("allGroupings[0].owners.members[3].name").value("o3-name"))
-                .andExpect(jsonPath("allGroupings[0].owners.members[3].uhUuid").value("o3-uuid"))
-                .andExpect(jsonPath("allGroupings[0].owners.members[3].username").value("o3-username"))
-
-                .andExpect(jsonPath("allGroupings[1].name").value("kim"))
-                .andExpect(jsonPath("allGroupings[1].path").value("test:ing:me:kim"))
-                .andExpect(jsonPath("allGroupings[1].syncDestinations").isEmpty())
-                .andExpect(jsonPath("allGroupings[1].basis.members", hasSize(3)))
-                .andExpect(jsonPath("allGroupings[1].basis.members[0].name").value("b4-name"))
-                .andExpect(jsonPath("allGroupings[1].basis.members[0].uhUuid").value("b4-uuid"))
-                .andExpect(jsonPath("allGroupings[1].basis.members[0].username").value("b4-username"))
-                .andExpect(jsonPath("allGroupings[1].basis.members[1].name").value("b5-name"))
-
-                .andExpect(jsonPath("adminGroup.members[0].name").value("o4-name"))
-                .andExpect(jsonPath("adminGroup.members[0].uhUuid").value("o4-uuid"))
-                .andExpect(jsonPath("adminGroup.members[1].uhUuid").value("o5-uuid"))
-                .andExpect(jsonPath("adminGroup.members[1].username").value("o5-username"))
-                .andExpect(jsonPath("adminGroup.members[2].name").value("o6-name"))
-                .andExpect(jsonPath("adminGroup.members[3].uhUuid").value("o7-uuid"))
-                .andExpect(jsonPath("adminGroup.members", hasSize(4)));
+                .andExpect(jsonPath("allGroupingPaths[0].name").value("grouping0"))
+                .andExpect(jsonPath("allGroupingPaths[1].name").value("grouping1"))
+                .andExpect(jsonPath("allGroupingPaths[2].name").value("grouping2"))
+                .andExpect(jsonPath("allGroupingPaths[0].path").value("path:to:grouping0"))
+                .andExpect(jsonPath("allGroupingPaths[1].path").value("path:to:grouping1"))
+                .andExpect(jsonPath("allGroupingPaths[2].path").value("path:to:grouping2"))
+                .andExpect(jsonPath("adminGroup.members[0].name").value("admin0"))
+                .andExpect(jsonPath("adminGroup.members[1].name").value("admin1"))
+                .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
     }
+
 
     @Ignore
     @Test
@@ -453,48 +404,23 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser(username = "bobo")
-    public void ownerGroupingsAdminTest() throws Exception {
+    public void getGroupingsOwnedAdminTest() throws Exception {
         final String uid = "grouping";
         final String admin = "bobo";
 
-        given(groupingAssignmentService.restGroupingsOwned(admin, uid))
-                .willReturn(groupingList());
+        String path = "path:to:grouping";
 
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        groupingPathList.add(new GroupingPath(path));
+
+        given(memberAttributeService.getOwnedGroupings(admin, uid))
+                .willReturn(groupingPathList);
         mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("grouping0"))
-                .andExpect(jsonPath("$[1].name").value("grouping1"))
-                .andExpect(jsonPath("$[2].name").value("grouping2"))
-                .andExpect(jsonPath("$[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
+                .header(CURRENT_USER, admin)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].path").value(path))
+                .andExpect(jsonPath("$[0].name").value("grouping"));
     }
 
-    @Test
-    @WithMockUhUser(username = "grouping")
-    public void ownerGroupingsMyselfTest() throws Exception {
-        final String uid = "grouping";
-
-        given(groupingAssignmentService.restGroupingsOwned(uid, uid))
-                .willReturn(groupingList());
-
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                .header(CURRENT_USER, uid))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("grouping0"))
-                .andExpect(jsonPath("$[1].name").value("grouping1"))
-                .andExpect(jsonPath("$[2].name").value("grouping2"))
-                .andExpect(jsonPath("$[0].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[0].basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("$[1].basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("$[2].basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("$[0].owners.members[0].uhUuid").value("o0-uuid"))
-                .andExpect(jsonPath("$[1].owners.members[2].uhUuid").value("o2-uuid"));
-    }
 
     @Ignore
     @Test
@@ -919,6 +845,7 @@ public class GroupingsRestControllerv2_1Test {
 
         assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
     }
+
 
     @Test
     @WithMockUhUser

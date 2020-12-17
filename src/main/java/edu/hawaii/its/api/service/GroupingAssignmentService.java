@@ -22,8 +22,6 @@ public interface GroupingAssignmentService {
 
     List<String> groupingsOwnedPaths(List<String> groupPaths);
 
-    List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername);
-
     List<Grouping> groupingsOptedInto(String username, List<String> groupPaths);
 
     List<Grouping> groupingsOptedOutOf(String username, List<String> groupPaths);

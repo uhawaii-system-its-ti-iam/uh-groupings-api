@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
@@ -11,8 +12,8 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -277,6 +278,18 @@ public class HelperServiceImpl implements HelperService {
         return groupings;
     }
 
+    /**
+     * Take a list of grouping path strings and return a list of GroupingPath objects.
+     */
+    @Override
+    public List<GroupingPath> makePaths(List<String> groupingPaths) {
+        List<GroupingPath> paths = new ArrayList<>();
+        if (groupingPaths.size() > 0) {
+            paths = groupingPaths.stream().map(GroupingPath::new).collect(Collectors.toList());
+        }
+        return paths;
+    }
+
     //removes one of the words (:exclude, :include, :owners ...) from the end of the string
     @Override
     public String parentGroupingPath(String group) {
@@ -308,15 +321,9 @@ public class HelperServiceImpl implements HelperService {
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
-    @Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result", grouperFS.getSyncDestinations());
+    @Override
+    public GenericServiceResult swaggerToString(String currentUser, String path) {
+        return new GenericServiceResult("result", "result");
     }
-
-    /*@Override public GenericServiceResult swaggerToString(String currentUser, String path) {
-        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
-        WsGetGrouperPrivilegesLiteResult result =
-                grouperFS.makeWsGetGrouperPrivilegesLiteResult(path, PRIVILEGE_OPT_IN, wsSubjectLookup);
-        return new GenericServiceResult("result", result);
-    }*/
 }
 
