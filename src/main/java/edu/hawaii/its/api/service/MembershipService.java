@@ -58,8 +58,6 @@ public interface MembershipService {
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
-    GenericServiceResult generic();
-
     boolean isUhUuid(String username);
 
     boolean canOpt(String path);
