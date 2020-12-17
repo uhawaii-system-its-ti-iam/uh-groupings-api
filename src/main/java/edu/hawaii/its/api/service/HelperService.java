@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -26,6 +27,8 @@ public interface HelperService {
     GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
 
     List<Grouping> makeGroupings(List<String> groupingPaths);
+
+    List<GroupingPath> makePaths(List<String> groupingPaths);
 
     String parentGroupingPath(String group);
 

@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -204,11 +205,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         groupings.forEach(this::setGroupingAttributes);
 
         return groupings;
-    }
-
-    @Override
-    public List<Grouping> restGroupingsOwned(String actingUsername, String ownerUsername) {
-        return groupingsOwned(getGroupPaths(actingUsername, ownerUsername));
     }
 
     @Override
@@ -492,29 +488,24 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
-        AdminListsHolder adminListsHolder = new AdminListsHolder();
-        List<Grouping> groupings;
-
-        if (memberAttributeService.isSuperuser(adminUsername)) {
-
-            WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                    grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
-                            ASSIGN_TYPE_GROUP,
-                            TRIO);
-
-            List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
-
-            List<String> groupPaths = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
-
-            List<String> adminGrouping = new ArrayList<>(1);
-            adminGrouping.add(GROUPING_ADMINS);
-            Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
-            groupings = helperService.makeGroupings(groupPaths);
-            adminListsHolder.setAdminGroup(admin);
-            adminListsHolder.setAllGroupings(groupings);
-            return adminListsHolder;
+        if (!memberAttributeService.isAdmin(adminUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        AdminListsHolder adminListsHolder = new AdminListsHolder();
+
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO);
+
+        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
+
+        List<String> groupingPathStrings = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
+
+        List<String> adminGrouping = new ArrayList<>(1);
+        adminGrouping.add(GROUPING_ADMINS);
+        Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
+        adminListsHolder.setAllGroupingPaths(helperService.makePaths(groupingPathStrings));
+        adminListsHolder.setAdminGroup(admin);
+        return adminListsHolder;
     }
 
     //returns a list of groupings corresponding to the include group or exclude group (includeOrrExclude) in groupPaths that
@@ -685,12 +676,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info("getGroupPaths; username: " + username + ";");
 
         if (ownerUsername.equals(username) || memberAttributeService.isSuperuser(ownerUsername)) {
-            WsStemLookup stemLookup = grouperFactoryService.makeWsStemLookup(STEM);
             WsGetGroupsResults wsGetGroupsResults;
 
             wsGetGroupsResults = grouperFactoryService.makeWsGetGroupsResults(
                     username,
-                    stemLookup,
+                    grouperFactoryService.makeWsStemLookup(STEM),
                     StemScope.ALL_IN_SUBTREE
             );
 
@@ -720,7 +710,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                     .collect(Collectors.toSet());
 
         }
-        return names.stream().collect(Collectors.toList());
+        return new ArrayList<>(names);
     }
 
     /**

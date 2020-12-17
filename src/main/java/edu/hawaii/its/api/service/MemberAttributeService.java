@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
@@ -46,4 +46,6 @@ public interface MemberAttributeService {
     Boolean getIsOwner(String currentUser, String usernameInQuestion);
 
     Boolean getIsAdmin(String currentUser, String usernameInQuestion);
+
+    List<GroupingPath> getOwnedGroupings(String currentUser, String user);
 }
