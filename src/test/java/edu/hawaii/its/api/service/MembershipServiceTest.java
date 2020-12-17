@@ -267,12 +267,6 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void genericTest() {
-        GenericServiceResult result = membershipService.generic();
-        assertTrue((result.getData()).get(0) == "HelloWorld!");
-    }
-
-    @Test
     @Ignore
     public void addGroupingMemberTest() {
         Iterable<Grouping> group = groupingRepository.findAll();

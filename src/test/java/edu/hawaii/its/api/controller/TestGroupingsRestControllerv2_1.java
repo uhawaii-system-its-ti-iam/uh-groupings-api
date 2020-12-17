@@ -16,8 +16,6 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.type.MembershipAssignment;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -421,62 +419,6 @@ public class TestGroupingsRestControllerv2_1 {
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
-        }
-    }
-
-    @Test
-    public void memberGroupingsAdminTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], adminUser);
-        assertThat(membershipAssignment.getGroupingsIn().size(), not(0));
-
-        try {
-            mapMembershipAssignment("fake username ", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
-
-    }
-
-    @Test
-    public void memberGroupingsMyselfTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser01);
-        assertThat(membershipAssignment.getGroupingsIn(), not(0));
-    }
-
-    //    @Test
-    @WithAnonymousUser
-    public void memberGroupingsAnonTest() throws Exception {
-
-        try {
-            mapList(API_BASE + "members/" + usernames[0] + "/groupings", "get", anonUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
-    }
-
-    // This user owns nothing
-    @Test
-    public void memberGroupingsFailTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser05);
-        assertThat(membershipAssignment.getGroupingsIn().size(), equalTo(0));
-    }
-
-    @Test
-    public void ownerGroupingsAdminTest() throws Exception {
-
-        List listGroupings = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", adminUser);
-        assertThat(listGroupings.size(), not(0));
-
-        try {
-            mapList(API_BASE + "owners/bob-jones/groupings", "get", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
         }
     }
 
@@ -1282,21 +1224,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), GroupingsServiceResult.class);
-        } else {
-            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());
-        }
-    }
-
-    // Mapping of MembershipAssignment call
-    private MembershipAssignment mapMembershipAssignment(String username, User user) throws Exception {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = mapHelper(API_BASE + "members/" + username + "/groupings", "get", user);
-
-        if (result.getResponse().getStatus() == 200) {
-            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), MembershipAssignment.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
