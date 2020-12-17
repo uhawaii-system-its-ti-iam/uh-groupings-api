@@ -433,24 +433,4 @@ public class TestGroupAttributeService {
         boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
         assertTrue(true);
     }
-
-    /**
-     * Check by sync destination name if the proper destinations were received from grouper.
-     */
-    private boolean testGetSynDestinationsHelper(List<SyncDestination> destinations) {
-        List<String> supposedDestinationNames = new ArrayList<>();
-        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:google-group");
-        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:listserv");
-        supposedDestinationNames.add("uh-settings:attributes:for-groups:uh-grouping:destinations:uhReleasedGrouping");
-
-        Iterator<SyncDestination> syncDestinationIterator = destinations.iterator();
-        Iterator<String> supposedDestinationNamesIterator = supposedDestinationNames.iterator();
-
-        while (supposedDestinationNamesIterator.hasNext() && syncDestinationIterator.hasNext()) {
-            if (!supposedDestinationNamesIterator.next().equals(syncDestinationIterator.next().getName())) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
