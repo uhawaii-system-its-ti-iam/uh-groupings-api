@@ -478,13 +478,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
-
-        try {
-            mapList(API_BASE + "owners//groupings", "get", adminUser);
-            fail("Shouldn't be here");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
     }
 
     @Test
@@ -632,14 +625,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             listHolderPass = mapAdminListsHolder(adminUser);
             assertFalse(listHolderPass.getAdminGroup().getUsernames().contains("bob-jones"));
-        }
-
-        try {
-            mapGSR(API_BASE + "admins//", "post", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            listHolderPass = mapAdminListsHolder(adminUser);
-            assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(""));
         }
 
         GroupingsServiceResult gsr = mapGSR(API_BASE + "admins/bob-jones/", "delete", adminUser);

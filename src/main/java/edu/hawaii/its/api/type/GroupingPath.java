@@ -4,6 +4,10 @@ public class GroupingPath {
     String path;
     String name;
 
+    public GroupingPath() {
+       
+    }
+
     public GroupingPath(String path) {
         this.path = path;
         this.name = makeName();
