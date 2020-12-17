@@ -191,19 +191,6 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     //Test data (2.1 API).
-    private List<Grouping> groupingList() {
-        GroupingAssignment mg = new GroupingAssignment();
-        List<Grouping> groupings = new ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            groupings.add(grouping());
-            groupings.get(i).setPath("grouping" + i);
-        }
-
-        return groupings;
-    }
-
-    //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrList() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         gsrList.add(new GroupingsServiceResult(SUCCESS, "add users to grouping"));
@@ -259,26 +246,6 @@ public class GroupingsRestControllerv2_1Test {
     //Test data (2.1 API).
     private GroupingsServiceResult gsrReleasedGrouping() {
         return new GroupingsServiceResult(SUCCESS, "ldap status changed");
-    }
-
-    //Test data.
-    private GroupingAssignment myGroupings() {
-        GroupingAssignment mg = new GroupingAssignment();
-        List<Grouping> groupings = new ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            groupings.add(grouping());
-            groupings.get(i).setPath("grouping" + i);
-        }
-
-        mg.setGroupingsIn(groupings);
-        mg.setGroupingsOwned(groupings);
-        mg.setGroupingsOptedOutOf(groupings);
-        mg.setGroupingsOptedInTo(groupings);
-        mg.setGroupingsToOptOutOf(groupings);
-        mg.setGroupingsToOptInTo(groupings);
-
-        return mg;
     }
 
     @Test
@@ -337,53 +304,6 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "randomUser")
     public void getMemberAttributesTest() throws Exception {
 
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void memberGroupingsAdminTest() throws Exception {
-        final String uid = "grouping";
-        final String admin = "bobo";
-        MembershipAssignment membershipAssignment = new MembershipAssignment();
-
-        membershipAssignment.setGroupingsIn(groupingStringList()
-                .stream()
-                .map(Grouping::new)
-                .collect(Collectors.toList()));
-        System.err.println(membershipAssignment.toString());
-        given(groupingAssignmentService.getMembershipAssignment(admin, uid))
-                .willReturn(membershipAssignment);
-
-        mockMvc.perform(get(API_BASE + "/members/" + uid + "/groupings")
-                .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("groupingsIn[0]['path']").value("g0-gName"))
-                .andExpect(jsonPath("groupingsIn[1]['path']").value("g1-gName"))
-                .andExpect(jsonPath("groupingsIn[2]['path']").value("g2-gName"));
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser(username = "grouping")
-    public void memberGroupingsMyselfTest() throws Exception {
-        final String uid = "grouping";
-        MembershipAssignment membershipAssignment = new MembershipAssignment();
-
-        membershipAssignment.setGroupingsIn(groupingStringList()
-                .stream()
-                .map(Grouping::new)
-                .collect(Collectors.toList()));
-
-        given(groupingAssignmentService.getMembershipAssignment(uid, uid))
-                .willReturn(membershipAssignment);
-
-        mockMvc.perform(get(API_BASE + "/members/" + uid + "/groupings")
-                .header(CURRENT_USER, uid))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("groupingsIn[0]['path']").value("g0-gName"))
-                .andExpect(jsonPath("groupingsIn[1]['path']").value("g1-gName"))
-                .andExpect(jsonPath("groupingsIn[2]['path']").value("g2-gName"));
     }
 
     //todo This user owns nothing
