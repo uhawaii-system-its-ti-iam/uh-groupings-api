@@ -3,8 +3,6 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
@@ -32,11 +30,6 @@ public interface GroupingAssignmentService {
             String sortString,
             Boolean isAscending);
 
-    GroupingAssignment getGroupingAssignment(String username);
-
-    //get a MembershipAssignment object containing the groups that a user is in and can opt into
-    MembershipAssignment getMembershipAssignment(String username, String uid);
-
     AdminListsHolder adminLists(String adminUsername);
 
     //not to be included in the REST controller
@@ -55,13 +48,13 @@ public interface GroupingAssignmentService {
     Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
             String sortString, Boolean isAscending);
 
-    public List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername);
+    List<Grouping> restGroupingsExclude(String actingUsername, String ownerUsername);
 
-    public List<Grouping> excludeGroups(List<String> groupPaths);
+    List<Grouping> excludeGroups(List<String> groupPaths);
 
-    public List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths);
+    List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths);
 
-    public List<String> getOptInGroups(String owner, String optInUid);
+    List<String> getOptInGroups(String owner, String optInUid);
 
-    public List<String> getOptOutGroups(String owner, String optOutUid);
+    List<String> getOptOutGroups(String owner, String optOutUid);
 }

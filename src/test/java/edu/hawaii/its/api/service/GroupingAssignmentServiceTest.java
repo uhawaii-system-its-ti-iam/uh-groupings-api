@@ -11,8 +11,6 @@ import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
@@ -217,25 +215,6 @@ public class GroupingAssignmentServiceTest {
         assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
     }
 
-    @Test
-    public void getMyGroupingsTest() {
-        GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
-
-        assertThat(myGroupings.getGroupingsOwned().size(), is(0));
-        assertThat(myGroupings.getGroupingsIn().size(), is(5));
-        assertThat(myGroupings.getGroupingsOptedInTo().size(), is(0));
-        assertThat(myGroupings.getGroupingsOptedOutOf().size(), is(0));
-        assertThat(myGroupings.getGroupingsToOptInTo().size(), is(0));
-        assertThat(myGroupings.getGroupingsToOptOutOf().size(), is(2));
-
-    }
-
-    @Test
-    public void groupingsToOptTest() {
-        GroupingAssignment myGroupings = groupingAssignmentService.getGroupingAssignment(users.get(1).getUsername());
-        //todo finish
-
-    }
 
     @Test
     public void groupingsInTest() {
@@ -444,66 +423,6 @@ public class GroupingAssignmentServiceTest {
         }
     }
 
-    @Test
-    public void getMembershipAssignmentTest() {
-        String username = users.get(0).getUsername();
-        //    // username should already be in GROUPING_0_PATH
-        //    List<String> groupingsIn = groupingAssignmentService
-        //        .getMembershipAssignment(username, username)
-        //        .getGroupingsIn()
-        //        .stream()
-        //        .map(Grouping::getPath)
-        //        .collect(Collectors.toList());
-        //
-        //    List<String> groupingsToOptInto = groupingAssignmentService
-        //        .getMembershipAssignment(username, username)
-        //        .getGroupingsToOptInTo()
-        //        .stream()
-        //        .map(Grouping::getPath)
-        //        .collect(Collectors.toList());
-        //
-        //    assertTrue(groupingsIn.contains(GROUPING_0_PATH));
-        //    assertFalse(groupingsToOptInto.contains(GROUPING_0_PATH));
-        //
-        //    // take username[1] out of GROUPING
-        //    membershipService.deleteGroupingMember(username, GROUPING_0_PATH, username);
-        //
-        //    // GROUPING has OPT-IN turned on, so username[1] should be able to opt back into GROUPING
-        //    groupingsIn = groupingAssignmentService
-        //        .getMembershipAssignment(username, username)
-        //        .getGroupingsIn()
-        //        .stream()
-        //        .map(Grouping::getPath)
-        //        .collect(Collectors.toList());
-        //
-        //    groupingsToOptInto = groupingAssignmentService
-        //        .getMembershipAssignment(username, username)
-        //        .getGroupingsToOptInTo()
-        //        .stream()
-        //        .map(Grouping::getPath)
-        //        .collect(Collectors.toList());
-        //
-        //    assertFalse(groupingsIn.contains(GROUPING_0_PATH));
-        //    assertTrue(groupingsToOptInto.contains(GROUPING_0_PATH));
-
-        MembershipAssignment membershipAssignment;
-
-        // Test getting the attributes inInclude, inExclude, inOwner, and inBasis.
-        membershipAssignment = groupingAssignmentService.getMembershipAssignment(username, username);
-
-        assertTrue(membershipAssignment.isInOwner(GROUPING_0_PATH));
-        assertTrue(membershipAssignment.isInBasis(GROUPING_0_PATH));
-        assertFalse(membershipAssignment.isInInclude(GROUPING_0_PATH));
-        assertFalse(membershipAssignment.isInExclude(GROUPING_0_PATH));
-
-        // Try to get the memberships for a user that doesn't exist.
-        try {
-            membershipAssignment = groupingAssignmentService.getMembershipAssignment(username, "somenamethatNoexist");
-
-        } catch (Exception e) {
-            System.out.println("User doesn't exist.");
-        }
-    }
 
     @Test
     public void makeGroupsTest() {

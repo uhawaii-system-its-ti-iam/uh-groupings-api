@@ -50,8 +50,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      */
     public boolean isOwner(String username) {
         try {
-            logger.info("//////////////////////////////");
-            if (!groupingAssignmentService.getGroupingAssignment(username).getGroupingsOwned().isEmpty()) {
+            if (!memberAttributeService.isOwner(username)) {
                 logger.info("This person is an owner");
                 return true;
             } else {
@@ -66,7 +65,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     /**
      * Determines if a user is an admin in grouping admin.
      *
-     * @param username  self-explanitory
+     * @param username self-explanitory
      * @return true if the person gets pass the grouping admins check by checking if they can get all the groupings.
      */
     public boolean isAdmin(String username) {

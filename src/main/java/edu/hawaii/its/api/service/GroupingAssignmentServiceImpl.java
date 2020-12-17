@@ -5,9 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 
@@ -20,7 +17,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -348,142 +344,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
     }
 
-    //get a GroupingAssignment object containing the groups that a user is in and can opt into
-    @Override
-    public GroupingAssignment getGroupingAssignment(String username) {
-        GroupingAssignment groupingAssignment = new GroupingAssignment();
-        List<String> groupPaths = getGroupPaths(username, username);
-
-        groupingAssignment.setGroupingsIn(groupingsIn(groupPaths));
-        groupingAssignment.setGroupingsOwned(groupingsOwned(groupPaths));
-        groupingAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
-        groupingAssignment.setGroupingsToOptOutOf(groupingsToOptOutOf(username, groupPaths));
-        groupingAssignment.setGroupingsOptedOutOf(groupingsOptedOutOf(username, groupPaths));
-        groupingAssignment.setGroupingsOptedInTo(groupingsOptedInto(username, groupPaths));
-
-        return groupingAssignment;
-    }
-
-    /**
-     * @param username A string with the username of acting user
-     * @param uid      A string with the username of the user being acted upon
-     * @return membershipAssigment: A MembershipAssignment object with the membership
-     * Function call that makes calls to grouper in order to get the groupings a user is a member of and a list of
-     * groupings a user can opt into.
-     */
-    @Override
-    public MembershipAssignment getMembershipAssignment(String username, String uid) {
-
-        // Creates the MembershipAssignment object.
-        MembershipAssignment membershipAssignment = new MembershipAssignment();
-
-        // Get all groups, not groupings, a user is in.
-        List<String> groupPaths = getGroupPaths(username, uid);
-        // Create an array list that is used to check for duplicates.
-        List<String> duplicateChecker = new ArrayList<>();
-        // Takes the list of groups and extracts on the groupings from them that a user is in.
-        List<Grouping> memeberships = groupingsIn(groupPaths);
-        // Gets the groupings that a user is an owner of.
-        List<Grouping> ownerships = groupingsOwned(groupPaths);
-        // Gets all the groupings the user is has been excluded from.
-        List<Grouping> excludes = excludeGroups(groupPaths);
-        // Creates a list for the combined list of all sub groupings: owners, exclude, and member.
-        // Builds the combined list off the memberships list.
-        List<Grouping> combinedGroupings = new ArrayList<>(memeberships);
-        // Appends the excludes list to the combined.
-        combinedGroupings.addAll(excludes);
-
-        // Sets the groupings in and the groupings available to opt into attribute.
-        membershipAssignment.setGroupingsIn(memeberships);
-        membershipAssignment.setGroupingsToOptInTo(groupingsToOptInto(username, groupPaths));
-
-        // Goes through all the groupings in memberships and adds them to appropriate attributes.
-        for (Grouping grouping : memeberships) {
-            // Adds the grouping name to the duplicate checker list.
-            duplicateChecker.add(grouping.getPath());
-
-            /*
-                The inOwner, inBasis, inInclude, and inExlcude attributes of MembershipAssignment are hash maps that
-                take in the key value pair of <String, Boolean>.
-
-                The string is the grouping name and the boolean is the value of whether the user being acted upon (uid)
-                is in the specific group i.e.:
-
-                    membershipAssignment.addInBasis("test-grouping", memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-
-                    This checks if the user, uid, is a part of the basis for the test-grouping. If it is, it adds the
-                    key value pair <"test-grouping", true>, otherwise it adds <"test-grouping", false>.
-
-             */
-            membershipAssignment.addInOwner(grouping.getPath(), false);
-            membershipAssignment.addInBasis(grouping.getPath(),
-                    memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-
-            // Checks if they are in the basis or not to determine which logic to use.
-            if (membershipAssignment.isInBasis(grouping.getPath())) {
-                // If they are in the basis, they can be in the exclude, include, or neither so we must check both.
-
-                membershipAssignment.addInInclude(grouping.getPath(),
-                        memberAttributeService.isMember(grouping.getPath() + ":include", uid));
-
-                // Checks if the user is in the include, if they are in the include group add to the inExclude
-                // attribute the key-value <grouping-name, false>.
-                if (membershipAssignment.isInInclude(grouping.getPath())) {
-                    membershipAssignment.addInExclude(grouping.getPath(), false);
-                } else {
-                    // If they aren't in the include, check if they are in the exclude and add the key-value pair.
-                    membershipAssignment.addInExclude(grouping.getPath(),
-                            memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
-                }
-            } else {
-                // If they aren't in the basis but in the memberships groupings, they must either be in the
-                // exclude or include, not both.
-                if (memberAttributeService.isMember(grouping.getPath() + ":include", uid)) {
-                    membershipAssignment.addInInclude(grouping.getPath(), true);
-                    membershipAssignment.addInExclude(grouping.getPath(), false);
-                } else {
-                    membershipAssignment.addInInclude(grouping.getPath(), false);
-                    membershipAssignment.addInExclude(grouping.getPath(), true);
-                }
-            }
-        }
-
-        // Groupings in the excludes list are never in the memberships list. They are also never in the include.
-        // We only need to check for the basis.
-        for (Grouping grouping : excludes) {
-            duplicateChecker.add(grouping.getPath());
-            membershipAssignment.addInOwner(grouping.getPath(), false);
-            membershipAssignment.addInBasis(grouping.getPath(),
-                    memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-            membershipAssignment.addInExclude(grouping.getPath(), true);
-            membershipAssignment.addInInclude(grouping.getPath(), false);
-
-        }
-
-        // If the person is an owner of a grouping, they could also be in basis, include, and exclude groups.
-        // We must check the duplicate checker to see if the grouping is already in the combined list.
-        for (Grouping grouping : ownerships) {
-            // If they are not in the duplicate checker list, add the grouping to the combined list and the respective
-            // MembershipAssignment attributes.
-            if (!duplicateChecker.contains(grouping.getPath())) {
-                combinedGroupings.add(grouping);
-                membershipAssignment.addInBasis(grouping.getPath(),
-                        memberAttributeService.isMember(grouping.getPath() + ":basis", uid));
-                membershipAssignment.addInInclude(grouping.getPath(),
-                        memberAttributeService.isMember(grouping.getPath() + ":include", uid));
-                membershipAssignment.addInExclude(grouping.getPath(),
-                        memberAttributeService.isMember(grouping.getPath() + ":exclude", uid));
-            }
-
-            // Update the owner attribute for all groupings in the ownerships list.
-            membershipAssignment.addInOwner(grouping.getPath(), true);
-        }
-
-        // Set the combined groupings attribute.
-        membershipAssignment.setCombinedGroupings(combinedGroupings);
-
-        return membershipAssignment;
-    }
 
     //returns an adminLists object containing the list of all admins and all groupings
     @Override

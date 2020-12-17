@@ -646,21 +646,6 @@ public class MembershipServiceImpl implements MembershipService {
                 action);
     }
 
-    @Override public GenericServiceResult generic() {
-        GenericServiceResult genericServiceResult = new GenericServiceResult();
-
-        String hello = "HelloWorld!";
-        GroupingsServiceResult groupingsServiceResult =
-                new GroupingsServiceResult(SUCCESS, "Testing: GenericServiceResult");
-        List<String> fbb = Arrays.asList("foo", "bar", "baz");
-
-        genericServiceResult.add("hello", hello);
-        genericServiceResult.add("fbb", fbb);
-        genericServiceResult.add(Arrays.asList("groupingsServiceResult", "boolean"), groupingsServiceResult, true);
-        genericServiceResult.add("int", 1);
-
-        return genericServiceResult;
-    }
 
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
