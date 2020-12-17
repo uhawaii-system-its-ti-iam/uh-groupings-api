@@ -164,12 +164,6 @@ public class TestMembershipService {
     }
 
     @Test
-    public void genericTest() {
-        GenericServiceResult result = membershipService.generic();
-        assertTrue((result.getData()).get(0) == "HelloWorld!");
-    }
-
-    @Test
     public void groupOptOutPermissionTest() {
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
         assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
