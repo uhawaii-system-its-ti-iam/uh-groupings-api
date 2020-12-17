@@ -16,8 +16,6 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.type.MembershipAssignment;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
