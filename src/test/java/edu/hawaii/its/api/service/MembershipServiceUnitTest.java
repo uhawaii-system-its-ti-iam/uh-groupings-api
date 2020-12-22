@@ -13,9 +13,21 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResponseMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
+import org.springframework.beans.factory.annotation.Value;
 
 public class MembershipServiceUnitTest {
+
+    @Value("${groupings.api.success_allowed}")
+    private String SUCCESS_ALLOWED;
 
     @Test
     public void batchDeleteOne() {
@@ -47,6 +59,51 @@ public class MembershipServiceUnitTest {
         memberResults.forEach(
                 result -> assertTrue((result.toString())
                         .contains("edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults@")));
+    }
+
+    @Test
+    public void batchIsMemberTest() {
+        MemberAttributeService memberAttribute = new MemberAttributeServiceImpl() {
+            public boolean isMember(String groupPath, Person personToAdd) {
+                System.out.println("Checking if " + personToAdd + " is a member of " + groupPath);
+                return true;
+            }
+            public boolean isOwner(String groupPath, Person personToAdd) {
+                System.out.println("Checking if " + personToAdd + " is a owner of " + groupPath);
+                return true;
+            }
+            public boolean isSuperuser(String username) {
+                System.out.println("Checking if " + username + " is a super user.");
+                return true;
+            }
+        };
+
+        GrouperFactoryService grouperService = new GrouperFactoryServiceImpl() {
+            public WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
+                    String privilegeName,
+                    WsSubjectLookup lookup) {
+                WsGetGrouperPrivilegesLiteResult result = new WsGetGrouperPrivilegesLiteResult();
+                WsResultMeta res = new WsResultMeta();
+                res.setResultCode("${groupings.api.success_allowed}");
+                result.setResultMetadata(res);
+                return result;
+            }
+        };
+
+        MembershipServiceImpl membershipService = new MembershipServiceImpl();
+        membershipService.setMemberAttributeService(memberAttribute);
+        membershipService.setGrouperFactoryService(grouperService);
+        List<String> groupPaths = new ArrayList<>();
+        List<List<GroupingsServiceResult>> memberResults = new ArrayList<>();
+        //Creating 5 groupPaths.
+        for (int i = 0; i < 5; i++) {
+            groupPaths.add("groupPath-" + i);
+            //Creating 5 users to batch delete from those 5 groups.
+        }
+        for (int j = 0; j < 5; j++) {
+            String optInUsername = "optInUsername-" + j;
+            memberResults.add(membershipService.optIn(optInUsername, groupPaths.get(j)));
+        }
     }
 
     private class DeleteTestRunnerTwo extends Thread {
