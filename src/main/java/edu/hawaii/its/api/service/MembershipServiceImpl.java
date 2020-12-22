@@ -234,7 +234,7 @@ public class MembershipServiceImpl implements MembershipService {
     public List<String> listOwned(String admin, String user) {
         List<String> groupsOwned = new ArrayList<>();
 
-        if (memberAttributeService.isSuperuser(admin)) {
+        if (memberAttributeService.isAdmin(admin)) {
             List<Grouping> groups =
                     groupingAssignmentService.groupingsOwned(groupingAssignmentService.getGroupPaths(admin, user));
 
@@ -392,7 +392,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
-        if (memberAttributeService.isSuperuser(currentAdminUsername)) {
+        if (memberAttributeService.isAdmin(currentAdminUsername)) {
             if (memberAttributeService.isAdmin(newAdminUsername)) {
                 return helperService.makeGroupingsServiceResult(
                         SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
@@ -415,7 +415,7 @@ public class MembershipServiceImpl implements MembershipService {
         String action;
         action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
 
-        if (memberAttributeService.isSuperuser(adminUsername)) {
+        if (memberAttributeService.isAdmin(adminUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
 
             WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(
@@ -503,7 +503,7 @@ public class MembershipServiceImpl implements MembershipService {
         String preposition = "to ";
         String addGroup = groupingPath + INCLUDE;
 
-        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
+        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
             return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
         } else {
             GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
@@ -522,7 +522,7 @@ public class MembershipServiceImpl implements MembershipService {
         String preposition = "from ";
         String addGroup = groupingPath + EXCLUDE;
 
-        if (currentUser.equals(uid) || memberAttributeService.isSuperuser(currentUser)) {
+        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
             return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
         } else {
             GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
@@ -656,7 +656,7 @@ public class MembershipServiceImpl implements MembershipService {
         String action = "add users to " + groupPath;
 
         if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
-                || memberAttributeService.isSuperuser(username) || (personToAdd.getUsername() != null && personToAdd
+                || memberAttributeService.isAdmin(username) || (personToAdd.getUsername() != null && personToAdd
                 .getUsername().equals(username))) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = helperService.parentGroupingPath(groupPath);
@@ -785,7 +785,7 @@ public class MembershipServiceImpl implements MembershipService {
         String composite = helperService.parentGroupingPath(groupPath);
 
         if (memberAttributeService.isOwner(composite, username) || memberAttributeService
-                .isSuperuser(username) || username.equals(personToDelete.getUsername())) {
+                .isAdmin(username) || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
                 if (memberAttributeService.isMember(groupPath, personToDelete)) {

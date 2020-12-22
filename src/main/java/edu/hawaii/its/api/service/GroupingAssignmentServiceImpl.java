@@ -272,7 +272,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         Grouping compositeGrouping;
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
+                .isAdmin(ownerUsername)) {
             compositeGrouping = new Grouping(groupingPath);
 
             String basis = groupingPath + BASIS;
@@ -313,7 +313,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
 
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
-                .isSuperuser(ownerUsername)) {
+                .isAdmin(ownerUsername)) {
 
             Grouping compositeGrouping = new Grouping(groupingPath);
             String basis = groupingPath + BASIS;
@@ -535,7 +535,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
 
-        if (ownerUsername.equals(username) || memberAttributeService.isSuperuser(ownerUsername)) {
+        if (ownerUsername.equals(username) || memberAttributeService.isAdmin(ownerUsername)) {
             WsGetGroupsResults wsGetGroupsResults;
 
             wsGetGroupsResults = grouperFactoryService.makeWsGetGroupsResults(
