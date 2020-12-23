@@ -333,14 +333,6 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void isSuperuserTest() {
-        assertFalse(memberAttributeService.isSuperuser(users.get(2).getUsername()));
-        assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
-
-        assertTrue(memberAttributeService.isSuperuser(APP_USER));
-    }
-
-    @Test
     public void getUserAttributesTest() {
 
         String username = users.get(5).getUsername();

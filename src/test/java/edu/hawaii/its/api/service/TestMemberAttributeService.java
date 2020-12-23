@@ -429,32 +429,6 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void isSuperUserTest() {
-        //todo
-
-        // User is not super user
-        assertFalse(memberAttributeService.isSuperuser(usernames[1]));
-
-        // User is super user
-        assertTrue(memberAttributeService.isSuperuser(APP_USER));
-        assertTrue(memberAttributeService.isSuperuser(ADMIN_USER));
-
-        // User does not exist
-        try {
-            assertFalse(memberAttributeService.isSuperuser("someName"));
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-
-        // User is null
-        try {
-            assertFalse(memberAttributeService.isSuperuser(null));
-        } catch (RuntimeException re) {
-            re.printStackTrace();
-        }
-    }
-
-    @Test
     public void isAdminTest() {
         //todo
 

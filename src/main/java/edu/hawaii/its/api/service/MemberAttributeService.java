@@ -29,8 +29,6 @@ public interface MemberAttributeService {
 
     boolean isApp(String username);
 
-    boolean isSuperuser(String username);
-
     boolean isSelfOpted(String groupPath, String username);
 
     WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);

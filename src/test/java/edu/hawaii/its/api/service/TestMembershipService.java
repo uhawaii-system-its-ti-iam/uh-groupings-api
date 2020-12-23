@@ -201,8 +201,6 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
 
-        //Non super user tries to opt another user in.
-        assertFalse(memberAttributeService.isSuperuser(username[0]));
         membershipService.optIn(username[0], GROUPING, username[3]);
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
         membershipService.optOut(username[0], GROUPING, username[3]);
@@ -734,9 +732,6 @@ public class TestMembershipService {
         //checks to make sure user is not in include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
-        //checks if user is a superuser
-        assertFalse(memberAttributeService.isSuperuser(username[2]));
-
         //chceks to make sure user is not part of include
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
 
@@ -854,7 +849,6 @@ public class TestMembershipService {
 
         //Makes sure user isn't owner or superuser
         assertFalse(memberAttributeService.isOwner(GROUPING, username[4]));
-        assertFalse(memberAttributeService.isSuperuser(username[4]));
 
         //has non owner/superuser try to delete
         try {
@@ -933,38 +927,22 @@ public class TestMembershipService {
 
         //checks to see that username[3] is NOT an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
-        assertFalse(memberAttributeService.isSuperuser(username[3]));
 
         //makes username[3] an admin
         results = membershipService.addAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
-        //checks to make sure that username[3] is an admin
-        assertTrue(memberAttributeService.isSuperuser(username[3]));
-
         //tries to make an already admin an admin
         results = membershipService.addAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
-
-        //checks to make sure that username[3] is an admin
-        assertTrue(memberAttributeService.isSuperuser(username[3]));
 
         //removes username[3] as an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
-        //checks to see that username[3] is NOT an admin
-        assertFalse(memberAttributeService.isSuperuser(username[3]));
-
         //tries to remove an person that is not an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
-
-        //checks to see that username[3] is NOT an admin
-        assertFalse(memberAttributeService.isSuperuser(username[3]));
-
-        //checks to see that username[4] is NOT an admin
-        assertFalse(memberAttributeService.isSuperuser(username[4]));
 
         //tries to make username[4] an admin but fails due to username[3] not being an admin
         try {
@@ -972,9 +950,6 @@ public class TestMembershipService {
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
-
-        //checks to see that username[4] is NOT an admin
-        assertFalse(memberAttributeService.isSuperuser(username[4]));
 
         //tries to delete username[4] as an admin but fails due to username[3] not being an admin
         try {
