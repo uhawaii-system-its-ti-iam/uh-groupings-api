@@ -1097,4 +1097,8 @@ public class MembershipServiceImpl implements MembershipService {
         this.memberAttributeService = memberAttributeService;
     }
 
+    public void setHelperService(HelperService helperService) {
+        this.helperService = helperService;
+    }
+
 }
