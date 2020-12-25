@@ -4,12 +4,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -68,7 +78,7 @@ public class MembershipServiceUnitTest {
                 System.out.println("Checking if " + personToAdd + " is a member of " + groupPath);
                 return true;
             }
-            public boolean isOwner(String groupPath, Person personToAdd) {
+            public boolean isOwner(String groupPath, String personToAdd) {
                 System.out.println("Checking if " + personToAdd + " is a owner of " + groupPath);
                 return true;
             }
@@ -90,20 +100,46 @@ public class MembershipServiceUnitTest {
             }
         };
 
+        HelperService helperService = new HelperServiceImpl() {
+            public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action) {
+                GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+                groupingsServiceResult.setAction(action);
+                groupingsServiceResult.setResultCode(resultCode);
+                return groupingsServiceResult;
+            }
+        };
+
+
+        //MembershipServiceImpl membershipService = mock(MembershipServiceImpl.class);
+        //when(membershipService.isGroupCanOptIn("","")).thenReturn(true);
+        //when(membershipService.optIn(optInUsername,groupPaths.get(j))).thenCallRealMethod();
         MembershipServiceImpl membershipService = new MembershipServiceImpl();
         membershipService.setMemberAttributeService(memberAttribute);
         membershipService.setGrouperFactoryService(grouperService);
+        membershipService.setHelperService(helperService);
         List<String> groupPaths = new ArrayList<>();
         List<List<GroupingsServiceResult>> memberResults = new ArrayList<>();
-        //Creating 5 groupPaths.
-        for (int i = 0; i < 5; i++) {
+
+        // Creating 5 groupPaths.
+        for (int i = 0; i < 100; i++) {
             groupPaths.add("groupPath-" + i);
-            //Creating 5 users to batch delete from those 5 groups.
+            // Creating 5 users to batch delete from those 5 groups.
         }
-        for (int j = 0; j < 5; j++) {
+        for (int j = 0; j < 100; j++) {
             String optInUsername = "optInUsername-" + j;
             memberResults.add(membershipService.optIn(optInUsername, groupPaths.get(j)));
         }
+
+        // Check that all threads returned a result.
+        assertEquals(memberResults.size(), 100);
+        int i = 0;
+        // Check that the proper result information is returned.
+        for (List<GroupingsServiceResult> result : memberResults){
+           assertEquals(result.get(0).getAction(), "opt in optInUsername-"+ i +" to groupPath-" + i);
+           i++;
+        }
+
+
     }
 
     private class DeleteTestRunnerTwo extends Thread {
@@ -191,6 +227,51 @@ public class MembershipServiceUnitTest {
         for (int i = 0; i < TEST_RUNS; i++) {
             assertEquals(map.get(i).intValue(), i + 100);
         }
+    }
+
+    class testCallable1 implements Callable<Integer> {
+        private final int increment;
+        public testCallable1(int increment) {
+            this.increment = increment;
+        }
+        @Override
+        public Integer call() {
+            int i = increment + 1;
+            return i;
+        }
+    }
+
+
+    @Test
+    public void executorServiceTest() throws ExecutionException, InterruptedException {
+        // Creates a thread pool with 10 threads.
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        // Utilize constructors to configure custom executor service.
+        ExecutorService executorService =
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<Runnable>());
+
+        List<Callable<Integer>> threads = new ArrayList<>();
+        for(int i = 0; i <= 100; i++){
+            Callable<Integer> test = new testCallable1(i);
+            threads.add(test);
+        }
+        // Send all threads to the executor service which runs all threads with invokeAll.
+        List<Future<Integer>> results = executor.invokeAll(threads);
+        int expectedValue = 1;
+
+        // Asserts that all threads have incremented their passed int by 1.
+        for (Future result : results){
+            assertEquals(result.get(), expectedValue);
+            expectedValue++;
+        }
+
+
+
+        // Shuts down the service once all threads have completed.
+        executor.shutdown();
+
     }
 
     private synchronized void pollUntilFinished(final int TEST_RUNS, Thread[] serviceThreads) {
