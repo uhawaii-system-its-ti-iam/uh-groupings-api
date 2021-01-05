@@ -345,9 +345,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMember(currentUser, path + EXCLUDE, uid));
     }
 
-    /**
-     * Remove multiple members pertaining to the uids list from exclude grouping of grouping at path.
-     */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMultipleMembers/{uids}")
     public ResponseEntity<List<GroupingsServiceResult>> deleteMultipleExcludeMembers(
             @RequestHeader("current_user") String currentUser,
@@ -359,9 +356,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.deleteGroupMembers(currentUser, path + EXCLUDE, uids));
     }
 
-    /**
-     * Get an owner's owned groupings by username or UH id number.
-     */
     @GetMapping("/owners/{uid:[\\w-:.]+}/groupings")
     public ResponseEntity<List<GroupingPath>> ownerGroupings(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
