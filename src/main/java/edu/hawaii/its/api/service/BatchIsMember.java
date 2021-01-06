@@ -5,5 +5,5 @@ import edu.hawaii.its.api.type.Person;
 public interface BatchIsMember {
     boolean isMember(String groupPath, Person personToAdd);
     boolean isOwner(String groupPath, String personToAdd);
-    boolean isSuperuser(String username);
+    boolean isAdmin(String username);
 }

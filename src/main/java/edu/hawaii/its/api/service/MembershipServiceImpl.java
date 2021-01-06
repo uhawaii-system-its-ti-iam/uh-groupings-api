@@ -34,6 +34,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 @Service("membershipService")
@@ -441,7 +444,7 @@ public class MembershipServiceImpl implements MembershipService {
         List<WsDeleteMemberResults> deleteMemberResults =
                 makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
         for (int i = 0; i < deleteMemberResults.size(); i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+            logger.info("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
             result.add(helperService.makeGroupingsServiceResult(deleteMemberResults.get(i), action));
         }
@@ -449,37 +452,33 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
-        List<WsDeleteMemberResults> results = new ArrayList<>();
-
         // Creating a thread list which is populated with a thread for each removal that needs to be done.
-        List<Thread> threads = new ArrayList<Thread>();
-        List<FutureTask<WsDeleteMemberResults>> tasks = new ArrayList<>();
-
+        List<WsDeleteMemberResults> results = new ArrayList<>();
+        List<Callable<WsDeleteMemberResults>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(groupPaths.size());
         for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
-
             //creating runnable object containing the data needed for each individual delete.
             Callable<WsDeleteMemberResults> master =
                     new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
-            FutureTask<WsDeleteMemberResults> task = new FutureTask<>(master);
-            tasks.add(task);
-            Thread curr = new Thread(task);
-            threads.add(curr);
+            threads.add(master);
         }
-
         // Starting all of the created threads.
-        for (int i = 0; i < threads.size(); i++) {
-            threads.get(i).start();
+        List<Future<WsDeleteMemberResults>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
         }
-
         // Waiting to return result until every thread in the list has completed running.
-        for (int i = 0; i < threads.size(); i++) {
+        for (Future future : futures){
             try {
-                results.add((tasks.get(i)).get());
-                threads.get(i).join();
+                results.add((WsDeleteMemberResults) future.get());
             } catch (InterruptedException | ExecutionException e) {
-                System.out.println("Thread Interrupted: " + e);
+                logger.info("Thread Interrupted: " + e);
             }
         }
+        // Shuts down the service once all threads have completed.
+        executor.shutdown();
         return results;
     }
 
@@ -493,7 +492,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
+                logger.info("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
                 WsDeleteMemberResults deleteMemberResults =
@@ -503,7 +502,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         if (!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
+                logger.info("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
                 WsDeleteMemberResults deleteMemberResults =
@@ -541,11 +540,6 @@ public class MembershipServiceImpl implements MembershipService {
         String outOrrIn = "in ";
         String preposition = "to ";
         String addGroup = groupingPath + INCLUDE;
-
-        System.out.println("OPTIN START TIME");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
 
         if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
             return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
@@ -635,10 +629,6 @@ public class MembershipServiceImpl implements MembershipService {
                     + grouping;
             results.add(helperService.makeGroupingsServiceResult(failureResult, action));
         }
-        System.out.println("OPTIN FINISH TIME");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
         return results;
     }
 
@@ -703,27 +693,27 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         String action = "add users to " + groupPath;
 
-        Callable<Boolean> inOwnerThread = new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService);
-        Callable<Boolean> isSuperUserThread = new BatchIsSuperUserTask(username, memberAttributeService);
-        FutureTask<Boolean> taskOwner = new FutureTask<>(inOwnerThread);
-        FutureTask<Boolean> taskSuper = new FutureTask<>(isSuperUserThread);
-        Thread threadOwner = new Thread(taskOwner);
-        Thread threadSuper = new Thread(taskSuper);
-        threadOwner.start();
-        threadSuper.start();
         boolean inOwner = false;
         boolean isSuper = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        threads.add(new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService));
+        threads.add(new BatchIsSuperUserTask(username, memberAttributeService));
 
+        List<Future<Boolean>> futures = null;
         try {
-            inOwner = taskOwner.get();
-            threadOwner.join();
-            isSuper = taskSuper.get();
-            threadSuper.join();
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            inOwner = futures.get(0).get();
+            isSuper = futures.get(1).get();
         } catch (InterruptedException | ExecutionException e) {
-            System.out.print("Thread Interrupted : " + e);
+            logger.info("Thread Interrupted: " + e);
         }
 
-
+        executor.shutdown();
 
         if (inOwner || isSuper || (personToAdd.getUsername() != null && personToAdd
                 .getUsername().equals(username))) {
@@ -738,33 +728,30 @@ public class MembershipServiceImpl implements MembershipService {
             boolean isIncludeUpdated = false;
             boolean isOwnersUpdated = false;
 
-            Callable<Boolean> inExcludeThread = new BatchIsMemberTask(exclude, personToAdd, memberAttributeService);
-            Callable<Boolean> inIncludeThread = new BatchIsMemberTask(include, personToAdd, memberAttributeService);
-            Callable<Boolean> inOwnersThread = new BatchIsMemberTask(owners, personToAdd, memberAttributeService);
-            FutureTask<Boolean> task1 = new FutureTask<>(inExcludeThread);
-            FutureTask<Boolean> task2 = new FutureTask<>(inIncludeThread);
-            FutureTask<Boolean> task3 = new FutureTask<>(inOwnersThread);
-            Thread thread1 = new Thread(task1);
-            Thread thread2 = new Thread(task2);
-            Thread thread3 = new Thread(task3);
 
-            thread1.start();
-            thread2.start();
-            thread3.start();
             boolean inExclude = false;
             boolean inInclude = false;
             boolean inOwners = false;
+            List<Callable<Boolean>> threads1 = new ArrayList<>();
+            ExecutorService executor1 = Executors.newFixedThreadPool(3);
+            threads1.add(new BatchIsMemberTask(exclude, personToAdd, memberAttributeService));
+            threads1.add(new BatchIsMemberTask(include, personToAdd, memberAttributeService));
+            threads1.add(new BatchIsMemberTask(owners, personToAdd, memberAttributeService));
 
+            List<Future<Boolean>> futures1 = null;
             try {
-                inExclude = task1.get();
-                thread1.join();
-                inInclude = task2.get();
-                thread2.join();
-                inOwners = task3.get();
-                thread3.join();
-            } catch (InterruptedException | ExecutionException e) {
-                System.out.println("Thread Interrupted: " + e);
+                futures1 = executor1.invokeAll(threads1);
+            } catch (InterruptedException e) {
+                logger.info("Executor Interrupted: " + e);
             }
+            try {
+                inExclude = futures1.get(0).get();
+                inInclude = futures1.get(1).get();
+                inOwners = futures1.get(2).get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.info("Thread Interrupted: " + e);
+            }
+            executor1.shutdown();
 
             //check to see if it is the include, exclude or owners
             if (groupPath.endsWith(INCLUDE)) {
@@ -880,32 +867,29 @@ public class MembershipServiceImpl implements MembershipService {
 
         String composite = helperService.parentGroupingPath(groupPath);
 
-        Callable<Boolean> inOwnerThread = new BatchIsOwnerTask(composite, username, memberAttributeService);
-        Callable<Boolean> isSuperThread = new BatchIsSuperUserTask(username, memberAttributeService);
-        Callable<Boolean> isMemberThread = new BatchIsMemberTask(groupPath, personToDelete, memberAttributeService);
-        FutureTask<Boolean> taskOwner = new FutureTask<>(inOwnerThread);
-        FutureTask<Boolean> taskSuper = new FutureTask<>(isSuperThread);
-        FutureTask<Boolean> taskMember = new FutureTask<>(isMemberThread);
-        Thread threadOwner = new Thread(taskOwner);
-        Thread threadSuper = new Thread(taskSuper);
-        Thread threadMember = new Thread(taskMember);
-        threadOwner.start();
-        threadSuper.start();
-        threadMember.start();
         boolean inOwner = false;
         boolean isSuper = false;
         boolean isMember = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsOwnerTask(composite, username, memberAttributeService));
+        threads.add(new BatchIsSuperUserTask(username, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupPath, personToDelete, memberAttributeService));
 
+        List<Future<Boolean>> futures = null;
         try {
-            inOwner = taskOwner.get();
-            threadOwner.join();
-            isSuper = taskSuper.get();
-            threadSuper.join();
-            isMember = taskMember.get();
-            threadMember.join();
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Thread Interrupted: " + e);
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
         }
+        try {
+            inOwner = futures.get(0).get();
+            isSuper = futures.get(1).get();
+            isMember = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
 
         if (inOwner || isSuper || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
@@ -939,33 +923,29 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        //Multi-threading for isMember() calls.
-        Callable<Boolean> basisResult = new BatchIsMemberTask(basis, personToAdd, memberAttributeService);
-        Callable<Boolean> compResult = new BatchIsMemberTask(groupingPath, personToAdd, memberAttributeService);
-        Callable<Boolean> includeResult = new BatchIsMemberTask(include, personToAdd, memberAttributeService);
-        FutureTask<Boolean> task1 = new FutureTask<>(basisResult);
-        FutureTask<Boolean> task2 = new FutureTask<>(compResult);
-        FutureTask<Boolean> task3 = new FutureTask<>(includeResult);
-        Thread thread1 = new Thread(task1);
-        Thread thread2 = new Thread(task2);
-        Thread thread3 = new Thread(task3);
 
-        thread1.start();
-        thread2.start();
-        thread3.start();
         boolean isInBasis = false;
         boolean isInComposite = false;
         boolean isInInclude = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsMemberTask(basis, personToAdd, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupingPath, personToAdd, memberAttributeService));
+        threads.add(new BatchIsMemberTask(include, personToAdd, memberAttributeService));
+        List<Future<Boolean>> futures = null;
         try {
-            isInBasis = task1.get();
-            thread1.join();
-            isInComposite = task1.get();
-            thread2.join();
-            isInInclude = task1.get();
-            thread3.join();
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Thread Interrupted: " + e);
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
         }
+        try {
+            isInBasis = futures.get(0).get();
+            isInComposite = futures.get(1).get();
+            isInInclude = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
 
         //check to see if they are already in the grouping
         if (!isInComposite) {
@@ -1001,9 +981,28 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        boolean isInBasis = memberAttributeService.isMember(basis, personToDelete);
-        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToDelete);
-        boolean isInExclude = memberAttributeService.isMember(exclude, personToDelete);
+        boolean isInBasis = false;
+        boolean isInComposite = false;
+        boolean isInExclude = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsMemberTask(basis, personToDelete, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupingPath, personToDelete, memberAttributeService));
+        threads.add(new BatchIsMemberTask(exclude, personToDelete, memberAttributeService));
+        List<Future<Boolean>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            isInBasis = futures.get(0).get();
+            isInComposite = futures.get(1).get();
+            isInExclude = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
 
         //if they are in the include group, get them out
         gsrList.add(deleteGroupMember(username, include, userIdentifier));
@@ -1015,6 +1014,7 @@ public class MembershipServiceImpl implements MembershipService {
                 gsrList.addAll(addGroupMember(username, exclude, userIdentifier));
             }
         }
+
         //since they are not in the Grouping, do nothing, but return SUCCESS
         else {
             gsrList.add(

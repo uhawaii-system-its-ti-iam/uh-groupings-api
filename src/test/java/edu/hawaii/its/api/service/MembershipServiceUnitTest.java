@@ -82,7 +82,7 @@ public class MembershipServiceUnitTest {
                 System.out.println("Checking if " + personToAdd + " is a owner of " + groupPath);
                 return true;
             }
-            public boolean isSuperuser(String username) {
+            public boolean isAdmin(String username) {
                 System.out.println("Checking if " + username + " is a super user.");
                 return true;
             }
@@ -109,10 +109,6 @@ public class MembershipServiceUnitTest {
             }
         };
 
-
-        //MembershipServiceImpl membershipService = mock(MembershipServiceImpl.class);
-        //when(membershipService.isGroupCanOptIn("","")).thenReturn(true);
-        //when(membershipService.optIn(optInUsername,groupPaths.get(j))).thenCallRealMethod();
         MembershipServiceImpl membershipService = new MembershipServiceImpl();
         membershipService.setMemberAttributeService(memberAttribute);
         membershipService.setGrouperFactoryService(grouperService);
