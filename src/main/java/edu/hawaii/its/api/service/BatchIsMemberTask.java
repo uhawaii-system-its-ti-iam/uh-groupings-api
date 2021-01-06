@@ -50,6 +50,6 @@ class BatchIsSuperUserTask implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-        return bd.isSuperuser(username);
+        return bd.isAdmin(username);
     }
 }
