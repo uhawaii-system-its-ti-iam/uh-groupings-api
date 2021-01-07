@@ -27,7 +27,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import java.util.List;
 
-public interface GrouperFactoryService {
+public interface GrouperFactoryService extends BatchDeleter{
     WsGroupSaveResults addEmptyGroup(String username, String path);
 
     WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path);

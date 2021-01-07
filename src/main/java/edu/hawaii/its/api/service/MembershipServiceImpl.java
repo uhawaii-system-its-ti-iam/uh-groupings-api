@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -27,9 +28,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -433,15 +441,45 @@ public class MembershipServiceImpl implements MembershipService {
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
             List<String> GroupPaths) {
         List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
-        for (int i = 0; i < GroupPaths.size(); i++) {
-            System.out.println("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
+        List<WsDeleteMemberResults> deleteMemberResults =
+                makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
+        for (int i = 0; i < deleteMemberResults.size(); i++) {
+            logger.info("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
             String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-            WsSubjectLookup adminLookup = grouperFS.makeWsSubjectLookup(adminUsername);
-            WsDeleteMemberResults deleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(GroupPaths.get(i), adminLookup, userToRemove);
-            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
+            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults.get(i), action));
         }
         return result;
+    }
+
+    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
+        // Creating a thread list which is populated with a thread for each removal that needs to be done.
+        List<WsDeleteMemberResults> results = new ArrayList<>();
+        List<Callable<WsDeleteMemberResults>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(groupPaths.size());
+        for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
+            //creating runnable object containing the data needed for each individual delete.
+            Callable<WsDeleteMemberResults> master =
+                    new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
+            threads.add(master);
+        }
+        // Starting all of the created threads.
+        List<Future<WsDeleteMemberResults>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        // Waiting to return result until every thread in the list has completed running.
+        for (Future future : futures){
+            try {
+                results.add((WsDeleteMemberResults) future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                logger.info("Thread Interrupted: " + e);
+            }
+        }
+        // Shuts down the service once all threads have completed.
+        executor.shutdown();
+        return results;
     }
 
     @Override
@@ -454,7 +492,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (!includeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < includeIdentifier.size(); i++) {
-                System.out.println("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
+                logger.info("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
                 String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
                 WsDeleteMemberResults deleteMemberResults =
@@ -464,7 +502,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         if (!excludeIdentifier.get(0).equals("empty")) {
             for (int i = 0; i < excludeIdentifier.size(); i++) {
-                System.out.println("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
+                logger.info("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
                 String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
                 WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
                 WsDeleteMemberResults deleteMemberResults =
@@ -655,8 +693,29 @@ public class MembershipServiceImpl implements MembershipService {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
         String action = "add users to " + groupPath;
 
-        if (memberAttributeService.isOwner(helperService.parentGroupingPath(groupPath), username)
-                || memberAttributeService.isAdmin(username) || (personToAdd.getUsername() != null && personToAdd
+        boolean inOwner = false;
+        boolean isSuper = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        threads.add(new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService));
+        threads.add(new BatchIsSuperUserTask(username, memberAttributeService));
+
+        List<Future<Boolean>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            inOwner = futures.get(0).get();
+            isSuper = futures.get(1).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+
+        executor.shutdown();
+
+        if (inOwner || isSuper || (personToAdd.getUsername() != null && personToAdd
                 .getUsername().equals(username))) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             String composite = helperService.parentGroupingPath(groupPath);
@@ -669,10 +728,35 @@ public class MembershipServiceImpl implements MembershipService {
             boolean isIncludeUpdated = false;
             boolean isOwnersUpdated = false;
 
+
+            boolean inExclude = false;
+            boolean inInclude = false;
+            boolean inOwners = false;
+            List<Callable<Boolean>> threads1 = new ArrayList<>();
+            ExecutorService executor1 = Executors.newFixedThreadPool(3);
+            threads1.add(new BatchIsMemberTask(exclude, personToAdd, memberAttributeService));
+            threads1.add(new BatchIsMemberTask(include, personToAdd, memberAttributeService));
+            threads1.add(new BatchIsMemberTask(owners, personToAdd, memberAttributeService));
+
+            List<Future<Boolean>> futures1 = null;
+            try {
+                futures1 = executor1.invokeAll(threads1);
+            } catch (InterruptedException e) {
+                logger.info("Executor Interrupted: " + e);
+            }
+            try {
+                inExclude = futures1.get(0).get();
+                inInclude = futures1.get(1).get();
+                inOwners = futures1.get(2).get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.info("Thread Interrupted: " + e);
+            }
+            executor1.shutdown();
+
             //check to see if it is the include, exclude or owners
             if (groupPath.endsWith(INCLUDE)) {
                 //if personToAdd is in exclude, get them out
-                if (memberAttributeService.isMember(exclude, personToAdd)) {
+                if (inExclude) {
                     WsDeleteMemberResults wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(
                             exclude,
                             user,
@@ -681,7 +765,7 @@ public class MembershipServiceImpl implements MembershipService {
                     isExcludeUpdated = true;
                 }
                 //check to see if personToAdd is already in include
-                if (!memberAttributeService.isMember(include, personToAdd)) {
+                if (!inInclude) {
                     //add to include
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(include, user, personToAdd);
 
@@ -703,7 +787,7 @@ public class MembershipServiceImpl implements MembershipService {
             //if exclude check if personToAdd is in the include
             else if (groupPath.endsWith(EXCLUDE)) {
                 //if personToAdd is in include, get them out
-                if (memberAttributeService.isMember(include, personToAdd)) {
+                if (inInclude) {
                     WsDeleteMemberResults wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(
                             include,
                             user,
@@ -712,7 +796,7 @@ public class MembershipServiceImpl implements MembershipService {
                     isIncludeUpdated = true;
                 }
                 //check to see if userToAdd is not in exclude
-                if (!memberAttributeService.isMember(exclude, personToAdd)) {
+                if (!inExclude) {
                     //add to exclude
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(exclude, user, personToAdd);
 
@@ -737,7 +821,7 @@ public class MembershipServiceImpl implements MembershipService {
             //if owners check to see if the user is already in owners
             else if (groupPath.endsWith(OWNERS)) {
                 //check to see if userToAdd is already in owners
-                if (!memberAttributeService.isMember(owners, personToAdd)) {
+                if (!inOwners) {
                     //add userToAdd to owners
                     WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(owners, user, personToAdd);
 
@@ -774,7 +858,6 @@ public class MembershipServiceImpl implements MembershipService {
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         return gsrList;
     }
 
@@ -784,11 +867,34 @@ public class MembershipServiceImpl implements MembershipService {
 
         String composite = helperService.parentGroupingPath(groupPath);
 
-        if (memberAttributeService.isOwner(composite, username) || memberAttributeService
-                .isAdmin(username) || username.equals(personToDelete.getUsername())) {
+        boolean inOwner = false;
+        boolean isSuper = false;
+        boolean isMember = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsOwnerTask(composite, username, memberAttributeService));
+        threads.add(new BatchIsSuperUserTask(username, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupPath, personToDelete, memberAttributeService));
+
+        List<Future<Boolean>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            inOwner = futures.get(0).get();
+            isSuper = futures.get(1).get();
+            isMember = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
+
+        if (inOwner || isSuper || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
             if (groupPath.endsWith(EXCLUDE) || groupPath.endsWith(INCLUDE) || groupPath.endsWith(OWNERS)) {
-                if (memberAttributeService.isMember(groupPath, personToDelete)) {
+                if (isMember) {
                     WsDeleteMemberResults deleteMemberResults =
                             grouperFS.makeWsDeleteMemberResults(groupPath, user, personToDelete);
 
@@ -803,6 +909,7 @@ public class MembershipServiceImpl implements MembershipService {
             return helperService.makeGroupingsServiceResult(
                     FAILURE + ": " + username + " may only delete from exclude, include or owner group", action);
         }
+
         throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
     }
 
@@ -816,9 +923,29 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        boolean isInBasis = memberAttributeService.isMember(basis, personToAdd);
-        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToAdd);
-        boolean isInInclude = memberAttributeService.isMember(include, personToAdd);
+
+        boolean isInBasis = false;
+        boolean isInComposite = false;
+        boolean isInInclude = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsMemberTask(basis, personToAdd, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupingPath, personToAdd, memberAttributeService));
+        threads.add(new BatchIsMemberTask(include, personToAdd, memberAttributeService));
+        List<Future<Boolean>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            isInBasis = futures.get(0).get();
+            isInComposite = futures.get(1).get();
+            isInInclude = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
 
         //check to see if they are already in the grouping
         if (!isInComposite) {
@@ -854,9 +981,28 @@ public class MembershipServiceImpl implements MembershipService {
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
 
-        boolean isInBasis = memberAttributeService.isMember(basis, personToDelete);
-        boolean isInComposite = memberAttributeService.isMember(groupingPath, personToDelete);
-        boolean isInExclude = memberAttributeService.isMember(exclude, personToDelete);
+        boolean isInBasis = false;
+        boolean isInComposite = false;
+        boolean isInExclude = false;
+        List<Callable<Boolean>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        threads.add(new BatchIsMemberTask(basis, personToDelete, memberAttributeService));
+        threads.add(new BatchIsMemberTask(groupingPath, personToDelete, memberAttributeService));
+        threads.add(new BatchIsMemberTask(exclude, personToDelete, memberAttributeService));
+        List<Future<Boolean>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        try {
+            isInBasis = futures.get(0).get();
+            isInComposite = futures.get(1).get();
+            isInExclude = futures.get(2).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread Interrupted: " + e);
+        }
+        executor.shutdown();
 
         //if they are in the include group, get them out
         gsrList.add(deleteGroupMember(username, include, userIdentifier));
@@ -868,6 +1014,7 @@ public class MembershipServiceImpl implements MembershipService {
                 gsrList.addAll(addGroupMember(username, exclude, userIdentifier));
             }
         }
+
         //since they are not in the Grouping, do nothing, but return SUCCESS
         else {
             gsrList.add(
@@ -940,6 +1087,18 @@ public class MembershipServiceImpl implements MembershipService {
 
         return grouperFS.makeWsAssignAttributesResultsForMembership(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, operationName,
                 attributeUuid, membershipID);
+    }
+
+    public void setGrouperFactoryService(GrouperFactoryService grouperFactoryService) {
+        this.grouperFS = grouperFactoryService;
+    }
+
+    public void setMemberAttributeService(MemberAttributeService memberAttributeService) {
+        this.memberAttributeService = memberAttributeService;
+    }
+
+    public void setHelperService(HelperService helperService) {
+        this.helperService = helperService;
     }
 
 }
