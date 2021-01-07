@@ -4,11 +4,13 @@ import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 
-public interface MembershipService {
+public interface MembershipService{
 
     List<Membership> getMembershipResults(String owner, String uid);
 

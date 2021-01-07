@@ -8,7 +8,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -45,29 +44,14 @@ import static org.junit.Assert.fail;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class MembershipServiceTest {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    @Value("${groupings.api.test.username}")
-    private String USERNAME;
-
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
-
-    @Value("${groupings.api.test.name}")
-    private String NAME;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UHUUID;
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
@@ -100,12 +84,10 @@ public class MembershipServiceTest {
     private static final String GROUPING_4_EXCLUDE_PATH = GROUPING_4_PATH + EXCLUDE;
 
     private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
     private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
     private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
@@ -125,13 +107,13 @@ public class MembershipServiceTest {
     private GroupRepository groupRepository;
 
     @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
     private MembershipRepository membershipRepository;
 
     @Autowired
     private DatabaseSetupService databaseSetupService;
+
+    @Autowired
+    private HelperService helperService;
 
     @Before
     public void setup() {
@@ -144,6 +126,7 @@ public class MembershipServiceTest {
     public void construction() {
         //autowired
         assertNotNull(membershipService);
+        assertNotNull(helperService);
     }
 
     @Test
@@ -180,40 +163,39 @@ public class MembershipServiceTest {
 
     }
 
-    // Debug statement to look at contents of database
-    // Delete user from include group to remove them
-    // Use user number not slot in array
-    // Use assert to check if it worked
+    // Debug statement to look at contents of database.
+    // Delete user from include group to remove them.
+    // Use user number not slot in array.
+    // Use assert to check if it worked.
     @Test
     @Ignore
     public void deleteGroupingMemberTest() {
-        Iterable<Grouping> group = groupingRepository.findAll();
         List<GroupingsServiceResult> listGsr;
         GroupingsServiceResult gsr;
 
-        // Base test
-        // Remove person from include and composite
+        // Base test.
+        // Remove person from include and composite.
         listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(5).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        // If person is in composite and basis, add to exclude group
+        // If person is in composite and basis, add to exclude group.
         listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(1).getUhUuid());
         for (GroupingsServiceResult gsrFor : listGsr) {
             assertTrue(gsrFor.getResultCode().startsWith(SUCCESS));
         }
 
-        // Not in composite, do nothing but return success
+        // Not in composite, do nothing but return success.
         listGsr = membershipService.deleteGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(2).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        // todo Can't test with current database setup
-        // Not in basis, but in exclude
-        // Can't happen with current database
+        // todo Can't test with current database setup.
+        // Not in basis, but in exclude.
+        // Can't happen with current database.
 
-        // Test if user is not an owner
+        // Test if user is not an owner.
         try {
             listGsr = membershipService.deleteGroupingMember(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(6).getUhUuid());
@@ -222,18 +204,18 @@ public class MembershipServiceTest {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        // Test if user is admin
+        // Test if user is admin.
         listGsr = membershipService.deleteGroupingMember(ADMIN_USER, GROUPING_3_PATH,
                 users.get(6).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        // Test if path is not allowed to delete from
+        // Test if path is not allowed to delete from.
         try {
             gsr = membershipService.deleteGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+            gsre.getGsr();
         }
     }
 
@@ -259,7 +241,7 @@ public class MembershipServiceTest {
         try {
             String ownerUsername = ADMIN;
             String uid = "iamtst01";
-            List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
+            membershipService.getMembershipResults(ownerUsername, uid);
         } catch (Exception e) {
             System.out.println(e);
             assertTrue(e != null);
@@ -269,26 +251,24 @@ public class MembershipServiceTest {
     @Test
     @Ignore
     public void addGroupingMemberTest() {
-        Iterable<Grouping> group = groupingRepository.findAll();
         List<GroupingsServiceResult> listGsr;
-        GroupingsServiceResult gsr;
 
-        // Base test
-        // Remove person who's not in composite from exclude and return SUCCESS
+        // Base test.
+        // Remove person who's not in composite from exclude and return SUCCESS.
         listGsr = membershipService.addGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(2).getUsername());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        //todo Case where !inComposite && !inBasis is impossible w/ current db
+        //todo Case where !inComposite && !inBasis is impossible w/ current db.
 
-        // In composite
+        // In composite.
         listGsr = membershipService.addGroupingMember(users.get(0).getUsername(), GROUPING_3_PATH,
                 users.get(5).getUsername());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        //todo Case where inBasis && inInclude is impossible w/ current db
+        //todo Case where inBasis && inInclude is impossible w/ current db.
 
-        // Test if user is not an owner
+        // Test if user is not an owner.
         try {
             listGsr = membershipService.addGroupingMember(users.get(5).getUsername(), GROUPING_3_PATH,
                     users.get(3).getUsername());
@@ -297,7 +277,7 @@ public class MembershipServiceTest {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        // Test if user is admin
+        // Test if user is admin.
         listGsr = membershipService.addGroupingMember(ADMIN_USER, GROUPING_3_PATH,
                 users.get(3).getUhUuid());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
@@ -359,7 +339,7 @@ public class MembershipServiceTest {
             assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
         }
 
-        //Creating list larger than 100 will fail because of invalid address
+        // Creating list larger than 100 will fail because of invalid address.
         List<String> userToAddList = new ArrayList<>();
         for (int i = 0; i <= 100; i++) {
             userToAddList.add("username" + i);
@@ -377,7 +357,7 @@ public class MembershipServiceTest {
     @Test
     public void deleteGroupMemberTest() {
 
-        // Passes even though 1234 is not a person
+        // Passes even though 1234 is not a person.
         GroupingsServiceResult gsr = membershipService.deleteGroupMember(ADMIN_USER, GROUPING_3_INCLUDE_PATH, "1234");
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
         assertTrue(gsr.getResultCode().contains(NOT_IN_GROUP));
@@ -392,17 +372,17 @@ public class MembershipServiceTest {
     public void addAdminTest() {
 
         try {
-            //user is not super user
+            // user is not super user.
             membershipService.addAdmin(users.get(9).getUsername(), users.get(9).getUsername());
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //user is super user
+        // user is super user.
         GroupingsServiceResult gsr = membershipService.addAdmin(ADMIN_USER, users.get(9).getUsername());
         assertThat(gsr.getResultCode(), is(SUCCESS));
 
-        //users.get(9) is already and admin
+        // users.get(9) is already and admin.
         gsr = membershipService.addAdmin(ADMIN_USER, users.get(9).getUsername());
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
 
@@ -410,32 +390,32 @@ public class MembershipServiceTest {
 
     @Test
     public void deleteAdminTest() {
-        //usernameToDelete is not a superuser
+        // usernameToDelete is not a superuser.
         String usernameToDelete = users.get(9).getUsername();
 
         try {
-            //user is not super user
+            // User is not super user.
             membershipService.deleteAdmin(usernameToDelete, ADMIN_USER);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //user is super user usernameToDelete is not superuser
+        // user is super user usernameToDelete is not superuser.
         GroupingsServiceResult gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
         assertThat(gsr.getResultCode(), is(SUCCESS));
 
-        //make usernameToDelete a superuser
+        // make usernameToDelete a superuser.
         membershipService.addAdmin(ADMIN_USER, usernameToDelete);
         assertTrue(memberAttributeService.isAdmin(usernameToDelete));
 
-        //user is super user usernameToDelete is not superuser
+        // user is super user usernameToDelete is not superuser.
         gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
         assertThat(gsr.getResultCode(), is(SUCCESS));
 
     }
 
     @Test
-    public void removeFromGroupsTest() throws InterruptedException {
+    public void removeFromGroupsTest() {
         String userToRemove = users.get(0).getUsername();
         List<String> GroupPaths = new ArrayList<String>();
         GroupPaths.add(GROUPING_1_PATH);
@@ -452,7 +432,7 @@ public class MembershipServiceTest {
         List<GroupingsServiceResult> optInResults;
 
         try {
-            //opt in Permission for include group false
+            // opt in Permission for include group false.
             optInResults = membershipService.optIn(users.get(2).getUsername(), GROUPING_2_PATH);
         } catch (GroupingsServiceResultException gsre) {
             optInResults = new ArrayList<>();
@@ -460,27 +440,27 @@ public class MembershipServiceTest {
         }
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //opt in Permission for include group true and not in group, but in basis
+        // opt in Permission for include group true and not in group, but in basis.
         optInResults = membershipService.optIn(users.get(1).getUsername(), GROUPING_1_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertThat(optInResults.size(), is(1));
 
-        //opt in Permission for include group true but already in group, not self opted
+        // opt in Permission for include group true but already in group, not self opted.
         optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
 
-        //opt in Permission for include group true, but already self-opted
+        // opt in Permission for include group true, but already self-opted.
         optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
 
-        //non super users should not be able to opt in other users
+        // non super users should not be able to opt in other users.
         optInResults = membershipService.optIn(users.get(0).getUsername(), GROUPING_0_PATH, users.get(1).getUsername());
         assertThat(optInResults.size(), is(1));
         assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //super users should be able to opt in other users
+        // super users should be able to opt in other users.
         optInResults = membershipService.optIn(ADMIN_USER, GROUPING_0_PATH, users.get(2).getUsername());
         assertThat(optInResults.size(), is(2));
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
@@ -491,7 +471,7 @@ public class MembershipServiceTest {
     public void optOutTest() {
         List<GroupingsServiceResult> optOutResults;
         try {
-            //opt out Permission for exclude group false
+            // opt out Permission for exclude group false.
             optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
         } catch (GroupingsServiceResultException gsre) {
             optOutResults = new ArrayList<>();
@@ -499,31 +479,31 @@ public class MembershipServiceTest {
         }
         assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //opt out Permission for exclude group true
+        // opt out Permission for exclude group true.
         optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //opt out Permission for exclude group true, but already in the exclude group
+        // opt out Permission for exclude group true, but already in the exclude group.
         optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //opt out Permission for exclude group true, but already self-opted
+        // opt out Permission for exclude group true, but already self-opted.
         optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
 
-        //non super users should not be able to opt out other users
+        // non super users should not be able to opt out other users.
         optOutResults =
                 membershipService.optOut(users.get(0).getUsername(), GROUPING_1_PATH, users.get(1).getUsername());
         assertThat(optOutResults.size(), is(1));
         assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
 
-        //super users should be able to opt in other users
+        // super users should be able to opt in other users.
         optOutResults = membershipService.optOut(ADMIN_USER, GROUPING_1_PATH, users.get(6).getUsername());
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertThat(optOutResults.size(), is(1));
@@ -536,32 +516,32 @@ public class MembershipServiceTest {
         GroupingsServiceResult gsr;
 
         try {
-            //member is not in group
+            // member is not in group.
             gsr = membershipService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(5).getUsername());
         } catch (GroupingsServiceResultException gsre) {
             gsr = gsre.getGsr();
         }
         assertTrue(gsr.getResultCode().startsWith(FAILURE));
 
-        //member is not self-opted
+        // member is not self-opted.
         gsr = membershipService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(4).getUsername());
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
 
-        //make member self-opted
+        // make member self-opted.
         Membership membership = membershipRepository.findByPersonAndGroup(users.get(4), group);
         membership.setSelfOpted(true);
         membershipRepository.save(membership);
 
-        //member is self-opted
+        // member is self-opted.
         gsr = membershipService.removeSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(4).getUsername());
         assertTrue(gsr.getResultCode().startsWith(SUCCESS));
 
-        //addselfopted on not a member
+        // addselfopted on not a member.
         try {
             gsr = membershipService.addSelfOpted(GROUPING_4_EXCLUDE_PATH, users.get(5).getUsername());
             assertFalse(gsr.getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+            gsre.getGsr();
         }
 
     }
@@ -580,7 +560,6 @@ public class MembershipServiceTest {
     public void addMemberByUsernameTest() {
         Grouping grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         List<GroupingsServiceResult> listGsr;
-        GroupingsServiceResult gsr;
 
         assertFalse(grouping.getComposite().getMembers().contains(users.get(3)));
 
@@ -588,30 +567,30 @@ public class MembershipServiceTest {
                 users.get(3).getUsername());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(3)));
-        //todo Cases (inBasis && inInclude) and (!inComposite && !inBasis) not reachable w/ current DB
+        // todo Cases (inBasis && inInclude) and (!inComposite && !inBasis) not reachable w/ current DB.
 
-        //add existing Owner
+        // add existing Owner.
         membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_1_OWNERS_PATH,
                 users.get(0).getUsername());
         grouping = groupingRepository.findByPath(GROUPING_1_PATH);
         assertTrue(grouping.getComposite().getMembers().contains(users.get(0)));
 
-        //add to basis path (not allowed)
+        // add to basis path (not allowed).
         try {
             listGsr = membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_3_BASIS_PATH,
                     users.get(6).getUsername());
             assertTrue(listGsr.get(0).getResultCode().startsWith(FAILURE));
         } catch (GroupingsServiceResultException gsre) {
-            gsr = gsre.getGsr();
+            gsre.getGsr();
         }
 
-        //add member already in group
+        // add member already in group.
         listGsr = membershipService
                 .addGroupMember(users.get(0).getUsername(), GROUPING_1_INCLUDE_PATH,
                         users.get(5).getUsername());
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
 
-        //member that is adding is not an owner (not allowed)
+        // member that is adding is not an owner (not allowed).
         try {
             listGsr = membershipService.addGroupMember(users.get(2).getUsername(), GROUPING_3_INCLUDE_PATH,
                     users.get(3).getUsername());
@@ -623,7 +602,7 @@ public class MembershipServiceTest {
 
     @Test
     public void addMembers() throws IOException, MessagingException {
-        //add all usernames
+        // add all usernames.
         List<String> usernames = new ArrayList<>();
         for (Person user : users) {
             usernames.add(user.getUsername());
@@ -631,23 +610,23 @@ public class MembershipServiceTest {
 
         Grouping grouping = groupingRepository.findByPath(GROUPING_3_PATH);
 
-        //check how many members are in the basis
+        // check how many members are in the basis.
         int numberOfBasisMembers = grouping.getBasis().getMembers().size();
 
-        //try to put all users into exclude group
+        // try to put all users into exclude group.
         membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, usernames);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        //there should be no real members in composite, but it should still have the 'grouperAll' member
+        // there should be no real members in composite, but it should still have the 'grouperAll' member.
         assertThat(grouping.getComposite().getMembers().size(), is(1));
-        //only the users in the basis should have been added to the exclude group
+        // only the users in the basis should have been added to the exclude group.
         assertThat(grouping.getExclude().getMembers().size(), is(numberOfBasisMembers));
 
-        //try to put all users into the include group
+        // try to put all users into the include group.
         membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, usernames);
         grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        //all members should be in the group ( - 1 for 'grouperAll' in composite);
+        // all members should be in the group ( - 1 for 'grouperAll' in composite);.
         assertThat(grouping.getComposite().getMembers().size() - 1, is(usernames.size()));
-        //members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups)
+        // members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups).
         assertThat(grouping.getInclude().getMembers().size(), is(usernames.size() - numberOfBasisMembers + 2));
     }
 }
