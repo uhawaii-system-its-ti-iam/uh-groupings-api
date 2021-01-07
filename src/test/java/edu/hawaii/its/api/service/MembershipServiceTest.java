@@ -443,7 +443,7 @@ public class MembershipServiceTest {
         // opt in Permission for include group true and not in group, but in basis.
         optInResults = membershipService.optIn(users.get(1).getUsername(), GROUPING_1_PATH);
         assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertThat(optInResults.size(), is(2));
+        assertThat(optInResults.size(), is(1));
 
         // opt in Permission for include group true but already in group, not self opted.
         optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
