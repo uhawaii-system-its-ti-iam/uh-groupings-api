@@ -470,7 +470,7 @@ public class MembershipServiceImpl implements MembershipService {
             logger.info("Executor Interrupted: " + e);
         }
         // Waiting to return result until every thread in the list has completed running.
-        for (Future future : futures){
+        for (Future future : futures) {
             try {
                 results.add((WsDeleteMemberResults) future.get());
             } catch (InterruptedException | ExecutionException e) {
@@ -684,7 +684,6 @@ public class MembershipServiceImpl implements MembershipService {
                 action);
     }
 
-
     //logic for adding a member
     public List<GroupingsServiceResult> addMemberHelper(String username, String groupPath, Person personToAdd) {
         logger.info(
@@ -697,7 +696,8 @@ public class MembershipServiceImpl implements MembershipService {
         boolean isSuper = false;
         List<Callable<Boolean>> threads = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        threads.add(new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService));
+        threads.add(
+                new BatchIsOwnerTask(helperService.parentGroupingPath(groupPath), username, memberAttributeService));
         threads.add(new BatchIsSuperUserTask(username, memberAttributeService));
 
         List<Future<Boolean>> futures = null;
@@ -727,7 +727,6 @@ public class MembershipServiceImpl implements MembershipService {
             boolean isExcludeUpdated = false;
             boolean isIncludeUpdated = false;
             boolean isOwnersUpdated = false;
-
 
             boolean inExclude = false;
             boolean inInclude = false;
@@ -922,7 +921,6 @@ public class MembershipServiceImpl implements MembershipService {
         String basis = groupingPath + BASIS;
         String exclude = groupingPath + EXCLUDE;
         String include = groupingPath + INCLUDE;
-
 
         boolean isInBasis = false;
         boolean isInComposite = false;
