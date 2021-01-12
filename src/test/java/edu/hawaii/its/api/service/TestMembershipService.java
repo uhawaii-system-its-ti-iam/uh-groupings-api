@@ -164,15 +164,8 @@ public class TestMembershipService {
     public void getMembershipResultsTest() {
         String ownerUsername = ADMIN;
         String uid = username[4];
-        boolean inBasis;
-        boolean inInclude;
-        boolean inExclude;
-        boolean inBasisAndInclude;
-        boolean inOwners;
-
         List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         assertTrue(result.size() > 0);
-
     }
 
     @Test
