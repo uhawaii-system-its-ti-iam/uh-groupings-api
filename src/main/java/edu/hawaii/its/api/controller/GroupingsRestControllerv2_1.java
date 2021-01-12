@@ -303,6 +303,17 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
     }
 
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")
+    public ResponseEntity<List<AddMemberResult>> addExcludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+        logger.info("Entered REST addExcludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
+    }
+
     /**
      * Add user with uid as a new exclude member to grouping at path.
      */
