@@ -395,18 +395,25 @@ public class MembershipServiceImpl implements MembershipService {
             String uhUuid;
             String uid;
 
-            WsDeleteMemberResults wsDeleteMemberResults =
-                    grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
-            wasRemoved = "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
-            WsAddMemberResults wsAddMemberResults =
-                    grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
+            try {
+                WsDeleteMemberResults wsDeleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
+                wasRemoved =
+                        "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                WsAddMemberResults wsAddMemberResults =
+                        grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
 
-            wasAdded = "SUCCESS".equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
-            name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
-            uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
-            uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-            addMemberResults
-                    .add(new AddMemberResult(wasAdded, wasRemoved, groupingPath, removalPath, name, uhUuid, uid));
+                wasAdded = "SUCCESS".equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
+                uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
+                uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+                addMemberResults
+                        .add(new AddMemberResult(wasAdded, wasRemoved, groupingPath, removalPath, name, uhUuid, uid,
+                                SUCCESS, userToAdd));
+            } catch (GcWebServiceError e) {
+                addMemberResults.add(new AddMemberResult(FAILURE, userToAdd));
+
+            }
         }
         return addMemberResults;
     }

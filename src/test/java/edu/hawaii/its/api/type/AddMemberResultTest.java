@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class AddMemberResultTest {
     private AddMemberResult addMemberResultInstantiatedOnConstruction;
@@ -19,11 +20,13 @@ public class AddMemberResultTest {
     private final String uhUuid = " uhUuid";
     private final String uid = "uid";
     private final String result = "result";
+    private final String userIdentifier = "userIdentifier";
 
     @Before
     public void setUp() {
         addMemberResultInstantiatedOnConstruction =
-                new AddMemberResult(userWasAdded, userWasRemoved, pathOfAdd, pathOfRemoved, name, uhUuid, uid);
+                new AddMemberResult(userWasAdded, userWasRemoved, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
+                        userIdentifier);
         addMemberResultEmptyOnConstruction = new AddMemberResult();
     }
 
@@ -31,6 +34,16 @@ public class AddMemberResultTest {
     public void construction() {
         assertNotNull(addMemberResultInstantiatedOnConstruction);
         assertNotNull(addMemberResultEmptyOnConstruction);
+        AddMemberResult addMemberResult = new AddMemberResult(result, userIdentifier);
+        assertNotNull(addMemberResult);
+        assertNotNull(addMemberResult.getResult());
+        assertNotNull(addMemberResult.getUserIdentifier());
+        assertNull(addMemberResult.getPathOfAdd());
+        assertNull(addMemberResult.getPathOfRemoved());
+        assertNull(addMemberResult.getName());
+        assertNull(addMemberResult.getUhUuid());
+        assertFalse(addMemberResult.isUserWasAdded());
+        assertFalse(addMemberResult.isUserWasRemoved());
     }
 
     @Test
@@ -106,5 +119,30 @@ public class AddMemberResultTest {
         assertNull(addMemberResultEmptyOnConstruction.getUid());
         addMemberResultEmptyOnConstruction.setUid(uid);
         assertEquals(uid, addMemberResultEmptyOnConstruction.getUid());
+    }
+
+    @Test
+    public void getResultTest() {
+        assertNotNull(addMemberResultInstantiatedOnConstruction.getResult());
+        assertEquals(result, addMemberResultInstantiatedOnConstruction.getResult());
+    }
+
+    @Test
+    public void setResultTest() {
+        assertNull(addMemberResultEmptyOnConstruction.getResult());
+        addMemberResultEmptyOnConstruction.setResult(result);
+        assertEquals(result, addMemberResultEmptyOnConstruction.getResult());
+    }
+
+    @Test
+    public void setUserIdentifierTest() {
+        assertNotNull(addMemberResultInstantiatedOnConstruction.getUserIdentifier());
+        assertEquals(userIdentifier, addMemberResultInstantiatedOnConstruction.getUserIdentifier());
+    }
+
+    public void getUserIdentifierTest() {
+        assertNull(addMemberResultEmptyOnConstruction.getUserIdentifier());
+        addMemberResultEmptyOnConstruction.setUserIdentifier(userIdentifier);
+        assertEquals(userIdentifier, addMemberResultEmptyOnConstruction.getUserIdentifier());
     }
 }

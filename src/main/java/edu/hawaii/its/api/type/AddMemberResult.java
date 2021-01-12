@@ -1,19 +1,21 @@
 package edu.hawaii.its.api.type;
 
 public class AddMemberResult {
-    boolean userWasAdded;
-    boolean userWasRemoved;
-    String pathOfAdd;
-    String pathOfRemoved;
-    String name;
-    String uhUuid;
-    String uid;
+    private boolean userWasAdded;
+    private boolean userWasRemoved;
+    private String pathOfAdd;
+    private String pathOfRemoved;
+    private String name;
+    private String uhUuid;
+    private String uid;
+    private String result;
+    private String userIdentifier;
 
     public AddMemberResult() {
     }
 
     public AddMemberResult(boolean userWasAdded, boolean userWasRemoved, String pathOfAdd, String pathOfRemoved,
-            String name, String uhUuid, String uid) {
+            String name, String uhUuid, String uid, String result, String userIdentifier) {
         this.userWasAdded = userWasAdded;
         this.userWasRemoved = userWasRemoved;
         this.pathOfAdd = pathOfAdd;
@@ -21,6 +23,13 @@ public class AddMemberResult {
         this.name = name;
         this.uhUuid = uhUuid;
         this.uid = uid;
+        this.result = result;
+        this.userIdentifier = userIdentifier;
+    }
+
+    public AddMemberResult(String userIdentifier, String result) {
+        this.result = result;
+        this.userIdentifier = userIdentifier;
     }
 
     public boolean isUserWasAdded() {
@@ -71,15 +80,12 @@ public class AddMemberResult {
         this.uid = uid;
     }
 
-    @Override public String toString() {
-        return "AddMemberResult{" +
-                "userWasAdded=" + userWasAdded +
-                ", userWasRemoved=" + userWasRemoved +
-                ", pathOfAdd='" + pathOfAdd + '\'' +
-                ", pathOfRemoved='" + pathOfRemoved + '\'' +
-                ", name='" + name + '\'' +
-                ", uhUuid='" + uhUuid + '\'' +
-                ", uid='" + uid + '\'' +
-                '}';
-    }
+    public String getResult() { return result; }
+
+    public void setResult(String result) { this.result = result; }
+
+    public void setUserIdentifier(String userIdentifier) { this.userIdentifier = userIdentifier; }
+
+    public String getUserIdentifier() { return userIdentifier; }
+
 }
