@@ -3,6 +3,10 @@ package edu.hawaii.its.api.type;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -140,9 +144,20 @@ public class AddMemberResultTest {
         assertEquals(userIdentifier, addMemberResultInstantiatedOnConstruction.getUserIdentifier());
     }
 
+    @Test
     public void getUserIdentifierTest() {
         assertNull(addMemberResultEmptyOnConstruction.getUserIdentifier());
         addMemberResultEmptyOnConstruction.setUserIdentifier(userIdentifier);
         assertEquals(userIdentifier, addMemberResultEmptyOnConstruction.getUserIdentifier());
+    }
+
+    @Test
+    public void toCsvTest() {
+        String[] csv = addMemberResultInstantiatedOnConstruction.toCsv();
+        List<String> fields = Arrays.asList(uid, uhUuid, name, result);
+        int i = 0;
+        for (String field : fields) {
+            assertEquals(field, csv[i++]);
+        }
     }
 }
