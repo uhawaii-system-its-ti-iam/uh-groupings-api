@@ -12,6 +12,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -162,9 +164,15 @@ public class TestMembershipService {
     public void getMembershipResultsTest() {
         String ownerUsername = ADMIN;
         String uid = username[4];
+        boolean inBasis;
+        boolean inInclude;
+        boolean inExclude;
+        boolean inBasisAndInclude;
+        boolean inOwners;
 
         List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         assertTrue(result.size() > 0);
+
     }
 
     @Test
@@ -829,11 +837,8 @@ public class TestMembershipService {
         String ownerUsername = username[0];
         List<AddMemberResult> addMemberResults;
 
-        // Add valid users.
-        List<String> validUsernames = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            validUsernames.add(username[i]);
-        }
+        // Add valid users to include.
+        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(SUCCESS, addMemberResult.getResult());
@@ -844,13 +849,36 @@ public class TestMembershipService {
             assertNotNull(addMemberResult.getName());
         }
 
-        // Add invalid users.
+        // Add invalid users to include.
         List<String> invalidUsernames = new ArrayList<>();
-        int i = 0;
         invalidUsernames.add("zzzzz");
         invalidUsernames.add("ffff");
         addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+            assertNull(addMemberResult.getName());
+            assertNull(addMemberResult.getUid());
+            assertNull(addMemberResult.getUhUuid());
+        }
 
+        // Add valid users to exclude.
+        validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, validUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(SUCCESS, addMemberResult.getResult());
+            assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
+            assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
+            assertNotNull(addMemberResult.getUid());
+            assertNotNull(addMemberResult.getUhUuid());
+            assertNotNull(addMemberResult.getName());
+        }
+
+        // Add invalid users to include.
+        List<String> invalidUsernamesForExclude = new ArrayList<>();
+        invalidUsernamesForExclude.add("zzzzz");
+        invalidUsernamesForExclude.add("ffff");
+        addMemberResults =
+                membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
             assertNull(addMemberResult.getName());
@@ -864,7 +892,6 @@ public class TestMembershipService {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
-
     }
 
     @Test
