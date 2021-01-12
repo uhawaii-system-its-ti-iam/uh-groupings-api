@@ -23,7 +23,7 @@ public class AddMemberResultTest {
     @Before
     public void setUp() {
         addMemberResultInstantiatedOnConstruction =
-                new AddMemberResult(userWasAdded, userWasRemoved, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result);
+                new AddMemberResult(userWasAdded, userWasRemoved, pathOfAdd, pathOfRemoved, name, uhUuid, uid);
         addMemberResultEmptyOnConstruction = new AddMemberResult();
     }
 
@@ -106,18 +106,5 @@ public class AddMemberResultTest {
         assertNull(addMemberResultEmptyOnConstruction.getUid());
         addMemberResultEmptyOnConstruction.setUid(uid);
         assertEquals(uid, addMemberResultEmptyOnConstruction.getUid());
-    }
-
-    @Test
-    public void getResultTest() {
-        assertNotNull(addMemberResultInstantiatedOnConstruction.getResult());
-        assertEquals(result, addMemberResultInstantiatedOnConstruction.getResult());
-    }
-
-    @Test
-    public void setResultTest() {
-        assertNull(addMemberResultEmptyOnConstruction.getResult());
-        addMemberResultEmptyOnConstruction.setResult(result);
-        assertEquals(result, addMemberResultEmptyOnConstruction.getResult());
     }
 }
