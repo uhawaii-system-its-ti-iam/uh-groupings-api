@@ -10,6 +10,7 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -275,7 +276,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
     }
 
-
     @Ignore
     @Test
     @WithAnonymousUser
@@ -338,7 +338,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].path").value(path))
                 .andExpect(jsonPath("$[0].name").value("grouping"));
     }
-
 
     @Ignore
     @Test
@@ -482,6 +481,40 @@ public class GroupingsRestControllerv2_1Test {
                 .willReturn(gsrList());
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMultipleMembers/" + usersToAdd)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addIncludeMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+                .willReturn(addMemberResults);
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/addIncludeMembers/" + usersToAdd)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addExcludeMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+                .willReturn(addMemberResults);
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/addExcludeMembers/" + usersToAdd)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
@@ -763,7 +796,6 @@ public class GroupingsRestControllerv2_1Test {
 
         assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
     }
-
 
     @Test
     @WithMockUhUser
