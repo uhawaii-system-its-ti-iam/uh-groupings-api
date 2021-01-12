@@ -7,6 +7,7 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
@@ -289,6 +290,17 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")
+    public ResponseEntity<List<AddMemberResult>> addIncludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+        logger.info("Entered REST addIncludeMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
     }
 
     /**

@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -367,6 +368,47 @@ public class MembershipServiceImpl implements MembershipService {
             }
         }
         return memberships;
+    }
+
+    @Override public List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath,
+            List<String> usersToAdd) {
+
+        String parentPath = helperService.parentGroupingPath(groupingPath);
+        if (!memberAttributeService.isOwner(parentPath, ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        String removalPath = parentPath;
+        if (groupingPath.endsWith(INCLUDE)) {
+            removalPath += EXCLUDE;
+        } else if (groupingPath.endsWith(EXCLUDE)) {
+            removalPath += INCLUDE;
+        } else {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        for (String userToAdd : usersToAdd) {
+            boolean wasAdded;
+            boolean wasRemoved;
+            String name;
+            String uhUuid;
+            String uid;
+
+            WsDeleteMemberResults wsDeleteMemberResults =
+                    grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
+            wasRemoved = "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+            WsAddMemberResults wsAddMemberResults =
+                    grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
+
+            wasAdded = "SUCCESS".equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
+            name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
+            uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
+            uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+            addMemberResults
+                    .add(new AddMemberResult(wasAdded, wasRemoved, groupingPath, removalPath, name, uhUuid, uid));
+        }
+        return addMemberResults;
     }
 
     /**

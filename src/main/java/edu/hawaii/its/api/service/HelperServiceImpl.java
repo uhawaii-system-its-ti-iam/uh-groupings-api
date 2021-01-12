@@ -10,7 +10,9 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -323,7 +326,8 @@ public class HelperServiceImpl implements HelperService {
 
     @Override
     public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result", "result");
+        return new GenericServiceResult("result",
+                membershipService.addGroupingMembers(currentUser, path, Collections.singletonList(currentUser)));
     }
 }
 
