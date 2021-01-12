@@ -109,4 +109,13 @@ public class AddMemberResult {
                 ", userIdentifier='" + userIdentifier + '\'' +
                 '}';
     }
+
+    public String[] toCsv() {
+        String[] data = new String[4];
+        data[0] = getUid();
+        data[1] = getUhUuid();
+        data[2] = getName();
+        data[3] = getResult();
+        return data;
+    }
 }

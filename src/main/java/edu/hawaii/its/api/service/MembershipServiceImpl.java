@@ -271,6 +271,7 @@ public class MembershipServiceImpl implements MembershipService {
             }
         }
 
+        /*
         if (usersToAdd.size() > 100) {
             groupingsMailService
                     .setJavaMailSender(javaMailSender)
@@ -282,6 +283,7 @@ public class MembershipServiceImpl implements MembershipService {
                     "",
                     "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", gsrs);
         }
+         */
         return gsrs;
     }
 
@@ -413,6 +415,17 @@ public class MembershipServiceImpl implements MembershipService {
             } catch (GcWebServiceError e) {
                 addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
             }
+        }
+        if (usersToAdd.size() > 100) {
+            groupingsMailService
+                    .setJavaMailSender(javaMailSender)
+                    .setFrom("no-reply@its.hawaii.edu");
+            groupingsMailService.sendCSVMessage(
+                    "no-reply@its.hawaii.edu",
+                    groupingsMailService.getUserEmail(ownerUsername),
+                    "Groupings: Add " + groupingPath,
+                    "",
+                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", addMemberResults);
         }
         return addMemberResults;
     }
