@@ -387,8 +387,6 @@ public class MembershipServiceImpl implements MembershipService {
             removalPath += EXCLUDE;
         } else if (groupingPath.endsWith(EXCLUDE)) {
             removalPath += INCLUDE;
-        } else {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         for (String userToAdd : usersToAdd) {
             boolean wasAdded;
@@ -414,7 +412,6 @@ public class MembershipServiceImpl implements MembershipService {
                                 SUCCESS, userToAdd));
             } catch (GcWebServiceError e) {
                 addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
-
             }
         }
         return addMemberResults;

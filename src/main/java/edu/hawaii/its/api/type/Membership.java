@@ -198,4 +198,21 @@ public class Membership implements Comparable<Membership> {
         return -1;
     }
 
+    @Override public String toString() {
+        return "Membership{" +
+                "identifier='" + identifier + '\'' +
+                ", person=" + person +
+                ", group=" + group +
+                ", path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", isSelfOpted=" + isSelfOpted +
+                ", isOptInEnabled=" + isOptInEnabled +
+                ", isOptOutEnabled=" + isOptOutEnabled +
+                ", inBasis=" + inBasis +
+                ", inInclude=" + inInclude +
+                ", inExclude=" + inExclude +
+                ", inOwner=" + inOwner +
+                ", inBasisAndInclude=" + inBasisAndInclude +
+                '}';
+    }
 }
