@@ -80,12 +80,33 @@ public class AddMemberResult {
         this.uid = uid;
     }
 
-    public String getResult() { return result; }
+    public String getResult() {
+        return result;
+    }
 
-    public void setResult(String result) { this.result = result; }
+    public void setResult(String result) {
+        this.result = result;
+    }
 
-    public void setUserIdentifier(String userIdentifier) { this.userIdentifier = userIdentifier; }
+    public void setUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
+    }
 
-    public String getUserIdentifier() { return userIdentifier; }
+    public String getUserIdentifier() {
+        return userIdentifier;
+    }
 
+    @Override public String toString() {
+        return "AddMemberResult{" +
+                "userWasAdded=" + userWasAdded +
+                ", userWasRemoved=" + userWasRemoved +
+                ", pathOfAdd='" + pathOfAdd + '\'' +
+                ", pathOfRemoved='" + pathOfRemoved + '\'' +
+                ", name='" + name + '\'' +
+                ", uhUuid='" + uhUuid + '\'' +
+                ", uid='" + uid + '\'' +
+                ", result='" + result + '\'' +
+                ", userIdentifier='" + userIdentifier + '\'' +
+                '}';
+    }
 }

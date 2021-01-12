@@ -12,6 +12,7 @@ import edu.hawaii.its.api.util.Dates;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
@@ -370,7 +371,8 @@ public class MembershipServiceImpl implements MembershipService {
         return memberships;
     }
 
-    @Override public List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath,
+    @Override
+    public List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath,
             List<String> usersToAdd) {
 
         String parentPath = helperService.parentGroupingPath(groupingPath);
@@ -400,9 +402,9 @@ public class MembershipServiceImpl implements MembershipService {
                         grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
                 wasRemoved =
                         "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+
                 WsAddMemberResults wsAddMemberResults =
                         grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
-
                 wasAdded = "SUCCESS".equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
                 name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
@@ -411,7 +413,7 @@ public class MembershipServiceImpl implements MembershipService {
                         .add(new AddMemberResult(wasAdded, wasRemoved, groupingPath, removalPath, name, uhUuid, uid,
                                 SUCCESS, userToAdd));
             } catch (GcWebServiceError e) {
-                addMemberResults.add(new AddMemberResult(FAILURE, userToAdd));
+                addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
 
             }
         }
