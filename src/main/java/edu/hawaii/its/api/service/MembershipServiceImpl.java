@@ -412,7 +412,7 @@ public class MembershipServiceImpl implements MembershipService {
                 addMemberResults
                         .add(new AddMemberResult(wasAdded, wasRemoved, groupingPath, removalPath, name, uhUuid, uid,
                                 SUCCESS, userToAdd));
-            } catch (GcWebServiceError e) {
+            } catch (GcWebServiceError | NullPointerException e) {
                 addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
             }
         }

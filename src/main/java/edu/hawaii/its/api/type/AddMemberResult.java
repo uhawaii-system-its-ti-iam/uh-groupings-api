@@ -96,7 +96,8 @@ public class AddMemberResult {
         return userIdentifier;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "AddMemberResult{" +
                 "userWasAdded=" + userWasAdded +
                 ", userWasRemoved=" + userWasRemoved +

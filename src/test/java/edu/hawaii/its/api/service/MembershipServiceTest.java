@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -312,6 +313,32 @@ public class MembershipServiceTest {
 
         listGsr = membershipService.addGroupMember(ownerUsername, groupPath, uuidToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+
+    }
+
+    @Test
+    public void addGroupingMembersTest() {
+        List<AddMemberResult> addMemberResults;
+        List<String> usersToAdd = new ArrayList<>();
+
+        String ownerUsername = users.get(0).getUsername();
+
+        usersToAdd.add(users.get(2).getUsername());
+        usersToAdd.add(users.get(3).getUsername());
+
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToAdd);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+        }
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToAdd);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+        }
+        try {
+            membershipService.addGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
 
     }
 
