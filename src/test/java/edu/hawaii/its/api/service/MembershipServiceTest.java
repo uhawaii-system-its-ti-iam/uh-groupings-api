@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
@@ -81,6 +82,7 @@ public class MembershipServiceTest {
     private static final String GROUPING_3_EXCLUDE_PATH = GROUPING_3_PATH + EXCLUDE;
     private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
 
+    private static final String GROUPING_4_INCLUDE_PATH = GROUPING_4_PATH + INCLUDE;
     private static final String GROUPING_4_EXCLUDE_PATH = GROUPING_4_PATH + EXCLUDE;
 
     private static final String ADMIN_USER = "admin";
@@ -352,6 +354,55 @@ public class MembershipServiceTest {
         } catch (Exception e) {
             assertTrue(e != null);
         }
+
+        // Testing for largest possible group member additions in the testing environment.
+        String manyPath = GROUPING_4_INCLUDE_PATH;
+        List<String> manyUsers = new ArrayList<String>();
+        for(Person user : users){
+            manyUsers.add(user.getUsername());
+        }
+        List<GroupingsServiceResult> manyGsr;
+        manyGsr = membershipService.addGroupMembers(ownerUsername, manyPath, manyUsers);
+
+        // Checks that the desired amount of results are returned.
+        assertTrue(manyGsr.size() == 95);
+
+        // Checks that all results return with success value.
+        for(GroupingsServiceResult result : manyGsr){
+            assertTrue(result.getResultCode().startsWith(SUCCESS));
+        }
+
+        // Testing for proper handling of null parameter values.
+        try{
+            membershipService.addGroupMembers(null, null, null);
+        }catch(Exception e){
+            assertTrue(e.toString().equals("java.lang.NullPointerException"));
+        }
+
+        // Testing for proper handling of invalid grouping path.
+        try{
+            membershipService.addGroupMembers(ownerUsername, "dummyPath", manyUsers);
+        }catch(Exception e){
+            assertTrue(e.toString().equals("edu.hawaii.its.api.type.GroupingsServiceResultException"));
+        }
+
+        // Testing for proper handling of invalid owner username.
+        try{
+            membershipService.addGroupMembers("dummyOwner", manyPath, manyUsers);
+        }catch(Exception e){
+            System.out.println("Exception thrown: " + e);
+            assertTrue(e.toString().equals("org.springframework.security.access.AccessDeniedException: Insufficient Privileges"));
+        }
+
+        // Testing for proper handling of invalid usernames list.
+        List<String> dummyUsers = new ArrayList<String>();
+        for(int i = 0; i <= 10; i++){
+            dummyUsers.add("dummyUser" + i);
+        }
+        // Expecting 0 returned GSRs from invalid usernames.
+        List<GroupingsServiceResult> emptyGsr;
+        emptyGsr = membershipService.addGroupMembers(ownerUsername, manyPath, dummyUsers);
+        assertTrue(emptyGsr.size() == 0);
     }
 
     @Test
