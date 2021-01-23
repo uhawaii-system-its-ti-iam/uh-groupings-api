@@ -118,7 +118,7 @@ public class MembershipServiceTest {
     @Before
     public void setup() {
 
-        // todo not sure if preserving admins/adminGroup/appGroup fuctionality is necessary
+        // todo not sure if preserving admins/adminGroup/appGroup functionality is necessary
         databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
     }
 
