@@ -317,7 +317,7 @@ public class GrouperFactoryServiceTest {
         WsGetAttributeAssignmentsResults results;
 
         String assignType = "placeholder";
-        String attributeDefNameName = "palceholder";
+        String attributeDefNameName = "placeholder";
 
         results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName);
 
@@ -328,7 +328,7 @@ public class GrouperFactoryServiceTest {
         WsGetAttributeAssignmentsResults results;
 
         String assignType = "placeholder";
-        String attributeDefNameName0 = "palceholder";
+        String attributeDefNameName0 = "placeholder";
         String attributeDefNameName1In = OPT_IN;
         String attributeDefNameName1Out = OPT_OUT;
 
@@ -344,7 +344,7 @@ public class GrouperFactoryServiceTest {
         List<WsGetAttributeAssignmentsResults> results;
 
         List<String> ownerGroupNames = new ArrayList<>();
-        String attributeDefNameName0 = "palceholder";
+        String attributeDefNameName0 = "placeholder";
         String attributeDefNameName1In = OPT_IN;
         String attributeDefNameName1Out = OPT_OUT;
 
