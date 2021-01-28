@@ -320,7 +320,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
         logger.info("Entered REST removeIncludeMembers...");
-        path = path + EXCLUDE;
+        path = path + INCLUDE;
         return ResponseEntity
                 .ok()
                 .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
