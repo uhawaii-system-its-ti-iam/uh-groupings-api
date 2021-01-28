@@ -4,6 +4,7 @@ import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
@@ -16,6 +17,8 @@ public interface MembershipService {
     List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+
+    List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 

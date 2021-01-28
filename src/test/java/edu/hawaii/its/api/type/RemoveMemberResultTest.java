@@ -3,9 +3,6 @@ package edu.hawaii.its.api.type;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -44,6 +41,7 @@ public class RemoveMemberResultTest {
         assertNull(removeMemberResult.getUhUuid());
         assertFalse(removeMemberResult.isUserWasRemoved());
     }
+
     @Test
     public void isUserWasRemoveedTest() {
         assertTrue(removeMemberResultInstantiatedOnConstruction.isUserWasRemoved());
