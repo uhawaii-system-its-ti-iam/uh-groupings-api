@@ -445,6 +445,7 @@ public class MembershipServiceImpl implements MembershipService {
             String name;
             String uhUuid;
             String uid;
+            String result;
             try {
                 WsDeleteMemberResults wsDeleteMemberResults =
                         grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
@@ -452,9 +453,9 @@ public class MembershipServiceImpl implements MembershipService {
                 name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsDeleteMemberResults.getResults()[0].getWsSubject().getId();
                 uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+                result = wasRemoved ? SUCCESS : FAILURE;
                 removeMemberResults
-                        .add(new RemoveMemberResult(wasRemoved, groupPath, name, uhUuid, uid, SUCCESS, userToRemove));
-
+                        .add(new RemoveMemberResult(wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove));
             } catch (GcWebServiceError | NullPointerException e) {
                 removeMemberResults.add(new RemoveMemberResult(userToRemove, FAILURE));
             }
