@@ -315,7 +315,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
     }
 
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/RemoveIncludeMembers/{usersToRemove}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
@@ -323,10 +323,10 @@ public class GroupingsRestControllerv2_1 {
         path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMembers(currentUser, path, usersToRemove));
+                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
     }
 
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/RemoveExcludeMembers/{usersToRemove}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
@@ -334,9 +334,8 @@ public class GroupingsRestControllerv2_1 {
         path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMembers(currentUser, path, usersToRemove));
+                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
     }
-
 
     /**
      * Add user with uid as a new exclude member to grouping at path.

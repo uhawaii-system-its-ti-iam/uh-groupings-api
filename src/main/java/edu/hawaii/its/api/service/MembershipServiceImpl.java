@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.util.Dates;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -428,6 +429,38 @@ public class MembershipServiceImpl implements MembershipService {
                     "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", addMemberResults);
         }
         return addMemberResults;
+    }
+
+    @Override public List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath,
+            List<String> usersToRemove) {
+        String parentPath = helperService.parentGroupingPath(groupPath);
+        if (!memberAttributeService.isOwner(parentPath, ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
+        for (String userToRemove : usersToRemove) {
+            boolean wasRemoved;
+            String name;
+            String uhUuid;
+            String uid;
+            try {
+                WsDeleteMemberResults wsDeleteMemberResults =
+                        grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
+                wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
+                uhUuid = wsDeleteMemberResults.getResults()[0].getWsSubject().getId();
+                uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+                removeMemberResults
+                        .add(new RemoveMemberResult(wasRemoved, groupPath, name, uhUuid, uid, SUCCESS, userToRemove));
+
+            } catch (GcWebServiceError | NullPointerException e) {
+                removeMemberResults.add(new RemoveMemberResult(userToRemove, FAILURE));
+            }
+        }
+
+        return removeMemberResults;
     }
 
     /**
