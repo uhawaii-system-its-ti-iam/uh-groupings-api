@@ -14,6 +14,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -313,6 +314,29 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
     }
+
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/RemoveIncludeMembers/{usersToRemove}")
+    public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
+        logger.info("Entered REST removeIncludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToRemove));
+    }
+
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/RemoveExcludeMembers/{usersToRemove}")
+    public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
+        logger.info("Entered REST removeExcludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToRemove));
+    }
+
 
     /**
      * Add user with uid as a new exclude member to grouping at path.
