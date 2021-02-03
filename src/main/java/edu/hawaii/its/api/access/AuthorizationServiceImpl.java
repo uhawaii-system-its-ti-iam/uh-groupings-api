@@ -49,17 +49,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
      * @return true if the person has groupings that they own, otherwise false.
      */
     public boolean isOwner(String username) {
-        try {
-            if (!memberAttributeService.isOwner(username)) {
-                logger.info("This person is an owner");
-                return true;
-            } else {
-                logger.info("This person is not an owner");
-            }
-        } catch (Exception e) {
-            logger.info("The grouping for this person is " + e.getMessage());
-        }
-        return false;
+        logger.info("isOwner; username: " + username + ";");
+        return memberAttributeService.isOwner(username);
     }
 
     /**
