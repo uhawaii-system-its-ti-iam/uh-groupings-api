@@ -804,11 +804,14 @@ public class MembershipServiceImpl implements MembershipService {
         try {
             inOwner = futures.get(0).get();
             isSuper = futures.get(1).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException ie) {
+            logger.info("Thread Interrupted: " + ie);
+        } catch(ExecutionException e) {
             logger.info("Thread Interrupted: " + e);
+            throw new GcWebServiceError("Error 404 Not Found");
+        } finally {
+            executor.shutdown();
         }
-
-        executor.shutdown();
 
         if (inOwner || isSuper || (personToAdd.getUsername() != null && personToAdd
                 .getUsername().equals(username))) {
@@ -980,10 +983,14 @@ public class MembershipServiceImpl implements MembershipService {
             inOwner = futures.get(0).get();
             isSuper = futures.get(1).get();
             isMember = futures.get(2).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException ie) {
+            logger.info("Thread Interrupted: " + ie);
+        } catch(ExecutionException e) {
             logger.info("Thread Interrupted: " + e);
+            throw new GcWebServiceError("Error 404 Not Found");
+        } finally {
+            executor.shutdown();
         }
-        executor.shutdown();
 
         if (inOwner || isSuper || username.equals(personToDelete.getUsername())) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(username);
