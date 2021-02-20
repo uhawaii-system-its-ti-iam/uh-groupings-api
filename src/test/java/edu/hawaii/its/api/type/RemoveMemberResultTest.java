@@ -24,7 +24,7 @@ public class RemoveMemberResultTest {
     @Before
     public void setUp() {
         removeMemberResultInstantiatedOnConstruction =
-                new RemoveMemberResult(userWasRemoved, pathOfRemoved, name, uhUuid, uid, result, userIdentifier);
+                new RemoveMemberResult(true, pathOfRemoved, name, uhUuid, uid, result, userIdentifier);
         removeMemberResultEmptyOnConstruction = new RemoveMemberResult();
     }
 
