@@ -3,7 +3,6 @@ package edu.hawaii.its.api.type;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,8 +15,6 @@ import static org.junit.Assert.assertFalse;
 public class AddMemberResultTest {
     private AddMemberResult addMemberResultInstantiatedOnConstruction;
     private AddMemberResult addMemberResultEmptyOnConstruction;
-    boolean userWasAdded = true;
-    boolean userWasRemoved = true;
     private final String pathOfAdd = "pathOfAdd";
     private final String pathOfRemoved = "pathOfRemoved";
     private final String name = "name";
@@ -29,7 +26,7 @@ public class AddMemberResultTest {
     @Before
     public void setUp() {
         addMemberResultInstantiatedOnConstruction =
-                new AddMemberResult(userWasAdded, userWasRemoved, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
+                new AddMemberResult(true, true, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
                         userIdentifier);
         addMemberResultEmptyOnConstruction = new AddMemberResult();
     }

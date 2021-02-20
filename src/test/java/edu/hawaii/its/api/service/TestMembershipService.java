@@ -6,13 +6,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -39,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
