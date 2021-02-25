@@ -13,7 +13,6 @@ public class RemoveMemberResultTest {
     private RemoveMemberResult removeMemberResultInstantiatedOnConstruction;
     private RemoveMemberResult removeMemberResultEmptyOnConstruction;
 
-    boolean userWasRemoved = true;
     private final String pathOfRemoved = "pathOfRemoved";
     private final String name = "name";
     private final String uhUuid = " uhUuid";

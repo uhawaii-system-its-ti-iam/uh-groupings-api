@@ -342,7 +342,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void RemoveGroupingMembersTest() {
+    public void removeGroupingMembersTest() {
         List<RemoveMemberResult> removeMemberResults;
         List<String> usersToRemove = new ArrayList<>();
 
