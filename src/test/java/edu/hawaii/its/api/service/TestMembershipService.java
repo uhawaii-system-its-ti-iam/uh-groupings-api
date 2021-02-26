@@ -5,7 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -31,7 +31,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -158,7 +161,6 @@ public class TestMembershipService {
     public void getMembershipResultsTest() {
         String ownerUsername = ADMIN;
         String uid = username[4];
-
         List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
         assertTrue(result.size() > 0);
     }
@@ -818,6 +820,68 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isOwner(GROUPING, username[2]));
 
         membershipService.deleteGroupMember(ownerUsername, GROUPING_OWNERS, username[2]);
+    }
+
+    @Test
+    public void addGroupingMembersTest() {
+        String ownerUsername = username[0];
+        List<AddMemberResult> addMemberResults;
+
+        // Add valid users to include.
+        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(SUCCESS, addMemberResult.getResult());
+            assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
+            assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfRemoved());
+            assertNotNull(addMemberResult.getUid());
+            assertNotNull(addMemberResult.getUhUuid());
+            assertNotNull(addMemberResult.getName());
+        }
+
+        // Add invalid users to include.
+        List<String> invalidUsernames = new ArrayList<>();
+        invalidUsernames.add("zzzzz");
+        invalidUsernames.add("ffff");
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+            assertNull(addMemberResult.getName());
+            assertNull(addMemberResult.getUid());
+            assertNull(addMemberResult.getUhUuid());
+        }
+
+        // Add valid users to exclude.
+        validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, validUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(SUCCESS, addMemberResult.getResult());
+            assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
+            assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
+            assertNotNull(addMemberResult.getUid());
+            assertNotNull(addMemberResult.getUhUuid());
+            assertNotNull(addMemberResult.getName());
+        }
+
+        // Add invalid users to include.
+        List<String> invalidUsernamesForExclude = new ArrayList<>();
+        invalidUsernamesForExclude.add("zzzzz");
+        invalidUsernamesForExclude.add("ffff");
+        addMemberResults =
+                membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+            assertNull(addMemberResult.getName());
+            assertNull(addMemberResult.getUid());
+            assertNull(addMemberResult.getUhUuid());
+        }
+
+        // A non-owner attempts to add members.
+        try {
+            membershipService.addGroupingMembers("zzzz", GROUPING_INCLUDE, validUsernames);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
     }
 
     @Test

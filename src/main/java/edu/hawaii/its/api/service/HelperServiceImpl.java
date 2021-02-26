@@ -13,7 +13,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -323,7 +323,8 @@ public class HelperServiceImpl implements HelperService {
 
     @Override
     public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result", "result");
+        return new GenericServiceResult("result",
+                membershipService.addGroupingMembers(currentUser, path, Collections.singletonList(currentUser)));
     }
 }
 
