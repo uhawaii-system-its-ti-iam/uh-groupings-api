@@ -7,12 +7,14 @@ import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -289,6 +291,50 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.addGroupMembers(currentUser, path, uids));
+    }
+
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")
+    public ResponseEntity<List<AddMemberResult>> addIncludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+        logger.info("Entered REST addIncludeMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
+    }
+
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")
+    public ResponseEntity<List<AddMemberResult>> addExcludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+        logger.info("Entered REST addExcludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
+    }
+
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")
+    public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
+        logger.info("Entered REST removeIncludeMembers...");
+        path = path + INCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
+    }
+
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
+    public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
+            @RequestHeader("current_user") String currentUser, @PathVariable String path,
+            @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
+        logger.info("Entered REST removeExcludeMembers...");
+        path = path + EXCLUDE;
+        return ResponseEntity
+                .ok()
+                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
     }
 
     /**

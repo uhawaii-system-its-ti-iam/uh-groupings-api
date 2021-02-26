@@ -8,13 +8,14 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.type.GenericServiceResult;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -315,6 +317,58 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void addGroupingMembersTest() {
+        List<AddMemberResult> addMemberResults;
+        List<String> usersToAdd = new ArrayList<>();
+
+        String ownerUsername = users.get(0).getUsername();
+
+        usersToAdd.add(users.get(2).getUsername());
+        usersToAdd.add(users.get(3).getUsername());
+
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToAdd);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+        }
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToAdd);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(FAILURE, addMemberResult.getResult());
+        }
+        try {
+            membershipService.addGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void removeGroupingMembersTest() {
+        List<RemoveMemberResult> removeMemberResults;
+        List<String> usersToRemove = new ArrayList<>();
+
+        String ownerUsername = users.get(0).getUsername();
+
+        usersToRemove.add(users.get(2).getUsername());
+        usersToRemove.add(users.get(3).getUsername());
+
+        removeMemberResults =
+                membershipService.removeGroupingMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToRemove);
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertEquals(FAILURE, removeMemberResult.getResult());
+        }
+        removeMemberResults =
+                membershipService.removeGroupingMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToRemove);
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertEquals(FAILURE, removeMemberResult.getResult());
+        }
+        try {
+            membershipService.removeGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
     public void addGroupMembersTest() throws IOException, MessagingException {
 
         List<GroupingsServiceResult> listGsr;
@@ -357,7 +411,7 @@ public class MembershipServiceTest {
         // Testing for largest possible group member additions in the testing environment.
         String manyPath = GROUPING_4_INCLUDE_PATH;
         List<String> manyUsers = new ArrayList<String>();
-        for(Person user : users){
+        for (Person user : users) {
             manyUsers.add(user.getUsername());
         }
         List<GroupingsServiceResult> manyGsr;
@@ -367,35 +421,36 @@ public class MembershipServiceTest {
         assertTrue(manyGsr.size() == 95);
 
         // Checks that all results return with success value.
-        for(GroupingsServiceResult result : manyGsr){
+        for (GroupingsServiceResult result : manyGsr) {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
         }
 
         // Testing for proper handling of null parameter values.
-        try{
+        try {
             membershipService.addGroupMembers(null, null, null);
-        }catch(Exception e){
+        } catch (Exception e) {
             assertTrue(e.toString().equals("java.lang.NullPointerException"));
         }
 
         // Testing for proper handling of invalid grouping path.
-        try{
+        try {
             membershipService.addGroupMembers(ownerUsername, "dummyPath", manyUsers);
-        }catch(Exception e){
+        } catch (Exception e) {
             assertTrue(e.toString().equals("edu.hawaii.its.api.type.GroupingsServiceResultException"));
         }
 
         // Testing for proper handling of invalid owner username.
-        try{
+        try {
             membershipService.addGroupMembers("dummyOwner", manyPath, manyUsers);
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Exception thrown: " + e);
-            assertTrue(e.toString().equals("org.springframework.security.access.AccessDeniedException: Insufficient Privileges"));
+            assertTrue(e.toString()
+                    .equals("org.springframework.security.access.AccessDeniedException: Insufficient Privileges"));
         }
 
         // Testing for proper handling of invalid usernames list.
         List<String> dummyUsers = new ArrayList<String>();
-        for(int i = 0; i <= 10; i++){
+        for (int i = 0; i <= 10; i++) {
             dummyUsers.add("dummyUser" + i);
         }
         // Expecting 0 returned GSRs from invalid usernames.

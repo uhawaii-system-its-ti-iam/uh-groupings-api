@@ -1,8 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
@@ -10,9 +12,13 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 
-public interface MembershipService{
+public interface MembershipService {
 
     List<Membership> getMembershipResults(String owner, String uid);
+
+    List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+
+    List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
 
     List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
