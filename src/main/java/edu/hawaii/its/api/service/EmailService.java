@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Map;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Service
 public class EmailService {
@@ -37,11 +38,20 @@ public class EmailService {
 
     public void sendWithStack(Exception e, String exceptionType) {
         logger.info("Feedback Error email has been triggered.");
+
+        InetAddress ip;
+        String hostname = "Unknown Host";
+
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         String exceptionAsString = sw.toString();
-        String systemUsername = System.getenv("USERNAME");
-        String systemOS = System.getenv("DESKTOP_SESSION");
+
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+        } catch (UnknownHostException f) {
+            f.printStackTrace();
+        }
 
         if (isEnabled) {
             SimpleMailMessage msg = new SimpleMailMessage();
@@ -51,8 +61,7 @@ public class EmailService {
             String header = "UH Groupings API Error Response";
             text += "Cause of Response: The API threw an exception that has triggered the ErrorControllerAdvice. \n\n";
             text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
-            text += "User Name: " + systemUsername + ".\n";
-            text += "OS: " + systemOS + ".\n";
+            text += "Host Name: " + hostname + ".\n";
             text += "----------------------------------------------------" + "\n\n";
             text += "API Stack Trace: \n\n" + exceptionAsString;
             msg.setText(text);
