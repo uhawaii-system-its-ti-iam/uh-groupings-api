@@ -292,44 +292,29 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      *
      */
     public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
+
+        if (!isAdmin(ownerUsername) && !isOwner(ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
         String[] attributeValues = new String[5];
         Map<String, String> mapping = new HashMap<>();
-
-        // Checks to make sure the user requesting information of another is a superuser or the owner of the group.
-        if (isAdmin(ownerUsername) || groupingAssignmentService.groupingsOwned(
-                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-            try {
-
-                // Makes a call to GrouperClient and creates a WebService Subject Lookup of specified user.
-                lookup = grouperFS.makeWsSubjectLookup(username);
-
-                /*
-                 * Using the WebService Subject Lookup it gets the gets the WebService Subject Results.
-                 * The results returns information about the user including the user's attributes.
-                 * In the results are the attributes and attribute names.
-                 */
-                results = grouperFS.makeWsGetSubjectsResults(lookup);
-
-                // Maps the attribute to the attribute name.
-                for (int i = 0; i < attributeValues.length; i++) {
-                    mapping.put(results.getSubjectAttributeNames()[i],
-                            results.getWsSubjects()[0].getAttributeValues()[i]);
-                }
-                return mapping;
-
-            } catch (NullPointerException npe) {
-                throw new GcWebServiceError("Error 404 Not Found");
+        try {
+            lookup = grouperFS.makeWsSubjectLookup(username);
+            results = grouperFS.makeWsGetSubjectsResults(lookup);
+            // Maps the attribute to the attribute name.
+            for (int i = 0; i < attributeValues.length; i++) {
+                mapping.put(results.getSubjectAttributeNames()[i],
+                        results.getWsSubjects()[0].getAttributeValues()[i]);
             }
-        } else {
+        } catch (NullPointerException npe) {
             String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
             for (int i = 0; i < attributeValues.length; i++) {
-                mapping.put(subjectAttributeNames[i], "");
+                mapping.put(subjectAttributeNames[i], null);
             }
-            return mapping;
         }
-
+        return mapping;
     }
 
     // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
