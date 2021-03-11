@@ -282,35 +282,28 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
-    /*
-     * Covered by Integration Tests
-     *
-     * Returns a user's attributes (FirstName(givenName), LastName(sn), Composite Name(cn), Username(uid), UH User ID(uhUuid)) based on the username.
-     * If the requester of the information is not a superuser or owner, then the function returns a mapping with empty values.
-     *
-     * Not testable with Unit test as needs to connect to Grouper database to work, not mock db.
-     *
+    /**
+     * Get a mapping of all user attributes pertaining to the uid or uhUuid passed through userIdentifier.
      */
-    public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
+    public Map<String, String> getUserAttributes(String currentUser, String userIdentifier) {
 
-        if (!isAdmin(ownerUsername) && !isOwner(ownerUsername)) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
-        String[] attributeValues = new String[5];
+        int numberOfAttributes = 5;
         Map<String, String> mapping = new HashMap<>();
         try {
-            lookup = grouperFS.makeWsSubjectLookup(username);
+            lookup = grouperFS.makeWsSubjectLookup(userIdentifier);
             results = grouperFS.makeWsGetSubjectsResults(lookup);
-            // Maps the attribute to the attribute name.
-            for (int i = 0; i < attributeValues.length; i++) {
+            for (int i = 0; i < numberOfAttributes; i++) {
                 mapping.put(results.getSubjectAttributeNames()[i],
                         results.getWsSubjects()[0].getAttributeValues()[i]);
             }
         } catch (NullPointerException npe) {
             String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (int i = 0; i < attributeValues.length; i++) {
+            for (int i = 0; i < numberOfAttributes; i++) {
                 mapping.put(subjectAttributeNames[i], null);
             }
         }
