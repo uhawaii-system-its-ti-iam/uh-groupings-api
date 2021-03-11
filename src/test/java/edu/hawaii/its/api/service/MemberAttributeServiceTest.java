@@ -342,11 +342,11 @@ public class MemberAttributeServiceTest {
 
         Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, username);
 
-        assertThat(attributes.get(UID), equalTo(personFive.getUsername()));
-        assertThat(attributes.get(COMPOSITE_NAME), equalTo(personFive.getName()));
-        assertThat(attributes.get(UHUUID), equalTo(personFive.getUhUuid()));
-        assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
-        assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
+        assertEquals(personFive.getUsername(), attributes.get(UID));
+        assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
+        assertEquals(personFive.getUhUuid(), attributes.get(UHUUID));
+        assertEquals(personFive.getFirstName(), attributes.get(FIRST_NAME));
+        assertEquals(personFive.getLastName(), attributes.get(LAST_NAME));
 
         String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, username, 0);
         assertThat(attribute, equalTo(personFive.getUsername()));
