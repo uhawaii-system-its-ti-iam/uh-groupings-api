@@ -408,9 +408,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
         logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
                 + ";");
-        if (!isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
         try {
             return groupingAssignmentService.adminLists(usernameInQuestion).getAdminGroup().getMembers().size() > 0;
         } catch (AccessDeniedException | GcWebServiceError e) {
