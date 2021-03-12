@@ -330,17 +330,15 @@ public class MemberAttributeServiceTest {
     @Test
     public void isAppTest() {
         assertFalse(memberAttributeService.isApp(users.get(2).getUsername()));
-
         assertTrue(memberAttributeService.isApp(APP_USER));
     }
 
     @Test
     public void getUserAttributesTest() {
 
-        String username = users.get(5).getUsername();
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
 
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, username);
+        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, personFive.getUsername());
 
         assertEquals(personFive.getUsername(), attributes.get(UID));
         assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
@@ -348,18 +346,18 @@ public class MemberAttributeServiceTest {
         assertEquals(personFive.getFirstName(), attributes.get(FIRST_NAME));
         assertEquals(personFive.getLastName(), attributes.get(LAST_NAME));
 
-        String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, username, 0);
+        String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, personFive.getUsername(), 0);
         assertThat(attribute, equalTo(personFive.getUsername()));
 
-        // Test with user that owns no groupings
+        // Bogus admin throws an Access Denied Exception.
         try {
-            memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
+            memberAttributeService.getUserAttributes("bogus admin", personFive.getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
-        // Bogus user should return a map filled with null values.
-        Map<String, String> bogusUser = memberAttributeService.getUserAttributes(ADMIN_USER, "zzz");
+        // Bogus user returns a map filled with null values.
+        Map<String, String> bogusUser = memberAttributeService.getUserAttributes(ADMIN_USER, "bogus user");
         assertTrue(bogusUser.values().stream().allMatch(Objects::isNull));
 
     }
