@@ -191,7 +191,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getUserAttributes(currentUser, uid));
+                .body(memberAttributeService.getMemberAttributes(currentUser, uid));
     }
 
     /**
