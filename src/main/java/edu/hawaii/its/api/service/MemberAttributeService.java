@@ -4,7 +4,6 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
 import java.util.List;
