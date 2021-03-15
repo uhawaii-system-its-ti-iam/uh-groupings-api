@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -13,12 +14,14 @@ import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -160,6 +163,9 @@ public class HelperServiceImpl implements HelperService {
     private GrouperFactoryService grouperFS;
     @Autowired
     private MembershipService membershipService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
@@ -322,9 +328,11 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override
-    public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result",
-                membershipService.addGroupingMembers(currentUser, path, Collections.singletonList(currentUser)));
+    public GenericServiceResult swaggerToString(String currentUser, String path) throws IOException {
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(currentUser);
+        WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
+
+        return new GenericServiceResult("result", results);
     }
 }
 

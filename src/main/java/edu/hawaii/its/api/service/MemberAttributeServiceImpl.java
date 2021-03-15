@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.MemberAttributesResult;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
@@ -283,7 +284,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a mapping of all user attributes pertaining to the uid or uhUuid passed through userIdentifier.
+     * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
+     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier will return a mapping with null values.
      */
     public Map<String, String> getUserAttributes(String currentUser, String userIdentifier) {
 
@@ -302,10 +304,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                         results.getWsSubjects()[0].getAttributeValues()[i]);
             }
         } catch (NullPointerException npe) {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (int i = 0; i < numberOfAttributes; i++) {
-                mapping.put(subjectAttributeNames[i], null);
-            }
+            return null;
         }
         return mapping;
     }

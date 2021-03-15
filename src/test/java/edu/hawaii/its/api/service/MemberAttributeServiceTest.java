@@ -337,7 +337,6 @@ public class MemberAttributeServiceTest {
     public void getUserAttributesTest() {
 
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
-
         Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, personFive.getUsername());
 
         assertEquals(personFive.getUsername(), attributes.get(UID));

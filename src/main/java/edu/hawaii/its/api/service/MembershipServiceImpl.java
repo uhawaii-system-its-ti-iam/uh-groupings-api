@@ -331,8 +331,14 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info(action);
 
         List<Membership> memberships = new ArrayList<>();
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
-        List<String> optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        List<String> groupPaths;
+        List<String> optOutList;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        } catch (GcWebServiceError e) {
+            return null;
+        }
 
         for (String groupPath : groupPaths) {
             boolean hasMembership = false;
