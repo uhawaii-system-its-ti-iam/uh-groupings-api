@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -14,10 +17,6 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +28,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
