@@ -589,6 +589,7 @@ public class MembershipServiceTest {
         assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
 
         // opt out Permission for exclude group true.
+
         optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
         assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
