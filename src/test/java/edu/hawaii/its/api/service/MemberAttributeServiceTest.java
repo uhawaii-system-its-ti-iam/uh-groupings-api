@@ -29,7 +29,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,6 +37,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
@@ -335,7 +335,8 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributesTest() {
 
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
+        Map<String, String> attributes =
+                memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
 
         assertEquals(personFive.getUsername(), attributes.get(UID));
         assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
@@ -355,7 +356,7 @@ public class MemberAttributeServiceTest {
 
         // Bogus user returns a map filled with null values.
         Map<String, String> bogusUser = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogus user");
-        assertTrue(bogusUser.values().stream().allMatch(Objects::isNull));
+        assertNull(bogusUser);
 
     }
 
