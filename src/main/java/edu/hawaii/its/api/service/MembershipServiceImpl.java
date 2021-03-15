@@ -868,10 +868,10 @@ public class MembershipServiceImpl implements MembershipService {
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUsername()));
                     } else {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
@@ -899,10 +899,10 @@ public class MembershipServiceImpl implements MembershipService {
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUsername()));
                     } else {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));

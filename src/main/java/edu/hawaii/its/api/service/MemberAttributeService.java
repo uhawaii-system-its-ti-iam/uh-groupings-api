@@ -33,7 +33,7 @@ public interface MemberAttributeService extends BatchIsMember {
 
     WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    Map<String, String> getUserAttributes(String ownerUsername, String uid);
+    Map<String, String> getMemberAttributes(String ownerUsername, String uid);
 
     boolean isUhUuid(String naming);
 

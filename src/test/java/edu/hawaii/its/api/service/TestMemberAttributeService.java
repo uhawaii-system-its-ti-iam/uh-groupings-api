@@ -189,7 +189,7 @@ public class TestMemberAttributeService {
 
         try {
             assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
-        } catch (AccessDeniedException |GcWebServiceError e) {
+        } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
     }
@@ -217,7 +217,7 @@ public class TestMemberAttributeService {
 
         try {
             assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
-        } catch (AccessDeniedException |GcWebServiceError e) {
+        } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
     }
@@ -502,7 +502,7 @@ public class TestMemberAttributeService {
         // Base test
         String useruid = usernames[1];
 
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, useruid);
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
@@ -510,7 +510,7 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uhUuid").equals("iamtst02"));
 
         //todo Owner test
-        attributes = memberAttributeService.getUserAttributes("iamtst01", useruid);
+        attributes = memberAttributeService.getMemberAttributes("iamtst01", useruid);
         assertTrue(attributes.get("uid").equals("iamtst02"));
         assertTrue(attributes.get("cn").equals("tst02name"));
         assertTrue(attributes.get("sn").equals("tst02name"));
@@ -518,7 +518,7 @@ public class TestMemberAttributeService {
         assertTrue(attributes.get("uhUuid").equals("iamtst02"));
 
         //todo Not an owner test
-        attributes = memberAttributeService.getUserAttributes("iamtst03", useruid);
+        attributes = memberAttributeService.getMemberAttributes("iamtst03", useruid);
         assertTrue(attributes.get("uid").equals(""));
         assertTrue(attributes.get("cn").equals(""));
         assertTrue(attributes.get("sn").equals(""));
@@ -527,7 +527,7 @@ public class TestMemberAttributeService {
 
         // Test with invalid username
         try {
-            memberAttributeService.getUserAttributes(ADMIN_USER, "notarealperson");
+            memberAttributeService.getMemberAttributes(ADMIN_USER, "notarealperson");
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();
@@ -535,7 +535,7 @@ public class TestMemberAttributeService {
 
         // Test with null field
         try {
-            memberAttributeService.getUserAttributes(ADMIN_USER, null);
+            memberAttributeService.getMemberAttributes(ADMIN_USER, null);
             fail("Shouldn't be here.");
         } catch (GcWebServiceError gce) {
             gce.printStackTrace();

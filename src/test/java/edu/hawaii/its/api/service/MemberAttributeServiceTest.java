@@ -334,10 +334,10 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getUserAttributesTest() {
+    public void getMemberAttributesTest() {
 
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, personFive.getUsername());
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
 
         assertEquals(personFive.getUsername(), attributes.get(UID));
         assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
@@ -350,13 +350,13 @@ public class MemberAttributeServiceTest {
 
         // Bogus admin throws an Access Denied Exception.
         try {
-            memberAttributeService.getUserAttributes("bogus admin", personFive.getUsername());
+            memberAttributeService.getMemberAttributes("bogus admin", personFive.getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         // Bogus user returns a map filled with null values.
-        Map<String, String> bogusUser = memberAttributeService.getUserAttributes(ADMIN_USER, "bogus user");
+        Map<String, String> bogusUser = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogus user");
         assertTrue(bogusUser.values().stream().allMatch(Objects::isNull));
 
     }

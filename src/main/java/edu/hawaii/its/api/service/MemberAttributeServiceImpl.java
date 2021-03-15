@@ -287,7 +287,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
      * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier will return a mapping with null values.
      */
-    public Map<String, String> getUserAttributes(String currentUser, String userIdentifier) {
+    public Map<String, String> getMemberAttributes(String currentUser, String userIdentifier) {
 
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
