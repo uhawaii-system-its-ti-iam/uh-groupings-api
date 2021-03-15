@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface HelperService {
@@ -34,5 +35,5 @@ public interface HelperService {
 
     String nameGroupingPath(String group);
 
-    GenericServiceResult swaggerToString(String currentUser, String path);
+    GenericServiceResult swaggerToString(String currentUser, String path) throws IOException;
 }
