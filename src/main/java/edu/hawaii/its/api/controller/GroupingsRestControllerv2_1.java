@@ -110,7 +110,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/swagger/toString/{path}")
     @ResponseBody
     public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser,
-            String path) {
+            String path) throws IOException {
         logger.info("Entered REST swaggerToString");
         return ResponseEntity
                 .ok()
@@ -191,7 +191,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getUserAttributes(currentUser, uid));
+                .body(memberAttributeService.getMemberAttributes(currentUser, uid));
     }
 
     /**

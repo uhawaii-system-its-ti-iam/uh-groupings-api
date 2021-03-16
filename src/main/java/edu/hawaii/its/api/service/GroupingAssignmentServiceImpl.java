@@ -545,7 +545,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             );
 
             WsGetGroupsResult groupResults = wsGetGroupsResults.getResults()[0];
-
             List<WsGroup> groups = new ArrayList<>();
 
             if (groupResults.getWsGroups() != null) {

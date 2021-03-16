@@ -19,9 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -158,8 +158,6 @@ public class HelperServiceImpl implements HelperService {
 
     @Autowired
     private GrouperFactoryService grouperFS;
-    @Autowired
-    private MembershipService membershipService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
@@ -322,9 +320,8 @@ public class HelperServiceImpl implements HelperService {
     }
 
     @Override
-    public GenericServiceResult swaggerToString(String currentUser, String path) {
-        return new GenericServiceResult("result",
-                membershipService.addGroupingMembers(currentUser, path, Collections.singletonList(currentUser)));
+    public GenericServiceResult swaggerToString(String currentUser, String path) throws IOException {
+        return new GenericServiceResult("result", "result");
     }
 }
 

@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.repository.PersonRepository;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -16,9 +17,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -282,54 +280,33 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return wsAttributes != null ? wsAttributes : grouperFS.makeEmptyWsAttributeAssignArray();
     }
 
-    /*
-     * Covered by Integration Tests
-     *
-     * Returns a user's attributes (FirstName(givenName), LastName(sn), Composite Name(cn), Username(uid), UH User ID(uhUuid)) based on the username.
-     * If the requester of the information is not a superuser or owner, then the function returns a mapping with empty values.
-     *
-     * Not testable with Unit test as needs to connect to Grouper database to work, not mock db.
-     *
+    /**
+     * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
+     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier will return a mapping with null values.
      */
-    public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
+    public Map<String, String> getMemberAttributes(String currentUser, String userIdentifier) {
+
+        Map<String, String> mapping = new HashMap<>();
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
+            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+            for (String subjectAttributeName : subjectAttributeNames) {
+                mapping.put(subjectAttributeName, null);
+            }
+        }
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
-        String[] attributeValues = new String[5];
-        Map<String, String> mapping = new HashMap<>();
-
-        // Checks to make sure the user requesting information of another is a superuser or the owner of the group.
-        if (isAdmin(ownerUsername) || groupingAssignmentService.groupingsOwned(
-                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-            try {
-
-                // Makes a call to GrouperClient and creates a WebService Subject Lookup of specified user.
-                lookup = grouperFS.makeWsSubjectLookup(username);
-
-                /*
-                 * Using the WebService Subject Lookup it gets the gets the WebService Subject Results.
-                 * The results returns information about the user including the user's attributes.
-                 * In the results are the attributes and attribute names.
-                 */
-                results = grouperFS.makeWsGetSubjectsResults(lookup);
-
-                // Maps the attribute to the attribute name.
-                for (int i = 0; i < attributeValues.length; i++) {
-                    mapping.put(results.getSubjectAttributeNames()[i],
-                            results.getWsSubjects()[0].getAttributeValues()[i]);
-                }
-                return mapping;
-
-            } catch (NullPointerException npe) {
-                throw new GcWebServiceError("Error 404 Not Found");
+        int numberOfAttributes = 5;
+        try {
+            lookup = grouperFS.makeWsSubjectLookup(userIdentifier);
+            results = grouperFS.makeWsGetSubjectsResults(lookup);
+            for (int i = 0; i < numberOfAttributes; i++) {
+                mapping.put(results.getSubjectAttributeNames()[i],
+                        results.getWsSubjects()[0].getAttributeValues()[i]);
             }
-        } else {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (int i = 0; i < attributeValues.length; i++) {
-                mapping.put(subjectAttributeNames[i], "");
-            }
-            return mapping;
+        } catch (NullPointerException npe) {
+            return null;
         }
-
+        return mapping;
     }
 
     // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
