@@ -331,8 +331,14 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info(action);
 
         List<Membership> memberships = new ArrayList<>();
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
-        List<String> optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        List<String> groupPaths;
+        List<String> optOutList;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        } catch (GcWebServiceError e) {
+            return null;
+        }
 
         for (String groupPath : groupPaths) {
             boolean hasMembership = false;
@@ -862,10 +868,10 @@ public class MembershipServiceImpl implements MembershipService {
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUsername()));
                     } else {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));
@@ -893,10 +899,10 @@ public class MembershipServiceImpl implements MembershipService {
                     // Set person's attributes whether it's with username or Uuid.
                     if (personToAdd.getUsername() != null) {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUsername()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUsername()));
                     } else {
                         personToAdd.setAttributes(
-                                memberAttributeService.getUserAttributes(username, personToAdd.getUhUuid()));
+                                memberAttributeService.getMemberAttributes(username, personToAdd.getUhUuid()));
                     }
 
                     gsrList.add(helperService.makeGroupingsServiceResult(addMemberResults, action, personToAdd));

@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -13,10 +16,6 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +33,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -328,46 +327,36 @@ public class MemberAttributeServiceTest {
     @Test
     public void isAppTest() {
         assertFalse(memberAttributeService.isApp(users.get(2).getUsername()));
-
         assertTrue(memberAttributeService.isApp(APP_USER));
     }
 
     @Test
-    public void getUserAttributesTest() {
+    public void getMemberAttributesTest() {
 
-        String username = users.get(5).getUsername();
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
+        Map<String, String> attributes =
+                memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
 
-        Map<String, String> attributes = memberAttributeService.getUserAttributes(ADMIN_USER, username);
+        assertEquals(personFive.getUsername(), attributes.get(UID));
+        assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
+        assertEquals(personFive.getUhUuid(), attributes.get(UHUUID));
+        assertEquals(personFive.getFirstName(), attributes.get(FIRST_NAME));
+        assertEquals(personFive.getLastName(), attributes.get(LAST_NAME));
 
-        assertThat(attributes.get(UID), equalTo(personFive.getUsername()));
-        assertThat(attributes.get(COMPOSITE_NAME), equalTo(personFive.getName()));
-        assertThat(attributes.get(UHUUID), equalTo(personFive.getUhUuid()));
-        assertThat(attributes.get(FIRST_NAME), equalTo(personFive.getFirstName()));
-        assertThat(attributes.get(LAST_NAME), equalTo(personFive.getLastName()));
-
-        // Test getSpecificUserAttribute
-        //UID = 0, UHUUID = 1, LAST_NAME = 2, COMPOSITE_NAME = 3, FIRST_NAME = 4
-        String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, username, 0);
+        String attribute = memberAttributeService.getSpecificUserAttribute(ADMIN_USER, personFive.getUsername(), 0);
         assertThat(attribute, equalTo(personFive.getUsername()));
 
-        // Test with user that owns no groupings
-        Map<String, String> emptyAttributes =
-                memberAttributeService.getUserAttributes(users.get(3).getUsername(), username);
-
-        assertThat(emptyAttributes.get(UID), equalTo(""));
-        assertThat(emptyAttributes.get(COMPOSITE_NAME), equalTo(""));
-        assertThat(emptyAttributes.get(UHUUID), equalTo(""));
-        assertThat(emptyAttributes.get(FIRST_NAME), equalTo(""));
-        assertThat(emptyAttributes.get(LAST_NAME), equalTo(""));
-
-        // Test with null username
+        // Bogus admin throws an Access Denied Exception.
         try {
-            Map<String, String> nullPersonAttributes = memberAttributeService.getUserAttributes(ADMIN_USER, null);
-            fail("Shouldn't be here.");
-        } catch (GcWebServiceError gce) {
-            assertThat(gce.getContainerResponseObject(), equalTo("Error 404 Not Found"));
+            memberAttributeService.getMemberAttributes("bogus admin", personFive.getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
+        // Bogus user returns a map filled with null values.
+        Map<String, String> bogusUser = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogus user");
+        assertNull(bogusUser);
+
     }
 
     @Test

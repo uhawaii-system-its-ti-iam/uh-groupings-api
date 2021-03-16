@@ -4,7 +4,6 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public interface MemberAttributeService extends BatchIsMember {
 
     WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError;
+    Map<String, String> getMemberAttributes(String ownerUsername, String uid);
 
     boolean isUhUuid(String naming);
 
