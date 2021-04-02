@@ -292,6 +292,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             for (String subjectAttributeName : subjectAttributeNames) {
                 mapping.put(subjectAttributeName, null);
             }
+            return mapping;
         }
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
@@ -304,7 +305,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                         results.getWsSubjects()[0].getAttributeValues()[i]);
             }
         } catch (NullPointerException npe) {
-            return null;
+            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+            for (String subjectAttributeName : subjectAttributeNames) {
+                mapping.put(subjectAttributeName, null);
+            }
         }
         return mapping;
     }
