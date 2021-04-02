@@ -1,6 +1,13 @@
 package edu.hawaii.its.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hamcrest.core.IsEqual;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.access.AnonymousUser;
 import edu.hawaii.its.api.access.Role;
 import edu.hawaii.its.api.access.User;
@@ -18,14 +25,6 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hamcrest.core.IsEqual;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,14 +51,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @ActiveProfiles("integrationTest")
@@ -360,57 +370,74 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void memberAttributesAdminTest() throws Exception {
 
-        Map attributes = mapGetUserAttributes(usernames[0], adminUser);
+        // Current user is admin.
+        MvcResult result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, ADMIN)
+                .with(user(ADMIN))
+                .with(csrf()))
+                .andReturn();
+        Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertEquals("iamtst01", map.get(USERNAME));
+        assertEquals("tst01name", map.get(FIRST_NAME));
+        assertEquals("iamtst01", map.get(UHUUID));
+        assertEquals("tst01name", map.get(COMPOSITE_NAME));
+        assertEquals("tst01name", map.get(LAST_NAME));
 
-        assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
-        assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
+        // Member in question is bogus.
+        result = mockMvc.perform(get(API_BASE + "members/" + "bob-jones")
+                .header(CURRENT_USER, ADMIN)
+                .with(user(ADMIN))
+                .with(csrf()))
+                .andReturn();
+        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertNull(map.get(USERNAME));
+        assertNull(map.get(FIRST_NAME));
+        assertNull(map.get(UHUUID));
+        assertNull(map.get(COMPOSITE_NAME));
+        assertNull(map.get(LAST_NAME));
 
-        try {
-            mapGetUserAttributes("bob-jones", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
-
+        // Member in question is empty string.
         try {
             mapGetUserAttributes("", adminUser);
-            fail("Shouldn't be here.");
+            result = mockMvc.perform(get(API_BASE + "members/" + "")
+                    .header(CURRENT_USER, ADMIN)
+                    .with(user(ADMIN))
+                    .with(csrf()))
+                    .andReturn();
+            new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
+
+        // Current user is not owner or admin.
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, usernames[2])
+                .with(user(usernames[2]))
+                .with(csrf()))
+                .andReturn();
+        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertNull(map.get(USERNAME));
+        assertNull(map.get(FIRST_NAME));
+        assertNull(map.get(UHUUID));
+        assertNull(map.get(COMPOSITE_NAME));
+        assertNull(map.get(LAST_NAME));
+
+        // Current user is an owner.
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, usernames[0])
+                .with(user(usernames[0]))
+                .with(csrf()))
+                .andReturn();
+        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertEquals("iamtst01", map.get(USERNAME));
+        assertEquals("tst01name", map.get(FIRST_NAME));
+        assertEquals("iamtst01", map.get(UHUUID));
+        assertEquals("tst01name", map.get(COMPOSITE_NAME));
+        assertEquals("tst01name", map.get(LAST_NAME));
+
     }
 
-    @Test
-    public void memberAttributesMyselfTest() throws Exception {
-
-        Map attributes = mapGetUserAttributes(usernames[0], uhUser01);
-
-        assertThat(attributes.get(USERNAME), equalTo("iamtst01"));
-        assertThat(attributes.get(FIRST_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(UHUUID), equalTo("iamtst01"));
-        assertThat(attributes.get(COMPOSITE_NAME), equalTo("tst01name"));
-        assertThat(attributes.get(LAST_NAME), equalTo("tst01name"));
-
-    }
-
-    // This user owns nothing
-    @Test
-    public void memberAttributesFailTest() throws Exception {
-
-        Map attributes = mapGetUserAttributes(usernames[0], uhUser03);
-
-        assertThat(attributes.get(USERNAME), equalTo(""));
-        assertThat(attributes.get(FIRST_NAME), equalTo(""));
-        assertThat(attributes.get(UHUUID), equalTo(""));
-        assertThat(attributes.get(COMPOSITE_NAME), equalTo(""));
-        assertThat(attributes.get(LAST_NAME), equalTo(""));
-
-    }
-
-    //    @Test
+    //  @Test
     @WithAnonymousUser
     public void memberAttributesAnonTest() throws Exception {
 
@@ -790,21 +817,21 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSRs(API_BASE + "groupings/somegrouping/includeMembers/bob-jones", "put", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSRs(API_BASE + "groupings/somegrouping/includeMembers/bob-jones", "delete", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
             mapGSRs(API_BASE + "groupings/somegrouping/excludeMembers/bob-jones", "put", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
+            assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         // Empty fields tests
