@@ -434,19 +434,22 @@ public class TestGroupingsRestControllerv2_1 {
         assertEquals("iamtst01", map.get(UHUUID));
         assertEquals("tst01name", map.get(COMPOSITE_NAME));
         assertEquals("tst01name", map.get(LAST_NAME));
-
     }
 
-    //  @Test
+    @Test
     @WithAnonymousUser
     public void memberAttributesAnonTest() throws Exception {
-
-        try {
-            mapGetUserAttributes(usernames[0], anon);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
+        MvcResult result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, anon)
+                .with(user(anon))
+                .with(csrf()))
+                .andReturn();
+        Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertNull(map.get(USERNAME));
+        assertNull(map.get(FIRST_NAME));
+        assertNull(map.get(UHUUID));
+        assertNull(map.get(COMPOSITE_NAME));
+        assertNull(map.get(LAST_NAME));
     }
 
     @Test
