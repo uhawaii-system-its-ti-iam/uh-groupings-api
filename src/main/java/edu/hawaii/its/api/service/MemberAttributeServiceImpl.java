@@ -282,17 +282,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     /**
      * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
-     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier will return a mapping with null values.
+     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier or current user will return a mapping
+     * with null values.
      */
     public Map<String, String> getMemberAttributes(String currentUser, String userIdentifier) {
 
         Map<String, String> mapping = new HashMap<>();
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (String subjectAttributeName : subjectAttributeNames) {
-                mapping.put(subjectAttributeName, null);
-            }
-            return mapping;
+            return hs.memberAttributeMapSetKeys();
         }
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
@@ -305,10 +302,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                         results.getWsSubjects()[0].getAttributeValues()[i]);
             }
         } catch (NullPointerException npe) {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (String subjectAttributeName : subjectAttributeNames) {
-                mapping.put(subjectAttributeName, null);
-            }
+            mapping = hs.memberAttributeMapSetKeys();
         }
         return mapping;
     }

@@ -11,6 +11,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface HelperService {
 
@@ -36,4 +37,6 @@ public interface HelperService {
     String nameGroupingPath(String group);
 
     GenericServiceResult swaggerToString(String currentUser, String path) throws IOException;
+
+    Map<String, String> memberAttributeMapSetKeys();
 }
