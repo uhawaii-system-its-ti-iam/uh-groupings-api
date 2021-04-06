@@ -1,5 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -9,12 +14,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -499,47 +504,35 @@ public class TestMemberAttributeService {
     @Test
     public void getUserAttributesTest() {
 
-        // Base test
-        String useruid = usernames[1];
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, usernames[1]);
+        assertEquals("iamtst02", attributes.get("uid"));
+        assertEquals("tst02name", attributes.get("cn"));
+        assertEquals("tst02name", attributes.get("sn"));
+        assertEquals("tst02name", attributes.get("givenName"));
+        assertEquals("iamtst02", attributes.get("uhUuid"));
 
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, useruid);
-        assertTrue(attributes.get("uid").equals("iamtst02"));
-        assertTrue(attributes.get("cn").equals("tst02name"));
-        assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("tst02name"));
-        assertTrue(attributes.get("uhUuid").equals("iamtst02"));
+        attributes = memberAttributeService.getMemberAttributes("iamtst01", usernames[1]);
+        assertEquals("iamtst02", attributes.get("uid"));
+        assertEquals("tst02name", attributes.get("cn"));
+        assertEquals("tst02name", attributes.get("sn"));
+        assertEquals("tst02name", attributes.get("givenName"));
+        assertEquals("iamtst02", attributes.get("uhUuid"));
 
-        //todo Owner test
-        attributes = memberAttributeService.getMemberAttributes("iamtst01", useruid);
-        assertTrue(attributes.get("uid").equals("iamtst02"));
-        assertTrue(attributes.get("cn").equals("tst02name"));
-        assertTrue(attributes.get("sn").equals("tst02name"));
-        assertTrue(attributes.get("givenName").equals("tst02name"));
-        assertTrue(attributes.get("uhUuid").equals("iamtst02"));
-
-        //todo Not an owner test
-        attributes = memberAttributeService.getMemberAttributes("iamtst03", useruid);
-        assertTrue(attributes.get("uid").equals(""));
-        assertTrue(attributes.get("cn").equals(""));
-        assertTrue(attributes.get("sn").equals(""));
-        assertTrue(attributes.get("givenName").equals(""));
-        assertTrue(attributes.get("uhUuid").equals(""));
+        // Passing an invalid user should return a map of null values.
+        attributes = memberAttributeService.getMemberAttributes("iamtst03", usernames[1]);
+        assertNull(attributes.get("uid"));
+        assertNull(attributes.get("cn"));
+        assertNull(attributes.get("sn"));
+        assertNull(attributes.get("givenName"));
+        assertNull(attributes.get("uhUuid"));
 
         // Test with invalid username
-        try {
-            memberAttributeService.getMemberAttributes(ADMIN_USER, "notarealperson");
-            fail("Shouldn't be here.");
-        } catch (GcWebServiceError gce) {
-            gce.printStackTrace();
-        }
-
-        // Test with null field
-        try {
-            memberAttributeService.getMemberAttributes(ADMIN_USER, null);
-            fail("Shouldn't be here.");
-        } catch (GcWebServiceError gce) {
-            gce.printStackTrace();
-        }
+        attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogusUser");
+        assertNull(attributes.get("uid"));
+        assertNull(attributes.get("cn"));
+        assertNull(attributes.get("sn"));
+        assertNull(attributes.get("givenName"));
+        assertNull(attributes.get("uhUuid"));
     }
 
     @Test
