@@ -19,10 +19,12 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -69,6 +71,21 @@ public class TestHelperService {
 
     @Value("${groupings.api.test.usernames}")
     private String[] username;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String UID;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     @Autowired
     private GrouperFactoryService grouperFS;
@@ -204,8 +221,20 @@ public class TestHelperService {
         }
 
     }
+
     @Test
     public void nameGroupingPathTest() {
         assertEquals("grouping-test-path", helperService.nameGroupingPath("test:grouping-test-path:include"));
+    }
+
+    @Test public void memberAttributeMapSetKeysTest() {
+        Map<String, String> map = helperService.memberAttributeMapSetKeys();
+
+        // Check if keys are correct, and that values are set to null.
+        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+        for (String subjectAttributeName : subjectAttributeNames) {
+            assertTrue(map.containsKey(subjectAttributeName));
+            assertNull(map.get(subjectAttributeName));
+        }
     }
 }
