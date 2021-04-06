@@ -157,4 +157,19 @@ public class AddMemberResultTest {
             assertEquals(field, csv[i++]);
         }
     }
+
+    @Test
+    public void toStringTest() {
+        assertEquals("AddMemberResult{" +
+                "userWasAdded=" + true +
+                ", userWasRemoved=" + true +
+                ", pathOfAdd='" + pathOfAdd + '\'' +
+                ", pathOfRemoved='" + pathOfRemoved + '\'' +
+                ", name='" + name + '\'' +
+                ", uhUuid='" + uhUuid + '\'' +
+                ", uid='" + uid + '\'' +
+                ", result='" + result + '\'' +
+                ", userIdentifier='" + userIdentifier + '\'' +
+                '}', addMemberResultInstantiatedOnConstruction.toString());
+    }
 }
