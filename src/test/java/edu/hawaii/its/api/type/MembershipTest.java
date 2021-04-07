@@ -3,96 +3,110 @@ package edu.hawaii.its.api.type;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class MembershipTest {
-    Person membershipHolder = new Person("Membership Holder", "12345", "mholder");
-    Group group;
-    Membership membership;
-
-    String id = "membership id";
-    String newId = "new membership id";
+    private Membership membershipInstantiatedOnConstruction;
+    private Membership membershipEmptyOnConstruction;
+    private final Person person = new Person();
+    private final Group group = new Group();
 
     @Before
-    public void setup() {
-        List<Person> members = new ArrayList<>();
-        members.add(membershipHolder);
-
-        for(int i = 0; i < 10; i ++) {
-            Person member = new Person("name" + i, "uhUuid" + i, "username" + i);
-            members.add(member);
-        }
-
-        group = new Group("path:to:group", members);
-
-        membership = new Membership(members.get(0), group);
-        membership.setIdentifier(id);
+    public void setUp() {
+        membershipEmptyOnConstruction = new Membership();
+        membershipInstantiatedOnConstruction = new Membership(person, group);
     }
 
     @Test
-    public void idTest(){
-        membership.setIdentifier(newId);
-        assertThat(membership.getIdentifier(), is(newId));
+    public void construction() {
+        assertNotNull(membershipInstantiatedOnConstruction);
+        assertNotNull(membershipEmptyOnConstruction);
+        assertNotNull(membershipInstantiatedOnConstruction.getPerson());
+        assertNotNull(membershipInstantiatedOnConstruction.getGroup());
     }
 
     @Test
-    public void PersonTest(){
-        membership.setPerson(membershipHolder);
-        assertThat(membership.getPerson(), is(membershipHolder));
+    public void identifierTest() {
+        assertNull(membershipEmptyOnConstruction.getIdentifier());
+        String identifier = "identifier";
+        membershipEmptyOnConstruction.setIdentifier(identifier);
+        assertEquals(identifier, membershipEmptyOnConstruction.getIdentifier());
     }
 
     @Test
-    public void GroupTest(){
-        membership.setGroup(group);
-        assertThat(membership.getGroup(), is(group));
+    public void getNameTest() {
+        assertNull(membershipEmptyOnConstruction.getName());
+        String name = "name";
+        membershipEmptyOnConstruction.setName(name);
+        assertEquals(name, membershipEmptyOnConstruction.getName());
     }
 
     @Test
-    public void SelfOptedTest(){
-        membership.setSelfOpted(true);
-        assertTrue(membership.isSelfOpted());
-        membership.setSelfOpted(false);
-        assertFalse(membership.isSelfOpted());
+    public void getPathTest() {
+        assertNull(membershipEmptyOnConstruction.getPath());
+        String path = "path";
+        membershipEmptyOnConstruction.setPath(path);
+        assertEquals(path, membershipEmptyOnConstruction.getPath());
     }
 
     @Test
-    public void isOptInEnabledTest(){
-        membership.setOptInEnabled(true);
-        assertTrue(membership.isOptInEnabled());
-        membership.setOptInEnabled(false);
-        assertFalse(membership.isOptInEnabled());
+    public void inBasisTest() {
+        assertFalse(membershipEmptyOnConstruction.isInBasis());
+        membershipEmptyOnConstruction.setInBasis(true);
+        assertTrue(membershipEmptyOnConstruction.isInBasis());
     }
 
     @Test
-    public void isOptOutEnabledTest(){
-        membership.setOptOutEnabled(true);
-        assertTrue(membership.isOptOutEnabled());
-        membership.setOptOutEnabled(false);
-        assertFalse(membership.isOptOutEnabled());
+    public void inOwnerTest() {
+        assertFalse(membershipEmptyOnConstruction.isInOwner());
+        membershipEmptyOnConstruction.setInOwner(true);
+        assertTrue(membershipEmptyOnConstruction.isInOwner());
     }
 
     @Test
-    public void equalsTest() {
-        Membership differentMembership = new Membership();
-        assertNotEquals(membership, differentMembership);
-
-        Membership diffPersonMember = new Membership();
-        diffPersonMember.setIdentifier(membership.getIdentifier());
-        diffPersonMember.setPerson(new Person());
-        diffPersonMember.setGroup(membership.getGroup());
-        assertNotEquals(membership, diffPersonMember);
-
-        Membership diffGroupMember = new Membership();
-        diffGroupMember.setIdentifier(membership.getIdentifier());
-        diffGroupMember.setPerson(membership.getPerson());
-        diffGroupMember.setGroup(new Group());
-        assertNotEquals(membership, diffGroupMember);
+    public void inIncludeTest() {
+        assertFalse(membershipEmptyOnConstruction.isInInclude());
+        membershipEmptyOnConstruction.setInInclude(true);
+        assertTrue(membershipEmptyOnConstruction.isInInclude());
     }
+
+    @Test
+    public void inBasisAndIncludeTest() {
+        assertFalse(membershipEmptyOnConstruction.isInBasisAndInclude());
+        membershipEmptyOnConstruction.setInBasisAndInclude(true);
+        assertTrue(membershipEmptyOnConstruction.isInBasisAndInclude());
+    }
+
+    @Test
+    public void inExcludeTest() {
+        assertFalse(membershipEmptyOnConstruction.isInExclude());
+        membershipEmptyOnConstruction.setInExclude(true);
+        assertTrue(membershipEmptyOnConstruction.isInExclude());
+    }
+
+    @Test
+    public void selfOptedTest() {
+        assertFalse(membershipEmptyOnConstruction.isSelfOpted());
+        membershipEmptyOnConstruction.setSelfOpted(true);
+        assertTrue(membershipEmptyOnConstruction.isSelfOpted());
+    }
+
+    @Test
+    public void optInEnabledTest() {
+        assertFalse(membershipEmptyOnConstruction.isOptInEnabled());
+        membershipEmptyOnConstruction.setOptInEnabled(true);
+        assertTrue(membershipEmptyOnConstruction.isOptInEnabled());
+    }
+
+    @Test
+    public void optOutEnabledTest() {
+        assertFalse(membershipEmptyOnConstruction.isOptOutEnabled());
+        membershipEmptyOnConstruction.setOptOutEnabled(true);
+        assertTrue(membershipEmptyOnConstruction.isOptOutEnabled());
+    }
+
 }
