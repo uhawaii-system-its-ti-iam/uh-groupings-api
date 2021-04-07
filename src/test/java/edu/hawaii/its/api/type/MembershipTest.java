@@ -8,8 +8,9 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class MembershipTest {
     Person membershipHolder = new Person("Membership Holder", "12345", "mholder");
@@ -79,25 +80,19 @@ public class MembershipTest {
 
     @Test
     public void equalsTest() {
-        Membership membershipNull = null;
-        membership.equals(membershipNull);
-
-        Membership membershipCopy = membership;
-        assertTrue(membership.equals(membershipCopy));
-
         Membership differentMembership = new Membership();
-        assertFalse(membership.equals(differentMembership));
+        assertNotEquals(membership, differentMembership);
 
         Membership diffPersonMember = new Membership();
         diffPersonMember.setIdentifier(membership.getIdentifier());
         diffPersonMember.setPerson(new Person());
         diffPersonMember.setGroup(membership.getGroup());
-        assertFalse(membership.equals(diffPersonMember));
+        assertNotEquals(membership, diffPersonMember);
 
         Membership diffGroupMember = new Membership();
         diffGroupMember.setIdentifier(membership.getIdentifier());
         diffGroupMember.setPerson(membership.getPerson());
         diffGroupMember.setGroup(new Group());
-        assertFalse(membership.equals(diffGroupMember));
+        assertNotEquals(membership, diffGroupMember);
     }
 }
