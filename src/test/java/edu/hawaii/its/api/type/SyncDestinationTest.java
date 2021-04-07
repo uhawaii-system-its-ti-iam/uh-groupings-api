@@ -32,6 +32,10 @@ public class SyncDestinationTest {
         assertThat(destination.getDescription(), equalTo("description"));
         assertNull(destination.getIsSynced());
         assertNull(destination.getTooltip());
+
+        SyncDestination syncDestination = new SyncDestination(null, null);
+        assertEquals("", syncDestination.getName());
+        assertEquals("", syncDestination.getDescription());
     }
 
     @Test
@@ -83,17 +87,14 @@ public class SyncDestinationTest {
         String name = "name";
         String description = "description";
         String tooltip = "tooltip";
-        boolean isSynced = true;
 
         SyncDestination syncDestination = new SyncDestination(name, description);
         syncDestination.setTooltip(tooltip);
         syncDestination.setIsSynced(true);
-        assertEquals("SyncDestination{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", tooltip='" + tooltip + '\'' +
-                ", isSynced=" + isSynced +
-                '}', syncDestination.toString());
+        String expected =
+                "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
+                        + tooltip + '\'' + ", isSynced=" + true + '}';
+        assertEquals(expected, syncDestination.toString());
     }
 
 }
