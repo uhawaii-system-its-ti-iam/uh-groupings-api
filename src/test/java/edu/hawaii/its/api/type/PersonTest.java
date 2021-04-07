@@ -1,19 +1,20 @@
 package edu.hawaii.its.api.type;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class PersonTest {
 
@@ -236,6 +237,22 @@ public class PersonTest {
         assertFalse(person.getUsername() == "a");
         person.setAttribute("username", "a");
         assertTrue(person.getAttribute("username") == "a");
+    }
+
+    @Test
+    public void toCsvTest() {
+        String uid = "uid";
+        String uhUuid = "uhUuid";
+        String firstName = "firstName";
+        String lastName = "lastName";
+        String name = "name";
+        Person person = new Person(name, uhUuid, uid, firstName, lastName);
+        String[] csv = person.toCsv();
+        List<String> fields = Arrays.asList(uid, uhUuid, firstName, lastName, name);
+        int i = 0;
+        for (String field : fields) {
+            assertEquals(field, csv[i++]);
+        }
     }
 
 }
