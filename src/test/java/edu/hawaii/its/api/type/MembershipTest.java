@@ -30,6 +30,18 @@ public class MembershipTest {
     }
 
     @Test
+    public void personTest() {
+        membershipEmptyOnConstruction.setPerson(person);
+        assertEquals(person, membershipEmptyOnConstruction.getPerson());
+    }
+
+    @Test
+    public void groupTest() {
+        membershipEmptyOnConstruction.setGroup(group);
+        assertEquals(group, membershipEmptyOnConstruction.getGroup());
+    }
+
+    @Test
     public void identifierTest() {
         assertNull(membershipEmptyOnConstruction.getIdentifier());
         String identifier = "identifier";
