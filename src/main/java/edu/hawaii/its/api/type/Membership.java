@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 @Entity
-public class Membership implements Comparable<Membership> {
+public class Membership  {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
@@ -58,16 +58,44 @@ public class Membership implements Comparable<Membership> {
         this.group = group;
     }
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
     public Person getPerson() {
         return person;
     }
 
     public Group getGroup() {
         return group;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isInBasis() {
+        return inBasis;
+    }
+
+    public boolean isInOwner() {
+        return inOwner;
+    }
+
+    public boolean isInInclude() {
+        return inInclude;
+    }
+
+    public boolean isInBasisAndInclude() {
+        return inBasisAndInclude;
+    }
+
+    public boolean isInExclude() {
+        return inExclude;
     }
 
     public boolean isSelfOpted() {
@@ -82,16 +110,24 @@ public class Membership implements Comparable<Membership> {
         return isOptOutEnabled;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public void setPerson(Person person) {
         this.person = person;
     }
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setSelfOpted(boolean isSelfOpted) {
@@ -114,57 +150,41 @@ public class Membership implements Comparable<Membership> {
         this.inOwner = inOwner;
     }
 
-    public boolean isInBasis() {
-        return inBasis;
-    }
-
-    public boolean isInOwner() {
-        return inOwner;
-    }
-
     public void setInInclude(boolean inInclude) {
         this.inInclude = inInclude;
-    }
-
-    public boolean isInInclude() {
-        return inInclude;
     }
 
     public void setInExclude(boolean inExclude) {
         this.inExclude = inExclude;
     }
 
-    public boolean isInExclude() {
-        return inExclude;
-    }
-
     public void setInBasisAndInclude(boolean inBasisAndInclude) {
         this.inBasisAndInclude = inBasisAndInclude;
     }
 
-    public boolean isInBasisAndInclude() {
-        return inBasisAndInclude;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
+    /*
     @Override
     public boolean equals(Object o) {
-        return ((compareTo((Membership) o) == 0 && o instanceof Membership));
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (!(o instanceof Membership))
+            return false;
+        Membership membership = (Membership) o;
+        return ((this.getPerson().equals(membership.getPerson()))
+                && (this.getGroup().equals(membership.getGroup()))
+                && (this.getIdentifier().equals(membership.getIdentifier()))
+                && (this.getName().equals(membership.getName()))
+                && (this.getPath().equals(membership.getPath()))
+                && (this.isInBasis() == membership.isInBasis())
+                && (this.isInInclude() == membership.isInInclude())
+                && (this.isInOwner() == membership.isInOwner())
+                && (this.isInExclude() == membership.isInExclude())
+                && (this.isInBasisAndInclude() == membership.isInBasisAndInclude())
+                && (this.isSelfOpted() == membership.isSelfOpted())
+                && (this.isOptInEnabled() == membership.isOptInEnabled())
+                && (this.isOptOutEnabled() == membership.isOptOutEnabled));
     }
 
     @Override
@@ -197,4 +217,5 @@ public class Membership implements Comparable<Membership> {
         }
         return -1;
     }
+     */
 }
