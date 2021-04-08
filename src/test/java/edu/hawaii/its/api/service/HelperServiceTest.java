@@ -4,10 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -45,20 +41,11 @@ import static org.junit.Assert.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class HelperServiceTest {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
     @Value("${groupings.api.grouping_apps}")
     private String GROUPING_APPS;
 
     @Value("${groupings.api.basis_plus_include}")
     private String BASIS_PLUS_INCLUDE;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
@@ -74,21 +61,6 @@ public class HelperServiceTest {
 
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String UID_KEY;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME_KEY;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME_KEY;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME_KEY;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -115,18 +87,6 @@ public class HelperServiceTest {
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
-
-    @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
 
     @Autowired
     private HelperService helperService;
