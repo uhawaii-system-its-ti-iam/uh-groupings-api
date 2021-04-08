@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 @Entity
-public class Membership implements Comparable<Membership> {
+public class Membership  {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
@@ -58,16 +58,44 @@ public class Membership implements Comparable<Membership> {
         this.group = group;
     }
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
     public Person getPerson() {
         return person;
     }
 
     public Group getGroup() {
         return group;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isInBasis() {
+        return inBasis;
+    }
+
+    public boolean isInOwner() {
+        return inOwner;
+    }
+
+    public boolean isInInclude() {
+        return inInclude;
+    }
+
+    public boolean isInBasisAndInclude() {
+        return inBasisAndInclude;
+    }
+
+    public boolean isInExclude() {
+        return inExclude;
     }
 
     public boolean isSelfOpted() {
@@ -82,16 +110,24 @@ public class Membership implements Comparable<Membership> {
         return isOptOutEnabled;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public void setPerson(Person person) {
         this.person = person;
     }
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setSelfOpted(boolean isSelfOpted) {
@@ -114,87 +150,15 @@ public class Membership implements Comparable<Membership> {
         this.inOwner = inOwner;
     }
 
-    public boolean isInBasis() {
-        return inBasis;
-    }
-
-    public boolean isInOwner() {
-        return inOwner;
-    }
-
     public void setInInclude(boolean inInclude) {
         this.inInclude = inInclude;
-    }
-
-    public boolean isInInclude() {
-        return inInclude;
     }
 
     public void setInExclude(boolean inExclude) {
         this.inExclude = inExclude;
     }
 
-    public boolean isInExclude() {
-        return inExclude;
-    }
-
     public void setInBasisAndInclude(boolean inBasisAndInclude) {
         this.inBasisAndInclude = inBasisAndInclude;
-    }
-
-    public boolean isInBasisAndInclude() {
-        return inBasisAndInclude;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return ((compareTo((Membership) o) == 0 && o instanceof Membership));
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((person == null) ? 0 : person.hashCode());
-        result = prime * result + ((group == null) ? 0 : group.hashCode());
-        return result;
-    }
-
-    @Override
-    public int compareTo(Membership membership) {
-        if (membership != null) {
-            int idComp =
-                    membership.getIdentifier() != null ? getIdentifier().compareTo(membership.getIdentifier()) : -1;
-            int personComp = membership.getPerson() != null ? getPerson().compareTo(membership.getPerson()) : -1;
-            int groupComp = membership.getGroup() != null ? getGroup().compareTo(membership.getGroup()) : -1;
-
-            if (idComp != 0) {
-                return idComp;
-            }
-            if (personComp != 0) {
-                return personComp;
-            }
-            if (groupComp != 0) {
-                return groupComp;
-            }
-            return 0;
-        }
-        return -1;
     }
 }

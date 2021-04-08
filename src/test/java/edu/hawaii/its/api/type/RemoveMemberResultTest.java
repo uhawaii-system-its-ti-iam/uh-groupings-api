@@ -141,4 +141,17 @@ public class RemoveMemberResultTest {
         removeMemberResultEmptyOnConstruction.setUserIdentifier(userIdentifier);
         assertEquals(userIdentifier, removeMemberResultEmptyOnConstruction.getUserIdentifier());
     }
+
+    @Test
+    public void toStringTest() {
+        assertEquals("RemoveMemberResult{" +
+                "userWasRemoved=" + true +
+                ", pathOfRemoved='" + pathOfRemoved + '\'' +
+                ", name='" + name + '\'' +
+                ", uhUuid='" + uhUuid + '\'' +
+                ", uid='" + uid + '\'' +
+                ", result='" + result + '\'' +
+                ", userIdentifier='" + userIdentifier + '\'' +
+                '}', removeMemberResultInstantiatedOnConstruction.toString());
+    }
 }

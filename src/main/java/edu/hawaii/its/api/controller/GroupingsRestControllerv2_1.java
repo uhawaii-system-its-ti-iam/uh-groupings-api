@@ -107,14 +107,14 @@ public class GroupingsRestControllerv2_1 {
      * Get a GenericServiceResult to be viewed on swagger, a great helper for observing the contents of a grouper
      * object.
      */
-    @GetMapping(value = "/swagger/toString/{path}")
+    @GetMapping(value = "/swagger/toString/")
     @ResponseBody
-    public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser,
-            String path) throws IOException {
+    public ResponseEntity<GenericServiceResult> swaggerToString(@RequestHeader("current_user") String currentUser)
+            throws IOException {
         logger.info("Entered REST swaggerToString");
         return ResponseEntity
                 .ok()
-                .body(helperService.swaggerToString(currentUser, path));
+                .body(helperService.swaggerToString(currentUser));
     }
 
     /**

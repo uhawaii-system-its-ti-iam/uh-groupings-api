@@ -18,7 +18,9 @@ public class GroupingPathTest {
 
     @Test
     public void construction() {
+        GroupingPath groupingPath = new GroupingPath();
         assertNotNull(path);
+        assertNotNull(groupingPath);
     }
 
     @Test
@@ -30,7 +32,7 @@ public class GroupingPathTest {
 
     @Test
     public void getNameTest() {
-        assertEquals("grouping", path.name );
+        assertEquals("grouping", path.name);
     }
 
     @Test

@@ -4,20 +4,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
-import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +22,18 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -41,44 +41,26 @@ import static org.junit.Assert.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class HelperServiceTest {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
     @Value("${groupings.api.grouping_apps}")
     private String GROUPING_APPS;
 
     @Value("${groupings.api.basis_plus_include}")
     private String BASIS_PLUS_INCLUDE;
 
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.test.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.test.name}")
-    private String NAME;
-
-    @Value("${groupings.api.test.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID_KEY;
-
     @Value("${groupings.api.person_attributes.username}")
-    private String UID_KEY;
+    private String UID;
 
     @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME_KEY;
+    private String FIRST_NAME;
 
     @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME_KEY;
+    private String LAST_NAME;
 
     @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME_KEY;
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
@@ -105,18 +87,6 @@ public class HelperServiceTest {
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
-
-    @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
 
     @Autowired
     private HelperService helperService;
@@ -209,28 +179,12 @@ public class HelperServiceTest {
 
     @Test
     public void makeGroupingsServiceResultTest() {
-        String action = "add a member";
-        String resultCode = "successfully added member";
-        WsAddMemberResults gr = new WsAddMemberResults();
-        WsResultMeta resultMeta = new WsResultMeta();
-        resultMeta.setResultCode(resultCode);
-        gr.setResultMetadata(resultMeta);
-
-        GroupingsServiceResult gsr = helperService.makeGroupingsServiceResult(gr, action);
-        assertThat(gsr.getAction(), is(action));
-        assertThat(gsr.getResultCode(), is(resultCode));
-
-        resultMeta.setResultCode(FAILURE);
-        gr.setResultMetadata(resultMeta);
-
-        try {
-            gsr = helperService.makeGroupingsServiceResult(gr, action);
-            assertThat(gsr.getAction(), is(action));
-            assertThat(gsr.getResultCode(), is(resultCode));
-        } catch (GroupingsServiceResultException gsre) {
-            gsre.printStackTrace();
-        }
-
+        String resultCode = "resultCode";
+        String action = "action";
+        GroupingsServiceResult groupingsServiceResult = helperService.makeGroupingsServiceResult(resultCode, action);
+        assertNotNull(groupingsServiceResult);
+        assertEquals(resultCode, groupingsServiceResult.getResultCode());
+        assertEquals(action, groupingsServiceResult.getAction());
     }
 
     @Test
@@ -269,6 +223,44 @@ public class HelperServiceTest {
     @Test
     public void nameGroupingPathTest() {
         assertEquals("grouping-test-path", helperService.nameGroupingPath("test:grouping-test-path:include"));
+        assertEquals("",helperService.nameGroupingPath(""));
+    }
+
+    @Test
+    public void swaggerToStringTest() throws IOException {
+        GenericServiceResult genericServiceResult = helperService.swaggerToString(ADMIN_USER);
+        assertNotNull(genericServiceResult);
+
+    }
+
+    @Test
+    public void memberAttributeMapSetKeysTest() {
+        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+        Map<String, String> map = helperService.memberAttributeMapSetKeys();
+
+        for (String subjectAttributeName : subjectAttributeNames) {
+            assertTrue(map.containsKey(subjectAttributeName));
+            assertNull(map.get(subjectAttributeName));
+        }
+    }
+
+    @Test
+    public void makePathsTest() {
+        List<String> strPaths = new ArrayList<>();
+        assertEquals(0, helperService.makePaths(strPaths).size());
+        String[] testPaths = { INCLUDE, EXCLUDE, OWNERS, BASIS };
+        for (String testPath : testPaths) {
+            strPaths.add(PATH_ROOT + testPath);
+        }
+
+        List<GroupingPath> groupingPaths = helperService.makePaths(strPaths);
+        assertTrue(groupingPaths.size() > 0);
+        Iterator<String> stringIterator = strPaths.iterator();
+        Iterator<GroupingPath> groupingPathIterator = groupingPaths.iterator();
+        while (groupingPathIterator.hasNext() && stringIterator.hasNext()) {
+            assertEquals(stringIterator.next(), groupingPathIterator.next().getPath());
+        }
+
     }
 
 }

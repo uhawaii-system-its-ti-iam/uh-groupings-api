@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -14,7 +15,9 @@ public class SyncDestinationTest {
     private SyncDestination destination;
 
     @Before
-    public void setUp() { destination = new SyncDestination(); }
+    public void setUp() {
+        destination = new SyncDestination();
+    }
 
     @Test
     public void construction() {
@@ -29,6 +32,10 @@ public class SyncDestinationTest {
         assertThat(destination.getDescription(), equalTo("description"));
         assertNull(destination.getIsSynced());
         assertNull(destination.getTooltip());
+
+        SyncDestination syncDestination = new SyncDestination(null, null);
+        assertEquals("", syncDestination.getName());
+        assertEquals("", syncDestination.getDescription());
     }
 
     @Test
@@ -65,16 +72,29 @@ public class SyncDestinationTest {
 
     @Test
     public void parseKeyVal() {
-        String desc = "this is a decription";
+        String desc = "this is a description";
         String descReg = "this is ${} description with regex characters";
         String replacer = "replaced";
 
+        assertThat(destination.parseKeyVal(replacer, desc), equalTo("this is a description"));
 
-        assertThat(desc = destination.parseKeyVal(replacer, desc), equalTo("this is a decription"));
+        assertThat(destination.parseKeyVal(replacer, descReg),
+                equalTo("this is replaced description with regex characters"));
+    }
 
-        assertThat(descReg = destination.parseKeyVal(replacer, descReg), equalTo("this is replaced description with regex characters"));
+    @Test
+    public void toStringTest() {
+        String name = "name";
+        String description = "description";
+        String tooltip = "tooltip";
 
-
+        SyncDestination syncDestination = new SyncDestination(name, description);
+        syncDestination.setTooltip(tooltip);
+        syncDestination.setIsSynced(true);
+        String expected =
+                "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
+                        + tooltip + '\'' + ", isSynced=" + true + '}';
+        assertEquals(expected, syncDestination.toString());
     }
 
 }

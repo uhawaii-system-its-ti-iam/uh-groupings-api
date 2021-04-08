@@ -5,15 +5,17 @@ public class GroupingsServiceResult {
     private String resultCode = "null";
     private Person person = null;
 
+    // Constructor
     public GroupingsServiceResult() {
-        // Empty.
     }
 
+    // Constructor
     public GroupingsServiceResult(String resultCode, String action) {
         this.resultCode = resultCode;
         this.action = action;
     }
 
+    // Constructor
     public GroupingsServiceResult(String resultCode, String action, Person person) {
         this.resultCode = resultCode;
         this.action = action;
@@ -44,11 +46,8 @@ public class GroupingsServiceResult {
         this.person = person;
     }
 
-    @Override
-    public String toString() {
-        return "GroupingsServiceResult [action=" + action
-                + ", resultCode=" + resultCode
-                + "]";
+    @Override public String toString() {
+        return "GroupingsServiceResult{" + "action='" + action + '\'' + ", resultCode='" + resultCode + '\''
+                + ", person=" + person + '}';
     }
-
 }
