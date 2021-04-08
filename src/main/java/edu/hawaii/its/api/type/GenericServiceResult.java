@@ -34,7 +34,8 @@ public class GenericServiceResult {
      * @param object to add.
      */
     public GenericServiceResult(String key, Object object) {
-        this();
+        this.data = new ArrayList<>();
+        this.map = new HashMap<>();
         this.add(key, object);
     }
 

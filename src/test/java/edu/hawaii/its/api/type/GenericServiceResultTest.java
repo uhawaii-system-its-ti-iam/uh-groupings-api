@@ -26,6 +26,9 @@ public class GenericServiceResultTest {
     public void construction() {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult("TEST", "adding single objects");
 
+        GenericServiceResult gsr = new GenericServiceResult("floats", this.floats);
+        assertNotNull(gsr);
+
         assertNotNull(genericServiceResult);
         // Check what was added on setup.
         constructionHelper(genericServiceResult);
@@ -52,8 +55,21 @@ public class GenericServiceResultTest {
     }
 
     @Test
+    public void getDataTest() {
+        genericServiceResult = new GenericServiceResult(Arrays.asList("string", "integer", "floats"),
+                this.string, this.integer, this.floats);
+
+        List<Object> data = genericServiceResult.getData();
+        assertEquals(string, data.get(0));
+        assertEquals(integer, data.get(1));
+        assertEquals(floats, data.get(2));
+
+    }
+
+    @Test
     public void toStringTest() {
-        assertEquals(this.genericServiceResult.toString(), "[ floats: [1.0, 1.1, 1.2]; string: STRING; integer: 300;  ]" );
+        assertEquals("[ floats: [1.0, 1.1, 1.2]; string: STRING; integer: 300;  ]",
+                this.genericServiceResult.toString());
     }
 
     /**
