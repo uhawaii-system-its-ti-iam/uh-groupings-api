@@ -76,9 +76,9 @@ public class SyncDestinationTest {
         String descReg = "this is ${} description with regex characters";
         String replacer = "replaced";
 
-        assertThat(desc = destination.parseKeyVal(replacer, desc), equalTo("this is a description"));
+        assertThat(destination.parseKeyVal(replacer, desc), equalTo("this is a description"));
 
-        assertThat(descReg = destination.parseKeyVal(replacer, descReg),
+        assertThat(destination.parseKeyVal(replacer, descReg),
                 equalTo("this is replaced description with regex characters"));
     }
 
