@@ -159,16 +159,11 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
 
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
     @Autowired
     private GrouperFactoryService grouperFS;
-
-    @Autowired
-    MemberAttributeService memberAttributeService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
