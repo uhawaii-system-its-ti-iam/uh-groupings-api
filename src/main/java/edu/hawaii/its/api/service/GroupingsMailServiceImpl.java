@@ -1,11 +1,8 @@
 package edu.hawaii.its.api.service;
 
 import com.opencsv.CSVWriter;
-
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -41,11 +38,6 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
 
     /**
      * Send a SMTP message with no attachment.
-     *
-     * @param from    - address
-     * @param to      - address
-     * @param subject - email subject
-     * @param text    - email text body
      */
     @Override public void sendSimpleMessage(String from, String to, String subject, String text) {
 
@@ -60,13 +52,6 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
 
     /**
      * Send an SMTP message with a CSV file attachment.
-     *
-     * @param from    - address
-     * @param to      - address
-     * @param subject - email subject
-     * @param text    - email text body
-     * @param path    - path or name of the temporary CSV file
-     * @param res     - data to be converted to CSV
      */
     @Override
     public void sendCSVMessage(String from, String to, String subject, String text, String path,
@@ -83,13 +68,6 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
 
     /**
      * Send an SMTP message with a file attachment
-     *
-     * @param from               - address
-     * @param to                 - address
-     * @param subject            - email subject
-     * @param text               - email text body
-     * @param fileSystemResource - File being sent
-     * @param file               - descriptor of fil being sent
      */
     private void sendAttachmentMessage(String from, String to, String subject, String text,
             FileSystemResource fileSystemResource, File file) {
@@ -129,11 +107,6 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
 
     /**
      * Write Csv data to a file.
-     *
-     * @param data - Csv data returned from toCsvObj()
-     * @param file - Descriptor ro be written too.
-     * @return - FileSystemResource to be sent via SMTP.
-     * @throws IOException
      */
     private FileSystemResource toCsv(List<String[]> data, File file) throws IOException {
         try {
