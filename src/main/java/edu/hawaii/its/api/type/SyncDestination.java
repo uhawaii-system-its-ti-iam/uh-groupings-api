@@ -4,8 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 @Entity
@@ -79,10 +77,12 @@ public class SyncDestination {
         return result;
     }
 
-    public String toString() {
-        return "name: " + this.name +
-                "; description: " + this.description +
-                "; tooltip: " + this.tooltip +
-                "; isSynced: " + this.isSynced + ";";
+    @Override public String toString() {
+        return "SyncDestination{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", tooltip='" + tooltip + '\'' +
+                ", isSynced=" + isSynced +
+                '}';
     }
 }

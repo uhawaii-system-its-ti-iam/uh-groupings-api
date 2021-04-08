@@ -36,7 +36,7 @@ public interface HelperService {
 
     String nameGroupingPath(String group);
 
-    GenericServiceResult swaggerToString(String currentUser, String path) throws IOException;
-
     Map<String, String> memberAttributeMapSetKeys();
+
+    GenericServiceResult swaggerToString(String currentUser) throws IOException;
 }

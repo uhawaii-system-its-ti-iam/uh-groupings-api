@@ -4,10 +4,11 @@ public class GroupingPath {
     String path;
     String name;
 
+    // Constructor
     public GroupingPath() {
-       
     }
 
+    // Constructor
     public GroupingPath(String path) {
         this.path = path;
         this.name = makeName();
