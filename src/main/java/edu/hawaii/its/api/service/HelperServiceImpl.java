@@ -159,10 +159,16 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
     @Autowired
     private GrouperFactoryService grouperFS;
+
+    @Autowired
+    MemberAttributeService memberAttributeService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
@@ -261,7 +267,6 @@ public class HelperServiceImpl implements HelperService {
         if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
             throw new GroupingsServiceResultException(groupingsServiceResult);
         }
-
         return groupingsServiceResult;
     }
 
@@ -324,11 +329,6 @@ public class HelperServiceImpl implements HelperService {
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
-    @Override
-    public GenericServiceResult swaggerToString(String currentUser, String path) throws IOException {
-        return new GenericServiceResult("result", "result");
-    }
-
     /**
      * Initialize a mapping of member attribute keys with value null.
      */
@@ -339,6 +339,11 @@ public class HelperServiceImpl implements HelperService {
             mapping.put(subjectAttributeName, null);
         }
         return mapping;
+    }
+
+    @Override
+    public GenericServiceResult swaggerToString(String currentUser) throws IOException {
+        return new GenericServiceResult("result", "result");
     }
 }
 

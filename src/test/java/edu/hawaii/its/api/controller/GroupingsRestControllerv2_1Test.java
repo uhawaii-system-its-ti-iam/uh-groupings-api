@@ -12,6 +12,7 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -431,6 +432,17 @@ public class GroupingsRestControllerv2_1Test {
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void swaggerToStringTest() throws Exception {
+        given(helperService.swaggerToString(ADMIN)).willReturn(new GenericServiceResult());
+        mockMvc.perform(get(API_BASE + "/swagger/toString/")
+                .with(csrf())
+                .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk());
+
     }
 
     @Test
