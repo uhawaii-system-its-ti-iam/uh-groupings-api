@@ -417,6 +417,7 @@ public class MembershipServiceImpl implements MembershipService {
                 addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
             }
         }
+        /*
         if (usersToAdd.size() > 100) {
             groupingsMailService
                     .setJavaMailSender(javaMailSender)
@@ -428,6 +429,8 @@ public class MembershipServiceImpl implements MembershipService {
                     "",
                     "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", addMemberResults);
         }
+
+         */
         return addMemberResults;
     }
 
@@ -455,7 +458,7 @@ public class MembershipServiceImpl implements MembershipService {
                 uhUuid = wsDeleteMemberResults.getResults()[0].getWsSubject().getId();
                 uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
                 result = wasRemoved ? SUCCESS : FAILURE;
-                
+
                 removeMemberResults
                         .add(new RemoveMemberResult(wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove));
             } catch (GcWebServiceError | NullPointerException e) {
