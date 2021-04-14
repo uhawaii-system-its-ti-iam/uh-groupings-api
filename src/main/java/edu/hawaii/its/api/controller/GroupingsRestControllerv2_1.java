@@ -72,6 +72,9 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
 
+    @Value("${groupings.api.insufficient_privileges}")
+    private String INSUFFICIENT_PRIVILEGES;
+
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -243,48 +246,43 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uid a member of the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<GroupingsServiceResult>> optIn(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+    public ResponseEntity<List<AddMemberResult>> optIn(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable String uid) {
+
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optIn(currentUser, path, uid));
+                .body(membershipService.opt_In(currentUser, path, uid));
     }
 
     /**
      * Make a user of uid a member of the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<GroupingsServiceResult>> optOut(@RequestHeader("current_user") String currentUser,
-            @PathVariable String path,
-            @PathVariable String uid) {
+    public ResponseEntity<List<AddMemberResult>> optOut(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optOut(currentUser, path, uid));
+                .body(membershipService.opt_Out(currentUser, path, uid));
     }
 
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")
-    public ResponseEntity<List<AddMemberResult>> addIncludeMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+    public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addIncludeMembers...");
-        path = path + INCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
+                .body(membershipService.addExcludeMembers(currentUser, path, usersToAdd));
     }
 
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")
-    public ResponseEntity<List<AddMemberResult>> addExcludeMembers(
-            @RequestHeader("current_user") String currentUser, @PathVariable String path,
-            @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
+    public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addExcludeMembers...");
-        path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.addGroupingMembers(currentUser, path, usersToAdd));
+                .body(membershipService.addExcludeMembers(currentUser, path, usersToAdd));
     }
 
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")

@@ -1,12 +1,9 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -17,6 +14,8 @@ public interface MembershipService {
     List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addIncludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addExcludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
 
@@ -54,6 +53,10 @@ public interface MembershipService {
     List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
 
     List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
+
+    List<AddMemberResult> opt_In(String currentUser, String groupingPath, String uid);
+
+    List<AddMemberResult> opt_Out(String currentUser, String groupingPath, String uid);
 
     boolean isGroupCanOptIn(String username, String groupPath);
 
