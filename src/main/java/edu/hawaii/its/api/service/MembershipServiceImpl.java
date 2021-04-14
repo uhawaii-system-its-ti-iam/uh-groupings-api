@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -381,13 +382,10 @@ public class MembershipServiceImpl implements MembershipService {
                 + "usersToAdd: " + usersToAdd + ";");
 
         String parentPath = helperService.parentGroupingPath(groupingPath);
-        if (!memberAttributeService.isOwner(parentPath, ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
         String removalPath = parentPath;
+
         if (groupingPath.endsWith(INCLUDE)) {
             removalPath += EXCLUDE;
         } else if (groupingPath.endsWith(EXCLUDE)) {
@@ -403,7 +401,8 @@ public class MembershipServiceImpl implements MembershipService {
             try {
                 WsDeleteMemberResults wsDeleteMemberResults =
                         grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
-                wasRemoved = "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                wasRemoved =
+                        "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
 
                 WsAddMemberResults wsAddMemberResults =
                         grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
@@ -433,6 +432,22 @@ public class MembershipServiceImpl implements MembershipService {
 
          */
         return addMemberResults;
+    }
+
+    @Override
+    public List<AddMemberResult> addIncludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd) {
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        return addGroupingMembers(ownerUsername, groupingPath + INCLUDE, usersToAdd);
+    }
+
+    @Override
+    public List<AddMemberResult> addExcludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd) {
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        return addGroupingMembers(ownerUsername, groupingPath + EXCLUDE, usersToAdd);
     }
 
     @Override public List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath,
@@ -671,6 +686,20 @@ public class MembershipServiceImpl implements MembershipService {
             list.add(groupingsServiceResult);
             return list;
         }
+    }
+
+    @Override public List<AddMemberResult> opt_In(String currentUser, String groupingPath, String uid) {
+        if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        return addGroupingMembers(currentUser, groupingPath + INCLUDE, Collections.singletonList(uid));
+    }
+
+    @Override public List<AddMemberResult> opt_Out(String currentUser, String groupingPath, String uid) {
+        if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        return addGroupingMembers(currentUser, groupingPath + EXCLUDE, Collections.singletonList(uid));
     }
 
     //returns true if the group allows that user to opt out
