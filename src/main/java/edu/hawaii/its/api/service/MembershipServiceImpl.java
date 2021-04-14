@@ -377,6 +377,8 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath,
             List<String> usersToAdd) {
+        logger.info("addGroupingMembers; ownerUsername: " + ownerUsername + "; groupingPath: " + groupingPath + ";"
+                + "usersToAdd: " + usersToAdd + ";");
 
         String parentPath = helperService.parentGroupingPath(groupingPath);
         if (!memberAttributeService.isOwner(parentPath, ownerUsername)) {
@@ -401,8 +403,7 @@ public class MembershipServiceImpl implements MembershipService {
             try {
                 WsDeleteMemberResults wsDeleteMemberResults =
                         grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
-                wasRemoved =
-                        "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                wasRemoved = "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
 
                 WsAddMemberResults wsAddMemberResults =
                         grouperFS.makeWsAddMemberResults(groupingPath, wsSubjectLookup, userToAdd);
