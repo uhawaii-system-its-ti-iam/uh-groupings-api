@@ -273,7 +273,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addExcludeMembers(currentUser, path, usersToAdd));
+                .body(membershipService.addIncludeMembers(currentUser, path, usersToAdd));
     }
 
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")

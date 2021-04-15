@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -162,7 +161,7 @@ public class TestGroupingAssignmentService {
         includeNames.add(usernames[0]);
         includeNames.add(usernames[1]);
         includeNames.add(usernames[2]);
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from exclude
         membershipService.addGroupingMember(usernames[0], GROUPING, usernames[4]);

@@ -286,7 +286,7 @@ public class TestGroupingsRestControllerv2_1 {
         includeNames.add(usernames[2]);
         includeNames.add(usernames[4]);
         includeNames.add(usernames[5]);
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
         membershipService.deleteGroupMember(usernames[0], GROUPING_INCLUDE, usernames[3]);
@@ -757,8 +757,6 @@ public class TestGroupingsRestControllerv2_1 {
         mapGSR(API_BASE + "admins/" + tstUuid[0], "delete", adminUser);
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
     }
-
-
 
     @Test
     public void enableDisablePreferencesAndSyncDestsPassTest() throws Exception {
