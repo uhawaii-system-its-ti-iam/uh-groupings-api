@@ -27,8 +27,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -369,101 +367,6 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void addGroupMembersTest() throws IOException, MessagingException {
-
-        List<GroupingsServiceResult> listGsr;
-        List<String> usersToAdd = new ArrayList<String>();
-        List<String> uuidsToAdd = new ArrayList<String>();
-
-        String ownerUsername = users.get(0).getUsername();
-        String groupPath = GROUPING_3_INCLUDE_PATH;
-
-        usersToAdd.add(users.get(2).getUsername());
-        usersToAdd.add(users.get(3).getUsername());
-
-        uuidsToAdd.add(users.get(2).getUhUuid());
-        uuidsToAdd.add(users.get(3).getUhUuid());
-
-        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, usersToAdd);
-        for (int i = 0; i < listGsr.size(); i++) {
-            assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
-        }
-
-        listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, uuidsToAdd);
-        for (int i = 0; i < listGsr.size(); i++) {
-            assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
-        }
-
-        // Creating list larger than 100 will fail because of invalid address.
-        List<String> userToAddList = new ArrayList<>();
-        for (int i = 0; i <= 100; i++) {
-            userToAddList.add("username" + i);
-        }
-        try {
-            listGsr = membershipService.addGroupMembers(ownerUsername, groupPath, userToAddList);
-            for (int i = 0; i < listGsr.size(); i++) {
-                assertTrue(listGsr.get(i).getResultCode().startsWith(SUCCESS));
-            }
-        } catch (Exception e) {
-            assertTrue(e != null);
-        }
-
-        // Testing for largest possible group member additions in the testing environment.
-        String manyPath = GROUPING_4_INCLUDE_PATH;
-        List<String> manyUsers = new ArrayList<String>();
-        for (Person user : users) {
-            manyUsers.add(user.getUsername());
-        }
-        List<GroupingsServiceResult> manyGsr;
-        manyGsr = membershipService.addGroupMembers(ownerUsername, manyPath, manyUsers);
-
-        // Checks that the desired amount of results are returned.
-        assertTrue(manyGsr.size() == 95);
-
-        // Checks that all results return with success value.
-        for (GroupingsServiceResult result : manyGsr) {
-            assertTrue(result.getResultCode().startsWith(SUCCESS));
-        }
-
-        // Testing for proper handling of null parameter values.
-        /*
-        try {
-            membershipService.addGroupMembers(null, null, null);
-        } catch (Exception e) {
-            assertTrue(e.toString().equals("java.lang.NullPointerException"));
-        }
-         */
-
-        // Testing for proper handling of invalid grouping path.
-        try {
-            membershipService.addGroupMembers(ownerUsername, "dummyPath", manyUsers);
-        } catch (Exception e) {
-            assertTrue(e.toString().equals("edu.hawaii.its.api.type.GroupingsServiceResultException"));
-        }
-
-        // Testing for proper handling of invalid owner username.
-        try {
-            membershipService.addGroupMembers("dummyOwner", manyPath, manyUsers);
-        } catch (Exception e) {
-            System.out.println("Exception thrown: " + e);
-            assertTrue(e.toString()
-                    .equals("org.springframework.security.access.AccessDeniedException: Insufficient Privileges"));
-        }
-
-        /*
-        // Testing for proper handling of invalid usernames list.
-        List<String> dummyUsers = new ArrayList<String>();
-        for (int i = 0; i <= 10; i++) {
-            dummyUsers.add("dummyUser" + i);
-        }
-        // Expecting 0 returned GSRs from invalid usernames.
-        List<GroupingsServiceResult> emptyGsr;
-        emptyGsr = membershipService.addGroupMembers(ownerUsername, manyPath, dummyUsers);
-        assertEquals(0, emptyGsr.size());
-         */
-    }
-
-    @Test
     public void deleteGroupMemberTest() {
 
         // Passes even though 1234 is not a person.
@@ -708,35 +611,5 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
-    }
-
-    @Test
-    public void addMembers() throws IOException, MessagingException {
-        // add all usernames.
-        List<String> usernames = new ArrayList<>();
-        for (Person user : users) {
-            usernames.add(user.getUsername());
-        }
-
-        Grouping grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-
-        // check how many members are in the basis.
-        int numberOfBasisMembers = grouping.getBasis().getMembers().size();
-
-        // try to put all users into exclude group.
-        membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_EXCLUDE_PATH, usernames);
-        grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        // there should be no real members in composite, but it should still have the 'grouperAll' member.
-        assertThat(grouping.getComposite().getMembers().size(), is(1));
-        // only the users in the basis should have been added to the exclude group.
-        assertThat(grouping.getExclude().getMembers().size(), is(numberOfBasisMembers));
-
-        // try to put all users into the include group.
-        membershipService.addGroupMembers(users.get(0).getUsername(), GROUPING_3_INCLUDE_PATH, usernames);
-        grouping = groupingRepository.findByPath(GROUPING_3_PATH);
-        // all members should be in the group ( - 1 for 'grouperAll' in composite);.
-        assertThat(grouping.getComposite().getMembers().size() - 1, is(usernames.size()));
-        // members in basis should not have been added to the include group ( + 2 for 'grouperAll' in both groups).
-        assertThat(grouping.getInclude().getMembers().size(), is(usernames.size() - numberOfBasisMembers + 2));
     }
 }

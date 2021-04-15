@@ -127,7 +127,7 @@ public class TestMembershipService {
         includeNames.add(username[1]);
         includeNames.add(username[2]);
 
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         // Add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis).
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
@@ -882,28 +882,6 @@ public class TestMembershipService {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
-    }
-
-    @Test
-    public void addGroupMembersTest() throws IOException, MessagingException {
-        String ownerUsername = username[0];
-
-        List<GroupingsServiceResult> results;
-        List<String> usernames = new ArrayList<>();
-
-        for (int i = 0; i < 6; i++) {
-            usernames.add(username[i]);
-        }
-
-        results = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, usernames);
-
-        for (GroupingsServiceResult result : results) {
-            assertTrue(result.getResultCode().startsWith(SUCCESS));
-        }
-
-        //        for (int i = 0; i < 6; i++) {
-        //            membershipService.deleteGroupMember(ownerUsername, GROUPING_INCLUDE, username[i]);
-        //        }
     }
 
     @Test

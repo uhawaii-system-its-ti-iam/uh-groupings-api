@@ -254,36 +254,6 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Add a list of multiple usersToAdd to groupPath as ownerUsername
-     */
-    @Override
-    public List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToAdd) {
-        List<GroupingsServiceResult> gsrs = new ArrayList<>();
-        for (String userToAdd : usersToAdd) {
-            try {
-                gsrs.addAll(addGroupMember(ownerUsername, groupPath, userToAdd));
-            } catch (GcWebServiceError e) {
-            }
-        }
-
-        /*
-        if (usersToAdd.size() > 100) {
-            groupingsMailService
-                    .setJavaMailSender(javaMailSender)
-                    .setFrom("no-reply@its.hawaii.edu");
-            groupingsMailService.sendCSVMessage(
-                    "no-reply@its.hawaii.edu",
-                    groupingsMailService.getUserEmail(ownerUsername),
-                    "Groupings: Add " + groupPath,
-                    "",
-                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", gsrs);
-        }
-         */
-        return gsrs;
-    }
-
-    /**
      * Authenticate userIdentifier as a valid person and add them to groupPath as ownerUsername
      */
     @Override

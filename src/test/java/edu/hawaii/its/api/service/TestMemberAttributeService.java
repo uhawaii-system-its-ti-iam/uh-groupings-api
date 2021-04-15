@@ -152,7 +152,7 @@ public class TestMemberAttributeService {
         includeNames.add(usernames[0]);
         includeNames.add(usernames[1]);
         includeNames.add(usernames[2]);
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
         membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[4]);
