@@ -600,72 +600,14 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
-    //user adds them self to the group if they have permission
-    @Override
-    public List<GroupingsServiceResult> optIn(String optInUsername, String groupingPath) {
-        String outOrrIn = "in ";
-        String preposition = "to ";
-        String addGroup = groupingPath + INCLUDE;
-
-        return opt(optInUsername, groupingPath, addGroup, outOrrIn, preposition);
-    }
-
-    //user removes them self from the group if they have permission
-    @Override
-    public List<GroupingsServiceResult> optOut(String optOutUsername, String groupingPath) {
-        String outOrrIn = "out ";
-        String preposition = "from ";
-        String addGroup = groupingPath + EXCLUDE;
-
-        return opt(optOutUsername, groupingPath, addGroup, outOrrIn, preposition);
-    }
-
-    //user adds them self to the group if they have permission
-    @Override
-    public List<GroupingsServiceResult> optIn(String currentUser, String groupingPath, String uid) {
-        String outOrrIn = "in ";
-        String preposition = "to ";
-        String addGroup = groupingPath + INCLUDE;
-
-        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
-            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
-        } else {
-            GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
-                    FAILURE + currentUser + " cannot opt " + uid + " into " + groupingPath,
-                    currentUser + " opts " + uid + " into " + groupingPath);
-            List<GroupingsServiceResult> list = new ArrayList<>();
-            list.add(groupingsServiceResult);
-            return list;
-        }
-    }
-
-    //user removes them self from the group if they have permission
-    @Override
-    public List<GroupingsServiceResult> optOut(String currentUser, String groupingPath, String uid) {
-        String outOrrIn = "out ";
-        String preposition = "from ";
-        String addGroup = groupingPath + EXCLUDE;
-
-        if (currentUser.equals(uid) || memberAttributeService.isAdmin(currentUser)) {
-            return opt(uid, groupingPath, addGroup, outOrrIn, preposition);
-        } else {
-            GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult(
-                    FAILURE + currentUser + " cannot opt " + uid + " out of " + groupingPath,
-                    currentUser + " opts " + uid + " out of " + groupingPath);
-            List<GroupingsServiceResult> list = new ArrayList<>();
-            list.add(groupingsServiceResult);
-            return list;
-        }
-    }
-
-    @Override public List<AddMemberResult> opt_In(String currentUser, String groupingPath, String uid) {
+    @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupingMembers(currentUser, groupingPath + INCLUDE, Collections.singletonList(uid));
     }
 
-    @Override public List<AddMemberResult> opt_Out(String currentUser, String groupingPath, String uid) {
+    @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }

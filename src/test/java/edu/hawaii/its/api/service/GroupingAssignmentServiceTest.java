@@ -215,7 +215,6 @@ public class GroupingAssignmentServiceTest {
         assertTrue(groupingNull.getComposite().getUhUuids().contains(users.get(7).getUhUuid()));
     }
 
-
     @Test
     public void groupingsInTest() {
 
@@ -289,22 +288,22 @@ public class GroupingAssignmentServiceTest {
         assertThat(groupingsOptedInto.size(), is(0));
 
         //opt into a grouping
-        membershipService.optIn(user5, GROUPING_1_PATH);
+        membershipService.optIn(user5, GROUPING_1_PATH, user5);
         groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
         assertThat(groupingsOptedInto.size(), is(1));
 
         //opt into another grouping
-        membershipService.optIn(user5, GROUPING_3_PATH);
+        membershipService.optIn(user5, GROUPING_3_PATH, user5);
         groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
         assertThat(groupingsOptedInto.size(), is(2));
 
         //opt out of a grouping
-        membershipService.optOut(user5, GROUPING_3_PATH);
+        membershipService.optOut(user5, GROUPING_3_PATH, user5);
         groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
         assertThat(groupingsOptedInto.size(), is(1));
 
         //opt out of another grouping
-        membershipService.optOut(user5, GROUPING_1_PATH);
+        membershipService.optOut(user5, GROUPING_1_PATH, user5);
         groupingsOptedInto = groupingAssignmentService.groupingsOptedInto(user5, groupPaths);
         assertThat(groupingsOptedInto.size(), is(0));
     }
@@ -325,7 +324,7 @@ public class GroupingAssignmentServiceTest {
         assertThat(groupingsOptedOutOf.size(), is(0));
 
         //opt out of a grouping
-        membershipService.optOut(user1, GROUPING_1_PATH);
+        membershipService.optOut(user1, GROUPING_1_PATH, user1);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
         for (Group group : groups) {
@@ -335,7 +334,7 @@ public class GroupingAssignmentServiceTest {
         assertThat(groupingsOptedOutOf.size(), is(1));
 
         //opt out of another grouping
-        membershipService.optOut(user1, GROUPING_3_PATH);
+        membershipService.optOut(user1, GROUPING_3_PATH, user1);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
         for (Group group : groups) {
@@ -345,7 +344,7 @@ public class GroupingAssignmentServiceTest {
         assertThat(groupingsOptedOutOf.size(), is(2));
 
         //opt into a grouping
-        membershipService.optIn(user1, GROUPING_3_PATH);
+        membershipService.optIn(user1, GROUPING_3_PATH, user1);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
         for (Group group : groups) {
@@ -355,7 +354,7 @@ public class GroupingAssignmentServiceTest {
         assertThat(groupingsOptedOutOf.size(), is(1));
 
         //opt into another grouping
-        membershipService.optIn(user1, GROUPING_1_PATH);
+        membershipService.optIn(user1, GROUPING_1_PATH, user1);
         groups = groupRepository.findByMembersUsername(user1);
         groupPaths = new ArrayList<>();
         for (Group group : groups) {
@@ -422,7 +421,6 @@ public class GroupingAssignmentServiceTest {
             assertTrue(groupNames.contains("testName_" + i));
         }
     }
-
 
     @Test
     public void makeGroupsTest() {
