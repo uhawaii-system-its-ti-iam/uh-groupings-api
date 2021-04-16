@@ -27,9 +27,6 @@ public interface MembershipService {
     GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
             String userToDelete);
 
-    List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToDelete);
-
     List<String> listOwned(String adminUsername, String username);
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);

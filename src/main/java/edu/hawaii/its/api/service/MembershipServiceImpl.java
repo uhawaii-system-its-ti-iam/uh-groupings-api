@@ -276,23 +276,6 @@ public class MembershipServiceImpl implements MembershipService {
         return deleteMemberHelper(ownerUsername, groupPath, createNewPerson(userIdentifier));
     }
 
-    @Override
-    public List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToDelete) {
-        logger.info("deleteGroupMemberByUuid; user: " + ownerUsername
-                + "; group: " + groupPath
-                + "; usersToDelete: " + usersToDelete
-                + ";");
-        List<GroupingsServiceResult> gsrs = new ArrayList<>();
-        for (String userToDelete : usersToDelete) {
-            try {
-                gsrs.add(new GroupingsServiceResult("Success!", "Delete!", new Person("noName", userToDelete)));
-            } catch (GcWebServiceError e) {
-            }
-        }
-        return gsrs;
-    }
-
     /**
      * Get a list of memberships pertaining to uid.
      */

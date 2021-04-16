@@ -111,7 +111,7 @@ public class MembershipServiceUnitTest {
         membershipService.setMemberAttributeService(memberAttribute);
         membershipService.setGrouperFactoryService(grouperService);
         membershipService.setHelperService(helperService);
-        
+
         // Todo - This needs to be reworked with the new opt in/out return values of List<AddMemberResult.
        /*
         List<String> groupPaths = new ArrayList<>();

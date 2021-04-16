@@ -248,7 +248,6 @@ public class GroupingsRestControllerv2_1 {
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{uid:[\\w-:.]+}/self")
     public ResponseEntity<List<AddMemberResult>> optIn(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable String uid) {
-
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
