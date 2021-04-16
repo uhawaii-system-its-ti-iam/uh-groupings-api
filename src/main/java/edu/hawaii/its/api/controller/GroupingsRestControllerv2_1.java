@@ -252,7 +252,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.opt_In(currentUser, path, uid));
+                .body(membershipService.optIn(currentUser, path, uid));
     }
 
     /**
@@ -264,7 +264,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST optOut...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.opt_Out(currentUser, path, uid));
+                .body(membershipService.optOut(currentUser, path, uid));
     }
 
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")

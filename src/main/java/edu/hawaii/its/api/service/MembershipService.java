@@ -41,17 +41,9 @@ public interface MembershipService {
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
-    List<GroupingsServiceResult> optIn(String username, String groupingPath);
+    List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid);
 
-    List<GroupingsServiceResult> optOut(String username, String groupingPath);
-
-    List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
-
-    List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
-
-    List<AddMemberResult> opt_In(String currentUser, String groupingPath, String uid);
-
-    List<AddMemberResult> opt_Out(String currentUser, String groupingPath, String uid);
+    List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
 
     boolean isGroupCanOptIn(String username, String groupPath);
 

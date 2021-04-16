@@ -190,50 +190,6 @@ public class TestMembershipService {
         assertThat(assignedValue, is(dateStr));
     }
 
-    @Test
-    public void optTest() {
-        //Reset group.
-        membershipService.removeSelfOpted(GROUPING_EXCLUDE, username[3]);
-
-        //tst[3] is not in the composite or include, but is in the basis and exclude.
-        //tst[3] is not self opted into the exclude.
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
-
-        membershipService.optIn(username[0], GROUPING, username[3]);
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-        membershipService.optOut(username[0], GROUPING, username[3]);
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
-
-        //tst[3] opts in to the Grouping.
-        membershipService.optIn(username[3], GROUPING);
-        //tst[3] should still be in the basis and now also in the Grouping.
-        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING, username[3]));
-        //tst[3] is no longer in the exclude, and because tst[3] is in the basis,
-        //tst[3] does not get added to the include.
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-
-        //tst[3] opts out of the Grouping.
-        membershipService.optOut(username[3], GROUPING);
-        //tst[3] is still in basis, now in exclude and not in Grouping or include.
-        assertTrue(memberAttributeService.isMember(GROUPING_BASIS, username[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username[3]));
-        //tst[3] is now self opted into exclude.
-        assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
-
-        //Admins can opt other users.
-        membershipService.optIn(ADMIN, GROUPING, username[3]);
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username[3]));
-        membershipService.optOut(ADMIN, GROUPING, username[3]);
-        assertTrue(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[3]));
-    }
 
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them.
     @Test

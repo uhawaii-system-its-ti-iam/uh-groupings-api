@@ -351,7 +351,7 @@ public class TestGroupingAssignmentService {
         assertTrue(optedGroups.size() == 3);
 
         // Opt out one of the groups.
-        membershipService.optOut(usernames[0], GROUPING);
+        membershipService.optOut(usernames[0], GROUPING, usernames[0]);
 
         // Call groupingsOpted once more to get refreshed list of opted groups.
         optedGroups = groupingAssignmentService.groupingsOpted("include", usernames[0], groupings);
