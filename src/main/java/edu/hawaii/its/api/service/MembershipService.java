@@ -18,12 +18,8 @@ public interface MembershipService {
     List<AddMemberResult> addExcludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
-
-    List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
-
-    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
-
-    GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath, String userToDelete);
+    List<RemoveMemberResult> removeIncludeMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
+    List<RemoveMemberResult> removeExcludeMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
 
     List<String> listOwned(String adminUsername, String username);
 

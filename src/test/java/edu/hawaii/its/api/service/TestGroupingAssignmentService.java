@@ -168,7 +168,7 @@ public class TestGroupingAssignmentService {
         membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[5]));
 
         // add to exclude
-        membershipService.deleteGroupingMember(usernames[0], GROUPING, usernames[3]);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
     }
 
@@ -333,15 +333,17 @@ public class TestGroupingAssignmentService {
         groupings.add(GROUPING_TRUE_EMPTY_INCLUDE);
 
         // Add user to individual group then set then assign the self opted attribute to user.
-        membershipService.addGroupMember(usernames[0], GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_STORE_EMPTY_INCLUDE,
+                Collections.singletonList(usernames[0]));
         membershipService.addSelfOpted(GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
 
         // Add user to individual group then set then assign the self opted attribute to user.
-        membershipService.addGroupMember(usernames[0], GROUPING_INCLUDE, usernames[0]);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[0]));
         membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[0]);
 
         // Add user to individual group then set then assign self opted attribute to user.
-        membershipService.addGroupMember(usernames[0], GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
+        membershipService
+                .addGroupingMembers(usernames[0], GROUPING_TRUE_EMPTY_INCLUDE, Collections.singletonList(usernames[0]));
         membershipService.addSelfOpted(GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
 
         // Call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings.

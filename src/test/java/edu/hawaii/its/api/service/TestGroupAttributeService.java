@@ -137,7 +137,7 @@ public class TestGroupAttributeService {
         membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
 
         //add to exclude
-        membershipService.deleteGroupingMember(username[0], GROUPING, username[3]);
+        membershipService.addGroupingMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
