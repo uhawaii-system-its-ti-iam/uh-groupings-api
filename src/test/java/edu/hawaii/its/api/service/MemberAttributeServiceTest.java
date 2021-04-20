@@ -222,42 +222,6 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void removeOwnershipTest() {
-        GroupingsServiceResult randomUserRemoves;
-
-        try {
-            //non-owner/non-admin tries to remove ownership
-            randomUserRemoves = memberAttributeService
-                    .removeOwnership(GROUPING_0_PATH, users.get(1).getUsername(), users.get(1).getUsername());
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-
-        //add owner for owner to remove
-        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
-                users.get(1).getUsername());
-
-        //owner tries to remove other ownership
-        GroupingsServiceResult ownerRemoves = memberAttributeService
-                .removeOwnership(GROUPING_0_PATH, users.get(0).getUsername(), users.get(1).getUsername());
-        assertThat(ownerRemoves.getResultCode(), is(SUCCESS));
-
-        //try to remove ownership from user that is not an owner
-        GroupingsServiceResult ownerRemovesNonOwner = memberAttributeService
-                .removeOwnership(GROUPING_0_PATH, users.get(0).getUsername(), users.get(1).getUsername());
-        assertThat(ownerRemovesNonOwner.getResultCode(), is(SUCCESS));
-
-        //add owner for admin to remove
-        membershipService.addGroupMember(users.get(0).getUsername(), GROUPING_0_OWNERS_PATH,
-                users.get(1).getUsername());
-
-        //admin tries to remove ownership
-        GroupingsServiceResult adminRemoves =
-                memberAttributeService.removeOwnership(GROUPING_0_PATH, ADMIN_USER, users.get(1).getUsername());
-        assertThat(SUCCESS, is(adminRemoves.getResultCode()));
-    }
-
-    @Test
     public void checkSelfOptedTest() {
 
         //user is not in group

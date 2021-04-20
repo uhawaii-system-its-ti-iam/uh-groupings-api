@@ -292,7 +292,7 @@ public class GroupingsRestControllerv2_1 {
         path = path + INCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
+                .body(membershipService.removeIncludeMembers(currentUser, path, usersToRemove));
     }
 
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
@@ -303,7 +303,7 @@ public class GroupingsRestControllerv2_1 {
         path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeGroupingMembers(currentUser, path, usersToRemove));
+                .body(membershipService.removeExcludeMembers(currentUser, path, usersToRemove));
     }
 
     /**

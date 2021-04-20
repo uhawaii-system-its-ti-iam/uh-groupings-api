@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,8 +57,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -289,13 +290,15 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
-        membershipService.deleteGroupMember(usernames[0], GROUPING_INCLUDE, usernames[3]);
+        membershipService
+                .removeGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[3]));
 
         // add to exclude
-        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[3]);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         // remove from exclude
-        membershipService.deleteGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[2]);
+        membershipService
+                .removeGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[2]));
 
         // Remove admin privileges
         membershipService.deleteAdmin(ADMIN, usernames[0]);
@@ -312,13 +315,13 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], RELEASED_GROUPING, false);
 
         // Ensures users are not already in group
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[2]);
+        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[2]));
 
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[2]);
+        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[2]));
     }
 
     @Test
