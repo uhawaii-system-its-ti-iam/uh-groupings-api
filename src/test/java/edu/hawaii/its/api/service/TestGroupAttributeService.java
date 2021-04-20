@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -132,8 +133,8 @@ public class TestGroupAttributeService {
         membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMember(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMember(username[0], GROUPING, username[5]);
+        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
+        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
 
         //add to exclude
         membershipService.deleteGroupingMember(username[0], GROUPING, username[3]);
@@ -257,7 +258,6 @@ public class TestGroupAttributeService {
     public void changeUhReleasedGroupingsStatusTest() {
         //todo
     }
-
 
     @Test
     public void updateDescriptionTest() {

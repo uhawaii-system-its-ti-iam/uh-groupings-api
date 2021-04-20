@@ -207,16 +207,6 @@ public class MembershipServiceImpl implements MembershipService {
         return new Person(null, null, userToAdd, null, null);
     }
 
-    // Adds a member to a Grouping from either UH username or UH ID number.
-    @Override
-    public List<GroupingsServiceResult> addGroupingMember(String username, String groupingPath,
-            String userIdentifier) {
-        logger.info("addGroupingMemberByUuid; user: " + username + "; grouping: " + groupingPath + "; userToAdd: "
-                + userIdentifier + ";");
-
-        return addGroupingMemberHelper(username, groupingPath, userIdentifier, createNewPerson(userIdentifier));
-    }
-
     /**
      * Delete a member of groupingPath with respect to uid or uhUuid as ownerUsername.
      */
@@ -382,7 +372,6 @@ public class MembershipServiceImpl implements MembershipService {
                     "",
                     "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", addMemberResults);
         }
-
          */
         return addMemberResults;
     }
@@ -620,41 +609,6 @@ public class MembershipServiceImpl implements MembershipService {
                 .getResultMetadata()
                 .getResultCode()
                 .equals(SUCCESS_ALLOWED);
-    }
-
-    public List<GroupingsServiceResult> opt(String username, String grouping, String addGroup, String outOrrIn,
-            String preposition) {
-
-        List<GroupingsServiceResult> results = new ArrayList<>();
-
-        if (isGroupCanOptIn(username, addGroup)) {
-
-            switch (outOrrIn) {
-                case "out ":
-                    results.addAll(deleteGroupingMember(username, grouping, username));
-                    break;
-
-                case "in ":
-                    results.addAll(addGroupingMember(username, grouping, username));
-                    break;
-            }
-
-            if (memberAttributeService.isMember(addGroup, username)) {
-                results.add(addSelfOpted(addGroup, username));
-            }
-        } else {
-
-            String action = "opt " + outOrrIn + username + " " + preposition + grouping;
-            String failureResult = FAILURE
-                    + ": "
-                    + username
-                    + " does not have permission to opt "
-                    + outOrrIn
-                    + preposition
-                    + grouping;
-            results.add(helperService.makeGroupingsServiceResult(failureResult, action));
-        }
-        return results;
     }
 
     //adds the self-opted attribute to the membership between the group and user
