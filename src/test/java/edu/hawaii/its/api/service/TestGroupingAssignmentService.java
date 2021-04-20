@@ -164,8 +164,8 @@ public class TestGroupingAssignmentService {
         membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from exclude
-        membershipService.addGroupingMember(usernames[0], GROUPING, usernames[4]);
-        membershipService.addGroupingMember(usernames[0], GROUPING, usernames[5]);
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[5]));
 
         // add to exclude
         membershipService.deleteGroupingMember(usernames[0], GROUPING, usernames[3]);

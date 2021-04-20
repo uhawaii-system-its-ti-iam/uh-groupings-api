@@ -12,20 +12,18 @@ public interface MembershipService {
     List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+
     List<AddMemberResult> addIncludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+
     List<AddMemberResult> addExcludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
 
     List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
 
-    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
-
     List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
 
-    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
-            String userIdentifier);
+    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
 
-    GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
-            String userToDelete);
+    GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath, String userToDelete);
 
     List<String> listOwned(String adminUsername, String username);
 
@@ -33,8 +31,8 @@ public interface MembershipService {
 
     List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 
-    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
-            List<String> includeIdentifier, List<String> excludeIdentifier);
+    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> includeIdentifier,
+            List<String> excludeIdentifier);
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
