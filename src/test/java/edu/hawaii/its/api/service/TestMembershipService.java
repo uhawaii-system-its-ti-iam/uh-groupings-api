@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -248,7 +250,6 @@ public class TestMembershipService {
         assertTrue(usernames.contains(username[5]));
     }
 
-
     @Test
     public void addGroupingMembersTest() {
         String ownerUsername = username[0];
@@ -311,6 +312,50 @@ public class TestMembershipService {
         }
     }
 
+    @Test
+    public void removeGroupingMembersTest() {
+
+        String ownerUsername = username[0];
+        List<RemoveMemberResult> removeMemberResults;
+        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+
+        // Remove a single member.
+        removeMemberResults =
+                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertTrue(removeMemberResult.isUserWasRemoved());
+            assertEquals(SUCCESS, removeMemberResult.getResult());
+        }
+
+        // Remove multiple members.
+        removableUsernames = new ArrayList<>(Arrays.asList(username).subList(1, 6));
+        removeMemberResults =
+                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+        Iterator<String> removableUsernamesIter = removableUsernames.iterator();
+        Iterator<RemoveMemberResult> removedMemberResultsIter = removeMemberResults.iterator();
+
+        while (removableUsernamesIter.hasNext() && removedMemberResultsIter.hasNext()) {
+            RemoveMemberResult result = removedMemberResultsIter.next();
+            String uid = removableUsernamesIter.next();
+            assertTrue(result.isUserWasRemoved());
+            assertEquals(SUCCESS, result.getResult());
+            assertEquals(uid, result.getUid());
+        }
+
+        // Attempt to remove non-members, sense removableUsernames have already been removed above, removing them again
+        // should fail.
+        removeMemberResults =
+                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+        removedMemberResultsIter = removeMemberResults.iterator();
+
+        while (removedMemberResultsIter.hasNext()) {
+            RemoveMemberResult result = removedMemberResultsIter.next();
+            assertFalse(result.isUserWasRemoved());
+            assertEquals(FAILURE, result.getResult());
+        }
+
+    }
 
     //Add admin and delete admin in one test
     @Test

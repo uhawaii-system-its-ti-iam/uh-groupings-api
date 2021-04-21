@@ -301,14 +301,16 @@ public class MembershipServiceImpl implements MembershipService {
         return addMemberResults;
     }
 
-    @Override public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+    @Override
+    public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupingMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
     }
 
-    @Override public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+    @Override
+    public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -376,7 +378,6 @@ public class MembershipServiceImpl implements MembershipService {
         return addGroupingMembers(currentUser, groupingPath + EXCLUDE, Collections.singletonList(uid));
     }
 
-
     //adds a user to the admins group via username or UH id number
     @Override
     public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
@@ -435,37 +436,6 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
-    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
-        // Creating a thread list which is populated with a thread for each removal that needs to be done.
-        List<WsDeleteMemberResults> results = new ArrayList<>();
-        List<Callable<WsDeleteMemberResults>> threads = new ArrayList<>();
-        ExecutorService executor = Executors.newFixedThreadPool(groupPaths.size());
-        for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
-            //creating runnable object containing the data needed for each individual delete.
-            Callable<WsDeleteMemberResults> master =
-                    new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
-            threads.add(master);
-        }
-        // Starting all of the created threads.
-        List<Future<WsDeleteMemberResults>> futures = null;
-        try {
-            futures = executor.invokeAll(threads);
-        } catch (InterruptedException e) {
-            logger.info("Executor Interrupted: " + e);
-        }
-        // Waiting to return result until every thread in the list has completed running.
-        for (Future future : futures) {
-            try {
-                results.add((WsDeleteMemberResults) future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                logger.info("Thread Interrupted: " + e);
-            }
-        }
-        // Shuts down the service once all threads have completed.
-        executor.shutdown();
-        return results;
-    }
-
     @Override
     public List<GroupingsServiceResult> resetGroup(String currentUser, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier) {
@@ -498,11 +468,12 @@ public class MembershipServiceImpl implements MembershipService {
         return result;
     }
 
-    //returns true if the group allows that user to opt out
+    //returns true if the group allows that user to opt in
     @Override
-    public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
-        logger.info("groupOptOutPermission; group: " + groupPath + "; username: " + optOutUsername + ";");
-        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optOutUsername, PRIVILEGE_OPT_OUT, groupPath);
+    public boolean isGroupCanOptIn(String optInUsername, String groupPath) {
+        logger.info("groupOptInPermission; group: " + groupPath + "; username: " + optInUsername + ";");
+
+        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optInUsername, PRIVILEGE_OPT_IN, groupPath);
 
         return result
                 .getResultMetadata()
@@ -510,12 +481,11 @@ public class MembershipServiceImpl implements MembershipService {
                 .equals(SUCCESS_ALLOWED);
     }
 
-    //returns true if the group allows that user to opt in
+    //returns true if the group allows that user to opt out
     @Override
-    public boolean isGroupCanOptIn(String optInUsername, String groupPath) {
-        logger.info("groupOptInPermission; group: " + groupPath + "; username: " + optInUsername + ";");
-
-        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optInUsername, PRIVILEGE_OPT_IN, groupPath);
+    public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
+        logger.info("groupOptOutPermission; group: " + groupPath + "; username: " + optOutUsername + ";");
+        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optOutUsername, PRIVILEGE_OPT_OUT, groupPath);
 
         return result
                 .getResultMetadata()
@@ -644,6 +614,37 @@ public class MembershipServiceImpl implements MembershipService {
 
     public void setHelperService(HelperService helperService) {
         this.helperService = helperService;
+    }
+
+    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
+        // Creating a thread list which is populated with a thread for each removal that needs to be done.
+        List<WsDeleteMemberResults> results = new ArrayList<>();
+        List<Callable<WsDeleteMemberResults>> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(groupPaths.size());
+        for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
+            //creating runnable object containing the data needed for each individual delete.
+            Callable<WsDeleteMemberResults> master =
+                    new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
+            threads.add(master);
+        }
+        // Starting all of the created threads.
+        List<Future<WsDeleteMemberResults>> futures = null;
+        try {
+            futures = executor.invokeAll(threads);
+        } catch (InterruptedException e) {
+            logger.info("Executor Interrupted: " + e);
+        }
+        // Waiting to return result until every thread in the list has completed running.
+        for (Future future : futures) {
+            try {
+                results.add((WsDeleteMemberResults) future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                logger.info("Thread Interrupted: " + e);
+            }
+        }
+        // Shuts down the service once all threads have completed.
+        executor.shutdown();
+        return results;
     }
 
 }

@@ -144,8 +144,7 @@ public class MembershipServiceTest {
             String uid = "iamtst01";
             membershipService.getMembershipResults(ownerUsername, uid);
         } catch (Exception e) {
-            System.out.println(e);
-            assertTrue(e != null);
+            assertNotNull(e);
         }
     }
 
