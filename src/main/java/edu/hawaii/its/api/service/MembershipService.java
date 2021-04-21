@@ -23,18 +23,18 @@ public interface MembershipService {
 
     List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 
+    List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid);
+
+    List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
+
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
+
+    GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
     List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 
     List<GroupingsServiceResult> resetGroup(String currentUser, String path, List<String> includeIdentifier,
             List<String> excludeIdentifier);
-
-    GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
-
-    List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid);
-
-    List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
 
     boolean isGroupCanOptIn(String username, String groupPath);
 
