@@ -11,23 +11,23 @@ public interface MembershipService {
 
     List<Membership> getMembershipResults(String owner, String uid);
 
-    List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addGroupingMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
-    List<AddMemberResult> addIncludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
-    List<AddMemberResult> addExcludeMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
-    List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
-    List<RemoveMemberResult> removeIncludeMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
-    List<RemoveMemberResult> removeExcludeMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
+    List<RemoveMemberResult> removeGroupingMembers(String currentUser, String groupPath, List<String> usersToRemove);
 
-    List<String> listOwned(String adminUsername, String username);
+    List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
+
+    List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
     List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 
-    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path, List<String> includeIdentifier,
+    List<GroupingsServiceResult> resetGroup(String currentUser, String path, List<String> includeIdentifier,
             List<String> excludeIdentifier);
 
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
@@ -48,6 +48,4 @@ public interface MembershipService {
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
     boolean isUhUuid(String username);
-
-    boolean canOpt(String path);
 }

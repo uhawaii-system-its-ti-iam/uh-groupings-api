@@ -72,9 +72,6 @@ public class GroupingsRestControllerv2_1 {
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
 
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
     @Autowired
     private GroupAttributeService groupAttributeService;
 
@@ -289,7 +286,6 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
         logger.info("Entered REST removeIncludeMembers...");
-        path = path + INCLUDE;
         return ResponseEntity
                 .ok()
                 .body(membershipService.removeIncludeMembers(currentUser, path, usersToRemove));
@@ -300,7 +296,6 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
         logger.info("Entered REST removeExcludeMembers...");
-        path = path + EXCLUDE;
         return ResponseEntity
                 .ok()
                 .body(membershipService.removeExcludeMembers(currentUser, path, usersToRemove));
