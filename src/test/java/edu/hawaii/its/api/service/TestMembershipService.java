@@ -313,6 +313,34 @@ public class TestMembershipService {
     }
 
     @Test
+    public void addIncludeMembersTest() {
+        String ownerUsername = username[0];
+        List<AddMemberResult> addMemberResults;
+
+        // Add valid users to include.
+        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
+        addMemberResults = membershipService.addIncludeMembers(ownerUsername, GROUPING, validUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
+            assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfRemoved());
+        }
+    }
+
+    @Test
+    public void addExcludeMembersTest() {
+        String ownerUsername = username[0];
+        List<AddMemberResult> addMemberResults;
+
+        // Add valid users to include.
+        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
+        addMemberResults = membershipService.addExcludeMembers(ownerUsername, GROUPING, validUsernames);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
+            assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
+        }
+    }
+
+    @Test
     public void removeGroupingMembersTest() {
 
         String ownerUsername = username[0];
@@ -354,7 +382,30 @@ public class TestMembershipService {
             assertFalse(result.isUserWasRemoved());
             assertEquals(FAILURE, result.getResult());
         }
+    }
 
+    @Test
+    public void removeIncludeMembersTest() {
+        String ownerUsername = username[0];
+        List<RemoveMemberResult> removeMemberResults;
+        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+        removeMemberResults =
+                membershipService.removeIncludeMembers(ownerUsername, GROUPING, removableUsernames);
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertEquals(GROUPING_INCLUDE, removeMemberResult.getPathOfRemoved());
+        }
+    }
+
+    @Test
+    public void removeExcludeMembersTest() {
+        String ownerUsername = username[0];
+        List<RemoveMemberResult> removeMemberResults;
+        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+        removeMemberResults =
+                membershipService.removeExcludeMembers(ownerUsername, GROUPING, removableUsernames);
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertEquals(GROUPING_EXCLUDE, removeMemberResult.getPathOfRemoved());
+        }
     }
 
     //Add admin and delete admin in one test

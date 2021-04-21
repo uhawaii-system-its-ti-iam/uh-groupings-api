@@ -174,6 +174,30 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void addIncludeMembersTest() {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add(users.get(2).getUsername());
+        usersToAdd.add(users.get(3).getUsername());
+        try {
+            membershipService.addIncludeMembers("zzzzz", GROUPING_3_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void addExcludeMembersTest() {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add(users.get(2).getUsername());
+        usersToAdd.add(users.get(3).getUsername());
+        try {
+            membershipService.addExcludeMembers("zzzzz", GROUPING_3_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
     public void removeGroupingMembersTest() {
         List<RemoveMemberResult> removeMemberResults;
         List<String> usersToRemove = new ArrayList<>();
@@ -195,6 +219,32 @@ public class MembershipServiceTest {
         }
         try {
             membershipService.removeGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void removeIncludeMembersTest() {
+        List<String> usersToRemove = new ArrayList<>();
+        usersToRemove.add(users.get(2).getUsername());
+        usersToRemove.add(users.get(3).getUsername());
+        // Bogus owner.
+        try {
+            membershipService.removeIncludeMembers("zzzzz", GROUPING_3_PATH, usersToRemove);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void removeExcludeMembersTest() {
+        List<String> usersToRemove = new ArrayList<>();
+        usersToRemove.add(users.get(2).getUsername());
+        usersToRemove.add(users.get(3).getUsername());
+        // Bogus owner.
+        try {
+            membershipService.removeExcludeMembers("zzzzz", GROUPING_3_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
