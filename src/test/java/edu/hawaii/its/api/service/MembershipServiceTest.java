@@ -183,6 +183,13 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
+        // Non-owner/admin attempts add.
+        try {
+            membershipService.addIncludeMembers(users.get(2).getUsername(), GROUPING_3_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
     }
 
     @Test
@@ -190,8 +197,17 @@ public class MembershipServiceTest {
         List<String> usersToAdd = new ArrayList<>();
         usersToAdd.add(users.get(2).getUsername());
         usersToAdd.add(users.get(3).getUsername());
+
+        // Bogus owner attempts to add.
         try {
             membershipService.addExcludeMembers("zzzzz", GROUPING_3_PATH, usersToAdd);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        // Non-owner/admin attempts add.
+        try {
+            membershipService.addExcludeMembers(users.get(2).getUsername(), GROUPING_3_PATH, usersToAdd);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -235,6 +251,12 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+        // Non-owner/admin attempts remove.
+        try {
+            membershipService.removeExcludeMembers(users.get(2).getUsername(), GROUPING_3_PATH, usersToRemove);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
     }
 
     @Test
@@ -245,6 +267,13 @@ public class MembershipServiceTest {
         // Bogus owner.
         try {
             membershipService.removeExcludeMembers("zzzzz", GROUPING_3_PATH, usersToRemove);
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        // Non-owner/admin attempts remove.
+        try {
+            membershipService.removeExcludeMembers(users.get(2).getUsername(), GROUPING_3_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }

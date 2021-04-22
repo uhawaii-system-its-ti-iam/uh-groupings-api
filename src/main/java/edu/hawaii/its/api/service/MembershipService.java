@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface MembershipService {
 
+    boolean isUhUuid(String username);
+   
     List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupingMembers(String currentUser, String groupPath, List<String> usersToAdd);
@@ -47,5 +49,4 @@ public interface MembershipService {
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
-    boolean isUhUuid(String username);
 }
