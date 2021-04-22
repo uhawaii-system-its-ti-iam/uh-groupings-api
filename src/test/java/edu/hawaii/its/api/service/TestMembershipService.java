@@ -310,6 +310,18 @@ public class TestMembershipService {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
+        List<String> invalidUsers = new ArrayList<>();
+        invalidUsers.add("zzzzzzz");
+        invalidUsers.add("aaaaaaa");
+
+        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        for (AddMemberResult addMemberResult : addMemberResults) {
+            assertFalse(addMemberResult.isUserWasRemoved());
+            assertNull(addMemberResult.getName());
+            assertNull(addMemberResult.getUid());
+            assertEquals(FAILURE, addMemberResult.getResult());
+        }
     }
 
     @Test
@@ -320,9 +332,13 @@ public class TestMembershipService {
         // Add valid users to include.
         List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         addMemberResults = membershipService.addIncludeMembers(ownerUsername, GROUPING, validUsernames);
+        Iterator<String> iter = validUsernames.iterator();
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfRemoved());
+            assertNotNull(addMemberResult.getName());
+            assertNotNull(addMemberResult.getUhUuid());
+            assertEquals(iter.next(), addMemberResult.getUid());
         }
     }
 
@@ -331,12 +347,16 @@ public class TestMembershipService {
         String ownerUsername = username[0];
         List<AddMemberResult> addMemberResults;
 
-        // Add valid users to include.
+        // Add valid users to exclude.
         List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         addMemberResults = membershipService.addExcludeMembers(ownerUsername, GROUPING, validUsernames);
+        Iterator<String> iter = validUsernames.iterator();
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
+            assertNotNull(addMemberResult.getName());
+            assertNotNull(addMemberResult.getUhUuid());
+            assertEquals(iter.next(), addMemberResult.getUid());
         }
     }
 
@@ -354,6 +374,10 @@ public class TestMembershipService {
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertTrue(removeMemberResult.isUserWasRemoved());
             assertEquals(SUCCESS, removeMemberResult.getResult());
+            assertNotNull(removeMemberResult.getUhUuid());
+            assertNotNull(removeMemberResult.getName());
+            assertNotNull(removeMemberResult.getUid());
+            assertEquals(GROUPING_INCLUDE, removeMemberResult.getPathOfRemoved());
         }
 
         // Remove multiple members.
@@ -369,10 +393,15 @@ public class TestMembershipService {
             assertTrue(result.isUserWasRemoved());
             assertEquals(SUCCESS, result.getResult());
             assertEquals(uid, result.getUid());
+            assertEquals(uid, result.getUhUuid());
+            assertNotNull(result.getUhUuid());
+            assertNotNull(result.getUid());
+            assertNotNull(result.getName());
+            assertEquals(GROUPING_INCLUDE, result.getPathOfRemoved());
         }
 
-        // Attempt to remove non-members, sense removableUsernames have already been removed above, removing them again
-        // should fail.
+        // Try to remove non-members, the list of removableUsernames has already been removed above, thus attempting to
+        // remove them again should fail.
         removeMemberResults =
                 membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
         removedMemberResultsIter = removeMemberResults.iterator();
@@ -382,6 +411,19 @@ public class TestMembershipService {
             assertFalse(result.isUserWasRemoved());
             assertEquals(FAILURE, result.getResult());
         }
+
+        List<String> invalidUsers = new ArrayList<>();
+        invalidUsers.add("zzzzzzz");
+        invalidUsers.add("aaaaaaa");
+
+        removeMemberResults = membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            assertFalse(removeMemberResult.isUserWasRemoved());
+            assertNull(removeMemberResult.getName());
+            assertNull(removeMemberResult.getUid());
+            assertEquals(FAILURE, removeMemberResult.getResult());
+        }
+
     }
 
     @Test
