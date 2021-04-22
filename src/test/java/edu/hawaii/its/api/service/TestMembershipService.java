@@ -408,6 +408,30 @@ public class TestMembershipService {
         }
     }
 
+    @Test
+    public void optInTest() {
+        String ownerUsername = username[0];
+        List<AddMemberResult> optResults;
+
+        optResults = membershipService.optIn(ownerUsername, GROUPING, ownerUsername);
+        for (AddMemberResult optResult : optResults) {
+            assertEquals(GROUPING_INCLUDE, optResult.getPathOfAdd());
+            assertEquals(GROUPING_EXCLUDE, optResult.getPathOfRemoved());
+        }
+    }
+
+    @Test
+    public void optOutTest() {
+        String ownerUsername = username[0];
+        List<AddMemberResult> optResults;
+
+        optResults = membershipService.optOut(ownerUsername, GROUPING, ownerUsername);
+        for (AddMemberResult optResult : optResults) {
+            assertEquals(GROUPING_EXCLUDE, optResult.getPathOfAdd());
+            assertEquals(GROUPING_INCLUDE, optResult.getPathOfRemoved());
+        }
+    }
+
     //Add admin and delete admin in one test
     @Test
     public void adminTest() {

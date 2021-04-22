@@ -251,6 +251,39 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void optInTest() {
+        // Invalid user attempts to opt.
+        try {
+            membershipService.optIn("zzzzz", GROUPING_3_PATH, users.get(2).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+        // Non-owner/admin attempts to opt.
+        try {
+            membershipService.optIn(users.get(2).getUsername(), GROUPING_3_PATH, users.get(2).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+    }
+
+    @Test
+    public void optOutTest() {
+        // Invalid user attempts to opt.
+        try {
+            membershipService.optOut("zzzzz", GROUPING_3_PATH, users.get(2).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+        // Non-owner/admin attempts to opt.
+        try {
+            membershipService.optOut(users.get(2).getUsername(), GROUPING_3_PATH, users.get(2).getUsername());
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
     public void addAdminTest() {
 
         try {
@@ -308,92 +341,6 @@ public class MembershipServiceTest {
         assertThat(gsr.get(1).getResultCode(), is(SUCCESS));
         assertThat(gsr.get(2).getResultCode(), is(SUCCESS));
     }
-
-    /*
-    @Test
-    public void optInTest() {
-        List<GroupingsServiceResult> optInResults;
-
-        try {
-            // opt in Permission for include group false.
-            optInResults = membershipService.optIn(users.get(2).getUsername(), GROUPING_2_PATH);
-        } catch (GroupingsServiceResultException gsre) {
-            optInResults = new ArrayList<>();
-            optInResults.add(gsre.getGsr());
-        }
-        assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
-
-        // opt in Permission for include group true and not in group, but in basis.
-        optInResults = membershipService.optIn(users.get(1).getUsername(), GROUPING_1_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertThat(optInResults.size(), is(1));
-
-        // opt in Permission for include group true but already in group, not self opted.
-        optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-
-        // opt in Permission for include group true, but already self-opted.
-        optInResults = membershipService.optIn(users.get(9).getUsername(), GROUPING_0_PATH);
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-
-        // non super users should not be able to opt in other users.
-        optInResults = membershipService.optIn(users.get(0).getUsername(), GROUPING_0_PATH, users.get(1).getUsername());
-        assertThat(optInResults.size(), is(1));
-        assertTrue(optInResults.get(0).getResultCode().startsWith(FAILURE));
-
-        // super users should be able to opt in other users.
-        optInResults = membershipService.optIn(ADMIN_USER, GROUPING_0_PATH, users.get(2).getUsername());
-        assertThat(optInResults.size(), is(2));
-        assertTrue(optInResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optInResults.get(1).getResultCode().startsWith(SUCCESS));
-    }
-
-
-    @Test
-    public void optOutTest() {
-        List<GroupingsServiceResult> optOutResults;
-        try {
-            // opt out Permission for exclude group false.
-            optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_0_PATH);
-        } catch (GroupingsServiceResultException gsre) {
-            optOutResults = new ArrayList<>();
-            optOutResults.add(gsre.getGsr());
-        }
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
-
-        // opt out Permission for exclude group true.
-
-        optOutResults = membershipService.optOut(users.get(1).getUsername(), GROUPING_1_PATH);
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
-
-        // opt out Permission for exclude group true, but already in the exclude group.
-        optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
-
-        // opt out Permission for exclude group true, but already self-opted.
-        optOutResults = membershipService.optOut(users.get(2).getUsername(), GROUPING_1_PATH);
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(1).getResultCode().startsWith(SUCCESS));
-        assertTrue(optOutResults.get(2).getResultCode().startsWith(SUCCESS));
-
-        // non super users should not be able to opt out other users.
-        optOutResults =
-                membershipService.optOut(users.get(0).getUsername(), GROUPING_1_PATH, users.get(1).getUsername());
-        assertThat(optOutResults.size(), is(1));
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(FAILURE));
-
-        // super users should be able to opt in other users.
-        optOutResults = membershipService.optOut(ADMIN_USER, GROUPING_1_PATH, users.get(6).getUsername());
-        assertTrue(optOutResults.get(0).getResultCode().startsWith(SUCCESS));
-        assertThat(optOutResults.size(), is(1));
-    }
-     */
 
     @Test
     public void selfOptedTest() {
