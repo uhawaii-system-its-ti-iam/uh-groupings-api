@@ -193,12 +193,12 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(1).getUsername()));
 
         try {
-            memberAttributeService.getIsOwner("zzzz", users.get(0).getUsername());
+            memberAttributeService.getIsOwner("zz_zz", users.get(0).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
         try {
-            memberAttributeService.getIsOwner(users.get(0).getUsername(), "zzzz");
+            memberAttributeService.getIsOwner(users.get(0).getUsername(), "zz_zz");
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
@@ -210,12 +210,12 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername()));
 
         try {
-            memberAttributeService.getIsAdmin("zzzz", users.get(0).getUsername());
+            memberAttributeService.getIsAdmin("zz_zz", users.get(0).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
         try {
-            memberAttributeService.getIsAdmin(ADMIN_USER, "zzzz");
+            memberAttributeService.getIsAdmin(ADMIN_USER, "zz_zz");
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }

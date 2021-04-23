@@ -246,24 +246,29 @@ public class MembershipServiceImpl implements MembershipService {
 
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
-     * members which already exist in the exclude group will be removed from the exclude group and visa-versa.
+     * members which already exist in the exclude group will be removed from the exclude group and visa-versa. This
+     * method was designed to add new members to the include and exclude groups only. Passing in other groups paths will
+     * result in undefined behavior.
      */
     @Override
     public List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
-        logger.info("addGroupingMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
+        logger.info("addGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToAdd: " + usersToAdd + ";");
 
-        String parentPath = helperService.parentGroupingPath(groupPath);
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
-        String removalPath = parentPath;
+        String removalPath = helperService.parentGroupingPath(groupPath);
 
         if (groupPath.endsWith(INCLUDE)) {
             removalPath += EXCLUDE;
         } else if (groupPath.endsWith(EXCLUDE)) {
             removalPath += INCLUDE;
         }
+
         for (String userToAdd : usersToAdd) {
+            AddMemberResult addMemberResult;
+            WsDeleteMemberResults wsDeleteMemberResults;
+            WsAddMemberResults wsAddMemberResults;
             boolean wasAdded;
             boolean wasRemoved;
             String name;
@@ -271,23 +276,26 @@ public class MembershipServiceImpl implements MembershipService {
             String uid;
 
             try {
-                WsDeleteMemberResults wsDeleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
-                wasRemoved =
-                        "SUCCESS".equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
-
-                WsAddMemberResults wsAddMemberResults =
-                        grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, userToAdd);
-                wasAdded = "SUCCESS".equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                // Remove.
+                wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
+                // Add.
+                wsAddMemberResults = grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, userToAdd);
+                // Store results.
+                wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                wasAdded = SUCCESS.equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
                 name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
                 uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-                addMemberResults
-                        .add(new AddMemberResult(wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid,
-                                SUCCESS, userToAdd));
+
+                addMemberResult = new AddMemberResult(
+                        wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid, SUCCESS, userToAdd);
+                addMemberResults.add(addMemberResult);
+
             } catch (GcWebServiceError | NullPointerException e) {
-                addMemberResults.add(new AddMemberResult(userToAdd, FAILURE));
+                addMemberResult = new AddMemberResult(userToAdd, FAILURE);
+                addMemberResults.add(addMemberResult);
             }
+            logger.info("addGroupMembers; " + addMemberResult.toString());
         }
         /*
         if (usersToAdd.size() > 100) {
@@ -310,6 +318,8 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override
     public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+        logger.info("addIncludeMembers; currentUser: " + currentUser +
+                "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -321,6 +331,8 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override
     public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+        logger.info("addExcludeMembers; currentUser: " + currentUser +
+                "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -328,36 +340,43 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Remove all the members in list usersToRemove from group at groupPath.
+     * Remove all the members in list usersToRemove from group at groupPath. This method was designed to remove members
+     * from the include and exclude groups only. Passing in other group paths will result in undefined behavior.
      */
-    @Override public List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath,
+    @Override
+    public List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath,
             List<String> usersToRemove) {
+        logger.info("removeGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
+                + "usersToRemove: " + usersToRemove + ";");
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         for (String userToRemove : usersToRemove) {
+            RemoveMemberResult removeMemberResult;
+            WsDeleteMemberResults wsDeleteMemberResults;
             boolean wasRemoved;
             String name;
             String uhUuid;
             String uid;
             String result;
             try {
-                WsDeleteMemberResults wsDeleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
-
+                // Remove.
+                wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
+                // Store results.
                 wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
                 name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsDeleteMemberResults.getResults()[0].getWsSubject().getId();
                 uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
                 result = wasRemoved ? SUCCESS : FAILURE;
 
-                removeMemberResults
-                        .add(new RemoveMemberResult(wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove));
+                removeMemberResult = new RemoveMemberResult(
+                        wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove);
+                removeMemberResults.add(removeMemberResult);
+
             } catch (GcWebServiceError | NullPointerException e) {
-                removeMemberResults.add(new RemoveMemberResult(userToRemove, FAILURE));
+                removeMemberResult = new RemoveMemberResult(userToRemove, FAILURE);
+                removeMemberResults.add(removeMemberResult);
             }
-        }
-        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
-            System.err.println(removeMemberResult.toString());
+            logger.info("removeGroupMembers; " + removeMemberResult.toString());
         }
         return removeMemberResults;
     }
@@ -367,6 +386,8 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override public List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
+        logger.info("removeIncludeMembers; currentUser: " + currentUser +
+                "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -378,6 +399,8 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override public List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
+        logger.info("removeExcludeMembers; currentUser: " + currentUser +
+                "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -389,6 +412,7 @@ public class MembershipServiceImpl implements MembershipService {
      * uid to the include list and removes them from the exclude list.
      */
     @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
+        logger.info("optIn; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -400,6 +424,7 @@ public class MembershipServiceImpl implements MembershipService {
      * at uid to the exclude list and removes them from the include list.
      */
     @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
+        logger.info("optOut; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }

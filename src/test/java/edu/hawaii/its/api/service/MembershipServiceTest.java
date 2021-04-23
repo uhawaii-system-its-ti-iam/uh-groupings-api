@@ -167,7 +167,7 @@ public class MembershipServiceTest {
             assertEquals(FAILURE, addMemberResult.getResult());
         }
         try {
-            membershipService.addGroupMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
+            membershipService.addGroupMembers("zz_zzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -179,7 +179,7 @@ public class MembershipServiceTest {
         usersToAdd.add(users.get(2).getUsername());
         usersToAdd.add(users.get(3).getUsername());
         try {
-            membershipService.addIncludeMembers("zzzzz", GROUPING_3_PATH, usersToAdd);
+            membershipService.addIncludeMembers("zz_zzz", GROUPING_3_PATH, usersToAdd);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -200,7 +200,7 @@ public class MembershipServiceTest {
 
         // Bogus owner attempts to add.
         try {
-            membershipService.addExcludeMembers("zzzzz", GROUPING_3_PATH, usersToAdd);
+            membershipService.addExcludeMembers("zz_zzz", GROUPING_3_PATH, usersToAdd);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -234,7 +234,7 @@ public class MembershipServiceTest {
             assertEquals(FAILURE, removeMemberResult.getResult());
         }
         try {
-            membershipService.removeGroupMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
+            membershipService.removeGroupMembers("zz_zzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -247,7 +247,7 @@ public class MembershipServiceTest {
         usersToRemove.add(users.get(3).getUsername());
         // Bogus owner.
         try {
-            membershipService.removeIncludeMembers("zzzzz", GROUPING_3_PATH, usersToRemove);
+            membershipService.removeIncludeMembers("zz_zzz", GROUPING_3_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -266,7 +266,7 @@ public class MembershipServiceTest {
         usersToRemove.add(users.get(3).getUsername());
         // Bogus owner.
         try {
-            membershipService.removeExcludeMembers("zzzzz", GROUPING_3_PATH, usersToRemove);
+            membershipService.removeExcludeMembers("zz_zzz", GROUPING_3_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -283,7 +283,7 @@ public class MembershipServiceTest {
     public void optInTest() {
         // Invalid user attempts to opt.
         try {
-            membershipService.optIn("zzzzz", GROUPING_3_PATH, users.get(2).getUsername());
+            membershipService.optIn("zz_zzz", GROUPING_3_PATH, users.get(2).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -300,7 +300,7 @@ public class MembershipServiceTest {
     public void optOutTest() {
         // Invalid user attempts to opt.
         try {
-            membershipService.optOut("zzzzz", GROUPING_3_PATH, users.get(2).getUsername());
+            membershipService.optOut("zz_zzz", GROUPING_3_PATH, users.get(2).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
