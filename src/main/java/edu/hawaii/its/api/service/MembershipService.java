@@ -13,13 +13,13 @@ public interface MembershipService {
    
     List<Membership> getMembershipResults(String owner, String uid);
 
-    List<AddMemberResult> addGroupingMembers(String currentUser, String groupPath, List<String> usersToAdd);
+    List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
     List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
     List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
-    List<RemoveMemberResult> removeGroupingMembers(String currentUser, String groupPath, List<String> usersToRemove);
+    List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath, List<String> usersToRemove);
 
     List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 

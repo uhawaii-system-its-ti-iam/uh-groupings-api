@@ -158,16 +158,16 @@ public class MembershipServiceTest {
         usersToAdd.add(users.get(2).getUsername());
         usersToAdd.add(users.get(3).getUsername());
 
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToAdd);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToAdd);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
         }
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToAdd);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToAdd);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
         }
         try {
-            membershipService.addGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
+            membershipService.addGroupMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToAdd);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -224,17 +224,17 @@ public class MembershipServiceTest {
         usersToRemove.add(users.get(3).getUsername());
 
         removeMemberResults =
-                membershipService.removeGroupingMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToRemove);
+                membershipService.removeGroupMembers(ownerUsername, GROUPING_3_INCLUDE_PATH, usersToRemove);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertEquals(FAILURE, removeMemberResult.getResult());
         }
         removeMemberResults =
-                membershipService.removeGroupingMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToRemove);
+                membershipService.removeGroupMembers(ownerUsername, GROUPING_3_EXCLUDE_PATH, usersToRemove);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertEquals(FAILURE, removeMemberResult.getResult());
         }
         try {
-            membershipService.removeGroupingMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
+            membershipService.removeGroupMembers("zzzzz", GROUPING_3_EXCLUDE_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }

@@ -244,8 +244,12 @@ public class MembershipServiceImpl implements MembershipService {
         return memberships;
     }
 
+    /**
+     * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
+     * members which already exist in the exclude group will be removed from the exclude group and visa-versa.
+     */
     @Override
-    public List<AddMemberResult> addGroupingMembers(String currentUser, String groupPath, List<String> usersToAdd) {
+    public List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
         logger.info("addGroupingMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToAdd: " + usersToAdd + ";");
 
@@ -301,23 +305,32 @@ public class MembershipServiceImpl implements MembershipService {
         return addMemberResults;
     }
 
+    /**
+     * Check if the currentUser has the proper privs then call addGroupMembers.
+     */
     @Override
     public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupingMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
+        return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
     }
 
+    /**
+     * Check if the currentUser has the proper privs then call addGroupMembers.
+     */
     @Override
     public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupingMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
+        return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
     }
 
-    @Override public List<RemoveMemberResult> removeGroupingMembers(String currentUser, String groupPath,
+    /**
+     * Remove all the members in list usersToRemove from group at groupPath.
+     */
+    @Override public List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath,
             List<String> usersToRemove) {
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
@@ -349,34 +362,48 @@ public class MembershipServiceImpl implements MembershipService {
         return removeMemberResults;
     }
 
+    /**
+     * Check if the currentUser has the proper privs then call removeGroupMembers.
+     */
     @Override public List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return removeGroupingMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
+        return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
     }
 
+    /**
+     * Check if the currentUser has the proper privs then call removeGroupMembers.
+     */
     @Override public List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return removeGroupingMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
+        return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
     }
 
+    /**
+     * Check if the currentUser has the proper privs to opt, then call addGroupMembers. Opting in adds a member/user at
+     * uid to the include list and removes them from the exclude list.
+     */
     @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupingMembers(currentUser, groupingPath + INCLUDE, Collections.singletonList(uid));
+        return addGroupMembers(currentUser, groupingPath + INCLUDE, Collections.singletonList(uid));
     }
 
+    /**
+     * Check if the currentUser has the proper privs to opt, then call addGroupMembers. Opting out adds a member/user
+     * at uid to the exclude list and removes them from the include list.
+     */
     @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupingMembers(currentUser, groupingPath + EXCLUDE, Collections.singletonList(uid));
+        return addGroupMembers(currentUser, groupingPath + EXCLUDE, Collections.singletonList(uid));
     }
 
     //adds a user to the admins group via username or UH id number

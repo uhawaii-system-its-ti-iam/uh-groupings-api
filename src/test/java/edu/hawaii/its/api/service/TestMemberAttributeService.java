@@ -152,20 +152,20 @@ public class TestMemberAttributeService {
         includeNames.add(usernames[0]);
         includeNames.add(usernames[1]);
         includeNames.add(usernames[2]);
-        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.removeGroupingMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
-        membershipService.removeGroupingMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[5]));
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[5]));
 
         //add to exclude
-        membershipService.addGroupingMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
+        membershipService.addGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
 
         // Remove from Exclude
-        membershipService.removeGroupingMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
 
         // Turn off Self-Opted flags
         //todo Tests run properly without doing a isSelfOpted check on GROUPING_INCLUDE and usernames[1] for unknown reason
@@ -295,7 +295,7 @@ public class TestMemberAttributeService {
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
 
-        membershipService.addGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[1]));
 
@@ -364,7 +364,7 @@ public class TestMemberAttributeService {
 
         // User is not self opted because user is not in group
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));
-        membershipService.addGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
 
         // User is not self opted b/c added by owner
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));

@@ -130,14 +130,14 @@ public class TestGroupAttributeService {
         includeNames.add(username[0]);
         includeNames.add(username[1]);
         includeNames.add(username[2]);
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
 
         //add to exclude
-        membershipService.addGroupingMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
+        membershipService.addGroupMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
