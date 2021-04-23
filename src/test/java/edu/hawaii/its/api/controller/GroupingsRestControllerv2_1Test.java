@@ -477,8 +477,7 @@ public class GroupingsRestControllerv2_1Test {
 
     }
 
-    @Test
-    @WithMockUhUser
+    @Test @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
         List<AddMemberResult> addMemberResults = new ArrayList<>();

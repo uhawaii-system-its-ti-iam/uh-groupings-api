@@ -269,7 +269,7 @@ public class TestMembershipService {
 
         // Add invalid users to include.
         List<String> invalidUsernames = new ArrayList<>();
-        invalidUsernames.add("zzzzz");
+        invalidUsernames.add("zz_zzz");
         invalidUsernames.add("ffff");
         addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
         for (AddMemberResult addMemberResult : addMemberResults) {
@@ -293,7 +293,7 @@ public class TestMembershipService {
 
         // Add invalid users to include.
         List<String> invalidUsernamesForExclude = new ArrayList<>();
-        invalidUsernamesForExclude.add("zzzzz");
+        invalidUsernamesForExclude.add("zz_zzz");
         invalidUsernamesForExclude.add("ffff");
         addMemberResults =
                 membershipService.addGroupMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
@@ -306,13 +306,13 @@ public class TestMembershipService {
 
         // A non-owner attempts to add members.
         try {
-            membershipService.addGroupMembers("zzzz", GROUPING_INCLUDE, validUsernames);
+            membershipService.addGroupMembers("zz_zz", GROUPING_INCLUDE, validUsernames);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         List<String> invalidUsers = new ArrayList<>();
-        invalidUsers.add("zzzzzzz");
+        invalidUsers.add("zz_zzzzz");
         invalidUsers.add("aaaaaaa");
 
         addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
@@ -413,8 +413,8 @@ public class TestMembershipService {
         }
 
         List<String> invalidUsers = new ArrayList<>();
-        invalidUsers.add("zzzzzzz");
-        invalidUsers.add("aaaaaaa");
+        invalidUsers.add("zzz_zz_zz");
+        invalidUsers.add("aaa_aaaa");
 
         removeMemberResults = membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {

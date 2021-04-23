@@ -288,7 +288,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove a list of users to the include group of grouping at path.
+     * Remove a list of users of the include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
@@ -301,7 +301,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Remove a list of users to exclude include group of grouping at path.
+     * Remove a list of users of exclude include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
