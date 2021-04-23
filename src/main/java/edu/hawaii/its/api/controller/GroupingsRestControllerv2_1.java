@@ -263,6 +263,9 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.optOut(currentUser, path, uid));
     }
 
+    /**
+     * Add a list of users to the include group of grouping at path.
+     */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")
     public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
@@ -272,6 +275,9 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addIncludeMembers(currentUser, path, usersToAdd));
     }
 
+    /**
+     * Add a list of users to the exclude group of grouping at path.
+     */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")
     public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
@@ -281,6 +287,9 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.addExcludeMembers(currentUser, path, usersToAdd));
     }
 
+    /**
+     * Remove a list of users to the include group of grouping at path.
+     */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
@@ -291,6 +300,9 @@ public class GroupingsRestControllerv2_1 {
                 .body(membershipService.removeIncludeMembers(currentUser, path, usersToRemove));
     }
 
+    /**
+     * Remove a list of users to exclude include group of grouping at path.
+     */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,

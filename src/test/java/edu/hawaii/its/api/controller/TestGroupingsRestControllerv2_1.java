@@ -287,18 +287,18 @@ public class TestGroupingsRestControllerv2_1 {
         includeNames.add(usernames[2]);
         includeNames.add(usernames[4]);
         includeNames.add(usernames[5]);
-        membershipService.addGroupingMembers(usernames[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
         membershipService
-                .removeGroupingMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[3]));
+                .removeGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[3]));
 
         // add to exclude
-        membershipService.addGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         // remove from exclude
         membershipService
-                .removeGroupingMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[2]));
+                .removeGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[2]));
 
         // Remove admin privileges
         membershipService.deleteAdmin(ADMIN, usernames[0]);
@@ -315,13 +315,13 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], RELEASED_GROUPING, false);
 
         // Ensures users are not already in group
-        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[0]));
-        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[1]));
-        membershipService.removeGroupingMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[2]));
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[2]));
 
-        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[0]));
-        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[1]));
-        membershipService.removeGroupingMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[2]));
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[2]));
     }
 
     @Test

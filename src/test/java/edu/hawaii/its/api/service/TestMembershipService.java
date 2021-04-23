@@ -129,7 +129,7 @@ public class TestMembershipService {
         includeNames.add(username[1]);
         includeNames.add(username[2]);
 
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         // Add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis).
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
@@ -138,11 +138,11 @@ public class TestMembershipService {
         grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[5]);
 
         //Remove from exclude.
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
 
         //Add to exclude.
-        membershipService.addGroupingMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[3]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[3]));
 
         //Add to basis.
         //membershipService.addGroupMember(username[0], GROUPING_BASIS, username[5]);
@@ -257,7 +257,7 @@ public class TestMembershipService {
 
         // Add valid users to include.
         List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(SUCCESS, addMemberResult.getResult());
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
@@ -271,7 +271,7 @@ public class TestMembershipService {
         List<String> invalidUsernames = new ArrayList<>();
         invalidUsernames.add("zzzzz");
         invalidUsernames.add("ffff");
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
             assertNull(addMemberResult.getName());
@@ -281,7 +281,7 @@ public class TestMembershipService {
 
         // Add valid users to exclude.
         validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, validUsernames);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_EXCLUDE, validUsernames);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(SUCCESS, addMemberResult.getResult());
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
@@ -296,7 +296,7 @@ public class TestMembershipService {
         invalidUsernamesForExclude.add("zzzzz");
         invalidUsernamesForExclude.add("ffff");
         addMemberResults =
-                membershipService.addGroupingMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
+                membershipService.addGroupMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
             assertNull(addMemberResult.getName());
@@ -306,7 +306,7 @@ public class TestMembershipService {
 
         // A non-owner attempts to add members.
         try {
-            membershipService.addGroupingMembers("zzzz", GROUPING_INCLUDE, validUsernames);
+            membershipService.addGroupMembers("zzzz", GROUPING_INCLUDE, validUsernames);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -315,7 +315,7 @@ public class TestMembershipService {
         invalidUsers.add("zzzzzzz");
         invalidUsers.add("aaaaaaa");
 
-        addMemberResults = membershipService.addGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertFalse(addMemberResult.isUserWasRemoved());
             assertNull(addMemberResult.getName());
@@ -369,7 +369,7 @@ public class TestMembershipService {
 
         // Remove a single member.
         removeMemberResults =
-                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
 
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertTrue(removeMemberResult.isUserWasRemoved());
@@ -383,7 +383,7 @@ public class TestMembershipService {
         // Remove multiple members.
         removableUsernames = new ArrayList<>(Arrays.asList(username).subList(1, 6));
         removeMemberResults =
-                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
         Iterator<String> removableUsernamesIter = removableUsernames.iterator();
         Iterator<RemoveMemberResult> removedMemberResultsIter = removeMemberResults.iterator();
 
@@ -403,7 +403,7 @@ public class TestMembershipService {
         // Try to remove non-members, the list of removableUsernames has already been removed above, thus attempting to
         // remove them again should fail.
         removeMemberResults =
-                membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
         removedMemberResultsIter = removeMemberResults.iterator();
 
         while (removedMemberResultsIter.hasNext()) {
@@ -416,7 +416,7 @@ public class TestMembershipService {
         invalidUsers.add("zzzzzzz");
         invalidUsers.add("aaaaaaa");
 
-        removeMemberResults = membershipService.removeGroupingMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        removeMemberResults = membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertFalse(removeMemberResult.isUserWasRemoved());
             assertNull(removeMemberResult.getName());
