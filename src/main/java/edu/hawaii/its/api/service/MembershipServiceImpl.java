@@ -343,13 +343,15 @@ public class MembershipServiceImpl implements MembershipService {
                 removeMemberResults.add(new RemoveMemberResult(userToRemove, FAILURE));
             }
         }
+        for (RemoveMemberResult removeMemberResult : removeMemberResults) {
+            System.err.println(removeMemberResult.toString());
+        }
         return removeMemberResults;
     }
 
     @Override public List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
-        String parentPath = helperService.parentGroupingPath(groupingPath);
-        if (!memberAttributeService.isOwner(parentPath, currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupingMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
@@ -357,8 +359,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override public List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
-        String parentPath = helperService.parentGroupingPath(groupingPath);
-        if (!memberAttributeService.isOwner(parentPath, currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupingMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);

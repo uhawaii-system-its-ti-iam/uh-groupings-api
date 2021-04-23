@@ -19,6 +19,7 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -484,7 +485,7 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+        given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/addIncludeMembers/" + usersToAdd)
@@ -493,15 +494,14 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUhUser
+    @Test @WithMockUhUser
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+        given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/addExcludeMembers/" + usersToAdd)
@@ -510,12 +510,38 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk());
     }
 
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonIncludeMembersTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/tst04name").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+    @Test @WithMockUhUser
+    public void removeIncludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
+
+        given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
+
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeIncludeMembers/" + usersToRemove)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+    }
+
+    @Test @WithMockUhUser
+    public void removeExcludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
+
+        given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
+
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeExcludeMembers/" + usersToRemove)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
     }
 
     @Test
