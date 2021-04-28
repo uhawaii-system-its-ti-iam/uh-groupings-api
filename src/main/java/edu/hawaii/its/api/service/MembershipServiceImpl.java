@@ -247,8 +247,8 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
      * members which already exist in the exclude group will be removed from the exclude group and visa-versa. This
-     * method was designed to add new members to the include and exclude groups only. Passing in other groups paths will
-     * result in undefined behavior.
+     * method was designed to add new members to the include and exclude groups only. Upon passing group paths other than
+     * include or exclude, addGroupMembers will return null.
      */
     @Override
     public List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
@@ -263,18 +263,16 @@ public class MembershipServiceImpl implements MembershipService {
             removalPath += EXCLUDE;
         } else if (groupPath.endsWith(EXCLUDE)) {
             removalPath += INCLUDE;
+        } else {
+            return null;
         }
 
         for (String userToAdd : usersToAdd) {
-            AddMemberResult addMemberResult;
             WsDeleteMemberResults wsDeleteMemberResults;
             WsAddMemberResults wsAddMemberResults;
-            boolean wasAdded;
-            boolean wasRemoved;
-            String name;
-            String uhUuid;
-            String uid;
-
+            AddMemberResult addMemberResult;
+            boolean wasRemoved, wasAdded;
+            String uhUuid, name, uid;
             try {
                 // Remove.
                 wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
@@ -283,8 +281,8 @@ public class MembershipServiceImpl implements MembershipService {
                 // Store results.
                 wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
                 wasAdded = SUCCESS.equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
-                name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
+                name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
 
                 addMemberResult = new AddMemberResult(
@@ -314,7 +312,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs then call addGroupMembers.
+     * Check if the currentUser has the proper privileges then call addGroupMembers.
      */
     @Override
     public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
@@ -327,7 +325,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs then call addGroupMembers.
+     * Check if the currentUser has the proper privileges then call addGroupMembers.
      */
     @Override
     public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
@@ -351,22 +349,19 @@ public class MembershipServiceImpl implements MembershipService {
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         for (String userToRemove : usersToRemove) {
-            RemoveMemberResult removeMemberResult;
             WsDeleteMemberResults wsDeleteMemberResults;
+            RemoveMemberResult removeMemberResult;
+            String uhUuid, result, name, uid;
             boolean wasRemoved;
-            String name;
-            String uhUuid;
-            String uid;
-            String result;
             try {
                 // Remove.
                 wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
                 // Store results.
                 wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
-                name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
                 uhUuid = wsDeleteMemberResults.getResults()[0].getWsSubject().getId();
-                uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
                 result = wasRemoved ? SUCCESS : FAILURE;
+                name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
+                uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
 
                 removeMemberResult = new RemoveMemberResult(
                         wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove);
@@ -382,7 +377,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs then call removeGroupMembers.
+     * Check if the currentUser has the proper privileges then call removeGroupMembers.
      */
     @Override public List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
@@ -395,7 +390,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs then call removeGroupMembers.
+     * Check if the currentUser has the proper privileges then call removeGroupMembers.
      */
     @Override public List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
@@ -408,7 +403,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs to opt, then call addGroupMembers. Opting in adds a member/user at
+     * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at
      * uid to the include list and removes them from the exclude list.
      */
     @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
@@ -420,7 +415,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     /**
-     * Check if the currentUser has the proper privs to opt, then call addGroupMembers. Opting out adds a member/user
+     * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting out adds a member/user
      * at uid to the exclude list and removes them from the include list.
      */
     @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
