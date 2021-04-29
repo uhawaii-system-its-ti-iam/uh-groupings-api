@@ -264,7 +264,7 @@ public class MembershipServiceImpl implements MembershipService {
         } else if (groupPath.endsWith(EXCLUDE)) {
             removalPath += INCLUDE;
         } else {
-            return null;
+            return addMemberResults;
         }
 
         for (String userToAdd : usersToAdd) {
