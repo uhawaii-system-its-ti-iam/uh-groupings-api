@@ -171,6 +171,11 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
+        //  Attempting to add to a group path other than include or exclude will return an empty list.
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToAdd);
+        assertTrue(addMemberResults.isEmpty());
+        assertNotNull(addMemberResults);
     }
 
     @Test
