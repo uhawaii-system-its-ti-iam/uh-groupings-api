@@ -248,7 +248,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
      * members which already exist in the exclude group will be removed from the exclude group and visa-versa. This
      * method was designed to add new members to the include and exclude groups only. Upon passing group paths other than
-     * include or exclude, addGroupMembers will return null.
+     * include or exclude, addGroupMembers will return empty list.
      */
     @Override
     public List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
