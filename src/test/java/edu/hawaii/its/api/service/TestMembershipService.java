@@ -322,6 +322,10 @@ public class TestMembershipService {
             assertNull(addMemberResult.getUid());
             assertEquals(FAILURE, addMemberResult.getResult());
         }
+
+        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_OWNERS, validUsernames);
+        assertNotNull(addMemberResults);
+        assertTrue(addMemberResults.isEmpty());
     }
 
     @Test
