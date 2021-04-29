@@ -271,8 +271,11 @@ public class MembershipServiceImpl implements MembershipService {
             WsDeleteMemberResults wsDeleteMemberResults;
             WsAddMemberResults wsAddMemberResults;
             AddMemberResult addMemberResult;
-            boolean wasRemoved, wasAdded;
-            String uhUuid, name, uid;
+            boolean wasRemoved;
+            boolean wasAdded;
+            String uhUuid;
+            String name;
+            String uid;
             try {
                 // Remove.
                 wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
@@ -351,8 +354,11 @@ public class MembershipServiceImpl implements MembershipService {
         for (String userToRemove : usersToRemove) {
             WsDeleteMemberResults wsDeleteMemberResults;
             RemoveMemberResult removeMemberResult;
-            String uhUuid, result, name, uid;
             boolean wasRemoved;
+            String uhUuid;
+            String result;
+            String name;
+            String uid;
             try {
                 // Remove.
                 wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(groupPath, wsSubjectLookup, userToRemove);
