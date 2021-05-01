@@ -349,6 +349,9 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToRemove: " + usersToRemove + ";");
+        if (!groupPath.endsWith(INCLUDE) && !groupPath.endsWith(EXCLUDE)) {
+            throw new GcWebServiceError("404: Invalid group path.");
+        }
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         for (String userToRemove : usersToRemove) {

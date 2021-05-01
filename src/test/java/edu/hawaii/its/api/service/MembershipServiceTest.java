@@ -246,6 +246,11 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+        try {
+            membershipService.removeGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToRemove);
+        }catch (GcWebServiceError e) {
+            assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
+        }
     }
 
     @Test
