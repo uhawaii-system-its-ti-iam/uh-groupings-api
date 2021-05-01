@@ -266,7 +266,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Add a list of users to the include group of grouping at path.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addIncludeMembers/{usersToAdd}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{usersToAdd}")
     public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addIncludeMembers...");
@@ -278,7 +278,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Add a list of users to the exclude group of grouping at path.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/addExcludeMembers/{usersToAdd}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{usersToAdd}")
     public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addExcludeMembers...");
@@ -290,7 +290,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Remove a list of users from the include group of grouping at path.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeIncludeMembers/{usersToRemove}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/includeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
@@ -303,7 +303,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Remove a list of users from the exclude include group of grouping at path.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeExcludeMembers/{usersToRemove}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/excludeMembers/{usersToRemove}")
     public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
