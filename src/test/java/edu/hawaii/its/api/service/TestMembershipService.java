@@ -432,6 +432,12 @@ public class TestMembershipService {
             assertEquals(FAILURE, removeMemberResult.getResult());
         }
 
+        try {
+            membershipService.removeGroupMembers(ownerUsername, GROUPING_OWNERS, removableUsernames);
+        } catch (GcWebServiceError e) {
+            assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
+        }
+
     }
 
     @Test
