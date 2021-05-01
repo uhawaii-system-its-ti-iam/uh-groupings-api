@@ -264,7 +264,7 @@ public class MembershipServiceImpl implements MembershipService {
         } else if (groupPath.endsWith(EXCLUDE)) {
             removalPath += INCLUDE;
         } else {
-            return addMemberResults;
+            throw new GcWebServiceError("404: Invalid group path.");
         }
 
         for (String userToAdd : usersToAdd) {

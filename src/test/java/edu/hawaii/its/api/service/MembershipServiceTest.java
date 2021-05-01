@@ -15,6 +15,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,10 +173,12 @@ public class MembershipServiceTest {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
-        //  Attempting to add to a group path other than include or exclude will return an empty list.
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToAdd);
-        assertTrue(addMemberResults.isEmpty());
-        assertNotNull(addMemberResults);
+        // A group path ending in anything other than include or exclude should 404.
+        try {
+            membershipService.addGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToAdd);
+        } catch (GcWebServiceError e) {
+            assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
+        }
     }
 
     @Test
