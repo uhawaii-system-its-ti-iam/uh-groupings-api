@@ -11,6 +11,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -323,9 +324,12 @@ public class TestMembershipService {
             assertEquals(FAILURE, addMemberResult.getResult());
         }
 
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_OWNERS, validUsernames);
-        assertNotNull(addMemberResults);
-        assertTrue(addMemberResults.isEmpty());
+        // A group path ending in anything other than include or exclude should 404.
+        try {
+            membershipService.addGroupMembers(ownerUsername, GROUPING_OWNERS, validUsernames);
+        } catch (GcWebServiceError e) {
+            assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
+        }
     }
 
     @Test
