@@ -487,7 +487,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/addIncludeMembers/" + usersToAdd)
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + usersToAdd)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
@@ -503,7 +503,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/addExcludeMembers/" + usersToAdd)
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/" + usersToAdd)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
@@ -520,7 +520,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(removeMemberResults);
 
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeIncludeMembers/" + usersToRemove)
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/" + usersToRemove)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
@@ -537,7 +537,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(removeMemberResults);
 
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeExcludeMembers/" + usersToRemove)
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/" + usersToRemove)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
