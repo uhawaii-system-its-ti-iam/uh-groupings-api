@@ -28,16 +28,16 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -155,17 +155,17 @@ public class TestMemberAttributeService {
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[4]);
-        membershipService.addGroupingMember(ADMIN_USER, GROUPING, usernames[5]);
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[5]));
 
         //add to exclude
-        membershipService.deleteGroupingMember(ADMIN_USER, GROUPING, usernames[3]);
+        membershipService.addGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
 
         // Remove from Exclude
-        membershipService.addGroupMember(ADMIN_USER, GROUPING_INCLUDE, usernames[4]);
+        membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
 
         // Turn off Self-Opted flags
         //todo Tests run properly without doing a isSelfOpted check on GROUPING_INCLUDE and usernames[1] for unknown reason
@@ -177,23 +177,23 @@ public class TestMemberAttributeService {
 
     @Test
     public void getIsOwnerTest() {
-        assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
+        assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
 
         assertTrue(memberAttributeService.isOwner(ADMIN_USER));
-        assertFalse(memberAttributeService.isOwner("zzzz"));
+        assertFalse(memberAttributeService.isOwner("zz_zz"));
         Boolean[] assumptions = new Boolean[] { true, false, false, false, true, false };
         for (int i = 0; i < 6; i++) {
             assertEquals(assumptions[i], memberAttributeService.getIsOwner(ADMIN_USER, usernames[i]));
         }
 
         try {
-            memberAttributeService.getIsOwner("zzzz", usernames[0]);
+            memberAttributeService.getIsOwner("zz_zz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         try {
-            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
+            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
@@ -215,13 +215,13 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
 
         try {
-            memberAttributeService.getIsAdmin("zzzz", usernames[0]);
+            memberAttributeService.getIsAdmin("zz_zz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         try {
-            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zzzz"));
+            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
@@ -295,7 +295,7 @@ public class TestMemberAttributeService {
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[1]));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
 
-        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[3]);
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[1]));
 
@@ -364,7 +364,7 @@ public class TestMemberAttributeService {
 
         // User is not self opted because user is not in group
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));
-        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[4]);
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
 
         // User is not self opted b/c added by owner
         assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4]));
@@ -533,28 +533,6 @@ public class TestMemberAttributeService {
         assertNull(attributes.get("sn"));
         assertNull(attributes.get("givenName"));
         assertNull(attributes.get("uhUuid"));
-    }
-
-    @Test
-    public void searchMembersTest() {
-
-        // iamtst04 is in the basis grouping
-        List<Person> members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[3]);
-        assertThat(members.get(0).getName(), equalTo("tst04name"));
-        assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
-
-        // iamtst01 is not in the basis group (results list should be empty)
-        members = memberAttributeService.searchMembers(GROUPING_BASIS, usernames[0]);
-        assertThat(members.size(), equalTo(0));
-
-        // Should work with large basis groups too
-        membershipService.addGroupMember(ADMIN_USER, GROUPING_TIMEOUT + INCLUDE, usernames[3]);
-
-        members = memberAttributeService.searchMembers(GROUPING_TIMEOUT, usernames[3]);
-        assertThat(members.get(0).getName(), equalTo("tst04name"));
-        assertThat(members.get(0).getUsername(), equalTo(usernames[3]));
-        assertThat(members.get(0).getUhUuid(), equalTo(usernames[3]));
     }
 
     @Test

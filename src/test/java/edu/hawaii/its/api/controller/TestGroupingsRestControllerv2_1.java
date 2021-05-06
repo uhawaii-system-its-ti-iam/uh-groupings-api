@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,8 +57,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -289,13 +290,15 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // remove from include
-        membershipService.deleteGroupMember(usernames[0], GROUPING_INCLUDE, usernames[3]);
+        membershipService
+                .removeGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[3]));
 
         // add to exclude
-        membershipService.addGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[3]);
+        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         // remove from exclude
-        membershipService.deleteGroupMember(usernames[0], GROUPING_EXCLUDE, usernames[2]);
+        membershipService
+                .removeGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[2]));
 
         // Remove admin privileges
         membershipService.deleteAdmin(ADMIN, usernames[0]);
@@ -312,13 +315,13 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], RELEASED_GROUPING, false);
 
         // Ensures users are not already in group
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMember(usernames[4], A_INCLUDE, tstUuid[2]);
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupMembers(usernames[4], A_INCLUDE, Collections.singletonList(tstUuid[2]));
 
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[0]);
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[1]);
-        membershipService.deleteGroupMember(usernames[4], A_EXCLUDE, tstUuid[2]);
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[0]));
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[1]));
+        membershipService.removeGroupMembers(usernames[4], A_EXCLUDE, Collections.singletonList(tstUuid[2]));
     }
 
     @Test
@@ -734,33 +737,6 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    // Should test for code Coverage purposes.
-    // Related to ticket-500, used hardcoded values that were deleted.
-    @Ignore
-    @Test
-    public void addDeleteMemberUuidPassTest() throws Exception {
-
-        assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[0]));
-        assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[1]));
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[1]));
-
-        mapGSRs(API_BASE + "groupings/" + A_GROUPING + "/includeMembers/" + tstUuid[0], "put", uhUser05);
-
-        assertTrue(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[0]));
-
-        mapGSRs(API_BASE + "groupings/" + A_GROUPING + "/excludeMembers/" + tstUuid[1], "put", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[1]));
-        assertTrue(memberAttributeService.isMember(A_EXCLUDE, tstUuid[1]));
-
-        mapGSR(API_BASE + "groupings/" + A_GROUPING + "/includeMembers/" + tstUuid[0], "delete", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_INCLUDE, tstUuid[0]));
-
-        mapGSR(API_BASE + "groupings/" + A_GROUPING + "/excludeMembers/" + tstUuid[1], "delete", uhUser05);
-        assertFalse(memberAttributeService.isMember(A_EXCLUDE, tstUuid[1]));
-    }
-
     @Test
     public void addDeleteOwnerUuidPassTest() throws Exception {
         assertFalse(memberAttributeService.isMember(OWNERS, tstUuid[0]));
@@ -783,153 +759,6 @@ public class TestGroupingsRestControllerv2_1 {
 
         mapGSR(API_BASE + "admins/" + tstUuid[0], "delete", adminUser);
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
-    }
-
-    @Test
-    public void addDeleteMemberPassTest() throws Exception {
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
-
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "put", uhUser01);
-
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[3]));
-
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "delete", uhUser01);
-
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[3]));
-
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[2]));
-
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "put", uhUser01);
-
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[2]));
-
-        mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "delete", uhUser01);
-
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, usernames[2]));
-
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[2], "put", uhUser01);
-        mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[3], "put", uhUser01);
-
-        // Garbage data tests
-        //todo Test all permutations of bad data
-        try {
-            mapGSRs(API_BASE + "groupings/somegrouping/includeMembers/bob-jones", "put", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings/somegrouping/includeMembers/bob-jones", "delete", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings/somegrouping/excludeMembers/bob-jones", "put", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        // Empty fields tests
-        try {
-            mapGSRs(API_BASE + "groupings//includeMembers//", "put", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(405));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings//includeMembers//", "delete", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(405));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings//excludeMembers//", "put", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(405));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings//excludeMembers//", "delete", uhUser01);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(405));
-        }
-    }
-
-    @Test
-    public void addDeleteMemberFailTest() throws Exception {
-
-        try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[3], "put", uhUser02);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/includeMembers/" + usernames[2], "delete", uhUser02);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[2], "put", uhUser02);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-
-        try {
-            mapGSR(API_BASE + "groupings/" + GROUPING + "/excludeMembers/" + usernames[3], "delete", uhUser02);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(403));
-        }
-    }
-
-    @Ignore
-    @WithAnonymousUser
-    public void addDeleteMemberAnonTest() throws Exception {
-
-        try {
-            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + usernames[2], "put", null);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
-
-        try {
-            mapGSR(API_BASE + "" + GROUPING + "/includeMembers/" + usernames[2], "delete", null);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
-
-        try {
-            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + usernames[2], "put", null);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
-
-        try {
-            mapGSR(API_BASE + "" + GROUPING + "/excludeMembers/" + usernames[2], "delete", null);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(302));
-        }
     }
 
     @Test

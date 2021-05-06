@@ -1,59 +1,42 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.util.List;
 
 public interface MembershipService {
 
+    boolean isUhUuid(String username);
+   
     List<Membership> getMembershipResults(String owner, String uid);
 
-    List<AddMemberResult> addGroupingMembers(String ownerUsername, String groupingPath, List<String> usersToAdd);
+    List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
-    List<RemoveMemberResult> removeGroupingMembers(String ownerUsername, String groupPath, List<String> usersToRemove);
+    List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
-    List<GroupingsServiceResult> addGroupingMember(String ownerUsername, String groupingPath, String userIdentifier);
+    List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
-    List<GroupingsServiceResult> addGroupMember(String ownerUsername, String groupingPath, String userToAdd);
+    List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath, List<String> usersToRemove);
 
-    List<GroupingsServiceResult> addGroupMembers(String ownerUsername, String groupingPath, List<String> usersToAdd)
-            throws IOException, MessagingException;
+    List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 
-    List<GroupingsServiceResult> deleteGroupingMember(String ownerUsername, String groupingPath,
-            String userIdentifier);
+    List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 
-    GroupingsServiceResult deleteGroupMember(String ownerUsername, String groupPath,
-            String userToDelete);
+    List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid);
 
-    List<GroupingsServiceResult> deleteGroupMembers(String ownerUsername, String groupPath,
-            List<String> usersToDelete);
-
-    List<String> listOwned(String adminUsername, String username);
+    List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
-    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
-
-    List<GroupingsServiceResult> resetGroup(String ownerUsername, String path,
-            List<String> includeIdentifier, List<String> excludeIdentifier);
-
     GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
 
-    List<GroupingsServiceResult> optIn(String username, String groupingPath);
+    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 
-    List<GroupingsServiceResult> optOut(String username, String groupingPath);
-
-    List<GroupingsServiceResult> optIn(String username, String groupingPath, String uid);
-
-    List<GroupingsServiceResult> optOut(String username, String groupingPath, String uid);
+    List<GroupingsServiceResult> resetGroup(String currentUser, String path, List<String> includeIdentifier,
+            List<String> excludeIdentifier);
 
     boolean isGroupCanOptIn(String username, String groupPath);
 
@@ -66,7 +49,4 @@ public interface MembershipService {
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
-    boolean isUhUuid(String username);
-
-    boolean canOpt(String path);
 }
