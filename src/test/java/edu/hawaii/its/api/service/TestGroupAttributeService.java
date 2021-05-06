@@ -1,17 +1,15 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-import edu.hawaii.its.api.type.SyncDestination;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.SyncDestination;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,17 +24,20 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assert.*;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -132,11 +133,11 @@ public class TestGroupAttributeService {
         membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
 
         //remove from exclude
-        membershipService.addGroupingMember(username[0], GROUPING, username[4]);
-        membershipService.addGroupingMember(username[0], GROUPING, username[5]);
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
+        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
 
         //add to exclude
-        membershipService.deleteGroupingMember(username[0], GROUPING, username[3]);
+        membershipService.addGroupMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
 
         //remove from owners
         memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
@@ -256,133 +257,6 @@ public class TestGroupAttributeService {
     @Test
     public void changeUhReleasedGroupingsStatusTest() {
         //todo
-    }
-
-    @Test
-    public void changeOptInStatusTest() {
-        //expect these to fail
-        List<GroupingsServiceResult> optInFail;
-
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-
-        try {
-            optInFail = membershipService.optIn(username[4], GROUPING);
-        } catch (GroupingsServiceResultException gsre) {
-            optInFail = new ArrayList<>();
-            optInFail.add(gsre.getGsr());
-        }
-
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertFalse(memberAttributeService.isMember(GROUPING, username[3]));
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-
-        assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
-        try {
-            optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], true);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-        try {
-            optInFail = groupAttributeService.changeOptInStatus(GROUPING, username[1], false);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-        assertTrue(optInFail.get(0).getResultCode().startsWith(FAILURE));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
-    }
-
-    @Test
-    public void changeOptOutStatusTest() {
-        //expect this to fail
-        List<GroupingsServiceResult> optOutFail;
-
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        try {
-            optOutFail = membershipService.optOut(username[1], GROUPING);
-        } catch (GroupingsServiceResultException gsre) {
-            optOutFail = new ArrayList<>();
-            optOutFail.add(gsre.getGsr());
-        }
-
-        assertTrue(optOutFail.get(0).getResultCode().startsWith(FAILURE));
-        assertTrue(memberAttributeService.isMember(GROUPING, username[1]));
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
-
-        try {
-            groupAttributeService.changeOptOutStatus(GROUPING, username[1], true);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertFalse(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertFalse(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
-        try {
-            groupAttributeService.changeOptOutStatus(GROUPING, username[1], false);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
-
     }
 
     @Test

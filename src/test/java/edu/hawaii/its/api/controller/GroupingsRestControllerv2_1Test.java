@@ -19,6 +19,7 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -406,36 +407,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void includeMembersTest() throws Exception {
-        given(membershipService.addGroupMember(USERNAME, "grouping" + INCLUDE, "tst04name"))
-                .willReturn(gsrList());
-
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/tst04name")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("add users to grouping"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void deleteMultipleExcludeMembersTest() throws Exception {
-        List<String> usersToAdd = new ArrayList<>();
-        usersToAdd.add("tst04name");
-        usersToAdd.add("tst05name");
-        usersToAdd.add("tst06name");
-        given(membershipService.deleteGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
-                .willReturn(gsrList());
-
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUhUser
     public void swaggerToStringTest() throws Exception {
         given(helperService.swaggerToString(ADMIN)).willReturn(new GenericServiceResult());
         mockMvc.perform(get(API_BASE + "/swagger/toString/")
@@ -506,100 +477,70 @@ public class GroupingsRestControllerv2_1Test {
 
     }
 
-    @Test
-    @WithMockUhUser
-    public void includeMultipleMembersTest() throws Exception {
-        List<String> usersToAdd = new ArrayList<>();
-        usersToAdd.add("tst04name");
-        usersToAdd.add("tst05name");
-        usersToAdd.add("tst06name");
-        given(membershipService.addGroupMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
-                .willReturn(gsrList());
-
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMultipleMembers/" + usersToAdd)
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUhUser
+    @Test @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+        given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/addIncludeMembers/" + usersToAdd)
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + usersToAdd)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUhUser
+    @Test @WithMockUhUser
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addGroupingMembers(USERNAME, "grouping" + INCLUDE, usersToAdd))
+        given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/addExcludeMembers/" + usersToAdd)
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/" + usersToAdd)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
     }
 
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonIncludeMembersTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/tst04name").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-    }
+    @Test @WithMockUhUser
+    public void removeIncludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
 
-    @Test
-    @WithMockUhUser
-    public void excludeMembersTest() throws Exception {
-        given(membershipService.addGroupMember(USERNAME, "grouping" + EXCLUDE, "tst04name"))
-                .willReturn(gsrList2());
+        given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/tst04name")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("delete member from include group"));
-    }
-
-    @Test
-    @WithMockUhUser
-    public void excludeMultipleMembersTest() throws Exception {
-        List<String> usersToAdd = new ArrayList<>();
-        usersToAdd.add("tst04name");
-        usersToAdd.add("tst05name");
-        usersToAdd.add("tst06name");
-        given(membershipService.addGroupMembers(USERNAME, "grouping" + EXCLUDE, usersToAdd))
-                .willReturn(gsrList());
-
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMultipleMembers/" + usersToAdd)
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/" + usersToRemove)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
     }
 
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonExcludeMembersTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/tst04name").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+    @Test @WithMockUhUser
+    public void removeExcludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
+
+        given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
+
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/" + usersToRemove)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -783,52 +724,6 @@ public class GroupingsRestControllerv2_1Test {
     public void anonDeleteOwnerTest() throws Exception {
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
                 .with(csrf()))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void deleteIncludeTest() throws Exception {
-        given(membershipService.deleteGroupMember(USERNAME, "grouping" + INCLUDE, "frylock"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted frylock from include"));
-
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted frylock from include"));
-
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonDeleteIncludeTest() throws Exception {
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/frylock").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void deleteExcludeTest() throws Exception {
-        given(membershipService.deleteGroupMember(USERNAME, "grouping" + EXCLUDE, "carl"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted carl from exclude"));
-
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted carl from exclude"));
-
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonDeleteExcludeTest() throws Exception {
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/carl").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
