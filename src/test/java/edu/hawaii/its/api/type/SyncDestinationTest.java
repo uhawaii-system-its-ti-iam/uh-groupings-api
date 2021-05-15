@@ -91,9 +91,10 @@ public class SyncDestinationTest {
         SyncDestination syncDestination = new SyncDestination(name, description);
         syncDestination.setTooltip(tooltip);
         syncDestination.setIsSynced(true);
+        syncDestination.setHidden(false);
         String expected =
                 "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
-                        + tooltip + '\'' + ", isSynced=" + true + '}';
+                        + tooltip + '\'' + ", isSynced=" + true + '\'' + ", hidden=" + false + '}';
         assertEquals(expected, syncDestination.toString());
     }
 
