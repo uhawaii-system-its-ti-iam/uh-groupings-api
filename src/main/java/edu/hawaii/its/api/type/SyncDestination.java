@@ -14,6 +14,7 @@ public class SyncDestination {
     private String description;
     private String tooltip;
     private Boolean isSynced;
+    private Boolean hidden;
 
     // Default Constructor
     public SyncDestination() {
@@ -25,6 +26,7 @@ public class SyncDestination {
         this.description = description != null ? description : "";
         this.tooltip = null;
         this.isSynced = null;
+        this.hidden = null;
     }
 
     @Id
@@ -63,6 +65,14 @@ public class SyncDestination {
         this.isSynced = isSynced;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
+    }
+
     public String parseKeyVal(String replace, String desc) {
         final String regex = "(\\$\\{)(.*)(})";
         String result;
@@ -82,7 +92,8 @@ public class SyncDestination {
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", tooltip='" + tooltip + '\'' +
-                ", isSynced=" + isSynced +
+                ", isSynced=" + isSynced + '\'' +
+                ", hidden=" + hidden +
                 '}';
     }
 }
