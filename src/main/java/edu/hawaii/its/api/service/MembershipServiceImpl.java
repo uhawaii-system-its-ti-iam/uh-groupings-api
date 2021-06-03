@@ -207,7 +207,7 @@ public class MembershipServiceImpl implements MembershipService {
             groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
             optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
         } catch (GcWebServiceError e) {
-            return null;
+            return memberships;
         }
 
         for (String groupPath : groupPaths) {
