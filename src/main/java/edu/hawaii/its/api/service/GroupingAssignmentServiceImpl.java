@@ -264,41 +264,33 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groupingsOpted(EXCLUDE, username, groupPaths);
     }
 
-    //fetch a grouping from Grouper or the database
+    /**
+     * Fetch a grouping from the Grouper database.
+     */
     @Override
     public Grouping getGrouping(String groupingPath, String ownerUsername) {
         logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + ";");
 
-        Grouping compositeGrouping;
-
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService
                 .isAdmin(ownerUsername)) {
-            compositeGrouping = new Grouping(groupingPath);
-
-            String basis = groupingPath + BASIS;
-            String include = groupingPath + INCLUDE;
-            String exclude = groupingPath + EXCLUDE;
-            String owners = groupingPath + OWNERS;
-
-            String[] paths = { include,
-                    exclude,
-                    basis,
-                    groupingPath,
-                    owners };
-            Map<String, Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
-
-            compositeGrouping = setGroupingAttributes(compositeGrouping);
-
-            compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
-            compositeGrouping.setBasis(groups.get(basis));
-            compositeGrouping.setExclude(groups.get(exclude));
-            compositeGrouping.setInclude(groups.get(include));
-            compositeGrouping.setComposite(groups.get(groupingPath));
-            compositeGrouping.setOwners(groups.get(owners));
-
-        } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+        Grouping compositeGrouping = new Grouping(groupingPath);
+        String basis = groupingPath + BASIS;
+        String include = groupingPath + INCLUDE;
+        String exclude = groupingPath + EXCLUDE;
+        String owners = groupingPath + OWNERS;
+        String[] paths = { include, exclude, basis, groupingPath, owners };
+        Map<String, Group> groups = getMembers(ownerUsername, Arrays.asList(paths));
+
+        compositeGrouping = setGroupingAttributes(compositeGrouping);
+        compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
+        compositeGrouping.setBasis(groups.get(basis));
+        compositeGrouping.setExclude(groups.get(exclude));
+        compositeGrouping.setInclude(groups.get(include));
+        compositeGrouping.setComposite(groups.get(groupingPath));
+        compositeGrouping.setOwners(groups.get(owners));
+
         return compositeGrouping;
     }
 
@@ -343,7 +335,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
     }
-
 
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
