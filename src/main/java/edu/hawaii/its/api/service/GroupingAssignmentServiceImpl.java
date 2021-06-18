@@ -303,37 +303,34 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
-
-        if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService
                 .isAdmin(ownerUsername)) {
-
-            Grouping compositeGrouping = new Grouping(groupingPath);
-            String basis = groupingPath + BASIS;
-            String include = groupingPath + INCLUDE;
-            String exclude = groupingPath + EXCLUDE;
-            String owners = groupingPath + OWNERS;
-
-            List<String> paths = new ArrayList<>();
-            paths.add(include);
-            paths.add(exclude);
-            paths.add(basis);
-            paths.add(groupingPath);
-            paths.add(owners);
-            Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
-            compositeGrouping = setGroupingAttributes(compositeGrouping);
-
-            compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
-            compositeGrouping.setBasis(groups.get(basis));
-            compositeGrouping.setExclude(groups.get(exclude));
-            compositeGrouping.setInclude(groups.get(include));
-            compositeGrouping.setComposite(groups.get(groupingPath));
-            compositeGrouping.setOwners(groups.get(owners));
-
-            System.out.println("CompositeGroupingComingBack" + compositeGrouping);
-            return compositeGrouping;
-        } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+        Grouping compositeGrouping = new Grouping(groupingPath);
+        String basis = groupingPath + BASIS;
+        String include = groupingPath + INCLUDE;
+        String exclude = groupingPath + EXCLUDE;
+        String owners = groupingPath + OWNERS;
+        List<String> paths = new ArrayList<>();
+
+        paths.add(include);
+        paths.add(exclude);
+        paths.add(basis);
+        paths.add(groupingPath);
+        paths.add(owners);
+        Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
+
+        compositeGrouping = setGroupingAttributes(compositeGrouping);
+        compositeGrouping.setDescription(grouperFactoryService.getDescription(groupingPath));
+        compositeGrouping.setBasis(groups.get(basis));
+        compositeGrouping.setExclude(groups.get(exclude));
+        compositeGrouping.setInclude(groups.get(include));
+        compositeGrouping.setComposite(groups.get(groupingPath));
+        compositeGrouping.setOwners(groups.get(owners));
+
+        System.out.println("CompositeGroupingComingBack" + compositeGrouping);
+        return compositeGrouping;
     }
 
     //returns an adminLists object containing the list of all admins and all groupings
