@@ -387,19 +387,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 "; description: " + description + ";");
 
         GroupingsServiceResult gsr;
-
         String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
 
         if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService
                 .isAdmin(ownerUsername)) {
-
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         grouperFactoryService.updateGroupDescription(groupPath, description);
-
         gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
-
         return gsr;
     }
 
