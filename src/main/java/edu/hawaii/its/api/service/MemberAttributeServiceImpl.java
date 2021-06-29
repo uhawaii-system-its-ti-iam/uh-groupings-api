@@ -357,25 +357,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Return true if usernameInQuestion is an owner, otherwise return false.
+     * Return true if usernameInQuestion is an owner or is an admin, otherwise return false.
      */
     @Override
     public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
         logger.info("getIsOwner: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
                 + ";");
-
-        if (!isOwner(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-        try {
-            return groupingAssignmentService
-                    .groupingsOwned(groupingAssignmentService.getGroupPaths(currentUser, usernameInQuestion)).size()
-                    > 0;
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            return false;
-        }
+        return (isMember(OWNERS_GROUP, usernameInQuestion)||getIsAdmin(currentUser,usernameInQuestion));
     }
-
     /**
      * Return true if usernameInQuestion is an admin, otherwise return false.
      */
@@ -383,12 +372,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
         logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
                 + ";");
-        try {
-            return groupingAssignmentService.adminLists(usernameInQuestion).getAdminGroup().getMembers().size() > 0;
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            return false;
-        }
-
+        return isMember(GROUPING_ADMINS, usernameInQuestion);
     }
 
     /**
