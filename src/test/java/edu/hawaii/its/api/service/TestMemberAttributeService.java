@@ -9,7 +9,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
@@ -172,58 +171,6 @@ public class TestMemberAttributeService {
         membershipService.removeSelfOpted(GROUPING_INCLUDE, usernames[1]);
         if (memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[4])) {
             membershipService.removeSelfOpted(GROUPING_EXCLUDE, usernames[4]);
-        }
-    }
-
-    @Test
-    public void hasOwnerPrivsTest() {
-        assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
-
-        assertTrue(memberAttributeService.isOwner(ADMIN_USER));
-        assertFalse(memberAttributeService.isOwner("zz_zz"));
-        Boolean[] assumptions = new Boolean[] { true, false, false, false, true, false };
-        for (int i = 0; i < 6; i++) {
-            assertEquals(assumptions[i], memberAttributeService.hasOwnerPrivs(ADMIN_USER, usernames[i]));
-        }
-
-        try {
-            memberAttributeService.hasOwnerPrivs("zz_zz", usernames[0]);
-        } catch (AccessDeniedException e) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
-        }
-
-        try {
-            assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void hasAdminPrivsTest() {
-        assertTrue(memberAttributeService.hasAdminPrivs(ADMIN_USER, ADMIN_USER));
-        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, "zzz"));
-
-        if (memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0])) {
-            membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
-        }
-        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
-
-        membershipService.addAdmin(ADMIN_USER, usernames[0]);
-        assertTrue(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
-        membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
-        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
-
-        try {
-            memberAttributeService.hasAdminPrivs("zz_zz", usernames[0]);
-        } catch (AccessDeniedException e) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
-        }
-
-        try {
-            assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            fail(e.getMessage());
         }
     }
 
