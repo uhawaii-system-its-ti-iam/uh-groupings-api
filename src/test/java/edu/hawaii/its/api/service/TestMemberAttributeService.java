@@ -176,52 +176,52 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void getIsOwnerTest() {
-        assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
+    public void hasOwnerPrivsTest() {
+        assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
 
         assertTrue(memberAttributeService.isOwner(ADMIN_USER));
         assertFalse(memberAttributeService.isOwner("zz_zz"));
         Boolean[] assumptions = new Boolean[] { true, false, false, false, true, false };
         for (int i = 0; i < 6; i++) {
-            assertEquals(assumptions[i], memberAttributeService.getIsOwner(ADMIN_USER, usernames[i]));
+            assertEquals(assumptions[i], memberAttributeService.hasOwnerPrivs(ADMIN_USER, usernames[i]));
         }
 
         try {
-            memberAttributeService.getIsOwner("zz_zz", usernames[0]);
+            memberAttributeService.hasOwnerPrivs("zz_zz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         try {
-            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
+            assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void getIsAdminTest() {
-        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
-        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, "zzz"));
+    public void hasAdminPrivsTest() {
+        assertTrue(memberAttributeService.hasAdminPrivs(ADMIN_USER, ADMIN_USER));
+        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, "zzz"));
 
-        if (memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0])) {
+        if (memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0])) {
             membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
         }
-        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
 
         membershipService.addAdmin(ADMIN_USER, usernames[0]);
-        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+        assertTrue(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
         membershipService.deleteAdmin(ADMIN_USER, usernames[0]);
-        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, usernames[0]));
+        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, usernames[0]));
 
         try {
-            memberAttributeService.getIsAdmin("zz_zz", usernames[0]);
+            memberAttributeService.hasAdminPrivs("zz_zz", usernames[0]);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
 
         try {
-            assertFalse(memberAttributeService.getIsOwner(ADMIN_USER, "zz_zz"));
+            assertFalse(memberAttributeService.hasOwnerPrivs(ADMIN_USER, "zz_zz"));
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }

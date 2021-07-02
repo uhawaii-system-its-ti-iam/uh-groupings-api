@@ -430,9 +430,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void getIsAdminTest() throws Exception {
+    public void hasAdminPrivsTest() throws Exception {
 
-        given(memberAttributeService.getIsAdmin(USERNAME, "tst04name"))
+        given(memberAttributeService.hasAdminPrivs(USERNAME, "tst04name"))
                 .willReturn(true);
 
         mockMvc.perform(get(API_BASE + "/admins/tst04name")
@@ -443,8 +443,8 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void getIsOwnerTest() throws Exception {
-        given(memberAttributeService.getIsOwner(USERNAME, "tst04name"))
+    public void hasOwnerPrivsTest() throws Exception {
+        given(memberAttributeService.hasOwnerPrivs(USERNAME, "tst04name"))
                 .willReturn(true);
 
         mockMvc.perform(get(API_BASE + "/owners/tst04name")

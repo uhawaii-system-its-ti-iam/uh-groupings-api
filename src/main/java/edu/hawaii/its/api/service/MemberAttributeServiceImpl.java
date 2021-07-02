@@ -360,7 +360,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * Return true if usernameInQuestion is an owner, otherwise return false.
      */
     @Override
-    public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
+    public Boolean hasOwnerPrivs(String currentUser, String usernameInQuestion) {
         logger.info("getIsOwner: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
                 + ";");
 
@@ -380,7 +380,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * Return true if usernameInQuestion is an admin, otherwise return false.
      */
     @Override
-    public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
+    public Boolean hasAdminPrivs(String currentUser, String usernameInQuestion) {
         logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
                 + ";");
         try {
