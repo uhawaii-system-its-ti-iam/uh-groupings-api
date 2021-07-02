@@ -457,7 +457,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * True if currentUser is an owner.
      */
-    @GetMapping(value = "/owner")
+    @GetMapping(value = "/owners")
     @ResponseBody
     public ResponseEntity<Boolean> hasOwnerPrivs(@RequestHeader("current_user") String currentUser) {
         logger.info("Entered REST hasOwnerPrivs...");
@@ -469,7 +469,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * True if currentUser is an admin.
      */
-    @GetMapping(value = "/admin")
+    @GetMapping(value = "/admins")
     @ResponseBody
     public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader("current_user") String currentUser) {
         logger.info("Entered REST hasAdminPrivs...");
