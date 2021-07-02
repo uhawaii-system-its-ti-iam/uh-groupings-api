@@ -188,34 +188,34 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
-    public void getIsOwnerTest() {
-        assertTrue(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(0).getUsername()));
-        assertFalse(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(1).getUsername()));
+    public void hasOwnerPrivsTest() {
+        assertTrue(memberAttributeService.hasOwnerPrivs(users.get(0).getUsername(), users.get(0).getUsername()));
+        assertFalse(memberAttributeService.hasOwnerPrivs(users.get(0).getUsername(), users.get(1).getUsername()));
 
         try {
-            memberAttributeService.getIsOwner("zz_zz", users.get(0).getUsername());
+            memberAttributeService.hasOwnerPrivs("zz_zz", users.get(0).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
         try {
-            memberAttributeService.getIsOwner(users.get(0).getUsername(), "zz_zz");
+            memberAttributeService.hasOwnerPrivs(users.get(0).getUsername(), "zz_zz");
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void getIsAdminTest() {
-        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
-        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername()));
+    public void hasAdminPrivsTest() {
+        assertTrue(memberAttributeService.hasAdminPrivs(ADMIN_USER, ADMIN_USER));
+        assertFalse(memberAttributeService.hasAdminPrivs(ADMIN_USER, users.get(0).getUsername()));
 
         try {
-            memberAttributeService.getIsAdmin("zz_zz", users.get(0).getUsername());
+            memberAttributeService.hasAdminPrivs("zz_zz", users.get(0).getUsername());
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
         try {
-            memberAttributeService.getIsAdmin(ADMIN_USER, "zz_zz");
+            memberAttributeService.hasAdminPrivs(ADMIN_USER, "zz_zz");
         } catch (AccessDeniedException | GcWebServiceError e) {
             fail(e.getMessage());
         }

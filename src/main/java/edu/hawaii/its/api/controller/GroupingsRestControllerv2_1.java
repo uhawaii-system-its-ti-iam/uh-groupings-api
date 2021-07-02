@@ -459,12 +459,12 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/owners/{uid:[\\w-:.]+}")
     @ResponseBody
-    public ResponseEntity<Boolean> getIsOwner(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<Boolean> hasOwnerPrivs(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST getIsOwner...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getIsOwner(currentUser, uid));
+                .body(memberAttributeService.hasOwnerPrivs(currentUser, uid));
     }
 
     /**
@@ -472,12 +472,12 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/admins/{uid:[\\w-:.]+}")
     @ResponseBody
-    public ResponseEntity<Boolean> getIsAdmin(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST getIsAdmin...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getIsAdmin(currentUser, uid));
+                .body(memberAttributeService.hasAdminPrivs(currentUser, uid));
     }
 
 }
