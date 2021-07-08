@@ -428,30 +428,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUhUser
-    public void getIsAdminTest() throws Exception {
-
-        given(memberAttributeService.getIsAdmin(USERNAME, "tst04name"))
-                .willReturn(true);
-
-        mockMvc.perform(get(API_BASE + "/admins/tst04name")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void getIsOwnerTest() throws Exception {
-        given(memberAttributeService.getIsOwner(USERNAME, "tst04name"))
-                .willReturn(true);
-
-        mockMvc.perform(get(API_BASE + "/owners/tst04name")
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @WithMockUhUser

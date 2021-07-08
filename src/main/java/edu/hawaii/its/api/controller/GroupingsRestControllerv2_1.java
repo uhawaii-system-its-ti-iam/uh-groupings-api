@@ -455,29 +455,27 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a response which specifies whether uid is an owner or not,
+     * True if currentUser is an owner.
      */
-    @GetMapping(value = "/owners/{uid:[\\w-:.]+}")
+    @GetMapping(value = "/owners")
     @ResponseBody
-    public ResponseEntity<Boolean> getIsOwner(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST getIsOwner...");
+    public ResponseEntity<Boolean> hasOwnerPrivs(@RequestHeader("current_user") String currentUser) {
+        logger.info("Entered REST hasOwnerPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getIsOwner(currentUser, uid));
+                .body(memberAttributeService.isOwner(currentUser));
     }
 
     /**
-     * Get a response which specifies whether uid is an owner or not.
+     * True if currentUser is an admin.
      */
-    @GetMapping(value = "/admins/{uid:[\\w-:.]+}")
+    @GetMapping(value = "/admins")
     @ResponseBody
-    public ResponseEntity<Boolean> getIsAdmin(@RequestHeader("current_user") String currentUser,
-            @PathVariable String uid) {
-        logger.info("Entered REST getIsAdmin...");
+    public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader("current_user") String currentUser) {
+        logger.info("Entered REST hasAdminPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getIsAdmin(currentUser, uid));
+                .body(memberAttributeService.isAdmin(currentUser));
     }
 
 }

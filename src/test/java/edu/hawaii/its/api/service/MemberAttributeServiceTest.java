@@ -14,7 +14,6 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -185,40 +183,6 @@ public class MemberAttributeServiceTest {
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
         assertThat(uuidAdds.getResultCode(), is(SUCCESS));
-    }
-
-    @Test
-    public void getIsOwnerTest() {
-        assertTrue(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(0).getUsername()));
-        assertFalse(memberAttributeService.getIsOwner(users.get(0).getUsername(), users.get(1).getUsername()));
-
-        try {
-            memberAttributeService.getIsOwner("zz_zz", users.get(0).getUsername());
-        } catch (AccessDeniedException e) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
-        }
-        try {
-            memberAttributeService.getIsOwner(users.get(0).getUsername(), "zz_zz");
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void getIsAdminTest() {
-        assertTrue(memberAttributeService.getIsAdmin(ADMIN_USER, ADMIN_USER));
-        assertFalse(memberAttributeService.getIsAdmin(ADMIN_USER, users.get(0).getUsername()));
-
-        try {
-            memberAttributeService.getIsAdmin("zz_zz", users.get(0).getUsername());
-        } catch (AccessDeniedException e) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
-        }
-        try {
-            memberAttributeService.getIsAdmin(ADMIN_USER, "zz_zz");
-        } catch (AccessDeniedException | GcWebServiceError e) {
-            fail(e.getMessage());
-        }
     }
 
     @Test
