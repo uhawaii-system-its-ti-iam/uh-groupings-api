@@ -59,6 +59,21 @@ public class TestMembershipService {
     @Value("${groupings.api.test.grouping_many_extra}")
     private String GROUPING_EXTRA;
 
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
+    @Value("${groupings.api.basis_plus_include}")
+    private String BASIS_PLUS_INCLUDE;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.owners}")
+    private String OWNERS;
+
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
@@ -164,8 +179,14 @@ public class TestMembershipService {
     public void getMembershipResultsTest() {
         String ownerUsername = ADMIN;
         String uid = username[4];
-        List<Membership> result = membershipService.getMembershipResults(ownerUsername, uid);
-        assertTrue(result.size() > 0);
+        List<Membership> memberships = membershipService.getMembershipResults(ownerUsername, uid);
+        assertTrue(memberships.size() > 0);
+        for (Membership membership : memberships) {
+            assertFalse(membership.getPath().endsWith(INCLUDE));
+            assertFalse(membership.getPath().endsWith(EXCLUDE));
+            assertFalse(membership.getPath().endsWith(BASIS));
+            assertFalse(membership.getPath().endsWith(OWNERS));
+        }
     }
 
     @Test
