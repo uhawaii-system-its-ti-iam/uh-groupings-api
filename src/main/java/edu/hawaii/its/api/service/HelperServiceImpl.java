@@ -159,11 +159,13 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
-
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
     @Autowired
     private GrouperFactoryService grouperFS;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override

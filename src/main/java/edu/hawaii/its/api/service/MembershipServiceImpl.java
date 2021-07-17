@@ -26,7 +26,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -207,39 +209,44 @@ public class MembershipServiceImpl implements MembershipService {
             groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
             optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
         } catch (GcWebServiceError e) {
-            return null;
+            return memberships;
+        }
+        
+        Map<String, List<String>> pathMap = new HashMap<>();
+        for (String pathToCheck : groupPaths) {
+            if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
+                    && !pathToCheck.endsWith(OWNERS)) {
+                continue;
+            }
+            String parentPath = helperService.parentGroupingPath(pathToCheck);
+            if (!pathMap.containsKey(parentPath)) {
+                pathMap.put(parentPath, new ArrayList<>());
+            }
+            pathMap.get(parentPath).add(pathToCheck);
         }
 
-        for (String groupPath : groupPaths) {
-            boolean hasMembership = false;
-
+        for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
+            String groupingPath = entry.getKey();
+            List<String> paths = entry.getValue();
             Membership membership = new Membership();
-            if (groupPath.endsWith(INCLUDE)) {
-                membership.setInInclude(true);
-                hasMembership = true;
+            for (String path : paths) {
+                if (path.endsWith(BASIS)) {
+                    membership.setInBasis(true);
+                }
+                if (path.endsWith(INCLUDE)) {
+                    membership.setInInclude(true);
+                }
+                if (path.endsWith(EXCLUDE)) {
+                    membership.setInExclude(true);
+                }
+                if (path.endsWith(OWNERS)) {
+                    membership.setInOwner(true);
+                }
             }
-            if (groupPath.endsWith(BASIS)) {
-                membership.setInBasis(true);
-                hasMembership = true;
-            }
-            if (groupPath.endsWith(EXCLUDE)) {
-                membership.setInExclude(true);
-                hasMembership = true;
-            }
-            if (groupPath.endsWith(BASIS_PLUS_INCLUDE)) {
-                membership.setInBasisAndInclude(true);
-                hasMembership = true;
-            }
-            if (groupPath.endsWith(OWNERS)) {
-                membership.setInOwner(true);
-                hasMembership = true;
-            }
-            if (hasMembership) {
-                membership.setPath(groupPath);
-                membership.setOptOutEnabled(optOutList.contains(helperService.parentGroupingPath(groupPath)));
-                membership.setName(helperService.nameGroupingPath(groupPath));
-                memberships.add(membership);
-            }
+            membership.setPath(groupingPath);
+            membership.setOptOutEnabled(optOutList.contains(groupingPath));
+            membership.setName(helperService.nameGroupingPath(groupingPath));
+            memberships.add(membership);
         }
         return memberships;
     }
