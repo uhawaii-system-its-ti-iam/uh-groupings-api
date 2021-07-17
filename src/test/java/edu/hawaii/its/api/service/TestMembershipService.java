@@ -62,9 +62,6 @@ public class TestMembershipService {
     @Value("${groupings.api.basis}")
     private String BASIS;
 
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
     @Value("${groupings.api.exclude}")
     private String EXCLUDE;
 
