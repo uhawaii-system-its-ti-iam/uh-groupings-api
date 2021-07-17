@@ -164,9 +164,6 @@ public class HelperServiceImpl implements HelperService {
     @Autowired
     private GrouperFactoryService grouperFS;
 
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
-
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
     public String extractFirstMembershipID(WsGetMembershipsResults wsGetMembershipsResults) {
