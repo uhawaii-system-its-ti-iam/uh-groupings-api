@@ -211,7 +211,7 @@ public class MembershipServiceImpl implements MembershipService {
         } catch (GcWebServiceError e) {
             return memberships;
         }
-        
+
         Map<String, List<String>> pathMap = new HashMap<>();
         for (String pathToCheck : groupPaths) {
             if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
