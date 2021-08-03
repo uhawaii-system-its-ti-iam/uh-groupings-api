@@ -39,10 +39,13 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -1012,4 +1015,23 @@ public class GroupingsRestControllerv2_1Test {
 
     }
 
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void getNumberOfGroupingsTest() throws Exception{
+        final String uid = "grouping";
+        final String owner = "bobo";
+
+        String path = "path:to:grouping";
+
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            groupingPathList.add(new GroupingPath(path));
+        }
+
+        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
+
+        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+                .header(CURRENT_USER, owner))
+                .andExpect(status().isOk());
+    }
 }

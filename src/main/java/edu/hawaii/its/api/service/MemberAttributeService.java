@@ -45,4 +45,6 @@ public interface MemberAttributeService extends BatchIsMember {
     Boolean getIsAdmin(String currentUser, String usernameInQuestion);
 
     List<GroupingPath> getOwnedGroupings(String currentUser, String user);
+
+    Integer getNumberOfGroupings(String currentUser, String uid);
 }
