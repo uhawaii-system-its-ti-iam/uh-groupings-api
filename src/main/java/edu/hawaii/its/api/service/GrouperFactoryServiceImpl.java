@@ -59,9 +59,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 @Service("grouperFactoryService")
 @Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
@@ -127,7 +124,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
         // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
         WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION).assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
+                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION)
+                        .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 
@@ -147,7 +145,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
                     e.printStackTrace();
                 }
             }
-                syncDest.add(newSyncDest);
+            syncDest.add(newSyncDest);
         }
         return syncDest;
     }
@@ -737,9 +735,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     }
 
     @Override
-    public WsGetGroupsResults makeWsGetGroupsResults(String username,
-            WsStemLookup stemLookup,
-            StemScope stemScope) {
+    public WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope) {
 
         if (isUuid(username)) {
             return new GcGetGroups()
