@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -480,10 +481,13 @@ public class GroupingsRestControllerv2_1 {
                 .body(memberAttributeService.getIsAdmin(currentUser, uid));
     }
 
-    @GetMapping(value = "/owners/{uid:[\\w-:.]+}/groupings")
+    /**
+     * Get's the number of groupings that the current user owns
+     */
+    @GetMapping(value = "/owners/{uid:[\\w-:.]+}/grouping")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader("current_user") String currentUser, @PathVariable String uid) {
-        logger.info("Entered REST getNumberOfGroupings");
+        logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getNumberOfGroupings(currentUser, uid));
