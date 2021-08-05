@@ -10,6 +10,7 @@ import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
@@ -26,14 +27,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.hamcrest.CoreMatchers.equalToObject;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -344,6 +351,24 @@ public class MemberAttributeServiceTest {
         } catch (AccessDeniedException e) {
             e.printStackTrace();
         }
+
+    }
+
+    //assertThat(some long, equalTo(another long));
+    @Test
+    public void getNumberOfGroupingsTest() {
+        List<GroupingPath> groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(0).getUsername());
+
+        //Test a owner that owns 5 groupings
+        assertThat(groupingPathList.size(), equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername())));
+
+        //Test a owner that owns 0 groupings
+        groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(3).getUsername());
+        assertThat(groupingPathList.size(), equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(3).getUsername())));
+
+        //Test that two different users w/ different number of groupings don't return the same number of groupings
+        groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(1).getUsername());
+        assertThat(groupingPathList.size(), is(not(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername()))));
 
     }
 }
