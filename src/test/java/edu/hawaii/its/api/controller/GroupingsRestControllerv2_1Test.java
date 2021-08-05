@@ -3,12 +3,14 @@ package edu.hawaii.its.api.controller;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MemberAttributeServiceImpl;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
@@ -30,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -323,6 +326,25 @@ public class GroupingsRestControllerv2_1Test {
     public void memberGroupingsAnonTest() throws Exception {
         mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void getNumberOfGroupingsTest() throws Exception{
+        final String uid = "grouping";
+        final String owner = "bobo";
+
+        String path = "grouping";
+
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            groupingPathList.add(new GroupingPath(path));
+        }
+        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
+
+        mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
+                .header(CURRENT_USER, owner))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -1013,25 +1035,5 @@ public class GroupingsRestControllerv2_1Test {
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().is4xxClientError());
 
-    }
-
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void getNumberOfGroupingsTest() throws Exception{
-        final String uid = "grouping";
-        final String owner = "bobo";
-
-        String path = "path:to:grouping";
-
-        List<GroupingPath> groupingPathList = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            groupingPathList.add(new GroupingPath(path));
-        }
-
-        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
-
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
     }
 }
