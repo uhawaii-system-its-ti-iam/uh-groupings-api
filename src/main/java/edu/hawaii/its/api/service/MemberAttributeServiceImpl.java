@@ -408,10 +408,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Return the number of groupings a user owns.
-     * @param currentUser
-     * @param uid
-     * @return
+     * Get's the number of groupings a user owns.
      */
     @Override
     public Integer getNumberOfGroupings(String currentUser, String uid) {
