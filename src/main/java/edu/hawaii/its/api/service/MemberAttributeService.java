@@ -40,5 +40,9 @@ public interface MemberAttributeService extends BatchIsMember {
 
     String getSpecificUserAttribute(String adminUser, String username, int attribute);
 
+    Boolean getIsOwner(String currentUser, String usernameInQuestion);
+
+    Boolean getIsAdmin(String currentUser, String usernameInQuestion);
+
     List<GroupingPath> getOwnedGroupings(String currentUser, String user);
 }

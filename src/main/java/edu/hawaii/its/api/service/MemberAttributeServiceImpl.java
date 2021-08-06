@@ -238,12 +238,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     //returns true if the user is in the owner group of the grouping or is an admin
     @Override
     public boolean isOwner(String groupingPath, String username) {
-        return isMember(groupingPath + OWNERS, username) || isMember(GROUPING_ADMINS, username);
+        logger.info("isOwner; groupPath: " + groupingPath + "; username: " + username + ";");
+        return isMember(groupingPath + OWNERS, username) || isAdmin(username);
     }
 
     //returns true if the user is in the admins group
     @Override
     public boolean isAdmin(String username) {
+        logger.info("isAdmin; groupPath: " + GROUPING_ADMINS + "; username: " + username + ";");
         return isMember(GROUPING_ADMINS, username);
     }
 
