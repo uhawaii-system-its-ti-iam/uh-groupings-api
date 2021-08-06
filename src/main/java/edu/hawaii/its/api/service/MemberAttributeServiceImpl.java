@@ -235,10 +235,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return false;
     }
 
-    //returns true if the user is in the owner group of the grouping
+    //returns true if the user is in the owner group of the grouping or is an admin
     @Override
     public boolean isOwner(String groupingPath, String username) {
-        return isMember(groupingPath + OWNERS, username);
+        return isMember(groupingPath + OWNERS, username) || isMember(GROUPING_ADMINS, username);
     }
 
     //returns true if the user is in the admins group
@@ -356,6 +356,25 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return members;
     }
 
+    /**
+     * Return true if usernameInQuestion is an owner or is an admin, otherwise return false.
+     */
+    @Override
+    public Boolean getIsOwner(String currentUser, String usernameInQuestion) {
+        logger.info("getIsOwner: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
+                + ";");
+        return (isMember(OWNERS_GROUP, usernameInQuestion)||getIsAdmin(currentUser,usernameInQuestion));
+    }
+  
+    /**
+     * Return true if usernameInQuestion is an admin, otherwise return false.
+     */
+    @Override
+    public Boolean getIsAdmin(String currentUser, String usernameInQuestion) {
+        logger.info("getIsAdmin: " + "currentUser: " + currentUser + ";, " + "usernameInQuestion: " + usernameInQuestion
+                + ";");
+        return isMember(GROUPING_ADMINS, usernameInQuestion);
+    }
     /**
      * Get a list of GroupPaths the user owns.
      */
