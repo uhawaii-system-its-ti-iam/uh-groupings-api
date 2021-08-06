@@ -365,6 +365,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 + ";");
         return (isMember(OWNERS_GROUP, usernameInQuestion)||getIsAdmin(currentUser,usernameInQuestion));
     }
+  
     /**
      * Return true if usernameInQuestion is an admin, otherwise return false.
      */
@@ -374,7 +375,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 + ";");
         return isMember(GROUPING_ADMINS, usernameInQuestion);
     }
-
     /**
      * Get a list of GroupPaths the user owns.
      */
