@@ -323,6 +323,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @SuppressWarnings("PMD") //PMD suppress warning for assert() for Codacy
     @WithMockUhUser(username = "bobo")
     public void getNumberOfGroupingsTest() throws Exception{
         final String uid = "grouping";
