@@ -466,6 +466,7 @@ public class GroupingsRestControllerv2_1 {
                 .body(memberAttributeService.isOwner(currentUser));
     }
 
+    
     /**
      * True if currentUser is an admin.
      */
