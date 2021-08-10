@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -323,7 +324,6 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    @SuppressWarnings("PMD") //PMD suppress warning for assert() for Codacy
     @WithMockUhUser(username = "bobo")
     public void getNumberOfGroupingsTest() throws Exception{
         final String uid = "grouping";
@@ -337,9 +337,12 @@ public class GroupingsRestControllerv2_1Test {
         }
         given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
+        MvcResult result = mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
                 .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result, notNullValue()); //To make PMD happy
     }
 
     @Test
