@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -320,6 +321,28 @@ public class GroupingsRestControllerv2_1Test {
     public void memberGroupingsAnonTest() throws Exception {
         mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void getNumberOfGroupingsTest() throws Exception{
+        final String uid = "grouping";
+        final String owner = "bobo";
+
+        String path = "grouping";
+
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            groupingPathList.add(new GroupingPath(path));
+        }
+        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
+                .header(CURRENT_USER, owner))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result, notNullValue()); //To make PMD happy
     }
 
     @Test
@@ -987,5 +1010,4 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().is4xxClientError());
 
     }
-
 }
