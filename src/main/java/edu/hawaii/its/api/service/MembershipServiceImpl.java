@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
@@ -14,9 +17,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLit
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -178,6 +180,59 @@ public class MembershipServiceImpl implements MembershipService {
     // returns true if username is a UH id number
     public boolean isUuid(String username) {
         return username.matches("\\d+");
+    }
+
+    @Override public List<Membership> getMembershipResults(String owner, String uid) {
+        String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
+        logger.info(action);
+
+        List<Membership> memberships = new ArrayList<>();
+        List<String> groupPaths;
+        List<String> optOutList;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        } catch (GcWebServiceError e) {
+            return memberships;
+        }
+
+        Map<String, List<String>> pathMap = new HashMap<>();
+        for (String pathToCheck : groupPaths) {
+            if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
+                    && !pathToCheck.endsWith(OWNERS)) {
+                continue;
+            }
+            String parentPath = helperService.parentGroupingPath(pathToCheck);
+            if (!pathMap.containsKey(parentPath)) {
+                pathMap.put(parentPath, new ArrayList<>());
+            }
+            pathMap.get(parentPath).add(pathToCheck);
+        }
+
+        for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
+            String groupingPath = entry.getKey();
+            List<String> paths = entry.getValue();
+            Membership membership = new Membership();
+            for (String path : paths) {
+                if (path.endsWith(BASIS)) {
+                    membership.setInBasis(true);
+                }
+                if (path.endsWith(INCLUDE)) {
+                    membership.setInInclude(true);
+                }
+                if (path.endsWith(EXCLUDE)) {
+                    membership.setInExclude(true);
+                }
+                if (path.endsWith(OWNERS)) {
+                    membership.setInOwner(true);
+                }
+            }
+            membership.setPath(groupingPath);
+            membership.setOptOutEnabled(optOutList.contains(groupingPath));
+            membership.setName(helperService.nameGroupingPath(groupingPath));
+            memberships.add(membership);
+        }
+        return memberships;
     }
 
     @Override
