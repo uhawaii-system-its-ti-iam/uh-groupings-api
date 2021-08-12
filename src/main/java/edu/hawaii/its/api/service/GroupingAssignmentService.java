@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -13,9 +14,10 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 public interface GroupingAssignmentService {
+
+    List<String> getOptOutGroups(String owner, String optOutUid);
 
     public List<Grouping> groupingsIn(List<String> groupPaths);
 
