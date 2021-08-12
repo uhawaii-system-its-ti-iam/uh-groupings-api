@@ -1,10 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
 
@@ -16,20 +17,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +36,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Service("groupingAssignmentService")
@@ -305,7 +293,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
 
-
         if (memberAttributeService.isOwner(groupingPath, ownerUsername) || memberAttributeService
                 .isSuperuser(ownerUsername)) {
 
@@ -333,7 +320,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             compositeGrouping.setOwners(groups.get(owners));
 
             System.out.println("CompositeGroupingComingBack" + compositeGrouping);
-//            logger.info(compositeGrouping);
+            //            logger.info(compositeGrouping);
             return compositeGrouping;
         } else {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
@@ -405,7 +392,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         // todo get the self opted memberships in one grouper call
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
-                && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
+                        && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
 
         if (groupsOpted.size() > 0) {
@@ -450,61 +437,61 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //todo Consider deleting. Is not being used in any meaningful way at the moment
     //todo Commenting out in case this become useful later
-//        @Override
-//        public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
-//            logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
-//                    "; componentId: " + componentId + ";");
-//
-//            String groupPath = parentGroupingPath + componentId;
-//            Group groupMembers = new Group();
-//
-//            if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
-//                    .isSuperuser(ownerUsername)) {
-//
-//                WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
-//                WsGetMembersResults membersResults;
-//
-//                ExecutorService executor = Executors.newSingleThreadExecutor();
-//                Callable<WsGetMembersResults> callable = () -> {
-//                    List<String> groupPaths = new ArrayList<>();
-//                    groupPaths.add(groupPath);
-//
-//                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
-//                            lookup,
-//                            groupPaths,
-//                            null,
-//                            null,
-//                            null,
-//                            null);
-//                };
-//
-//                Future<WsGetMembersResults> future = executor.submit(callable);
-//
-//                try {
-//                    membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
-//                } catch (TimeoutException te) {
-//                    //                te.printStackTrace();
-//                    GroupingsHTTPException ghe = new GroupingsHTTPException();
-//                    throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
-//                }
-//
-//                if (executor.isTerminated()) {
-//                    executor.shutdown();
-//                }
-//
-//                if (membersResults.getResults() != null) {
-//                    if (componentId.equals(BASIS)) {
-//                        groupMembers = makeBasisGroup(membersResults);
-//                    } else {
-//                        groupMembers = makeGroup(membersResults);
-//                    }
-//                }
-//            }
-//            else {
-//                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-//            }
-//            return groupMembers;
-//        }
+    //        @Override
+    //        public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception {
+    //            logger.info("getGroupMembers; user: " + ownerUsername + "; parentGroupingPath: " + parentGroupingPath +
+    //                    "; componentId: " + componentId + ";");
+    //
+    //            String groupPath = parentGroupingPath + componentId;
+    //            Group groupMembers = new Group();
+    //
+    //            if (memberAttributeService.isOwner(parentGroupingPath, ownerUsername) || memberAttributeService
+    //                    .isSuperuser(ownerUsername)) {
+    //
+    //                WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ownerUsername);
+    //                WsGetMembersResults membersResults;
+    //
+    //                ExecutorService executor = Executors.newSingleThreadExecutor();
+    //                Callable<WsGetMembersResults> callable = () -> {
+    //                    List<String> groupPaths = new ArrayList<>();
+    //                    groupPaths.add(groupPath);
+    //
+    //                    return grouperFactoryService.makeWsGetMembersResults(SUBJECT_ATTRIBUTE_NAME_UID,
+    //                            lookup,
+    //                            groupPaths,
+    //                            null,
+    //                            null,
+    //                            null,
+    //                            null);
+    //                };
+    //
+    //                Future<WsGetMembersResults> future = executor.submit(callable);
+    //
+    //                try {
+    //                    membersResults = future.get(TIMEOUT, TimeUnit.SECONDS);
+    //                } catch (TimeoutException te) {
+    //                    //                te.printStackTrace();
+    //                    GroupingsHTTPException ghe = new GroupingsHTTPException();
+    //                    throw new GroupingsHTTPException("getGroupMembers Operation Timed Out.", ghe, 504);
+    //                }
+    //
+    //                if (executor.isTerminated()) {
+    //                    executor.shutdown();
+    //                }
+    //
+    //                if (membersResults.getResults() != null) {
+    //                    if (componentId.equals(BASIS)) {
+    //                        groupMembers = makeBasisGroup(membersResults);
+    //                    } else {
+    //                        groupMembers = makeGroup(membersResults);
+    //                    }
+    //                }
+    //            }
+    //            else {
+    //                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+    //            }
+    //            return groupMembers;
+    //        }
 
     @Override
     public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
@@ -678,7 +665,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns the list of groupings that the user is allowed to opt-in to
     public List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths) {
-        logger.info("groupingsToOptInto; username: " + optInUsername + "; groupPaths : " + groupPaths + ";");
+
+        logger.info("groupingsToOptInto; start.");
+        if (logger.isDebugEnabled()) {
+            logger.info("groupingsToOptInto; username: " + optInUsername + "; groupPaths : " + groupPaths + ";");
+        }
 
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
@@ -722,7 +713,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     //returns a list of groupings that the user is allowed to opt-out of
     public List<Grouping> groupingsToOptOutOf(String optOutUsername, List<String> groupPaths) {
-        logger.info("groupingsToOptOutOf; username: " + optOutUsername + "; groupPaths: " + groupPaths + ";");
+        logger.info("groupingsToOptOutOf; start.");
+        if (logger.isDebugEnabled()) {
+            logger.info("groupingsToOptOutOf; username: " + optOutUsername + "; groupPaths : " + groupPaths + ";");
+        }
 
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();

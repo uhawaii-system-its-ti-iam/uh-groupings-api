@@ -1,15 +1,17 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -181,9 +183,12 @@ public class HelperServiceImpl implements HelperService {
         return grouperFS.makeWsGetMembershipsResults(group, lookup);
     }
 
-    //returns the list of all of the groups in groupPaths that are also groupings
+    //returns the list of all groups in groupPaths that are also groupings
     public List<String> extractGroupings(List<String> groupPaths) {
-        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
+        logger.info("extractGroupings; start.");
+        if (logger.isDebugEnabled()) {
+            logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
+        }
 
         List<String> groupings = new ArrayList<>();
 
@@ -209,39 +214,36 @@ public class HelperServiceImpl implements HelperService {
         return groupings;
     }
 
-
     //todo GroupingsIn optimization (work in progress)
-//    public List<Grouping> extractGroupingsNew(List<String> groupPaths) {
-////        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
-////
-////        List<String> groupings = new ArrayList<>();
-////        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-////        List<Grouping> groupingsTwo = new ArrayList<>();
-////
-////        if (groupPaths.size() > 0) {
-////
-////            List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
-////                    grouperFS.makeWsGetAttributeAssignmentsResultsTrioNew(
-////                            ASSIGN_TYPE_GROUP,
-////                            TRIO,
-////                            groupPaths);
-////
-////            attributeAssignmentsResults
-////                    .stream()
-////                    .filter(results -> results.getWsAttributeAssigns() != null)
-////                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
-////
-////            if (attributeAssigns.size() > 0) {
-////                groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
-////                        .collect(toList()));
-////            }
-////
-////            groupingsTwo = makeGroupings(groupings);
-////
-////        }
-////        return groupingsTwo;
-//    }
-
+    //    public List<Grouping> extractGroupingsNew(List<String> groupPaths) {
+    ////        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
+    ////
+    ////        List<String> groupings = new ArrayList<>();
+    ////        List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
+    ////        List<Grouping> groupingsTwo = new ArrayList<>();
+    ////
+    ////        if (groupPaths.size() > 0) {
+    ////
+    ////            List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
+    ////                    grouperFS.makeWsGetAttributeAssignmentsResultsTrioNew(
+    ////                            ASSIGN_TYPE_GROUP,
+    ////                            TRIO,
+    ////                            groupPaths);
+    ////
+    ////            attributeAssignmentsResults
+    ////                    .stream()
+    ////                    .filter(results -> results.getWsAttributeAssigns() != null)
+    ////                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
+    ////
+    ////            if (attributeAssigns.size() > 0) {
+    ////                groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
+    ////                        .collect(toList()));
+    ////            }
+    ////
+    ////
+    ////        }
+    ////        return groupingsTwo;
+    //    }
 
     @Override
     public String toString() {
@@ -279,7 +281,10 @@ public class HelperServiceImpl implements HelperService {
     //makes a list of groupings each with a path from the list
     @Override
     public List<Grouping> makeGroupings(List<String> groupingPaths) {
-        logger.info("makeGroupings; groupingPaths: " + groupingPaths + ";");
+        logger.info("makeGroupings; start.");
+        if (logger.isDebugEnabled()) {
+            logger.info("makeGroupings; groupingPaths: " + groupingPaths + ";");
+        }
 
         List<Grouping> groupings = new ArrayList<>();
         if (groupingPaths.size() > 0) {
@@ -289,9 +294,9 @@ public class HelperServiceImpl implements HelperService {
                     .collect(Collectors.toList());
         }
 
-//        for(Grouping group : groupings) {
-//            group.setDescription(grouperFS.getDescription(group.getPath()));
-//        }
+        //        for(Grouping group : groupings) {
+        //            group.setDescription(grouperFS.getDescription(group.getPath()));
+        //        }
 
         return groupings;
     }
