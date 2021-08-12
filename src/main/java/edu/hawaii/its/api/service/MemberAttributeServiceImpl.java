@@ -371,4 +371,12 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
         return groupingPaths;
     }
+
+    /**
+     * Get's the number of groupings a user owns.
+     */
+    @Override
+    public Integer getNumberOfGroupings(String currentUser, String uid) {
+        return getOwnedGroupings(currentUser, uid).size();
+    }
 }
