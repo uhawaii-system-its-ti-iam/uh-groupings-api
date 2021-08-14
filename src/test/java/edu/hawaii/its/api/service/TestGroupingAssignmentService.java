@@ -192,8 +192,26 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getOptOutGroupsTest() {
-        List<String> optOutGroupsList = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[0]);
-        assertTrue(optOutGroupsList.size() > 0);
+        List<List<String>> optOutPathsLists = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            optOutPathsLists.add(new ArrayList<>(
+                    groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1])));
+        }
+        for (List<String> list : optOutPathsLists) {
+            assertTrue(list.contains(GROUPING));
+        }
+    }
+
+    @Test
+    public void getOptInGroupsTest() {
+        List<List<String>> optInPathsLists = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            optInPathsLists.add(new ArrayList<>(
+                    groupingAssignmentService.getOptInGroups(usernames[0], usernames[1])));
+        }
+        for (List<String> list : optInPathsLists) {
+            assertTrue(list.contains(GROUPING));
+        }
     }
 
     @Test
