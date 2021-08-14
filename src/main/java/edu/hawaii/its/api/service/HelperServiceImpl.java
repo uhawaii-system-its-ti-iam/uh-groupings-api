@@ -321,4 +321,12 @@ public class HelperServiceImpl implements HelperService {
         return "";
     }
 
+    @Override public String nameGroupingPath(String groupPath) {
+        String parentPath = parentGroupingPath(groupPath);
+        if ("".equals(parentPath)) {
+            return "";
+        }
+        return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
+    }
+
 }

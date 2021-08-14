@@ -19,6 +19,8 @@ public interface GroupingAssignmentService {
 
     List<String> getOptOutGroups(String owner, String optOutUid);
 
+    List<String> getOptInGroups(String owner, String optInUid);
+
     public List<Grouping> groupingsIn(List<String> groupPaths);
 
     public List<Grouping> groupingsOwned(List<String> groupPaths);
@@ -31,9 +33,10 @@ public interface GroupingAssignmentService {
 
     public Grouping getGrouping(String groupingPath, String ownerUsername);
 
-    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size, String sortString, Boolean isAscending);
+    public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size,
+            String sortString, Boolean isAscending);
 
-//    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size);
+    //    public Grouping getPaginatedGroupingHelper(String ownerUsername, String groupingPath, Integer page, Integer size);
 
     public GroupingAssignment getGroupingAssignment(String username);
 
@@ -55,7 +58,8 @@ public interface GroupingAssignmentService {
 
     public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths);
 
-//    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
+    //    public Group getGroupMembers(String ownerUsername, String parentGroupingPath, String componentId) throws Exception;
 
-    public Map<String, Group> getPaginatedMembers( String ownerUsername, List<String> groupPaths, Integer page, Integer size, String sortString, Boolean isAscending);
+    public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
+            Integer size, String sortString, Boolean isAscending);
 }

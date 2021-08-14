@@ -235,6 +235,48 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return new ArrayList<>(new HashSet<>(opts));
     }
 
+    @Override public List<String> getOptInGroups(String owner, String optInUid) {
+        logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optInUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_IN);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        String name = assign.getOwnerGroupName();
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
+                        String name = assign.getOwnerGroupName();
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            //opts intersection trios
+            opts.retainAll(trios);
+            //excludes intersection opts
+            excludes.retainAll(opts);
+            //opts - (opts intersection groupPaths)
+            opts.removeAll(groupPaths);
+            //opts union excludes
+            opts.addAll(excludes);
+        }
+        //get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {
