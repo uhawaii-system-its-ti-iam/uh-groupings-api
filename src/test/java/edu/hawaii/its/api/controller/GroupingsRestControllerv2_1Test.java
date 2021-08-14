@@ -1,5 +1,9 @@
 package edu.hawaii.its.api.controller;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -12,12 +16,10 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingAssignment;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.MembershipAssignment;
 import edu.hawaii.its.api.type.Person;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +42,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -522,7 +527,17 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(post(API_BASE + "/admins/newAdmin").with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
+    @Test
+    @WithMockUhUser
+    public void membershipResultsTest() throws Exception {
+        List<Membership> memberships = new ArrayList<>();
+        given(membershipService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
+        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
+                        .with(csrf())
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk());
+    }
     @Test
     @WithMockUhUser(username = "uhAdmin")
     public void addOwnerTest() throws Exception {
