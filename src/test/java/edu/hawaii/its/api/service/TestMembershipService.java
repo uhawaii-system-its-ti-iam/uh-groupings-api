@@ -24,7 +24,9 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -168,16 +170,24 @@ public class TestMembershipService {
         List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
         assertNotNull(memberships);
         assertTrue(memberships.size() != 0);
+        boolean hasDuplicates = false;
+        Set<String> pathMap = new HashSet<>();
         for (Membership membership : memberships) {
             assertNotNull(membership.getPath());
             assertNotNull(membership.getName());
+            // The membership's path should be a parent path.
             assertFalse(membership.getPath().endsWith(INCLUDE));
             assertFalse(membership.getPath().endsWith(EXCLUDE));
             assertFalse(membership.getPath().endsWith(BASIS));
             assertFalse(membership.getPath().endsWith(OWNERS));
+            // The member should be in at least one of these.
             assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
                     || membership.isInOwner());
+            if (!pathMap.add(membership.getPath())) {
+                hasDuplicates = true;
+            }
         }
+        assertFalse(hasDuplicates);
     }
 
     @Test
