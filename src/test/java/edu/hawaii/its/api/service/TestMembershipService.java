@@ -28,6 +28,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -74,6 +75,18 @@ public class TestMembershipService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.owners}")
+    private String OWNERS;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -153,8 +166,17 @@ public class TestMembershipService {
     @Test
     public void getMembershipResultsTest() {
         List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
+        assertNotNull(memberships);
+        assertTrue(memberships.size() != 0);
         for (Membership membership : memberships) {
-            System.err.println(membership.toString());
+            assertNotNull(membership.getPath());
+            assertNotNull(membership.getName());
+            assertFalse(membership.getPath().endsWith(INCLUDE));
+            assertFalse(membership.getPath().endsWith(EXCLUDE));
+            assertFalse(membership.getPath().endsWith(BASIS));
+            assertFalse(membership.getPath().endsWith(OWNERS));
+            assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
+                    || membership.isInOwner());
         }
     }
 
