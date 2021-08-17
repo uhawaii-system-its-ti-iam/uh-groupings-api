@@ -1012,6 +1012,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @SuppressWarnings("PMD")
     @WithMockUhUser
     public void getNumberOfMembershipTest() throws Exception {
         List<Membership> memberships = membershipService.getMembershipResults(ADMIN, "iamtst01");
