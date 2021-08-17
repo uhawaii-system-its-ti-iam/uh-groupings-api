@@ -216,22 +216,20 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
                 if (assign.getAttributeDefNameName() != null) {
                     if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
                         trios.add(assign.getOwnerGroupName());
                     } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
-                        String name = assign.getOwnerGroupName();
                         opts.add(assign.getOwnerGroupName());
                     }
                 }
             }
-            //opts intersection trios
+            // Opts intersection trios
             opts.retainAll(trios);
-            //excludes intersection opts
+            // Excludes intersection opts
             excludes.retainAll(opts);
-            //opts - (opts intersection groupPaths)
-            //opts union excludes
+            // Opts - (opts intersection groupPaths)
+            // Opts union excludes
         }
-        //get rid of duplicates
+        // Get rid of duplicates
         return new ArrayList<>(new HashSet<>(opts));
     }
 
@@ -256,24 +254,22 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
                 if (assign.getAttributeDefNameName() != null) {
                     if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
                         trios.add(assign.getOwnerGroupName());
                     } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
-                        String name = assign.getOwnerGroupName();
                         opts.add(assign.getOwnerGroupName());
                     }
                 }
             }
-            //opts intersection trios
+            // Opts intersection trios
             opts.retainAll(trios);
-            //excludes intersection opts
+            // Excludes intersection opts
             excludes.retainAll(opts);
-            //opts - (opts intersection groupPaths)
+            // Opts - (opts intersection groupPaths)
             opts.removeAll(groupPaths);
-            //opts union excludes
+            // Opts union excludes
             opts.addAll(excludes);
         }
-        //get rid of duplicates
+        // Get rid of duplicates
         return new ArrayList<>(new HashSet<>(opts));
     }
 
