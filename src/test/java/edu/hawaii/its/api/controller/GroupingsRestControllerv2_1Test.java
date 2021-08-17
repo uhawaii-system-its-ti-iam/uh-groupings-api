@@ -51,6 +51,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -1009,5 +1010,18 @@ public class GroupingsRestControllerv2_1Test {
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().is4xxClientError());
 
+    }
+
+    @Test
+    @WithMockUhUser
+    public void getNumberOfMembershipTest() throws Exception {
+        List<Membership> memberships = membershipService.getMembershipResults(ADMIN, "iamtst01");
+        given(membershipService.getNumberOfMemberships(ADMIN, "iamtst01")).willReturn(memberships.size());
+
+        mockMvc.perform(get(API_BASE + "/groupings/iamtst01/memberships")
+                        .with(csrf())
+                        .header(CURRENT_USER, "iamtst01"))
+                        .andExpect(status().isOk())
+                        .andReturn();
     }
 }
