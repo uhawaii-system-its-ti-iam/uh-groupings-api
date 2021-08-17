@@ -170,7 +170,6 @@ public class TestMembershipService {
         List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
         assertNotNull(memberships);
         assertTrue(memberships.size() != 0);
-        boolean hasDuplicates = false;
         Set<String> pathMap = new HashSet<>();
         for (Membership membership : memberships) {
             assertNotNull(membership.getPath());
@@ -183,11 +182,8 @@ public class TestMembershipService {
             // The member should be in at least one of these.
             assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
                     || membership.isInOwner());
-            if (!pathMap.add(membership.getPath())) {
-                hasDuplicates = true;
-            }
+            assertTrue(pathMap.add(membership.getPath()));
         }
-        assertFalse(hasDuplicates);
     }
 
     @Test

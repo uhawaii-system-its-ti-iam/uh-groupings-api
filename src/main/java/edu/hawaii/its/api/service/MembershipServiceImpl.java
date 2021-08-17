@@ -432,7 +432,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         //should not be in exclude if not in basis
         if (!isInBasis && isInExclude) {
-            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid    ));
+            gsrList.add(deleteGroupMemberByUsername(ownerUsername, exclude, userToDeleteUuid));
         }
 
         return gsrList;

@@ -30,7 +30,9 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -192,25 +194,33 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getOptOutGroupsTest() {
-        List<List<String>> optOutPathsLists = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            optOutPathsLists.add(new ArrayList<>(
-                    groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1])));
-        }
-        for (List<String> list : optOutPathsLists) {
-            assertTrue(list.contains(GROUPING));
+        List<String> optOutPaths = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1]);
+        assertTrue(optOutPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optOutPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for dups.
+            assertTrue(pathMap.add(path));
         }
     }
 
     @Test
     public void getOptInGroupsTest() {
-        List<List<String>> optInPathsLists = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            optInPathsLists.add(new ArrayList<>(
-                    groupingAssignmentService.getOptInGroups(usernames[0], usernames[1])));
-        }
-        for (List<String> list : optInPathsLists) {
-            assertTrue(list.contains(GROUPING));
+        List<String> optInPaths = groupingAssignmentService.getOptInGroups(usernames[0], usernames[1]);
+        assertTrue(optInPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optInPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for dups.
+            assertTrue(pathMap.add(path));
         }
     }
 
@@ -228,7 +238,8 @@ public class TestGroupingAssignmentService {
 
         WsGetAttributeAssignmentsResults assignments =
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
-        String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+        String assignedValue =
+                assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
         assertEquals(dateStr, assignedValue);
     }
