@@ -431,7 +431,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void getNumberOfMembershipTest(){
+    public void getNumberOfMembershipsTest(){
         String user = users.get(10).getUsername();
 
         assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(0));
