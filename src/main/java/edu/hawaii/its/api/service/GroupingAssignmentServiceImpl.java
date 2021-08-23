@@ -195,6 +195,84 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
     @Autowired GroupAttributeService groupAttributeService;
 
+    @Override public List<String> getOptOutGroups(String owner, String optOutUid) {
+        logger.info("getOptOutGroups; owner: " + owner + "; optOutUid: " + optOutUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optOutUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_OUT);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            // Opts intersection trios
+            opts.retainAll(trios);
+            // Excludes intersection opts
+            excludes.retainAll(opts);
+            // Opts - (opts intersection groupPaths)
+            // Opts union excludes
+        }
+        // Get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
+    @Override public List<String> getOptInGroups(String owner, String optInUid) {
+        logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
+
+        List<String> groupPaths = getGroupPaths(owner, optInUid);
+        List<String> trios = new ArrayList<>();
+        List<String> opts = new ArrayList<>();
+        List<String> excludes = groupPaths
+                .stream()
+                .map(group -> group + EXCLUDE)
+                .collect(Collectors.toList());
+
+        WsGetAttributeAssignmentsResults assignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
+                        ASSIGN_TYPE_GROUP,
+                        TRIO,
+                        OPT_IN);
+
+        if (assignmentsResults.getWsAttributeAssigns() != null) {
+            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
+                if (assign.getAttributeDefNameName() != null) {
+                    if (assign.getAttributeDefNameName().equals(TRIO)) {
+                        trios.add(assign.getOwnerGroupName());
+                    } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
+                        opts.add(assign.getOwnerGroupName());
+                    }
+                }
+            }
+            // Opts intersection trios
+            opts.retainAll(trios);
+            // Excludes intersection opts
+            excludes.retainAll(opts);
+            // Opts - (opts intersection groupPaths)
+            opts.removeAll(groupPaths);
+            // Opts union excludes
+            opts.addAll(excludes);
+        }
+        // Get rid of duplicates
+        return new ArrayList<>(new HashSet<>(opts));
+    }
+
     // returns a list of all of the groups in groupPaths that are also groupings
     @Override
     public List<Grouping> groupingsIn(List<String> groupPaths) {

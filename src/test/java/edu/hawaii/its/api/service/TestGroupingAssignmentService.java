@@ -1,22 +1,23 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingAssignment;
-import edu.hawaii.its.api.type.GroupingsHTTPException;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Person;
-import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingAssignment;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,20 +30,25 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -187,6 +193,38 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
+    public void getOptOutGroupsTest() {
+        List<String> optOutPaths = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1]);
+        assertTrue(optOutPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optOutPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for dups.
+            assertTrue(pathMap.add(path));
+        }
+    }
+
+    @Test
+    public void getOptInGroupsTest() {
+        List<String> optInPaths = groupingAssignmentService.getOptInGroups(usernames[0], usernames[1]);
+        assertTrue(optInPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optInPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for dups.
+            assertTrue(pathMap.add(path));
+        }
+    }
+
+    @Test
     public void updateLastModifiedTest() {
         // Test is accurate to the minute, and if checks to see if the current
         // time gets added to the lastModified attribute of a group if the
@@ -200,7 +238,8 @@ public class TestGroupingAssignmentService {
 
         WsGetAttributeAssignmentsResults assignments =
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
-        String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+        String assignedValue =
+                assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
 
         assertEquals(dateStr, assignedValue);
     }
@@ -248,11 +287,12 @@ public class TestGroupingAssignmentService {
         // Page 1 contains 3 stale subjects, should return 17
         Grouping paginatedGroupingPage1 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
-//        // Page 2 contains 1 stale subject, should return 19
+        //        // Page 2 contains 1 stale subject, should return 19
         Grouping paginatedGroupingPage2 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
 
-        Grouping normalGrouping = groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
+        Grouping normalGrouping =
+                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));

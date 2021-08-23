@@ -1,14 +1,17 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.Membership;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,13 +24,18 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMembershipService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -69,6 +77,18 @@ public class TestMembershipService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.basis}")
+    private String BASIS;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.owners}")
+    private String OWNERS;
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -146,6 +166,27 @@ public class TestMembershipService {
     }
 
     @Test
+    public void getMembershipResultsTest() {
+        List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
+        assertNotNull(memberships);
+        assertTrue(memberships.size() != 0);
+        Set<String> pathMap = new HashSet<>();
+        for (Membership membership : memberships) {
+            assertNotNull(membership.getPath());
+            assertNotNull(membership.getName());
+            // The membership's path should be a parent path.
+            assertFalse(membership.getPath().endsWith(INCLUDE));
+            assertFalse(membership.getPath().endsWith(EXCLUDE));
+            assertFalse(membership.getPath().endsWith(BASIS));
+            assertFalse(membership.getPath().endsWith(OWNERS));
+            // The member should be in at least one of these.
+            assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
+                    || membership.isInOwner());
+            assertTrue(pathMap.add(membership.getPath()));
+        }
+    }
+
+    @Test
     public void updateLastModifiedTest() {
         // Test is accurate to the minute, and if checks to see if the current
         // time gets added to the lastModified attribute of a group if the
@@ -214,7 +255,6 @@ public class TestMembershipService {
     //Issue with not finding group on the server when calling is owner while getGroupPaths is able to find them
     @Test
     public void listOwnedTest() {
-
 
         // Tests that when there is no groups owned, the list is empty
         assertTrue(membershipService.listOwned(ADMIN, username[1]).isEmpty());
@@ -326,7 +366,7 @@ public class TestMembershipService {
 
     @Test
     public void getMembersTest() {
-        String[] groupings = {GROUPING};
+        String[] groupings = { GROUPING };
         Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
@@ -983,9 +1023,9 @@ public class TestMembershipService {
             assertTrue(result.getResultCode().startsWith(SUCCESS));
         }
 
-//        for (int i = 0; i < 6; i++) {
-//            membershipService.deleteGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[i]);
-//        }
+        //        for (int i = 0; i < 6; i++) {
+        //            membershipService.deleteGroupMemberByUsername(ownerUsername, GROUPING_INCLUDE, username[i]);
+        //        }
     }
 
     @Test
@@ -1071,7 +1111,6 @@ public class TestMembershipService {
     public void adminTest() {
 
         GroupingsServiceResult results;
-
 
         //checks to see that username[3] is NOT an admin
         results = membershipService.deleteAdmin(ADMIN, username[3]);

@@ -26,4 +26,6 @@ public interface HelperService {
     public List<Grouping> makeGroupings(List<String> groupingPaths);
 
     public String parentGroupingPath(String group);
+
+    String nameGroupingPath(String groupPath);
 }

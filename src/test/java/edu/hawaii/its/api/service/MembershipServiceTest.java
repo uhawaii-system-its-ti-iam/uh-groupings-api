@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -14,10 +17,6 @@ import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +29,12 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -176,6 +180,46 @@ public class MembershipServiceTest {
 
         listGsr = membershipService.addGroupingMember(ownerUsername, groupingPath, uuidToAdd);
         assertTrue(listGsr.get(0).getResultCode().startsWith(SUCCESS));
+    }
+
+    @Test
+    public void getMembershipResultsTest() {
+        // A user can access their own memberships.
+        List<Membership> memberships =
+                membershipService.getMembershipResults(users.get(0).getUsername(), users.get(0).getUsername());
+        assertNotNull(memberships);
+        for (Membership membership : memberships) {
+            assertNotNull(membership);
+            assertNotNull(membership.getPath());
+            assertNotNull(membership.getName());
+            assertEquals((GROUPING_0_PATH.substring(0, GROUPING_0_PATH.length() - 1)),
+                    membership.getPath().substring(0, membership.getPath().length() - 1));
+            assertTrue(membership.getPath().endsWith(membership.getName()));
+            assertNull(membership.getPerson());
+            assertNull(membership.getIdentifier());
+            assertFalse(membership.isSelfOpted());
+            assertFalse(membership.isOptInEnabled());
+            assertFalse(membership.isInInclude());
+            assertFalse(membership.isInExclude());
+            assertTrue(membership.isInBasis());
+            assertTrue(membership.isInOwner());
+        }
+        // Admins can access anyone's memberships.
+        for (int i = 0; i < 5; i++) {
+            memberships = membershipService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
+            assertNotNull(memberships);
+            assertFalse(memberships.isEmpty());
+        }
+        // A non-admin user cannot access another users memberships.
+        try {
+            membershipService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Admins accessing an invalid user will return an empty list.
+        memberships = membershipService.getMembershipResults(ADMIN_USER, "zzzzzzzzzzzzzzzzzz");
+        assertNotNull(memberships);
+        assertTrue(memberships.isEmpty());
     }
 
     // Debug statement to look at contents of database

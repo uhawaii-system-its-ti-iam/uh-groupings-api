@@ -1,5 +1,9 @@
 package edu.hawaii.its.api.service;
 
+import org.jasig.cas.client.authentication.AttributePrincipalImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -17,13 +21,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.jasig.cas.client.authentication.AttributePrincipalImpl;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import sun.security.acl.PrincipalImpl;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,14 +32,20 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.Constants.a;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -276,6 +279,28 @@ public class GroupingAssignmentServiceTest {
 
         for (int i = 0; i < groupingsOwned.size(); i++) {
             assertTrue(groupingsOwned.get(i).getPath().equals(PATH_ROOT + i));
+        }
+    }
+
+    @Test
+    public void getOptOutGroupsTest() {
+        List<String> optOutPaths =
+                groupingAssignmentService.getOptOutGroups(users.get(0).getUsername(), users.get(1).getUsername());
+        assertNotNull(optOutPaths);
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optOutPaths) {
+            assertTrue(pathMap.add(path));
+        }
+    }
+
+    @Test
+    public void getOptInGroupsTest() {
+        List<String> optInPaths =
+                groupingAssignmentService.getOptInGroups(users.get(0).getUsername(), users.get(1).getUsername());
+        assertNotNull(optInPaths);
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optInPaths) {
+            assertTrue(pathMap.add(path));
         }
     }
 
