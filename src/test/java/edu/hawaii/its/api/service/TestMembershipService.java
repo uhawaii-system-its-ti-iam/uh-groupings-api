@@ -182,6 +182,7 @@ public class TestMembershipService {
             // The member should be in at least one of these.
             assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
                     || membership.isInOwner());
+                    // Check for duplicates.
             assertTrue(pathMap.add(membership.getPath()));
         }
     }

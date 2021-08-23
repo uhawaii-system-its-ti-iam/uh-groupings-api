@@ -289,6 +289,7 @@ public class GroupingAssignmentServiceTest {
         assertNotNull(optOutPaths);
         Set<String> pathMap = new HashSet<>();
         for (String path : optOutPaths) {
+            // Check for duplicates.
             assertTrue(pathMap.add(path));
         }
     }
@@ -300,6 +301,7 @@ public class GroupingAssignmentServiceTest {
         assertNotNull(optInPaths);
         Set<String> pathMap = new HashSet<>();
         for (String path : optInPaths) {
+            // Check for duplicates.
             assertTrue(pathMap.add(path));
         }
     }
