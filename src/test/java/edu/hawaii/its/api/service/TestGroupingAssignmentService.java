@@ -203,7 +203,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
-            // Check for dups.
+            // Check for duplicates.
             assertTrue(pathMap.add(path));
         }
     }
@@ -219,7 +219,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
-            // Check for dups.
+            // Check for duplicates.
             assertTrue(pathMap.add(path));
         }
     }
