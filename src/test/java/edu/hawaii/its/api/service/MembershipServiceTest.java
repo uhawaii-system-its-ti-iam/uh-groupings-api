@@ -33,6 +33,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -140,13 +141,42 @@ public class MembershipServiceTest {
 
     @Test
     public void getMembershipResultsTest() {
-        try {
-            String ownerUsername = ADMIN;
-            String uid = "iamtst01";
-            membershipService.getMembershipResults(ownerUsername, uid);
-        } catch (Exception e) {
-            assertNotNull(e);
+        // A user can access their own memberships.
+        List<Membership> memberships =
+                membershipService.getMembershipResults(users.get(0).getUsername(), users.get(0).getUsername());
+        assertNotNull(memberships);
+        for (Membership membership : memberships) {
+            assertNotNull(membership);
+            assertNotNull(membership.getPath());
+            assertNotNull(membership.getName());
+            assertEquals((GROUPING_0_PATH.substring(0, GROUPING_0_PATH.length() - 1)),
+                    membership.getPath().substring(0, membership.getPath().length() - 1));
+            assertTrue(membership.getPath().endsWith(membership.getName()));
+            assertNull(membership.getPerson());
+            assertNull(membership.getIdentifier());
+            assertFalse(membership.isSelfOpted());
+            assertFalse(membership.isOptInEnabled());
+            assertFalse(membership.isInInclude());
+            assertFalse(membership.isInExclude());
+            assertTrue(membership.isInBasis());
+            assertTrue(membership.isInOwner());
         }
+        // Admins can access anyone's memberships.
+        for (int i = 0; i < 5; i++) {
+            memberships = membershipService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
+            assertNotNull(memberships);
+            assertFalse(memberships.isEmpty());
+        }
+        // A non-admin user cannot access another users memberships.
+        try {
+            membershipService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Admins accessing an invalid user will return an empty list.
+        memberships = membershipService.getMembershipResults(ADMIN_USER, "zzzzzzzzzzzzzzzzzz");
+        assertNotNull(memberships);
+        assertTrue(memberships.isEmpty());
     }
 
     @Test
