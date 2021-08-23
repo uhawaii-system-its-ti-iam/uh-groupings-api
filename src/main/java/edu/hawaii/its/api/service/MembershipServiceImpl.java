@@ -186,6 +186,10 @@ public class MembershipServiceImpl implements MembershipService {
         String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
         logger.info(action);
 
+        if (!memberAttributeService.isAdmin(owner) && !owner.equals(uid)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
         List<Membership> memberships = new ArrayList<>();
         List<String> groupPaths;
         List<String> optOutList;

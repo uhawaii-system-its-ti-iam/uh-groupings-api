@@ -1,6 +1,13 @@
 package edu.hawaii.its.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hamcrest.core.IsEqual;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.access.AnonymousUser;
 import edu.hawaii.its.api.access.Role;
 import edu.hawaii.its.api.access.User;
@@ -19,14 +26,9 @@ import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.MembershipAssignment;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hamcrest.core.IsEqual;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,11 +56,19 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @ActiveProfiles("integrationTest")
@@ -442,28 +452,6 @@ public class TestGroupingsRestControllerv2_1 {
         }
     }
 
-    @Test
-    public void memberGroupingsAdminTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], adminUser);
-        assertThat(membershipAssignment.getGroupingsIn().size(), not(0));
-
-        try {
-            mapMembershipAssignment("fake username ", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            assertThat(ghe.getStatusCode(), equalTo(404));
-        }
-
-    }
-
-    @Test
-    public void memberGroupingsMyselfTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser01);
-        assertThat(membershipAssignment.getGroupingsIn(), not(0));
-    }
-
     //    @Test
     @WithAnonymousUser
     public void memberGroupingsAnonTest() throws Exception {
@@ -474,14 +462,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(302));
         }
-    }
-
-    // This user owns nothing
-    @Test
-    public void memberGroupingsFailTest() throws Exception {
-
-        MembershipAssignment membershipAssignment = mapMembershipAssignment(usernames[0], uhUser05);
-        assertThat(membershipAssignment.getGroupingsIn().size(), equalTo(0));
     }
 
     @Test
@@ -650,14 +630,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             listHolderPass = mapAdminListsHolder(adminUser);
             assertFalse(listHolderPass.getAdminGroup().getUsernames().contains("bob-jones"));
-        }
-
-        try {
-            mapGSR(API_BASE + "admins//", "post", adminUser);
-            fail("Shouldn't be here.");
-        } catch (GroupingsHTTPException ghe) {
-            listHolderPass = mapAdminListsHolder(adminUser);
-            assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(""));
         }
 
         GroupingsServiceResult gsr = mapGSR(API_BASE + "admins/bob-jones/", "delete", adminUser);

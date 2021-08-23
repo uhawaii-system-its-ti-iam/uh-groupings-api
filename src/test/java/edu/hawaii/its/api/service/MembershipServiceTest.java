@@ -211,7 +211,13 @@ public class MembershipServiceTest {
             assertFalse(memberships.isEmpty());
         }
         // A non-admin user cannot access another users memberships.
-        memberships = membershipService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
+        try {
+            membershipService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Admins accessing an invalid user will return an empty list.
+        memberships = membershipService.getMembershipResults(ADMIN_USER, "zzzzzzzzzzzzzzzzzz");
         assertNotNull(memberships);
         assertTrue(memberships.isEmpty());
     }
