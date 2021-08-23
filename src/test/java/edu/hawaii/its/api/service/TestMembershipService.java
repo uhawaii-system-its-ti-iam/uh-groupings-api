@@ -30,8 +30,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -174,15 +176,23 @@ public class TestMembershipService {
 
     @Test
     public void getMembershipResultsTest() {
-        String ownerUsername = ADMIN;
-        String uid = username[4];
-        List<Membership> memberships = membershipService.getMembershipResults(ownerUsername, uid);
-        assertTrue(memberships.size() > 0);
+        List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
+        assertNotNull(memberships);
+        assertTrue(memberships.size() != 0);
+        Set<String> pathMap = new HashSet<>();
         for (Membership membership : memberships) {
+            assertNotNull(membership.getPath());
+            assertNotNull(membership.getName());
+            // The membership's path should be a parent path.
             assertFalse(membership.getPath().endsWith(INCLUDE));
             assertFalse(membership.getPath().endsWith(EXCLUDE));
             assertFalse(membership.getPath().endsWith(BASIS));
             assertFalse(membership.getPath().endsWith(OWNERS));
+            // The member should be in at least one of these.
+            assertTrue(membership.isInBasis() || membership.isInExclude() || membership.isInInclude()
+                    || membership.isInOwner());
+            // Check for duplicate paths.
+            assertTrue(pathMap.add(membership.getPath()));
         }
     }
 
