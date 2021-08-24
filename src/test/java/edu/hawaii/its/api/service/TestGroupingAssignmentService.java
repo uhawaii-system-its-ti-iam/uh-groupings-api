@@ -29,7 +29,9 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -363,14 +365,34 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void getOptInGroupsTest() {
-        List<List<String>> optInPathsLists = new ArrayList<List<String>>();
-        for (int i = 0; i < 6; i++) {
-            optInPathsLists.add(new ArrayList<>(
-                    groupingAssignmentService.getOptInGroups(usernames[0], usernames[1])));
+    public void getOptOutGroupsTest() {
+        List<String> optOutPaths = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1]);
+        assertTrue(optOutPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optOutPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for duplicates.
+            assertTrue(pathMap.add(path));
         }
-        for (List<String> list : optInPathsLists) {
-            assertTrue(list.contains(GROUPING));
+    }
+
+    @Test
+    public void getOptInGroupsTest() {
+        List<String> optInPaths = groupingAssignmentService.getOptInGroups(usernames[0], usernames[1]);
+        assertTrue(optInPaths.contains(GROUPING));
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optInPaths) {
+            // The path should be a parent path.
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+            // Check for duplicates.
+            assertTrue(pathMap.add(path));
         }
     }
 
