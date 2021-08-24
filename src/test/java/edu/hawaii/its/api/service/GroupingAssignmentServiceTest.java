@@ -29,8 +29,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -254,6 +256,26 @@ public class GroupingAssignmentServiceTest {
                 assertTrue(assumedPaths.contains(path));
             }
         }
+        List<String> optInPaths =
+                groupingAssignmentService.getOptInGroups(users.get(0).getUsername(), users.get(1).getUsername());
+        assertNotNull(optInPaths);
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optInPaths) {
+            // Check for duplicate paths.
+            assertTrue(pathMap.add(path));
+        }
+    }
+
+    @Test
+    public void getOptOutGroupsTest() {
+        List<String> optOutPaths =
+                groupingAssignmentService.getOptOutGroups(users.get(0).getUsername(), users.get(1).getUsername());
+        assertNotNull(optOutPaths);
+        Set<String> pathMap = new HashSet<>();
+        for (String path : optOutPaths) {
+            // Check for duplicate paths.
+            assertTrue(pathMap.add(path));
+        }
     }
 
     @Test
@@ -271,7 +293,6 @@ public class GroupingAssignmentServiceTest {
             assertTrue(groupingsOwned.get(i).getPath().equals(PATH_ROOT + i));
         }
     }
-
 
     @Test
     public void adminListsTest() {
