@@ -49,4 +49,5 @@ public interface MembershipService {
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
+    Integer getNumberOfMemberships(String currentUser, String uid);
 }

@@ -612,6 +612,11 @@ public class MembershipServiceImpl implements MembershipService {
                 action);
     }
 
+    // Get the number of memberships the current user has
+    @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
+        return getMembershipResults(currentUser, uid).size();
+    }
+
     //updates the last modified attribute of the group to the current date and time
     @Override
     public GroupingsServiceResult updateLastModified(String groupPath) {

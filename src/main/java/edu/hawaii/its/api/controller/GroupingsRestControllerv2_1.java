@@ -490,4 +490,17 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(memberAttributeService.getNumberOfGroupings(currentUser, uid));
     }
+
+    /**
+     * Get the number of memberships the current user has
+     */
+    @GetMapping(value = "/groupings/{uid:[\\w-:.<>]+}/memberships")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader("current_user") String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST getNumberOfMemberships...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.getNumberOfMemberships(currentUser, uid));
+    }
 }
