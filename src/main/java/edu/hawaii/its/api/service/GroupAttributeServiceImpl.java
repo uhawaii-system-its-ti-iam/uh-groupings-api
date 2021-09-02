@@ -181,6 +181,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         if (!memberAttributeService.isAdmin(currentUsername) && !memberAttributeService.isOwner(currentUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+       
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
         List<SyncDestination> finSyncDestList = grouperFactoryService.getSyncDestinations();
 
