@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -96,6 +97,21 @@ public class SyncDestinationTest {
                 "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
                         + tooltip + '\'' + ", isSynced=" + true + '\'' + ", hidden=" + false + '}';
         assertEquals(expected, syncDestination.toString());
+    }
+
+    @Test
+    public void getHiddenTest() {
+        String name = "name";
+        String description = "description";
+        SyncDestination syncDestination = new SyncDestination(name, description);
+        assertFalse(syncDestination.getHidden());
+        assertNotNull(syncDestination.getHidden());
+        syncDestination.setHidden(true);
+        assertTrue(syncDestination.getHidden());
+        syncDestination.setHidden(null);
+        assertFalse(syncDestination.getHidden());
+        syncDestination.setHidden(false);
+        assertFalse(syncDestination.getHidden());
     }
 
 }
