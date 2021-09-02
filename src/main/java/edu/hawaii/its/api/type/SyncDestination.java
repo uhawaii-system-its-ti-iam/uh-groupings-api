@@ -26,7 +26,7 @@ public class SyncDestination {
         this.description = description != null ? description : "";
         this.tooltip = null;
         this.isSynced = null;
-        this.hidden = null;
+        this.hidden = false;
     }
 
     @Id
@@ -70,7 +70,7 @@ public class SyncDestination {
     }
 
     public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
+        this.hidden = Boolean.valueOf(String.valueOf(hidden));
     }
 
     public String parseKeyVal(String replace, String desc) {
