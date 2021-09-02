@@ -18,7 +18,7 @@ public class SyncDestination {
 
     // Default Constructor
     public SyncDestination() {
-        //empty
+        this.hidden = false;
     }
 
     public SyncDestination(String name, String description) {
