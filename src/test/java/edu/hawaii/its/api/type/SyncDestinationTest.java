@@ -100,7 +100,7 @@ public class SyncDestinationTest {
     }
 
     @Test
-    public void getHiddenTest() {
+    public void getSetHiddenTest() {
         String name = "name";
         String description = "description";
         SyncDestination syncDestination = new SyncDestination(name, description);

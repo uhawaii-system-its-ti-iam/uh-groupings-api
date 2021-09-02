@@ -66,10 +66,11 @@ public class SyncDestination {
     }
 
     public Boolean getHidden() {
-        return hidden;
+        return this.hidden;
     }
 
     public void setHidden(Boolean hidden) {
+        // Set this.hidden to false if hidden is null.
         this.hidden = Boolean.valueOf(String.valueOf(hidden));
     }
 
