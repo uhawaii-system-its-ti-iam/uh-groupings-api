@@ -59,7 +59,7 @@ public class SyncDestination {
         return synced;
     }
 
-    public void setIsSynced(Boolean synced) {
+    public void setSynced(Boolean synced) {
         this.synced = synced != null && synced;
     }
 
