@@ -837,7 +837,6 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
     }
 
     @Test
@@ -847,13 +846,11 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
 
         mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
     }
 
     @Ignore
@@ -972,14 +969,12 @@ public class GroupingsRestControllerv2_1Test {
                         .header("accept", "application/json"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
 
         mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
                         .header("current_user", "o6-username")
                         .header("accept", "application/json"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
     }
 
     @Test
@@ -992,7 +987,6 @@ public class GroupingsRestControllerv2_1Test {
                         .header("current_user", "o6-username"))
                 .andDo(print())
                 .andExpect(status().isOk());
-                // .andReturn();
     }
 
     @Test
@@ -1028,7 +1022,6 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
-                // .andReturn();
 
         verify(membershipService, times(1))
                 .getNumberOfMemberships(ADMIN, uid);
