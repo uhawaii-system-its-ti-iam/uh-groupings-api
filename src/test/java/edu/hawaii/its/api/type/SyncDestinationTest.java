@@ -26,12 +26,12 @@ public class SyncDestinationTest {
         assertNull(destination.getName());
         assertNull(destination.getDescription());
         assertNull(destination.getTooltip());
-        assertNull(destination.getIsSynced());
+        assertNull(destination.isSynced());
 
         destination = new SyncDestination("name", "description");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
-        assertNull(destination.getIsSynced());
+        assertNull(destination.isSynced());
         assertNull(destination.getTooltip());
 
         SyncDestination syncDestination = new SyncDestination(null, null);
@@ -44,16 +44,16 @@ public class SyncDestinationTest {
         assertNull(destination.getName());
         assertNull(destination.getDescription());
         assertNull(destination.getTooltip());
-        assertNull(destination.getIsSynced());
+        assertNull(destination.isSynced());
 
         destination.setIsSynced(true);
-        assertTrue(destination.getIsSynced());
+        assertTrue(destination.isSynced());
         assertNull(destination.getTooltip());
         assertNull(destination.getDescription());
         assertNull(destination.getName());
 
         destination.setDescription("description");
-        assertTrue(destination.getIsSynced());
+        assertTrue(destination.isSynced());
         assertThat(destination.getDescription(), equalTo("description"));
         assertNull(destination.getName());
         assertNull(destination.getTooltip());
@@ -61,14 +61,14 @@ public class SyncDestinationTest {
         destination.setName("name");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
-        assertTrue(destination.getIsSynced());
+        assertTrue(destination.isSynced());
         assertNull(destination.getTooltip());
 
         destination.setTooltip("tooltip");
         assertThat(destination.getTooltip(), equalTo("tooltip"));
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
-        assertTrue(destination.getIsSynced());
+        assertTrue(destination.isSynced());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class SyncDestinationTest {
         syncDestination.setHidden(false);
         String expected =
                 "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
-                        + tooltip + '\'' + ", isSynced=" + true + '\'' + ", hidden=" + false + '}';
+                        + tooltip + '\'' + ", synced=" + true + '\'' + ", hidden=" + false + '}';
         assertEquals(expected, syncDestination.toString());
     }
 
@@ -104,14 +104,14 @@ public class SyncDestinationTest {
         String name = "name";
         String description = "description";
         SyncDestination syncDestination = new SyncDestination(name, description);
-        assertFalse(syncDestination.getHidden());
-        assertNotNull(syncDestination.getHidden());
+        assertFalse(syncDestination.isHidden());
+        assertNotNull(syncDestination.isHidden());
         syncDestination.setHidden(true);
-        assertTrue(syncDestination.getHidden());
+        assertTrue(syncDestination.isHidden());
         syncDestination.setHidden(null);
-        assertFalse(syncDestination.getHidden());
+        assertFalse(syncDestination.isHidden());
         syncDestination.setHidden(false);
-        assertFalse(syncDestination.getHidden());
+        assertFalse(syncDestination.isHidden());
     }
 
 }
