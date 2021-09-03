@@ -430,7 +430,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("give newOwner ownership of path1"));
-
     }
 
     @Ignore
@@ -449,7 +448,6 @@ public class GroupingsRestControllerv2_1Test {
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
-
     }
 
     @Test
@@ -485,7 +483,6 @@ public class GroupingsRestControllerv2_1Test {
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
-
     }
 
     @Test
@@ -596,7 +593,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$.action").value("ldap status changed"));
-
     }
 
     @Ignore
@@ -660,7 +656,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$.action").value("ldap status changed"));
-
     }
 
     @Ignore
@@ -690,7 +685,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted admin"));
-
     }
 
     @Test
@@ -730,7 +724,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted owner"));
-
     }
 
     @Ignore
@@ -830,7 +823,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
     }
 
     @Test
@@ -840,12 +832,12 @@ public class GroupingsRestControllerv2_1Test {
         String mockGroupPath = testGrouping.getPath();
 
         mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("Test")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
+                // .andReturn();
     }
 
     @Test
@@ -854,14 +846,14 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/members/i0-uuid")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
+                // .andReturn();
 
         mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
+                // .andReturn();
     }
 
     @Ignore
@@ -913,7 +905,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-
     }
 
     @Ignore
@@ -980,16 +971,15 @@ public class GroupingsRestControllerv2_1Test {
                         .header("current_user", "o6-username")
                         .header("accept", "application/json"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
+                // .andReturn();
 
         mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
                         .header("current_user", "o6-username")
                         .header("accept", "application/json"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
+                .andExpect(status().isOk());
+                // .andReturn();
     }
 
     @Test
@@ -1001,8 +991,8 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
                         .header("current_user", "o6-username"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
+                // .andReturn();
     }
 
     @Test
@@ -1024,7 +1014,6 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().is4xxClientError());
-
     }
 
     @Test
@@ -1038,8 +1027,8 @@ public class GroupingsRestControllerv2_1Test {
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
-                .andExpect(content().string("369"))
-                .andReturn();
+                .andExpect(content().string("369"));
+                // .andReturn();
 
         verify(membershipService, times(1))
                 .getNumberOfMemberships(ADMIN, uid);
