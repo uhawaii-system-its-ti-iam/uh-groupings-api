@@ -102,7 +102,7 @@ public class Grouping {
 
         for (SyncDestination destination : syncDestinations) {
             if (destination.getName().equals(key)) {
-                destination.setIsSynced(boo);
+                destination.setSynced(boo);
             }
         }
 

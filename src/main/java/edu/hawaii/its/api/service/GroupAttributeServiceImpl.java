@@ -203,7 +203,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             return null;
         }
         for (SyncDestination destination : syncDestinations) {
-            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+            destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
             destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
         }
         return syncDestinations;

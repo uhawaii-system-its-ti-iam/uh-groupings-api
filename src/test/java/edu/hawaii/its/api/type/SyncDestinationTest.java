@@ -46,7 +46,7 @@ public class SyncDestinationTest {
         assertNull(destination.getTooltip());
         assertNull(destination.isSynced());
 
-        destination.setIsSynced(true);
+        destination.setSynced(true);
         assertTrue(destination.isSynced());
         assertNull(destination.getTooltip());
         assertNull(destination.getDescription());
@@ -91,7 +91,7 @@ public class SyncDestinationTest {
 
         SyncDestination syncDestination = new SyncDestination(name, description);
         syncDestination.setTooltip(tooltip);
-        syncDestination.setIsSynced(true);
+        syncDestination.setSynced(true);
         syncDestination.setHidden(false);
         String expected =
                 "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
