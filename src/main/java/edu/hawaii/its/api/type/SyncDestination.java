@@ -13,7 +13,7 @@ public class SyncDestination {
     private String name;
     private String description;
     private String tooltip;
-    private Boolean isSynced;
+    private Boolean synced;
     private Boolean hidden;
 
     // Default Constructor
@@ -24,8 +24,6 @@ public class SyncDestination {
     public SyncDestination(String name, String description) {
         this.name = name != null ? name : "";
         this.description = description != null ? description : "";
-        this.tooltip = null;
-        this.isSynced = null;
         this.hidden = false;
     }
 
@@ -36,7 +34,7 @@ public class SyncDestination {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name != null ? name : "";
     }
 
     @Column(name = "description")
@@ -45,7 +43,7 @@ public class SyncDestination {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description != null ? description : "";
     }
 
     @Column(name = "tooltip")
@@ -57,21 +55,20 @@ public class SyncDestination {
         this.tooltip = tooltip;
     }
 
-    public Boolean getIsSynced() {
-        return isSynced;
+    public Boolean isSynced() {
+        return synced;
     }
 
-    public void setIsSynced(Boolean isSynced) {
-        this.isSynced = isSynced;
+    public void setIsSynced(Boolean synced) {
+        this.synced = synced != null && synced;
     }
 
-    public Boolean getHidden() {
-        return this.hidden;
+    public Boolean isHidden() {
+        return hidden;
     }
 
     public void setHidden(Boolean hidden) {
-        // Set this.hidden to false if hidden is null.
-        this.hidden = Boolean.valueOf(String.valueOf(hidden));
+        this.hidden = hidden != null && hidden;
     }
 
     public String parseKeyVal(String replace, String desc) {
@@ -93,7 +90,7 @@ public class SyncDestination {
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", tooltip='" + tooltip + '\'' +
-                ", isSynced=" + isSynced + '\'' +
+                ", synced=" + synced + '\'' +
                 ", hidden=" + hidden +
                 '}';
     }

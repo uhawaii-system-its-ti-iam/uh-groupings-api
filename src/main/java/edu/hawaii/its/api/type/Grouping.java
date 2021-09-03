@@ -87,7 +87,7 @@ public class Grouping {
 
         for (SyncDestination destination : syncDestinations) {
 
-            syncDestinationsState.put(destination.getName(), destination.getIsSynced());
+            syncDestinationsState.put(destination.getName(), destination.isSynced());
         }
     }
 
