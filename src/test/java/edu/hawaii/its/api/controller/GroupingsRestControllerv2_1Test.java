@@ -285,6 +285,7 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, username))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("allGroupingPaths", hasSize(adminCount)))
+                .andExpect(jsonPath("adminGroup.members", hasSize(adminCount)))
                 .andExpect(jsonPath("allGroupingPaths[0].name").value("grouping0"))
                 .andExpect(jsonPath("allGroupingPaths[1].name").value("grouping1"))
                 .andExpect(jsonPath("allGroupingPaths[2].name").value("grouping2"))
