@@ -296,7 +296,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonAdminsGroupingsTest() throws Exception {
@@ -383,7 +382,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonOwnerGroupingsTest() throws Exception {
@@ -418,7 +416,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonAddNewAdminTest() throws Exception {
@@ -446,7 +443,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonAddOwnerTest() throws Exception {
@@ -635,7 +631,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(groupingResult, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonEnablePreferenceSyncDestTest() throws Exception {
@@ -708,7 +703,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(groupingResult, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonDisablePreferenceSyncDestTest() throws Exception {
@@ -769,7 +763,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonDeleteNewAdminTest() throws Exception {
@@ -795,7 +788,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithAnonymousUser
     public void anonDeleteOwnerTest() throws Exception {
@@ -937,7 +929,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(htmlResult, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithMockUhUser(username = "abc")
     public void lookUpPermissionTestMember() throws Exception {
@@ -965,7 +956,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(memberAttributeResult, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithMockAdminUser(username = "bobo")
     public void lookUpPermissionTestAdmin() throws Exception {
@@ -995,7 +985,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(memberAttributeResult, notNullValue());
     }
 
-    @Ignore
     @Test
     @WithMockUhUser(username = "testUser")
     public void lookUpPermissionTestOwner() throws Exception {
