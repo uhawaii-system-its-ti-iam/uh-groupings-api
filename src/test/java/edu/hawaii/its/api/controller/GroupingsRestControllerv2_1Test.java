@@ -1,13 +1,11 @@
 package edu.hawaii.its.api.controller;
 
 import static org.hamcrest.CoreMatchers.is;
-// import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-// import static org.mockito.ArgumentMatchers.isNotNull;
-// import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,7 +28,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-// import org.thymeleaf.spring5.expression.Mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -280,11 +277,13 @@ public class GroupingsRestControllerv2_1Test {
         }
         Group adminGroup = new Group(admins);
         AdminListsHolder adminListsHolder = new AdminListsHolder(groupingPaths, adminGroup);
-
-        given(groupingAssignmentService.adminLists("bobo")).willReturn(adminListsHolder);
+        String username = currentUser().getUsername();
+        assertThat(username, equalTo("bobo"));
+        given(groupingAssignmentService.adminLists(username)).willReturn(adminListsHolder);
         mockMvc.perform(get(API_BASE + "/adminsGroupings")
-                        .header(CURRENT_USER, "bobo"))
+                        .header(CURRENT_USER, username))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("allGroupingPaths[0].name").value("grouping0"))
                 .andExpect(jsonPath("allGroupingPaths[1].name").value("grouping1"))
                 .andExpect(jsonPath("allGroupingPaths[2].name").value("grouping2"))
@@ -294,6 +293,9 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[0].name").value("admin0"))
                 .andExpect(jsonPath("adminGroup.members[1].name").value("admin1"))
                 .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
+
+        verify(groupingAssignmentService, times(1))
+                .adminLists(username);
     }
 
     @Test
