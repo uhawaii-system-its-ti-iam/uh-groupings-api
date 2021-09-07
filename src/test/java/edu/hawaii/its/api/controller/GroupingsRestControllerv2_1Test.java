@@ -271,6 +271,7 @@ public class GroupingsRestControllerv2_1Test {
     public void adminsGroupingsTest() throws Exception {
         List<GroupingPath> groupingPaths = new ArrayList<>();
         List<Person> admins = new ArrayList<>();
+        int adminCount = 3;
         for (int i = 0; i < 3; i++) {
             groupingPaths.add(new GroupingPath("path:to:grouping" + i));
             admins.add(new Person("admin" + i));
@@ -283,7 +284,7 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/adminsGroupings")
                         .header(CURRENT_USER, username))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("allGroupingPaths", hasSize(adminCount)))
                 .andExpect(jsonPath("allGroupingPaths[0].name").value("grouping0"))
                 .andExpect(jsonPath("allGroupingPaths[1].name").value("grouping1"))
                 .andExpect(jsonPath("allGroupingPaths[2].name").value("grouping2"))
