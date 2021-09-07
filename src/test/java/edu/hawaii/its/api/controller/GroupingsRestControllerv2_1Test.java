@@ -1,13 +1,13 @@
 package edu.hawaii.its.api.controller;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+// import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.ArgumentMatchers.notNull;
+// import static org.mockito.ArgumentMatchers.isNotNull;
+// import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.thymeleaf.spring5.expression.Mvc;
+// import org.thymeleaf.spring5.expression.Mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -657,7 +657,7 @@ public class GroupingsRestControllerv2_1Test {
         MvcResult groupingResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
-        assertThat(listservResult, notNullValue());
+        assertThat(groupingResult, notNullValue());
     }
 
     @Test
@@ -792,6 +792,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("deleted owner"))
                 .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Ignore
