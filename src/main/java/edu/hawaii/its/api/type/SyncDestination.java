@@ -86,12 +86,12 @@ public class SyncDestination {
     }
 
     @Override public String toString() {
-        return "SyncDestination{" +
+        return "SyncDestination[" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", tooltip='" + tooltip + '\'' +
-                ", synced=" + synced + '\'' +
+                ", synced=" + synced +
                 ", hidden=" + hidden +
-                '}';
+                ']';
     }
 }
