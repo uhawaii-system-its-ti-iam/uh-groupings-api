@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.regex.PatternSyntaxException;
 
 @Entity
 @Table(name = "syncDestinations")
@@ -69,20 +68,6 @@ public class SyncDestination {
 
     public void setHidden(Boolean hidden) {
         this.hidden = hidden != null && hidden;
-    }
-
-    public String parseKeyVal(String replace, String desc) {
-        final String regex = "(\\$\\{)(.*)(})";
-        String result;
-
-        try {
-            result = desc.replaceFirst(regex, replace);
-        } catch (PatternSyntaxException e) {
-            result = desc;
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
     @Override public String toString() {
