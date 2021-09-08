@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
@@ -181,12 +182,12 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         if (!memberAttributeService.isAdmin(currentUsername) && !memberAttributeService.isOwner(currentUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-       
+
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
         List<SyncDestination> finSyncDestList = grouperFactoryService.getSyncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
-            dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
+            dest.setDescription(parseKeyVal(grouping.getName(), dest.getDescription()));
         }
 
         return finSyncDestList;
@@ -204,7 +205,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         }
         for (SyncDestination destination : syncDestinations) {
             destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
+            destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
         }
         return syncDestinations;
     }
@@ -401,6 +402,20 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
 
         return gsr;
+    }
+
+    private String parseKeyVal(String replace, String desc) {
+        final String regex = "(\\$\\{)(.*)(})";
+        String result;
+
+        try {
+            result = desc.replaceFirst(regex, replace);
+        } catch (PatternSyntaxException e) {
+            result = desc;
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
 }
