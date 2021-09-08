@@ -71,6 +71,7 @@ public class SyncDestinationTest {
         assertTrue(destination.isSynced());
     }
 
+    @Test
     public void toStringTest() {
         String name = "name";
         String description = "description";
@@ -81,8 +82,8 @@ public class SyncDestinationTest {
         syncDestination.setSynced(true);
         syncDestination.setHidden(false);
         String expected =
-                "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
-                        + tooltip + '\'' + ", synced=" + true + '\'' + ", hidden=" + false + '}';
+                "SyncDestination[" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
+                        + tooltip + '\'' + ", synced=" + true + ", hidden=" + false + ']';
         assertEquals(expected, syncDestination.toString());
     }
 
