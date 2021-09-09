@@ -270,6 +270,9 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addIncludeMembers...");
+        System.out.println("  <><><> currentUser: " + currentUser);
+        System.out.println("  <><><>        path: " + path);
+        System.out.println("  <><><>  usersToAdd: " + usersToAdd);
         return ResponseEntity
                 .ok()
                 .body(membershipService.addIncludeMembers(currentUser, path, usersToAdd));
