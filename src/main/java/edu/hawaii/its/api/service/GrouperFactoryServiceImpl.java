@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
@@ -55,7 +55,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -134,14 +133,11 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             SyncDestination newSyncDest =
                     new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
             if ((newSyncDest.getName() != null) && (newSyncDest.getDescription() != null)) {
-                String jsonString = newSyncDest.getDescription();
-
                 // Uses Springboot Mapper to change JSON to a Java Object, in this case a SyncDestination.
                 try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    newSyncDest = mapper.readValue(jsonString, SyncDestination.class);
+                    newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
                     newSyncDest.setName(wsAttributeDefName.getName());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
