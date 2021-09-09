@@ -412,7 +412,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             result = desc.replaceFirst(regex, replace);
         } catch (PatternSyntaxException e) {
             result = desc;
-            e.printStackTrace();
         }
 
         return result;
