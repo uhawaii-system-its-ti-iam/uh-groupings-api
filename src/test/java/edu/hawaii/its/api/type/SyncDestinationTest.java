@@ -71,6 +71,20 @@ public class SyncDestinationTest {
         assertTrue(destination.isSynced());
     }
 
+    /*
+    @Test
+    public void parseKeyVal() {
+        String desc = "this is a description";
+        String descReg = "this is ${} description with regex characters";
+        String replacer = "replaced";
+
+        assertThat(destination.parseKeyVal(replacer, desc), equalTo("this is a description"));
+
+        assertThat(destination.parseKeyVal(replacer, descReg),
+                equalTo("this is replaced description with regex characters"));
+    }
+     */
+
     @Test
     public void toStringTest() {
         String name = "name";
@@ -82,8 +96,8 @@ public class SyncDestinationTest {
         syncDestination.setSynced(true);
         syncDestination.setHidden(false);
         String expected =
-                "SyncDestination[" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
-                        + tooltip + '\'' + ", synced=" + true + ", hidden=" + false + ']';
+                "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
+                        + tooltip + '\'' + ", synced=" + true + '\'' + ", hidden=" + false + '}';
         assertEquals(expected, syncDestination.toString());
     }
 

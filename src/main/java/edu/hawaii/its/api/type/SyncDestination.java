@@ -18,12 +18,14 @@ public class SyncDestination {
     // Default Constructor
     public SyncDestination() {
         this.hidden = false;
+        this.synced = false;
     }
 
     public SyncDestination(String name, String description) {
         this.name = name != null ? name : "";
         this.description = description != null ? description : "";
         this.hidden = false;
+        this.synced = false;
     }
 
     @Id
