@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.thymeleaf.spring5.expression.Mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -290,14 +291,18 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[0].name").value("admin0"))
                 .andExpect(jsonPath("adminGroup.members[1].name").value("admin1"))
                 .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
+        verify(groupingAssignmentService, times(1))
+                .adminLists("bobo");
     }
 
     @Ignore
     @Test
     @WithAnonymousUser
     public void anonAdminsGroupingsTest() throws Exception {
-        mockMvc.perform(get(API_BASE + "/adminsGroupings"))
-                .andExpect(status().is3xxRedirection());
+        MvcResult result = mockMvc.perform(get(API_BASE + "/adminsGroupings"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     //todo GetUserAttributes has no tests(?)
@@ -385,8 +390,10 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonOwnerGroupingsTest() throws Exception {
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-                .andExpect(status().is3xxRedirection());
+        MvcResult result = mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     //todo This user owns nothing
@@ -419,8 +426,10 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonAddNewAdminTest() throws Exception {
-        mockMvc.perform(post(API_BASE + "/admins/newAdmin").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+        MvcResult result = mockMvc.perform(post(API_BASE + "/admins/newAdmin").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
@@ -446,8 +455,10 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonAddOwnerTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
@@ -518,12 +529,11 @@ public class GroupingsRestControllerv2_1Test {
         System.out.println("  <><><>  usersToAdd: " + usersToAdd);
         given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
-        System.out.println("  <><><>  addMemberResults: " + addMemberResults);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + usersToAdd)
                         .with(csrf())
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
-
+        System.out.println("  <><><>  addMemberResults: " + addMemberResults);
         verify(membershipService, times(1))
                 .addIncludeMembers(USERNAME, "grouping", usersToAdd);
     }
@@ -645,14 +655,25 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonEnablePreferenceSyncDestTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(inResult, notNullValue());
+
+        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(outResult, notNullValue());
+
+        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(listResult, notNullValue());
+
+        MvcResult groupingResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(groupingResult, notNullValue());
     }
 
     @Test
@@ -720,15 +741,26 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonDisablePreferenceSyncDestTest() throws Exception {
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(
+        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(inResult, notNullValue());
+
+        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(outResult, notNullValue());
+
+        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(listResult, notNullValue());
+
+        MvcResult groupingResult = mockMvc.perform(
                         put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(groupingResult, notNullValue());
     }
 
     @Test
@@ -760,18 +792,22 @@ public class GroupingsRestControllerv2_1Test {
         /*given(membershipService.deleteAdmin(ADMIN, ))
                 .willReturn(new GroupingsServiceResult(SUCCESS, "delete admin"));*/
 
-        mockMvc.perform(delete(API_BASE + "/admins/" + paths + "/" + userToRemove)
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + paths + "/" + userToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Ignore
     @Test
     @WithAnonymousUser
     public void anonDeleteNewAdminTest() throws Exception {
-        mockMvc.perform(delete(API_BASE + "/admins/homerSimpson").with(csrf()))
-                .andExpect(status().is3xxRedirection());
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/homerSimpson").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
@@ -795,9 +831,11 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonDeleteOwnerTest() throws Exception {
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
@@ -813,7 +851,6 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void getGrouping() throws Exception {
-
         given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, null, null, null, null))
                 .willReturn(grouping());
 
@@ -897,7 +934,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
+        assertThat(mvcResult, notNullValue());
     }
 
     @Test
@@ -906,53 +943,58 @@ public class GroupingsRestControllerv2_1Test {
         Grouping testGrouping = groupingTwo();
         String mockGroupPath = testGrouping.getPath();
 
-        mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("Test")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
     @WithMockUhUser
     public void memberLookupTest() throws Exception {
-        mockMvc.perform(get(API_BASE + "/members/i0-uuid")
+        MvcResult validResult = mockMvc.perform(get(API_BASE + "/members/i0-uuid")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(validResult, notNullValue());
 
-        mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
+        MvcResult invalidResult = mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
                         .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(invalidResult, notNullValue());
     }
 
     @Ignore
     @Test
     @WithMockUhUser(username = "abc")
     public void lookUpPermissionTestMember() throws Exception {
-        Person random = new Person("0o0-name", "0o0-uuid", "0o0-username");
         MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
                 .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
+        assertThat(ownerResult, notNullValue());
 
         MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
                 .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
+        assertThat(groupingsResult, notNullValue());
 
         MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
                 .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
+        assertThat(memberAttributeResult, notNullValue());
     }
 
     @Ignore
@@ -966,20 +1008,17 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
                         .header(CURRENT_USER, newAdmin))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
                         .header(CURRENT_USER, newAdmin))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
                         .header(CURRENT_USER, newAdmin))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         verify(membershipService, times(1))
                 .addAdmin(ADMIN, newAdmin);
@@ -1030,6 +1069,7 @@ public class GroupingsRestControllerv2_1Test {
                         .andDo(print())
                         .andExpect(status().is4xxClientError())
                         .andReturn();
+        assertThat(memberDescriptionResult, notNullValue());
 
         // Admin should be able to change description
         MvcResult adminDescriptionResult =
@@ -1038,27 +1078,28 @@ public class GroupingsRestControllerv2_1Test {
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andReturn();
+        assertThat(adminDescriptionResult, notNullValue());
     }
 
     @Test
     @WithMockUhUser
     public void selfTest() throws Exception {
-        Grouping test = groupingTwo();
 
-        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
+        MvcResult includeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
                         .header("current_user", "o6-username")
                         .header("accept", "application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(includeResult, notNullValue());
 
-        mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
+        MvcResult excludeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
                         .header("current_user", "o6-username")
                         .header("accept", "application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-
+        assertThat(excludeResult, notNullValue());
     }
 
     @Test
@@ -1067,33 +1108,41 @@ public class GroupingsRestControllerv2_1Test {
         Grouping group = groupingTwo();
         System.out.println(group.getOwners());
 
-        mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/syncDestinations")
                         .header("current_user", "o6-username"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(result, notNullValue());
     }
 
     @Test
     @WithMockUhUser
     public void regexTest() throws Exception {
         // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
-        mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
+        MvcResult result1 = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+        assertThat(result1, notNullValue());
 
-        mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "^" + "/groupings")
+        MvcResult result2 = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "^" + "/groupings")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+        assertThat(result2, notNullValue());
 
-        mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
+        MvcResult result3 = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+        assertThat(result3, notNullValue());
 
-        mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
+        MvcResult result4 = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError());
-
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+        assertThat(result4, notNullValue());
     }
 
     @Test
@@ -1107,8 +1156,7 @@ public class GroupingsRestControllerv2_1Test {
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
-                .andExpect(content().string("369"))
-                .andReturn();
+                .andExpect(content().string("369"));
 
         verify(membershipService, times(1))
                 .getNumberOfMemberships(ADMIN, uid);
