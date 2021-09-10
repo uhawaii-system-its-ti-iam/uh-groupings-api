@@ -8,14 +8,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "syncDestinations")
 public class SyncDestination {
-    // 3 variables for object
     private String name;
     private String description;
     private String tooltip;
     private Boolean synced;
     private Boolean hidden;
 
-    // Default Constructor
     public SyncDestination() {
         this("", "");
     }
