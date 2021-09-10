@@ -121,26 +121,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public List<SyncDestination> getSyncDestinations() {
 
-        // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
-        WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION)
-                        .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
+                .assignScope(SYNC_DESTINATIONS_LOCATION)
+                .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES)
+                .execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 
-        // For each attribute, grab the name and definition and create a new SyncDestination object.
         for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
             SyncDestination newSyncDest =
                     new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
-            if ((newSyncDest.getName() != null) && (newSyncDest.getDescription() != null)) {
-                // Uses Springboot Mapper to change JSON to a Java Object, in this case a SyncDestination.
-                try {
-                    newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
-                    newSyncDest.setName(wsAttributeDefName.getName());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
+            newSyncDest.setName(wsAttributeDefName.getName());
             syncDest.add(newSyncDest);
         }
         return syncDest;
