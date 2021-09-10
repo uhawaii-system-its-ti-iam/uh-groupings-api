@@ -9,7 +9,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -516,16 +515,17 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
+        System.out.println("  <><><>  usersToAdd: " + usersToAdd);
         given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
-
+        System.out.println("  <><><>  addMemberResults: " + addMemberResults);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + usersToAdd)
                         .with(csrf())
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
 
-        /*verify(membershipService, times(1))
-                .addIncludeMembers(USERNAME, "grouping", usersToAdd);*/
+        verify(membershipService, times(1))
+                .addIncludeMembers(USERNAME, "grouping", usersToAdd);
     }
 
     @Test
@@ -544,8 +544,8 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
 
-        /*verify(membershipService, times(1))
-                .addExcludeMembers(USERNAME, "grouping", usersToAdd);*/
+        verify(membershipService, times(1))
+                .addExcludeMembers(USERNAME, "grouping", usersToAdd);
     }
 
     @Test
@@ -565,8 +565,8 @@ public class GroupingsRestControllerv2_1Test {
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
 
-        /*verify(membershipService, times(1))
-                .removeIncludeMembers(USERNAME, "grouping", usersToRemove);*/
+        verify(membershipService, times(1))
+                .removeIncludeMembers(USERNAME, "grouping", usersToRemove);
     }
 
     @Test
@@ -580,14 +580,13 @@ public class GroupingsRestControllerv2_1Test {
 
         given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(removeMemberResults);
-
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/" + usersToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
 
-        /*verify(membershipService, times(1))
-                .removeExcludeMembers(USERNAME, "grouping", usersToRemove);*/
+        verify(membershipService, times(1))
+                .removeExcludeMembers(USERNAME, "grouping", usersToRemove);
     }
 
     @Test
