@@ -28,13 +28,13 @@ public class JsonUtilTest {
     @Test
     public void problems() {
         String json = JsonUtil.asJson(null);
-        assertEquals(json, "null"); // Weird.
+        assertEquals(json, "null");
 
         json = JsonUtil.asJson("{}");
-        assertEquals(json, "\"{}\""); // Weird.
+        assertEquals(json, "\"{}\"");
 
         json = JsonUtil.asJson("mistake");
-        assertEquals(json, "\"mistake\""); // Weird.
+        assertEquals(json, "\"mistake\"");
     }
 
     @Test

@@ -194,6 +194,7 @@ public class TestMembershipService {
             // Check for duplicate paths.
             assertTrue(pathMap.add(membership.getPath()));
         }
+        assertThat(memberships);
     }
 
     @Test
