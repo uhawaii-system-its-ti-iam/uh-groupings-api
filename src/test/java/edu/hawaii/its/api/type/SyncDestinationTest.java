@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -25,14 +24,14 @@ public class SyncDestinationTest {
         assertNotNull(destination);
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
         assertFalse(destination.isSynced());
 
         destination = new SyncDestination("name", "description");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
         assertFalse(destination.isSynced());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
 
         SyncDestination syncDestination = new SyncDestination(null, null);
         assertEquals("", syncDestination.getName());
@@ -43,12 +42,12 @@ public class SyncDestinationTest {
     public void accessors() {
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
         assertFalse(destination.isSynced());
 
         destination.setSynced(true);
         assertTrue(destination.isSynced());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
 
@@ -56,13 +55,13 @@ public class SyncDestinationTest {
         assertTrue(destination.isSynced());
         assertThat(destination.getDescription(), equalTo("description"));
         assertEquals("", destination.getName());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
 
         destination.setName("name");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
         assertTrue(destination.isSynced());
-        assertNull(destination.getTooltip());
+        assertEquals("",destination.getTooltip());
 
         destination.setTooltip("tooltip");
         assertThat(destination.getTooltip(), equalTo("tooltip"));
