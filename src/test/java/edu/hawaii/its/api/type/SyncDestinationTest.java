@@ -23,15 +23,15 @@ public class SyncDestinationTest {
     @Test
     public void construction() {
         assertNotNull(destination);
-        assertNull(destination.getName());
-        assertNull(destination.getDescription());
+        assertEquals("", destination.getName());
+        assertEquals("", destination.getDescription());
         assertNull(destination.getTooltip());
-        assertNull(destination.isSynced());
+        assertFalse(destination.isSynced());
 
         destination = new SyncDestination("name", "description");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
-        assertNull(destination.isSynced());
+        assertFalse(destination.isSynced());
         assertNull(destination.getTooltip());
 
         SyncDestination syncDestination = new SyncDestination(null, null);
@@ -41,21 +41,21 @@ public class SyncDestinationTest {
 
     @Test
     public void accessors() {
-        assertNull(destination.getName());
-        assertNull(destination.getDescription());
+        assertEquals("", destination.getName());
+        assertEquals("", destination.getDescription());
         assertNull(destination.getTooltip());
-        assertNull(destination.isSynced());
+        assertFalse(destination.isSynced());
 
         destination.setSynced(true);
         assertTrue(destination.isSynced());
         assertNull(destination.getTooltip());
-        assertNull(destination.getDescription());
-        assertNull(destination.getName());
+        assertEquals("", destination.getName());
+        assertEquals("", destination.getDescription());
 
         destination.setDescription("description");
         assertTrue(destination.isSynced());
         assertThat(destination.getDescription(), equalTo("description"));
-        assertNull(destination.getName());
+        assertEquals("", destination.getName());
         assertNull(destination.getTooltip());
 
         destination.setName("name");
@@ -71,20 +71,6 @@ public class SyncDestinationTest {
         assertTrue(destination.isSynced());
     }
 
-    /*
-    @Test
-    public void parseKeyVal() {
-        String desc = "this is a description";
-        String descReg = "this is ${} description with regex characters";
-        String replacer = "replaced";
-
-        assertThat(destination.parseKeyVal(replacer, desc), equalTo("this is a description"));
-
-        assertThat(destination.parseKeyVal(replacer, descReg),
-                equalTo("this is replaced description with regex characters"));
-    }
-     */
-
     @Test
     public void toStringTest() {
         String name = "name";
@@ -96,8 +82,8 @@ public class SyncDestinationTest {
         syncDestination.setSynced(true);
         syncDestination.setHidden(false);
         String expected =
-                "SyncDestination{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
-                        + tooltip + '\'' + ", synced=" + true + '\'' + ", hidden=" + false + '}';
+                "SyncDestination[" + "name='" + name + '\'' + ", description='" + description + '\'' + ", tooltip='"
+                        + tooltip + '\'' + ", synced=" + true + ", hidden=" + false + ']';
         assertEquals(expected, syncDestination.toString());
     }
 

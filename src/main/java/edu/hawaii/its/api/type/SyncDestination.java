@@ -17,13 +17,12 @@ public class SyncDestination {
 
     // Default Constructor
     public SyncDestination() {
-        this.hidden = false;
-        this.synced = false;
+        this("", "");
     }
 
     public SyncDestination(String name, String description) {
-        this.name = name != null ? name : "";
-        this.description = description != null ? description : "";
+        setName(name);
+        setDescription(description);
         this.hidden = false;
         this.synced = false;
     }
