@@ -13,7 +13,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -32,8 +31,7 @@ import static org.junit.Assert.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GrouperFactoryServiceMockTest {
 
-    @Autowired
-    GrouperFactoryService gfs;
+    GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
 
     @Test
     public void addEmptyGroupTest() {
