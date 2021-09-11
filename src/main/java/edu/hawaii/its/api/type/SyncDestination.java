@@ -21,7 +21,7 @@ public class SyncDestination {
     public SyncDestination(String name, String description) {
         setName(name);
         setDescription(description);
-        this.tooltip = "";
+        setTooltip("");
         this.hidden = false;
         this.synced = false;
     }
