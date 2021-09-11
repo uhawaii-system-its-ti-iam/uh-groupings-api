@@ -22,12 +22,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -125,15 +129,37 @@ public class GroupAttributeServiceTest {
 
     @Test
     public void getAllSyncDestinationsTest() {
-
-        assertTrue(groupAttributeService.getAllSyncDestinations(ADMIN_USER, GROUPING_0_PATH).size() > 0);
         List<SyncDestination> syncDestinations =
                 groupAttributeService.getAllSyncDestinations(ADMIN_USER, GROUPING_0_PATH);
-
+        assertTrue(syncDestinations.size() > 0);
+        assertNotNull(syncDestinations);
+        Set<String> names = new HashSet<>();
         for (SyncDestination syncDestination : syncDestinations) {
-            System.err.println(syncDestination.toString());
+            assertNotEquals("", syncDestination.getDescription());
+            assertNotEquals("", syncDestination.getName());
+            assertEquals("", syncDestination.getTooltip());
+            assertNotNull(syncDestination);
+            // Check for duplicates.
+            assertTrue(names.add(syncDestination.getName()));
         }
 
+    }
+
+    @Test
+    public void getSyncDestinationsTest() {
+        Grouping grouping = new Grouping(GROUPING_0_PATH);
+        List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
+        assertTrue(syncDestinations.size() > 0);
+        assertNotNull(syncDestinations);
+        Set<String> names = new HashSet<>();
+        for (SyncDestination syncDestination : syncDestinations) {
+            assertNotEquals("", syncDestination.getDescription());
+            assertNotEquals("", syncDestination.getName());
+            assertEquals("", syncDestination.getTooltip());
+            assertNotNull(syncDestination);
+            // Check for duplicates.
+            assertTrue(names.add(syncDestination.getName()));
+        }
     }
 
     @Test

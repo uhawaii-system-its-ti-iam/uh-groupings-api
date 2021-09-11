@@ -200,9 +200,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
         List<SyncDestination> syncDestinations = grouperFactoryService.getSyncDestinations();
-        if (syncDestinations == null) {
-            return null;
-        }
+
         for (SyncDestination destination : syncDestinations) {
             destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
             destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
