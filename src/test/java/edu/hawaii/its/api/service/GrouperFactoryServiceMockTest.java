@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
@@ -7,18 +9,14 @@ import edu.hawaii.its.api.util.Dates;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,7 +32,8 @@ import static org.junit.Assert.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GrouperFactoryServiceMockTest {
 
-    GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
+    @Autowired
+    GrouperFactoryService gfs;
 
     @Test
     public void addEmptyGroupTest() {
@@ -149,7 +148,6 @@ public class GrouperFactoryServiceMockTest {
         try {
             String group = "path:to:grouping1";
             WsSubjectLookup lookup = gfs.makeWsSubjectLookup("username");
-            ;
             String newMember = "username";
             gfs.makeWsAddMemberResults(group, lookup, newMember);
         } catch (Exception e) {
@@ -172,7 +170,6 @@ public class GrouperFactoryServiceMockTest {
         try {
             String group = "path:to:grouping1";
             WsSubjectLookup lookup = gfs.makeWsSubjectLookup("username1");
-            ;
             Person personToAdd = new Person();
             personToAdd.setUsername("username");
             gfs.makeWsAddMemberResults(group, lookup, personToAdd);
@@ -185,7 +182,6 @@ public class GrouperFactoryServiceMockTest {
         try {
             String group = "path:to:grouping1";
             WsSubjectLookup lookup = gfs.makeWsSubjectLookup("username1");
-            ;
             Person personToAdd = new Person();
             personToAdd.setUhUuid("123456789");
             gfs.makeWsAddMemberResults(group, lookup, personToAdd);
