@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
@@ -55,7 +55,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -122,29 +121,18 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
     @Override
     public List<SyncDestination> getSyncDestinations() {
 
-        // Grabs the sync destinations from the defined scope and returns them into a WebService Attribute Results (WsFindAttributeDefNamesResults).
-        WsFindAttributeDefNamesResults findAttributeDefNamesResults =
-                new GcFindAttributeDefNames().assignScope(SYNC_DESTINATIONS_LOCATION)
-                        .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES).execute();
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
+                .assignScope(SYNC_DESTINATIONS_LOCATION)
+                .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES)
+                .execute();
 
         List<SyncDestination> syncDest = new ArrayList<>();
 
-        // For each attribute, grab the name and definition and create a new SyncDestination object.
         for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
             SyncDestination newSyncDest =
                     new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
-            if ((newSyncDest.getName() != null) && (newSyncDest.getDescription() != null)) {
-                String jsonString = newSyncDest.getDescription();
-
-                // Uses Springboot Mapper to change JSON to a Java Object, in this case a SyncDestination.
-                try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    newSyncDest = mapper.readValue(jsonString, SyncDestination.class);
-                    newSyncDest.setName(wsAttributeDefName.getName());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
+            newSyncDest.setName(wsAttributeDefName.getName());
             syncDest.add(newSyncDest);
         }
         return syncDest;

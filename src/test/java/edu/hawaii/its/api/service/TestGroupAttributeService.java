@@ -25,7 +25,9 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -168,8 +170,16 @@ public class TestGroupAttributeService {
         grouping.setPath(GROUPING);
         grouping.setName("test-grouping");
         List<SyncDestination> destinations = groupAttributeService.getSyncDestinations(grouping);
-        assertTrue(destinations.size() > 0);
-        assertNotNull(grouping);
+        Set<String> names = new HashSet<>();
+        for (SyncDestination destination : destinations) {
+            assertNotNull(destination.getTooltip());
+            assertNotNull(destination.getName());
+            assertNotNull(destination.getDescription());
+            assertNotNull(destination.isSynced());
+            assertNotNull(destination.isHidden());
+            // Check for duplicates.
+            assertTrue(names.add(destination.getName()));
+        }
     }
 
     @Test

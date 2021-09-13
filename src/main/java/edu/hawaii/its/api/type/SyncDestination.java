@@ -4,29 +4,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.regex.PatternSyntaxException;
 
 @Entity
 @Table(name = "syncDestinations")
 public class SyncDestination {
-    // 3 variables for object
     private String name;
     private String description;
     private String tooltip;
-    private Boolean isSynced;
+    private Boolean synced;
     private Boolean hidden;
 
-    // Default Constructor
     public SyncDestination() {
-        //empty
+        this("", "");
     }
 
     public SyncDestination(String name, String description) {
-        this.name = name != null ? name : "";
-        this.description = description != null ? description : "";
-        this.tooltip = null;
-        this.isSynced = null;
-        this.hidden = null;
+        setName(name);
+        setDescription(description);
+        this.tooltip = "";
+        this.hidden = false;
+        this.synced = false;
     }
 
     @Id
@@ -36,7 +33,7 @@ public class SyncDestination {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name != null ? name : "";
     }
 
     @Column(name = "description")
@@ -45,7 +42,7 @@ public class SyncDestination {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description != null ? description : "";
     }
 
     @Column(name = "tooltip")
@@ -54,46 +51,32 @@ public class SyncDestination {
     }
 
     public void setTooltip(String tooltip) {
-        this.tooltip = tooltip;
+        this.tooltip = tooltip != null ? tooltip : "";
     }
 
-    public Boolean getIsSynced() {
-        return isSynced;
+    public Boolean isSynced() {
+        return synced;
     }
 
-    public void setIsSynced(Boolean isSynced) {
-        this.isSynced = isSynced;
+    public void setSynced(Boolean synced) {
+        this.synced = synced != null && synced;
     }
 
-    public Boolean getHidden() {
+    public Boolean isHidden() {
         return hidden;
     }
 
     public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
-    }
-
-    public String parseKeyVal(String replace, String desc) {
-        final String regex = "(\\$\\{)(.*)(})";
-        String result;
-
-        try {
-            result = desc.replaceFirst(regex, replace);
-        } catch (PatternSyntaxException e) {
-            result = desc;
-            e.printStackTrace();
-        }
-
-        return result;
+        this.hidden = hidden != null && hidden;
     }
 
     @Override public String toString() {
-        return "SyncDestination{" +
+        return "SyncDestination[" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", tooltip='" + tooltip + '\'' +
-                ", isSynced=" + isSynced + '\'' +
+                ", synced=" + synced +
                 ", hidden=" + hidden +
-                '}';
+                ']';
     }
 }
