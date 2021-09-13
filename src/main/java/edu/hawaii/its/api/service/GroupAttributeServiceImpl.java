@@ -402,6 +402,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         return gsr;
     }
 
+    /**
+     * Replace ${} with replace in desc otherwise return desc.
+     */
     private String parseKeyVal(String replace, String desc) {
         final String regex = "(\\$\\{)(.*)(})";
         String result;
