@@ -1,5 +1,9 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
@@ -8,6 +12,7 @@ import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -26,31 +31,27 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 
 public class GrouperFactoryServiceTest {
@@ -138,7 +139,6 @@ public class GrouperFactoryServiceTest {
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
-
     private GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
 
     @Autowired
@@ -169,7 +169,17 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void getSyncDestinationsTest() {
-       assertTrue(gfsl.getSyncDestinations().size() > 0);
+        List<SyncDestination> syncDestinations = gfsl.getSyncDestinations();
+        Set<String> names = new HashSet<>();
+       
+        for (SyncDestination syncDestination : syncDestinations) {
+            assertEquals("", syncDestination.getTooltip());
+            assertFalse(syncDestination.isSynced());
+            assertFalse(syncDestination.isHidden());
+            // Check for duplicates.
+            assertTrue(names.add(syncDestination.getName()));
+        }
+        assertTrue(gfsl.getSyncDestinations().size() > 0);
     }
 
     @Test
@@ -179,7 +189,7 @@ public class GrouperFactoryServiceTest {
     }
 
     @Test
-    public void makeWsSubjectLookupTest(){
+    public void makeWsSubjectLookupTest() {
         WsSubjectLookup subjectLookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
         assertTrue(subjectLookup.getSubjectIdentifier().equals("username0"));
         subjectLookup = gfsl.makeWsSubjectLookup(users.get(1).getUsername());
@@ -238,7 +248,7 @@ public class GrouperFactoryServiceTest {
         WsStemLookup result;
         result = gfsl.makeWsStemLookup("pre");
         assertNotNull(result);
-        result = gfsl.makeWsStemLookup("pre",UUID);
+        result = gfsl.makeWsStemLookup("pre", UUID);
         assertNotNull(result);
     }
 
@@ -258,7 +268,7 @@ public class GrouperFactoryServiceTest {
     @Ignore
     @Test
     //These tests are calls to grouper web service functions within grouper and do not work on local test enviornment.
-    public void deleteStemTest(){
+    public void deleteStemTest() {
         WsSubjectLookup adminLookup = gfsl.makeWsSubjectLookup(ADMIN);
         WsStemLookup stem = gfsl.makeWsStemLookup("testStem");
 
@@ -529,9 +539,11 @@ public class GrouperFactoryServiceTest {
         }
 
     }
+
     @Test
     public void makeWsGetMembershipsResultsTest() {
-        WsGetMembershipsResults result = gfsl.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
+        WsGetMembershipsResults result =
+                gfsl.makeWsGetMembershipsResults(GROUPING_0_PATH, gfsl.makeWsSubjectLookup(users.get(0).getUsername()));
         assertTrue(result != null);
     }
 

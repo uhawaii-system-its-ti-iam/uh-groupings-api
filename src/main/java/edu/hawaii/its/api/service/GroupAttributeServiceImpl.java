@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
@@ -186,7 +187,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         List<SyncDestination> finSyncDestList = grouperFactoryService.getSyncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
-            dest.setDescription(dest.parseKeyVal(grouping.getName(), dest.getDescription()));
+            dest.setDescription(parseKeyVal(grouping.getName(), dest.getDescription()));
         }
 
         return finSyncDestList;
@@ -199,12 +200,10 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Override
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
         List<SyncDestination> syncDestinations = grouperFactoryService.getSyncDestinations();
-        if (syncDestinations == null) {
-            return null;
-        }
+
         for (SyncDestination destination : syncDestinations) {
-            destination.setIsSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-            destination.setDescription(destination.parseKeyVal(grouping.getName(), destination.getDescription()));
+            destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
+            destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
         }
         return syncDestinations;
     }
@@ -401,6 +400,22 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
 
         return gsr;
+    }
+
+    /**
+     * Replace ${} with replace in desc otherwise return desc.
+     */
+    private String parseKeyVal(String replace, String desc) {
+        final String regex = "(\\$\\{)(.*)(})";
+        String result;
+
+        try {
+            result = desc.replaceFirst(regex, replace);
+        } catch (PatternSyntaxException e) {
+            result = desc;
+        }
+
+        return result;
     }
 
 }

@@ -1,17 +1,17 @@
 package edu.hawaii.its.api.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,20 +20,22 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -127,9 +129,37 @@ public class GroupAttributeServiceTest {
 
     @Test
     public void getAllSyncDestinationsTest() {
+        List<SyncDestination> syncDestinations =
+                groupAttributeService.getAllSyncDestinations(ADMIN_USER, GROUPING_0_PATH);
+        assertTrue(syncDestinations.size() > 0);
+        assertNotNull(syncDestinations);
+        Set<String> names = new HashSet<>();
+        for (SyncDestination syncDestination : syncDestinations) {
+            assertNotEquals("", syncDestination.getDescription());
+            assertNotEquals("", syncDestination.getName());
+            assertEquals("", syncDestination.getTooltip());
+            assertNotNull(syncDestination);
+            // Check for duplicates.
+            assertTrue(names.add(syncDestination.getName()));
+        }
 
-        assertTrue(groupAttributeService.getAllSyncDestinations(ADMIN_USER, GROUPING_0_PATH).size() > 0);
+    }
 
+    @Test
+    public void getSyncDestinationsTest() {
+        Grouping grouping = new Grouping(GROUPING_0_PATH);
+        List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
+        assertTrue(syncDestinations.size() > 0);
+        assertNotNull(syncDestinations);
+        Set<String> names = new HashSet<>();
+        for (SyncDestination syncDestination : syncDestinations) {
+            assertNotEquals("", syncDestination.getDescription());
+            assertNotEquals("", syncDestination.getName());
+            assertEquals("", syncDestination.getTooltip());
+            assertNotNull(syncDestination);
+            // Check for duplicates.
+            assertTrue(names.add(syncDestination.getName()));
+        }
     }
 
     @Test
@@ -433,11 +463,11 @@ public class GroupAttributeServiceTest {
         assertThat(turnOffWhenOnAdmin.get(2).getResultCode(), is(SUCCESS));
 
         assertThat(turnOnWhenOffOwner.get(0).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffOwner.get(1).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffOwner.get(1).getResultCode(), is(SUCCESS));
         assertThat(turnOnWhenOffOwner.get(2).getResultCode(), is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(),is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(),is(SUCCESS));
-        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(),is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(0).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(1).getResultCode(), is(SUCCESS));
+        assertThat(turnOnWhenOffAdmin.get(2).getResultCode(), is(SUCCESS));
 
         assertTrue(turnOffWhenOffOwner.get(0).getResultCode().startsWith(SUCCESS));
         assertTrue(turnOffWhenOffOwner.get(1).getResultCode().startsWith(SUCCESS));
@@ -481,7 +511,7 @@ public class GroupAttributeServiceTest {
 
         isGroupingHasListserv = groupAttributeService.isGroupAttribute(GROUPING_3_PATH, LISTSERV);
 
-        assertThat(isGroupingHasListserv,is(true));
+        assertThat(isGroupingHasListserv, is(true));
     }
 
     @Test
