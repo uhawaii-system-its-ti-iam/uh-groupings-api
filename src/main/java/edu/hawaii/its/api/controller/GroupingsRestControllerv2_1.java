@@ -270,9 +270,6 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addIncludeMembers...");
-        System.out.println("  <><><> currentUser: " + currentUser);
-        System.out.println("  <><><>        path: " + path);
-        System.out.println("  <><><>  usersToAdd: " + usersToAdd);
         return ResponseEntity
                 .ok()
                 .body(membershipService.addIncludeMembers(currentUser, path, usersToAdd));
@@ -285,9 +282,6 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader("current_user") String currentUser,
             @PathVariable String path, @PathVariable List<String> usersToAdd) throws IOException, MessagingException {
         logger.info("Entered REST addExcludeMembers...");
-        System.out.println("  <><><> currentUser: " + currentUser);
-        System.out.println("  <><><>        path: " + path);
-        System.out.println("  <><><>  usersToAdd: " + usersToAdd);
         return ResponseEntity
                 .ok()
                 .body(membershipService.addExcludeMembers(currentUser, path, usersToAdd));
@@ -301,9 +295,6 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
         logger.info("Entered REST removeIncludeMembers...");
-        System.out.println("  <><><> currentUser: " + currentUser);
-        System.out.println("  <><><>        path: " + path);
-        System.out.println("  <><><>  usersToAdd: " + usersToRemove);
         return ResponseEntity
                 .ok()
                 .body(membershipService.removeIncludeMembers(currentUser, path, usersToRemove));
@@ -317,9 +308,6 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader("current_user") String currentUser, @PathVariable String path,
             @PathVariable List<String> usersToRemove) throws IOException, MessagingException {
         logger.info("Entered REST removeExcludeMembers...");
-        System.out.println("  <><><> currentUser: " + currentUser);
-        System.out.println("  <><><>        path: " + path);
-        System.out.println("  <><><>  usersToAdd: " + usersToRemove);
         return ResponseEntity
                 .ok()
                 .body(membershipService.removeExcludeMembers(currentUser, path, usersToRemove));
