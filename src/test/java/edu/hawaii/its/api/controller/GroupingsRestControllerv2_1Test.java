@@ -698,15 +698,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
 
-        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, false))
-                .willReturn(gsrListOut2());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
-
         verify(groupAttributeService, times(1))
                 .changeOptOutStatus("grouping", USERNAME, false);
 
