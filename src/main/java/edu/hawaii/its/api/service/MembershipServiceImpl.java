@@ -337,7 +337,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        membershipService.updateLastModified(groupingPath);
         return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
     }
 
@@ -351,7 +350,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        membershipService.updateLastModified(groupingPath);
         return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
     }
 
@@ -414,7 +412,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        membershipService.updateLastModified(groupingPath);
         return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
     }
 
@@ -428,7 +425,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        membershipService.updateLastModified(groupingPath);
         return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
     }
 
