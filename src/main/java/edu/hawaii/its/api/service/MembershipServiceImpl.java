@@ -547,7 +547,6 @@ public class MembershipServiceImpl implements MembershipService {
                 .getResultCode()
                 .equals(SUCCESS_ALLOWED);
     }
-
     //returns true if the group allows that user to opt out
     @Override
     public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
@@ -559,7 +558,6 @@ public class MembershipServiceImpl implements MembershipService {
                 .getResultCode()
                 .equals(SUCCESS_ALLOWED);
     }
-
     //adds the self-opted attribute to the membership between the group and user
     @Override
     public GroupingsServiceResult addSelfOpted(String groupPath, String username) {
