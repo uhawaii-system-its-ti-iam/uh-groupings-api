@@ -309,21 +309,45 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "bobo")
     public void getMemberAttributesAdminTest() throws Exception {
+        final String uid = "grouping";
+        final String member = "bobo";
 
+        given(memberAttributeService.getMemberAttributes(member, uid)).willReturn();
+        mockMvc.perform(get(API_BASE + "/members/grouper/groupings")
+                .header(CURRENT_USER, member))
+                .andExpect(status().isOk());
+
+        verify(memberAttributeService, times(1))
+                .getMemberAttributes(member, uid);
     }
 
     //todo As Myself
     @Test
     @WithMockUhUser(username = "grouping")
     public void getMemberAttributesMyselfTest() throws Exception {
+        final String uid = "grouping";
+        given(memberAttributeService.getMemberAttributes(USERNAME, uid)).willReturn();
+        mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
 
+        verify(memberAttributeService, times(1))
+                .getMemberAttributes(USERNAME, uid);
     }
 
     //todo As Nobody
     @Test
     @WithMockUhUser(username = "randomUser")
     public void getMemberAttributesTest() throws Exception {
+        final String uid = "grouping";
+        final String member = "abc";
+        given(memberAttributeService.getMemberAttributes(member, uid)).willReturn(null);
+        mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
+                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
 
+        verify(memberAttributeService, times(1))
+                .getMemberAttributes(member, uid);
     }
 
     //todo This user owns nothing
