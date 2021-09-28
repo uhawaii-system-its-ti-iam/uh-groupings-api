@@ -3,6 +3,7 @@ package edu.hawaii.its.api.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -88,6 +90,21 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String UID;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
@@ -309,30 +326,38 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "bobo")
     public void getMemberAttributesAdminTest() throws Exception {
+        final String owner = "bobo";
         final String uid = "grouping";
-        final String member = "bobo";
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
 
-        given(memberAttributeService.getMemberAttributes(member, uid)).willReturn();
         mockMvc.perform(get(API_BASE + "/members/grouper/groupings")
-                .header(CURRENT_USER, member))
+                .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
 
-        verify(memberAttributeService, times(1))
-                .getMemberAttributes(member, uid);
+        assertThat(attributes.get(UID), notNullValue());
+        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
+        assertThat(attributes.get(UHUUID), notNullValue());
+        assertThat(attributes.get(FIRST_NAME), notNullValue());
+        assertThat(attributes.get(LAST_NAME), notNullValue());
     }
 
     //todo As Myself
     @Test
     @WithMockUhUser(username = "grouping")
     public void getMemberAttributesMyselfTest() throws Exception {
+        final String owner = "grouping";
         final String uid = "grouping";
-        given(memberAttributeService.getMemberAttributes(USERNAME, uid)).willReturn();
+
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
         mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
-                .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
 
-        verify(memberAttributeService, times(1))
-                .getMemberAttributes(USERNAME, uid);
+        assertThat(attributes.get(UID), notNullValue());
+        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
+        assertThat(attributes.get(UHUUID), notNullValue());
+        assertThat(attributes.get(FIRST_NAME), notNullValue());
+        assertThat(attributes.get(LAST_NAME), notNullValue());
     }
 
     //todo As Nobody
@@ -340,14 +365,19 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "randomUser")
     public void getMemberAttributesTest() throws Exception {
         final String uid = "grouping";
-        final String member = "abc";
-        given(memberAttributeService.getMemberAttributes(member, uid)).willReturn(null);
+        final String owner = "randomUser";
+
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
+
         mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
-                .header(CURRENT_USER, USERNAME))
+                .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
 
-        verify(memberAttributeService, times(1))
-                .getMemberAttributes(member, uid);
+        assertThat(attributes.get(UID), notNullValue());
+        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
+        assertThat(attributes.get(UHUUID), notNullValue());
+        assertThat(attributes.get(FIRST_NAME), notNullValue());
+        assertThat(attributes.get(LAST_NAME), notNullValue());
     }
 
     //todo This user owns nothing
@@ -541,7 +571,6 @@ public class GroupingsRestControllerv2_1Test {
                 .getOptInGroups(ADMIN, "iamtst01");
     }
 
-    @Ignore
     @Test
     @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
