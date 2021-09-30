@@ -232,7 +232,29 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupAttributeService.getAllSyncDestinations(currentUser));
     }
+    /**
+     * True if currentUser is an owner.
+     */
+    @GetMapping(value = "/owners")
+    @ResponseBody
+    public ResponseEntity<Boolean> hasOwnerPrivs(@RequestHeader("current_user") String currentUser) {
+        logger.info("Entered REST hasOwnerPrivs...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.isOwner(currentUser));
+    }
 
+    /**
+     * True if currentUser is an admin.
+     */
+    @GetMapping(value = "/admins")
+    @ResponseBody
+    public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader("current_user") String currentUser) {
+        logger.info("Entered REST hasAdminPrivs...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.isAdmin(currentUser));
+    }
     //todo Default getGrouping method w/o pagination; depreciated but saving in case
     /**
      * Get a specific grouping
