@@ -10,7 +10,6 @@ UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise a
 
 [![Build Status](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api.png?branch=master)](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api)
 [![Coverage Status](https://coveralls.io/repos/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg?branch=master&service=github)](https://coveralls.io/github/uhawaii-system-its-ti-iam/uh-groupings-api?branch=master&service=github)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/69274196397f4587b88b0ecce5856d0a)](https://www.codacy.com/app/mhodgesatuh/uh-groupings-api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uhawaii-system-its-ti-iam/uh-groupings-api&amp;utm_campaign=Badge_Grade)
 [![Known Vulnerabilities](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg)](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api)
 [![LGTM Alert Badge](https://img.shields.io/lgtm/alerts/github/uhawaii-system-its-ti-iam/uh-groupings-api)](https://lgtm.com/projects/g/uhawaii-system-its-ti-iam/uh-groupings-api/?mode=list)
 [![LGTM JavaScript Badge](https://img.shields.io/lgtm/grade/javascript/github/uhawaii-system-its-ti-iam/uh-groupings-api)](https://lgtm.com/projects/g/uhawaii-system-its-ti-iam/uh-groupings-api/context:javascript)
