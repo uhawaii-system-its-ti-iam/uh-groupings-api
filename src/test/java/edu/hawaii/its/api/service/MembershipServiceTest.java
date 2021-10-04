@@ -379,27 +379,27 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void deleteAdminTest() {
-        // usernameToDelete is not a superuser.
-        String usernameToDelete = users.get(9).getUsername();
+    public void removeAdminTest() {
+        // usernameToRemove is not a superuser.
+        String usernameToRemove = users.get(9).getUsername();
 
         try {
             // User is not super user.
-            membershipService.deleteAdmin(usernameToDelete, ADMIN_USER);
+            membershipService.removeAdmin(usernameToRemove, ADMIN_USER);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        // user is super user usernameToDelete is not superuser.
-        GroupingsServiceResult gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
+        // user is super user usernameToRemove is not superuser.
+        GroupingsServiceResult gsr = membershipService.removeAdmin(ADMIN_USER, usernameToRemove);
         assertThat(gsr.getResultCode(), is(SUCCESS));
 
-        // make usernameToDelete a superuser.
-        membershipService.addAdmin(ADMIN_USER, usernameToDelete);
-        assertTrue(memberAttributeService.isAdmin(usernameToDelete));
+        // make usernameToRemove a superuser.
+        membershipService.addAdmin(ADMIN_USER, usernameToRemove);
+        assertTrue(memberAttributeService.isAdmin(usernameToRemove));
 
-        // user is super user usernameToDelete is not superuser.
-        gsr = membershipService.deleteAdmin(ADMIN_USER, usernameToDelete);
+        // user is super user usernameToRemove is not superuser.
+        gsr = membershipService.removeAdmin(ADMIN_USER, usernameToRemove);
         assertThat(gsr.getResultCode(), is(SUCCESS));
 
     }
