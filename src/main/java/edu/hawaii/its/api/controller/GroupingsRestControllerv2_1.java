@@ -133,24 +133,24 @@ public class GroupingsRestControllerv2_1 {
      * Create a new admin.
      */
     @PostMapping(value = "/admins/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> addNewAdmin(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GroupingsServiceResult> addAdmin(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST addNewAdmin...");
+        logger.info("Entered REST addAdmin...");
         return ResponseEntity
                 .ok()
                 .body(membershipService.addAdmin(currentUser, uid));
     }
 
     /**
-     * Delete an admin.
+     * Remove an admin.
      */
     @DeleteMapping(value = "/admins/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> deleteNewAdmin(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<GroupingsServiceResult> removeAdmin(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
-        logger.info("Entered REST deleteNewAdmin...");
+        logger.info("Entered REST removeAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.deleteAdmin(currentUser, uid));
+                .body(membershipService.removeAdmin(currentUser, uid));
     }
 
     /**

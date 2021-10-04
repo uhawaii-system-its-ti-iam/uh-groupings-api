@@ -301,7 +301,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .removeGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[2]));
 
         // Remove admin privileges
-        membershipService.deleteAdmin(ADMIN, usernames[0]);
+        membershipService.removeAdmin(ADMIN, usernames[0]);
 
         // Remove ownership
         memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
@@ -577,7 +577,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void addDeleteAdminPassTest() throws Exception {
+    public void addRemoveAdminPassTest() throws Exception {
 
         AdminListsHolder listHolderPass = mapAdminListsHolder(adminUser);
         assertFalse(listHolderPass.getAdminGroup().getUsernames().contains(usernames[0]));
@@ -607,7 +607,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void addDeleteAdminFailTest() throws Exception {
+    public void addRemoveAdminFailTest() throws Exception {
 
         try {
             mapGSR(API_BASE + "admins/" + usernames[1], "post", uhUser01);
@@ -625,7 +625,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     //    @Test
-    public void addDeleteAdminAnonTest() throws Exception {
+    public void addRemoveAdminAnonTest() throws Exception {
 
         try {
             mapGSR(API_BASE + "admins/" + usernames[0], "post", null);
@@ -751,7 +751,7 @@ public class TestGroupingsRestControllerv2_1 {
     // todo adding an admin with a uuid is currently not supported
     @Ignore
     @Test
-    public void addDeleteAdminUuidPassTest() throws Exception {
+    public void addRemoveAdminUuidPassTest() throws Exception {
         assertFalse(memberAttributeService.isAdmin(tstUuid[0]));
 
         mapGSR(API_BASE + "admins/" + tstUuid[0], "post", adminUser);

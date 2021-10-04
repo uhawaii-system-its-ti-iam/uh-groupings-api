@@ -476,11 +476,11 @@ public class MembershipServiceImpl implements MembershipService {
 
     //removes a user from the admins group
     @Override
-    public GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername) {
-        logger.info("deleteAdmin; username: " + adminUsername + "; adminToDelete: " + adminToDeleteUsername + ";");
+    public GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername) {
+        logger.info("removeAdmin; username: " + adminUsername + "; adminToRemove: " + adminToRemoveUsername + ";");
 
         String action;
-        action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
+        action = "remove " + adminToRemoveUsername + " from " + GROUPING_ADMINS;
 
         if (memberAttributeService.isAdmin(adminUsername)) {
             WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
@@ -488,7 +488,7 @@ public class MembershipServiceImpl implements MembershipService {
             WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(
                     GROUPING_ADMINS,
                     user,
-                    adminToDeleteUsername);
+                    adminToRemoveUsername);
 
             return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
         }
