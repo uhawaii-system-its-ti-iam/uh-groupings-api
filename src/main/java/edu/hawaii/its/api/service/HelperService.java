@@ -7,25 +7,25 @@ import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 
 import java.util.List;
+import java.util.Map;
 
 public interface HelperService {
 
-    public String extractFirstMembershipID(WsGetMembershipsResults wsGetMembershipsResults);
+    String extractFirstMembershipID(WsGetMembershipsResults wsGetMembershipsResults);
 
-    public WsGetMembershipsResults membershipsResults(String username, String group);
+    WsGetMembershipsResults membershipsResults(String username, String group);
 
-    public List<String> extractGroupings(List<String> groupPaths);
+    List<String> extractGroupings(List<String> groupPaths);
 
-    //todo Not complete
-//    public List<Grouping> extractGroupingsNew(List<String> groupPaths);
+    GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
 
-    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action);
+    GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
 
-    public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action);
+    List<Grouping> makeGroupings(List<String> groupingPaths);
 
-    public List<Grouping> makeGroupings(List<String> groupingPaths);
-
-    public String parentGroupingPath(String group);
+    String parentGroupingPath(String group);
 
     String nameGroupingPath(String groupPath);
+
+    Map<String, String> memberAttributeMapSetKeys();
 }

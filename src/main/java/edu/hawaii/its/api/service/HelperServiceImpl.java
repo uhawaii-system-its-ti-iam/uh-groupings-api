@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("helperService")
@@ -152,6 +154,9 @@ public class HelperServiceImpl implements HelperService {
 
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME;
+
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
 
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
@@ -327,6 +332,17 @@ public class HelperServiceImpl implements HelperService {
             return "";
         }
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
+    }
+    /**
+     * Initialize a mapping of member attribute keys with value null.
+     */
+    @Override public Map<String, String> memberAttributeMapSetKeys() {
+        Map<String, String> mapping = new HashMap<>();
+        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+        for (String subjectAttributeName : subjectAttributeNames) {
+            mapping.put(subjectAttributeName, null);
+        }
+        return mapping;
     }
 
 }

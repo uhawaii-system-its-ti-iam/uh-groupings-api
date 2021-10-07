@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -13,11 +15,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -398,40 +396,25 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     // Returns a user's attributes (FirstName, LastName, etc.) based on the username
     // Not testable with Unit test as needs to connect to Grouper database to work, not mock db
     public Map<String, String> getUserAttributes(String ownerUsername, String username) throws GcWebServiceError {
-        WsSubject[] subjects;
-        WsSubjectLookup lookup;
-        String[] attributeValues = new String[5];
-        Map<String, String> mapping = new HashMap<String, String>();
 
-        //        if(username.equals(null)){
-        //            throw new GcWebServiceError("Error 404 Not Found");
-        //        }
-        if (isSuperuser(ownerUsername) || groupingAssignmentService.groupingsOwned(
-                groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
-            //todo Possibly push this onto main UHGroupings? Might not be necessary, not sure of implications this has
-            try {
-                lookup = grouperFS.makeWsSubjectLookup(username);
-                WsGetSubjectsResults results = grouperFS.makeWsGetSubjectsResults(lookup);
-                subjects = results.getWsSubjects();
-
-                attributeValues = subjects[0].getAttributeValues();
-                String[] subjectAttributeNames = { UID, UHUUID, LAST_NAME, COMPOSITE_NAME, FIRST_NAME };
-                for (int i = 0; i < attributeValues.length; i++) {
-                    mapping.put(subjectAttributeNames[i], attributeValues[i]);
-                }
-                return mapping;
-
-            } catch (NullPointerException npe) {
-                throw new GcWebServiceError("Error 404 Not Found");
-            }
-        } else {
-            String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-            for (int i = 0; i < attributeValues.length; i++) {
-                mapping.put(subjectAttributeNames[i], "");
-            }
-            return mapping;
+        Map<String, String> mapping = new HashMap<>();
+        if (!isAdmin(ownerUsername) && !isOwner(ownerUsername)) {
+            return hs.memberAttributeMapSetKeys();
         }
-
+        WsSubjectLookup lookup;
+        WsGetSubjectsResults results;
+        int numberOfAttributes = 5;
+        try {
+            lookup = grouperFS.makeWsSubjectLookup(username);
+            results = grouperFS.makeWsGetSubjectsResults(lookup);
+            for (int i = 0; i < numberOfAttributes; i++) {
+                mapping.put(results.getSubjectAttributeNames()[i],
+                        results.getWsSubjects()[0].getAttributeValues()[i]);
+            }
+        } catch (NullPointerException npe) {
+            mapping = hs.memberAttributeMapSetKeys();
+        }
+        return mapping;
     }
 
     @Override
