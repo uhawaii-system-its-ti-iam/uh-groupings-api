@@ -462,7 +462,6 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isAdmin(currentAdminUsername)) {
            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
         if (memberAttributeService.isAdmin(newAdminUsername)) {
             return helperService.makeGroupingsServiceResult(
                     SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
