@@ -449,14 +449,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    //todo This user owns nothing
-    //    @Test
-    //    @WithMockUhUser(username = "")
-    //    public void ownerGroupingsFailTest() throws Exception {
-    //        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-    //                .andExpect(status().is4xxClientError());
-    //    }
-
     @Test
     @WithMockUhUser(username = "uhAdmin")
     public void addNewAdminTest() throws Exception {
