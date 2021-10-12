@@ -89,6 +89,9 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
 
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
     @MockBean
     private GroupAttributeService groupAttributeService;
 
