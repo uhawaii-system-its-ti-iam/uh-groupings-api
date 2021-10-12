@@ -321,64 +321,13 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-   /* //todo GetUserAttributes has no tests(?)
+    //todo GetUserAttributes has no tests(?)
     //todo As Admin
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void getMemberAttributesAdminTest() throws Exception {
-        final String owner = "bobo";
-        final String uid = "grouping";
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
-
-        mockMvc.perform(get(API_BASE + "/members/grouper/groupings")
-                .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
-
-        assertThat(attributes.get(UID), notNullValue());
-        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
-        assertThat(attributes.get(UHUUID), notNullValue());
-        assertThat(attributes.get(FIRST_NAME), notNullValue());
-        assertThat(attributes.get(LAST_NAME), notNullValue());
-    }
 
     //todo As Myself
-    @Test
-    @WithMockUhUser(username = "grouping")
-    public void getMemberAttributesMyselfTest() throws Exception {
-        final String owner = "grouping";
-        final String uid = "grouping";
-
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
-        mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
-                .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
-
-        assertThat(attributes.get(UID), notNullValue());
-        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
-        assertThat(attributes.get(UHUUID), notNullValue());
-        assertThat(attributes.get(FIRST_NAME), notNullValue());
-        assertThat(attributes.get(LAST_NAME), notNullValue());
-    }
 
     //todo As Nobody
-    @Test
-    @WithMockUhUser(username = "randomUser")
-    public void getMemberAttributesTest() throws Exception {
-        final String uid = "grouping";
-        final String owner = "randomUser";
 
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(owner, uid);
-
-        mockMvc.perform(get(API_BASE + "/members/grouping/groupings")
-                .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
-
-        assertThat(attributes.get(UID), notNullValue());
-        assertThat(attributes.get(COMPOSITE_NAME), notNullValue());
-        assertThat(attributes.get(UHUUID), notNullValue());
-        assertThat(attributes.get(FIRST_NAME), notNullValue());
-        assertThat(attributes.get(LAST_NAME), notNullValue());
-    }*/
 
     //todo This user owns nothing
     //    @Test
