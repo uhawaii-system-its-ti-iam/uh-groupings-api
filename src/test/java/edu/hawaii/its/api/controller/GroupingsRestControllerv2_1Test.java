@@ -3,7 +3,6 @@ package edu.hawaii.its.api.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -90,27 +88,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String UID;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${url.base}")
-    private String BASE_URL;
 
     @MockBean
     private GroupAttributeService groupAttributeService;
