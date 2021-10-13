@@ -14,6 +14,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
@@ -40,7 +41,6 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -186,7 +186,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uid:[\\w-:.<>]+}")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> memberAttributes(@RequestHeader("current_user") String currentUser,
+    public ResponseEntity<Person> memberAttributes(@RequestHeader("current_user") String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
