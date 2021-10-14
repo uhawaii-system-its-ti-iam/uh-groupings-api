@@ -264,8 +264,8 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributesTest() {
 
         Person personFive = personRepository.findByUsername(users.get(5).getUsername());
-        Map<String, String> attributes =
-                memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
+        Person p = memberAttributeService.getMemberAttributes(ADMIN_USER, personFive.getUsername());
+        Map<String, String> attributes = p.getAttributes();
 
         assertEquals(personFive.getUsername(), attributes.get(UID));
         assertEquals(personFive.getName(), attributes.get(COMPOSITE_NAME));
@@ -284,7 +284,7 @@ public class MemberAttributeServiceTest {
         }
 
         // Bogus user returns a map filled with null values.
-        Map<String, String> bogusUser = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogus user");
+        Map<String, String> bogusUser = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogus user").getAttributes();
         assertTrue(bogusUser.values().stream().allMatch(Objects::isNull));
 
     }
@@ -316,18 +316,22 @@ public class MemberAttributeServiceTest {
     //assertThat(some long, equalTo(another long));
     @Test
     public void getNumberOfGroupingsTest() {
-        List<GroupingPath> groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(0).getUsername());
+        List<GroupingPath> groupingPathList =
+                memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(0).getUsername());
 
         //Test a owner that owns 5 groupings
-        assertThat(groupingPathList.size(), equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername())));
+        assertThat(groupingPathList.size(),
+                equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername())));
 
         //Test a owner that owns 0 groupings
         groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(3).getUsername());
-        assertThat(groupingPathList.size(), equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(3).getUsername())));
+        assertThat(groupingPathList.size(),
+                equalTo(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(3).getUsername())));
 
         //Test that two different users w/ different number of groupings don't return the same number of groupings
         groupingPathList = memberAttributeService.getOwnedGroupings(ADMIN_USER, users.get(1).getUsername());
-        assertThat(groupingPathList.size(), is(not(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername()))));
+        assertThat(groupingPathList.size(),
+                is(not(memberAttributeService.getNumberOfGroupings(ADMIN_USER, users.get(0).getUsername()))));
 
     }
 }

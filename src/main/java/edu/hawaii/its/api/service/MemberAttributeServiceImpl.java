@@ -77,7 +77,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     private MembershipService membershipService;
 
     @Autowired
-    private HelperService hs;
+    private HelperService helperService;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
@@ -95,8 +95,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         logger.info("isSelfOpted; group: " + groupPath + "; username: " + username + ";");
 
         if (isMember(groupPath, username)) {
-            WsGetMembershipsResults wsGetMembershipsResults = hs.membershipsResults(username, groupPath);
-            String membershipID = hs.extractFirstMembershipID(wsGetMembershipsResults);
+            WsGetMembershipsResults wsGetMembershipsResults = helperService.membershipsResults(username, groupPath);
+            String membershipID = helperService.extractFirstMembershipID(wsGetMembershipsResults);
 
             WsAttributeAssign[] wsAttributes =
                     getMembershipAttributes(ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP, SELF_OPTED, membershipID);
@@ -139,7 +139,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
         WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
 
-        ownershipResult = hs.makeGroupingsServiceResult(amr, action);
+        ownershipResult = helperService.makeGroupingsServiceResult(amr, action);
 
         membershipService.updateLastModified(groupingPath);
         membershipService.updateLastModified(groupingPath + OWNERS);
@@ -170,7 +170,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 groupingPath + OWNERS,
                 lookup,
                 ownerToRemove);
-        ownershipResults = hs.makeGroupingsServiceResult(memberResults, action);
+        ownershipResults = helperService.makeGroupingsServiceResult(memberResults, action);
 
         membershipService.updateLastModified(groupingPath);
         membershipService.updateLastModified(groupingPath + OWNERS);
@@ -285,12 +285,12 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier or current user will return a mapping
      * with null values.
      */
-    public Map<String, String> getMemberAttributes(String currentUser, String userIdentifier) {
+    public Person getMemberAttributes(String currentUser, String userIdentifier) {
 
-        Map<String, String> mapping = new HashMap<>();
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
-            return hs.memberAttributeMapSetKeys();
+            return new Person(helperService.memberAttributeMapSetKeys());
         }
+        Person person = new Person();
         WsSubjectLookup lookup;
         WsGetSubjectsResults results;
         int numberOfAttributes = 5;
@@ -298,13 +298,13 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             lookup = grouperFS.makeWsSubjectLookup(userIdentifier);
             results = grouperFS.makeWsGetSubjectsResults(lookup);
             for (int i = 0; i < numberOfAttributes; i++) {
-                mapping.put(results.getSubjectAttributeNames()[i],
-                        results.getWsSubjects()[0].getAttributeValues()[i]);
+                person.getAttributes()
+                        .put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
             }
         } catch (NullPointerException npe) {
-            mapping = hs.memberAttributeMapSetKeys();
+            person.setAttributes(helperService.memberAttributeMapSetKeys());
         }
-        return mapping;
+        return person;
     }
 
     // Returns a specific user's attribute (FirstName, LastName, etc.) based on the username
@@ -366,7 +366,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         for (String path : pathStrings) {
             if (path.endsWith(OWNERS)) {
-                groupingPaths.add(new GroupingPath(hs.parentGroupingPath(path)));
+                groupingPaths.add(new GroupingPath(helperService.parentGroupingPath(path)));
             }
         }
         return groupingPaths;
