@@ -451,14 +451,14 @@ public class TestMemberAttributeService {
     @Test
     public void getUserAttributesTest() {
 
-        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, usernames[1]);
+        Map<String, String> attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, usernames[1]).getAttributes();
         assertEquals("iamtst02", attributes.get("uid"));
         assertEquals("tst02name", attributes.get("cn"));
         assertEquals("tst02name", attributes.get("sn"));
         assertEquals("tst02name", attributes.get("givenName"));
         assertEquals("iamtst02", attributes.get("uhUuid"));
 
-        attributes = memberAttributeService.getMemberAttributes("iamtst01", usernames[1]);
+        attributes = memberAttributeService.getMemberAttributes("iamtst01", usernames[1]).getAttributes();
         assertEquals("iamtst02", attributes.get("uid"));
         assertEquals("tst02name", attributes.get("cn"));
         assertEquals("tst02name", attributes.get("sn"));
@@ -466,7 +466,7 @@ public class TestMemberAttributeService {
         assertEquals("iamtst02", attributes.get("uhUuid"));
 
         // Passing an invalid user should return a map of null values.
-        attributes = memberAttributeService.getMemberAttributes("iamtst03", usernames[1]);
+        attributes = memberAttributeService.getMemberAttributes("iamtst03", usernames[1]).getAttributes();
         assertNull(attributes.get("uid"));
         assertNull(attributes.get("cn"));
         assertNull(attributes.get("sn"));
@@ -474,7 +474,7 @@ public class TestMemberAttributeService {
         assertNull(attributes.get("uhUuid"));
 
         // Test with invalid username
-        attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogusUser");
+        attributes = memberAttributeService.getMemberAttributes(ADMIN_USER, "bogusUser").getAttributes();
         assertNull(attributes.get("uid"));
         assertNull(attributes.get("cn"));
         assertNull(attributes.get("sn"));

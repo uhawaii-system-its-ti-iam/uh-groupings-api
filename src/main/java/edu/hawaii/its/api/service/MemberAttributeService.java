@@ -7,7 +7,6 @@ import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
 import java.util.List;
-import java.util.Map;
 
 public interface MemberAttributeService extends BatchIsMember {
     GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
@@ -32,7 +31,7 @@ public interface MemberAttributeService extends BatchIsMember {
 
     WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
 
-    Map<String, String> getMemberAttributes(String ownerUsername, String uid);
+    Person getMemberAttributes(String ownerUsername, String uid);
 
     boolean isUhUuid(String naming);
 
