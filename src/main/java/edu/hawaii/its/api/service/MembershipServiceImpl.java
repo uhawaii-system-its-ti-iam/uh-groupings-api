@@ -183,6 +183,9 @@ public class MembershipServiceImpl implements MembershipService {
     private MemberAttributeService memberAttributeService;
 
     @Autowired
+    private MembershipService membershipService;
+
+    @Autowired
     private JavaMailSender javaMailSender;
 
     @Autowired
@@ -297,7 +300,9 @@ public class MembershipServiceImpl implements MembershipService {
                 uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
                 name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-
+                if (wasAdded) {
+                    membershipService.updateLastModified(groupPath);
+                }
                 addMemberResult = new AddMemberResult(
                         wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid, SUCCESS, userToAdd);
                 addMemberResults.add(addMemberResult);
@@ -381,7 +386,9 @@ public class MembershipServiceImpl implements MembershipService {
                 result = wasRemoved ? SUCCESS : FAILURE;
                 name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
                 uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-
+                if (wasRemoved) {
+                    membershipService.updateLastModified(groupPath);
+                }
                 removeMemberResult = new RemoveMemberResult(
                         wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove);
                 removeMemberResults.add(removeMemberResult);
@@ -452,41 +459,37 @@ public class MembershipServiceImpl implements MembershipService {
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
-        if (memberAttributeService.isAdmin(currentAdminUsername)) {
-            if (memberAttributeService.isAdmin(newAdminUsername)) {
-                return helperService.makeGroupingsServiceResult(
-                        SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
-            }
-            WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(
-                    GROUPING_ADMINS,
-                    newAdminUsername);
-
-            return helperService.makeGroupingsServiceResult(addMemberResults, action);
+        if (!memberAttributeService.isAdmin(currentAdminUsername)) {
+           throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+        if (memberAttributeService.isAdmin(newAdminUsername)) {
+            return helperService.makeGroupingsServiceResult(
+                    SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
+        }
+        WsAddMemberResults addMemberResults = grouperFS.makeWsAddMemberResults(
+                GROUPING_ADMINS,
+                newAdminUsername);
 
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        return helperService.makeGroupingsServiceResult(addMemberResults, action);
     }
 
     //removes a user from the admins group
     @Override
-    public GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername) {
-        logger.info("deleteAdmin; username: " + adminUsername + "; adminToDelete: " + adminToDeleteUsername + ";");
+    public GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername) {
+        logger.info("removeAdmin; username: " + adminUsername + "; adminToRemove: " + adminToRemoveUsername + ";");
 
         String action;
-        action = "delete " + adminToDeleteUsername + " from " + GROUPING_ADMINS;
+        action = "remove " + adminToRemoveUsername + " from " + GROUPING_ADMINS;
 
-        if (memberAttributeService.isAdmin(adminUsername)) {
-            WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
-
-            WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(
-                    GROUPING_ADMINS,
-                    user,
-                    adminToDeleteUsername);
-
-            return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
+        if (!memberAttributeService.isAdmin(adminUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-
-        throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        WsSubjectLookup user = grouperFS.makeWsSubjectLookup(adminUsername);
+        WsDeleteMemberResults deleteMemberResults = grouperFS.makeWsDeleteMemberResults(
+                GROUPING_ADMINS,
+                user,
+                adminToRemoveUsername);
+        return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
     }
 
     @Override

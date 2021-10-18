@@ -31,7 +31,7 @@ public interface MembershipService {
 
     GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
 
-    GroupingsServiceResult deleteAdmin(String adminUsername, String adminToDeleteUsername);
+    GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername);
 
     List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
 

@@ -92,9 +92,6 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Value("${url.base}")
-    private String BASE_URL;
-
     @MockBean
     private GroupAttributeService groupAttributeService;
 
@@ -217,7 +214,7 @@ public class GroupingsRestControllerv2_1Test {
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrList2() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "delete member from include group"));
+        gsrList.add(new GroupingsServiceResult(SUCCESS, "remove member from include group"));
         return gsrList;
     }
 
@@ -306,25 +303,11 @@ public class GroupingsRestControllerv2_1Test {
 
     //todo GetUserAttributes has no tests(?)
     //todo As Admin
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void getMemberAttributesAdminTest() throws Exception {
-
-    }
 
     //todo As Myself
-    @Test
-    @WithMockUhUser(username = "grouping")
-    public void getMemberAttributesMyselfTest() throws Exception {
-
-    }
 
     //todo As Nobody
-    @Test
-    @WithMockUhUser(username = "randomUser")
-    public void getMemberAttributesTest() throws Exception {
 
-    }
 
     //todo This user owns nothing
     //    @Test
@@ -395,14 +378,6 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(result, notNullValue());
     }
 
-    //todo This user owns nothing
-    //    @Test
-    //    @WithMockUhUser(username = "")
-    //    public void ownerGroupingsFailTest() throws Exception {
-    //        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-    //                .andExpect(status().is4xxClientError());
-    //    }
-
     @Test
     @WithMockUhUser(username = "uhAdmin")
     public void addNewAdminTest() throws Exception {
@@ -424,7 +399,7 @@ public class GroupingsRestControllerv2_1Test {
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonAddNewAdminTest() throws Exception {
+    public void anonAddAdminTest() throws Exception {
         MvcResult result = mockMvc.perform(post(API_BASE + "/admins/newAdmin").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
@@ -517,7 +492,6 @@ public class GroupingsRestControllerv2_1Test {
                 .getOptInGroups(ADMIN, "iamtst01");
     }
 
-    @Ignore
     @Test
     @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
@@ -754,19 +728,19 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void deleteNewAdminTest() throws Exception {
-        given(membershipService.deleteAdmin(USERNAME, "homerSimpson"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted admin"));
+    public void removeNewAdminTest() throws Exception {
+        given(membershipService.removeAdmin(USERNAME, "homerSimpson"))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
 
         mockMvc.perform(delete(API_BASE + "/admins/homerSimpson")
                         .with(csrf())
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted admin"));
+                .andExpect(jsonPath("action").value("removed admin"));
 
         verify(membershipService, times(1))
-                .deleteAdmin(USERNAME, "homerSimpson");
+                .removeAdmin(USERNAME, "homerSimpson");
     }
 
     @Test
@@ -778,8 +752,8 @@ public class GroupingsRestControllerv2_1Test {
         }
         String userToRemove = "homerSimpson";
         // Look into adding given and verify calls for this test
-        /*given(membershipService.deleteAdmin(ADMIN, ))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "delete admin"));*/
+        /*given(membershipService.removeAdmin(ADMIN, ))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));*/
 
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + paths + "/" + userToRemove)
                         .with(csrf())
@@ -792,7 +766,7 @@ public class GroupingsRestControllerv2_1Test {
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonDeleteNewAdminTest() throws Exception {
+    public void anonRemoveAdminTest() throws Exception {
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/homerSimpson").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
@@ -801,16 +775,16 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void deleteOwnerTest() throws Exception {
+    public void removeOwnerTest() throws Exception {
         given(memberAttributeService.removeOwnership("grouping", USERNAME, "frye"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "deleted owner"));
+                .willReturn(new GroupingsServiceResult(SUCCESS, "removed owner"));
 
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
                         .with(csrf())
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("deleted owner"));
+                .andExpect(jsonPath("action").value("removed owner"));
 
         verify(memberAttributeService, times(1))
                 .removeOwnership("grouping", USERNAME, "frye");
@@ -819,7 +793,7 @@ public class GroupingsRestControllerv2_1Test {
     @Ignore
     @Test
     @WithAnonymousUser
-    public void anonDeleteOwnerTest() throws Exception {
+    public void anonRemoveOwnerTest() throws Exception {
         MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -898,20 +872,20 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser(username = "admin")
-    public void deleteAdminTest() throws Exception {
-        String adminToDelete = "adminToDelete";
-        given(membershipService.deleteAdmin(ADMIN, adminToDelete))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "delete admin"));
+    public void removeAdminTest() throws Exception {
+        String adminToRemove = "adminToRemove";
+        given(membershipService.removeAdmin(ADMIN, adminToRemove))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
 
-        mockMvc.perform(delete(API_BASE + "/admins/" + adminToDelete)
+        mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("delete admin"));
+                .andExpect(jsonPath("action").value("removed admin"));
 
         verify(membershipService, times(1))
-                .deleteAdmin(ADMIN, adminToDelete);
+                .removeAdmin(ADMIN, adminToRemove);
     }
 
     @Test
