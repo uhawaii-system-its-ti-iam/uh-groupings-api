@@ -157,7 +157,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../edu/hawaii/its/api/controller/GroupingsRestControllerv2_1.html#addNewAdmin-java.lang.String-java.lang.String-">addNewAdmin</a></span>(java.lang.String&nbsp;currentUser,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../edu/hawaii/its/api/controller/GroupingsRestControllerv2_1.html#addAdmin-java.lang.String-java.lang.String-">addAdmin</a></span>(java.lang.String&nbsp;currentUser,
            java.lang.String&nbsp;uid)</code>
 <div class="block">Create a new admin</div>
 </td>
@@ -210,7 +210,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../edu/hawaii/its/api/controller/GroupingsRestControllerv2_1.html#deleteNewAdmin-java.lang.String-java.lang.String-">deleteNewAdmin</a></span>(java.lang.String&nbsp;currentUser,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../edu/hawaii/its/api/controller/GroupingsRestControllerv2_1.html#removeAdmin-java.lang.String-java.lang.String-">removeAdmin</a></span>(java.lang.String&nbsp;currentUser,
               java.lang.String&nbsp;uid)</code>
 <div class="block">Delete an admin</div>
 </td>
@@ -612,16 +612,16 @@ public&nbsp;org.springframework.http.ResponseEntity&lt;java.util.List&lt;java.la
 </dl>
 </li>
 </ul>
-<a name="addNewAdmin-java.lang.String-java.lang.String-">
+<a name="addAdmin-java.lang.String-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>addNewAdmin</h4>
+<h4>addAdmin</h4>
 <pre>@RequestMapping(value="/admins/{uid}",
                 method=POST,
                 produces="application/json")
-public&nbsp;org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;&nbsp;addNewAdmin(@RequestHeader(value="current_user")
+public&nbsp;org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;&nbsp;addAdmin(@RequestHeader(value="current_user")
                                                                                                                                                                                                     java.lang.String&nbsp;currentUser,
                                                                                                                                                                                                     @PathVariable
                                                                                                                                                                                                     java.lang.String&nbsp;uid)</pre>
@@ -961,16 +961,16 @@ public&nbsp;org.springframework.http.ResponseEntity&lt;<a href="../../../../../e
 </dl>
 </li>
 </ul>
-<a name="deleteNewAdmin-java.lang.String-java.lang.String-">
+<a name="removeAdmin-java.lang.String-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>deleteNewAdmin</h4>
+<h4>removeAdmin</h4>
 <pre>@RequestMapping(value="/admins/{uid}",
                 method=DELETE,
                 produces="application/json")
-public&nbsp;org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;&nbsp;deleteNewAdmin(@RequestHeader(value="current_user")
+public&nbsp;org.springframework.http.ResponseEntity&lt;<a href="../../../../../edu/hawaii/its/api/type/GroupingsServiceResult.html" title="class in edu.hawaii.its.api.type">GroupingsServiceResult</a>&gt;&nbsp;removeAdmin(@RequestHeader(value="current_user")
                                                                                                                                                                                                          java.lang.String&nbsp;currentUser,
                                                                                                                                                                                                          @PathVariable
                                                                                                                                                                                                          java.lang.String&nbsp;uid)</pre>
