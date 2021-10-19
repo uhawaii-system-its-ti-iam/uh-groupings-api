@@ -492,6 +492,7 @@ public class GroupingsRestControllerv2_1Test {
                 .getOptInGroups(ADMIN, "iamtst01");
     }
 
+    @Ignore
     @Test
     @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
