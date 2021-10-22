@@ -300,6 +300,7 @@ public class MembershipServiceImpl implements MembershipService {
                 uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
                 name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+
                 if (wasAdded) {
                     membershipService.updateLastModified(groupPath);
                 }
@@ -386,9 +387,11 @@ public class MembershipServiceImpl implements MembershipService {
                 result = wasRemoved ? SUCCESS : FAILURE;
                 name = wsDeleteMemberResults.getResults()[0].getWsSubject().getName();
                 uid = wsDeleteMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+
                 if (wasRemoved) {
                     membershipService.updateLastModified(groupPath);
                 }
+
                 removeMemberResult = new RemoveMemberResult(
                         wasRemoved, groupPath, name, uhUuid, uid, result, userToRemove);
                 removeMemberResults.add(removeMemberResult);
