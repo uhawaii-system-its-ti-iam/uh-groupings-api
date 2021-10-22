@@ -516,14 +516,14 @@ public class TestMembershipService {
         }
     }
 
-    //Add admin and delete admin in one test
+    //Add admin and remove admin in one test
     @Test
     public void adminTest() {
 
         GroupingsServiceResult results;
 
         //checks to see that username[3] is NOT an admin
-        results = membershipService.deleteAdmin(ADMIN, username[3]);
+        results = membershipService.removeAdmin(ADMIN, username[3]);
 
         //makes username[3] an admin
         results = membershipService.addAdmin(ADMIN, username[3]);
@@ -534,11 +534,11 @@ public class TestMembershipService {
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //removes username[3] as an admin
-        results = membershipService.deleteAdmin(ADMIN, username[3]);
+        results = membershipService.removeAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //tries to remove an person that is not an admin
-        results = membershipService.deleteAdmin(ADMIN, username[3]);
+        results = membershipService.removeAdmin(ADMIN, username[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //tries to make username[4] an admin but fails due to username[3] not being an admin
@@ -548,9 +548,9 @@ public class TestMembershipService {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //tries to delete username[4] as an admin but fails due to username[3] not being an admin
+        //tries to remove username[4] as an admin but fails due to username[3] not being an admin
         try {
-            membershipService.deleteAdmin(username[3], username[4]);
+            membershipService.removeAdmin(username[3], username[4]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
