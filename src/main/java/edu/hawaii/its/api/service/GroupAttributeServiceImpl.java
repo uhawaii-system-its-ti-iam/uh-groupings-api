@@ -1,82 +1,30 @@
 package edu.hawaii.its.api.service;
 
+import static edu.hawaii.its.api.type.SyncDestination.parseKeyVal;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
-
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.PatternSyntaxException;
-
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
 
-    @Value("${groupings.api.settings}")
-    private String SETTINGS;
-
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_superusers}")
-    private String GROUPING_SUPERUSERS;
-
-    @Value("${groupings.api.attributes}")
-    private String ATTRIBUTES;
-
-    @Value("${groupings.api.for_groups}")
-    private String FOR_GROUPS;
-
-    @Value("${groupings.api.for_memberships}")
-    private String FOR_MEMBERSHIPS;
-
-    @Value("${groupings.api.last_modified}")
-    private String LAST_MODIFIED;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.uhgrouping}")
-    private String UHGROUPING;
-
-    @Value("${groupings.api.destinations}")
-    private String DESTINATIONS;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.purge_grouping}")
-    private String PURGE_GROUPING;
-
-    @Value("${groupings.api.self_opted}")
-    private String SELF_OPTED;
-
-    @Value("${groupings.api.anyone_can}")
-    private String ANYONE_CAN;
+    private static final Log logger = LogFactory.getLog(GroupAttributeServiceImpl.class);
 
     @Value("${groupings.api.opt_in}")
     private String OPT_IN;
@@ -84,38 +32,20 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.opt_out}")
     private String OPT_OUT;
 
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
     @Value("${groupings.api.exclude}")
     private String EXCLUDE;
 
     @Value("${groupings.api.include}")
     private String INCLUDE;
 
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
-
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.assign_type_immediate_membership}")
-    private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.operation_assign_attribute}")
     private String OPERATION_ASSIGN_ATTRIBUTE;
 
     @Value("${groupings.api.operation_remove_attribute}")
     private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_replace_values}")
-    private String OPERATION_REPLACE_VALUES;
 
     @Value("${groupings.api.privilege_opt_out}")
     private String PRIVILEGE_OPT_OUT;
@@ -126,37 +56,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
 
-    @Value("${groupings.api.is_member}")
-    private String IS_MEMBER;
-
     @Value("${groupings.api.success}")
     private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.success_allowed}")
-    private String SUCCESS_ALLOWED;
-
-    @Value("${groupings.api.stem}")
-    private String STEM;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String UID;
-
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME;
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
-    public static final Log logger = LogFactory.getLog(GroupAttributeServiceImpl.class);
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private GrouperFactoryService grouperFactoryService;
@@ -169,9 +76,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     @Autowired
     private MembershipService membershipService;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
 
     /**
      * Get all the sync destinations for a specific grouping.
@@ -194,8 +98,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     /**
-     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
-     * person requesting the information is an owner or superuser as that has already been checked.
+     * Similar to the getAllSyncDestination except it is called through
+     * getGrouping and thus doesn't check to see if person requesting the
+     * information is an owner or superuser as that has already been checked.
      */
     @Override
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
@@ -400,22 +305,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         gsr = helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
 
         return gsr;
-    }
-
-    /**
-     * Replace ${} with replace in desc otherwise return desc.
-     */
-    private String parseKeyVal(String replace, String desc) {
-        final String regex = "(\\$\\{)(.*)(})";
-        String result;
-
-        try {
-            result = desc.replaceFirst(regex, replace);
-        } catch (PatternSyntaxException e) {
-            result = desc;
-        }
-
-        return result;
     }
 
 }

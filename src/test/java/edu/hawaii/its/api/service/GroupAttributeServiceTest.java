@@ -1,31 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.SyncDestination;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
@@ -36,6 +10,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.repository.GroupingRepository;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 @ActiveProfiles("localTest")
 @RunWith(SpringRunner.class)
@@ -103,18 +102,13 @@ public class GroupAttributeServiceTest {
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
     @Autowired
+    private DatabaseSetupService databaseSetupService;
+
+    @Autowired
     private GroupAttributeService groupAttributeService;
 
     @Autowired
-    private GrouperFactoryService grouperFactoryService;
-
-    private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
     private GroupingRepository groupingRepository;
-
-    @Autowired
-    private DatabaseSetupService databaseSetupService;
 
     @Before
     public void setup() {
@@ -123,7 +117,6 @@ public class GroupAttributeServiceTest {
 
     @Test
     public void construction() {
-        //autowired
         assertNotNull(groupAttributeService);
     }
 
@@ -142,7 +135,17 @@ public class GroupAttributeServiceTest {
             // Check for duplicates.
             assertTrue(names.add(syncDestination.getName()));
         }
+    }
 
+    @Test
+    public void testGetAllSyncDestinationsWithException() {
+        try {
+            String username = "user0";
+            groupAttributeService.getAllSyncDestinations(username, GROUPING_0_PATH);
+            fail("Should not reach here.");
+        } catch (Exception e) {
+            assertTrue(e instanceof AccessDeniedException);
+        }
     }
 
     @Test
@@ -565,5 +568,3 @@ public class GroupAttributeServiceTest {
         groupAttributeService.updateDescription(GROUPING_0_PATH, users.get(0).getUsername(), DEFAULT_DESCRIPTION);
     }
 }
-
-

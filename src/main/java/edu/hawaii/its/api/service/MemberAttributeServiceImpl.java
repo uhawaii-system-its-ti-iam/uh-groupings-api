@@ -1,11 +1,18 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -17,16 +24,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
@@ -89,7 +86,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return isMember(OWNERS_GROUP, username);
     }
 
-    //return true if the membership between the group and user has the self-opted attribute, false otherwise
     @Override
     public boolean isSelfOpted(String groupPath, String username) {
         logger.info("isSelfOpted; group: " + groupPath + "; username: " + username + ";");
@@ -178,7 +174,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return ownershipResults;
     }
 
-    //returns true if the user is a member of the group via username or UH id
+    // Is the user is a member of the group via username or UH id?
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
@@ -219,12 +215,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
-    // returns true if the person is a member of the group
+    // If the person is a member of the group?
     public boolean isMemberUuid(String groupPath, String idnum) {
         logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
 
         WsHasMemberResults memberResults = grouperFS.makeWsHasMemberResults(groupPath, idnum);
-
         WsHasMemberResult[] memberResultArray = memberResults.getResults();
 
         for (WsHasMemberResult hasMember : memberResultArray) {
@@ -281,8 +276,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
-     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier or current user will return a mapping
+     * Get a mapping of all user attributes (uid, composite name, last name,
+     * first name, uhUuid) pertaining to the uid or uhUuid passed through
+     * userIdentifier.
+     * Passing an invalid userIdentifier or current user will return a mapping
      * with null values.
      */
     public Person getMemberAttributes(String currentUser, String userIdentifier) {
@@ -314,7 +311,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
         String[] attributeValues = new String[5];
-        Map<String, String> mapping = new HashMap<>();
 
         if (isAdmin(ownerUsername) || groupingAssignmentService.groupingsOwned(
                 groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {

@@ -223,12 +223,6 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.60</version>
         </dependency>
-        <!--Comment this out until we can figure out how to integrate the new version into our project-->
-        <!--<dependency>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-web</artifactId>-->
-        <!--<version>5.1.0.RELEASE</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -379,10 +373,7 @@
                                 <echo>$ mvn clean test jacoco:report</echo>
                                 <echo></echo>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
-                                <echo>$ mvn
-                                    -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController
-                                    test
-                                </echo>
+                                <echo>$ mvn test -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController</echo>
                                 <echo></echo>
                                 <echo>To run UH Groupings locally:</echo>
                                 <echo>$ mvn clean spring-boot:run</echo>

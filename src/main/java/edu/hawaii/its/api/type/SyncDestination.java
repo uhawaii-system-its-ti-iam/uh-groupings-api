@@ -1,9 +1,14 @@
 package edu.hawaii.its.api.type;
 
+import java.util.regex.PatternSyntaxException;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "syncDestinations")
@@ -70,7 +75,26 @@ public class SyncDestination {
         this.hidden = hidden != null && hidden;
     }
 
-    @Override public String toString() {
+    /**
+     * Replace ${} with replace in desc otherwise return desc.
+     */
+    @JsonIgnore
+    @Transient
+    public static String parseKeyVal(String replace, String desc) {
+        final String regex = "(\\$\\{)(.*)(})";
+        String result;
+
+        try {
+            result = desc.replaceFirst(regex, replace);
+        } catch (PatternSyntaxException e) {
+            result = desc;
+        }
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
         return "SyncDestination[" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
