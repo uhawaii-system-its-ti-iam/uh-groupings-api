@@ -217,7 +217,6 @@ public class MembershipServiceImpl implements MembershipService {
         } catch (GcWebServiceError e) {
             return memberships;
         }
-
         Map<String, List<String>> pathMap = new HashMap<>();
         for (String pathToCheck : groupPaths) {
             if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
@@ -256,6 +255,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         return memberships;
     }
+
 
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
