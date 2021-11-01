@@ -582,9 +582,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupPaths = getGroupPaths(owner, optOutUid);
         List<String> trios = new ArrayList<>();
         List<String> opts = new ArrayList<>();
-        List<String> excludes = groupPaths
+        List<String> includes = groupPaths
                 .stream()
-                .map(group -> group + EXCLUDE)
+                .map(group -> group + INCLUDE)
                 .collect(Collectors.toList());
 
         WsGetAttributeAssignmentsResults assignmentsResults =
@@ -607,10 +607,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             }
             //opts intersection trios
             opts.retainAll(trios);
-            //excludes intersection opts
-            excludes.retainAll(opts);
+            //includes intersection opts
+            includes.retainAll(opts);
             //opts - (opts intersection groupPaths)
             //opts union excludes
+            opts.addAll(includes);
         }
         //get rid of duplicates
         return new ArrayList<>(new HashSet<>(opts));
