@@ -296,12 +296,14 @@ public class MembershipServiceImpl implements MembershipService {
                 String uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
                 String name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 String uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-
                 if (wasAdded) {
                     if (null == uid) {
                         uid = memberAttributeService.getMemberAttributes(currentUser, uhUuid).getUsername();
                     }
                     membershipService.updateLastModified(groupPath);
+                    if (null == uid) {
+                        uid = memberAttributeService.getMemberAttributes(currentUser, uhUuid).getUsername();
+                    }
                 }
                 addMemberResult = new AddMemberResult(
                         wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid, SUCCESS, userToAdd);
@@ -311,7 +313,7 @@ public class MembershipServiceImpl implements MembershipService {
                 addMemberResult = new AddMemberResult(userToAdd, FAILURE);
                 addMemberResults.add(addMemberResult);
             }
-            logger.info("addGroupMembers; " + addMemberResult.toString());
+            logger.info("addGroupMembers; " + addMemberResult);
         }
         /*
         if (usersToAdd.size() > 100) {
