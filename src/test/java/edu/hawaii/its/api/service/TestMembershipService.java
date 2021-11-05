@@ -280,9 +280,10 @@ public class TestMembershipService {
     }
 
     @Test
-    public void addGroupMembersTest() {
+    public void addGroupingMembersTest() {
         String ownerUsername = username[0];
         List<AddMemberResult> addMemberResults;
+
         // Add valid users to include.
         List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
         addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
