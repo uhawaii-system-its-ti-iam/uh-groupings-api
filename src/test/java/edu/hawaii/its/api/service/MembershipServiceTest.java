@@ -180,7 +180,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void addGroupMembersTest() {
+    public void addGroupingMembersTest() {
         List<AddMemberResult> addMemberResults;
         List<String> usersToAdd = new ArrayList<>();
 
@@ -278,7 +278,7 @@ public class MembershipServiceTest {
         }
         try {
             membershipService.removeGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToRemove);
-        } catch (GcWebServiceError e) {
+        }catch (GcWebServiceError e) {
             assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
         }
     }
@@ -461,7 +461,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void getNumberOfMembershipsTest() {
+    public void getNumberOfMembershipsTest(){
         String user = users.get(10).getUsername();
 
         assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(0));
