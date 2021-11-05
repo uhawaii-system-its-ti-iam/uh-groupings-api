@@ -282,28 +282,30 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         for (String userToAdd : usersToAdd) {
+            WsDeleteMemberResults wsDeleteMemberResults;
+            WsAddMemberResults wsAddMemberResults;
             AddMemberResult addMemberResult;
-
+            boolean wasRemoved;
+            boolean wasAdded;
+            String uhUuid;
+            String name;
+            String uid;
             try {
-                WsDeleteMemberResults wsDeleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
-                WsAddMemberResults wsAddMemberResults =
-                        grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, userToAdd);
-                boolean wasRemoved =
-                        SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
-                boolean wasAdded =
-                        SUCCESS.equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
-                String uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
-                String name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
-                String uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+                // Remove.
+                wsDeleteMemberResults = grouperFS.makeWsDeleteMemberResults(removalPath, wsSubjectLookup, userToAdd);
+                // Add.
+                wsAddMemberResults = grouperFS.makeWsAddMemberResults(groupPath, wsSubjectLookup, userToAdd);
+                // Store results.
+                wasRemoved = SUCCESS.equals(wsDeleteMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                wasAdded = SUCCESS.equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
+                uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
+                name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
+                uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
                 if (wasAdded) {
                     if (null == uid) {
                         uid = memberAttributeService.getMemberAttributes(currentUser, uhUuid).getUsername();
                     }
                     membershipService.updateLastModified(groupPath);
-                    if (null == uid) {
-                        uid = memberAttributeService.getMemberAttributes(currentUser, uhUuid).getUsername();
-                    }
                 }
                 addMemberResult = new AddMemberResult(
                         wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid, SUCCESS, userToAdd);
@@ -313,7 +315,7 @@ public class MembershipServiceImpl implements MembershipService {
                 addMemberResult = new AddMemberResult(userToAdd, FAILURE);
                 addMemberResults.add(addMemberResult);
             }
-            logger.info("addGroupMembers; " + addMemberResult);
+            logger.info("addGroupMembers; " + addMemberResult.toString());
         }
         /*
         if (usersToAdd.size() > 100) {
@@ -462,7 +464,7 @@ public class MembershipServiceImpl implements MembershipService {
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
 
         if (!memberAttributeService.isAdmin(currentAdminUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+           throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         if (memberAttributeService.isAdmin(newAdminUsername)) {
             return helperService.makeGroupingsServiceResult(
