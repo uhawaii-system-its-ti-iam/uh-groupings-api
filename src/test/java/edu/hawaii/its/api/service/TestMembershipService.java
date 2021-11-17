@@ -563,6 +563,7 @@ public class TestMembershipService {
         for (AddMemberResult optResult : optResults) {
             assertEquals(GROUPING_INCLUDE, optResult.getPathOfAdd());
             assertEquals(GROUPING_EXCLUDE, optResult.getPathOfRemoved());
+            assertTrue(memberAttributeService.isMember(GROUPING, ownerUsername));
         }
     }
 
@@ -575,6 +576,7 @@ public class TestMembershipService {
         for (AddMemberResult optResult : optResults) {
             assertEquals(GROUPING_EXCLUDE, optResult.getPathOfAdd());
             assertEquals(GROUPING_INCLUDE, optResult.getPathOfRemoved());
+            assertFalse(memberAttributeService.isMember(GROUPING, ownerUsername));
         }
     }
 

@@ -347,6 +347,7 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
         // Non-owner/admin attempts to opt.
         try {
             membershipService.optOut(users.get(2).getUsername(), GROUPING_3_PATH, users.get(2).getUsername());
