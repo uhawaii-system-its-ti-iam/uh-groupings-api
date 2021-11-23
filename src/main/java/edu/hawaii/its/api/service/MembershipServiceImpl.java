@@ -254,6 +254,7 @@ public class MembershipServiceImpl implements MembershipService {
             if (!membership.isInExclude() && !membership.isInBasis()) {
                 memberships.add(membership);
             }
+            //memberships.add(membership);
         }
         return memberships;
     }

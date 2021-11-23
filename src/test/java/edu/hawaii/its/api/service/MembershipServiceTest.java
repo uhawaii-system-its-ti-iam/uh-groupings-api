@@ -165,7 +165,6 @@ public class MembershipServiceTest {
         for (int i = 0; i < 5; i++) {
             memberships = membershipService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
             assertNotNull(memberships);
-            assertFalse(memberships.isEmpty());
         }
         // A non-admin user cannot access another users memberships.
         try {
