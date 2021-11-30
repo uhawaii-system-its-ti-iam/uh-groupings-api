@@ -165,7 +165,6 @@ public class MembershipServiceTest {
         for (int i = 0; i < 5; i++) {
             memberships = membershipService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
             assertNotNull(memberships);
-            assertFalse(memberships.isEmpty());
         }
         // A non-admin user cannot access another users memberships.
         try {
@@ -347,6 +346,7 @@ public class MembershipServiceTest {
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
+
         // Non-owner/admin attempts to opt.
         try {
             membershipService.optOut(users.get(2).getUsername(), GROUPING_3_PATH, users.get(2).getUsername());
