@@ -337,7 +337,9 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            if(!memberAttributeService.isAdmin(currentUser)) {
+                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            }
         }
         return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
     }
@@ -350,7 +352,9 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            if(!memberAttributeService.isAdmin(currentUser)) {
+                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            }
         }
         return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
     }
@@ -410,7 +414,9 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("removeIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            if(!memberAttributeService.isAdmin(currentUser)) {
+                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            }
         }
         return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
     }
@@ -423,7 +429,9 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("removeExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            if(!memberAttributeService.isAdmin(currentUser)) {
+                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            }
         }
         return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
     }

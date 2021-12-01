@@ -164,6 +164,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (!isOwner(groupingPath, actor) && !isAdmin(actor)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
+        //swaps the owner out with the admin
+        if (!isOwner(groupingPath, actor) && isAdmin(actor)) {
+            assignOwnership(groupingPath, ownerToRemove, actor);
+        }
 
         WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
         WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
