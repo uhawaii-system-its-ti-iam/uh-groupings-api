@@ -89,7 +89,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return isMember(OWNERS_GROUP, username);
     }
 
-    //return true if the membership between the group and user has the self-opted attribute, false otherwise
+    // Return true if the membership between the group and user has the self-opted attribute, false otherwise
     @Override
     public boolean isSelfOpted(String groupPath, String username) {
         logger.info("isSelfOpted; group: " + groupPath + "; username: " + username + ";");
@@ -113,7 +113,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return false;
     }
 
-    //give ownership to a new user
+    // Gives ownership to a new user
     @Override
     public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername) {
         logger.info("assignOwnership; groupingPath: "
@@ -147,7 +147,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return ownershipResult;
     }
 
-    //remove ownership of a grouping from a current owner
+    // Remove ownership of a grouping from a current owner
     @Override
     public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemove) {
         logger.info("removeOwnership; grouping: "
@@ -164,7 +164,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (!isOwner(groupingPath, actor) && !isAdmin(actor)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        //swaps the owner out with the admin
+        // Makes the admin also the owner in the event that there are no remaining owners otherwise.
         if (!isOwner(groupingPath, actor) && isAdmin(actor)) {
             assignOwnership(groupingPath, ownerToRemove, actor);
         }
@@ -182,7 +182,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return ownershipResults;
     }
 
-    //returns true if the user is a member of the group via username or UH id
+    // Returns true if the user is a member of the group via username or UH id
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
@@ -203,7 +203,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
     }
 
-    //returns true if the person is a member of the group
+    // Returns true if the person is a member of the group
     @Override
     public boolean isMember(String groupPath, Person person) {
         if (person.getUsername() != null) {
@@ -223,7 +223,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     }
 
-    // returns true if the person is a member of the group
+    // Returns true if the person is a member of the group
     public boolean isMemberUuid(String groupPath, String idnum) {
         logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
 
@@ -239,31 +239,31 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return false;
     }
 
-    //returns true if the user is in the owner group of the grouping
+    // Returns true if the user is in the owner group of the grouping
     @Override
     public boolean isOwner(String groupingPath, String username) {
         return isMember(groupingPath + OWNERS, username);
     }
 
-    //returns true if the user is in the admins group
+    // Returns true if the user is in the admins group
     @Override
     public boolean isAdmin(String username) {
         return isMember(GROUPING_ADMINS, username);
     }
 
-    //returns true if the user is in the apps group
+    // Returns true if the user is in the apps group
     @Override
     public boolean isApp(String username) {
         return isMember(GROUPING_APPS, username);
     }
 
-    // returns true if username is a UH id number
+    // Returns true if username is a UH id number
     @Override
     public boolean isUhUuid(String naming) {
         return naming.matches("\\d+");
     }
 
-    //checks to see if a membership has an attribute of a specific type and returns the list if it does
+    // Checks to see if a membership has an attribute of a specific type and returns the list if it does
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID) {
         logger.info("getMembershipAttributes; assignType: "
                 + assignType
