@@ -203,7 +203,7 @@ public class TestGroupAttributeService {
         assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
-        //get last modified time
+        // Get last modified time
         WsGetAttributeAssignmentsResults attributes =
                 groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
         String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
@@ -224,7 +224,7 @@ public class TestGroupAttributeService {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
-        //todo get last modified time and make sure that it has changed
+        // Get last modified time and make sure that it has changed
         try {
             TimeUnit.MINUTES.sleep(1);
         } catch (InterruptedException e) {
@@ -237,7 +237,7 @@ public class TestGroupAttributeService {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
 
-        //todo get last modified time and make sure that it hasn't changed
+        // Get last modified time and make sure that it hasn't changed
         try {
             TimeUnit.MINUTES.sleep(1);
         } catch (InterruptedException e) {
@@ -247,9 +247,9 @@ public class TestGroupAttributeService {
         String lastModTime4 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
         assertThat(lastModTime4, is(lastModTime3));
 
-        assertFalse(memberAttributeService.isOwner(GROUPING, username[1]));
+        // Invalid user can't change attribute status
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV, true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, true);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
@@ -257,7 +257,7 @@ public class TestGroupAttributeService {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, username[1], LISTSERV, false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, false);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
