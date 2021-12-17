@@ -466,7 +466,7 @@ public class TestMemberAttributeService {
         assertEquals("iamtst02", attributes.get("uhUuid"));
 
         // Passing an invalid user should return a map of null values.
-        attributes = memberAttributeService.getMemberAttributes("iamtst03", usernames[1]).getAttributes();
+        attributes = memberAttributeService.getMemberAttributes("zzz_zzz", usernames[1]).getAttributes();
         assertNull(attributes.get("uid"));
         assertNull(attributes.get("cn"));
         assertNull(attributes.get("sn"));
@@ -484,8 +484,10 @@ public class TestMemberAttributeService {
 
     @Test
     public void getOwnedGroupingsTest() {
+        // Testing with valid username
         assertTrue(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[0]).size() > 0);
-        assertFalse(memberAttributeService.getOwnedGroupings(ADMIN_USER, usernames[1]).size() > 0);
+        // Test with invalid username
+        assertFalse(memberAttributeService.getOwnedGroupings("zzz_zzz", usernames[1]).size() > 0);
 
         try {
             memberAttributeService.getOwnedGroupings(usernames[1], usernames[0]);
