@@ -821,6 +821,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableDisablePreferencesFailTest() throws Exception {
+        //try catches have valid put calls that deliberately fail with the fail calls
+        //may need future changes to the mapGSR testing
         try {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser03);
             fail("Shouldn't be here.");
