@@ -822,25 +822,29 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void enableDisablePreferencesFailTest() throws Exception {
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/enable", "put", uhUser03);
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_OUT + "/disable", "put", uhUser03);
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser03);
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser03);
+            fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
         }

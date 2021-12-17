@@ -249,7 +249,7 @@ public class TestGroupAttributeService {
 
         // Invalid user can't change attribute status
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzzzz", LISTSERV, true);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, true);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
@@ -257,7 +257,7 @@ public class TestGroupAttributeService {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
         try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzzzz", LISTSERV, false);
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, false);
         } catch (AccessDeniedException ade) {
             assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
         }
