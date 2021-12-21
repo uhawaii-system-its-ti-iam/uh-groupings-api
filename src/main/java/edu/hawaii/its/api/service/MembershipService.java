@@ -10,6 +10,10 @@ import java.util.List;
 public interface MembershipService {
 
     boolean isUhUuid(String username);
+
+    GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
+
+    List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove);
    
     List<Membership> getMembershipResults(String owner, String uid);
 

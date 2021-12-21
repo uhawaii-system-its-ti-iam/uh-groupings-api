@@ -132,7 +132,7 @@ public class TestMembershipService {
     public void setUp() throws IOException, MessagingException {
         //add ownership
 
-        memberAttributeService.assignOwnership(GROUPING, ADMIN, username[0]);
+        membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
@@ -163,9 +163,7 @@ public class TestMembershipService {
         //membershipService.addGroupMember(username[0], GROUPING_BASIS, username[5]);
 
         //Remove ownership.
-        memberAttributeService.removeOwnership(GROUPING, username[0], username[2]);
-        memberAttributeService.removeOwnership(GROUPING, username[0], username[4]);
-
+        membershipService.removeOwnerships(GROUPING, username[0], Arrays.asList(username[1]));
     }
 
     @Test

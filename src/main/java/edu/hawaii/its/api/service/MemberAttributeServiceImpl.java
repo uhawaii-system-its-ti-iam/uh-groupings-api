@@ -3,13 +3,10 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -20,7 +17,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -111,75 +107,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
 
         return false;
-    }
-
-    // Gives ownership to a new user
-    @Override
-    public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername) {
-        logger.info("assignOwnership; groupingPath: "
-                + groupingPath
-                + "; ownerUsername: "
-                + ownerUsername
-                + "; newOwnerUsername: "
-                + newOwnerUsername
-                + ";");
-        String action;
-        GroupingsServiceResult ownershipResult;
-
-        if (isUhUuid(newOwnerUsername)) {
-            action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
-        } else {
-            action = "give " + newOwnerUsername + " ownership of " + groupingPath;
-        }
-
-        if (!isOwner(groupingPath, ownerUsername) && !isAdmin(ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-
-        WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
-
-        ownershipResult = helperService.makeGroupingsServiceResult(amr, action);
-
-        membershipService.updateLastModified(groupingPath);
-        membershipService.updateLastModified(groupingPath + OWNERS);
-
-        return ownershipResult;
-    }
-
-    // Remove ownership of a grouping from a current owner
-    @Override
-    public GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemove) {
-        logger.info("removeOwnership; grouping: "
-                + groupingPath
-                + "; username: "
-                + actor
-                + "; ownerToRemove: "
-                + ownerToRemove
-                + ";");
-
-        GroupingsServiceResult ownershipResults;
-        String action = "remove ownership of " + groupingPath + " from " + ownerToRemove;
-
-        if (!isOwner(groupingPath, actor) && !isAdmin(actor)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-        // Makes the admin also the owner in the event that there are no remaining owners otherwise.
-        if (!isOwner(groupingPath, actor) && isAdmin(actor)) {
-            assignOwnership(groupingPath, ownerToRemove, actor);
-        }
-
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
-        WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
-                groupingPath + OWNERS,
-                lookup,
-                ownerToRemove);
-        ownershipResults = helperService.makeGroupingsServiceResult(memberResults, action);
-
-        membershipService.updateLastModified(groupingPath);
-        membershipService.updateLastModified(groupingPath + OWNERS);
-
-        return ownershipResults;
     }
 
     // Returns true if the user is a member of the group via username or UH id
