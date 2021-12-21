@@ -9,9 +9,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import java.util.List;
 
 public interface MemberAttributeService extends BatchIsMember {
-    GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
-
-    GroupingsServiceResult removeOwnership(String groupingPath, String actor, String ownerToRemoveUsername);
 
     boolean isMember(String groupPath, String username);
 

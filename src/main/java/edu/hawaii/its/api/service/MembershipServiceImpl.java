@@ -429,6 +429,82 @@ public class MembershipServiceImpl implements MembershipService {
         return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
     }
 
+    public List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove) {
+        logger.info("removeOwnership; grouping: "
+                + groupingPath
+                + "; username: "
+                + actor
+                + "; ownerToRemove: "
+                + ownersToRemove
+                + ";");
+
+        if (!memberAttributeService.isOwner(groupingPath, actor) && !memberAttributeService.isAdmin(actor)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        // Makes the admin also the owner in the event that there are no remaining owners otherwise.
+        if (!memberAttributeService.isOwner(groupingPath, actor) && memberAttributeService.isAdmin(actor)) {
+            assignOwnership(groupingPath, ownersToRemove.get(0), actor);
+        }
+
+        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(actor);
+        for (String ownerToRemove : ownersToRemove) {
+            RemoveMemberResult ownershipResults;
+
+            WsDeleteMemberResults memberResults = grouperFS.makeWsDeleteMemberResults(
+                    groupingPath + OWNERS,
+                    lookup,
+                    ownerToRemove);
+            boolean wasRemoved = SUCCESS.equals(memberResults.getResults()[0].getResultMetadata().getResultCode());
+            String uhUuid = memberResults.getResults()[0].getWsSubject().getId();
+            String result = wasRemoved ? SUCCESS : FAILURE;
+            String name = memberResults.getResults()[0].getWsSubject().getName();
+            String uid = memberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+            ownershipResults = new RemoveMemberResult(wasRemoved, groupingPath, name, uhUuid, uid, result, ownerToRemove);
+            removeMemberResultList.add(ownershipResults);
+            if (wasRemoved) {
+                membershipService.updateLastModified(groupingPath);
+                membershipService.updateLastModified(groupingPath + OWNERS);
+            }
+        }
+        return removeMemberResultList;
+    }
+
+
+    // Gives ownership to a new user
+    @Override
+    public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername) {
+        logger.info("assignOwnership; groupingPath: "
+                + groupingPath
+                + "; ownerUsername: "
+                + ownerUsername
+                + "; newOwnerUsername: "
+                + newOwnerUsername
+                + ";");
+        String action;
+        GroupingsServiceResult ownershipResult;
+
+        if (isUhUuid(newOwnerUsername)) {
+            action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
+        } else {
+            action = "give " + newOwnerUsername + " ownership of " + groupingPath;
+        }
+
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+
+        WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
+        WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
+
+        ownershipResult = helperService.makeGroupingsServiceResult(amr, action);
+
+        membershipService.updateLastModified(groupingPath);
+        membershipService.updateLastModified(groupingPath + OWNERS);
+
+        return ownershipResult;
+    }
+
     /**
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at
      * uid to the include list and removes them from the exclude list.
