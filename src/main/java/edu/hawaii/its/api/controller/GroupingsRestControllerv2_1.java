@@ -335,20 +335,20 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.assignOwnership(path, currentUser, uid));
+                .body(membershipService.assignOwnership(path, currentUser, uid));
     }
 
     /**
      * Delete a grouping owner.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> deleteOwner(@RequestHeader("current_user") String currentUser,
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid}")
+    public ResponseEntity<List<RemoveMemberResult>> removeOwners(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable String uid) {
-        logger.info("Entered REST deleteOwner");
+            @PathVariable List<String> uid) {
+        logger.info("Entered REST removeOwners");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.removeOwnership(path, currentUser, uid));
+                .body(membershipService.removeOwnerships(path, currentUser, uid));
     }
 
     /**
