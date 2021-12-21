@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -277,8 +278,8 @@ public class TestGroupingsRestControllerv2_1 {
         anon = new AnonymousUser();
 
         // add ownership
-        memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
-        memberAttributeService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
+        membershipService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+        membershipService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
 
         // add to include
         List<String> includeNames = new ArrayList<>();
@@ -304,7 +305,7 @@ public class TestGroupingsRestControllerv2_1 {
         membershipService.removeAdmin(ADMIN, usernames[0]);
 
         // Remove ownership
-        memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
+        membershipService.removeOwnerships(GROUPING, usernames[0], Arrays.asList(usernames));
 
         // Remove usernames[3] from include and add to exclude
 
