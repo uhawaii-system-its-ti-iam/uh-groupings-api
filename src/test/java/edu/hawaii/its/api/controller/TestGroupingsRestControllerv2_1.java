@@ -229,6 +229,7 @@ public class TestGroupingsRestControllerv2_1 {
     private User adminUser;
     private AnonymousUser anon;
     private User anonUser;
+    private User notAdminOwnerUser;
     private User uhUser01;
     private User uhUser02;
     private User uhUser05;
@@ -275,6 +276,9 @@ public class TestGroupingsRestControllerv2_1 {
         Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
         anonUser = new User("anonymous", anonAuthorities);
         anon = new AnonymousUser();
+
+        // Creates not admin or owner user for testing
+        notAdminOwnerUser = new User("notAdminOwner", anonAuthorities);
 
         // add ownership
         memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
@@ -371,6 +375,49 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void isAdminTest() throws Exception {
+
+        //Admin user should return true
+        MvcResult result = mockMvc.perform(get(API_BASE + "admins")
+                .header(CURRENT_USER, ADMIN)
+                .with(user(ADMIN))
+                .with(csrf()))
+                .andReturn();
+
+        assertEquals("true", result.getResponse().getContentAsString());
+
+        //non-Admin user should return false
+        result = mockMvc.perform(get(API_BASE + "admins")
+                .header(CURRENT_USER, usernames[0])
+                .with(user(usernames[0]))
+                .with(csrf()))
+                .andReturn();
+
+        assertEquals("false", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void isOwnerTest() throws Exception {
+        //User who is an owner of any group should return true
+        MvcResult result = mockMvc.perform(get(API_BASE + "owners")
+                .header(CURRENT_USER, usernames[0])
+                .with(user(usernames[0]))
+                .with(csrf()))
+                .andReturn();
+
+        assertEquals("true", result.getResponse().getContentAsString());
+
+        //User who is not an owner of any group should return false
+        result = mockMvc.perform(get(API_BASE + "owners")
+                .header(CURRENT_USER, "notAdminOwnerUser")
+                .with(user("notAdminOwnerUser"))
+                .with(csrf()))
+                .andReturn();
+
+        assertEquals("false", result.getResponse().getContentAsString());
+    }
+
+    @Test
     public void memberAttributesAdminTest() throws Exception {
 
         // Current user is admin.
@@ -380,11 +427,38 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(csrf()))
                 .andReturn();
         Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
-        assertEquals("iamtst01", map.get(USERNAME));
-        assertEquals("tst01name", map.get(FIRST_NAME));
-        assertEquals("iamtst01", map.get(UHUUID));
-        assertEquals("tst01name", map.get(COMPOSITE_NAME));
-        assertEquals("tst01name", map.get(LAST_NAME));
+        assertEquals("iamtst01", map.get("username"));
+        assertEquals("tst01name", map.get("firstName"));
+        assertEquals("iamtst01", map.get("uhUuid"));
+        assertEquals("tst01name", map.get("name"));
+        assertEquals("tst01name", map.get("lastName"));
+
+        // Current user is an owner.
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, usernames[0])
+                .with(user(usernames[0]))
+                .with(csrf()))
+                .andReturn();
+
+        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertEquals("iamtst01", map.get("username"));
+        assertEquals("tst01name", map.get("firstName"));
+        assertEquals("iamtst01", map.get("uhUuid"));
+        assertEquals("tst01name", map.get("name"));
+        assertEquals("tst01name", map.get("lastName"));
+
+        // Current user is not admin or owner.
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
+                .header(CURRENT_USER, "notAdminOwnerUser")
+                .with(user("notAdminOwnerUser"))
+                .with(csrf()))
+                .andReturn();
+        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        assertNull(map.get("username"));
+        assertNull(map.get("firstName"));
+        assertNull(map.get("uhUuid"));
+        assertNull(map.get("name"));
+        assertNull(map.get("lastName"));
 
         // Member in question is bogus.
         result = mockMvc.perform(get(API_BASE + "members/" + "bob-jones")
@@ -393,11 +467,11 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(csrf()))
                 .andReturn();
         map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
-        assertNull(map.get(USERNAME));
-        assertNull(map.get(FIRST_NAME));
-        assertNull(map.get(UHUUID));
-        assertNull(map.get(COMPOSITE_NAME));
-        assertNull(map.get(LAST_NAME));
+        assertNull(map.get("username"));
+        assertNull(map.get("firstName"));
+        assertNull(map.get("uhUuid"));
+        assertNull(map.get("name"));
+        assertNull(map.get("lastName"));
 
         // Member in question is empty string.
         try {
@@ -411,32 +485,6 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(404));
         }
-
-        // Current user is not owner or admin.
-        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, usernames[2])
-                .with(user(usernames[2]))
-                .with(csrf()))
-                .andReturn();
-        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
-        assertNull(map.get(USERNAME));
-        assertNull(map.get(FIRST_NAME));
-        assertNull(map.get(UHUUID));
-        assertNull(map.get(COMPOSITE_NAME));
-        assertNull(map.get(LAST_NAME));
-
-        // Current user is an owner.
-        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, usernames[0])
-                .with(user(usernames[0]))
-                .with(csrf()))
-                .andReturn();
-        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
-        assertEquals("iamtst01", map.get(USERNAME));
-        assertEquals("tst01name", map.get(FIRST_NAME));
-        assertEquals("iamtst01", map.get(UHUUID));
-        assertEquals("tst01name", map.get(COMPOSITE_NAME));
-        assertEquals("tst01name", map.get(LAST_NAME));
     }
 
     @Test
@@ -448,11 +496,11 @@ public class TestGroupingsRestControllerv2_1 {
                 .with(csrf()))
                 .andReturn();
         Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
-        assertNull(map.get(USERNAME));
-        assertNull(map.get(FIRST_NAME));
-        assertNull(map.get(UHUUID));
-        assertNull(map.get(COMPOSITE_NAME));
-        assertNull(map.get(LAST_NAME));
+        assertNull(map.get("username"));
+        assertNull(map.get("firstName"));
+        assertNull(map.get("uhUuid"));
+        assertNull(map.get("name"));
+        assertNull(map.get("lastName"));
     }
 
     @Test
