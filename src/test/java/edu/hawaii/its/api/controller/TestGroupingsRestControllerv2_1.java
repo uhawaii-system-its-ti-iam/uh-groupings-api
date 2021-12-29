@@ -278,7 +278,7 @@ public class TestGroupingsRestControllerv2_1 {
         anon = new AnonymousUser();
 
         // Creates not admin or owner user for testing
-        notAdminOwnerUser = new User("notAdminOwner", anonAuthorities);
+        notAdminOwnerUser = new User("notAdminOwner", uhAuthorities);
 
         // add ownership
         memberAttributeService.assignOwnership(GROUPING, ADMIN, usernames[0]);
