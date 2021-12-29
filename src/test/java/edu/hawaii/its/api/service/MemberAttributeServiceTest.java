@@ -153,7 +153,7 @@ public class MemberAttributeServiceTest {
         assertFalse(grouping.getOwners().isMember(randomUser));
 
         try {
-            randomUserAdds = memberAttributeService
+            randomUserAdds = membershipService
                     .assignOwnership(GROUPING_0_PATH, randomUser.getUsername(), randomUser.getUsername());
             assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
         } catch (AccessDeniedException ade) {
@@ -165,7 +165,7 @@ public class MemberAttributeServiceTest {
         assertFalse(grouping.getOwners().isMember(randomUser));
 
         GroupingsServiceResult ownerAdds =
-                memberAttributeService
+                membershipService
                         .assignOwnership(GROUPING_0_PATH, users.get(0).getUsername(), randomUser.getUsername());
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
@@ -173,14 +173,14 @@ public class MemberAttributeServiceTest {
         assertThat(SUCCESS, is(ownerAdds.getResultCode()));
 
         GroupingsServiceResult adminAdds =
-                memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, randomUser.getUsername());
+                membershipService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, randomUser.getUsername());
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));
         assertThat(adminAdds.getResultCode(), is(SUCCESS));
 
         //Test to make sure UUID works
-        GroupingsServiceResult uuidAdds = memberAttributeService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
+        GroupingsServiceResult uuidAdds = membershipService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
         grouping = groupingRepository.findByPath(GROUPING_0_PATH);
         assertTrue(grouping.getOwners().getMembers().contains(randomUser));
         assertTrue(grouping.getOwners().isMember(randomUser));

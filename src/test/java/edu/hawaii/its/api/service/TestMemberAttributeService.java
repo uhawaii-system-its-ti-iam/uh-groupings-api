@@ -8,6 +8,7 @@ import org.junit.runners.MethodSorters;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -27,6 +28,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +142,7 @@ public class TestMemberAttributeService {
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
 
         // add to owners
-        memberAttributeService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
+        membershipService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
 
         // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN_USER);
@@ -161,7 +163,7 @@ public class TestMemberAttributeService {
         membershipService.addGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         //remove from owners
-        memberAttributeService.removeOwnership(GROUPING, ADMIN_USER, usernames[1]);
+        membershipService.removeOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames));
 
         // Remove from Exclude
         membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
@@ -187,7 +189,7 @@ public class TestMemberAttributeService {
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[2]));
 
         try {
-            memberAttributeService.assignOwnership(GROUPING, usernames[1], usernames[1]);
+            membershipService.assignOwnership(GROUPING, usernames[1], usernames[1]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
@@ -206,7 +208,7 @@ public class TestMemberAttributeService {
         }
 
         GroupingsServiceResult assignOwnershipSuccess =
-                memberAttributeService.assignOwnership(GROUPING, usernames[0], usernames[1]);
+                membershipService.assignOwnership(GROUPING, usernames[0], usernames[1]);
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
         assertTrue(assignOwnershipSuccess.getResultCode().startsWith(SUCCESS));
 
@@ -215,22 +217,23 @@ public class TestMemberAttributeService {
         assertNotEquals(lastModTime1, lastModTime2);
 
         try {
-            memberAttributeService.removeOwnership(GROUPING, usernames[2], usernames[1]);
+            membershipService.removeOwnerships(GROUPING, usernames[2], Arrays.asList(usernames));
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
 
-        GroupingsServiceResult removeOwnershipSuccess =
-                memberAttributeService.removeOwnership(GROUPING, usernames[0], usernames[1]);
+        List<RemoveMemberResult> removeOwnershipSuccess =
+                membershipService.removeOwnerships(GROUPING, usernames[0], Arrays.asList(usernames));
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        assertTrue(removeOwnershipSuccess.getResultCode().startsWith(SUCCESS));
+//        assertTrue(removeOwnershipSuccess.containsAll());
+        assertEquals(10, removeOwnershipSuccess.size());
 
         //have an owner remove itself
-        memberAttributeService.assignOwnership(GROUPING, usernames[0], usernames[1]);
+        membershipService.assignOwnership(GROUPING, usernames[0], usernames[1]);
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        memberAttributeService.removeOwnership(GROUPING, usernames[1], usernames[1]);
+        membershipService.removeOwnerships(GROUPING, usernames[1], Arrays.asList(usernames));
         assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
     }
 
@@ -429,12 +432,12 @@ public class TestMemberAttributeService {
 
         WsAttributeAssign[] assigns = memberAttributeService.getMembershipAttributes(type, uuid, membershipID);
         //logger.info("Assigns length is " + assigns.length + ";");
-        assertTrue(assigns.length == 1);
+        assertEquals(1, assigns.length);
 
         // Test with invalid fields
         try {
             assigns = memberAttributeService.getMembershipAttributes("type", "uuid", "memberid");
-            assertTrue(assigns.length == 0);
+            assertEquals(0, assigns.length);
         } catch (RuntimeException re) {
             re.printStackTrace();
         }
@@ -442,7 +445,7 @@ public class TestMemberAttributeService {
         // Test with null fields
         try {
             assigns = memberAttributeService.getMembershipAttributes(null, null, null);
-            assertTrue(assigns.length == 0);
+            assertEquals(0, assigns.length);
         } catch (RuntimeException re) {
             re.printStackTrace();
         }
@@ -494,5 +497,14 @@ public class TestMemberAttributeService {
         } catch (AccessDeniedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void multiRemoveOwners() {
+        List<String> removeOwners = new ArrayList<>(Arrays.asList(usernames).subList(0, 3));
+        //Should return 3, this is the members that we have deleted
+        assertEquals(3, membershipService.removeOwnerships(GROUPING, ADMIN_USER, removeOwners).size());
+        //Should delete all the users in the grouping if all members are deleted then only one user should be left
+        assertEquals(6, membershipService.removeOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames)).size());
     }
 }
