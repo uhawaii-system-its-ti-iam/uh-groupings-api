@@ -335,9 +335,19 @@ public class HelperServiceImpl implements HelperService {
         return mapping;
     }
 
+    @Autowired
+    MembershipService membershipService;
+
     @Override
     public GenericServiceResult swaggerToString(String currentUser) throws IOException {
-        return new GenericServiceResult("result", "result");
+        /*
+        String time = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        String epoch = "19700101T1200";
+        String epochPlusOne = "19700101T1200";
+        Timestamp timestamp = membershipService.updateLastModifiedTimestamp(epoch, currentUser);
+
+         */
+        return new GenericServiceResult("reselt", "result");
     }
 }
 

@@ -4,13 +4,14 @@ import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UpdateTimestampResult;
 
 import java.util.List;
 
 public interface MembershipService {
 
     boolean isUhUuid(String username);
-   
+
     List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
@@ -42,8 +43,9 @@ public interface MembershipService {
 
     boolean isGroupCanOptOut(String username, String groupPath);
 
-    //do not include in REST controller
-    GroupingsServiceResult updateLastModified(String groupPath);
+    UpdateTimestampResult updateLastModified(String groupPath);
+
+    UpdateTimestampResult updateLastModifiedTimestamp(String time, String groupPath);
 
     GroupingsServiceResult addSelfOpted(String groupPath, String username);
 
