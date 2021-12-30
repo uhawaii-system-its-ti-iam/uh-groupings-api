@@ -278,8 +278,8 @@ public class TestGroupingsRestControllerv2_1 {
         anon = new AnonymousUser();
 
         // add ownership
-        membershipService.assignOwnership(GROUPING, ADMIN, usernames[0]);
-        membershipService.assignOwnership(A_GROUPING, ADMIN, usernames[4]);
+        membershipService.addOwners(GROUPING, ADMIN, Collections.singletonList(usernames[0]));
+        membershipService.addOwners(A_GROUPING, ADMIN, Collections.singletonList(usernames[4]));
 
         // add to include
         List<String> includeNames = new ArrayList<>();

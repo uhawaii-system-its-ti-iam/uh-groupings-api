@@ -7,8 +7,10 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
 import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
+import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
@@ -27,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -113,6 +116,9 @@ public class MembershipServiceTest {
     private DatabaseSetupService databaseSetupService;
 
     @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
     private HelperService helperService;
 
     @Before
@@ -132,18 +138,18 @@ public class MembershipServiceTest {
     @Test
     public void isUhUuidTest() {
         // Invalid UhUuid.
-        assertThat(membershipService.isUhUuid("username"), is(false));
+        assertThat(memberAttributeService.isUhUuid("username"), is(false));
         // Valid UhUuid.
-        assertThat(membershipService.isUhUuid("0000"), is(true));
+        assertThat(memberAttributeService.isUhUuid("0000"), is(true));
         // Null.
-        assertThat(membershipService.isUhUuid(null), is(false));
+        assertThat(memberAttributeService.isUhUuid(null), is(false));
     }
 
     @Test
     public void getMembershipResultsTest() {
         // A user can access their own memberships.
         List<Membership> memberships =
-                membershipService.getMembershipResults(users.get(0).getUsername(), users.get(0).getUsername());
+                memberAttributeService.getMembershipResults(users.get(0).getUsername(), users.get(0).getUsername());
         assertNotNull(memberships);
         for (Membership membership : memberships) {
             assertNotNull(membership);
@@ -163,17 +169,17 @@ public class MembershipServiceTest {
         }
         // Admins can access anyone's memberships.
         for (int i = 0; i < 5; i++) {
-            memberships = membershipService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
+            memberships = memberAttributeService.getMembershipResults(ADMIN_USER, users.get(i).getUsername());
             assertNotNull(memberships);
         }
         // A non-admin user cannot access another users memberships.
         try {
-            membershipService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
+            memberAttributeService.getMembershipResults(users.get(0).getUsername(), users.get(1).getUsername());
         } catch (AccessDeniedException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Admins accessing an invalid user will return an empty list.
-        memberships = membershipService.getMembershipResults(ADMIN_USER, "zzzzzzzzzzzzzzzzzz");
+        memberships = memberAttributeService.getMembershipResults(ADMIN_USER, "zzzzzzzzzzzzzzzzzz");
         assertNotNull(memberships);
         assertTrue(memberships.isEmpty());
     }
@@ -322,6 +328,38 @@ public class MembershipServiceTest {
     }
 
     @Test
+    public void addOwnerTest() {
+        //expect this to fail
+        List<AddMemberResult> randomUserAdds;
+
+        Person randomUser = personRepository.findByUsername(users.get(1).getUsername());
+        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+
+        assertFalse(grouping.getOwners().getMembers().contains(randomUser));
+        assertFalse(grouping.getOwners().isMember(randomUser));
+
+        try {
+            randomUserAdds = membershipService
+                    .addOwners(GROUPING_0_PATH, randomUser.getUsername(),
+                            Collections.singletonList(randomUser.getUsername()));
+            assertTrue(randomUserAdds.get(0).getResult().startsWith(FAILURE));
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+        }
+
+        try {
+            membershipService.addOwners(GROUPING_0_PATH, users.get(0).getUsername(),
+                    Collections.singletonList(randomUser.getUsername()));
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
+        assertFalse(grouping.getOwners().getMembers().contains(randomUser));
+        assertFalse(grouping.getOwners().isMember(randomUser));
+    }
+
+    @Test
     public void optInTest() {
         // Invalid user attempts to opt.
         try {
@@ -453,10 +491,10 @@ public class MembershipServiceTest {
 
     @Test
     public void groupOptOutPermissionTest() {
-        boolean isOop = membershipService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_2_EXCLUDE_PATH);
+        boolean isOop = memberAttributeService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_2_EXCLUDE_PATH);
         assertThat(isOop, is(false));
 
-        isOop = membershipService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_1_EXCLUDE_PATH);
+        isOop = memberAttributeService.isGroupCanOptOut(users.get(1).getUsername(), GROUPING_1_EXCLUDE_PATH);
         assertThat(isOop, is(true));
     }
 
@@ -464,22 +502,22 @@ public class MembershipServiceTest {
     public void getNumberOfMembershipsTest(){
         String user = users.get(10).getUsername();
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(0));
+        assertThat(memberAttributeService.getNumberOfMemberships(ADMIN_USER, user), is(0));
 
         membershipService.optIn(ADMIN_USER, GROUPING_0_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_1_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_2_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_3_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(4));
+        assertThat(memberAttributeService.getNumberOfMemberships(ADMIN_USER, user), is(4));
 
         membershipService.optOut(ADMIN_USER, GROUPING_1_PATH, user);
         membershipService.optOut(ADMIN_USER, GROUPING_3_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(2));
+        assertThat(memberAttributeService.getNumberOfMemberships(ADMIN_USER, user), is(2));
 
         membershipService.optIn(ADMIN_USER, GROUPING_1_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(3));
+        assertThat(memberAttributeService.getNumberOfMemberships(ADMIN_USER, user), is(3));
     }
 }

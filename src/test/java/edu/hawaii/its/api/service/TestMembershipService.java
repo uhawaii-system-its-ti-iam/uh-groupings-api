@@ -132,7 +132,7 @@ public class TestMembershipService {
     public void setUp() throws IOException, MessagingException {
         //add ownership
 
-        membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
+        membershipService.addOwners(GROUPING, ADMIN, Collections.singletonList(username[0]));
 
         groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
         groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
@@ -168,13 +168,13 @@ public class TestMembershipService {
 
     @Test
     public void groupOptInPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
     }
 
     @Test
     public void getMembershipResultsTest() {
-        List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
+        List<Membership> memberships = memberAttributeService.getMembershipResults(username[0], username[0]);
         assertNotNull(memberships);
         assertTrue(memberships.size() != 0);
         Set<String> pathMap = new HashSet<>();
@@ -196,8 +196,8 @@ public class TestMembershipService {
 
     @Test
     public void groupOptOutPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
     }
 
     @Test
@@ -252,11 +252,11 @@ public class TestMembershipService {
 
     @Test
     public void groupOptPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_EXCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptOut(username[0], GROUPING_INCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptOut(username[0], GROUPING_EXCLUDE));
 
-        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_EXCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptIn(username[0], GROUPING_INCLUDE));
+        assertTrue(memberAttributeService.isGroupCanOptIn(username[0], GROUPING_EXCLUDE));
     }
 
     @Test

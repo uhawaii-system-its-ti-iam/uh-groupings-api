@@ -3,11 +3,13 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
@@ -17,6 +19,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +29,24 @@ import java.util.Map;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
+
+    @Value("${groupings.api.privilege_opt_out}")
+    private String PRIVILEGE_OPT_OUT;
+
+    @Value("${groupings.api.privilege_opt_in}")
+    private String PRIVILEGE_OPT_IN;
+
+    @Value("${groupings.api.success_allowed}")
+    private String SUCCESS_ALLOWED;
+
+    @Value("${groupings.api.exclude}")
+    private String EXCLUDE;
+
+    @Value("${groupings.api.include}")
+    private String INCLUDE;
+
+    @Value("${groupings.api.basis}")
+    private String BASIS;
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -109,6 +130,47 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return false;
     }
 
+    //checks to see if the user has the privilege in that group
+    public WsGetGrouperPrivilegesLiteResult getGrouperPrivilege(String username, String privilegeName,
+            String groupPath) {
+        logger.info("getGrouperPrivilege; username: "
+                + username
+                + "; group: "
+                + groupPath
+                + "; privilegeName: "
+                + privilegeName
+                + ";");
+
+        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
+
+        return grouperFS.makeWsGetGrouperPrivilegesLiteResult(groupPath, privilegeName, lookup);
+    }
+
+    //returns true if the group allows that user to opt in
+    @Override
+    public boolean isGroupCanOptIn(String optInUsername, String groupPath) {
+        logger.info("groupOptInPermission; group: " + groupPath + "; username: " + optInUsername + ";");
+
+        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optInUsername, PRIVILEGE_OPT_IN, groupPath);
+
+        return result
+                .getResultMetadata()
+                .getResultCode()
+                .equals(SUCCESS_ALLOWED);
+    }
+
+    //returns true if the group allows that user to opt out
+    @Override
+    public boolean isGroupCanOptOut(String optOutUsername, String groupPath) {
+        logger.info("groupOptOutPermission; group: " + groupPath + "; username: " + optOutUsername + ";");
+        WsGetGrouperPrivilegesLiteResult result = getGrouperPrivilege(optOutUsername, PRIVILEGE_OPT_OUT, groupPath);
+
+        return result
+                .getResultMetadata()
+                .getResultCode()
+                .equals(SUCCESS_ALLOWED);
+    }
+
     // Returns true if the user is a member of the group via username or UH id
     @Override
     public boolean isMember(String groupPath, String username) {
@@ -184,11 +246,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         return isMember(GROUPING_APPS, username);
     }
 
-    // Returns true if username is a UH id number
     @Override
-    public boolean isUhUuid(String naming) {
-        return naming.matches("\\d+");
-    }
+    // returns true if username is a UH id number
+    public boolean isUhUuid(String naming) { return naming != null && naming.matches("\\d+"); }
 
     // Checks to see if a membership has an attribute of a specific type and returns the list if it does
     public WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID) {
@@ -304,10 +364,75 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
+     * Get a list of memberships pertaining to uid.
+     */
+    @Override public List<Membership> getMembershipResults(String owner, String uid) {
+        String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
+        logger.info(action);
+
+        if (!isAdmin(owner) && !owner.equals(uid)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        List<Membership> memberships = new ArrayList<>();
+        List<String> groupPaths;
+        List<String> optOutList;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        } catch (GcWebServiceError e) {
+            return memberships;
+        }
+        Map<String, List<String>> pathMap = new HashMap<>();
+        for (String pathToCheck : groupPaths) {
+            if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
+                    && !pathToCheck.endsWith(OWNERS)) {
+                continue;
+            }
+            String parentPath = helperService.parentGroupingPath(pathToCheck);
+            if (!pathMap.containsKey(parentPath)) {
+                pathMap.put(parentPath, new ArrayList<>());
+            }
+            pathMap.get(parentPath).add(pathToCheck);
+        }
+
+        for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
+            String groupingPath = entry.getKey();
+            List<String> paths = entry.getValue();
+            Membership membership = new Membership();
+            for (String path : paths) {
+                if (path.endsWith(BASIS)) {
+                    membership.setInBasis(true);
+                }
+                if (path.endsWith(INCLUDE)) {
+                    membership.setInInclude(true);
+                }
+                if (path.endsWith(EXCLUDE)) {
+                    membership.setInExclude(true);
+                }
+                if (path.endsWith(OWNERS)) {
+                    membership.setInOwner(true);
+                }
+            }
+            membership.setPath(groupingPath);
+            membership.setOptOutEnabled(optOutList.contains(groupingPath));
+            membership.setName(helperService.nameGroupingPath(groupingPath));
+            if (!membership.isInExclude() && !membership.isInBasis()) {
+                memberships.add(membership);
+            }
+        }
+        return memberships;
+    }
+
+    /**
      * Get's the number of groupings a user owns.
      */
     @Override
     public Integer getNumberOfGroupings(String currentUser, String uid) {
         return getOwnedGroupings(currentUser, uid).size();
+    }
+
+    // Get the number of memberships the current user has
+    @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
+        return getMembershipResults(currentUser, uid).size();
     }
 }

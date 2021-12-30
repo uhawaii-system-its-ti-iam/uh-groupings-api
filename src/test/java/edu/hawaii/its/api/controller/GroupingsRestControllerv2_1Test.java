@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -409,20 +410,19 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "uhAdmin")
     public void addOwnerTest() throws Exception {
+        List<AddMemberResult> returnList = new ArrayList<>();
         String admin = "uhAdmin";
 
-        given(membershipService.assignOwnership("path1", "uhAdmin", "newOwner"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "give newOwner ownership of path1"));
+        given(membershipService.addOwners("path1", "uhAdmin", Collections.singletonList("newOwner")))
+                .willReturn(returnList);
 
         mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner")
                         .with(csrf())
                         .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("give newOwner ownership of path1"));
+                .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .assignOwnership("path1", "uhAdmin", "newOwner");
+                .addOwners("path1", "uhAdmin", Collections.singletonList("newOwner"));
     }
 
     @Ignore
@@ -452,14 +452,14 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void membershipResultsTest() throws Exception {
         List<Membership> memberships = new ArrayList<>();
-        given(membershipService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
+        given(memberAttributeService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
         mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
-        verify(membershipService, times(1))
+        verify(memberAttributeService, times(1))
                 .getMembershipResults(ADMIN, "iamtst01");
     }
 
@@ -786,7 +786,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.removeOwnerships("grouping", USERNAME, ownersToRemove))
                 .willReturn(removeMemberResultList);
 
-        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeOwners/" + ownersToRemove)
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/" + ownersToRemove)
                 .with(csrf())
                 .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
@@ -1117,7 +1117,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "iamtst01")
     public void getNumberOfMembershipsTest() throws Exception {
         String uid = currentUser().getUid();
-        given(membershipService.getNumberOfMemberships(ADMIN, uid))
+        given(memberAttributeService.getNumberOfMemberships(ADMIN, uid))
                 .willReturn(369);
 
         mockMvc.perform(get(API_BASE + "/groupings/" + uid + "/memberships")
@@ -1126,7 +1126,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
 
-        verify(membershipService, times(1))
+        verify(memberAttributeService, times(1))
                 .getNumberOfMemberships(ADMIN, uid);
     }
 }

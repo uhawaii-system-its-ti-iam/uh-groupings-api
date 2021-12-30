@@ -222,7 +222,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST membershipResults...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getMembershipResults(currentUser, uid));
+                .body(memberAttributeService.getMembershipResults(currentUser, uid));
     }
 
     /**
@@ -328,27 +328,27 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to add a new owner.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uids}")
+    public ResponseEntity<List<AddMemberResult>> addOwners(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable String uid) {
+            @PathVariable List<String> uids) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.assignOwnership(path, currentUser, uid));
+                .body(membershipService.addOwners(path, currentUser, uids));
     }
 
     /**
      * Delete a grouping owner.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/removeOwners/{uid}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uids}")
     public ResponseEntity<List<RemoveMemberResult>> removeOwners(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable List<String> uid) {
+            @PathVariable List<String> uids) {
         logger.info("Entered REST removeOwners");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeOwnerships(path, currentUser, uid));
+                .body(membershipService.removeOwnerships(path, currentUser, uids));
     }
 
     /**
@@ -501,6 +501,6 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getNumberOfMemberships(currentUser, uid));
+                .body(memberAttributeService.getNumberOfMemberships(currentUser, uid));
     }
 }

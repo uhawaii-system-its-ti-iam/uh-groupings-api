@@ -2,20 +2,15 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import java.util.List;
 
 public interface MembershipService {
 
-    boolean isUhUuid(String username);
-
-    GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
+    List<AddMemberResult> addOwners(String groupingPath, String ownerUsername, List<String> newOwnerUsername);
 
     List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove);
-   
-    List<Membership> getMembershipResults(String owner, String uid);
 
     List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
@@ -42,16 +37,10 @@ public interface MembershipService {
     List<GroupingsServiceResult> resetGroup(String currentUser, String path, List<String> includeIdentifier,
             List<String> excludeIdentifier);
 
-    boolean isGroupCanOptIn(String username, String groupPath);
-
-    boolean isGroupCanOptOut(String username, String groupPath);
-
     //do not include in REST controller
     GroupingsServiceResult updateLastModified(String groupPath);
 
     GroupingsServiceResult addSelfOpted(String groupPath, String username);
 
     GroupingsServiceResult removeSelfOpted(String groupPath, String username);
-
-    Integer getNumberOfMemberships(String currentUser, String uid);
 }

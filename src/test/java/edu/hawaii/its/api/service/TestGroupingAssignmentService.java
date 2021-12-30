@@ -149,9 +149,9 @@ public class TestGroupingAssignmentService {
     @Before
     public void setUp() throws IOException, MessagingException {
         // assign ownership
-        membershipService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
-        membershipService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
-        membershipService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+        membershipService.addOwners(GROUPING_STORE_EMPTY, ADMIN, Collections.singletonList(usernames[0]));
+        membershipService.addOwners(GROUPING_TRUE_EMPTY, ADMIN, Collections.singletonList(usernames[0]));
+        membershipService.addOwners(GROUPING, ADMIN, Collections.singletonList(usernames[0]));
 
         // update statuses
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
