@@ -23,6 +23,7 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -57,12 +58,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -233,6 +234,7 @@ public class TestGroupingsRestControllerv2_1 {
     private User uhUser02;
     private User uhUser05;
     private User uhUser03;
+    private User bogusUser;
 
     private static final String API_BASE = "/api/groupings/v2.1/";
 
@@ -270,6 +272,7 @@ public class TestGroupingsRestControllerv2_1 {
         uhUser02 = new User(usernames[1], usernames[1], uhAuthorities);
         uhUser05 = new User(usernames[4], usernames[4], uhAuthorities);
         uhUser03 = new User(usernames[2], usernames[2], uhAuthorities);
+        bogusUser = new User("bogus-user", "bogus-user", uhAuthorities);
 
         // Creates anonymous user for testing
         Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
@@ -375,11 +378,12 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Current user is admin.
         MvcResult result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, ADMIN)
-                .with(user(ADMIN))
-                .with(csrf()))
+                        .header(CURRENT_USER, ADMIN)
+                        .with(user(ADMIN))
+                        .with(csrf()))
                 .andReturn();
-        Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        Person person = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Person.class);
+        Map<String, String> map = person.getAttributes();
         assertEquals("iamtst01", map.get(USERNAME));
         assertEquals("tst01name", map.get(FIRST_NAME));
         assertEquals("iamtst01", map.get(UHUUID));
@@ -388,11 +392,12 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Member in question is bogus.
         result = mockMvc.perform(get(API_BASE + "members/" + "bob-jones")
-                .header(CURRENT_USER, ADMIN)
-                .with(user(ADMIN))
-                .with(csrf()))
+                        .header(CURRENT_USER, ADMIN)
+                        .with(user(ADMIN))
+                        .with(csrf()))
                 .andReturn();
-        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        person = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Person.class);
+        map = person.getAttributes();
         assertNull(map.get(USERNAME));
         assertNull(map.get(FIRST_NAME));
         assertNull(map.get(UHUUID));
@@ -403,9 +408,9 @@ public class TestGroupingsRestControllerv2_1 {
         try {
             mapGetUserAttributes("", adminUser);
             result = mockMvc.perform(get(API_BASE + "members/" + "")
-                    .header(CURRENT_USER, ADMIN)
-                    .with(user(ADMIN))
-                    .with(csrf()))
+                            .header(CURRENT_USER, ADMIN)
+                            .with(user(ADMIN))
+                            .with(csrf()))
                     .andReturn();
             new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
         } catch (GroupingsHTTPException ghe) {
@@ -413,12 +418,13 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Current user is not owner or admin.
-        result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, usernames[2])
-                .with(user(usernames[2]))
-                .with(csrf()))
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[2])
+                        .header(CURRENT_USER, usernames[2])
+                        .with(user(usernames[2]))
+                        .with(csrf()))
                 .andReturn();
-        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        person = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Person.class);
+        map = person.getAttributes();
         assertNull(map.get(USERNAME));
         assertNull(map.get(FIRST_NAME));
         assertNull(map.get(UHUUID));
@@ -427,11 +433,12 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Current user is an owner.
         result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, usernames[0])
-                .with(user(usernames[0]))
-                .with(csrf()))
+                        .header(CURRENT_USER, usernames[0])
+                        .with(user(usernames[0]))
+                        .with(csrf()))
                 .andReturn();
-        map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        person = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Person.class);
+        map = person.getAttributes();
         assertEquals("iamtst01", map.get(USERNAME));
         assertEquals("tst01name", map.get(FIRST_NAME));
         assertEquals("iamtst01", map.get(UHUUID));
@@ -443,9 +450,9 @@ public class TestGroupingsRestControllerv2_1 {
     @WithAnonymousUser
     public void memberAttributesAnonTest() throws Exception {
         MvcResult result = mockMvc.perform(get(API_BASE + "members/" + usernames[0])
-                .header(CURRENT_USER, anon)
-                .with(user(anon))
-                .with(csrf()))
+                        .header(CURRENT_USER, anon)
+                        .with(user(anon))
+                        .with(csrf()))
                 .andReturn();
         Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
         assertNull(map.get(USERNAME));
@@ -822,14 +829,14 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void enableDisablePreferencesFailTest() throws Exception {
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", bogusUser);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
         }
 
         try {
-            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", uhUser02);
+            mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/enable", "put", bogusUser);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
             assertThat(ghe.getStatusCode(), equalTo(403));
@@ -959,9 +966,9 @@ public class TestGroupingsRestControllerv2_1 {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get(API_BASE + "members/" + username)
-                .header(CURRENT_USER, annotationUser.getUsername())
-                .with(user(annotationUser))
-                .with(csrf()))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(user(annotationUser))
+                        .with(csrf()))
                 .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
@@ -994,9 +1001,9 @@ public class TestGroupingsRestControllerv2_1 {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get(API_BASE + "adminsGroupings")
-                .header(CURRENT_USER, annotationUser.getUsername())
-                .with(user(annotationUser))
-                .with(csrf()))
+                        .header(CURRENT_USER, annotationUser.getUsername())
+                        .with(user(annotationUser))
+                        .with(csrf()))
                 .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
@@ -1040,9 +1047,9 @@ public class TestGroupingsRestControllerv2_1 {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = mockMvc.perform(get(baseUri + params)
-                .header(CURRENT_USER, currentUser.getUsername())
-                .with(user(currentUser))
-                .with(csrf()))
+                        .header(CURRENT_USER, currentUser.getUsername())
+                        .with(user(currentUser))
+                        .with(csrf()))
                 .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
@@ -1061,9 +1068,9 @@ public class TestGroupingsRestControllerv2_1 {
 
         MvcResult result =
                 mockMvc.perform(get(API_BASE + "groupings/" + parentGroupingPath + "/components/" + componentId)
-                        .header(CURRENT_USER, currentUser.getUsername())
-                        .with(user(currentUser))
-                        .with(csrf()))
+                                .header(CURRENT_USER, currentUser.getUsername())
+                                .with(user(currentUser))
+                                .with(csrf()))
                         .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
@@ -1111,9 +1118,9 @@ public class TestGroupingsRestControllerv2_1 {
 
         ObjectMapper objectMapper = new ObjectMapper();
         MvcResult result = mockMvc.perform(get(uri)
-                .with(user(user))
-                .header(CURRENT_USER, user.getUsername())
-                .with(csrf()))
+                        .with(user(user))
+                        .header(CURRENT_USER, user.getUsername())
+                        .with(csrf()))
                 .andReturn();
 
         if (result.getResponse().getStatus() == 200) {
@@ -1133,30 +1140,30 @@ public class TestGroupingsRestControllerv2_1 {
         switch (httpCall) {
             case "get":
                 result = mockMvc.perform(get(uri)
-                        .with(user(annotationUser))
-                        .header(CURRENT_USER, annotationUser.getUsername())
-                        .with(csrf()))
+                                .with(user(annotationUser))
+                                .header(CURRENT_USER, annotationUser.getUsername())
+                                .with(csrf()))
                         .andReturn();
                 break;
             case "post":
                 result = mockMvc.perform(post(uri)
-                        .with(user(annotationUser))
-                        .header(CURRENT_USER, annotationUser.getUsername())
-                        .with(csrf()))
+                                .with(user(annotationUser))
+                                .header(CURRENT_USER, annotationUser.getUsername())
+                                .with(csrf()))
                         .andReturn();
                 break;
             case "put":
                 result = mockMvc.perform(put(uri)
-                        .with(user(annotationUser))
-                        .header(CURRENT_USER, annotationUser.getUsername())
-                        .with(csrf()))
+                                .with(user(annotationUser))
+                                .header(CURRENT_USER, annotationUser.getUsername())
+                                .with(csrf()))
                         .andReturn();
                 break;
             case "delete":
                 result = mockMvc.perform(delete(uri)
-                        .with(user(annotationUser))
-                        .header(CURRENT_USER, annotationUser.getUsername())
-                        .with(csrf()))
+                                .with(user(annotationUser))
+                                .header(CURRENT_USER, annotationUser.getUsername())
+                                .with(csrf()))
                         .andReturn();
                 break;
             default:
