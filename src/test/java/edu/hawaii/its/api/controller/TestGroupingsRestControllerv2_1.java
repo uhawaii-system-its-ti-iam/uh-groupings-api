@@ -272,6 +272,7 @@ public class TestGroupingsRestControllerv2_1 {
         uhUser02 = new User(usernames[1], usernames[1], uhAuthorities);
         uhUser05 = new User(usernames[4], usernames[4], uhAuthorities);
         uhUser03 = new User(usernames[2], usernames[2], uhAuthorities);
+        // UH usernames can not contain hyphen characters, thus bogusUser can never be a valid username.
         bogusUser = new User("bogus-user", "bogus-user", uhAuthorities);
 
         // Creates anonymous user for testing
@@ -828,6 +829,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableDisablePreferencesFailTest() throws Exception {
+        // Passing bogusUser ensures that an exception is thrown.
         try {
             mapGSRs(API_BASE + "groupings/" + GROUPING + "/preferences/" + OPT_IN + "/disable", "put", bogusUser);
             fail("Shouldn't be here.");
