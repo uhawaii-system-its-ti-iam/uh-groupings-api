@@ -375,10 +375,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         }
         List<Membership> memberships = new ArrayList<>();
         List<String> groupPaths;
-        List<String> optOutList;
         try {
             groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
-            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
         } catch (GcWebServiceError e) {
             return memberships;
         }
@@ -394,7 +392,17 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             }
             pathMap.get(parentPath).add(pathToCheck);
         }
+        setMemberships(owner, uid, pathMap, memberships);
+        return memberships;
+    }
 
+    public void setMemberships(String owner, String uid, Map<String, List<String>> pathMap, List<Membership> memberships) {
+        List<String> optOutList;
+        try {
+            optOutList = groupingAssignmentService.getOptOutGroups(owner, uid);
+        } catch (GcWebServiceError e) {
+            return;
+        }
         for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
             String groupingPath = entry.getKey();
             List<String> paths = entry.getValue();
@@ -420,7 +428,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
                 memberships.add(membership);
             }
         }
-        return memberships;
     }
 
     /**
