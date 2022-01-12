@@ -24,7 +24,7 @@
         <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
         <hibernate.version>5.4.18.Final</hibernate.version>
         <h2.version>1.4.198</h2.version>
-        <org.jasig.cas.client-version>3.6.0</org.jasig.cas.client-version>
+        <org.jasig.cas.client-version>3.6.2</org.jasig.cas.client-version>
 
         <swagger2markup.version>1.2.0</swagger2markup.version>
         <asciidoctor.input.directory>${project.basedir}/src/docs/asciidoc</asciidoctor.input.directory>
@@ -34,7 +34,7 @@
         <asciidoctor.html.output.directory>${project.basedir}/src/docs/html</asciidoctor.html.output.directory>
         <asciidoctor.pdf.output.directory>${project.basedir}/src/docs/pdf</asciidoctor.pdf.output.directory>
         <swagger.input>${swagger.output.dir}/swagger.json</swagger.input>
-        <jackson.version>2.10.1</jackson.version>
+        <jackson.version>2.12.6</jackson.version>
         <springfox.version>2.9.2</springfox.version>
     </properties>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.2.0.RELEASE</version>
+            <version>2.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
-            <version>1.0.48</version>
+            <version>1.0.56</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -141,7 +141,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>6.3</version>
+            <version>6.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -221,7 +221,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.60</version>
+            <version>1.66</version>
         </dependency>
         <!--Comment this out until we can figure out how to integrate the new version into our project-->
         <!--<dependency>-->
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.1</version>
+            <version>2.12.6</version>
         </dependency>
         <dependency>
             <groupId>org.dom4j</groupId>
@@ -377,13 +377,13 @@
                                 <echo>$ mvn clean package</echo>
                                 <echo>$ mvn -Dmaven.test.skip=true clean package</echo>
                                 <echo>$ mvn clean test jacoco:report</echo>
-                                <echo></echo>
+                                <echo/>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
                                 <echo>$ mvn
                                     -Dtest=TestGroupAttributeService,TestGroupingAssignmentService,TestHelperService,TestMemberAttributeService,TestMembershipService,TestGroupingsRestController
                                     test
                                 </echo>
-                                <echo></echo>
+                                <echo/>
                                 <echo>To run UH Groupings locally:</echo>
                                 <echo>$ mvn clean spring-boot:run</echo>
                             </target>
