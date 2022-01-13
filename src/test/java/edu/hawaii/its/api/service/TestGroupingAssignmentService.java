@@ -10,7 +10,10 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -191,6 +194,25 @@ public class TestGroupingAssignmentService {
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
+    }
+
+    @Test
+    public void updateLastModifiedTest() {
+        // Test is accurate to the minute, and if checks to see if the current
+        // time gets added to the lastModified attribute of a group if the
+        // minute happens to change in between getting the time and setting
+        // the time, the test will fail.
+
+        final String group = GROUPING_INCLUDE;
+
+        GroupingsServiceResult gsr = membershipService.updateLastModified(group);
+        String dateStr = gsr.getAction().split(" to time ")[1];
+
+        WsGetAttributeAssignmentsResults assignments =
+                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
+        String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+
+        assertThat(assignedValue, is(dateStr));
     }
 
     @Test
