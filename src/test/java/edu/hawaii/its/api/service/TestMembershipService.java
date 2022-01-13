@@ -10,9 +10,10 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UpdateTimestampResult;
+import edu.hawaii.its.api.util.Dates;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -203,25 +207,6 @@ public class TestMembershipService {
     }
 
     @Test
-    public void updateLastModifiedTest() {
-        // Test is accurate to the minute, and if checks to see if the current
-        // time gets added to the lastModified attribute of a group if the
-        // minute happens to change in between getting the time and setting
-        // the time, the test will fail.
-
-        final String group = GROUPING_INCLUDE;
-
-        GroupingsServiceResult gsr = membershipService.updateLastModified(group);
-        String dateStr = gsr.getAction().split(" to time ")[1];
-
-        WsGetAttributeAssignmentsResults assignments =
-                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, group, YYYYMMDDTHHMM);
-        String assignedValue = assignments.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-
-        assertThat(assignedValue, is(dateStr));
-    }
-
-    @Test
     public void addRemoveSelfOptedTest() {
 
         //username[2] is not in the include, but not self opted.
@@ -264,6 +249,80 @@ public class TestMembershipService {
     @Test
     public void listGroupsTest() {
         //todo
+    }
+    @Test
+    public void updateLastModifiedTest() {
+        UpdateTimestampResult updateTimestampResult = membershipService.updateLastModified(GROUPING);
+        assertNotNull(updateTimestampResult);
+        updateTimestampResult = membershipService.updateLastModified(GROUPING_INCLUDE);
+        assertNotNull(updateTimestampResult);
+        updateTimestampResult = membershipService.updateLastModified(GROUPING_EXCLUDE);
+        assertNotNull(updateTimestampResult);
+        updateTimestampResult = membershipService.updateLastModified(GROUPING_BASIS);
+        assertNotNull(updateTimestampResult);
+        updateTimestampResult = membershipService.updateLastModified(GROUPING_OWNERS);
+        assertNotNull(updateTimestampResult);
+    }
+
+    @Test
+    public void updateLastModifiedTimestampTest() {
+        // Function updateLastModifiedTimestamp returns a complex grouper object which is wrapped into UpdateTimeResult.
+        // The structure of the grouper object returned depends on three cases...
+        //         i. Previous timestamp is less than new timestamp.
+        //        ii. Previous timestamp is equal to new timestamp.
+        //       iii. Previous timestamp is greater than new timestamp.
+        // Thus, two updates are made: the epoch is first updated as the timestamp, followed by the present time.
+        // This ensures case i.
+
+        // Create a random timestamp between the epoch and now.
+        LocalDateTime epoch = LocalDateTime.of(LocalDate.of(1970, 1, 1), LocalTime.MIDNIGHT);
+        LocalDateTime randomLocalDateTime = getRandomLocalDateTimeBetween(epoch, LocalDateTime.now());
+        String randomDateTime = Dates.formatDate(randomLocalDateTime, "yyyyMMdd'T'HHmm");
+        // Create a timestamp of present time.
+        String nowDateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        // Update grouping last modified timestamp to the random timestamp.
+        UpdateTimestampResult randomDateTimeResults =
+                membershipService.updateLastModifiedTimestamp(randomDateTime, GROUPING_INCLUDE);
+        // Update grouping last modified timestamp to present time.
+        UpdateTimestampResult nowDateTimeResults =
+                membershipService.updateLastModifiedTimestamp(nowDateTime, GROUPING_INCLUDE);
+
+        // Test for case i.
+        assertNotNull(randomDateTimeResults);
+        assertNotNull(nowDateTimeResults);
+        assertEquals(GROUPING_INCLUDE, nowDateTimeResults.getPathOfUpdate());
+        assertEquals(2, nowDateTimeResults.getTimestampUpdateArray().length);
+        assertEquals(nowDateTime,
+                nowDateTimeResults.getTimestampUpdateArray()[1].getWsAttributeAssignValue().getValueSystem());
+        assertEquals(randomDateTime,
+                nowDateTimeResults.getTimestampUpdateArray()[0].getWsAttributeAssignValue().getValueSystem());
+
+        // Test for case ii.
+        nowDateTimeResults = membershipService.updateLastModifiedTimestamp(nowDateTime, GROUPING_INCLUDE);
+        assertNotNull(nowDateTimeResults);
+        assertEquals(GROUPING_INCLUDE, nowDateTimeResults.getPathOfUpdate());
+        assertEquals(1, nowDateTimeResults.getTimestampUpdateArray().length);
+        assertEquals(nowDateTime,
+                nowDateTimeResults.getTimestampUpdateArray()[0].getWsAttributeAssignValue().getValueSystem());
+    }
+
+    /**
+     * Get a random LocalDateTime between start and end. This is a helper method for updateLastModifiedTimestampTest().
+     */
+    private static LocalDateTime getRandomLocalDateTimeBetween(LocalDateTime start, LocalDateTime end) {
+        return LocalDateTime.of(
+                getRandomNumberBetween(start.getYear(), end.getYear()),
+                getRandomNumberBetween(start.getMonthValue(), end.getMonthValue()),
+                getRandomNumberBetween(start.getDayOfMonth(), end.getDayOfMonth()),
+                getRandomNumberBetween(start.getHour(), end.getHour()),
+                getRandomNumberBetween(start.getMinute(), end.getMinute()));
+    }
+
+    /**
+     * Get a random number between start and end. This is a helper method for getRandomLocalDateTimeBetween().
+     */
+    private static int getRandomNumberBetween(int start, int end) {
+        return start + (int) Math.round(Math.random() * (end - start));
     }
 
     @Test
