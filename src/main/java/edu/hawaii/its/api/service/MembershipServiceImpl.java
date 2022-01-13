@@ -6,6 +6,7 @@ import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
@@ -258,7 +259,6 @@ public class MembershipServiceImpl implements MembershipService {
         return memberships;
     }
 
-
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
      * members which already exist in the exclude group will be removed from the exclude group and visa-versa. This
@@ -335,8 +335,9 @@ public class MembershipServiceImpl implements MembershipService {
     public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
-                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
     }
@@ -348,9 +349,10 @@ public class MembershipServiceImpl implements MembershipService {
     public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
-                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-            }
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
         return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
     }
 
@@ -406,8 +408,9 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
-                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
     }
@@ -419,8 +422,9 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(currentUser)) {
-                throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
     }
@@ -617,24 +621,29 @@ public class MembershipServiceImpl implements MembershipService {
         return getMembershipResults(currentUser, uid).size();
     }
 
-    //updates the last modified attribute of the group to the current date and time
+    /**
+     * Update the last modified attribute of a group to the current date and time.
+     */
     @Override
-    public GroupingsServiceResult updateLastModified(String groupPath) {
+    public UpdateTimestampResult updateLastModified(String groupPath) {
         logger.info("updateLastModified; group: " + groupPath + ";");
-        String time = wsDateTime();
-        WsAttributeAssignValue dateTimeValue = grouperFS.makeWsAttributeAssignValue(time);
+        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        return updateLastModifiedTimestamp(dateTime, groupPath);
+    }
 
-        WsAssignAttributesResults assignAttributesResults = grouperFS.makeWsAssignAttributesResults(
+    /**
+     * Update the last modified attribute of a group to dateTime.
+     */
+    @Override
+    public UpdateTimestampResult updateLastModifiedTimestamp(String dateTime, String groupPath) {
+        WsAttributeAssignValue wsAttributeAssignValue = grouperFS.makeWsAttributeAssignValue(dateTime);
+        return new UpdateTimestampResult(grouperFS.makeWsAssignAttributesResults(
                 ASSIGN_TYPE_GROUP,
                 OPERATION_ASSIGN_ATTRIBUTE,
                 groupPath,
                 YYYYMMDDTHHMM,
                 OPERATION_REPLACE_VALUES,
-                dateTimeValue);
-
-        return helperService.makeGroupingsServiceResult(assignAttributesResults,
-                "update last-modified attribute for " + groupPath + " to time " + time);
-
+                wsAttributeAssignValue));
     }
 
     //checks to see if the user has the privilege in that group
