@@ -411,7 +411,7 @@ public class GroupingsRestControllerv2_1Test {
     public void addOwnerTest() throws Exception {
         String admin = "uhAdmin";
 
-        given(memberAttributeService.assignOwnership("path1", "uhAdmin", "newOwner"))
+        given(membershipService.assignOwnership("path1", "uhAdmin", "newOwner"))
                 .willReturn(new GroupingsServiceResult(SUCCESS, "give newOwner ownership of path1"));
 
         mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner")
@@ -421,7 +421,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("give newOwner ownership of path1"));
 
-        verify(memberAttributeService, times(1))
+        verify(membershipService, times(1))
                 .assignOwnership("path1", "uhAdmin", "newOwner");
     }
 
@@ -777,18 +777,22 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void removeOwnerTest() throws Exception {
-        given(memberAttributeService.removeOwnership("grouping", USERNAME, "frye"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "removed owner"));
+        List<String> ownersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
+        ownersToRemove.add("tst04name");
+        ownersToRemove.add("tst05name");
+        ownersToRemove.add("tst06name");
 
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
+        given(membershipService.removeOwnerships("grouping", USERNAME, ownersToRemove))
+                .willReturn(removeMemberResultList);
+
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/removeOwners/" + ownersToRemove)
+                .with(csrf())
+                .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("removed owner"));
+                .andReturn();
 
-        verify(memberAttributeService, times(1))
-                .removeOwnership("grouping", USERNAME, "frye");
+        assertThat(result, notNullValue());
     }
 
     @Ignore
