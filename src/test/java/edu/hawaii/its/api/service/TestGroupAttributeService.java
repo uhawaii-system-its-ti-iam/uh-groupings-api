@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -141,8 +142,11 @@ public class TestGroupAttributeService {
         //add to exclude
         membershipService.addGroupMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
 
+        //add owners
+        membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
+
         //remove from owners
-        memberAttributeService.removeOwnership(GROUPING, username[0], username[1]);
+        membershipService.removeOwnerships(GROUPING, ADMIN, Arrays.asList(username[1]));
     }
 
     @Test
