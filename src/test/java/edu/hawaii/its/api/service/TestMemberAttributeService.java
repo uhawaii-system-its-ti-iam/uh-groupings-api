@@ -163,7 +163,7 @@ public class TestMemberAttributeService {
         membershipService.addGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
 
         //remove from owners
-        membershipService.removeOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames[1]));
+        membershipService.removeOwnerships(GROUPING, usernames[0], Arrays.asList(usernames[1]));
 
         // Remove from Exclude
         membershipService.removeGroupMembers(ADMIN_USER, GROUPING_EXCLUDE, Collections.singletonList(usernames[4]));
