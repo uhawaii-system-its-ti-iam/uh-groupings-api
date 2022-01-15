@@ -9,9 +9,7 @@ import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 
@@ -139,52 +137,6 @@ public class MemberAttributeServiceTest {
     public void construction() {
         //autowired
         assertNotNull(memberAttributeService);
-    }
-
-    @Test
-    public void assignOwnershipTest() {
-        //expect this to fail
-        GroupingsServiceResult randomUserAdds;
-
-        Person randomUser = personRepository.findByUsername(users.get(1).getUsername());
-        Grouping grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-
-        assertFalse(grouping.getOwners().getMembers().contains(randomUser));
-        assertFalse(grouping.getOwners().isMember(randomUser));
-
-        try {
-            randomUserAdds = membershipService
-                    .assignOwnership(GROUPING_0_PATH, randomUser.getUsername(), randomUser.getUsername());
-            assertTrue(randomUserAdds.getResultCode().startsWith(FAILURE));
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-
-        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-        assertFalse(grouping.getOwners().getMembers().contains(randomUser));
-        assertFalse(grouping.getOwners().isMember(randomUser));
-
-        GroupingsServiceResult ownerAdds =
-                membershipService
-                        .assignOwnership(GROUPING_0_PATH, users.get(0).getUsername(), randomUser.getUsername());
-        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-        assertTrue(grouping.getOwners().getMembers().contains(randomUser));
-        assertTrue(grouping.getOwners().isMember(randomUser));
-        assertThat(SUCCESS, is(ownerAdds.getResultCode()));
-
-        GroupingsServiceResult adminAdds =
-                membershipService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, randomUser.getUsername());
-        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-        assertTrue(grouping.getOwners().getMembers().contains(randomUser));
-        assertTrue(grouping.getOwners().isMember(randomUser));
-        assertThat(adminAdds.getResultCode(), is(SUCCESS));
-
-        //Test to make sure UUID works
-        GroupingsServiceResult uuidAdds = membershipService.assignOwnership(GROUPING_0_PATH, ADMIN_USER, "1234");
-        grouping = groupingRepository.findByPath(GROUPING_0_PATH);
-        assertTrue(grouping.getOwners().getMembers().contains(randomUser));
-        assertTrue(grouping.getOwners().isMember(randomUser));
-        assertThat(uuidAdds.getResultCode(), is(SUCCESS));
     }
 
     @Test

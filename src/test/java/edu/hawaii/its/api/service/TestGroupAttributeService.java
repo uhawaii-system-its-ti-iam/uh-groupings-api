@@ -146,7 +146,7 @@ public class TestGroupAttributeService {
         membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
 
         //remove from owners
-        membershipService.removeOwnerships(GROUPING, ADMIN, Arrays.asList(username[1]));
+        membershipService.removeOwnerships(GROUPING, username[0], Arrays.asList(username[1]));
     }
 
     @Test
