@@ -206,26 +206,6 @@ public class MembershipServiceUnitTest {
         assertEquals(map.size(), expectedMember);
     }
 
-    @Test
-    public void batchDeleteTwo() {
-        final int TEST_RUNS = 25;
-        final Map<Integer, Integer> map = new HashMap<>();
-
-        Thread[] serviceThreads = new DeleteTestRunner[TEST_RUNS];
-        for (int i = 0; i < TEST_RUNS; i++) {
-            serviceThreads[i] = new DeleteTestRunner(i, map);
-            serviceThreads[i].start();
-        }
-
-        // Wait on the threads to finish.
-        pollUntilFinished(TEST_RUNS, serviceThreads);
-
-        // Check the results.
-        for (int i = 0; i < TEST_RUNS; i++) {
-            assertEquals(map.get(i).intValue(), i + 100);
-        }
-    }
-
     class testCallable1 implements Callable<Integer> {
         private final int increment;
 

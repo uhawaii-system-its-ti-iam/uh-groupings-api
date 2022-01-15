@@ -27,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -277,7 +278,7 @@ public class MembershipServiceTest {
         }
         try {
             membershipService.removeGroupMembers(ownerUsername, GROUPING_1_OWNERS_PATH, usersToRemove);
-        }catch (GcWebServiceError e) {
+        } catch (GcWebServiceError e) {
             assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
         }
     }
@@ -318,6 +319,26 @@ public class MembershipServiceTest {
             membershipService.removeExcludeMembers(users.get(2).getUsername(), GROUPING_3_PATH, usersToRemove);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void assignOwnershipTest() {
+        //Non-owner/Admin adding a owner
+        try {
+            membershipService.assignOwnership(GROUPING_0_PATH, users.get(2).getUsername(), users.get(0).getUsername());
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+        }
+    }
+
+    @Test
+    public void removeOwnershipTest() {
+        try {
+            membershipService.removeOwnerships(GROUPING_0_PATH, users.get(1).getUsername(),
+                    Arrays.asList(users.get(0).getUsername()));
+        } catch (AccessDeniedException ade) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
     }
 
@@ -461,7 +482,7 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void getNumberOfMembershipsTest(){
+    public void getNumberOfMembershipsTest() {
         String user = users.get(10).getUsername();
 
         assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(0));
