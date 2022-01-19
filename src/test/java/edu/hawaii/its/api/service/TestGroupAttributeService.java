@@ -1,15 +1,16 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.google.common.primitives.Booleans;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,33 +18,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
-@RunWith(SpringRunner.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupAttributeService {
 
@@ -70,26 +59,14 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.opt_out}")
     private String OPT_OUT;
 
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
     @Value("${groupings.api.test.usernames}")
-    private String[] username;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
+    private List<String> TEST_USERNAMES;
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
+    @Value("${groupings.api.grouping_admins}")
+    private String GROUPING_ADMINS;
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
@@ -98,7 +75,7 @@ public class TestGroupAttributeService {
     private String ADMIN;
 
     @Autowired
-    private GrouperFactoryService grouperFactoryService;
+    private GrouperApiService grouperApiService;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -112,213 +89,392 @@ public class TestGroupAttributeService {
     @Autowired
     public Environment env; // Just for the settings check.
 
-    @PostConstruct
+    private Map<String, Boolean> attributeMap = new HashMap<>();
+    private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
+
+    private final String SUCCESS_NOT_ALLOWED_DIDNT_EXIST = "SUCCESS_NOT_ALLOWED_DIDNT_EXIST";
+    private final String SUCCESS_ALLOWED_ALREADY_EXISTED = "SUCCESS_ALLOWED_ALREADY_EXISTED";
+    private final String SUCCESS_ALLOWED = "SUCCESS_ALLOWED";
+    private final String SUCCESS_NOT_ALLOWED = "SUCCESS_NOT_ALLOWED";
+
+    @BeforeAll
     public void init() {
-        Assert.hasLength(env.getProperty("grouperClient.webService.url"),
-                "property 'grouperClient.webService.url' is required");
-        Assert.hasLength(env.getProperty("grouperClient.webService.login"),
-                "property 'grouperClient.webService.login' is required");
-        Assert.hasLength(env.getProperty("grouperClient.webService.password"),
-                "property 'grouperClient.webService.password' is required");
+        // Save the starting attribute settings for the test grouping.
+        attributeMap.put(OPT_IN, groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        attributeMap.put(OPT_OUT, groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, false);
+
+        TEST_USERNAMES.forEach(testUsername -> {
+            grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
+            grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
+            grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
+            grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
+
+            assertFalse(memberAttributeService.isOwner(GROUPING, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
+            assertFalse(memberAttributeService.isAdmin(testUsername));
+        });
     }
 
-    @Before
-    public void setUp() throws IOException, MessagingException {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
-        groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
-        groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
-
-        //put in include
-        List<String> includeNames = new ArrayList<>();
-        includeNames.add(username[0]);
-        includeNames.add(username[1]);
-        includeNames.add(username[2]);
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
-
-        //remove from exclude
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
-
-        //add to exclude
-        membershipService.addGroupMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
-
-        //add owners
-        membershipService.addOwnerships(GROUPING, ADMIN, Arrays.asList(username[0]));
-
-        //remove from owners
-        membershipService.removeOwnerships(GROUPING, username[0], Arrays.asList(username[1]));
+    @AfterAll
+    public void cleanUp() {
+        // Set the test grouping's attribute settings back.
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, attributeMap.get(OPT_IN));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, attributeMap.get(OPT_OUT));
     }
 
     @Test
     public void getAllSyncDestinationsTest() {
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
 
-        // test with admin
-        List<SyncDestination> destinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
-        assertTrue(destinations.size() > 0);
-
-        // test with owner
-        destinations = groupAttributeService.getAllSyncDestinations(username[0], GROUPING);
-        assertTrue(destinations.size() > 0);
-
-        // Test with a user who isn't an owner or admin
+        // Should throw an exception if current user is not an owner or and admin.
         try {
-            groupAttributeService.getAllSyncDestinations(username[5], GROUPING);
-            fail("shouldn't be here");
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
+            fail("Should throw an exception if current user is not an owner or and admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
-    }
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
 
-    @Test public void getSyncDestinationsTest() {
-        Grouping grouping = new Grouping();
-        grouping.setPath(GROUPING);
-        grouping.setName("test-grouping");
-        List<SyncDestination> destinations = groupAttributeService.getSyncDestinations(grouping);
-        Set<String> names = new HashSet<>();
-        for (SyncDestination destination : destinations) {
-            assertNotNull(destination.getTooltip());
-            assertNotNull(destination.getName());
-            assertNotNull(destination.getDescription());
-            assertNotNull(destination.isSynced());
-            assertNotNull(destination.isHidden());
-            // Check for duplicates.
-            assertTrue(names.add(destination.getName()));
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
         }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.getAllSyncDestinations(ADMIN, "bogus-path");
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+
+        // Should return sync destinations.
+        List<SyncDestination> syncDestinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
+        assertNotNull(syncDestinations);
+        assertFalse(syncDestinations.isEmpty());
     }
 
     @Test
-    public void optOutPermissionTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+    public void getSyncDestinationsTest() {
+        // Should throw and exception if a grouping with an invalid path is passed.
+        try {
+            groupAttributeService.getSyncDestinations(new Grouping("bogus-path"));
+            fail("Should throw and exception if a grouping with an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+
+        // Should return a list of sync destinations with the proper fields set.
+        List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(new Grouping(GROUPING));
+        assertNotNull(syncDestinations);
+        syncDestinations.forEach(syncDestination -> {
+            assertNotNull(syncDestination.getName());
+            assertNotNull(syncDestination.getDescription());
+            assertNotNull(syncDestination.getTooltip());
+            assertNotNull(syncDestination.isSynced());
+            assertNotNull(syncDestination.isHidden());
+        });
     }
 
     @Test
-    public void optInPermissionTest() {
+    public void changeOptInStatusTest() {
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+
+        // Should throw an exception if current user is not an owner or and admin.
+        try {
+            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+            fail("Should throw an exception if current user is not an owner or and admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.changeOptInStatus("bogus-path", iamtst01, false);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+
+        // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
+        List<GroupingsServiceResult> groupingsServiceResults =
+                groupAttributeService.changeOptInStatus(GROUPING, ADMIN, false);
+        GroupingsServiceResult optInResult = groupingsServiceResults.get(0);
+        assertNotNull(optInResult);
+        assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optInResult.getPerson());
+        assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optInResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
+        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        optInResult = groupingsServiceResults.get(0);
+        assertNotNull(optInResult);
+        assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optInResult.getPerson());
+        assertEquals(SUCCESS_ALLOWED, optInResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
+        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        optInResult = groupingsServiceResults.get(0);
+        assertNotNull(optInResult);
+        assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optInResult.getPerson());
+        assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optInResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
+        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, false);
+        optInResult = groupingsServiceResults.get(0);
+        assertNotNull(optInResult);
+        assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optInResult.getPerson());
+        assertEquals(SUCCESS_NOT_ALLOWED, optInResult.getResultCode());
+    }
+
+    @Test
+    public void changeOptOutStatusTest() {
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+
+        // Should throw an exception if current user is not an owner or and admin.
+        try {
+            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+            fail("Should throw an exception if current user is not an owner or and admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.changeOptOutStatus("bogus-path", iamtst01, false);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+
+        // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
+        List<GroupingsServiceResult> groupingsServiceResults =
+                groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, false);
+        GroupingsServiceResult optOutResult = groupingsServiceResults.get(1);
+        assertNotNull(optOutResult);
+        assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optOutResult.getPerson());
+        assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optOutResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
+        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
+        optOutResult = groupingsServiceResults.get(1);
+        assertNotNull(optOutResult);
+        assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optOutResult.getPerson());
+        assertEquals(SUCCESS_ALLOWED, optOutResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
+        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
+        optOutResult = groupingsServiceResults.get(1);
+        assertNotNull(optOutResult);
+        assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optOutResult.getPerson());
+        assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optOutResult.getResultCode());
+
+        // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
+        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, false);
+        optOutResult = groupingsServiceResults.get(1);
+        assertNotNull(optOutResult);
+        assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
+        assertNull(optOutResult.getPerson());
+        assertEquals(SUCCESS_NOT_ALLOWED, optOutResult.getResultCode());
+    }
+
+    @Test
+    public void changeGroupAttributeStatus() {
+
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+
+        // Should throw an exception if current user is not an owner or and admin.
+        try {
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
+            fail("Should throw an exception if current user is not an owner or and admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.changeGroupAttributeStatus("bogus-path", ADMIN, null, false);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+
+        // Should return success no matter what.
+        List<String> optList = new ArrayList<>();
+        boolean[] arr = { false, true, true, false };
+        List<Boolean> optSwitches = Booleans.asList(arr);
+        optList.add(OPT_IN);
+        optList.add(OPT_OUT);
+        optSwitches.forEach(bool -> {
+            optList.forEach(opt -> assertTrue(
+                    groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, opt, bool).getResultCode()
+                            .contains(SUCCESS))); // Should always be SUCCESS?
+        });
+
+    }
+
+    @Test
+    public void isGroupAttributeTest() {
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.isGroupAttribute("bogus-path", OPT_IN);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+        // Should throw an exception if an invalid attribute is passed.
+        try {
+            groupAttributeService.isGroupAttribute(GROUPING, "bogus-attribute");
+            fail("Should throw an exception if an invalid attribute is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains("ATTRIBUTE_DEF_NAME_NOT_FOUND"));
+        }
+
+        // Attributes should be set to false.
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+
+        // Should be true if attributes are turned on.
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, true);
         assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-    }
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
 
-    @Test
-    public void hasListservTest() {
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-    }
+        // Should be false if attributes are turned off.
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, false);
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
 
-    @Test
-    public void changeListServStatusTest() {
-
-        assertTrue(memberAttributeService.isOwner(GROUPING, username[0]));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
-        // Get last modified time
-        WsGetAttributeAssignmentsResults attributes =
-                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
-        //get last modified time and make sure that it hasn't changed
-        try {
-            TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertThat(lastModTime2, is(lastModTime));
-
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
-        // Get last modified time and make sure that it has changed
-        try {
-            TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime3 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertNotEquals(lastModTime2, lastModTime3);
-
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-
-        // Get last modified time and make sure that it hasn't changed
-        try {
-            TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime4 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertThat(lastModTime4, is(lastModTime3));
-
-        // Invalid user can't change attribute status
-        try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, true);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-        try {
-            groupAttributeService.changeGroupAttributeStatus(GROUPING, "zzz_zzz", LISTSERV, false);
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
-        }
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, LISTSERV));
-    }
-
-    @Test
-    public void changeUhReleasedGroupingsStatusTest() {
-        //todo
     }
 
     @Test
     public void updateDescriptionTest() {
+        String descriptionOriginal = grouperApiService.descriptionOf(GROUPING);
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
 
-        GroupingsServiceResult groupingsServiceResult;
-
-        // Sets the description to the default
-        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
-
-        //Test to make sure description is set to the default.
-        String description = grouperFactoryService.getDescription(GROUPING);
-        assertThat(DEFAULT_DESCRIPTION, containsString(description));
-
-        //Try to update grouping while user isn't owner or admin
+        // Should throw an exception if current user is not an owner or and admin.
         try {
-            groupingsServiceResult =
-                    groupAttributeService.updateDescription(GROUPING, username[3], DEFAULT_DESCRIPTION + " modified");
-        } catch (AccessDeniedException ade) {
-            assertThat(ade.getMessage(), equalTo(INSUFFICIENT_PRIVILEGES));
+            groupAttributeService.updateDescription(GROUPING, iamtst01, null);
+            fail("Should throw an exception if current user is not an owner or and admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
-        //Testing with admin
-        groupingsServiceResult =
-                groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION + " modified");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
+        // Should be set to default description
+        GroupingsServiceResult groupingsServiceResult =
+                groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
+        assertEquals(DEFAULT_DESCRIPTION, grouperApiService.descriptionOf(GROUPING));
+        assertTrue(groupingsServiceResult.getResultCode().contains(SUCCESS));
 
-        //Testing with owner
-        groupingsServiceResult =
-                groupAttributeService.updateDescription(GROUPING, username[0], DEFAULT_DESCRIPTION + " modifiedTwo");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
-
-        // Test with empty string
-        groupingsServiceResult = groupAttributeService.updateDescription(GROUPING, ADMIN, "");
-        assertThat(groupingsServiceResult.getResultCode(), startsWith(SUCCESS));
-
-        //Revert any changes
-        groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
-
-    }
-
-    //todo Test to play around with GroupAttribute methods
-    @Ignore
-    @Test
-    public void changeGroupAttributeStatusTest() {
-        groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
-        groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        assertTrue(true);
+        // Should be set back to original description.
+        groupAttributeService.updateDescription(GROUPING, ADMIN, descriptionOriginal);
+        assertEquals(descriptionOriginal, grouperApiService.descriptionOf(GROUPING));
     }
 }

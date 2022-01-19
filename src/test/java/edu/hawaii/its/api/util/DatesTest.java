@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -15,9 +15,10 @@ import java.time.Month;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DatesTest {
 
@@ -29,7 +30,7 @@ public class DatesTest {
     protected Date dayMusicDiedDate;
     protected Date newYearsDay2000Date;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         christmasLocalDate = LocalDate.of(1962, Month.DECEMBER, 25);
         newYearsDay2000LocalDate = LocalDate.of(2000, Month.JANUARY, 1);
@@ -189,7 +190,7 @@ public class DatesTest {
         assertThat(cal5.get(Calendar.DAY_OF_MONTH), is(1));
         assertThat(cal5.get(Calendar.MONTH), is(Calendar.JANUARY));
         assertThat(cal5.get(Calendar.YEAR), is(2011));
-        assertThat(cal5.get(Calendar.SECOND),is(0));
+        assertThat(cal5.get(Calendar.SECOND), is(0));
         assertThat(cal5.get(Calendar.MINUTE), is(0));
         assertThat(cal5.get(Calendar.HOUR_OF_DAY), is(0));
         cal5 = null;

@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupingsServiceResultTest {
     private GroupingsServiceResult groupingsServiceResult;
@@ -12,7 +12,7 @@ public class GroupingsServiceResultTest {
     private final String resultCode = "resultCode";
     private Person person = null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         groupingsServiceResult = new GroupingsServiceResult();
         person = new Person("name", "uhUuid", "uid");

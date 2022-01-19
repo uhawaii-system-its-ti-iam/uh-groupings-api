@@ -3,11 +3,9 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-
 import java.util.List;
 
-public interface MemberAttributeService extends BatchIsMember {
+public interface MemberAttributeService {
 
     boolean isMember(String groupPath, String username);
 
@@ -23,17 +21,7 @@ public interface MemberAttributeService extends BatchIsMember {
 
     boolean isApp(String username);
 
-    boolean isSelfOpted(String groupPath, String username);
-
-    WsAttributeAssign[] getMembershipAttributes(String assignType, String attributeUuid, String membershipID);
-
     Person getMemberAttributes(String ownerUsername, String uid);
-
-    boolean isUhUuid(String naming);
-
-    List<Person> searchMembers(String groupPath, String username);
-
-    String getSpecificUserAttribute(String adminUser, String username, int attribute);
 
     List<GroupingPath> getOwnedGroupings(String currentUser, String user);
 

@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.type;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+
 public class RemoveMemberResult {
     private boolean userWasRemoved;
     private String pathOfRemoved;
@@ -26,6 +29,16 @@ public class RemoveMemberResult {
     public RemoveMemberResult(String userIdentifier, String result) {
         this.userIdentifier = userIdentifier;
         this.result = result;
+    }
+
+    public RemoveMemberResult(WsDeleteMemberResults wsDeleteMemberResults) {
+        WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
+        this.userWasRemoved = "SUCCESS".equals(wsDeleteMemberResult.getResultMetadata().getResultCode());
+        setResult(this.userWasRemoved ? "SUCCESS" : "FAILURE");
+        setUid(wsDeleteMemberResult.getWsSubject().getIdentifierLookup());
+        setName(wsDeleteMemberResult.getWsSubject().getName());
+        setUhUuid(wsDeleteMemberResult.getWsSubject().getId());
+        setPathOfRemoved(wsDeleteMemberResults.getWsGroup().getName());
     }
 
     public boolean isUserWasRemoved() {

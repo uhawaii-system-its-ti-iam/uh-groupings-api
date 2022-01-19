@@ -1,16 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,74 +16,46 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
-@RunWith(SpringRunner.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
+
     @Value("${groupings.api.test.grouping_many_basis}")
     private String GROUPING_BASIS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
+
     @Value("${groupings.api.test.grouping_many_exclude}")
     private String GROUPING_EXCLUDE;
+
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
-    @Value("${groupings.api.test.grouping_store_empty}")
-    private String GROUPING_STORE_EMPTY;
-    @Value("${groupings.api.test.grouping_store_empty_include}")
-    private String GROUPING_STORE_EMPTY_INCLUDE;
-    @Value("${groupings.api.test.grouping_store_empty_exclude}")
-    private String GROUPING_STORE_EMPTY_EXCLUDE;
-    @Value("${groupings.api.test.grouping_store_empty_owners}")
-    private String GROUPING_STORE_EMPTY_OWNERS;
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
 
-    @Value("${groupings.api.test.grouping_true_empty}")
-    private String GROUPING_TRUE_EMPTY;
-    @Value("${groupings.api.test.grouping_true_empty_include}")
-    private String GROUPING_TRUE_EMPTY_INCLUDE;
-    @Value("${groupings.api.test.grouping_true_empty_exclude}")
-    private String GROUPING_TRUE_EMPTY_EXCLUDE;
-    @Value("${groupings.api.test.grouping_true_empty_owners}")
-    private String GROUPING_TRUE_EMPTY_OWNERS;
-
-    @Value("${groupings.api.test.grouping_timeout_test}")
-    private String GROUPING_TIMEOUT;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
 
     @Value("${groupings.api.basis}")
     private String BASIS;
@@ -102,19 +72,17 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
+    @Value("${groupings.api.grouping_admins}")
+    private String GROUPING_ADMINS;
 
     @Value("${groupings.api.test.usernames}")
-    private String[] usernames;
+    private List<String> TEST_USERNAMES;
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
-    public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
+    private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
+    private final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @Autowired
     GroupAttributeService groupAttributeService;
@@ -126,338 +94,321 @@ public class TestGroupingAssignmentService {
     private MembershipService membershipService;
 
     @Autowired
-    private HelperService helperService;
+    MemberAttributeService memberAttributeService;
+
+    @Autowired
+    GrouperApiService grouperApiService;
 
     @Autowired
     public Environment env; // Just for the settings check.
 
-    @PostConstruct
+    @BeforeAll
     public void init() {
-        Assert.hasLength(env.getProperty("grouperClient.webService.url"),
-                "property 'grouperClient.webService.url' is required");
-        Assert.hasLength(env.getProperty("grouperClient.webService.login"),
-                "property 'grouperClient.webService.login' is required");
-        Assert.hasLength(env.getProperty("grouperClient.webService.password"),
-                "property 'grouperClient.webService.password' is required");
-    }
+        assertTrue(memberAttributeService.isAdmin(ADMIN));
+        TEST_USERNAMES.forEach(testUsername -> {
+            grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
+            grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
+            grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
+            grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
 
-    @Before
-    public void setUp() throws IOException, MessagingException {
-        // assign ownership
-        membershipService.addOwnerships(GROUPING_STORE_EMPTY, ADMIN, Arrays.asList(usernames[0]));
-        membershipService.addOwnerships(GROUPING_TRUE_EMPTY, ADMIN, Arrays.asList(usernames[0]));
-        membershipService.addOwnerships(GROUPING, ADMIN, Arrays.asList(usernames[0]));
-
-        // update statuses
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
-        groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
-
-        // put in include
-        List<String> includeNames = new ArrayList<>();
-        includeNames.add(usernames[0]);
-        includeNames.add(usernames[1]);
-        includeNames.add(usernames[2]);
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
-
-        // remove from exclude
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[4]));
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[5]));
-
-        // add to exclude
-        membershipService.addGroupMembers(usernames[0], GROUPING_EXCLUDE, Collections.singletonList(usernames[3]));
-
-    }
-
-    @Test
-    public void adminListsTest() {
-        try {
-            // Try with non-admin.
-            groupingAssignmentService.adminLists(usernames[0]);
-            fail("shouldn't be here");
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-
-        try {
-            // Try with admin.
-            AdminListsHolder adminList = groupingAssignmentService.adminLists(ADMIN);
-            Group adminGroup = adminList.getAdminGroup();
-
-            // Assert that admins list was retrieved.
-            assertThat(adminGroup.getUsernames().size(), is(not(0)));
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
+            assertFalse(memberAttributeService.isOwner(GROUPING, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
+            assertFalse(memberAttributeService.isAdmin(testUsername));
+        });
     }
 
     @Test
     public void getGroupingTest() {
-
-        // usernames[4] does not own grouping, method should return empty grouping
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+        // Should throw and exception if current user is not an admin or and owner.
         try {
-            groupingAssignmentService.getGrouping(GROUPING, usernames[4]);
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+            fail("Should throw and exception if current user is not an admin or and owner.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        try {
+            groupingAssignmentService.getGrouping(GROUPING, "bogus-user");
+            fail("Should throw and exception if current user is not an admin or and owner.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
-        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
 
-        assertThat(GROUPING, is(grouping.getPath()));
+        // Should not throw an exception if current user is an admin and an owner.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin and an owner.");
+        }
 
-        // Testing for garbage uuid basis bug fix
-        // List<String> list = grouping.getBasis().getUuids();
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.removeAdmin(ADMIN, iamtst01);
+        try {
+            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
 
-        assertTrue(grouping.getBasis().getUsernames().contains(usernames[3]));
-        assertTrue(grouping.getBasis().getUsernames().contains(usernames[4]));
-        assertTrue(grouping.getBasis().getUsernames().contains(usernames[5]));
+        // Should throw and exception if a group path is passed.
+        try {
+            groupingAssignmentService.getGrouping(GROUPING_INCLUDE, ADMIN);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
 
-        assertTrue(grouping.getComposite().getUsernames().contains(usernames[0]));
-        assertTrue(grouping.getComposite().getUsernames().contains(usernames[1]));
-        assertTrue(grouping.getComposite().getUsernames().contains(usernames[2]));
-        assertTrue(grouping.getComposite().getUsernames().contains(usernames[4]));
-        assertTrue(grouping.getComposite().getUsernames().contains(usernames[5]));
+        // Should throw and exception if an invalid path is passed.
+        try {
+            groupingAssignmentService.getGrouping("bogus-path", ADMIN);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
 
-        assertTrue(grouping.getExclude().getUsernames().contains(usernames[3]));
-
-        assertTrue(grouping.getInclude().getUsernames().contains(usernames[0]));
-        assertTrue(grouping.getInclude().getUsernames().contains(usernames[1]));
-        assertTrue(grouping.getInclude().getUsernames().contains(usernames[2]));
-
-        assertTrue(grouping.getOwners().getUsernames().contains(usernames[0]));
+        // Should set all the fields of the Grouping returned.
+        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, ADMIN);
+        assertNotNull(grouping);
+        assertNotNull(grouping.getComposite());
+        assertNotNull(grouping.getPath());
+        assertNotNull(grouping.getOwners());
+        assertNotNull(grouping.getInclude());
+        assertNotNull(grouping.getExclude());
+        assertNotNull(grouping.getBasis());
+        assertNotNull(grouping.getDescription());
     }
 
     @Test
     public void getPaginatedGroupingTest() {
-
-        // Paging starts at 1 D:
-        // Page 1 contains 3 stale subjects, should return 17
-        Grouping paginatedGroupingPage1 =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 20, "name", true);
-        //        // Page 2 contains 1 stale subject, should return 19
-        Grouping paginatedGroupingPage2 =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
-
-        groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
-
-        // Check to see the pages come out the right sizes
-        assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage1.getInclude().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage1.getExclude().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage1.getComposite().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage1.getOwners().getMembers().size(), lessThanOrEqualTo(20));
-
-        assertThat(paginatedGroupingPage2.getBasis().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage2.getInclude().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage2.getExclude().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage2.getComposite().getMembers().size(), lessThanOrEqualTo(20));
-        assertThat(paginatedGroupingPage2.getOwners().getMembers().size(), lessThanOrEqualTo(20));
-
-        // Both pages should not be the same (assuming no groups are empty)
-        assertThat(paginatedGroupingPage1.getBasis(), not(paginatedGroupingPage2.getBasis()));
-        assertThat(paginatedGroupingPage1.getInclude(), not(paginatedGroupingPage2.getInclude()));
-        assertThat(paginatedGroupingPage1.getExclude(), not(paginatedGroupingPage2.getExclude()));
-        assertThat(paginatedGroupingPage1.getComposite(), not(paginatedGroupingPage2.getComposite()));
-        assertThat(paginatedGroupingPage1.getOwners(), not(paginatedGroupingPage2.getOwners()));
-
-        // Test if sorted properly (sorted ascending should have the names start with "A", sorted descending should not)
-        assertThat(paginatedGroupingPage1.getBasis().getMembers().get(0).getName(), startsWith("A"));
-        assertThat(paginatedGroupingPage2.getBasis().getMembers().get(0).getName(), not(startsWith("A")));
-
-        // Test paging without proper permissions (should return empty)
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+        // Should throw and exception if current user is not an admin or and owner.
         try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[1], 1, 20, "name", true);
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+            fail("Should throw and exception if current user is not an admin or and owner.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
-    }
-
-    // Testing why getting a grouping returns different results for a page of the size of the entire grouping
-    // Results are the pagination automatically removes stale subjects for us, but doesn't get the full page
-    // Plan is to leave as is, and some pages will be shorter than others
-    // Maybe UI can show messages of some sort to say this is the case
-    @Ignore
-    @Test
-    public void paginatedVersusNonpaginatedTest() {
-        Grouping groupingNonPaginated = groupingAssignmentService.getGrouping(GROUPING, usernames[0]);
-        groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 1, 369, null, null);
-
-        List<Person> nonPaginatedBasisMembers = groupingNonPaginated.getBasis().getMembers();
-
-        List<String> uuids = new ArrayList<>();
-
-        for (Person p : nonPaginatedBasisMembers) {
-            uuids.add(p.getUhUuid());
+        // Should throw and exception if current user is not valid.
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, "bogus-user", null, null, null, null);
+            fail("Should throw and exception if current user is not valid.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
-        Collections.sort(uuids);
-    }
-
-    @Test
-    public void paginatedLargeGroupingTest() {
-
-        for (int i = 1; i <= 150; i++) {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], i, 20, "name", true);
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-    }
 
-    @Test
-    public void groupingsOptedTest() {
-        // Create groupings list, then add 3 test groupings to the list.
-        List<String> groupings = new ArrayList<>();
-        groupings.add(GROUPING_INCLUDE);
-        groupings.add(GROUPING_STORE_EMPTY_INCLUDE);
-        groupings.add(GROUPING_TRUE_EMPTY_INCLUDE);
+        // Should not throw an exception if current user is an admin and an owner.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin and an owner.");
+        }
 
-        // Add user to individual group then set then assign the self opted attribute to user.
-        membershipService.addGroupMembers(usernames[0], GROUPING_STORE_EMPTY_INCLUDE,
-                Collections.singletonList(usernames[0]));
-        membershipService.addSelfOpted(GROUPING_STORE_EMPTY_INCLUDE, usernames[0]);
+        // Should not throw an exception if current user is an owner but not an admin.
+        membershipService.removeAdmin(ADMIN, iamtst01);
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner but not an admin.");
+        }
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
 
-        // Add user to individual group then set then assign the self opted attribute to user.
-        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[0]));
-        membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[0]);
+        // Should throw and exception if a group path is passed.
+        try {
+            groupingAssignmentService.getPaginatedGrouping(GROUPING_INCLUDE, ADMIN, null, null, null, null);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
 
-        // Add user to individual group then set then assign self opted attribute to user.
-        membershipService
-                .addGroupMembers(usernames[0], GROUPING_TRUE_EMPTY_INCLUDE, Collections.singletonList(usernames[0]));
-        membershipService.addSelfOpted(GROUPING_TRUE_EMPTY_INCLUDE, usernames[0]);
-
-        // Call groupingsOpted, passing in the list of groups just constructed which will return a list of opted groupings.
-        List<Grouping> optedGroups = groupingAssignmentService.groupingsOpted("include", usernames[0], groupings);
-
-        // Returned opted groups, should be 3.
-        assertTrue(optedGroups.size() == 3);
-
-        // Opt out one of the groups.
-        membershipService.optOut(usernames[0], GROUPING, usernames[0]);
-
-        // Call groupingsOpted once more to get refreshed list of opted groups.
-        optedGroups = groupingAssignmentService.groupingsOpted("include", usernames[0], groupings);
-
-        // Amount of opted groups return should be 1 less.
-        assertTrue(optedGroups.size() == 2);
-    }
-
-    @Test
-    public void getOptOutGroupsTest() {
-        List<String> optOutPaths = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1]);
-        assertTrue(optOutPaths.contains(GROUPING));
-        Set<String> pathMap = new HashSet<>();
-        for (String path : optOutPaths) {
-            // The path should be a parent path.
-            assertFalse(path.endsWith(INCLUDE));
-            assertFalse(path.endsWith(EXCLUDE));
-            assertFalse(path.endsWith(BASIS));
-            assertFalse(path.endsWith(OWNERS));
-            // Check for duplicates.
-            assertTrue(pathMap.add(path));
+        // Should throw and exception if an invalid path is passed.
+        try {
+            groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, null);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
     }
 
     @Test
-    public void getOptInGroupsTest() {
-        List<String> optInPaths = groupingAssignmentService.getOptInGroups(usernames[0], usernames[1]);
-        assertTrue(optInPaths.contains(GROUPING));
-        Set<String> pathMap = new HashSet<>();
-        for (String path : optInPaths) {
-            // The path should be a parent path.
-            assertFalse(path.endsWith(INCLUDE));
-            assertFalse(path.endsWith(EXCLUDE));
-            assertFalse(path.endsWith(BASIS));
-            assertFalse(path.endsWith(OWNERS));
-            // Check for duplicates.
-            assertTrue(pathMap.add(path));
+    public void adminListsTest() {
+        String iamtst01 = TEST_USERNAMES.get(0);
+
+        // Should throw an exception if current user is not an admin.
+        try {
+            groupingAssignmentService.adminLists(iamtst01);
+            fail("Should throw an exception if current user is not an admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
+
+        // Should not throw an exception if current user is an admin.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        try {
+            groupingAssignmentService.adminLists(iamtst01);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin.");
+        }
+        membershipService.removeAdmin(ADMIN, iamtst01);
+
+        // Fields in AdminListsHolder should not be null.
+        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN);
+        assertNotNull(adminListsHolder.getAdminGroup());
+        assertNotNull(adminListsHolder.getAllGroupingPaths());
     }
 
     @Test
     public void getMembersTest() {
 
-        // Testing for garbage uuid basis bug fix
-        // Group testGroup = groupingAssignmentService.getMembers(usernames[0], GROUPING_BASIS);
+        List<String> groupPaths = new ArrayList<>();
+        List<String> bogusGroupPaths = new ArrayList<>();
+        Collections.addAll(groupPaths, GROUPING, GROUPING_BASIS, GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+        bogusGroupPaths.add("bogus-path");
 
-        List<String> groupings = new ArrayList<>();
-        groupings.add(GROUPING);
-        Group group = groupingAssignmentService.getMembers(usernames[0], groupings).get(GROUPING);
-        List<String> usernames = group.getUsernames();
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupingAssignmentService.getMembers(ADMIN, bogusGroupPaths);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
 
-        assertTrue(usernames.contains(this.usernames[0]));
-        assertTrue(usernames.contains(this.usernames[1]));
-        assertTrue(usernames.contains(this.usernames[2]));
-        assertFalse(usernames.contains(this.usernames[3]));
-        assertTrue(usernames.contains(this.usernames[4]));
-        assertTrue(usernames.contains(this.usernames[5]));
+        // Should throw an exception if current user is invalid.
+        try {
+            groupingAssignmentService.getMembers("bogus-currentUser", groupPaths);
+            fail("Should throw an exception if current user is invalid.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(SUBJECT_NOT_FOUND));
+        }
+        Map<String, Group> groupMap = groupingAssignmentService.getMembers(ADMIN, groupPaths);
+        assertNotNull(groupMap);
     }
 
     @Test
-    public void getGroupNamesTest() {
-        List<String> groupNames1 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[1]);
-        List<String> groupNames3 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[3]);
+    public void getPaginatedMembersTest() {
+        List<String> groupPaths = new ArrayList<>();
+        List<String> bogusGroupPaths = new ArrayList<>();
+        Collections.addAll(groupPaths, GROUPING_BASIS, GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+        bogusGroupPaths.add("bogus-path");
 
-        //usernames[1] should be in the composite and the include, not basis or exclude
-        assertTrue(groupNames1.contains(GROUPING));
-        assertTrue(groupNames1.contains(GROUPING_INCLUDE));
-        assertFalse(groupNames1.contains(GROUPING_BASIS));
-        assertFalse(groupNames1.contains(GROUPING_EXCLUDE));
-
-        //usernames[3] should be in the basis and exclude, not the composite or include
-        assertTrue(groupNames3.contains(GROUPING_BASIS));
-        assertTrue(groupNames3.contains(GROUPING_EXCLUDE));
-        assertFalse(groupNames3.contains(GROUPING));
-        assertFalse(groupNames3.contains(GROUPING_INCLUDE));
-    }
-
-    @Test
-    public void getGroupPathsTest() {
-        List<String> paths = groupingAssignmentService.getGroupPaths(ADMIN, "gilbertz");
-        for (String path : paths) {
-            System.err.println(path);
+        // Should throw an exception if an invalid path is passed.
+        try {
+            groupingAssignmentService.getPaginatedMembers(ADMIN, bogusGroupPaths, null, null, null, null);
+            fail("Should throw and exception if a group path is passed.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        }
+        // Should throw an exception if current user is invalid.
+        try {
+            groupingAssignmentService.getPaginatedMembers("bogus-currentUser", groupPaths, null, null, null, null);
+            fail("Should throw an exception if current user is invalid.");
+        } catch (GcWebServiceError e) {
+            assertTrue(e.getMessage().contains(SUBJECT_NOT_FOUND));
         }
     }
 
     @Test
-    public void getGroupNames() {
-        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
+    public void optInOutGroupingsPathsTest() {
+        // Test both getOptInGroups and getOptOutGroups()
+        List<String> optInPaths = groupingAssignmentService.optInGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
+        Set<String> intersection =
+                optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
+        // Should be no intersection between the two lists.
+        assertTrue(intersection.isEmpty());
+        // Should have no duplicates.
+        Set<String> optInPathsMap = new HashSet<>();
+        Set<String> optOutPathsMap = new HashSet<>();
+        optInPaths.forEach(path -> {
+            assertTrue(optInPathsMap.add(path));
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+        });
+        optOutPaths.forEach(path -> {
+            assertTrue(optOutPathsMap.add(path));
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+        });
 
-        assertTrue(groups.contains(GROUPING_OWNERS));
-        assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
-        assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
-
-        List<String> groups2 = groupingAssignmentService.getGroupPaths(ADMIN, usernames[1]);
-
-        assertFalse(groups2.contains(GROUPING_OWNERS));
-        assertFalse(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
-        assertFalse(groups2.contains(GROUPING_TRUE_EMPTY_OWNERS));
     }
 
     @Test
-    public void getGroupPathsPermissionsTest() {
-        List<String> groups = groupingAssignmentService.getGroupPaths(ADMIN, usernames[0]);
-
-        assertTrue(groups.contains(GROUPING_OWNERS));
-        assertTrue(groups.contains(GROUPING_STORE_EMPTY_OWNERS));
-        assertTrue(groups.contains(GROUPING_TRUE_EMPTY_OWNERS));
-
-        List<String> groups2 = groupingAssignmentService.getGroupPaths(usernames[0], usernames[0]);
-
-        assertTrue(groups2.contains(GROUPING_OWNERS));
-        assertTrue(groups2.contains(GROUPING_STORE_EMPTY_OWNERS));
-        assertTrue(groups2.contains(GROUPING_TRUE_EMPTY_OWNERS));
-
-        List<String> groups3 = groupingAssignmentService.getGroupPaths(usernames[1], usernames[0]);
-        assertThat(groups3.size(), equalTo(0));
+    public void allGroupingsPathsTest() {
+        List<String> allGroupingsPaths = groupingAssignmentService.allGroupingsPaths();
+        assertNotNull(allGroupingsPaths);
     }
 
     @Test
-    public void makeGroupingsTest() {
-        List<String> groupingPaths = new ArrayList<>();
-        groupingPaths.add(GROUPING);
-        groupingPaths.add(GROUPING_STORE_EMPTY);
-        groupingPaths.add(GROUPING_TRUE_EMPTY);
+    public void optableGroupingsTest() {
+        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OPT_IN);
+        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OPT_OUT);
+        assertNotNull(optInablePaths);
+        assertNotNull(optOutablePaths);
 
-        List<Grouping> groupings = helperService.makeGroupings(groupingPaths);
+        // Should not have duplicates.
+        Set<String> optInpathMap = new HashSet<>();
+        optInablePaths.forEach(optInablePath -> assertTrue(optInpathMap.add(optInablePath)));
+        Set<String> optOutPathMap = new HashSet<>();
+        optOutablePaths.forEach(optOutablePath -> assertTrue(optOutPathMap.add(optOutablePath)));
 
-        assertTrue(groupings.size() == 3);
+        // Should throw an exception if optIn or optOut attribute is not passed.
+        try {
+            groupingAssignmentService.optableGroupings("bad-attribute");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+    }
+
+    @Test
+    public void setGroupingAttributesTest() {
+        // Should set the sync destinations.
+        Grouping grouping = groupingAssignmentService.setGroupingAttributes(new Grouping(GROUPING));
+        assertNotNull(grouping);
+        assertNotNull(grouping.getSyncDestinations());
+    }
+
+    @Test
+    public void getGroupPathsTest() {
+        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, ADMIN);
+        assertFalse(groupPaths.isEmpty());
+        // Should return an empty list if current user is not an admin and if current user is not the same as username.
+        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
+        assertTrue(groupPaths.isEmpty());
+
+        // Should return a non-empty list if current user is not an admin but is the same as username.
+        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(0));
+        assertFalse(groupPaths.isEmpty());
+
+        // Should return a non-empty list if current user is an admin but is not the same as username.
+        membershipService.addAdmin(ADMIN, TEST_USERNAMES.get(0));
+        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
+        assertFalse(groupPaths.isEmpty());
+        membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
 }

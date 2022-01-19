@@ -161,4 +161,22 @@ public class Membership  {
     public void setInBasisAndInclude(boolean inBasisAndInclude) {
         this.inBasisAndInclude = inBasisAndInclude;
     }
+
+    @Override public String toString() {
+        return "Membership{" +
+                "identifier='" + identifier + '\'' +
+                ", person=" + person +
+                ", group=" + group +
+                ", path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", isSelfOpted=" + isSelfOpted +
+                ", isOptInEnabled=" + isOptInEnabled +
+                ", isOptOutEnabled=" + isOptOutEnabled +
+                ", inBasis=" + inBasis +
+                ", inInclude=" + inInclude +
+                ", inExclude=" + inExclude +
+                ", inOwner=" + inOwner +
+                ", inBasisAndInclude=" + inBasisAndInclude +
+                '}';
+    }
 }

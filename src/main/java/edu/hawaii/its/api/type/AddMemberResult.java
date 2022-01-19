@@ -1,5 +1,10 @@
 package edu.hawaii.its.api.type;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+
 public class AddMemberResult {
     private boolean userWasAdded;
     private boolean userWasRemoved;
@@ -41,6 +46,30 @@ public class AddMemberResult {
     public AddMemberResult(String userIdentifier, String result) {
         this.result = result;
         this.userIdentifier = userIdentifier;
+    }
+
+    public AddMemberResult(WsAddMemberResults wsAddMemberResults, WsDeleteMemberResults wsDeleteMemberResults) {
+        WsAddMemberResult wsAddMemberResult = wsAddMemberResults.getResults()[0];
+        WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
+        this.userWasAdded = "SUCCESS".equals(wsAddMemberResult.getResultMetadata().getResultCode());
+        this.userWasRemoved = "SUCCESS".equals(wsDeleteMemberResult.getResultMetadata().getResultCode());
+        setUhUuid(wsAddMemberResult.getWsSubject().getId());
+        setName(wsAddMemberResult.getWsSubject().getName());
+        setUid(wsAddMemberResult.getWsSubject().getIdentifierLookup());
+        setPathOfAdd(wsAddMemberResults.getWsGroupAssigned().getName());
+        setPathOfRemoved(wsDeleteMemberResults.getWsGroup().getName());
+        setResult("SUCCESS");
+
+    }
+
+    public AddMemberResult(WsAddMemberResults wsAddMemberResults) {
+        WsAddMemberResult wsAddMemberResult = wsAddMemberResults.getResults()[0];
+        this.userWasAdded = "SUCCESS".equals(wsAddMemberResult.getResultMetadata().getResultCode());
+        setUhUuid(wsAddMemberResult.getWsSubject().getId());
+        setName(wsAddMemberResult.getWsSubject().getName());
+        setUid(wsAddMemberResult.getWsSubject().getIdentifierLookup());
+        setPathOfAdd(wsAddMemberResults.getWsGroupAssigned().getName());
+        setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
     }
 
     public boolean isUserWasAdded() {
@@ -130,4 +159,5 @@ public class AddMemberResult {
         data[3] = getResult();
         return data;
     }
+
 }

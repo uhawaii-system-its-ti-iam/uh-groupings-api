@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface MembershipService {
 
-    boolean isUhUuid(String username);
-
     List<AddMemberResult> addOwnerships(String groupingPath, String ownerUsername, List<String> newOwnerUsername);
 
     List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove);
@@ -38,23 +36,14 @@ public interface MembershipService {
 
     GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername);
 
-    List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove, List<String> GroupPaths);
+    List<RemoveMemberResult> removeFromGroups(String adminUsername, String userToRemove, List<String> groupPaths);
 
-    List<GroupingsServiceResult> resetGroup(String currentUser, String path, List<String> includeIdentifier,
-            List<String> excludeIdentifier);
+    List<RemoveMemberResult> resetGroup(String currentUser, String path, List<String> uhNumbersInclude,
+            List<String> uhNumbersExclude);
 
-    boolean isGroupCanOptIn(String username, String groupPath);
-
-    boolean isGroupCanOptOut(String username, String groupPath);
-
-    //do not include in REST controller
     UpdateTimestampResult updateLastModified(String groupPath);
 
     UpdateTimestampResult updateLastModifiedTimestamp(String dateTime, String groupPath);
-
-    GroupingsServiceResult addSelfOpted(String groupPath, String username);
-
-    GroupingsServiceResult removeSelfOpted(String groupPath, String username);
 
     Integer getNumberOfMemberships(String currentUser, String uid);
 }
