@@ -1,20 +1,20 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SyncDestinationTest {
 
     private SyncDestination destination;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         destination = new SyncDestination();
     }
@@ -24,14 +24,14 @@ public class SyncDestinationTest {
         assertNotNull(destination);
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
         assertFalse(destination.isSynced());
 
         destination = new SyncDestination("name", "description");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
         assertFalse(destination.isSynced());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
 
         SyncDestination syncDestination = new SyncDestination(null, null);
         assertEquals("", syncDestination.getName());
@@ -42,12 +42,12 @@ public class SyncDestinationTest {
     public void accessors() {
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
         assertFalse(destination.isSynced());
 
         destination.setSynced(true);
         assertTrue(destination.isSynced());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
         assertEquals("", destination.getName());
         assertEquals("", destination.getDescription());
 
@@ -55,13 +55,13 @@ public class SyncDestinationTest {
         assertTrue(destination.isSynced());
         assertThat(destination.getDescription(), equalTo("description"));
         assertEquals("", destination.getName());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
 
         destination.setName("name");
         assertThat(destination.getName(), equalTo("name"));
         assertThat(destination.getDescription(), equalTo("description"));
         assertTrue(destination.isSynced());
-        assertEquals("",destination.getTooltip());
+        assertEquals("", destination.getTooltip());
 
         destination.setTooltip("tooltip");
         assertThat(destination.getTooltip(), equalTo("tooltip"));

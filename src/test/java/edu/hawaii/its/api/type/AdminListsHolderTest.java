@@ -1,21 +1,21 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AdminListsHolderTest {
 
     private AdminListsHolder adminListHolder;
     private AdminListsHolder adminListHolder2;
 
-    @Before
+    @BeforeEach
     public void setup() {
         List<GroupingPath> groupingPaths = new ArrayList<>();
         List<Person> people = new ArrayList<>();

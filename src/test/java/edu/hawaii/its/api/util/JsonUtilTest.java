@@ -1,13 +1,13 @@
 package edu.hawaii.its.api.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonUtilTest {
 
