@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -146,9 +147,9 @@ public class TestGroupingAssignmentService {
     @Before
     public void setUp() throws IOException, MessagingException {
         // assign ownership
-        membershipService.assignOwnership(GROUPING_STORE_EMPTY, ADMIN, usernames[0]);
-        membershipService.assignOwnership(GROUPING_TRUE_EMPTY, ADMIN, usernames[0]);
-        membershipService.assignOwnership(GROUPING, ADMIN, usernames[0]);
+        membershipService.addOwnerships(GROUPING_STORE_EMPTY, ADMIN, Arrays.asList(usernames[0]));
+        membershipService.addOwnerships(GROUPING_TRUE_EMPTY, ADMIN, Arrays.asList(usernames[0]));
+        membershipService.addOwnerships(GROUPING, ADMIN, Arrays.asList(usernames[0]));
 
         // update statuses
         groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);

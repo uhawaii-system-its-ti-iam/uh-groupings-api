@@ -12,7 +12,7 @@ public interface MembershipService {
 
     boolean isUhUuid(String username);
 
-    GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername);
+    List<AddMemberResult> addOwnerships(String groupingPath, String ownerUsername, List<String> newOwnerUsername);
 
     List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove);
 

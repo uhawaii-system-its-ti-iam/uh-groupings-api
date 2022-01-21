@@ -326,7 +326,8 @@ public class MembershipServiceTest {
     public void assignOwnershipTest() {
         //Non-owner/Admin adding a owner
         try {
-            membershipService.assignOwnership(GROUPING_0_PATH, users.get(2).getUsername(), users.get(0).getUsername());
+            membershipService.addOwnerships(GROUPING_0_PATH, users.get(2).getUsername(),
+                    Arrays.asList(users.get(0).getUsername()));
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }

@@ -27,6 +27,17 @@ public class AddMemberResult {
         this.userIdentifier = userIdentifier;
     }
 
+    public AddMemberResult(boolean userWasAdded, String pathOfAdd,
+            String name, String uhUuid, String uid, String result, String userIdentifier) {
+        this.userWasAdded = userWasAdded;
+        this.pathOfAdd = pathOfAdd;
+        this.name = name;
+        this.uhUuid = uhUuid;
+        this.uid = uid;
+        this.result = result;
+        this.userIdentifier = userIdentifier;
+    }
+
     public AddMemberResult(String userIdentifier, String result) {
         this.result = result;
         this.userIdentifier = userIdentifier;
