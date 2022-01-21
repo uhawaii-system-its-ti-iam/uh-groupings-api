@@ -124,9 +124,9 @@ public class TestGroupAttributeService {
 
     @Before
     public void setUp() throws IOException, MessagingException {
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
+        groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
 
         //put in include
         List<String> includeNames = new ArrayList<>();
@@ -143,7 +143,7 @@ public class TestGroupAttributeService {
         membershipService.addGroupMembers(username[0], GROUPING_EXCLUDE, Collections.singletonList(username[3]));
 
         //add owners
-        membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
+        membershipService.addOwnerships(GROUPING, ADMIN, Arrays.asList(username[0]));
 
         //remove from owners
         membershipService.removeOwnerships(GROUPING, username[0], Arrays.asList(username[1]));

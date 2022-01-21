@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -443,7 +444,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         // Makes the admin also the owner in the event that there are no remaining owners otherwise.
         if (!memberAttributeService.isOwner(groupingPath, actor) && memberAttributeService.isAdmin(actor)) {
-            assignOwnership(groupingPath, ownersToRemove.get(0), actor);
+            addOwnerships(groupingPath, ownersToRemove.get(0), Arrays.asList(actor));
         }
 
         List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
@@ -471,39 +472,46 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
 
-    // Gives ownership to a new user
-    @Override
-    public GroupingsServiceResult assignOwnership(String groupingPath, String ownerUsername, String newOwnerUsername) {
+    /**
+     * Gives ownership to a single or multiple users.
+     */
+    public List<AddMemberResult> addOwnerships(String groupingPath, String ownerUsername, List<String> ownersToAdd) {
         logger.info("assignOwnership; groupingPath: "
                 + groupingPath
                 + "; ownerUsername: "
                 + ownerUsername
                 + "; newOwnerUsername: "
-                + newOwnerUsername
+                + ownersToAdd
                 + ";");
-        String action;
-        GroupingsServiceResult ownershipResult;
+        List<AddMemberResult> addOwnerResults = new ArrayList<>();
+        WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(ownerUsername);
 
-        if (isUhUuid(newOwnerUsername)) {
-            action = "give user with id " + newOwnerUsername + " ownership of " + groupingPath;
-        } else {
-            action = "give " + newOwnerUsername + " ownership of " + groupingPath;
-        }
-
-        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService
+                .isAdmin(ownerUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        WsSubjectLookup user = grouperFS.makeWsSubjectLookup(ownerUsername);
-        WsAddMemberResults amr = grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, user, newOwnerUsername);
-
-        ownershipResult = helperService.makeGroupingsServiceResult(amr, action);
-
-        membershipService.updateLastModified(groupingPath);
-        membershipService.updateLastModified(groupingPath + OWNERS);
-
-        return ownershipResult;
+        for (String ownerToAdd : ownersToAdd) {
+            AddMemberResult addOwnerResult;
+            WsAddMemberResults wsAddMemberResults =
+                    grouperFS.makeWsAddMemberResults(groupingPath + OWNERS, wsSubjectLookup, ownerToAdd);
+            boolean wasAdded =
+                    SUCCESS.equals(wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode());
+            String uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
+            String result = wasAdded ? SUCCESS : FAILURE;
+            String name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
+            String uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
+            addOwnerResult =
+                    new AddMemberResult(wasAdded, groupingPath, name, uhUuid, uid, result, ownerToAdd);
+            addOwnerResults.add(addOwnerResult);
+            if (wasAdded) {
+                membershipService.updateLastModified(groupingPath);
+                membershipService.updateLastModified(groupingPath + OWNERS);
+            }
+        }
+        return addOwnerResults;
     }
+
 
     /**
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at

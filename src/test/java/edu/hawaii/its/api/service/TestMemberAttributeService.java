@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,11 +38,12 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -142,7 +144,7 @@ public class TestMemberAttributeService {
         groupAttributeService.changeOptOutStatus(GROUPING, ADMIN_USER, true);
 
         // add to owners
-        membershipService.assignOwnership(GROUPING, ADMIN_USER, usernames[0]);
+        membershipService.addOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames[0]));
 
         // add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis)
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN_USER);
@@ -179,64 +181,6 @@ public class TestMemberAttributeService {
     @Test
     public void isOwnerTest() {
         assertTrue(memberAttributeService.isOwner(GROUPING, usernames[0]));
-    }
-
-    @Test
-    public void assignRemoveOwnershipTest() {
-
-        assertTrue(memberAttributeService.isOwner(GROUPING, usernames[0]));
-        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[2]));
-
-        try {
-            membershipService.assignOwnership(GROUPING, usernames[1], usernames[1]);
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-
-        // get last modified time
-        WsGetAttributeAssignmentsResults attributes =
-                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime1 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-
-        // get last modified time and make sure that it has changed
-        try {
-            TimeUnit.MINUTES.sleep(1);
-        } catch (InterruptedException e) {
-            fail();
-        }
-
-        GroupingsServiceResult assignOwnershipSuccess =
-                membershipService.assignOwnership(GROUPING, usernames[0], usernames[1]);
-        assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        assertTrue(assignOwnershipSuccess.getResultCode().startsWith(SUCCESS));
-
-        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
-        String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
-        assertNotEquals(lastModTime1, lastModTime2);
-
-        try {
-            membershipService.removeOwnerships(GROUPING, usernames[2], Arrays.asList(usernames[1]));
-        } catch (AccessDeniedException ade) {
-            assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
-        }
-
-        assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-
-        List<RemoveMemberResult> removeOwnershipSuccess =
-                membershipService.removeOwnerships(GROUPING, usernames[0], Arrays.asList(usernames[1]));
-        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-//        assertTrue(removeOwnershipSuccess.containsAll());
-        assertEquals(1, removeOwnershipSuccess.size());
-
-        //have an owner remove itself
-        membershipService.assignOwnership(GROUPING, usernames[0], usernames[1]);
-        assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
-        membershipService.removeOwnerships(GROUPING, usernames[1], Arrays.asList(usernames[1]));
-        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
-
-        //if there is only 1 owner
     }
 
     @Test
@@ -356,6 +300,169 @@ public class TestMemberAttributeService {
             assertFalse(memberAttributeService.isSelfOpted(null, usernames[4]));
         } catch (RuntimeException re) {
             re.printStackTrace();
+        }
+    }
+
+    @Test
+    public void addOwnerships() {
+        //Test non-owner adding to owners list
+        try {
+            membershipService.addOwnerships(GROUPING, usernames[1], Collections.singletonList(usernames[1]));
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+
+        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
+
+        // get last modified time
+        WsGetAttributeAssignmentsResults attributes =
+                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime1 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+
+        // Check that the last modified timestamp has changed after adding a user
+        try {
+            TimeUnit.MINUTES.sleep(1);
+        } catch (InterruptedException e) {
+            fail();
+        }
+
+        List<AddMemberResult> addOwnershipSuccess =
+                membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+        assertTrue(memberAttributeService.isOwner(GROUPING, usernames[1]));
+        assertTrue(addOwnershipSuccess.get(0).getResult().startsWith(SUCCESS));
+
+        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+        assertNotEquals(lastModTime1, lastModTime2);
+
+        //Test an owner adding a member to owners list
+        List<AddMemberResult> ownerAdds = membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[2]));
+        assertTrue(ownerAdds.get(0).isUserWasAdded());
+        assertTrue(memberAttributeService.isOwner(GROUPING, ownerAdds.get(0).getUserIdentifier()));
+        assertEquals(ownerAdds.get(0).getResult(), SUCCESS);
+
+        //Test a admin adding a member to owners list
+        List<AddMemberResult> adminAdds = membershipService.addOwnerships(GROUPING, ADMIN_USER, Collections.singletonList(usernames[3]));
+        assertTrue(adminAdds.get(0).isUserWasAdded());
+        assertTrue(memberAttributeService.isOwner(GROUPING, adminAdds.get(0).getUserIdentifier()));
+        assertEquals(adminAdds.get(0).getResult(), SUCCESS);
+
+        //Test adding uhuid to owners list
+        List<AddMemberResult> uuidAdds = membershipService.addOwnerships(GROUPING, ADMIN_USER, Collections.singletonList("iamtst05"));
+        assertTrue(uuidAdds.get(0).isUserWasAdded());
+        assertTrue(memberAttributeService.isOwner(GROUPING, uuidAdds.get(0).getUserIdentifier()));
+        assertEquals(uuidAdds.get(0).getResult(), SUCCESS);
+
+        //Test adding multiple owners to the owners list
+        List<String> addOwnerships = new ArrayList<>(Arrays.asList(usernames).subList(1, 6));
+        membershipService.removeOwnerships(GROUPING, usernames[0], addOwnerships);
+
+        List<AddMemberResult> addOwnerResults =
+                membershipService.addOwnerships(GROUPING, usernames[0], addOwnerships);
+        Iterator<String> iter = addOwnerships.iterator();
+
+        assertEquals(5, membershipService.addOwnerships(GROUPING, ADMIN_USER, addOwnerships).size());
+        for (int i = 0; i < addOwnerships.size(); i++) {
+            assertTrue(memberAttributeService.isOwner(GROUPING, usernames[i]));
+        }
+        assertEquals(6, membershipService.addOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames)).size());
+        for (String ownersAdded : usernames) {
+            assertTrue(memberAttributeService.isOwner(GROUPING, ownersAdded));
+        }
+
+        //Test results returned from adding owner to list
+        for (AddMemberResult addOwnerResult : addOwnerResults) {
+            assertEquals(GROUPING, addOwnerResult.getPathOfAdd());
+            assertEquals(SUCCESS, addOwnerResult.getResult());
+            assertNotNull(addOwnerResult.getName());
+            assertNotNull(addOwnerResult.getUhUuid());
+            assertEquals(iter.next(), addOwnerResult.getUid());
+        }
+    }
+
+    @Test
+    public void removeOwners() {
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[2]));
+
+        //Test a non-owner removes a owner
+        try {
+            membershipService.removeOwnerships(GROUPING, usernames[3], Collections.singletonList(usernames[0]));
+        } catch (AccessDeniedException e) {
+            assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
+        }
+        assertTrue(memberAttributeService.isOwner(usernames[0]));
+
+        // get last modified time
+        WsGetAttributeAssignmentsResults attributes =
+                groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime1 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+
+        // get last modified time and make sure that it has changed
+        try {
+            TimeUnit.MINUTES.sleep(1);
+        } catch (InterruptedException e) {
+            fail();
+        }
+
+        List<RemoveMemberResult> removeOwnerSuccess =
+                membershipService.removeOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+        assertFalse(memberAttributeService.isOwner(GROUPING, usernames[1]));
+        assertTrue(removeOwnerSuccess.get(0).getResult().startsWith(SUCCESS));
+
+        attributes = groupAttributeService.attributeAssignmentsResults(ASSIGN_TYPE_GROUP, GROUPING, YYYYMMDDTHHMM);
+        String lastModTime2 = attributes.getWsAttributeAssigns()[0].getWsAttributeAssignValues()[0].getValueSystem();
+        assertNotEquals(lastModTime1, lastModTime2);
+
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+
+        //Test an owner adding a member to owners list
+        List<RemoveMemberResult> ownerRemoves =
+                membershipService.removeOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+        assertTrue(ownerRemoves.get(0).isUserWasRemoved());
+        assertFalse(memberAttributeService.isOwner(GROUPING, ownerRemoves.get(0).getUserIdentifier()));
+        assertEquals(ownerRemoves.get(0).getResult(), SUCCESS);
+
+        //Test a admin adding a member to owners list
+        List<RemoveMemberResult> adminRemoves =
+                membershipService.removeOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[2]));
+        assertTrue(adminRemoves.get(0).isUserWasRemoved());
+        assertFalse(memberAttributeService.isOwner(GROUPING, adminRemoves.get(0).getUserIdentifier()));
+        assertEquals(adminRemoves.get(0).getResult(), SUCCESS);
+
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[3]));
+
+        //Test removing a uhuid from the owners list
+        List<RemoveMemberResult> uuidRemove = membershipService.removeOwnerships(GROUPING, ADMIN_USER, Collections.singletonList("iamtst04"));
+        assertTrue(uuidRemove.get(0).isUserWasRemoved());
+        assertFalse(memberAttributeService.isOwner(GROUPING, uuidRemove.get(0).getUserIdentifier()));
+        assertEquals(uuidRemove.get(0).getResult(), SUCCESS);
+
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[0]));
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[1]));
+        membershipService.addOwnerships(GROUPING, usernames[0], Collections.singletonList(usernames[2]));
+
+        //Test removing multiple owners to the owners list
+        List<String> removeOwners = new ArrayList<>(Arrays.asList(usernames).subList(1, 3));
+        List<RemoveMemberResult> removeOwnerResults =
+                membershipService.removeOwnerships(GROUPING, usernames[0], removeOwners);
+        Iterator<String> iter = removeOwners.iterator();
+        assertEquals(2, membershipService.removeOwnerships(GROUPING, ADMIN_USER, removeOwners).size());
+        for (String ownersRemoved : removeOwners) {
+            assertFalse(memberAttributeService.isOwner(GROUPING, ownersRemoved));
+        }
+        assertEquals(6, membershipService.removeOwnerships(GROUPING, ADMIN_USER, Arrays.asList(usernames)).size());
+        for (String ownersRemoved : usernames) {
+            assertFalse(memberAttributeService.isOwner(GROUPING, ownersRemoved));
+        }
+
+        //Test data returned from removing owners
+        for (RemoveMemberResult removeOwnerResult : removeOwnerResults) {
+            assertEquals(GROUPING, removeOwnerResult.getPathOfRemoved());
+            assertEquals(SUCCESS, removeOwnerResult.getResult());
+            assertNotNull(removeOwnerResult.getName());
+            assertNotNull(removeOwnerResult.getUhUuid());
+            assertEquals(iter.next(), removeOwnerResult.getUid());
         }
     }
 
