@@ -5,9 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -96,38 +93,19 @@ public class GroupingAssignmentServiceTest {
     private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
 
     private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
-    private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
 
     @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
     private GroupRepository groupRepository;
 
     @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
-
-    @Autowired
     private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
-    private GrouperFactoryService grouperFS;
 
     @Autowired
     private DatabaseSetupService databaseSetupService;
@@ -175,7 +153,7 @@ public class GroupingAssignmentServiceTest {
     public void getPaginatedGroupingTest() {
 
         try {
-            Grouping groupingRandom = groupingAssignmentService
+            groupingAssignmentService
                     .getPaginatedGrouping(GROUPING_0_PATH, users.get(1).getUsername(), 1, 4, "name", true);
             fail("Shouldn't be here.");
         } catch (AccessDeniedException ade) {
@@ -423,8 +401,8 @@ public class GroupingAssignmentServiceTest {
     //todo Finish this test for setGroupingAttributes
     @Test
     public void setGroupingAttributesTest() {
-        Grouping grouping = new Grouping();
-        grouping = groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
+        new Grouping();
+        groupingAssignmentService.getGrouping(GROUPING_3_PATH, users.get(0).getUsername());
     }
 
     @Test

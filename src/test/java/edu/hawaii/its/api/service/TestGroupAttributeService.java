@@ -316,9 +316,9 @@ public class TestGroupAttributeService {
     @Ignore
     @Test
     public void changeGroupAttributeStatusTest() {
-        boolean isInitial = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
-        GroupingsServiceResult gsr = groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
-        boolean isAfter = groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
+        groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, LISTSERV, true);
+        groupAttributeService.isGroupAttribute(GROUPING, LISTSERV);
         assertTrue(true);
     }
 }

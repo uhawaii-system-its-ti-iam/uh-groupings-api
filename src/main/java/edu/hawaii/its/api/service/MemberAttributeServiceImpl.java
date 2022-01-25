@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
@@ -68,9 +67,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Autowired
     private GrouperFactoryService grouperFS;
-
-    @Autowired
-    private MembershipService membershipService;
 
     @Autowired
     private HelperService helperService;
@@ -245,7 +241,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         WsSubject[] subjects;
         WsSubjectLookup lookup;
         String[] attributeValues = new String[5];
-        Map<String, String> mapping = new HashMap<>();
+        new HashMap<>();
 
         if (isAdmin(ownerUsername) || groupingAssignmentService.groupingsOwned(
                 groupingAssignmentService.getGroupPaths(ownerUsername, ownerUsername)).size() != 0) {
