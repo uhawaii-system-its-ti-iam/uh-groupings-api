@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Group;
@@ -63,15 +62,12 @@ public class MembershipServiceTest {
     private static final String INCLUDE = ":include";
     private static final String EXCLUDE = ":exclude";
     private static final String OWNERS = ":owners";
-    private static final String BASIS = ":basis";
-
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_2_PATH = PATH_ROOT + 2;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
     private static final String GROUPING_4_PATH = PATH_ROOT + 4;
 
-    private static final String GROUPING_1_INCLUDE_PATH = GROUPING_1_PATH + INCLUDE;
     private static final String GROUPING_1_EXCLUDE_PATH = GROUPING_1_PATH + EXCLUDE;
     private static final String GROUPING_1_OWNERS_PATH = GROUPING_1_PATH + OWNERS;
 
@@ -79,17 +75,12 @@ public class MembershipServiceTest {
 
     private static final String GROUPING_3_INCLUDE_PATH = GROUPING_3_PATH + INCLUDE;
     private static final String GROUPING_3_EXCLUDE_PATH = GROUPING_3_PATH + EXCLUDE;
-    private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + BASIS;
-
-    private static final String GROUPING_4_INCLUDE_PATH = GROUPING_4_PATH + INCLUDE;
     private static final String GROUPING_4_EXCLUDE_PATH = GROUPING_4_PATH + EXCLUDE;
 
     private static final String ADMIN_USER = "admin";
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
-    private static final String APP_USER = "app";
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
@@ -100,9 +91,6 @@ public class MembershipServiceTest {
 
     @Autowired
     private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private GroupingRepository groupingRepository;
 
     @Autowired
     private GroupRepository groupRepository;

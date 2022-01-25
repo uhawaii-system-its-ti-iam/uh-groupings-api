@@ -44,11 +44,6 @@ public class AssertionDummy implements Assertion {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-    }
-
-    @Override
     public Map<String, Object> getAttributes() {
         return null;
     }

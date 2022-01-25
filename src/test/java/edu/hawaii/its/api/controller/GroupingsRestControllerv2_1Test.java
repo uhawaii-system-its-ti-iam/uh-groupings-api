@@ -192,31 +192,6 @@ public class GroupingsRestControllerv2_1Test {
         return grouping;
     }
 
-    // Test data (2.1 API).
-    private List<String> groupingStringList() {
-        List<String> mockGroupingList = new ArrayList<>();
-
-        mockGroupingList.add("g0-gName");
-        mockGroupingList.add("g1-gName");
-        mockGroupingList.add("g2-gName");
-
-        return mockGroupingList;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrList() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "add users to grouping"));
-        return gsrList;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrList2() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "remove member from include group"));
-        return gsrList;
-    }
-
     private List<SyncDestination> sdList() {
         List<SyncDestination> sdList = new ArrayList<>();
         sdList.add(new SyncDestination(SUCCESS, "retrieved new sync destinations"));

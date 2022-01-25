@@ -127,9 +127,4 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     public String getUserEmail(String username) {
         return username + "@hawaii.edu";
     }
-
-    /* Get from address */
-    private String getUhSmtpAddress() {
-        return "smtp.hawaii.edu";
-    }
 }
