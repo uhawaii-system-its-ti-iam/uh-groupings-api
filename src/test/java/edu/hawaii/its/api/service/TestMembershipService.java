@@ -52,6 +52,7 @@ import static org.junit.Assert.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMembershipService {
 
+    
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
     @Value("${groupings.api.test.grouping_many_basis}")
@@ -96,7 +97,7 @@ public class TestMembershipService {
     private String RELEASED_GROUPING;
 
     @Value("${groupings.api.test.usernames}")
-    private String[] username;
+    private String[] usernames;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
@@ -136,49 +137,49 @@ public class TestMembershipService {
     public void setUp() throws IOException, MessagingException {
         //add ownership
 
-        membershipService.assignOwnership(GROUPING, ADMIN, username[0]);
+        membershipService.addOwnerships(GROUPING, ADMIN, Arrays.asList(usernames[0]));
 
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, username[0], LISTSERV, true);
-        groupAttributeService.changeOptInStatus(GROUPING, username[0], true);
-        groupAttributeService.changeOptOutStatus(GROUPING, username[0], true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, usernames[0], LISTSERV, true);
+        groupAttributeService.changeOptInStatus(GROUPING, usernames[0], true);
+        groupAttributeService.changeOptOutStatus(GROUPING, usernames[0], true);
 
         //Add to include.
         List<String> includeNames = new ArrayList<>();
-        includeNames.add(username[0]);
-        includeNames.add(username[1]);
-        includeNames.add(username[2]);
+        includeNames.add(usernames[0]);
+        includeNames.add(usernames[1]);
+        includeNames.add(usernames[2]);
 
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, includeNames);
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, includeNames);
 
         // Add to basis (you cannot do this directly, so we add the user to one of the groups that makes up the basis).
         WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(ADMIN);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[3]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[4]);
-        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, username[5]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[3]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[4]);
+        grouperFactoryService.makeWsAddMemberResults(GROUPING_BASIS, lookup, usernames[5]);
 
         //Remove from exclude.
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[4]));
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[5]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[4]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[5]));
 
         //Add to exclude.
-        membershipService.addGroupMembers(username[0], GROUPING_INCLUDE, Collections.singletonList(username[3]));
+        membershipService.addGroupMembers(usernames[0], GROUPING_INCLUDE, Collections.singletonList(usernames[3]));
 
         //Add to basis.
-        //membershipService.addGroupMember(username[0], GROUPING_BASIS, username[5]);
+        //membershipService.addGroupMember(usernames[0], GROUPING_BASIS, usernames[5]);
 
         //Remove ownership.
-        membershipService.removeOwnerships(GROUPING, username[0], Arrays.asList(username[1]));
+        membershipService.removeOwnerships(GROUPING, usernames[0], Arrays.asList(usernames[1]));
     }
 
     @Test
     public void groupOptInPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[1], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(usernames[1], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(usernames[1], GROUPING_EXCLUDE));
     }
-
+    
     @Test
     public void getMembershipResultsTest() {
-        List<Membership> memberships = membershipService.getMembershipResults(username[0], username[0]);
+        List<Membership> memberships = membershipService.getMembershipResults(usernames[0], usernames[0]);
         assertNotNull(memberships);
         assertTrue(memberships.size() != 0);
         Set<String> pathMap = new HashSet<>();
@@ -200,48 +201,48 @@ public class TestMembershipService {
 
     @Test
     public void groupOptOutPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[1], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(usernames[1], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(usernames[1], GROUPING_EXCLUDE));
     }
 
     @Test
     public void addRemoveSelfOptedTest() {
 
-        //username[2] is not in the include, but not self opted.
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username[2]));
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
+        //usernames[2] is not in the include, but not self opted.
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, usernames[2]));
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, usernames[2]));
 
-        //Add the self opted attribute for username[2]'s membership for the include group.
-        membershipService.addSelfOpted(GROUPING_INCLUDE, username[2]);
+        //Add the self opted attribute for usernames[2]'s membership for the include group.
+        membershipService.addSelfOpted(GROUPING_INCLUDE, usernames[2]);
 
-        //username[2] should now be self opted.
-        assertTrue(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
+        //usernames[2] should now be self opted.
+        assertTrue(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, usernames[2]));
 
-        //remove the self opted attribute for username[2]'s membership from the include group.
-        membershipService.removeSelfOpted(GROUPING_INCLUDE, username[2]);
+        //remove the self opted attribute for usernames[2]'s membership from the include group.
+        membershipService.removeSelfOpted(GROUPING_INCLUDE, usernames[2]);
 
-        //username[2] should no longer be self opted into the include.
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, username[2]));
+        //usernames[2] should no longer be self opted into the include.
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_INCLUDE, usernames[2]));
 
         //Try to add self opted attribute when not in the group.
         GroupingsServiceResult groupingsServiceResult;
 
         try {
-            groupingsServiceResult = membershipService.addSelfOpted(GROUPING_EXCLUDE, username[2]);
+            groupingsServiceResult = membershipService.addSelfOpted(GROUPING_EXCLUDE, usernames[2]);
         } catch (GroupingsServiceResultException gsre) {
             groupingsServiceResult = gsre.getGsr();
         }
         assertTrue(groupingsServiceResult.getResultCode().startsWith(FAILURE));
-        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, username[2]));
+        assertFalse(memberAttributeService.isSelfOpted(GROUPING_EXCLUDE, usernames[2]));
     }
 
     @Test
     public void groupOptPermissionTest() {
-        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptOut(username[0], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(usernames[0], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptOut(usernames[0], GROUPING_EXCLUDE));
 
-        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_INCLUDE));
-        assertTrue(membershipService.isGroupCanOptIn(username[0], GROUPING_EXCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(usernames[0], GROUPING_INCLUDE));
+        assertTrue(membershipService.isGroupCanOptIn(usernames[0], GROUPING_EXCLUDE));
     }
 
     @Test
@@ -326,24 +327,24 @@ public class TestMembershipService {
     @Test
     public void getMembersTest() {
         String[] groupings = { GROUPING };
-        Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(GROUPING);
+        Group group = groupingAssignmentService.getMembers(usernames[0], Arrays.asList(groupings)).get(GROUPING);
         List<String> usernames = group.getUsernames();
 
-        assertTrue(usernames.contains(username[0]));
-        assertTrue(usernames.contains(username[1]));
-        assertTrue(usernames.contains(username[2]));
-        assertTrue(usernames.contains(username[4]));
-        assertTrue(usernames.contains(username[5]));
+        assertTrue(usernames.contains(usernames.get(0)));
+        assertTrue(usernames.contains(usernames.get(1)));
+        assertTrue(usernames.contains(usernames.get(2)));
+        assertTrue(usernames.contains(usernames.get(4)));
+        assertTrue(usernames.contains(usernames.get(5)));
     }
 
     @Test
     public void addGroupingMembersTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<AddMemberResult> addMemberResults;
 
         // Add valid users to include.
-        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, validUsernames);
+        List<String> validusernamess = new ArrayList<>(Arrays.asList(usernames).subList(0, 6));
+        addMemberResults = membershipService.addGroupMembers(ownerusernames, GROUPING_INCLUDE, validusernamess);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(SUCCESS, addMemberResult.getResult());
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
@@ -354,10 +355,10 @@ public class TestMembershipService {
         }
 
         // Add invalid users to include.
-        List<String> invalidUsernames = new ArrayList<>();
-        invalidUsernames.add("zz_zzz");
-        invalidUsernames.add("ffff");
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsernames);
+        List<String> invalidusernamess = new ArrayList<>();
+        invalidusernamess.add("zz_zzz");
+        invalidusernamess.add("ffff");
+        addMemberResults = membershipService.addGroupMembers(ownerusernames, GROUPING_INCLUDE, invalidusernamess);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
             assertNull(addMemberResult.getName());
@@ -366,8 +367,8 @@ public class TestMembershipService {
         }
 
         // Add valid users to exclude.
-        validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_EXCLUDE, validUsernames);
+        validusernamess = new ArrayList<>(Arrays.asList(usernames).subList(0, 6));
+        addMemberResults = membershipService.addGroupMembers(ownerusernames, GROUPING_EXCLUDE, validusernamess);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(SUCCESS, addMemberResult.getResult());
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
@@ -378,11 +379,11 @@ public class TestMembershipService {
         }
 
         // Add invalid users to include.
-        List<String> invalidUsernamesForExclude = new ArrayList<>();
-        invalidUsernamesForExclude.add("zz_zzz");
-        invalidUsernamesForExclude.add("ffff");
+        List<String> invalidusernamessForExclude = new ArrayList<>();
+        invalidusernamessForExclude.add("zz_zzz");
+        invalidusernamessForExclude.add("ffff");
         addMemberResults =
-                membershipService.addGroupMembers(ownerUsername, GROUPING_EXCLUDE, invalidUsernamesForExclude);
+                membershipService.addGroupMembers(ownerusernames, GROUPING_EXCLUDE, invalidusernamessForExclude);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(FAILURE, addMemberResult.getResult());
             assertNull(addMemberResult.getName());
@@ -392,7 +393,7 @@ public class TestMembershipService {
 
         // A non-owner attempts to add members.
         try {
-            membershipService.addGroupMembers("zz_zz", GROUPING_INCLUDE, validUsernames);
+            membershipService.addGroupMembers("zz_zz", GROUPING_INCLUDE, validusernamess);
         } catch (AccessDeniedException e) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(e.getMessage()));
         }
@@ -401,7 +402,7 @@ public class TestMembershipService {
         invalidUsers.add("zz_zzzzz");
         invalidUsers.add("aaaaaaa");
 
-        addMemberResults = membershipService.addGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        addMemberResults = membershipService.addGroupMembers(ownerusernames, GROUPING_INCLUDE, invalidUsers);
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertFalse(addMemberResult.isUserWasRemoved());
             assertNull(addMemberResult.getName());
@@ -411,7 +412,7 @@ public class TestMembershipService {
 
         // A group path ending in anything other than include or exclude should 404.
         try {
-            membershipService.addGroupMembers(ownerUsername, GROUPING_OWNERS, validUsernames);
+            membershipService.addGroupMembers(ownerusernames, GROUPING_OWNERS, validusernamess);
         } catch (GcWebServiceError e) {
             assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
         }
@@ -419,13 +420,13 @@ public class TestMembershipService {
 
     @Test
     public void addIncludeMembersTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<AddMemberResult> addMemberResults;
 
         // Add valid users to include.
-        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addIncludeMembers(ownerUsername, GROUPING, validUsernames);
-        Iterator<String> iter = validUsernames.iterator();
+        List<String> validusernamess = new ArrayList<>(Arrays.asList(usernames).subList(0, 6));
+        addMemberResults = membershipService.addIncludeMembers(ownerusernames, GROUPING, validusernamess);
+        Iterator<String> iter = validusernamess.iterator();
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfRemoved());
@@ -437,13 +438,13 @@ public class TestMembershipService {
 
     @Test
     public void addExcludeMembersTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<AddMemberResult> addMemberResults;
 
         // Add valid users to exclude.
-        List<String> validUsernames = new ArrayList<>(Arrays.asList(username).subList(0, 6));
-        addMemberResults = membershipService.addExcludeMembers(ownerUsername, GROUPING, validUsernames);
-        Iterator<String> iter = validUsernames.iterator();
+        List<String> validusernamess = new ArrayList<>(Arrays.asList(usernames).subList(0, 6));
+        addMemberResults = membershipService.addExcludeMembers(ownerusernames, GROUPING, validusernamess);
+        Iterator<String> iter = validusernamess.iterator();
         for (AddMemberResult addMemberResult : addMemberResults) {
             assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
             assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
@@ -456,13 +457,13 @@ public class TestMembershipService {
     @Test
     public void removeGroupingMembersTest() {
 
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<RemoveMemberResult> removeMemberResults;
-        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+        List<String> removableusernamess = new ArrayList<>(Collections.singletonList(usernames[0]));
 
         // Remove a single member.
         removeMemberResults =
-                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+                membershipService.removeGroupMembers(ownerusernames, GROUPING_INCLUDE, removableusernamess);
 
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertTrue(removeMemberResult.isUserWasRemoved());
@@ -474,15 +475,15 @@ public class TestMembershipService {
         }
 
         // Remove multiple members.
-        removableUsernames = new ArrayList<>(Arrays.asList(username).subList(1, 6));
+        removableusernamess = new ArrayList<>(Arrays.asList(usernames).subList(1, 6));
         removeMemberResults =
-                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
-        Iterator<String> removableUsernamesIter = removableUsernames.iterator();
+                membershipService.removeGroupMembers(ownerusernames, GROUPING_INCLUDE, removableusernamess);
+        Iterator<String> removableusernamessIter = removableusernamess.iterator();
         Iterator<RemoveMemberResult> removedMemberResultsIter = removeMemberResults.iterator();
 
-        while (removableUsernamesIter.hasNext() && removedMemberResultsIter.hasNext()) {
+        while (removableusernamessIter.hasNext() && removedMemberResultsIter.hasNext()) {
             RemoveMemberResult result = removedMemberResultsIter.next();
-            String uid = removableUsernamesIter.next();
+            String uid = removableusernamessIter.next();
             assertTrue(result.isUserWasRemoved());
             assertEquals(SUCCESS, result.getResult());
             assertEquals(uid, result.getUid());
@@ -493,10 +494,10 @@ public class TestMembershipService {
             assertEquals(GROUPING_INCLUDE, result.getPathOfRemoved());
         }
 
-        // Try to remove non-members, the list of removableUsernames has already been removed above, thus attempting to
+        // Try to remove non-members, the list of removableusernamess has already been removed above, thus attempting to
         // remove them again should fail.
         removeMemberResults =
-                membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, removableUsernames);
+                membershipService.removeGroupMembers(ownerusernames, GROUPING_INCLUDE, removableusernamess);
         removedMemberResultsIter = removeMemberResults.iterator();
 
         while (removedMemberResultsIter.hasNext()) {
@@ -509,7 +510,7 @@ public class TestMembershipService {
         invalidUsers.add("zzz_zz_zz");
         invalidUsers.add("aaa_aaaa");
 
-        removeMemberResults = membershipService.removeGroupMembers(ownerUsername, GROUPING_INCLUDE, invalidUsers);
+        removeMemberResults = membershipService.removeGroupMembers(ownerusernames, GROUPING_INCLUDE, invalidUsers);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertFalse(removeMemberResult.isUserWasRemoved());
             assertNull(removeMemberResult.getName());
@@ -518,7 +519,7 @@ public class TestMembershipService {
         }
 
         try {
-            membershipService.removeGroupMembers(ownerUsername, GROUPING_OWNERS, removableUsernames);
+            membershipService.removeGroupMembers(ownerusernames, GROUPING_OWNERS, removableusernamess);
         } catch (GcWebServiceError e) {
             assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
         }
@@ -527,11 +528,11 @@ public class TestMembershipService {
 
     @Test
     public void removeIncludeMembersTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<RemoveMemberResult> removeMemberResults;
-        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+        List<String> removableusernamess = new ArrayList<>(Collections.singletonList(usernames[0]));
         removeMemberResults =
-                membershipService.removeIncludeMembers(ownerUsername, GROUPING, removableUsernames);
+                membershipService.removeIncludeMembers(ownerusernames, GROUPING, removableusernamess);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertEquals(GROUPING_INCLUDE, removeMemberResult.getPathOfRemoved());
         }
@@ -539,11 +540,11 @@ public class TestMembershipService {
 
     @Test
     public void removeExcludeMembersTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<RemoveMemberResult> removeMemberResults;
-        List<String> removableUsernames = new ArrayList<>(Collections.singletonList(username[0]));
+        List<String> removableusernamess = new ArrayList<>(Collections.singletonList(usernames[0]));
         removeMemberResults =
-                membershipService.removeExcludeMembers(ownerUsername, GROUPING, removableUsernames);
+                membershipService.removeExcludeMembers(ownerusernames, GROUPING, removableusernamess);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertEquals(GROUPING_EXCLUDE, removeMemberResult.getPathOfRemoved());
         }
@@ -551,27 +552,27 @@ public class TestMembershipService {
 
     @Test
     public void optInTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<AddMemberResult> optResults;
 
-        optResults = membershipService.optIn(ownerUsername, GROUPING, ownerUsername);
+        optResults = membershipService.optIn(ownerusernames, GROUPING, ownerusernames);
         for (AddMemberResult optResult : optResults) {
             assertEquals(GROUPING_INCLUDE, optResult.getPathOfAdd());
             assertEquals(GROUPING_EXCLUDE, optResult.getPathOfRemoved());
-            assertTrue(memberAttributeService.isMember(GROUPING, ownerUsername));
+            assertTrue(memberAttributeService.isMember(GROUPING, ownerusernames));
         }
     }
 
     @Test
     public void optOutTest() {
-        String ownerUsername = username[0];
+        String ownerusernames = usernames[0];
         List<AddMemberResult> optResults;
 
-        optResults = membershipService.optOut(ownerUsername, GROUPING, ownerUsername);
+        optResults = membershipService.optOut(ownerusernames, GROUPING, ownerusernames);
         for (AddMemberResult optResult : optResults) {
             assertEquals(GROUPING_EXCLUDE, optResult.getPathOfAdd());
             assertEquals(GROUPING_INCLUDE, optResult.getPathOfRemoved());
-            assertFalse(memberAttributeService.isMember(GROUPING, ownerUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING, ownerusernames));
         }
     }
 
@@ -581,35 +582,35 @@ public class TestMembershipService {
 
         GroupingsServiceResult results;
 
-        //checks to see that username[3] is NOT an admin
-        results = membershipService.removeAdmin(ADMIN, username[3]);
+        //checks to see that usernames[3] is NOT an admin
+        results = membershipService.removeAdmin(ADMIN, usernames[3]);
 
-        //makes username[3] an admin
-        results = membershipService.addAdmin(ADMIN, username[3]);
+        //makes usernames[3] an admin
+        results = membershipService.addAdmin(ADMIN, usernames[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //tries to make an already admin an admin
-        results = membershipService.addAdmin(ADMIN, username[3]);
+        results = membershipService.addAdmin(ADMIN, usernames[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
-        //removes username[3] as an admin
-        results = membershipService.removeAdmin(ADMIN, username[3]);
+        //removes usernames[3] as an admin
+        results = membershipService.removeAdmin(ADMIN, usernames[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
         //tries to remove an person that is not an admin
-        results = membershipService.removeAdmin(ADMIN, username[3]);
+        results = membershipService.removeAdmin(ADMIN, usernames[3]);
         assertTrue(results.getResultCode().startsWith(SUCCESS));
 
-        //tries to make username[4] an admin but fails due to username[3] not being an admin
+        //tries to make usernames[4] an admin but fails due to usernames[3] not being an admin
         try {
-            membershipService.addAdmin(username[3], username[4]);
+            membershipService.addAdmin(usernames[3], usernames[4]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }
 
-        //tries to remove username[4] as an admin but fails due to username[3] not being an admin
+        //tries to remove usernames[4] as an admin but fails due to usernames[3] not being an admin
         try {
-            membershipService.removeAdmin(username[3], username[4]);
+            membershipService.removeAdmin(usernames[3], usernames[4]);
         } catch (AccessDeniedException ade) {
             assertThat(INSUFFICIENT_PRIVILEGES, is(ade.getMessage()));
         }

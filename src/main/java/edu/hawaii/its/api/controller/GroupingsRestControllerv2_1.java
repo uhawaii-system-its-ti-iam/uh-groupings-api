@@ -328,14 +328,14 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to add a new owner.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> addOwner(@RequestHeader("current_user") String currentUser,
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid}")
+    public ResponseEntity<List<AddMemberResult>> addOwners(@RequestHeader("current_user") String currentUser,
             @PathVariable String path,
-            @PathVariable String uid) {
+            @PathVariable List<String> uid) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.assignOwnership(path, currentUser, uid));
+                .body(membershipService.addOwnerships(path, currentUser, uid));
     }
 
     /**

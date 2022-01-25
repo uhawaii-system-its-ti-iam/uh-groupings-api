@@ -383,20 +383,22 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "uhAdmin")
     public void addOwnerTest() throws Exception {
-        String admin = "uhAdmin";
+        List<String> ownersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResultList = new ArrayList<>();
+        ownersToAdd.add("tst04name");
+        ownersToAdd.add("tst05name");
+        ownersToAdd.add("tst06name");
 
-        given(membershipService.assignOwnership("path1", "uhAdmin", "newOwner"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "give newOwner ownership of path1"));
+        given(membershipService.addOwnerships("path1", "uhAdmin", ownersToAdd))
+                .willReturn(addMemberResultList);
 
-        mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner")
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/path1/owners/" + ownersToAdd)
                         .with(csrf())
-                        .header(CURRENT_USER, admin))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("give newOwner ownership of path1"));
+                        .header(CURRENT_USER, USERNAME))
+                        .andExpect(status().isOk())
+                        .andReturn();
 
-        verify(membershipService, times(1))
-                .assignOwnership("path1", "uhAdmin", "newOwner");
+        assertThat(result, notNullValue());
     }
 
     @Ignore
