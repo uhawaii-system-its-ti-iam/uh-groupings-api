@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
 import edu.hawaii.its.api.repository.MembershipRepository;
 import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
@@ -84,28 +83,18 @@ public class MemberAttributeServiceTest {
 
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
-    private static final String OWNERS = ":owners";
-
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
 
     private static final String GROUPING_0_INCLUDE_PATH = GROUPING_0_PATH + INCLUDE;
-    private static final String GROUPING_0_OWNERS_PATH = GROUPING_0_PATH + OWNERS;
-
     private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
     private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
-
-    @Autowired
-    private GroupingRepository groupingRepository;
 
     @Autowired
     private GroupRepository groupRepository;
@@ -115,9 +104,6 @@ public class MemberAttributeServiceTest {
 
     @Autowired
     private MembershipRepository membershipRepository;
-
-    @Autowired
-    private MembershipService membershipService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;

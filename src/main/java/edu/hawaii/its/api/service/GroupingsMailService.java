@@ -1,8 +1,6 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;

@@ -50,7 +50,7 @@ public class SpringBootWebApplication extends SpringBootServletInitializer {
                 lineNumbers.add(lineID);
             }
         }
-
+        fileScanner.close();
         // If lineNumbers is not empty, spits out the error message to the terminal.
         Assert.isTrue(lineNumbers.isEmpty(), "Please remove the password from the custom.properties file.");
     }

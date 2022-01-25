@@ -1,8 +1,6 @@
 package edu.hawaii.its.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -79,8 +77,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingsRestControllerv2_1 {
-
-    private static final Log logger = LogFactory.getLog(TestGroupingsRestControllerv2_1.class);
 
     @Value("${groupings.api.test.grouping_delete}")
     private String DELETE_GROUPING;
@@ -230,7 +226,6 @@ public class TestGroupingsRestControllerv2_1 {
 
     private User adminUser;
     private AnonymousUser anon;
-    private User anonUser;
     private User uhUser01;
     private User uhUser02;
     private User uhUser05;
@@ -275,7 +270,7 @@ public class TestGroupingsRestControllerv2_1 {
 
         // Creates anonymous user for testing
         Set<GrantedAuthority> anonAuthorities = new LinkedHashSet<>();
-        anonUser = new User("anonymous", anonAuthorities);
+        new User("anonymous", anonAuthorities);
         anon = new AnonymousUser();
 
         // add ownership
@@ -453,7 +448,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .with(user(anon))
                         .with(csrf()))
                 .andReturn();
-        Map map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
+        Map<?, ?> map = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Map.class);
         assertNull(map.get(USERNAME));
         assertNull(map.get(FIRST_NAME));
         assertNull(map.get(UHUUID));
@@ -464,7 +459,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void ownerGroupingsMyselfTest() throws Exception {
 
-        List listGroupings = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
+        List<?> listGroupings = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
         assertThat(listGroupings.size(), not(0));
     }
 
@@ -484,7 +479,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void ownerGroupingsFailTest() throws Exception {
 
-        List<String> results = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser05);
+        List<LinkedHashMap<?, ?>> results = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser05);
         assertThat(results.size(), equalTo(0));
     }
 
@@ -683,11 +678,11 @@ public class TestGroupingsRestControllerv2_1 {
             mapGSR(API_BASE + "groupings/someGrouping/owners/" + usernames[0], "put", uhUser01);
             fail("Shouldn't be here.");
         } catch (GroupingsHTTPException ghe) {
-            List list = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
+            List<?> list = mapList(API_BASE + "owners/" + usernames[0] + "/groupings", "get", uhUser01);
             list.contains("someGrouping");
         }
 
-        List gsr = mapList(API_BASE + "groupings/" + GROUPING + "/owners/bob-jones", "delete", uhUser01);
+        List<?> gsr = mapList(API_BASE + "groupings/" + GROUPING + "/owners/bob-jones", "delete", uhUser01);
         assertFalse(gsr.contains("bob-jones"));
         try {
             mapGSR(API_BASE + "groupings//owners//", "put", uhUser01);
@@ -939,7 +934,7 @@ public class TestGroupingsRestControllerv2_1 {
         String componentId = "basis";
         String uid = "iamtst04";
 
-        List<LinkedHashMap> searchResults =
+        List<LinkedHashMap<?, ?>> searchResults =
                 mapList(API_BASE + "groupings/" + path + "/components/" + componentId + "/members/" + uid, "get",
                         adminUser);
         assertThat(searchResults.get(0).get("name"), IsEqual.equalTo("tst04name"));
@@ -975,7 +970,7 @@ public class TestGroupingsRestControllerv2_1 {
     // MVC mapping
     //////////////////////////////////////////////////////////////////////
 
-    private Map mapGetUserAttributes(String username, User annotationUser) throws Exception {
+    private Map<?, ?> mapGetUserAttributes(String username, User annotationUser) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -995,13 +990,14 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // Mapping of any uri call that returns a list
-    private List mapList(String uri, String httpCall, User annotationUser) throws Exception {
+    @SuppressWarnings("unchecked")
+    private List<LinkedHashMap<?, ?>> mapList(String uri, String httpCall, User annotationUser) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
         MvcResult result = mapHelper(uri, httpCall, annotationUser);
 
         if (result.getResponse().getStatus() == 200) {
-            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
+            return (List<LinkedHashMap<?, ?>>)objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
@@ -1112,33 +1108,13 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     // Mapping of any uri call that returns a list of GroupingsServiceResults
-    private List mapGSRs(String uri, String httpCall, User annotationUser) throws Exception {
+    private List<?> mapGSRs(String uri, String httpCall, User annotationUser) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
         MvcResult result = mapHelper(uri, httpCall, annotationUser);
 
         if (result.getResponse().getStatus() == 200) {
             return objectMapper.readValue(result.getResponse().getContentAsByteArray(), List.class);
-        } else {
-            GroupingsHTTPException ghe = new GroupingsHTTPException();
-            throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),
-                    ghe, result.getResponse().getStatus());
-        }
-    }
-
-    //todo May or may not need this; saving in case
-    //     Mapping of call that returns a group object asynchronously
-    private Group mapAsyncGroup(String uri, User user) throws Exception {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MvcResult result = mockMvc.perform(get(uri)
-                        .with(user(user))
-                        .header(CURRENT_USER, user.getUsername())
-                        .with(csrf()))
-                .andReturn();
-
-        if (result.getResponse().getStatus() == 200) {
-            return objectMapper.readValue(result.getResponse().getContentAsByteArray(), Group.class);
         } else {
             GroupingsHTTPException ghe = new GroupingsHTTPException();
             throw new GroupingsHTTPException("URL call failed. Status code: " + result.getResponse().getStatus(),

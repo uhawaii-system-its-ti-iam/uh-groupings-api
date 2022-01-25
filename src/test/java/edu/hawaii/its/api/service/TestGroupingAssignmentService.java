@@ -125,9 +125,6 @@ public class TestGroupingAssignmentService {
     private MembershipService membershipService;
 
     @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
     private HelperService helperService;
 
     @Autowired
@@ -240,8 +237,7 @@ public class TestGroupingAssignmentService {
         Grouping paginatedGroupingPage2 =
                 groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], 2, 20, "name", false);
 
-        Grouping normalGrouping =
-                groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
+        groupingAssignmentService.getPaginatedGrouping(GROUPING, usernames[0], null, null, null, null);
 
         // Check to see the pages come out the right sizes
         assertThat(paginatedGroupingPage1.getBasis().getMembers().size(), lessThanOrEqualTo(20));

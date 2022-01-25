@@ -39,7 +39,7 @@ public class UhCasAttributesTest {
     public void loadMapInvalidValueType() {
         Map<Object, Object> map = new HashMap<>();
         map.put("uhUuid", "666666");
-        map.put("uid", new Integer(666));
+        map.put("uid", 666);
         UhCasAttributes attributes = new UhCasAttributes(map);
         assertThat(attributes.getUsername(), is(""));
         assertThat(attributes.getUhUuid(), is("666666"));
@@ -51,7 +51,7 @@ public class UhCasAttributesTest {
     public void loadMapInvalidKeyType() {
         Map<Object, Object> map = new HashMap<>();
         map.put("uhUuid", "666666");
-        map.put(new Integer(666), new Integer(666));
+        map.put(666, 666);
         UhCasAttributes attributes = new UhCasAttributes(map);
         assertThat(attributes.getUsername(), is(""));
         assertThat(attributes.getUhUuid(), is("666666"));
@@ -62,7 +62,7 @@ public class UhCasAttributesTest {
     @Test
     public void loadMapInvalidTypes() {
         Map<Object, Object> map = new HashMap<>();
-        map.put(new Integer(666), new Integer(666));
+        map.put(666, 666);
         UhCasAttributes attributes = new UhCasAttributes(map);
         assertThat(attributes.getUsername(), is(""));
         assertThat(attributes.getUhUuid(), is(""));
@@ -177,7 +177,7 @@ public class UhCasAttributesTest {
         map.put("uhUuid", "666666");
 
         Map<Long, java.util.Date> uidMap = new HashMap<>();
-        uidMap.put(new Long(666), new java.util.Date());
+        uidMap.put((long) 666, new java.util.Date());
         map.put("uid", uidMap);
 
         UhCasAttributes attributes = new UhCasAttributes(map);

@@ -2,7 +2,6 @@ package edu.hawaii.its.api.access;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Autowired
     private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
 
     private static final Log logger = LogFactory.getLog(AuthorizationServiceImpl.class);
 
