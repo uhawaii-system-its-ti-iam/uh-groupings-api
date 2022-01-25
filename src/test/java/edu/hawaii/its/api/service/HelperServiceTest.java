@@ -76,13 +76,9 @@ public class HelperServiceTest {
     private static final String GROUPING_2_OWNERS_PATH = GROUPING_2_PATH + OWNERS;
 
     private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
-    private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();

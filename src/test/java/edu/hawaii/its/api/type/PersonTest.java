@@ -70,6 +70,7 @@ public class PersonTest {
         assertThat(person.getUsername(), equalTo("username"));
     }
 
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     public void equals() {
         Person p0 = new Person();

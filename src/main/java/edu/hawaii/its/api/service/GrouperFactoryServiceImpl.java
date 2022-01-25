@@ -458,7 +458,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             List<String> ownerGroupNames) {
 
         List<WsGetAttributeAssignmentsResults> attributeAssignmentsResultList = new ArrayList<>();
-        Iterator iterator = ownerGroupNames.iterator();
+        Iterator<String> iterator = ownerGroupNames.iterator();
 
         for (int i = 0; i < ownerGroupNames.size(); i += ATTRIBUTES_ASSIGN_ID_SIZE) {
             GcGetAttributeAssignments attributeAssignments = new GcGetAttributeAssignments()
@@ -484,7 +484,7 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
             String attributeDefNameName1,
             List<String> ownerGroupNames) {
         List<WsGetAttributeAssignmentsResults> attributeAssignmentsResultList = new ArrayList<>();
-        Iterator iterator = ownerGroupNames.iterator();
+        Iterator<String> iterator = ownerGroupNames.iterator();
 
         for (int i = 0; i < ownerGroupNames.size(); i += ATTRIBUTES_ASSIGN_ID_SIZE) {
             GcGetAttributeAssignments attributeAssignments = new GcGetAttributeAssignments()

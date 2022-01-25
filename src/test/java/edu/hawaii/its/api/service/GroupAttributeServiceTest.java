@@ -106,11 +106,6 @@ public class GroupAttributeServiceTest {
     private GroupAttributeService groupAttributeService;
 
     @Autowired
-    private GrouperFactoryService grouperFactoryService;
-
-    private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
     private GroupingRepository groupingRepository;
 
     @Autowired

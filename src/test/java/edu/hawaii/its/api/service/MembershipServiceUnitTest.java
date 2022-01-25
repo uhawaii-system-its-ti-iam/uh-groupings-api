@@ -162,7 +162,7 @@ public class MembershipServiceUnitTest {
     @Test
     public void batchDeleteThree() {
         final int TEST_RUNS = 30;
-        final Map<String, String> mapControl = new HashMap<>(0);
+        new HashMap<>(0);
         final Map<String, String> map = new HashMap<>(0);
         GrouperFactoryService grouperService = new GrouperFactoryServiceImpl() {
             public WsDeleteMemberResults makeWsDeleteMemberResults(String group, String memberToDelete) {
@@ -191,7 +191,7 @@ public class MembershipServiceUnitTest {
         for (Map.Entry<String, String> e : map.entrySet()) {
             System.out.println("map.entry; key: " + e.getKey() + ", value: " + e.getValue());
             int i = 0;
-            for (Map.Entry<String, String> d : map.entrySet()) {
+            for (@SuppressWarnings("unused") Map.Entry<String, String> d : map.entrySet()) {
                 if (e.getValue().equals("userToRemove-" + i)) {
                     expectedMember++;
                 }
@@ -225,10 +225,8 @@ public class MembershipServiceUnitTest {
         // Creates a thread pool with 10 threads.
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
-        // Utilize constructors to configure custom executor service.
-        ExecutorService executorService =
-                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<Runnable>());
+        new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
 
         List<Callable<Integer>> threads = new ArrayList<>();
         for (int i = 0; i <= 100; i++) {
@@ -240,7 +238,7 @@ public class MembershipServiceUnitTest {
         int expectedValue = 1;
 
         // Asserts that all threads have incremented their passed int by 1.
-        for (Future result : results) {
+        for (Future<?> result : results) {
             assertEquals(result.get(), expectedValue);
             expectedValue++;
         }
@@ -270,27 +268,6 @@ public class MembershipServiceUnitTest {
             Thread.sleep(milliSeconds);
         } catch (InterruptedException e) {
             System.out.println("Interrupted during sleep.");
-        }
-    }
-
-    private class DeleteTestRunner extends Thread {
-        private final int id;
-        private final Map<Integer, Integer> map;
-
-        public DeleteTestRunner(int id, Map<Integer, Integer> map) {
-            this.id = id;
-            this.map = map;
-        }
-
-        @Override
-        public void run() {
-            try {
-                System.out.println("Running " + id);
-                map.put(id, id + 100);
-                // Remove above and put batch delete call.
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
         }
     }
 
