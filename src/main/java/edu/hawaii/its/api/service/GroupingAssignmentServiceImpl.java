@@ -597,10 +597,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
                 if (assign.getAttributeDefNameName() != null) {
                     if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
+                        assign.getOwnerGroupName();
                         trios.add(assign.getOwnerGroupName());
                     } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
-                        String name = assign.getOwnerGroupName();
+                        assign.getOwnerGroupName();
                         opts.add(assign.getOwnerGroupName());
                     }
                 }
@@ -642,10 +642,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
                 if (assign.getAttributeDefNameName() != null) {
                     if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
+                        assign.getOwnerGroupName();
                         trios.add(assign.getOwnerGroupName());
                     } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
-                        String name = assign.getOwnerGroupName();
+                        assign.getOwnerGroupName();
                         opts.add(assign.getOwnerGroupName());
                     }
                 }

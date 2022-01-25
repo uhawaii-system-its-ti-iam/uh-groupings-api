@@ -10,6 +10,10 @@ import static org.junit.Assert.assertThat;
 
 public class GroupingsHTTPExceptionTest extends RuntimeException {
 
+    /**
+   * 
+   */
+    private static final long serialVersionUID = -5524447476145640165L;
     private GroupingsHTTPException groupingsHTTPexception;
 
     @Before

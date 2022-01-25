@@ -85,16 +85,10 @@ public class TestHelperService {
     private String UHUUID;
 
     @Autowired
-    private GrouperFactoryService grouperFS;
-
-    @Autowired
     GroupAttributeService groupAttributeService;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private MembershipService membershipService;
 
     @Autowired
     private HelperService helperService;

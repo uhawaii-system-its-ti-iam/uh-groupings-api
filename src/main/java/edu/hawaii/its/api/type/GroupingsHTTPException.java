@@ -4,6 +4,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class GroupingsHTTPException extends RuntimeException{
+    /**
+   * 
+   */
+    private static final long serialVersionUID = -5579769846632452949L;
     private Integer statusCode = null;
     private String string = null;
 

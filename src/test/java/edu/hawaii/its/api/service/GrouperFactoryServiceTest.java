@@ -5,28 +5,21 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.repository.GroupRepository;
-import edu.hawaii.its.api.repository.GroupingRepository;
-import edu.hawaii.its.api.repository.MembershipRepository;
-import edu.hawaii.its.api.repository.PersonRepository;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemDeleteResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemSaveResults;
@@ -107,57 +100,21 @@ public class GrouperFactoryServiceTest {
     private static final String GROUPING_1_PATH = PATH_ROOT + 1;
     private static final String GROUPING_2_PATH = PATH_ROOT + 2;
     private static final String GROUPING_3_PATH = PATH_ROOT + 3;
-    private static final String GROUPING_4_PATH = PATH_ROOT + 4;
-
-    private static final String GROUPING_0_INCLUDE_PATH = GROUPING_0_PATH + ":include";
-    private static final String GROUPING_0_OWNERS_PATH = GROUPING_0_PATH + ":owners";
-
-    private static final String GROUPING_1_INCLUDE_PATH = GROUPING_1_PATH + ":include";
-    private static final String GROUPING_1_EXCLUDE_PATH = GROUPING_1_PATH + ":exclude";
-
-    private static final String GROUPING_2_INCLUDE_PATH = GROUPING_2_PATH + ":include";
-    private static final String GROUPING_2_EXCLUDE_PATH = GROUPING_2_PATH + ":exclude";
-    private static final String GROUPING_2_BASIS_PATH = GROUPING_2_PATH + ":basis";
-    private static final String GROUPING_2_OWNERS_PATH = GROUPING_2_PATH + ":owners";
-
     private static final String GROUPING_3_INCLUDE_PATH = GROUPING_3_PATH + ":include";
     private static final String GROUPING_3_EXCLUDE_PATH = GROUPING_3_PATH + ":exclude";
-    private static final String GROUPING_3_BASIS_PATH = GROUPING_3_PATH + ":basis";
-
-    private static final String GROUPING_4_EXCLUDE_PATH = GROUPING_4_PATH + ":exclude";
-
-    private static final String ADMIN_USER = "admin";
-    private static final Person ADMIN_PERSON = new Person(ADMIN_USER, ADMIN_USER, ADMIN_USER);
     private List<Person> admins = new ArrayList<>();
     private Group adminGroup = new Group();
 
-    private static final String APP_USER = "app";
-    private static final Person APP_PERSON = new Person(APP_USER, APP_USER, APP_USER);
-    private List<Person> apps = new ArrayList<>();
     private Group appGroup = new Group();
 
     private List<Person> users = new ArrayList<>();
     private List<WsSubjectLookup> lookups = new ArrayList<>();
-
-    private GrouperFactoryServiceImpl gfs = new GrouperFactoryServiceImpl();
 
     @Autowired
     private GrouperFactoryServiceImplLocal gfsl = new GrouperFactoryServiceImplLocal();
 
     @Autowired
     private HelperService hs;
-
-    @Autowired
-    private GroupingRepository groupingRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
 
     @Autowired
     private DatabaseSetupService databaseSetupService;
@@ -324,53 +281,45 @@ public class GrouperFactoryServiceTest {
     //Unsure as to what the function does but it is covered
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioTest() {
-        WsGetAttributeAssignmentsResults results;
-
         String assignType = "placeholder";
         String attributeDefNameName = "palceholder";
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName);
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName);
 
     }
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioTwoAttrTest() {
-        WsGetAttributeAssignmentsResults results;
-
         String assignType = "placeholder";
         String attributeDefNameName0 = "palceholder";
         String attributeDefNameName1In = OPT_IN;
         String attributeDefNameName1Out = OPT_OUT;
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0,
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0,
                 attributeDefNameName1In);
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0,
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio(assignType, attributeDefNameName0,
                 attributeDefNameName1Out);
 
     }
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioOwnerGroupNameTest() {
-        List<WsGetAttributeAssignmentsResults> results;
-
         List<String> ownerGroupNames = new ArrayList<>();
         String attributeDefNameName0 = "palceholder";
         String attributeDefNameName1In = OPT_IN;
         String attributeDefNameName1Out = OPT_OUT;
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0,
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0,
                 attributeDefNameName1In, ownerGroupNames);
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0,
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", attributeDefNameName0,
                 attributeDefNameName1Out, ownerGroupNames);
     }
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsTrioOwnerTwoAttrGroupNameTest() {
-        List<WsGetAttributeAssignmentsResults> results;
-
         List<String> ownerGroupNames = new ArrayList<>();
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", "attributeDefNamName", ownerGroupNames);
+        gfsl.makeWsGetAttributeAssignmentsResultsTrio("assignType", "attributeDefNamName", ownerGroupNames);
     }
 
     @Test
@@ -392,35 +341,27 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsForGroupTest() {
-        WsGetAttributeAssignmentsResults results;
-
         String assignType = "assignType";
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, GROUPING_3_PATH);
+        gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, GROUPING_3_PATH);
     }
 
     @Test
     public void makeWsGetAttributeAssignmentsResultsForGroupDefNameTest() {
-        WsGetAttributeAssignmentsResults results;
-
         String assignType = "assignType";
         String attributeDefNameName = "attributeDefNameName";
 
-        results = gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, attributeDefNameName, GROUPING_3_PATH);
+        gfsl.makeWsGetAttributeAssignmentsResultsForGroup(assignType, attributeDefNameName, GROUPING_3_PATH);
     }
 
     @Test
     public void makeWsHasMemberResultsTest() {
-        WsHasMemberResults results;
-
-        results = gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
+        gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
     }
 
     @Test
     public void makeWsHasMemberResultsPersonTest() {
-        WsHasMemberResults results;
-
-        results = gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
+        gfsl.makeWsHasMemberResults(GROUPING_3_PATH, "username101");
     }
 
     @Test
@@ -492,10 +433,7 @@ public class GrouperFactoryServiceTest {
 
         String assignType = "type";
         String assignOperation = OPERATION_ASSIGN_ATTRIBUTE;
-        String removeOperation = OPERATION_REMOVE_ATTRIBUTE;
         String defName = LISTSERV;
-        String defName2 = OPT_IN;
-        String defName3 = OPT_OUT;
         String groupName = GROUPING_3_PATH;
 
         results = gfsl.makeWsAssignAttributesResultsForGroup(lookup, assignType, assignOperation, defName, groupName);
@@ -507,8 +445,6 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void makeWsAssignGrouperPrivilegesLiteResultTest() {
-        WsAssignGrouperPrivilegesLiteResult result;
-
         WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
 
         String privilegeNameIn = PRIVILEGE_OPT_IN;
@@ -516,11 +452,11 @@ public class GrouperFactoryServiceTest {
         String groupName = GROUPING_3_PATH;
         Boolean isAllowed = true;
 
-        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, isAllowed);
-        result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, isAllowed);
+        gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameIn, lookup, isAllowed);
+        gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, privilegeNameOut, lookup, isAllowed);
 
         try {
-            result = gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, "illegal", lookup, isAllowed);
+            gfsl.makeWsAssignGrouperPrivilegesLiteResult(groupName, "illegal", lookup, isAllowed);
         } catch (IllegalArgumentException iae) {
             iae.printStackTrace();
         }
@@ -529,11 +465,10 @@ public class GrouperFactoryServiceTest {
 
     @Test
     public void makeWsGetGrouperPrivilegesLiteResultExceptionTest() {
-        WsGetGrouperPrivilegesLiteResult result;
         WsSubjectLookup lookup = gfsl.makeWsSubjectLookup(users.get(0).getUsername());
 
         try {
-            result = gfsl.makeWsGetGrouperPrivilegesLiteResult(GROUPING_3_PATH, "illegal", lookup);
+            gfsl.makeWsGetGrouperPrivilegesLiteResult(GROUPING_3_PATH, "illegal", lookup);
         } catch (IllegalArgumentException iae) {
             iae.printStackTrace();
         }
