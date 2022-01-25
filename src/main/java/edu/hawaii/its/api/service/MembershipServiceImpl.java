@@ -20,7 +20,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -185,12 +184,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Autowired
     private MembershipService membershipService;
-
-    @Autowired
-    private JavaMailSender javaMailSender;
-
-    @Autowired
-    private GroupingsMailService groupingsMailService;
 
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
@@ -792,7 +785,7 @@ public class MembershipServiceImpl implements MembershipService {
             logger.info("Executor Interrupted: " + e);
         }
         // Waiting to return result until every thread in the list has completed running.
-        for (Future future : futures) {
+        for (Future<?> future : futures) {
             try {
                 results.add((WsDeleteMemberResults) future.get());
             } catch (InterruptedException | ExecutionException e) {

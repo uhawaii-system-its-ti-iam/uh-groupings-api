@@ -56,6 +56,7 @@ public class GroupTest {
         assertThat(group.getMembers().size(), equalTo(0));
     }
 
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     public void equals() {
         Group g0 = new Group();

@@ -97,7 +97,7 @@ public class GroupingsRestControllerv2_1 {
      * Get a hello string, this is a test endpoint.
      */
     @GetMapping(value = "/")
-    @ResponseBody public ResponseEntity hello() {
+    @ResponseBody public ResponseEntity<String> hello() {
         return ResponseEntity
                 .ok()
                 .body("University of Hawaii Groupings");
