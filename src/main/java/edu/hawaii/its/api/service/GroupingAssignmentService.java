@@ -57,4 +57,5 @@ public interface GroupingAssignmentService {
     List<String> getOptInGroups(String owner, String optInUid);
 
     List<String> getOptOutGroups(String owner, String optOutUid);
+    List<String> optableGroupings(String optAttr);
 }

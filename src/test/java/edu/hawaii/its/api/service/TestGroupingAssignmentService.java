@@ -35,7 +35,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -112,6 +114,12 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
+
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
 
     public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
@@ -371,6 +379,27 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(OWNERS));
             // Check for duplicates.
             assertTrue(pathMap.add(path));
+        }
+    }
+
+    @Test
+    public void optableGroupingsTest() {
+        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OPT_IN);
+        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OPT_OUT);
+        assertNotNull(optInablePaths);
+        assertNotNull(optOutablePaths);
+
+        // Should not have duplicates.
+        Set<String> optInpathMap = new HashSet<>();
+        optInablePaths.forEach(optInablePath -> assertTrue(optInpathMap.add(optInablePath)));
+        Set<String> optOutPathMap = new HashSet<>();
+        optOutablePaths.forEach(optOutablePath -> assertTrue(optOutPathMap.add(optOutablePath)));
+
+        // Should throw an exception if optIn or optOut attribute is not passed.
+        try {
+            groupingAssignmentService.optableGroupings("bad-attribute");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
     }
 

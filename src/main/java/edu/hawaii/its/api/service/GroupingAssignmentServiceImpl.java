@@ -344,7 +344,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
     }
 
-
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
@@ -376,7 +375,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsOpted = new ArrayList<>();
 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
-                && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
+                        && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
 
         if (groupsOpted.size() > 0) {
@@ -661,6 +660,26 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
         //get rid of duplicates
         return new ArrayList<>(new HashSet<>(opts));
+    }
+
+    /**
+     * List grouping paths than can be opted into or out of.
+     */
+    @Override
+    public List<String> optableGroupings(String optAttr) {
+        if (!optAttr.equals(OPT_IN) && !optAttr.equals(OPT_OUT)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        }
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, optAttr);
+        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
+        List<String> optablePaths = new ArrayList<>();
+        attributeAssigns.forEach(attributeAssign -> {
+            if (attributeAssign.getAttributeDefNameName().equals(optAttr)) {
+                optablePaths.add(attributeAssign.getOwnerGroupName());
+            }
+        });
+        return new ArrayList<>(new HashSet<>(optablePaths));
     }
 
     //returns the list of groupings that the user is allowed to opt-in to
