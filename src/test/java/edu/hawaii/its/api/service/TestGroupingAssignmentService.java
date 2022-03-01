@@ -29,13 +29,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -112,6 +115,12 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.opt_in}")
+    private String OPT_IN;
+
+    @Value("${groupings.api.opt_out}")
+    private String OPT_OUT;
 
     public final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
@@ -343,35 +352,61 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void getOptOutGroupsTest() {
-        List<String> optOutPaths = groupingAssignmentService.getOptOutGroups(usernames[0], usernames[1]);
-        assertTrue(optOutPaths.contains(GROUPING));
-        Set<String> pathMap = new HashSet<>();
-        for (String path : optOutPaths) {
-            // The path should be a parent path.
+    public void optInOutGroupingsPathsTest() {
+        // Test both getOptInGroups and getOptOutGroups()
+        List<String> optInPaths = groupingAssignmentService.optInGroupingsPaths(ADMIN, usernames[1]);
+        List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, usernames[1]);
+
+        // Should be no intersection between the two lists.
+        Set<String> intersection =
+                optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
+        assertTrue(intersection.isEmpty());
+
+        // Should have no duplicates.
+        Set<String> optInPathsMap = new HashSet<>();
+        Set<String> optOutPathsMap = new HashSet<>();
+        optInPaths.forEach(path -> {
+            assertTrue(optInPathsMap.add(path));
             assertFalse(path.endsWith(INCLUDE));
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
-            // Check for duplicates.
-            assertTrue(pathMap.add(path));
+        });
+        optOutPaths.forEach(path -> {
+            assertTrue(optOutPathsMap.add(path));
+            assertFalse(path.endsWith(INCLUDE));
+            assertFalse(path.endsWith(EXCLUDE));
+            assertFalse(path.endsWith(BASIS));
+            assertFalse(path.endsWith(OWNERS));
+        });
+
+    }
+
+    @Test
+    public void optableGroupingsTest() {
+        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OPT_IN);
+        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OPT_OUT);
+        assertNotNull(optInablePaths);
+        assertNotNull(optOutablePaths);
+
+        // Should not have duplicates.
+        Set<String> optInpathMap = new HashSet<>();
+        optInablePaths.forEach(optInablePath -> assertTrue(optInpathMap.add(optInablePath)));
+        Set<String> optOutPathMap = new HashSet<>();
+        optOutablePaths.forEach(optOutablePath -> assertTrue(optOutPathMap.add(optOutablePath)));
+
+        // Should throw an exception if optIn or optOut attribute is not passed.
+        try {
+            groupingAssignmentService.optableGroupings("bad-attribute");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
     }
 
     @Test
-    public void getOptInGroupsTest() {
-        List<String> optInPaths = groupingAssignmentService.getOptInGroups(usernames[0], usernames[1]);
-        assertTrue(optInPaths.contains(GROUPING));
-        Set<String> pathMap = new HashSet<>();
-        for (String path : optInPaths) {
-            // The path should be a parent path.
-            assertFalse(path.endsWith(INCLUDE));
-            assertFalse(path.endsWith(EXCLUDE));
-            assertFalse(path.endsWith(BASIS));
-            assertFalse(path.endsWith(OWNERS));
-            // Check for duplicates.
-            assertTrue(pathMap.add(path));
-        }
+    public void allGroupingsPathsTest() {
+        List<String> allGroupingsPaths = groupingAssignmentService.allGroupingsPaths();
+        assertNotNull(allGroupingsPaths);
     }
 
     @Test
@@ -413,10 +448,6 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getGroupPathsTest() {
-        List<String> paths = groupingAssignmentService.getGroupPaths(ADMIN, "gilbertz");
-        for (String path : paths) {
-            System.err.println(path);
-        }
     }
 
     @Test

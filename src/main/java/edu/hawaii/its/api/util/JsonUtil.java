@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,5 +33,15 @@ public class JsonUtil {
             // Maybe we should throw something?
         }
         return result;
+    }
+
+    public static void printJson(final Object obj) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = "{" + objectMapper.writeValueAsString(obj) + "}";
+            System.err.println(json);
+        } catch (JsonProcessingException e) {
+            logger.error("Error: " + e);
+        }
     }
 }

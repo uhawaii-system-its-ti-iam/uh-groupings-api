@@ -54,7 +54,11 @@ public interface GroupingAssignmentService {
 
     List<Grouping> groupingsToOptInto(String optInUsername, List<String> groupPaths);
 
-    List<String> getOptInGroups(String owner, String optInUid);
+    List<String> optInGroupingsPaths(String owner, String optInUid);
 
-    List<String> getOptOutGroups(String owner, String optOutUid);
+    List<String> optOutGroupingsPaths(String owner, String optOutUid);
+
+    List<String> optableGroupings(String optAttr);
+
+    List<String> allGroupingsPaths();
 }

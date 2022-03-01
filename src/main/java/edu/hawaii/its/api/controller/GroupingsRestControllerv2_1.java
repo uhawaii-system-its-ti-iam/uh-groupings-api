@@ -236,7 +236,7 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService
-                        .getOptInGroups(currentUser, uid));
+                        .optInGroupingsPaths(currentUser, uid));
     }
 
     /**

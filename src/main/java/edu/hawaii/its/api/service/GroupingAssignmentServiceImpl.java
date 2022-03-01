@@ -344,7 +344,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
     }
 
-
     //returns an adminLists object containing the list of all admins and all groupings
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
@@ -352,14 +351,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
-
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO);
-
-        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
-
-        List<String> groupingPathStrings = groups.stream().map(WsGroup::getName).collect(Collectors.toList());
-
+        List<String> groupingPathStrings = allGroupingsPaths();
         List<String> adminGrouping = new ArrayList<>(1);
         adminGrouping.add(GROUPING_ADMINS);
         Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
@@ -376,7 +368,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsOpted = new ArrayList<>();
 
         List<String> groupsOpted = groupPaths.stream().filter(group -> group.endsWith(includeOrrExclude)
-                && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
+                        && memberAttributeService.isSelfOpted(group, username)).map(helperService::parentGroupingPath)
                 .collect(Collectors.toList());
 
         if (groupsOpted.size() > 0) {
@@ -576,91 +568,65 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     @Override
-    public List<String> getOptOutGroups(String owner, String optOutUid) {
-        logger.info("getOptOutGroups; owner: " + owner + "; optOutUid: " + optOutUid + ";");
+    public List<String> optOutGroupingsPaths(String owner, String optOutUid) {
+        logger.info("optOutGroupingsPaths; owner: " + owner + "; optOutUid: " + optOutUid + ";");
 
-        List<String> groupPaths = getGroupPaths(owner, optOutUid);
-        List<String> trios = new ArrayList<>();
-        List<String> opts = new ArrayList<>();
-        List<String> includes = groupPaths
-                .stream()
-                .map(group -> group + INCLUDE)
-                .collect(Collectors.toList());
-
-        WsGetAttributeAssignmentsResults assignmentsResults =
-                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
-                        ASSIGN_TYPE_GROUP,
-                        TRIO,
-                        OPT_OUT);
-
-        if (assignmentsResults.getWsAttributeAssigns() != null) {
-            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
-                if (assign.getAttributeDefNameName() != null) {
-                    if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
-                        trios.add(assign.getOwnerGroupName());
-                    } else if (assign.getAttributeDefNameName().equals(OPT_OUT)) {
-                        String name = assign.getOwnerGroupName();
-                        opts.add(assign.getOwnerGroupName());
-                    }
-                }
-            }
-            //opts intersection trios
-            opts.retainAll(trios);
-            //includes intersection opts
-            includes.retainAll(opts);
-            //opts - (opts intersection groupPaths)
-            //opts union excludes
-            opts.addAll(includes);
-        }
-        //get rid of duplicates
-        return new ArrayList<>(new HashSet<>(opts));
+        List<String> groupingsIn = getGroupPaths(owner, optOutUid);
+        List<String> includes =
+                groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
+        includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
+        List<String> optOutPaths = optableGroupings(OPT_OUT);
+        optOutPaths.retainAll(includes);
+        return new ArrayList<>(new HashSet<>(optOutPaths));
     }
 
     /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     @Override
-    public List<String> getOptInGroups(String owner, String optInUid) {
-        logger.info("getOptInGroups; owner: " + owner + "; optInUid: " + optInUid + ";");
+    public List<String> optInGroupingsPaths(String owner, String optInUid) {
+        logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
 
-        List<String> groupPaths = getGroupPaths(owner, optInUid);
-        List<String> trios = new ArrayList<>();
-        List<String> opts = new ArrayList<>();
-        List<String> excludes = groupPaths
-                .stream()
-                .map(group -> group + EXCLUDE)
-                .collect(Collectors.toList());
+        List<String> groupingsIn = getGroupPaths(owner, optInUid);
+        List<String> includes =
+                groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
+        List<String> excludes =
+                groupingsIn.stream().filter(path -> path.endsWith(EXCLUDE)).collect(Collectors.toList());
+        includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
+        excludes = excludes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
 
-        WsGetAttributeAssignmentsResults assignmentsResults =
-                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(
-                        ASSIGN_TYPE_GROUP,
-                        TRIO,
-                        OPT_IN);
+        List<String> optInPaths = optableGroupings(OPT_IN);
+        optInPaths.removeAll(includes);
+        optInPaths.addAll(excludes);
+        return new ArrayList<>(new HashSet<>(optInPaths));
+    }
 
-        if (assignmentsResults.getWsAttributeAssigns() != null) {
-            for (WsAttributeAssign assign : assignmentsResults.getWsAttributeAssigns()) {
-                if (assign.getAttributeDefNameName() != null) {
-                    if (assign.getAttributeDefNameName().equals(TRIO)) {
-                        String name = assign.getOwnerGroupName();
-                        trios.add(assign.getOwnerGroupName());
-                    } else if (assign.getAttributeDefNameName().equals(OPT_IN)) {
-                        String name = assign.getOwnerGroupName();
-                        opts.add(assign.getOwnerGroupName());
-                    }
-                }
-            }
-            //opts intersection trios
-            opts.retainAll(trios);
-            //excludes intersection opts
-            excludes.retainAll(opts);
-            //opts - (opts intersection groupPaths)
-            opts.removeAll(groupPaths);
-            //opts union excludes
-            opts.addAll(excludes);
+    /**
+     * List grouping paths than can be opted into or out of.
+     */
+    @Override
+    public List<String> optableGroupings(String optAttr) {
+        if (!optAttr.equals(OPT_IN) && !optAttr.equals(OPT_OUT)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        //get rid of duplicates
-        return new ArrayList<>(new HashSet<>(opts));
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, optAttr);
+        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
+        List<String> optablePaths = new ArrayList<>();
+        attributeAssigns.forEach(attributeAssign -> {
+            if (attributeAssign.getAttributeDefNameName().equals(optAttr)) {
+                optablePaths.add(attributeAssign.getOwnerGroupName());
+            }
+        });
+        return new ArrayList<>(new HashSet<>(optablePaths));
+    }
+
+    @Override
+    public List<String> allGroupingsPaths() {
+        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
+                grouperFactoryService.makeWsGetAttributeAssignmentsResultsTrio(ASSIGN_TYPE_GROUP, TRIO);
+        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
+        return groups.stream().map(WsGroup::getName).collect(Collectors.toList());
     }
 
     //returns the list of groupings that the user is allowed to opt-in to

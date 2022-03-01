@@ -28,7 +28,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -243,33 +242,10 @@ public class GroupingAssignmentServiceTest {
     }
 
     @Test
-    public void getOptInGroupsTest() {
-        List<List<String>> optInPathsLists = new ArrayList<List<String>>();
-        for (int i = 0; i < 6; i++) {
-            optInPathsLists.add(new ArrayList<>(
-                    groupingAssignmentService.getOptInGroups(users.get(0).getUsername(), users.get(i).getUsername())));
-        }
-        List<String> assumedPaths = Arrays.asList(GROUPING_0_PATH, GROUPING_1_PATH, GROUPING_3_PATH);
-
-        for (List<String> list : optInPathsLists) {
-            for (String path : list) {
-                assertTrue(assumedPaths.contains(path));
-            }
-        }
-        List<String> optInPaths =
-                groupingAssignmentService.getOptInGroups(users.get(0).getUsername(), users.get(1).getUsername());
-        assertNotNull(optInPaths);
-        Set<String> pathMap = new HashSet<>();
-        for (String path : optInPaths) {
-            // Check for duplicate paths.
-            assertTrue(pathMap.add(path));
-        }
-    }
-
-    @Test
     public void getOptOutGroupsTest() {
         List<String> optOutPaths =
-                groupingAssignmentService.getOptOutGroups(users.get(0).getUsername(), users.get(1).getUsername());
+                groupingAssignmentService.optOutGroupingsPaths(users.get(0).getUsername(),
+                        users.get(1).getUsername());
         assertNotNull(optOutPaths);
         Set<String> pathMap = new HashSet<>();
         for (String path : optOutPaths) {
