@@ -1,45 +1,9 @@
 package edu.hawaii.its.api.controller;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
-
 import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.access.UserContextService;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -59,6 +23,41 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("localTest")
@@ -308,7 +307,6 @@ public class GroupingsRestControllerv2_1Test {
 
     //todo As Nobody
 
-
     //todo This user owns nothing
     //    @Test
     //    @WithMockUhUser(username = "")
@@ -482,14 +480,14 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void getOptInGroupsTest() throws Exception {
         List<String> optInGroups = new ArrayList<>();
-        given(groupingAssignmentService.getOptInGroups(ADMIN, "iamtst01")).willReturn(optInGroups);
+        given(groupingAssignmentService.optInGroupingsPaths(ADMIN, "iamtst01")).willReturn(optInGroups);
         mockMvc.perform(get(API_BASE + "/groupings/optInGroups/iamtst01")
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
         verify(groupingAssignmentService, times(1))
-                .getOptInGroups(ADMIN, "iamtst01");
+                .optInGroupingsPaths(ADMIN, "iamtst01");
     }
 
     @Ignore
@@ -596,8 +594,8 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
 
-       verify(groupAttributeService, times(1))
-               .changeOptOutStatus("grouping", USERNAME, true);
+        verify(groupAttributeService, times(1))
+                .changeOptOutStatus("grouping", USERNAME, true);
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
@@ -628,22 +626,26 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonEnablePreferenceSyncDestTest() throws Exception {
-        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult inResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(inResult, notNullValue());
 
-        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult outResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(outResult, notNullValue());
 
-        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult listResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(listResult, notNullValue());
 
-        MvcResult groupingResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
+        MvcResult groupingResult = mockMvc.perform(
+                        put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
         assertThat(groupingResult, notNullValue());
@@ -705,19 +707,22 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithAnonymousUser
     public void anonDisablePreferenceSyncDestTest() throws Exception {
-        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult inResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(inResult, notNullValue());
 
-        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult outResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(outResult, notNullValue());
 
-        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MvcResult listResult =
+                mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
+                        .andExpect(status().is3xxRedirection())
+                        .andReturn();
         assertThat(listResult, notNullValue());
 
         MvcResult groupingResult = mockMvc.perform(
@@ -940,21 +945,21 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "abc")
     public void lookUpPermissionTestMember() throws Exception {
         MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
-                .header(CURRENT_USER, "0o0-username"))
+                        .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(ownerResult, notNullValue());
 
         MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
-                .header(CURRENT_USER, "0o0-username"))
+                        .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(groupingsResult, notNullValue());
 
         MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
-                .header(CURRENT_USER, "0o0-username"))
+                        .header(CURRENT_USER, "0o0-username"))
                 .andDo(print())
                 .andExpect(status().is5xxServerError())
                 .andReturn();
@@ -1049,20 +1054,22 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void selfTest() throws Exception {
 
-        MvcResult includeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
-                        .header("current_user", "o6-username")
-                        .header("accept", "application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult includeResult =
+                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
+                                .header("current_user", "o6-username")
+                                .header("accept", "application/json"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
         assertThat(includeResult, notNullValue());
 
-        MvcResult excludeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
-                        .header("current_user", "o6-username")
-                        .header("accept", "application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult excludeResult =
+                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
+                                .header("current_user", "o6-username")
+                                .header("accept", "application/json"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
         assertThat(excludeResult, notNullValue());
     }
 

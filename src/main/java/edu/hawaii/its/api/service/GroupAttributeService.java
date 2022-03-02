@@ -3,10 +3,10 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 import java.util.List;
-import java.util.Map;
 
 public interface GroupAttributeService {
 
