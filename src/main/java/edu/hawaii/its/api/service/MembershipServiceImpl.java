@@ -30,11 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -333,7 +328,8 @@ public class MembershipServiceImpl implements MembershipService {
     public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin( currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
@@ -346,7 +342,8 @@ public class MembershipServiceImpl implements MembershipService {
     public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin( currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
@@ -408,7 +405,8 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin( currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
@@ -421,7 +419,8 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin( currentUser)) {
+        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
+                currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
@@ -491,50 +490,52 @@ public class MembershipServiceImpl implements MembershipService {
         return helperService.makeGroupingsServiceResult(deleteMemberResults, action);
     }
 
+    /**
+     * Remove a user from all groups listed in groupPaths.
+     */
     @Override
     public List<GroupingsServiceResult> removeFromGroups(String adminUsername, String userToRemove,
-            List<String> GroupPaths) {
-        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
-        List<WsDeleteMemberResults> deleteMemberResults =
-                makeWsBatchDeleteMemberResults(GroupPaths, userToRemove);
-        for (int i = 0; i < deleteMemberResults.size(); i++) {
-            logger.info("Removing " + userToRemove + " from Group " + i + ":" + GroupPaths.get(i));
-            String action = "delete " + userToRemove + " from " + GroupPaths.get(i);
-            result.add(helperService.makeGroupingsServiceResult(deleteMemberResults.get(i), action));
+            List<String> groupPaths) {
+        if (!memberAttributeService.isAdmin(adminUsername)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return result;
+        List<GroupingsServiceResult> groupingsServiceResults = new ArrayList<>();
+        groupPaths.forEach(groupPath -> {
+            if (!groupPath.endsWith(OWNERS) && !groupPath.endsWith(INCLUDE) && !groupPath.endsWith(EXCLUDE)) {
+                throw new GcWebServiceError("404: Invalid group path");
+            }
+            groupingsServiceResults.add(helperService.makeGroupingsServiceResult(
+                    grouperFS.makeWsDeleteMemberResults(groupPath, userToRemove),
+                    "removeFromGroups: groupPath: " + groupPath + "; userToRemove: " + userToRemove + "; "));
+        });
+        return groupingsServiceResults;
     }
 
+    /**
+     * Remove all members in both identifier lists from the include and exclude of grouping at path.
+     */
     @Override
     public List<GroupingsServiceResult> resetGroup(String currentUser, String path,
             List<String> includeIdentifier, List<String> excludeIdentifier) {
 
-        List<GroupingsServiceResult> result = new ArrayList<GroupingsServiceResult>();
-        String excludePath = path + EXCLUDE;
-        String includePath = path + INCLUDE;
-
-        if (!includeIdentifier.get(0).equals("empty")) {
-            for (int i = 0; i < includeIdentifier.size(); i++) {
-                logger.info("Removing " + includeIdentifier.get(i) + " from Group " + i + ":" + includePath);
-                String action = "delete " + includeIdentifier.get(i) + " from " + includePath;
-                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(currentUser);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(includePath, ownerLookup, includeIdentifier.get(i));
-                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
-            }
+        if (!memberAttributeService.isAdmin(currentUser) && !memberAttributeService.isOwner(path, currentUser)) {
+            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        if (!excludeIdentifier.get(0).equals("empty")) {
-            for (int i = 0; i < excludeIdentifier.size(); i++) {
-                logger.info("Removing " + excludeIdentifier.get(i) + " from Group " + i + ":" + excludePath);
-                String action = "delete " + excludeIdentifier.get(i) + " from " + excludePath;
-                WsSubjectLookup ownerLookup = grouperFS.makeWsSubjectLookup(currentUser);
-                WsDeleteMemberResults deleteMemberResults =
-                        grouperFS.makeWsDeleteMemberResults(excludePath, ownerLookup, excludeIdentifier.get(i));
-                result.add(helperService.makeGroupingsServiceResult(deleteMemberResults, action));
-            }
-        }
+        List<GroupingsServiceResult> results = new ArrayList<>();
 
-        return result;
+        if (!includeIdentifier.isEmpty()) {
+            includeIdentifier.forEach(identifier -> {
+                results.add(helperService.makeGroupingsServiceResult(
+                        grouperFS.makeWsDeleteMemberResults(path + INCLUDE, identifier), "resetGroup: " + identifier));
+            });
+        }
+        if (!excludeIdentifier.isEmpty()) {
+            excludeIdentifier.forEach(identifier -> {
+                results.add(helperService.makeGroupingsServiceResult(
+                        grouperFS.makeWsDeleteMemberResults(path + EXCLUDE, identifier), "resetGroup: " + identifier));
+            });
+        }
+        return results;
     }
 
     //returns true if the group allows that user to opt in
@@ -693,37 +694,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     public void setHelperService(HelperService helperService) {
         this.helperService = helperService;
-    }
-
-    public List<WsDeleteMemberResults> makeWsBatchDeleteMemberResults(List<String> groupPaths, String userToRemove) {
-        // Creating a thread list which is populated with a thread for each removal that needs to be done.
-        List<WsDeleteMemberResults> results = new ArrayList<>();
-        List<Callable<WsDeleteMemberResults>> threads = new ArrayList<>();
-        ExecutorService executor = Executors.newFixedThreadPool(groupPaths.size());
-        for (int currGroup = 0; currGroup < groupPaths.size(); currGroup++) {
-            //creating runnable object containing the data needed for each individual delete.
-            Callable<WsDeleteMemberResults> master =
-                    new BatchDeleterTask(userToRemove, groupPaths.get(currGroup), grouperFS);
-            threads.add(master);
-        }
-        // Starting all of the created threads.
-        List<Future<WsDeleteMemberResults>> futures = null;
-        try {
-            futures = executor.invokeAll(threads);
-        } catch (InterruptedException e) {
-            logger.info("Executor Interrupted: " + e);
-        }
-        // Waiting to return result until every thread in the list has completed running.
-        for (Future future : futures) {
-            try {
-                results.add((WsDeleteMemberResults) future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                logger.info("Thread Interrupted: " + e);
-            }
-        }
-        // Shuts down the service once all threads have completed.
-        executor.shutdown();
-        return results;
     }
 
 }

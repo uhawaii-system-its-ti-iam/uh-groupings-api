@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -27,7 +28,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import java.util.List;
 
-public interface GrouperFactoryService extends BatchDeleter{
+public interface GrouperFactoryService {
     WsGroupSaveResults addEmptyGroup(String username, String path);
 
     WsGroupDeleteResults deleteGroup(WsSubjectLookup username, WsGroupLookup path);
@@ -69,100 +70,99 @@ public interface GrouperFactoryService extends BatchDeleter{
     WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup, Person personToDelete);
 
     WsDeleteMemberResults makeWsDeleteMemberResults(String group, WsSubjectLookup lookup,
-                                                           List<String> membersToDelete);
+            List<String> membersToDelete);
 
     WsDeleteMemberResults makeWsDeleteMemberResultsGroup(String groupPath, WsSubjectLookup lookup, String groupUid);
 
     WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                     String attributeDefNameName);
+            String attributeDefNameName);
 
     WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                     String attributeDefNameName0,
-                                                                                     String attributeDefNameName1);
+            String attributeDefNameName0,
+            String attributeDefNameName1);
 
     List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                           String attributeDefNameName,
-                                                                                           List<String> ownerGroupNames);
+            String attributeDefNameName,
+            List<String> ownerGroupNames);
 
     List<WsGetAttributeAssignmentsResults> makeWsGetAttributeAssignmentsResultsTrio(String assignType,
-                                                                                           String attributeDefNameName0,
-                                                                                           String attributeDefNameName1,
-                                                                                           List<String> ownerGroupNames);
+            String attributeDefNameName0,
+            String attributeDefNameName1,
+            List<String> ownerGroupNames);
 
     WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForMembership(String assignType,
-                                                                                              String attributeDefNameName,
-                                                                                              String membershipId);
+            String attributeDefNameName,
+            String membershipId);
 
     WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
-                                                                                         String group);
+            String group);
 
     WsGetAttributeAssignmentsResults makeWsGetAttributeAssignmentsResultsForGroup(String assignType,
-                                                                                         String attributeDefNameName,
-                                                                                         String group);
+            String attributeDefNameName,
+            String group);
 
     WsHasMemberResults makeWsHasMemberResults(String group, String username);
 
     WsHasMemberResults makeWsHasMemberResults(String group, Person person);
 
     WsAssignAttributesResults makeWsAssignAttributesResults(String attributeAssignType,
-                                                                   String attributeAssignOperation,
-                                                                   String ownerGroupName,
-                                                                   String attributeDefNameName,
-                                                                   String attributeAssignValueOperation,
-                                                                   WsAttributeAssignValue value);
+            String attributeAssignOperation,
+            String ownerGroupName,
+            String attributeDefNameName,
+            String attributeAssignValueOperation,
+            WsAttributeAssignValue value);
 
     WsAssignAttributesResults makeWsAssignAttributesResultsForMembership(String attributeAssignType,
-                                                                                String attributeAssignOperation,
-                                                                                String attributeDefNameName,
-                                                                                String ownerMembershipId);
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerMembershipId);
 
     WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(String attributeAssignType,
-                                                                           String attributeAssignOperation,
-                                                                           String attributeDefNameName,
-                                                                           String ownerGroupName);
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerGroupName);
 
     WsAssignAttributesResults makeWsAssignAttributesResultsForGroup(WsSubjectLookup lookup,
-                                                                           String attributeAssignType,
-                                                                           String attributeAssignOperation,
-                                                                           String attributeDefNameName,
-                                                                           String ownerGroupName);
-
-
-    WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
-                                                                                       String privilegeName,
-                                                                                       WsSubjectLookup lookup,
-                                                                                       WsSubjectLookup admin,
-                                                                                       boolean isAllowed);
+            String attributeAssignType,
+            String attributeAssignOperation,
+            String attributeDefNameName,
+            String ownerGroupName);
 
     WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
-                                                                                       String privilegeName,
-                                                                                       WsSubjectLookup lookup,
-                                                                                       boolean isAllowed);
+            String privilegeName,
+            WsSubjectLookup lookup,
+            WsSubjectLookup admin,
+            boolean isAllowed);
+
+    WsAssignGrouperPrivilegesLiteResult makeWsAssignGrouperPrivilegesLiteResult(String groupName,
+            String privilegeName,
+            WsSubjectLookup lookup,
+            boolean isAllowed);
 
     WsGetGrouperPrivilegesLiteResult makeWsGetGrouperPrivilegesLiteResult(String groupName,
-                                                                                 String privilegeName,
-                                                                                 WsSubjectLookup lookup);
+            String privilegeName,
+            WsSubjectLookup lookup);
 
     WsGetMembershipsResults makeWsGetMembershipsResults(String groupName, WsSubjectLookup lookup);
 
-    List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupName,List<WsSubjectLookup> lookup);
+    List<WsGetMembershipsResults> makeWsGetAllMembershipsResults(List<String> groupName, List<WsSubjectLookup> lookup);
 
     WsGetMembersResults makeWsGetMembersResults(String subjectAttributeName,
-                                                       WsSubjectLookup lookup,
-                                                       List<String> groupPaths,
-                                                       Integer pageNumber,
-                                                       Integer pageSize,
-                                                       String sortString,
-                                                       Boolean isAscending);
+            WsSubjectLookup lookup,
+            List<String> groupPaths,
+            Integer pageNumber,
+            Integer pageSize,
+            String sortString,
+            Boolean isAscending);
 
     WsGetGroupsResults makeWsGetGroupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
 
     WsAttributeAssign[] makeEmptyWsAttributeAssignArray();
 
     WsGroupSaveResults addCompositeGroup(String username, String parentGroupPath, String compositeType,
-                                                String leftGroupPath, String rightGroupPath);
+            String leftGroupPath, String rightGroupPath);
 
     WsGetSubjectsResults makeWsGetSubjectsResults(WsSubjectLookup lookup);
-    
+
     List<SyncDestination> getSyncDestinations();
 }

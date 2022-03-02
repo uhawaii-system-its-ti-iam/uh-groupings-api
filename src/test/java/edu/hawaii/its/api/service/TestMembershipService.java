@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AddMemberResult;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @ActiveProfiles("integrationTest")
 @RunWith(SpringRunner.class)
@@ -334,11 +336,6 @@ public class TestMembershipService {
     }
 
     @Test
-    public void listGroupsTest() {
-        //todo
-    }
-
-    @Test
     public void getMembersTest() {
         String[] groupings = { GROUPING };
         Group group = groupingAssignmentService.getMembers(username[0], Arrays.asList(groupings)).get(GROUPING);
@@ -561,6 +558,108 @@ public class TestMembershipService {
                 membershipService.removeExcludeMembers(ownerUsername, GROUPING, removableUsernames);
         for (RemoveMemberResult removeMemberResult : removeMemberResults) {
             assertEquals(GROUPING_EXCLUDE, removeMemberResult.getPathOfRemoved());
+        }
+    }
+
+    @Test
+    public void removeFromGroupsTest() {
+        String userToRemove = username[0];
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(GROUPING_INCLUDE);
+        groupPaths.add(GROUPING_OWNERS);
+        groupPaths.forEach(path -> {
+            grouperFactoryService.makeWsAddMemberResults(path, userToRemove);
+        });
+        assertTrue(memberAttributeService.isOwner(GROUPING, userToRemove));
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, userToRemove));
+        // Should remove a user from multiple groups.
+        List<GroupingsServiceResult> groupingsServiceResults =
+                membershipService.removeFromGroups(ADMIN, userToRemove, groupPaths);
+        assertEquals(2, groupingsServiceResults.size());
+        groupingsServiceResults.forEach(result -> assertEquals(SUCCESS, result.getResultCode()));
+        assertFalse(memberAttributeService.isOwner(GROUPING, userToRemove));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, userToRemove));
+
+        // Should throw an exception if adminUsername is not an admin.
+        membershipService.removeAdmin(ADMIN, userToRemove);
+        try {
+            membershipService.removeFromGroups(userToRemove, userToRemove, groupPaths);
+            fail("Should throw an exception in adminUsername is not an admin.");
+        } catch (AccessDeniedException e) {
+            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+
+        // Should throw an exception if an invalid path is passed.
+        groupPaths.add(GROUPING);
+        groupPaths.add(GROUPING_BASIS);
+        try {
+            membershipService.removeFromGroups(ADMIN, userToRemove, groupPaths);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GcWebServiceError e) {
+            assertEquals("404: Invalid group path", e.getContainerResponseObject().toString());
+        }
+    }
+
+    @Test
+    public void resetGroupTest() {
+        List<String> testUsernames = Arrays.asList(username);
+        List<String> includeIdentifiers = testUsernames.subList(0, 3);
+        List<String> excludeIdentifiers = testUsernames.subList(3, 6);
+        assertNotNull(membershipService.addIncludeMembers(ADMIN, GROUPING, includeIdentifiers));
+        assertNotNull(membershipService.addExcludeMembers(ADMIN, GROUPING, excludeIdentifiers));
+
+        // Should remove all includeIdentifiers and excludeIdentifiers from GROUPING.
+        List<GroupingsServiceResult> groupingsServiceResults =
+                membershipService.resetGroup(ADMIN, GROUPING, includeIdentifiers, excludeIdentifiers);
+        // Should all be success.
+        assertTrue(groupingsServiceResults.stream()
+                .allMatch(groupingsServiceResult -> groupingsServiceResult.getResultCode().equals(SUCCESS)));
+        // Should not be in the groups they were removed from.
+        includeIdentifiers.forEach(identifier ->
+                assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, identifier)));
+        excludeIdentifiers.forEach(identifier ->
+                assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, identifier)));
+
+        // Should throw an exception if current user is not an admin or an owner.
+        membershipService.removeAdmin(ADMIN, testUsernames.get(0));
+        memberAttributeService.removeOwnership(GROUPING, ADMIN, testUsernames.get(0));
+        try {
+            membershipService.resetGroup(testUsernames.get(0), GROUPING, null, null);
+            Assertions.fail("Should throw an exception if current user is not an admin or an owner.");
+        } catch (AccessDeniedException e) {
+            Assertions.assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        }
+        includeIdentifiers = new ArrayList<>();
+        excludeIdentifiers = new ArrayList<>();
+
+        // Should not throw an exception if current user is not an admin but is an owner.
+        memberAttributeService.assignOwnership(GROUPING, ADMIN, testUsernames.get(0));
+        assertTrue(memberAttributeService.isOwner(GROUPING, testUsernames.get(0)));
+        try {
+            assertTrue(membershipService
+                    .resetGroup(testUsernames.get(0), GROUPING, includeIdentifiers, excludeIdentifiers).isEmpty());
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is not an admin but is an owner.");
+        }
+        memberAttributeService.removeOwnership(GROUPING, ADMIN, testUsernames.get(0));
+        assertFalse(memberAttributeService.isOwner(GROUPING, testUsernames.get(0)));
+
+        // Should not throw an exception if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, testUsernames.get(0));
+        assertTrue(memberAttributeService.isAdmin(testUsernames.get(0)));
+        try {
+            assertTrue(membershipService
+                    .resetGroup(testUsernames.get(0), GROUPING, includeIdentifiers, excludeIdentifiers).isEmpty());
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an admin but not an owner.");
+        }
+        membershipService.removeAdmin(ADMIN, testUsernames.get(0));
+
+        // Should not throw and exception if user is an admin and an owner.
+        try {
+            assertTrue(membershipService.resetGroup(ADMIN, GROUPING, includeIdentifiers, excludeIdentifiers).isEmpty());
+        } catch (AccessDeniedException e) {
+            fail(" Should not throw and exception if user is an admin and an owner.");
         }
     }
 
