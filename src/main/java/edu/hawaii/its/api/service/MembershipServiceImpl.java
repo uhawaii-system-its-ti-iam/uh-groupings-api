@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
@@ -200,7 +201,6 @@ public class MembershipServiceImpl implements MembershipService {
     @Override public List<Membership> getMembershipResults(String owner, String uid) {
         String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
         logger.info(action);
-
         if (!memberAttributeService.isAdmin(owner) && !owner.equals(uid)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
@@ -617,7 +617,11 @@ public class MembershipServiceImpl implements MembershipService {
 
     // Get the number of memberships the current user has
     @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
-        return getMembershipResults(currentUser, uid).size();
+        return getMembershipResults(currentUser, uid)
+                .stream()
+                .filter(membership -> membership.isInInclude() || membership.isInBasis())
+                .collect(Collectors.toList())
+                .size();
     }
 
     /**
