@@ -448,25 +448,25 @@ public class MembershipServiceTest {
     }
 
     @Test
-    public void getNumberOfMembershipsTest(){
+    public void numberOfMembershipsTest(){
         String user = users.get(10).getUsername();
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(0));
+        assertThat(membershipService.numberOfMemberships(ADMIN_USER, user), is(0));
 
         membershipService.optIn(ADMIN_USER, GROUPING_0_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_1_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_2_PATH, user);
         membershipService.optIn(ADMIN_USER, GROUPING_3_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(4));
+        assertThat(membershipService.numberOfMemberships(ADMIN_USER, user), is(4));
 
         membershipService.optOut(ADMIN_USER, GROUPING_1_PATH, user);
         membershipService.optOut(ADMIN_USER, GROUPING_3_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(2));
+        assertThat(membershipService.numberOfMemberships(ADMIN_USER, user), is(2));
 
         membershipService.optIn(ADMIN_USER, GROUPING_1_PATH, user);
 
-        assertThat(membershipService.getNumberOfMemberships(ADMIN_USER, user), is(3));
+        assertThat(membershipService.numberOfMemberships(ADMIN_USER, user), is(3));
     }
 }

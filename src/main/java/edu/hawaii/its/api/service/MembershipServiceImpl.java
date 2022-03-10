@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -199,6 +200,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Get a list of memberships pertaining to uid.
      */
     @Override public List<Membership> getMembershipResults(String owner, String uid) {
+        JsonUtil printer = new JsonUtil();
         String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
         logger.info(action);
         if (!memberAttributeService.isAdmin(owner) && !owner.equals(uid)) {
@@ -249,6 +251,7 @@ public class MembershipServiceImpl implements MembershipService {
             membership.setName(helperService.nameGroupingPath(groupingPath));
             memberships.add(membership);
         }
+        printer.printJson(memberships);
         return memberships;
     }
 
@@ -616,7 +619,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     // Get the number of memberships the current user has
-    @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
+    @Override public Integer numberOfMemberships(String currentUser, String uid) {
         return getMembershipResults(currentUser, uid)
                 .stream()
                 .filter(membership -> membership.isInInclude() || membership.isInBasis())

@@ -1120,7 +1120,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "iamtst01")
     public void getNumberOfMembershipsTest() throws Exception {
         String uid = currentUser().getUid();
-        given(membershipService.getNumberOfMemberships(ADMIN, uid))
+        given(membershipService.numberOfMemberships(ADMIN, uid))
                 .willReturn(369);
 
         mockMvc.perform(get(API_BASE + "/groupings/" + uid + "/memberships")
@@ -1130,6 +1130,6 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(content().string("369"));
 
         verify(membershipService, times(1))
-                .getNumberOfMemberships(ADMIN, uid);
+                .numberOfMemberships(ADMIN, uid);
     }
 }
