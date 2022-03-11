@@ -501,6 +501,6 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getNumberOfMemberships(currentUser, uid));
+                .body(membershipService.numberOfMemberships(currentUser, uid));
     }
 }

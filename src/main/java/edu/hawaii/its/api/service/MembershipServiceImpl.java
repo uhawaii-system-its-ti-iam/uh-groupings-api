@@ -8,6 +8,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -616,7 +617,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     // Get the number of memberships the current user has
-    @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
+    @Override public Integer numberOfMemberships(String currentUser, String uid) {
         return getMembershipResults(currentUser, uid)
                 .stream()
                 .filter(membership -> membership.isInInclude() || membership.isInBasis())
