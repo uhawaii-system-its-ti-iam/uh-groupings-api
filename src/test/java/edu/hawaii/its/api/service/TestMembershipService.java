@@ -179,7 +179,6 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isAdmin(testUhNumber));
     }
 
-    // Todo create a ticket for rewrite.
     @Test
     public void getMembershipResultsTest() {
         List<String> iamtst01List = new ArrayList<>();
@@ -296,7 +295,6 @@ public class TestMembershipService {
         assertTrue(memberships.isEmpty());
     }
 
-    // Todo create a ticket for rewrite.
     @Test
     public void addGroupMembersTest() {
         List<String> iamtst01List = new ArrayList<>();

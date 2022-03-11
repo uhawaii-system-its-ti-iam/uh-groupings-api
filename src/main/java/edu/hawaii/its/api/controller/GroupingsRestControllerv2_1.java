@@ -319,7 +319,6 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping description.
      */
-    // Todo dtoString is needed to update the description thus it must be required. Also not sure if this should be passed as a body.
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/description")
     public ResponseEntity<GroupingsServiceResult> updateDescription(
             @RequestHeader(CURRENT_USER) String currentUser,
@@ -373,7 +372,6 @@ public class GroupingsRestControllerv2_1 {
         } else if (OPT_OUT.equals(preferenceId)) {
             results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
         } else {
-            // Todo this portion needs coverage.
             throw new UnsupportedOperationException();
         }
 
@@ -400,7 +398,6 @@ public class GroupingsRestControllerv2_1 {
         } else if (OPT_OUT.equals(preferenceId)) {
             results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
         } else {
-            // Todo this portion needs coverage.
             throw new UnsupportedOperationException();
         }
         return ResponseEntity
