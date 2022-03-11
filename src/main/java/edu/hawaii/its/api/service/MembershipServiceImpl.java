@@ -200,7 +200,6 @@ public class MembershipServiceImpl implements MembershipService {
      * Get a list of memberships pertaining to uid.
      */
     @Override public List<Membership> getMembershipResults(String owner, String uid) {
-        JsonUtil printer = new JsonUtil();
         String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
         logger.info(action);
         if (!memberAttributeService.isAdmin(owner) && !owner.equals(uid)) {
@@ -251,7 +250,6 @@ public class MembershipServiceImpl implements MembershipService {
             membership.setName(helperService.nameGroupingPath(groupingPath));
             memberships.add(membership);
         }
-        printer.printJson(memberships);
         return memberships;
     }
 
