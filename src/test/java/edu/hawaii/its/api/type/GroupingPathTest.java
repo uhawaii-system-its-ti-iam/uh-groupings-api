@@ -1,17 +1,17 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupingPathTest {
     private GroupingPath path;
 
     private static final String PATH_ROOT = "path:to:grouping";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         path = new GroupingPath(PATH_ROOT);
     }

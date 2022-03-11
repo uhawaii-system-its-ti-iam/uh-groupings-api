@@ -1,25 +1,25 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GroupingServiceResultExceptionTest extends GroupingsServiceResult {
 
     private GroupingsServiceResultException groupingsServiceResultException;
 
-    @Before
+    @BeforeEach
     public void setup() {
         groupingsServiceResultException = new GroupingsServiceResultException();
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void construction() {
         assertNotNull(groupingsServiceResultException);
         assertNull(groupingsServiceResultException.getGsr());

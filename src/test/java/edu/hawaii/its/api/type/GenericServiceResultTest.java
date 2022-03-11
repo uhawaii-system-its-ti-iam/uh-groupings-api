@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GenericServiceResultTest {
     GenericServiceResult genericServiceResult;
@@ -16,7 +16,7 @@ public class GenericServiceResultTest {
     Integer integer = 300;
     List<Float> floats = Arrays.asList(1.0f, 1.1f, 1.2f);
 
-    @Before
+    @BeforeEach
     public void setup() {
         genericServiceResult = new GenericServiceResult(Arrays.asList("string", "integer", "floats"),
                 this.string, this.integer, this.floats);

@@ -1,12 +1,11 @@
 package edu.hawaii.its.api.type;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GroupingsHTTPExceptionTest extends RuntimeException {
 
@@ -16,7 +15,7 @@ public class GroupingsHTTPExceptionTest extends RuntimeException {
     private static final long serialVersionUID = -5524447476145640165L;
     private GroupingsHTTPException groupingsHTTPexception;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         groupingsHTTPexception = new GroupingsHTTPException();
     }

@@ -1,51 +1,38 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("localTest")
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class HelperServiceTest {
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
@@ -62,38 +49,38 @@ public class HelperServiceTest {
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID_KEY;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String UID_KEY;
+
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME_KEY;
+
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME_KEY;
+
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME_KEY;
+
     private static final String PATH_ROOT = "path:to:grouping";
     private static final String INCLUDE = ":include";
     private static final String EXCLUDE = ":exclude";
     private static final String OWNERS = ":owners";
     private static final String BASIS = ":basis";
+    private static final String BASIS_PLUS_INCLUDE = ":basis+include";
 
-    private static final String GROUPING_2_PATH = PATH_ROOT + 2;
+    private static final String GROUPING_INCLUDE = PATH_ROOT + INCLUDE;
+    private static final String GROUPING_EXCLUDE = PATH_ROOT + EXCLUDE;
+    private static final String GROUPING_BASIS = PATH_ROOT + BASIS;
+    private static final String GROUPING_OWNERS = PATH_ROOT + OWNERS;
+    private static final String GROUPING_BASIS_PLUS_INCLUDE = PATH_ROOT + BASIS_PLUS_INCLUDE;
 
-    private static final String GROUPING_2_INCLUDE_PATH = GROUPING_2_PATH + INCLUDE;
-    private static final String GROUPING_2_EXCLUDE_PATH = GROUPING_2_PATH + EXCLUDE;
-    private static final String GROUPING_2_BASIS_PATH = GROUPING_2_PATH + BASIS;
-    private static final String GROUPING_2_OWNERS_PATH = GROUPING_2_PATH + OWNERS;
-
-    private static final String ADMIN_USER = "admin";
-    private List<Person> admins = new ArrayList<>();
-    private Group adminGroup = new Group();
-
-    private Group appGroup = new Group();
-
-    private List<Person> users = new ArrayList<>();
-    private List<WsSubjectLookup> lookups = new ArrayList<>();
+    private static final String GROUPING_0_PATH = PATH_ROOT + 0;
 
     @Autowired
     private HelperService helperService;
-
-    @Autowired
-    private DatabaseSetupService databaseSetupService;
-
-    @Before
-    public void setup() {
-        databaseSetupService.initialize(users, lookups, admins, adminGroup, appGroup);
-    }
 
     @Test
     public void construction() {
@@ -102,75 +89,44 @@ public class HelperServiceTest {
     }
 
     @Test
-    public void parentGroupingPathTest() {
-        assertThat(helperService.parentGroupingPath(GROUPING_2_BASIS_PATH), is(GROUPING_2_PATH));
-        assertThat(helperService.parentGroupingPath(GROUPING_2_PATH + BASIS_PLUS_INCLUDE), is(GROUPING_2_PATH));
-        assertThat(helperService.parentGroupingPath(GROUPING_2_EXCLUDE_PATH), is(GROUPING_2_PATH));
-        assertThat(helperService.parentGroupingPath(GROUPING_2_INCLUDE_PATH), is(GROUPING_2_PATH));
-        assertThat(helperService.parentGroupingPath(GROUPING_2_OWNERS_PATH), is(GROUPING_2_PATH));
-        assertThat(helperService.parentGroupingPath(GROUPING_APPS), is(GROUPING_APPS));
-        assertThat(helperService.parentGroupingPath(null), is(""));
-    }
-
-    /////////////////////////////////////////////////////
-    // non-mocked tests//////////////////////////////////
-    /////////////////////////////////////////////////////
-
-    @Test
-    public void toStringTest() {
-        String helperString = helperService.toString();
-        System.out.println(helperString);
-        assertThat("HelperServiceImpl [SETTINGS=uh-settings]", is(helperString));
+    public void isUhUuid() {
+        assertTrue(helperService.isUhUuid("111111"));
+        assertFalse(helperService.isUhUuid("111-111"));
+        assertFalse(helperService.isUhUuid("iamtst01"));
+        assertFalse(helperService.isUhUuid(null));
     }
 
     @Test
-    public void groupingParentPath() {
-        String grouping = "grouping";
+    public void extractFirstMembershipIDTest() {
+        WsGetMembershipsResults membershipsResults = null;
+        String firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("", firstMembershipId);
 
-        String[] groups = new String[] { grouping + EXCLUDE,
-                grouping + INCLUDE,
-                grouping + OWNERS,
-                grouping + BASIS,
-                grouping + BASIS_PLUS_INCLUDE,
-                grouping };
+        membershipsResults = new WsGetMembershipsResults();
+        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("", firstMembershipId);
 
-        for (String g : groups) {
-            assertThat(helperService.parentGroupingPath(g), is(grouping));
-        }
+        WsMembership[] memberships = null;
+        membershipsResults.setWsMemberships(memberships);
+        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("", firstMembershipId);
 
-        assertThat(helperService.parentGroupingPath(null), is(""));
-    }
+        memberships = new WsMembership[] { null };
+        membershipsResults.setWsMemberships(memberships);
+        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("", firstMembershipId);
 
-    @Test
-    public void extractFirstMembershipID() {
-        WsGetMembershipsResults mr = new WsGetMembershipsResults();
-        WsMembership[] memberships = new WsMembership[3];
-        for (int i = 0; i < 3; i++) {
-            memberships[i] = new WsMembership();
-            memberships[i].setMembershipId("membershipID_" + i);
-        }
-        mr.setWsMemberships(memberships);
+        WsMembership membership = new WsMembership();
+        memberships = new WsMembership[] { membership };
+        membershipsResults.setWsMemberships(memberships);
+        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("", firstMembershipId);
 
-        assertThat(helperService.extractFirstMembershipID(mr), is("membershipID_0"));
-    }
-
-    @Test
-    public void makeGroupingsNoAttributes() {
-        List<String> groupPaths = new ArrayList<>();
-
-        for (int i = 0; i < 5; i++) {
-            groupPaths.add("grouping_" + i);
-        }
-        for (int i = 0; i < 5; i++) {
-            groupPaths.add("path:grouping_" + (i + 5));
-        }
-
-        List<Grouping> groupings = helperService.makeGroupings(groupPaths);
-
-        for (int i = 5; i < 10; i++) {
-            assertThat(groupings.get(i).getPath(), is("path:grouping_" + i));
-            assertThat(groupings.get(i).getName(), is("grouping_" + i));
-        }
+        membership.setMembershipId("1234");
+        memberships = new WsMembership[] { membership };
+        membershipsResults.setWsMemberships(memberships);
+        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
+        assertEquals("1234", firstMembershipId);
     }
 
     @Test
@@ -181,63 +137,6 @@ public class HelperServiceTest {
         assertNotNull(groupingsServiceResult);
         assertEquals(resultCode, groupingsServiceResult.getResultCode());
         assertEquals(action, groupingsServiceResult.getAction());
-    }
-
-    @Test
-    public void extractFirstMembershipIDTest() {
-        WsGetMembershipsResults membershipsResults = null;
-        String firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("", is(firstMembershipId));
-
-        membershipsResults = new WsGetMembershipsResults();
-        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("", is(firstMembershipId));
-
-        WsMembership[] memberships = null;
-        membershipsResults.setWsMemberships(memberships);
-        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("", is(firstMembershipId));
-
-        memberships = new WsMembership[] { null };
-        membershipsResults.setWsMemberships(memberships);
-        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("", is(firstMembershipId));
-
-        WsMembership membership = new WsMembership();
-        memberships = new WsMembership[] { membership };
-        membershipsResults.setWsMemberships(memberships);
-        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("", is(firstMembershipId));
-
-        membership.setMembershipId("1234");
-        memberships = new WsMembership[] { membership };
-        membershipsResults.setWsMemberships(memberships);
-        firstMembershipId = helperService.extractFirstMembershipID(membershipsResults);
-        assertThat("1234", is(firstMembershipId));
-    }
-
-    @Test
-    public void nameGroupingPathTest() {
-        assertEquals("grouping-test-path", helperService.nameGroupingPath("test:grouping-test-path:include"));
-        assertEquals("",helperService.nameGroupingPath(""));
-    }
-
-    @Test
-    public void swaggerToStringTest() throws IOException {
-        GenericServiceResult genericServiceResult = helperService.swaggerToString(ADMIN_USER);
-        assertNotNull(genericServiceResult);
-
-    }
-
-    @Test
-    public void memberAttributeMapSetKeysTest() {
-        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-        Map<String, String> map = helperService.memberAttributeMapSetKeys();
-
-        for (String subjectAttributeName : subjectAttributeNames) {
-            assertTrue(map.containsKey(subjectAttributeName));
-            assertNull(map.get(subjectAttributeName));
-        }
     }
 
     @Test
@@ -256,8 +155,144 @@ public class HelperServiceTest {
         while (groupingPathIterator.hasNext() && stringIterator.hasNext()) {
             assertEquals(stringIterator.next(), groupingPathIterator.next().getPath());
         }
-
     }
 
+    @Test
+    public void parentGroupingPathTest() {
+        List<String> groupPaths = new ArrayList<>();
+        groupPaths.add(GROUPING_OWNERS);
+        groupPaths.add(GROUPING_BASIS);
+        groupPaths.add(GROUPING_INCLUDE);
+        groupPaths.add(GROUPING_EXCLUDE);
+        groupPaths.add(GROUPING_BASIS_PLUS_INCLUDE);
+        groupPaths.forEach(groupPath -> {
+            assertEquals(PATH_ROOT, helperService.parentGroupingPath(groupPath));
+        });
+        assertEquals("", helperService.parentGroupingPath(null));
+    }
+
+    @Test
+    public void nameGroupingPathTest() {
+        assertEquals("grouping-test-path", helperService.nameGroupingPath("test:grouping-test-path:include"));
+        assertEquals("", helperService.nameGroupingPath(""));
+    }
+
+    @Test
+    public void memberAttributeMapSetKeysTest() {
+        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
+        Map<String, String> map = helperService.memberAttributeMapSetKeys();
+
+        for (String subjectAttributeName : subjectAttributeNames) {
+            assertTrue(map.containsKey(subjectAttributeName));
+            assertNull(map.get(subjectAttributeName));
+        }
+    }
+
+    @Test
+    public void makeGroupsTest() {
+        WsGetMembersResults getMembersResults = new WsGetMembersResults();
+        String[] attributeNames =
+                new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+
+        // We create an array here because getMembersResults.setResults() only takes an array
+        WsGetMembersResult[] getMembersResult = new WsGetMembersResult[1];
+        WsGetMembersResult subGetMembersResult = new WsGetMembersResult();
+
+        WsGroup wsGroup = new WsGroup();
+        wsGroup.setName(GROUPING_0_PATH);
+
+        WsSubject[] list = new WsSubject[3];
+        for (int i = 0; i < 3; i++) {
+            list[i] = new WsSubject();
+            list[i].setName("testSubject_" + i);
+            list[i].setId("testSubject_uuid_" + i);
+            // Attribute values need to match names in order (uuid is set seperately, so it can be blank here
+            list[i].setAttributeValues(new String[] { "testSubject_username_" + i, "", "", "testSubject_" + i, "" });
+        }
+
+        subGetMembersResult.setWsSubjects(list);
+        subGetMembersResult.setWsGroup(wsGroup);
+        getMembersResult[0] = subGetMembersResult;
+
+        getMembersResults.setResults(getMembersResult);
+        getMembersResults.setSubjectAttributeNames(attributeNames);
+
+        Map<String, Group> groups = helperService.makeGroups(getMembersResults);
+
+        assertFalse(groups.isEmpty());
+        Group resultGroup = groups.get(GROUPING_0_PATH);
+
+        for (int i = 0; i < resultGroup.getMembers().size(); i++) {
+            assertEquals("testSubject_" + i, resultGroup.getMembers().get(i).getName());
+            assertTrue(resultGroup.getNames().contains("testSubject_" + i));
+            assertEquals("testSubject_uuid_" + i, resultGroup.getMembers().get(i).getUhUuid());
+            assertTrue(resultGroup.getUhUuids().contains("testSubject_uuid_" + i));
+            assertEquals("testSubject_username_" + i, resultGroup.getMembers().get(i).getUsername());
+            assertTrue(resultGroup.getUsernames().contains("testSubject_username_" + i));
+        }
+    }
+
+    @Test
+    public void makePersonTest() {
+        String name = "name";
+        String id = "uuid";
+        String identifier = "username";
+        String[] attributeNames =
+                new String[] { UID_KEY, UHUUID_KEY, LAST_NAME_KEY, COMPOSITE_NAME_KEY, FIRST_NAME_KEY };
+        String[] attributeValues = new String[] { identifier, id, null, name, null };
+
+        WsSubject subject = new WsSubject();
+        subject.setName(name);
+        subject.setId(id);
+        subject.setAttributeValues(attributeValues);
+
+        Person person = helperService.makePerson(subject, attributeNames);
+
+        assertEquals(name, person.getName());
+        assertEquals(id, person.getUhUuid());
+        assertEquals(identifier, person.getUsername());
+
+        assertNotNull(helperService.makePerson(new WsSubject(), new String[] {}));
+    }
+
+    @Test
+    public void extractGroupPaths() {
+        List<String> groupNames = helperService.extractGroupPaths(null);
+        assertTrue(groupNames.isEmpty());
+
+        List<WsGroup> groups = new ArrayList<>();
+        final int size = 300;
+
+        for (int i = 0; i < size; i++) {
+            WsGroup w = new WsGroup();
+            w.setName("testName_" + i);
+            groups.add(w);
+        }
+        assertEquals(size, groups.size());
+
+        groupNames = helperService.extractGroupPaths(groups);
+        for (int i = 0; i < size; i++) {
+            assertTrue(groupNames.contains("testName_" + i));
+        }
+        assertEquals(size, groupNames.size());
+
+        // Create some duplicates.
+        groups = new ArrayList<>();
+        for (int j = 0; j < 3; j++) {
+            for (int i = 0; i < size; i++) {
+                WsGroup w = new WsGroup();
+                w.setName("testName_" + i);
+                groups.add(w);
+            }
+        }
+        assertEquals(size * 3, groups.size());
+
+        // Duplicates should not be in groupNames list.
+        groupNames = helperService.extractGroupPaths(groups);
+        assertEquals(size, groupNames.size());
+        for (int i = 0; i < size; i++) {
+            assertTrue(groupNames.contains("testName_" + i));
+        }
+    }
 }
 

@@ -1,10 +1,6 @@
 package edu.hawaii.its.api.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -12,7 +8,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringsTest {
 
@@ -73,7 +73,7 @@ public class StringsTest {
 
     // Basic iterator testing for possible implementation
     @Test
-    public void myTest(){
+    public void myTest() {
         System.out.println("hello");
         List<String> list = new ArrayList<>();
 
@@ -81,12 +81,12 @@ public class StringsTest {
         list.add("name2");
         list.add("name3");
 
-        for(String s:list) {
+        for (String s : list) {
             System.out.println(s);
         }
 
         Iterator<String> itor = list.iterator();
-        while(itor.hasNext()) {
+        while (itor.hasNext()) {
             System.out.println(itor.next());
         }
     }

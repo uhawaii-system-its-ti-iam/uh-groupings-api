@@ -2,90 +2,33 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.GenericServiceResult;
-import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service("helperService")
 public class HelperServiceImpl implements HelperService {
 
-    @Value("${groupings.api.settings}")
-    private String SETTINGS;
-
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_superusers}")
-    private String GROUPING_SUPERUSERS;
-
-    @Value("${groupings.api.attributes}")
-    private String ATTRIBUTES;
-
-    @Value("${groupings.api.for_groups}")
-    private String FOR_GROUPS;
-
-    @Value("${groupings.api.for_memberships}")
-    private String FOR_MEMBERSHIPS;
-
-    @Value("${groupings.api.last_modified}")
-    private String LAST_MODIFIED;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.uhgrouping}")
-    private String UHGROUPING;
-
-    @Value("${groupings.api.destinations}")
-    private String DESTINATIONS;
-
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.purge_grouping}")
-    private String PURGE_GROUPING;
-
-    @Value("${groupings.api.self_opted}")
-    private String SELF_OPTED;
-
-    @Value("${groupings.api.anyone_can}")
-    private String ANYONE_CAN;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
 
     @Value("${groupings.api.basis}")
     private String BASIS;
@@ -102,47 +45,8 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.owners}")
     private String OWNERS;
 
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.assign_type_immediate_membership}")
-    private String ASSIGN_TYPE_IMMEDIATE_MEMBERSHIP;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
-
-    @Value("${groupings.api.operation_assign_attribute}")
-    private String OPERATION_ASSIGN_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_remove_attribute}")
-    private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_replace_values}")
-    private String OPERATION_REPLACE_VALUES;
-
-    @Value("${groupings.api.privilege_opt_out}")
-    private String PRIVILEGE_OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
-
-    @Value("${groupings.api.every_entity}")
-    private String EVERY_ENTITY;
-
-    @Value("${groupings.api.is_member}")
-    private String IS_MEMBER;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
     @Value("${groupings.api.failure}")
     private String FAILURE;
-
-    @Value("${groupings.api.success_allowed}")
-    private String SUCCESS_ALLOWED;
-
-    @Value("${groupings.api.stem}")
-    private String STEM;
 
     @Value("${groupings.api.person_attributes.username}")
     private String UID;
@@ -159,10 +63,17 @@ public class HelperServiceImpl implements HelperService {
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
 
+    @Value("${groupings.api.stale_subject_id}")
+    private String STALE_SUBJECT_ID;
+
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
-    @Autowired
-    private GrouperFactoryService grouperFS;
+    /**
+     * Return true if username is a UH id number
+     */
+    public boolean isUhUuid(String naming) {
+        return naming != null && naming.matches("\\d+");
+    }
 
     //returns the first membership id in the list of membership ids inside of the WsGerMembershipsResults object
     @Override
@@ -179,50 +90,9 @@ public class HelperServiceImpl implements HelperService {
         return "";
     }
 
-    //returns a list of groups that the user belongs to inside of a WsGetMembershipsResults object
-    @Override
-    public WsGetMembershipsResults membershipsResults(String username, String group) {
-        logger.info("membershipResults; username: " + username + "; group: " + group + ";");
-
-        WsSubjectLookup lookup = grouperFS.makeWsSubjectLookup(username);
-
-        return grouperFS.makeWsGetMembershipsResults(group, lookup);
-    }
-
-    //returns the list of all of the groups in groupPaths that are also groupings
-    public List<String> extractGroupings(List<String> groupPaths) {
-        logger.info("extractGroupings; groupPaths: " + groupPaths + ";");
-
-        List<String> groupings = new ArrayList<>();
-
-        if (groupPaths.size() > 0) {
-            List<WsAttributeAssign> attributeAssigns = new ArrayList<>();
-
-            List<WsGetAttributeAssignmentsResults> attributeAssignmentsResults =
-                    grouperFS.makeWsGetAttributeAssignmentsResultsTrio(
-                            ASSIGN_TYPE_GROUP,
-                            TRIO,
-                            groupPaths);
-
-            attributeAssignmentsResults
-                    .stream()
-                    .filter(results -> results.getWsAttributeAssigns() != null)
-                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
-
-            if (attributeAssigns.size() > 0) {
-                groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
-                        .collect(Collectors.toList()));
-            }
-        }
-        return groupings;
-    }
-
-    @Override
-    public String toString() {
-        return "HelperServiceImpl [SETTINGS=" + SETTINGS + "]";
-    }
-
-    //makes a groupingsServiceResult with the result code from the metadataHolder and the action string
+    /**
+     * Make a groupingsServiceResult with the result code from the metadataHolder and the action string.
+     */
     @Override
     public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action) {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
@@ -251,7 +121,6 @@ public class HelperServiceImpl implements HelperService {
         return groupingsServiceResult;
     }
 
-    //makes a groupingsServiceResult with the resultCode and the action string
     @Override
     public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action) {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
@@ -262,22 +131,6 @@ public class HelperServiceImpl implements HelperService {
             throw new GroupingsServiceResultException(groupingsServiceResult);
         }
         return groupingsServiceResult;
-    }
-
-    //makes a list of groupings each with a path from the list
-    @Override
-    public List<Grouping> makeGroupings(List<String> groupingPaths) {
-        logger.info("makeGroupings; groupingPaths: " + groupingPaths + ";");
-
-        List<Grouping> groupings = new ArrayList<>();
-        if (groupingPaths.size() > 0) {
-            groupings = groupingPaths
-                    .stream()
-                    .map(Grouping::new)
-                    .collect(Collectors.toList());
-        }
-
-        return groupings;
     }
 
     /**
@@ -292,7 +145,9 @@ public class HelperServiceImpl implements HelperService {
         return paths;
     }
 
-    //removes one of the words (:exclude, :include, :owners ...) from the end of the string
+    /**
+     * Remove one of the words (:exclude, :include, :owners ...) from the end of the string.
+     */
     @Override
     public String parentGroupingPath(String group) {
         if (group != null) {
@@ -335,9 +190,68 @@ public class HelperServiceImpl implements HelperService {
         return mapping;
     }
 
+    //makes a group filled with members from membersResults
     @Override
-    public GenericServiceResult swaggerToString(String currentUser) throws IOException {
-        return new GenericServiceResult("result", "result");
+    public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
+        Map<String, Group> groups = new HashMap<>();
+        if (membersResults.getResults().length > 0) {
+            String[] attributeNames = membersResults.getSubjectAttributeNames();
+
+            for (WsGetMembersResult result : membersResults.getResults()) {
+                WsSubject[] subjects = result.getWsSubjects();
+                Group group = new Group(result.getWsGroup().getName());
+
+                if (subjects == null || subjects.length == 0) {
+                    continue;
+                }
+                for (WsSubject subject : subjects) {
+                    if (subject == null) {
+                        continue;
+                    }
+                    Person personToAdd = makePerson(subject, attributeNames);
+                    if (group.getPath().endsWith(BASIS) && subject.getSourceId() != null
+                            && subject.getSourceId().equals(STALE_SUBJECT_ID)) {
+                        personToAdd.setUsername("User Not Available.");
+                    }
+                    group.addMember(personToAdd);
+                }
+                groups.put(group.getPath(), group);
+            }
+        }
+        // Return empty group if for any unforeseen results.
+        return groups;
+    }
+
+    // Makes a person with all attributes in attributeNames.
+    @Override
+    public Person makePerson(WsSubject subject, String[] attributeNames) {
+        if (subject == null || subject.getAttributeValues() == null) {
+            return new Person();
+        } else {
+
+            Map<String, String> attributes = new HashMap<>();
+            for (int i = 0; i < subject.getAttributeValues().length; i++) {
+                attributes.put(attributeNames[i], subject.getAttributeValue(i));
+            }
+            // uhUuid is the only attribute not actually in the WsSubject attribute array.
+            attributes.put(UHUUID, subject.getId());
+
+            return new Person(attributes);
+        }
+    }
+
+    @Override
+    //take a list of WsGroups ans return a list of the paths for all of those groups
+    public List<String> extractGroupPaths(List<WsGroup> groups) {
+        Set<String> names = new LinkedHashSet<>();
+        if (groups != null) {
+            names = groups
+                    .parallelStream()
+                    .map(WsGroup::getName)
+                    .collect(Collectors.toSet());
+
+        }
+        return new ArrayList<>(names);
     }
 }
 
