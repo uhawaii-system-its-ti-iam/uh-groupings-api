@@ -1,24 +1,22 @@
 package edu.hawaii.its.api.repository;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Person;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("localTest")
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
 public class GroupRepositoryTest {
@@ -32,7 +30,7 @@ public class GroupRepositoryTest {
     @Autowired
     private PersonRepository personRepository;
 
-    @Before
+    @BeforeEach
     public void setup() {
         for (int i = 0; i < 10; i++) {
             persons[i] = new Person("name" + i, "uuid" + i, "username" + i);

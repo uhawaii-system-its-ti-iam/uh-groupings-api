@@ -192,15 +192,4 @@ public class Grouping {
     public void setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
     }
-
-    @Override
-    public String toString() {
-        return "Grouping [name=" + name
-                + ", path=" + path
-                + ", OptInOn=" + isOptInOn()
-                + ", OptOutOn=" + isOptOutOn()
-                + ", basis=" + basis
-                + ", owners=" + owners
-                + "]";
-    }
 }

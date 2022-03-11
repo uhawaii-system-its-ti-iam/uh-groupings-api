@@ -1,20 +1,16 @@
 package edu.hawaii.its.api.controller;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.access.User;
 import edu.hawaii.its.api.access.UserContextService;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.HelperService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.GenericServiceResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -28,10 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -41,9 +35,9 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,19 +53,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingsRestControllerv2_1Test {
-
-    @Value("${app.iam.request.form}")
-    private String requestForm;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
 
     @Value("${groupings.api.opt_in}")
     private String OPT_IN;
@@ -98,9 +82,6 @@ public class GroupingsRestControllerv2_1Test {
     private GroupingAssignmentService groupingAssignmentService;
 
     @MockBean
-    private HelperService helperService;
-
-    @MockBean
     private MemberAttributeService memberAttributeService;
 
     @MockBean
@@ -119,7 +100,7 @@ public class GroupingsRestControllerv2_1Test {
     private static final String USERNAME = "user";
     private static final String ADMIN = "admin";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(context)
                 .apply(springSecurity())
@@ -237,6 +218,15 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @WithMockUhUser
+    public void helloTest() throws Exception {
+        MvcResult result = mockMvc.perform(get(API_BASE + "/"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
+    }
+
+    @Test
     @WithMockUhUser(username = "bobo")
     public void adminsGroupingsTest() throws Exception {
         List<GroupingPath> groupingPaths = new ArrayList<>();
@@ -265,531 +255,103 @@ public class GroupingsRestControllerv2_1Test {
                 .adminLists("bobo");
     }
 
-    @Ignore
     @Test
-    @WithAnonymousUser
-    public void anonAdminsGroupingsTest() throws Exception {
-        MvcResult result = mockMvc.perform(get(API_BASE + "/adminsGroupings"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
-    }
+    @WithMockUhUser(username = "admin")
+    public void addAdminTest() throws Exception {
+        String newAdmin = "newAdmin";
+        given(membershipService.addAdmin(ADMIN, newAdmin))
+                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
 
-    //todo GetUserAttributes has no tests(?)
-    //todo As Admin
-
-    //todo As Myself
-
-    //todo As Nobody
-
-
-    //todo This user owns nothing
-    //    @Test
-    //    @WithMockUhUser(username = "")
-    //    public void memberGroupingsFailTest() throws Exception {
-    //        mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
-    //                .andExpect(status().is4xxClientError());
-    //    }
-
-    //    @WithAnonymousUser
-    public void memberGroupingsAnonTest() throws Exception {
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/grouping/groupings"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void getNumberOfGroupingsTest() throws Exception {
-        final String uid = "grouping";
-        final String owner = "bobo";
-
-        String path = "grouping";
-
-        List<GroupingPath> groupingPathList = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            groupingPathList.add(new GroupingPath(path));
-        }
-        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
-
-        mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
-                        .header(CURRENT_USER, owner))
-                .andExpect(status().isOk());
-        verify(memberAttributeService, times(1))
-                .getNumberOfGroupings(owner, uid);
-    }
-
-    @Test
-    @WithMockUhUser(username = "bobo")
-    public void getGroupingsOwnedAdminTest() throws Exception {
-        final String uid = "grouping";
-        final String admin = "bobo";
-
-        String path = "path:to:grouping";
-
-        List<GroupingPath> groupingPathList = new ArrayList<>();
-        groupingPathList.add(new GroupingPath(path));
-
-        given(memberAttributeService.getOwnedGroupings(admin, uid))
-                .willReturn(groupingPathList);
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
-                        .header(CURRENT_USER, admin)).andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].path").value(path))
-                .andExpect(jsonPath("$[0].name").value("grouping"));
-
-        verify(memberAttributeService, times(1))
-                .getOwnedGroupings(admin, uid);
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonOwnerGroupingsTest() throws Exception {
-        MvcResult result = mockMvc.perform(get(API_BASE + "/owners/grouping/groupings"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser(username = "uhAdmin")
-    public void addNewAdminTest() throws Exception {
-        String admin = "uhAdmin";
-        given(membershipService.addAdmin(admin, "newAdmin"))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "add admin"));
-
-        mockMvc.perform(post(API_BASE + "/admins/newAdmin")
+        mockMvc.perform(post(API_BASE + "/admins/" + newAdmin)
                         .with(csrf())
-                        .header(CURRENT_USER, admin))
+                        .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("add admin"));
+                .andExpect(jsonPath("action").value("add " + newAdmin));
 
         verify(membershipService, times(1))
-                .addAdmin(admin, "newAdmin");
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonAddAdminTest() throws Exception {
-        MvcResult result = mockMvc.perform(post(API_BASE + "/admins/newAdmin").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
+                .addAdmin(ADMIN, newAdmin);
     }
 
     @Test
-    @WithMockUhUser(username = "uhAdmin")
-    public void addOwnerTest() throws Exception {
-        List<String> ownersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResultList = new ArrayList<>();
-        ownersToAdd.add("tst04name");
-        ownersToAdd.add("tst05name");
-        ownersToAdd.add("tst06name");
-
-        given(membershipService.addOwnerships("path1", "uhAdmin", ownersToAdd))
-                .willReturn(addMemberResultList);
-
-        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/path1/owners/" + ownersToAdd)
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        assertThat(result, notNullValue());
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonAddOwnerTest() throws Exception {
-        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/path1/owners/newOwner").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void swaggerToStringTest() throws Exception {
-        given(helperService.swaggerToString(ADMIN)).willReturn(new GenericServiceResult());
-        mockMvc.perform(get(API_BASE + "/swagger/toString/")
-                        .with(csrf())
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk());
-
-        verify(helperService, times(1))
-                .swaggerToString(ADMIN);
-    }
-
-    @Test
-    @WithMockUhUser
-    public void membershipResultsTest() throws Exception {
-        List<Membership> memberships = new ArrayList<>();
-        given(membershipService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
-
-        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
-                        .with(csrf())
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk());
-
-        verify(membershipService, times(1))
-                .getMembershipResults(ADMIN, "iamtst01");
-    }
-
-    @Test
-    @WithMockUhUser
-    public void getSyncDestinationsTest() throws Exception {
-        given(groupAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
-                .willReturn(sdList());
-
-        mockMvc.perform(get(API_BASE + "/groupings/grouping/syncDestinations")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(groupAttributeService, times(1))
-                .getAllSyncDestinations(USERNAME, "grouping");
-    }
-
-    @Test
-    @WithMockUhUser
-    public void getOptInGroupsTest() throws Exception {
-        List<String> optInGroups = new ArrayList<>();
-        given(groupingAssignmentService.getOptInGroups(ADMIN, "iamtst01")).willReturn(optInGroups);
-        mockMvc.perform(get(API_BASE + "/groupings/optInGroups/iamtst01")
-                        .with(csrf())
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk());
-
-        verify(groupingAssignmentService, times(1))
-                .getOptInGroups(ADMIN, "iamtst01");
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser
-    public void addIncludeMembersTest() throws Exception {
-        List<String> usersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
-        usersToAdd.add("tst04name");
-        usersToAdd.add("tst05name");
-        usersToAdd.add("tst06name");
-        given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(addMemberResults);
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + usersToAdd)
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(membershipService, times(1))
-                .addIncludeMembers(USERNAME, "grouping", usersToAdd);
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser
-    public void addExcludeMembersTest() throws Exception {
-        List<String> usersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
-        usersToAdd.add("tst04name");
-        usersToAdd.add("tst05name");
-        usersToAdd.add("tst06name");
-        given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(addMemberResults);
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/" + usersToAdd)
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(membershipService, times(1))
-                .addExcludeMembers(USERNAME, "grouping", usersToAdd);
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser
-    public void removeIncludeMembersTest() throws Exception {
-        List<String> usersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
-        usersToRemove.add("tst04name");
-        usersToRemove.add("tst05name");
-        usersToRemove.add("tst06name");
-        given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(removeMemberResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/" + usersToRemove)
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(membershipService, times(1))
-                .removeIncludeMembers(USERNAME, "grouping", usersToRemove);
-    }
-
-    @Ignore
-    @Test
-    @WithMockUhUser
-    public void removeExcludeMembersTest() throws Exception {
-        List<String> usersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
-        usersToRemove.add("tst04name");
-        usersToRemove.add("tst05name");
-        usersToRemove.add("tst06name");
-        given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(removeMemberResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/" + usersToRemove)
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(membershipService, times(1))
-                .removeExcludeMembers(USERNAME, "grouping", usersToRemove);
-    }
-
-    @Test
-    @WithMockUhUser
-    public void enablePreferenceSyncDestTest() throws Exception {
-        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
-                .willReturn(gsrListIn());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is opted-in"));
-
-        verify(groupAttributeService, times(1))
-                .changeOptInStatus("grouping", USERNAME, true);
-
-        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, true))
-                .willReturn(gsrListOut());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is opted-out"));
-
-       verify(groupAttributeService, times(1))
-               .changeOptOutStatus("grouping", USERNAME, true);
-
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
-                .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("listserv status changed"));
-
-        verify(groupAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true);
-
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
-                .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("ldap status changed"));
-
-        verify(groupAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true);
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonEnablePreferenceSyncDestTest() throws Exception {
-        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(inResult, notNullValue());
-
-        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(outResult, notNullValue());
-
-        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(listResult, notNullValue());
-
-        MvcResult groupingResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(groupingResult, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void disablePreferenceSyncDestTest() throws Exception {
-        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, false))
-                .willReturn(gsrListIn2());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is not opted-in"));
-
-        verify(groupAttributeService, times(1))
-                .changeOptInStatus("grouping", USERNAME, false);
-
-        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, false))
-                .willReturn(gsrListOut2());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is not opted-out"));
-
-        verify(groupAttributeService, times(1))
-                .changeOptOutStatus("grouping", USERNAME, false);
-
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false))
-                .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("listserv status changed"));
-
-        verify(groupAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, false);
-
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false))
-                .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/disable")
-                        .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("ldap status changed"));
-
-        verify(groupAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, false);
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonDisablePreferenceSyncDestTest() throws Exception {
-        MvcResult inResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(inResult, notNullValue());
-
-        MvcResult outResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(outResult, notNullValue());
-
-        MvcResult listResult = mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(listResult, notNullValue());
-
-        MvcResult groupingResult = mockMvc.perform(
-                        put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/disable").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(groupingResult, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser
-    public void removeNewAdminTest() throws Exception {
-        given(membershipService.removeAdmin(USERNAME, "homerSimpson"))
+    @WithMockUhUser(username = "admin")
+    public void removeAdminTest() throws Exception {
+        String adminToRemove = "adminToRemove";
+        given(membershipService.removeAdmin(ADMIN, adminToRemove))
                 .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
 
-        mockMvc.perform(delete(API_BASE + "/admins/homerSimpson")
+        mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
                         .with(csrf())
-                        .header(CURRENT_USER, USERNAME))
+                        .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("resultCode").value(SUCCESS))
                 .andExpect(jsonPath("action").value("removed admin"));
 
         verify(membershipService, times(1))
-                .removeAdmin(USERNAME, "homerSimpson");
+                .removeAdmin(ADMIN, adminToRemove);
     }
 
     @Test
     @WithMockUhUser
     public void removeFromGroupsTest() throws Exception {
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         List<String> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             paths.add("grouping" + i);
         }
-        String userToRemove = "homerSimpson";
-        // Look into adding given and verify calls for this test
-        /*given(membershipService.removeAdmin(ADMIN, ))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));*/
-
-        MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + paths + "/" + userToRemove)
+        String userToRemove = "userToRemove";
+        given(membershipService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(removeMemberResults);
+        MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + String.join(",", paths) + "/" + userToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertThat(result, notNullValue());
-    }
+        assertNotNull(result);
+        verify(membershipService, times(1)).removeFromGroups(ADMIN, userToRemove, paths);
 
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonRemoveAdminTest() throws Exception {
-        MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/homerSimpson").with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
     }
 
     @Test
     @WithMockUhUser
-    public void removeOwnerTest() throws Exception {
-        List<String> ownersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
-        ownersToRemove.add("tst04name");
-        ownersToRemove.add("tst05name");
-        ownersToRemove.add("tst06name");
-
-        given(membershipService.removeOwnerships("grouping", USERNAME, ownersToRemove))
-                .willReturn(removeMemberResultList);
-
-        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/" + ownersToRemove)
-                .with(csrf())
-                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        assertThat(result, notNullValue());
-    }
-
-    @Ignore
-    @Test
-    @WithAnonymousUser
-    public void anonRemoveOwnerTest() throws Exception {
-        MvcResult result = mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/frye")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        assertThat(result, notNullValue());
+    public void resetGroupTest() throws Exception {
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<String> includePaths = new ArrayList<>();
+        List<String> excludePaths = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            includePaths.add("groupingInclude" + i);
+            excludePaths.add("groupingExclude" + i);
+        }
+        String includePathsStr = String.join(",", includePaths);
+        String excludePathsStr = String.join(",", excludePaths);
+        given(membershipService.resetGroup(ADMIN, "grouping", includePaths, excludePaths)).willReturn(
+                removeMemberResults);
+        MvcResult result =
+                mockMvc.perform(
+                                delete(API_BASE + "/groupings/grouping/" + includePathsStr + "/" + excludePathsStr
+                                        + "/resetGroup")
+                                        .with(csrf())
+                                        .header(CURRENT_USER, ADMIN))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertNotNull(result);
+        verify(membershipService, times(1)).resetGroup(ADMIN, "grouping", includePaths, excludePaths);
     }
 
     @Test
     @WithMockUhUser
-    public void rootTest() throws Exception {
-        MvcResult result = mockMvc.perform(get(API_BASE + "/"))
+    public void memberAttributesTest() throws Exception {
+        MvcResult validResult = mockMvc.perform(get(API_BASE + "/members/i0-uuid")
+                        .header(CURRENT_USER, "0o0-username"))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
+        assertThat(validResult, notNullValue());
 
-        assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
+        MvcResult invalidResult = mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
+                        .header(CURRENT_USER, "0o0-username"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(invalidResult, notNullValue());
     }
 
     @Test
@@ -834,171 +396,339 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    @WithMockUhUser(username = "admin")
-    public void addAdminTest() throws Exception {
-        String newAdmin = "newAdmin";
-        given(membershipService.addAdmin(ADMIN, newAdmin))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
+    @WithMockUhUser
+    public void membershipResultsTest() throws Exception {
+        List<Membership> memberships = new ArrayList<>();
+        given(membershipService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
-        mockMvc.perform(post(API_BASE + "/admins/" + newAdmin)
+        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("add " + newAdmin));
+                .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .addAdmin(ADMIN, newAdmin);
-    }
-
-    @Test
-    @WithMockUhUser(username = "admin")
-    public void removeAdminTest() throws Exception {
-        String adminToRemove = "adminToRemove";
-        given(membershipService.removeAdmin(ADMIN, adminToRemove))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
-
-        mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
-                        .with(csrf())
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("removed admin"));
-
-        verify(membershipService, times(1))
-                .removeAdmin(ADMIN, adminToRemove);
-    }
-
-    @Test
-    @WithMockUhUser(username = "admin")
-    public void adminListsTest() throws Exception {
-        String mvcResult = mockMvc.perform(get(API_BASE + "/adminsGroupings")
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        assertThat(mvcResult, notNullValue());
+                .getMembershipResults(ADMIN, "iamtst01");
     }
 
     @Test
     @WithMockUhUser
-    public void descriptionCheck() throws Exception {
-        Grouping testGrouping = groupingTwo();
-        String mockGroupPath = testGrouping.getPath();
+    public void getOptInGroupsTest() throws Exception {
+        List<String> optInGroups = new ArrayList<>();
+        given(groupingAssignmentService.optInGroupingsPaths(ADMIN, "iamtst01")).willReturn(optInGroups);
+        mockMvc.perform(get(API_BASE + "/groupings/optInGroups/iamtst01")
+                        .with(csrf())
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk());
 
-        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/" + mockGroupPath + "/description")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("Test")
-                        .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
+        verify(groupingAssignmentService, times(1))
+                .optInGroupingsPaths(ADMIN, "iamtst01");
+    }
+
+    @Test
+    @WithMockUhUser
+    public void optInTest() throws Exception {
+        MvcResult includeResult =
+                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
+                                .header("current_user", "o6-username")
+                                .header("accept", "application/json"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertThat(includeResult, notNullValue());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void optOutTest() throws Exception {
+        MvcResult excludeResult =
+                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
+                                .header("current_user", "o6-username")
+                                .header("accept", "application/json"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertThat(excludeResult, notNullValue());
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addIncludeMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
+                .willReturn(addMemberResults);
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/includeMembers/" + String.join(",", usersToAdd))
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+
+        verify(membershipService, times(1))
+                .addIncludeMembers(USERNAME, "grouping", usersToAdd);
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addExcludeMembersTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
+                .willReturn(addMemberResults);
+
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/excludeMembers/" + String.join(",", usersToAdd))
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+
+        verify(membershipService, times(1))
+                .addExcludeMembers(USERNAME, "grouping", usersToAdd);
+    }
+
+    @Test
+    @WithMockUhUser
+    public void removeIncludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
+        given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/includeMembers/" + String.join(",", usersToRemove))
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+
+        verify(membershipService, times(1))
+                .removeIncludeMembers(USERNAME, "grouping", usersToRemove);
+    }
+
+    @Test
+    @WithMockUhUser
+    public void removeExcludeMembersTest() throws Exception {
+        List<String> usersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        usersToRemove.add("tst04name");
+        usersToRemove.add("tst05name");
+        usersToRemove.add("tst06name");
+        given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(removeMemberResults);
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/excludeMembers/" + String.join(",", usersToRemove))
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+
+        verify(membershipService, times(1))
+                .removeExcludeMembers(USERNAME, "grouping", usersToRemove);
+    }
+
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void ownerGroupingsTest() throws Exception {
+        final String uid = "grouping";
+        final String admin = "bobo";
+
+        String path = "path:to:grouping";
+
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        groupingPathList.add(new GroupingPath(path));
+
+        given(memberAttributeService.getOwnedGroupings(admin, uid))
+                .willReturn(groupingPathList);
+        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+                        .header(CURRENT_USER, admin)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].path").value(path))
+                .andExpect(jsonPath("$[0].name").value("grouping"));
+
+        verify(memberAttributeService, times(1))
+                .getOwnedGroupings(admin, uid);
+    }
+
+    @Test
+    @WithMockUhUser
+    public void addOwnersTest() throws Exception {
+        List<String> ownersToAdd = new ArrayList<>();
+        List<AddMemberResult> addMemberResultList = new ArrayList<>();
+        ownersToAdd.add("tst04name");
+        ownersToAdd.add("tst05name");
+        ownersToAdd.add("tst06name");
+
+        given(membershipService.addOwnerships("grouping", USERNAME, ownersToAdd))
+                .willReturn(addMemberResultList);
+
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToAdd))
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andReturn();
+
         assertThat(result, notNullValue());
+        verify(membershipService, times(1))
+                .addOwnerships("grouping", USERNAME, ownersToAdd);
+
     }
 
     @Test
     @WithMockUhUser
-    public void memberLookupTest() throws Exception {
-        MvcResult validResult = mockMvc.perform(get(API_BASE + "/members/i0-uuid")
-                        .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(validResult, notNullValue());
+    public void removeOwnersTest() throws Exception {
+        List<String> ownersToRemove = new ArrayList<>();
+        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
+        ownersToRemove.add("tst04name");
+        ownersToRemove.add("tst05name");
+        ownersToRemove.add("tst06name");
 
-        MvcResult invalidResult = mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
-                        .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(invalidResult, notNullValue());
-    }
+        given(membershipService.removeOwnerships("grouping", USERNAME, ownersToRemove))
+                .willReturn(removeMemberResultList);
 
-    @Ignore
-    @Test
-    @WithMockUhUser(username = "abc")
-    public void lookUpPermissionTestMember() throws Exception {
-        MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
-                .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
-                .andExpect(status().is5xxServerError())
-                .andReturn();
-        assertThat(ownerResult, notNullValue());
-
-        MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
-                .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
-                .andExpect(status().is5xxServerError())
-                .andReturn();
-        assertThat(groupingsResult, notNullValue());
-
-        MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
-                .header(CURRENT_USER, "0o0-username"))
-                .andDo(print())
-                .andExpect(status().is5xxServerError())
-                .andReturn();
-        assertThat(memberAttributeResult, notNullValue());
-    }
-
-    @Ignore
-    @Test
-    @WithMockAdminUser(username = "bobo")
-    public void lookUpPermissionTestAdmin() throws Exception {
-        String newAdmin = "newAdmin";
-        given(membershipService.addAdmin(ADMIN, newAdmin))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
-
-        mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "/groupings")
-                        .header(CURRENT_USER, newAdmin))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "/groupings")
-                        .header(CURRENT_USER, newAdmin))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get(API_BASE + "/members/" + USERNAME)
-                        .header(CURRENT_USER, newAdmin))
-                .andDo(print())
-                .andExpect(status().isOk());
-
+        MvcResult result =
+                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToRemove))
+                                .with(csrf())
+                                .header(CURRENT_USER, USERNAME))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertNotNull(result);
         verify(membershipService, times(1))
-                .addAdmin(ADMIN, newAdmin);
+                .removeOwnerships("grouping", USERNAME, ownersToRemove);
     }
 
-    @Ignore
     @Test
-    @WithMockUhUser(username = "testUser")
-    public void lookUpPermissionTestOwner() throws Exception {
-        Grouping testGroup = grouping();
-        System.out.println("TEST GROUP: " + testGroup);
-        System.out.println("OWNERS: " + testGroup.getOwners());
-        System.out.println("THE PATH: " + testGroup.getPath());
+    @WithMockUhUser
+    public void updateDescriptionTest() throws Exception {
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
 
-        // Try to look up information about member in owned group <-- SUCCEED
+        given(groupAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
+                groupingsServiceResult);
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/description")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME)
+                        .content("description"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
 
-        // Create an unrelated group
-        // Try to look up information about member in unrelated group <-- FAIL
+        verify(groupAttributeService, times(1))
+                .updateDescription("grouping", USERNAME, "description");
+    }
 
-        // Keeps failing; is this a bug?
-        assertTrue(memberAttributeService.isOwner(testGroup.getPath(), "o0-username"));
+    @Test
+    @WithMockUhUser
+    public void enablePreferenceSyncDestTest() throws Exception {
+        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
+                .willReturn(gsrListIn());
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_IN + "/enable")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$[0].action").value("member is opted-in"));
 
-        //            MvcResult ownerResult = mockMvc.perform(get(API_BASE + "/owners/" + lookUp[i] + "/groupings"))
-        //                    .andDo(print())
-        //                    .andExpect(status().isOk())
-        //                    .andReturn();
-        //
-        //            MvcResult groupingsResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i] + "/groupings"))
-        //                    .andDo(print())
-        //                    .andExpect(status().isOk())
-        //                    .andReturn();
-        //
-        //            MvcResult memberAttributeResult = mockMvc.perform(get(API_BASE + "/members/" + lookUp[i]))
-        //                    .andDo(print())
-        //                    .andExpect(status().isOk())
-        //                    .andReturn();
+        verify(groupAttributeService, times(1))
+                .changeOptInStatus("grouping", USERNAME, true);
+
+        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, true))
+                .willReturn(gsrListOut());
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/preferences/" + OPT_OUT + "/enable")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$[0].action").value("member is opted-out"));
+
+        verify(groupAttributeService, times(1))
+                .changeOptOutStatus("grouping", USERNAME, true);
+
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
+                .willReturn(gsrListserv());
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + LISTSERV + "/enable")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("listserv status changed"));
+
+        verify(groupAttributeService, times(1))
+                .changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true);
+
+        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
+                .willReturn(gsrReleasedGrouping());
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/syncDests/" + RELEASED_GROUPING + "/enable")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
+                .andExpect(jsonPath("$.action").value("ldap status changed"));
+
+        verify(groupAttributeService, times(1))
+                .changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true);
+    }
+
+    @Test
+    @WithMockUhUser
+    public void getSyncDestinationsTest() throws Exception {
+        given(groupAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
+                .willReturn(sdList());
+
+        mockMvc.perform(get(API_BASE + "/groupings/grouping/syncDestinations")
+                        .with(csrf())
+                        .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk());
+
+        verify(groupAttributeService, times(1))
+                .getAllSyncDestinations(USERNAME, "grouping");
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void hasOwnerPrivsTest() throws Exception {
+        given(memberAttributeService.isOwner(CURRENT_USER)).willReturn(false);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/owners")
+                        .with(csrf())
+                        .header(CURRENT_USER,CURRENT_USER))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        verify(memberAttributeService, times(1))
+                .isOwner(CURRENT_USER);
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void hasAdminPrivsTest() throws Exception {
+        given(memberAttributeService.isAdmin(CURRENT_USER)).willReturn(false);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/admins")
+                        .with(csrf())
+                        .header(CURRENT_USER,CURRENT_USER))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        verify(memberAttributeService, times(1))
+                .isAdmin(CURRENT_USER);
+    }
+
+    @Test
+    @WithMockUhUser(username = "bobo")
+    public void getNumberOfGroupingsTest() throws Exception {
+        final String uid = "grouping";
+        final String owner = "bobo";
+
+        String path = "grouping";
+
+        List<GroupingPath> groupingPathList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            groupingPathList.add(new GroupingPath(path));
+        }
+        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
+
+        mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
+                        .header(CURRENT_USER, owner))
+                .andExpect(status().isOk());
+        verify(memberAttributeService, times(1))
+                .getNumberOfGroupings(owner, uid);
     }
 
     @Test
@@ -1027,27 +757,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void selfTest() throws Exception {
-
-        MvcResult includeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/includeMembers/o6-username/self")
-                        .header("current_user", "o6-username")
-                        .header("accept", "application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(includeResult, notNullValue());
-
-        MvcResult excludeResult = mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/excludeMembers/o6-username/self")
-                        .header("current_user", "o6-username")
-                        .header("accept", "application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(excludeResult, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser
     public void syncDestinationsTest() throws Exception {
         Grouping group = groupingTwo();
         System.out.println(group.getOwners());
@@ -1058,6 +767,23 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(result, notNullValue());
+    }
+
+    @Test
+    @WithMockUhUser(username = "iamtst01")
+    public void getNumberOfMembershipsTest() throws Exception {
+        String uid = currentUser().getUid();
+        given(membershipService.getNumberOfMemberships(ADMIN, uid))
+                .willReturn(369);
+
+        mockMvc.perform(get(API_BASE + "/groupings/" + uid + "/memberships")
+                        .with(csrf())
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andExpect(content().string("369"));
+
+        verify(membershipService, times(1))
+                .getNumberOfMemberships(ADMIN, uid);
     }
 
     @Test
@@ -1087,22 +813,5 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().is4xxClientError())
                 .andReturn();
         assertThat(result4, notNullValue());
-    }
-
-    @Test
-    @WithMockUhUser(username = "iamtst01")
-    public void getNumberOfMembershipsTest() throws Exception {
-        String uid = currentUser().getUid();
-        given(membershipService.getNumberOfMemberships(ADMIN, uid))
-                .willReturn(369);
-
-        mockMvc.perform(get(API_BASE + "/groupings/" + uid + "/memberships")
-                        .with(csrf())
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(content().string("369"));
-
-        verify(membershipService, times(1))
-                .getNumberOfMemberships(ADMIN, uid);
     }
 }

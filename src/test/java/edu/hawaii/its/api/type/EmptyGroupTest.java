@@ -1,26 +1,25 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EmptyGroupTest extends Group {
 
     private EmptyGroup emptygroup;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public ExpectedException thrown;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    public void setup() {
+        thrown = ExpectedException.none();
         emptygroup = new EmptyGroup();
     }
 
     @Test
     public void test() {
-        thrown.expect(UnsupportedOperationException.class);
-        emptygroup.addMember(new Person());
-
+        assertThrows(UnsupportedOperationException.class, () -> emptygroup.addMember(new Person()));
     }
 }

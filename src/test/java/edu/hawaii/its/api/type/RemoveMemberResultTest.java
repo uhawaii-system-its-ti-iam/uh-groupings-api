@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,7 +20,7 @@ public class RemoveMemberResultTest {
     private final String result = "result";
     private final String userIdentifier = "userIdentifier";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         removeMemberResultInstantiatedOnConstruction =
                 new RemoveMemberResult(true, pathOfRemoved, name, uhUuid, uid, result, userIdentifier);

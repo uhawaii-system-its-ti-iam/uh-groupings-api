@@ -33,4 +33,24 @@ public class JsonUtil {
         }
         return result;
     }
+
+    public static void printJson(Object obj) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(obj);
+            System.err.println(json);
+        } catch (Exception e) {
+            logger.error("Error: " + e);
+        }
+    }
+    public static void prettyPrint(Object object) {
+        try {
+            String json = new ObjectMapper()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(object);
+            System.out.println(json);
+        } catch (Exception e) {
+            logger.error("Error: " + e);
+        }
+    }
 }

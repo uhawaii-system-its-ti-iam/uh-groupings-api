@@ -1,16 +1,16 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddMemberResultTest {
     private AddMemberResult addMemberResultInstantiatedOnConstruction;
@@ -23,7 +23,7 @@ public class AddMemberResultTest {
     private final String result = "result";
     private final String userIdentifier = "userIdentifier";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         addMemberResultInstantiatedOnConstruction =
                 new AddMemberResult(true, true, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
