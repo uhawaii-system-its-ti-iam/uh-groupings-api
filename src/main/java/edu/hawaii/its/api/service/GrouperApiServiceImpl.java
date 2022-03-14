@@ -74,10 +74,8 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     @Autowired
     HelperService helperService;
 
-    // Todo add logger messages to functions.
     @Override
     public List<SyncDestination> syncDestinations() {
-
         WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
                 .assignScope(SYNC_DESTINATIONS_LOCATION)
                 .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES)
@@ -266,7 +264,6 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    // Todo return value is never used.
     public WsAssignAttributesResults assignAttributesResultsForGroup(String attributeAssignType,
             String attributeAssignOperation,
             String attributeDefNameName,

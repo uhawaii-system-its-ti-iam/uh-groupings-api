@@ -91,7 +91,6 @@ public class MembershipServiceImpl implements MembershipService {
      * Add am admin.
      */
     @Override
-    // Todo return a custom make type no the GroupingServiceResult.
     public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
         logger.info("addAdmin; username: " + currentAdminUsername + "; newAdmin: " + newAdminUsername + ";");
 
@@ -344,7 +343,6 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Remove owner/owners from groupings at groupingPath.
      */
-    // Todo Needs a guard to throw exception if groupingPath is actually a groupPath.
     public List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove) {
         logger.info("removeOwnership; grouping: "
                 + groupingPath
@@ -382,7 +380,6 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Gives ownership to a single or multiple users.
      */
-    // Todo Needs a guard to throw exception if groupingPath is actually a groupPath.
     public List<AddMemberResult> addOwnerships(String groupingPath, String ownerUsername, List<String> ownersToAdd) {
         logger.info("assignOwnership; groupingPath: "
                 + groupingPath
@@ -416,7 +413,6 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at
      * uid to the include list and removes them from the exclude list.
      */
-    // Todo this could be returning only an AddMemberResult.
     @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
         logger.info("optIn; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
@@ -429,7 +425,6 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting out adds a member/user
      * at uid to the exclude list and removes them from the include list.
      */
-    // Todo this could be returning only an AddMemberResult.
     @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
         logger.info("optOut; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {

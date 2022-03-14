@@ -114,7 +114,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
      * Turn the ability for users to opt-in to a grouping on or off.
      */
     @Override
-    // Todo return type needs rethinking.
     public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername,
             boolean isOptInOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
