@@ -24,7 +24,7 @@
         <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
         <hibernate.version>5.4.18.Final</hibernate.version>
         <h2.version>2.0.206</h2.version>
-        <org.jasig.cas.client-version>3.6.0</org.jasig.cas.client-version>
+        <org.jasig.cas.client-version>3.6.3</org.jasig.cas.client-version>
 
         <swagger2markup.version>1.2.0</swagger2markup.version>
         <asciidoctor.input.directory>${project.basedir}/src/docs/asciidoc</asciidoctor.input.directory>
@@ -139,7 +139,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>6.3</version>
+            <version>7.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
