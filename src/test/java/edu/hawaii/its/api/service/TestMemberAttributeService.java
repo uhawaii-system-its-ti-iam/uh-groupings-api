@@ -104,7 +104,7 @@ public class TestMemberAttributeService {
             assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE,
                     new Person(testUsername, testUsername, testUsername)));
             assertEquals(0,
-                    getMembershipsForCurrentUser(membershipService.getMembershipResults(ADMIN, testUsername)).size());
+                    getMembershipsForCurrentUser(membershipService.membershipResults(ADMIN, testUsername)).size());
         });
 
         // Should be members after add.
@@ -209,7 +209,7 @@ public class TestMemberAttributeService {
     public void getOwnedGroupingsTest() {
         // Groupings owned by current admin should complement the list of memberships that the current admin is in.
         List<GroupingPath> groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
-        List<Membership> memberships = membershipService.getMembershipResults(ADMIN, ADMIN);
+        List<Membership> memberships = membershipService.membershipResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.forEach(groupingPath -> {
             assertTrue(
