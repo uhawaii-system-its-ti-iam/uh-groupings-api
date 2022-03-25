@@ -399,7 +399,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void membershipResultsTest() throws Exception {
         List<Membership> memberships = new ArrayList<>();
-        given(membershipService.getMembershipResults(ADMIN, "iamtst01")).willReturn(memberships);
+        given(membershipService.membershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
         mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
                         .with(csrf())
@@ -407,7 +407,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .getMembershipResults(ADMIN, "iamtst01");
+                .membershipResults(ADMIN, "iamtst01");
     }
 
     @Test

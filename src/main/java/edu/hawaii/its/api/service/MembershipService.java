@@ -14,7 +14,7 @@ public interface MembershipService {
 
     List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove);
 
-    List<Membership> getMembershipResults(String owner, String uid);
+    List<Membership> membershipResults(String currentUser, String uid);
 
     List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
