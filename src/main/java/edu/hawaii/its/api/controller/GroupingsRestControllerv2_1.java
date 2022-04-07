@@ -446,7 +446,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get's the number of groupings that the current user owns
+     * Get the number of groupings that the current user owns
      */
     @GetMapping(value = "/owners/{uid:[\\w-:.]+}/grouping")
     @ResponseBody
@@ -469,5 +469,18 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(membershipService.getNumberOfMemberships(currentUser, uid));
+    }
+
+    /**
+     * Get a list of owners from a grouping.
+     */
+    @GetMapping(value = "/{path:[\\w-:.]+}/owners/{uidToCheck}")
+    @ResponseBody
+    public ResponseEntity<Boolean> isSoleOwner(@RequestHeader(CURRENT_USER) String currentUser,
+            @PathVariable String path, @PathVariable String uidToCheck) {
+        logger.info("Entered REST getGroupingOwners...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.isSoleOwner(currentUser, path, uidToCheck));
     }
 }

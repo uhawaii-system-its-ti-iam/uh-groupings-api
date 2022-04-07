@@ -411,4 +411,7 @@ public class TestGroupingAssignmentService {
         assertFalse(groupPaths.isEmpty());
         membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
+
+    //ToDo add test coverage for getGroupingOwners() and isSoleOwner
+
 }
