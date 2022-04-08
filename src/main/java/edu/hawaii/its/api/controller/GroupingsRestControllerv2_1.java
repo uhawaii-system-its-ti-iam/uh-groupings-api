@@ -472,7 +472,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of owners from a grouping.
+     * Check if the user is a sole owner of a grouping
      */
     @GetMapping(value = "/{path:[\\w-:.]+}/owners/{uidToCheck}")
     @ResponseBody
