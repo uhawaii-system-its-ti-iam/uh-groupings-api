@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
@@ -32,9 +31,9 @@ public interface MembershipService {
 
     List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
 
-    GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
+    AddMemberResult addAdmin(String currentUser, String adminToAdd);
 
-    GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername);
+    RemoveMemberResult removeAdmin(String currentUser, String adminToRemove);
 
     List<RemoveMemberResult> removeFromGroups(String adminUsername, String userToRemove, List<String> groupPaths);
 

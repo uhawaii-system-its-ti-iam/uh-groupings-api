@@ -258,35 +258,29 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser(username = "admin")
     public void addAdminTest() throws Exception {
-        String newAdmin = "newAdmin";
-        given(membershipService.addAdmin(ADMIN, newAdmin))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "add " + newAdmin));
-
-        mockMvc.perform(post(API_BASE + "/admins/" + newAdmin)
+        String adminToAdd = "adminToAdd";
+        AddMemberResult addMemberResult = new AddMemberResult();
+        given(membershipService.addAdmin(ADMIN, adminToAdd)).willReturn(addMemberResult);
+        mockMvc.perform(post(API_BASE + "/admins/" + adminToAdd)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("add " + newAdmin));
-
+                .andExpect(status().isOk());
         verify(membershipService, times(1))
-                .addAdmin(ADMIN, newAdmin);
+                .addAdmin(ADMIN, adminToAdd);
     }
 
     @Test
     @WithMockUhUser(username = "admin")
     public void removeAdminTest() throws Exception {
         String adminToRemove = "adminToRemove";
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult();
         given(membershipService.removeAdmin(ADMIN, adminToRemove))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
+                .willReturn(removeMemberResult);
 
         mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("removed admin"));
-
+                .andExpect(status().isOk());
         verify(membershipService, times(1))
                 .removeAdmin(ADMIN, adminToRemove);
     }
@@ -688,7 +682,7 @@ public class GroupingsRestControllerv2_1Test {
         given(memberAttributeService.isOwner(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/owners")
                         .with(csrf())
-                        .header(CURRENT_USER,CURRENT_USER))
+                        .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
@@ -702,7 +696,7 @@ public class GroupingsRestControllerv2_1Test {
         given(memberAttributeService.isAdmin(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/admins")
                         .with(csrf())
-                        .header(CURRENT_USER,CURRENT_USER))
+                        .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
