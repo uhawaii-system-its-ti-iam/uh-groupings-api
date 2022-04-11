@@ -135,18 +135,18 @@ public class MembershipServiceImpl implements MembershipService {
      * Get a list of memberships pertaining to uid.
      */
     @Override
-    public List<Membership> getMembershipResults(String owner, String uid) {
-        String action = "getMembershipResults; owner: " + owner + "; uid: " + uid + ";";
+    public List<Membership> membershipResults(String currentUser, String uid) {
+        String action = "getMembershipResults; currentUser: " + currentUser + "; uid: " + uid + ";";
         logger.info(action);
 
-        if (!memberAttributeService.isAdmin(owner) && !owner.equals(uid)) {
+        if (!memberAttributeService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         List<Membership> memberships = new ArrayList<>();
         List<String> groupPaths;
         List<String> optOutList;
         try {
-            groupPaths = groupingAssignmentService.getGroupPaths(owner, uid);
+            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
             optOutList = groupingAssignmentService.optableGroupings(OPT_OUT);
         } catch (GcWebServiceError e) {
             return memberships;
@@ -292,21 +292,16 @@ public class MembershipServiceImpl implements MembershipService {
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         for (String userToRemove : usersToRemove) {
             RemoveMemberResult removeMemberResult;
-            try {
-                WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(groupPath, userToRemove);
-                removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-                if (removeMemberResult.isUserWasRemoved()) {
-                    membershipService.updateLastModified(groupPath);
-                    if (removeMemberResult.getUid() == null) {
-                        removeMemberResult.setUid(memberAttributeService
-                                .getMemberAttributes(currentUser, removeMemberResult.getUhUuid()).getUsername());
-                    }
+            WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(groupPath, userToRemove);
+            removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+            if (removeMemberResult.isUserWasRemoved()) {
+                membershipService.updateLastModified(groupPath);
+                if (removeMemberResult.getUid() == null) {
+                    removeMemberResult.setUid(memberAttributeService
+                            .getMemberAttributes(currentUser, removeMemberResult.getUhUuid()).getUsername());
                 }
-                removeMemberResults.add(removeMemberResult);
-            } catch (GcWebServiceError | NullPointerException e) {
-                removeMemberResult = new RemoveMemberResult(userToRemove, FAILURE);
-                removeMemberResults.add(removeMemberResult);
             }
+            removeMemberResults.add(removeMemberResult);
             logger.info("removeGroupMembers; " + removeMemberResult.toString());
         }
         return removeMemberResults;
@@ -443,18 +438,12 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         List<RemoveMemberResult> results = new ArrayList<>();
-        List<String> userToRemoveList = new ArrayList<>();
-        userToRemoveList.add(userToRemove);
-        groupPaths.forEach(groupPath -> {
-            if (groupPath.endsWith(OWNERS)) {
-                results.addAll(
-                        removeOwnerships(helperService.parentGroupingPath(groupPath), adminUsername, userToRemoveList));
-            } else if (groupPath.endsWith(INCLUDE) || groupPath.endsWith(EXCLUDE)) {
-                results.addAll(removeGroupMembers(adminUsername, groupPath, userToRemoveList));
-            } else {
+        for (String groupPath : groupPaths) {
+            if (!groupPath.endsWith(OWNERS) && !groupPath.endsWith(INCLUDE) && !groupPath.endsWith(EXCLUDE)) {
                 throw new GcWebServiceError("404: Invalid group path.");
             }
-        });
+            results.add(new RemoveMemberResult(grouperApiService.removeMember(groupPath, userToRemove)));
+        }
         return results;
     }
 
@@ -506,6 +495,6 @@ public class MembershipServiceImpl implements MembershipService {
      * Get the number of memberships.
      */
     @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
-        return getMembershipResults(currentUser, uid).size();
+        return membershipResults(currentUser, uid).size();
     }
 }

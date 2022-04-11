@@ -187,7 +187,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST membershipResults...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getMembershipResults(currentUser, uid));
+                .body(membershipService.membershipResults(currentUser, uid));
     }
 
     /**
