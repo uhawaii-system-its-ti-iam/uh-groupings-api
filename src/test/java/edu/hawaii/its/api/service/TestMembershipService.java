@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
@@ -124,30 +123,31 @@ public class TestMembershipService {
         }
 
         // Should not add if username is already in admins list.
-        GroupingsServiceResult groupingsServiceResult;
+        AddMemberResult addMemberResult;
         try {
-            groupingsServiceResult = membershipService.addAdmin(ADMIN, ADMIN);
-            assertNotNull(groupingsServiceResult);
-            assertEquals(SUCCESS + ": " + ADMIN + " was already in" + GROUPING_ADMINS,
-                    groupingsServiceResult.getResultCode());
+            addMemberResult = membershipService.addAdmin(ADMIN, ADMIN);
+            assertNotNull(addMemberResult);
+            assertEquals(FAILURE, addMemberResult.getResult());
         } catch (AccessDeniedException e) {
             fail(" Should not throw an exception if current user is an admin.");
         }
 
         // Should add a new admin via uh username.
         assertFalse(memberAttributeService.isAdmin(testUsername));
-        groupingsServiceResult = membershipService.addAdmin(ADMIN, testUsername);
+        addMemberResult = membershipService.addAdmin(ADMIN, testUsername);
         assertTrue(memberAttributeService.isAdmin(testUsername));
-        assertNotNull(groupingsServiceResult);
+        assertNotNull(addMemberResult);
+        assertEquals(SUCCESS, addMemberResult.getResult());
         //  Clean up
         grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
 
         // Should add a new admin via uh number.
         String testUhNumber = TEST_UH_NUMBERS.get(0);
         assertFalse(memberAttributeService.isAdmin(testUhNumber));
-        groupingsServiceResult = membershipService.addAdmin(ADMIN, testUhNumber);
+        addMemberResult = membershipService.addAdmin(ADMIN, testUhNumber);
         assertTrue(memberAttributeService.isAdmin(testUhNumber));
-        assertNotNull(groupingsServiceResult);
+        assertNotNull(addMemberResult);
+        assertEquals(SUCCESS, addMemberResult.getResult());
         //  Clean up
         grouperApiService.removeMember(GROUPING_ADMINS, testUhNumber);
     }

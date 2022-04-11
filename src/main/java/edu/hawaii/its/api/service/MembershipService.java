@@ -32,7 +32,7 @@ public interface MembershipService {
 
     List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
 
-    GroupingsServiceResult addAdmin(String adminUsername, String adminToAddUsername);
+    AddMemberResult addAdmin(String adminUsername, String adminToAddUsername);
 
     GroupingsServiceResult removeAdmin(String adminUsername, String adminToRemoveUsername);
 
