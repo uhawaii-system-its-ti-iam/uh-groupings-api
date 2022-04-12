@@ -331,6 +331,26 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
+    public WsGetMembersResults membersResults(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            List<String> groupPaths
+    ) {
+        GcGetMembers members = new GcGetMembers();
+
+        if (groupPaths != null && groupPaths.size() > 0) {
+            for (String path : groupPaths) {
+                members.addGroupName(path);
+            }
+        }
+
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .assignIncludeSubjectDetail(true)
+                .execute();
+    }
+
+    @Override
     public WsGetGroupsResults groupsResults(String username, WsStemLookup stemLookup, StemScope stemScope) {
 
         if (helperService.isUhUuid(username)) {
