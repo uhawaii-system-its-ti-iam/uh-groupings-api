@@ -278,6 +278,13 @@ public class TestGrouperApiService {
         );
         assertNotNull(membersResults);
 
+        //Overloaded membersResults test, only takes three parameters
+        membersResults = grouperApiService.membersResults(
+                ASSIGN_TYPE_GROUP,
+                grouperApiService.subjectLookup(ADMIN),
+                Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE)
+        );
+        assertNotNull(membersResults);
     }
 
     @Test

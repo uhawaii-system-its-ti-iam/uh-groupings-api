@@ -343,14 +343,15 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         WsGetMembersResults wsGetMembersResults = grouperApiService.membersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,
                 lookup,
-                path,
-                null,
-                null,
-                null,
-                null);
+                path);
+
         List<WsSubject> subjects = Arrays.asList(wsGetMembersResults.getResults()[0].getWsSubjects());
         subjects.forEach(subject -> {
-            owners.add(subject.getAttributeValue(1));
+            String ownerUid = subject.getAttributeValue(1);
+            //TODO Remove the if statement after old/outdated UH Grouper users have been pruned
+            if (!ownerUid.isEmpty()) {
+                owners.add(ownerUid);
+            }
         });
 
         return owners;
