@@ -91,7 +91,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Add am admin.
      */
     @Override
-    public GroupingsServiceResult addAdmin(String currentAdminUsername, String newAdminUsername) {
+    public AddMemberResult addAdmin(String currentAdminUsername, String newAdminUsername) {
         logger.info("addAdmin; username: " + currentAdminUsername + "; newAdmin: " + newAdminUsername + ";");
 
         String action = "add " + newAdminUsername + " to " + GROUPING_ADMINS;
@@ -99,15 +99,10 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isAdmin(currentAdminUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        if (memberAttributeService.isAdmin(newAdminUsername)) {
-            return helperService.makeGroupingsServiceResult(
-                    SUCCESS + ": " + newAdminUsername + " was already in" + GROUPING_ADMINS, action);
-        }
         WsAddMemberResults addMemberResult = grouperApiService.addMember(
                 GROUPING_ADMINS,
                 newAdminUsername);
-
-        return helperService.makeGroupingsServiceResult(addMemberResult, action);
+        return new AddMemberResult(addMemberResult);
     }
 
     /**

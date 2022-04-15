@@ -10,6 +10,7 @@ import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -159,7 +160,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                GroupingsServiceResult.class));
+                AddMemberResult.class));
         membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
 
