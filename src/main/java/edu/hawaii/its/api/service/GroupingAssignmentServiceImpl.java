@@ -13,6 +13,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -333,4 +334,35 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return groups.stream().map(WsGroup::getName).collect(Collectors.toList());
     }
 
+    @Override
+    public List<String> getGroupingOwners(String currentUser, String groupPath) {
+        List<String> owners = new ArrayList<>();
+        List<String> path = new ArrayList<>();
+        path.add(groupPath + OWNERS);
+        WsSubjectLookup lookup = grouperApiService.subjectLookup(currentUser);
+        WsGetMembersResults wsGetMembersResults = grouperApiService.membersResults(
+                SUBJECT_ATTRIBUTE_NAME_UID,
+                lookup,
+                path);
+
+        List<WsSubject> subjects = Arrays.asList(wsGetMembersResults.getResults()[0].getWsSubjects());
+        subjects.forEach(subject -> {
+            String ownerUid = subject.getAttributeValue(1);
+            //TODO Remove the if statement after old/outdated UH Grouper users have been pruned
+            if (!ownerUid.isEmpty()) {
+                owners.add(ownerUid);
+            }
+        });
+
+        return owners;
+    }
+
+    @Override
+    public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
+        List<String> ownersInGrouping = getGroupingOwners(currentUser, groupPath);
+        if (ownersInGrouping.size() >= 2) {
+            return false;
+        }
+        return ownersInGrouping.contains(uidToCheck);
+    }
 }
