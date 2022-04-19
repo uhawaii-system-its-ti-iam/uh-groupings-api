@@ -82,6 +82,11 @@ public interface GrouperApiService {
             String sortString,
             Boolean isAscending);
 
+    //Overloaded membersResults, only takes three parameters, no pageNumber, pageSize, sortString and isAscending
+    WsGetMembersResults membersResults(String subjectAttributeName,
+            WsSubjectLookup lookup,
+            List<String> groupPaths);
+
     WsGetGroupsResults groupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
 
     WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup);
