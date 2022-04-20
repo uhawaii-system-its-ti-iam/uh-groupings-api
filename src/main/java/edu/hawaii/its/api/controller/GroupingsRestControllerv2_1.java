@@ -110,7 +110,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove an admin.
      */
     @DeleteMapping(value = "/admins/{uid:[\\w-:.]+}")
-    public ResponseEntity<GroupingsServiceResult> removeAdmin(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<RemoveMemberResult> removeAdmin(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST removeAdmin...");
         return ResponseEntity
