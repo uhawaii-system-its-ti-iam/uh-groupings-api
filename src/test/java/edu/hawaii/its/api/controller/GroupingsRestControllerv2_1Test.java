@@ -273,15 +273,14 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "admin")
     public void removeAdminTest() throws Exception {
         String adminToRemove = "adminToRemove";
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult();
         given(membershipService.removeAdmin(ADMIN, adminToRemove))
-                .willReturn(new GroupingsServiceResult(SUCCESS, "removed admin"));
+                .willReturn(removeMemberResult);
 
         mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("resultCode").value(SUCCESS))
-                .andExpect(jsonPath("action").value("removed admin"));
+                .andExpect(status().isOk());
 
         verify(membershipService, times(1))
                 .removeAdmin(ADMIN, adminToRemove);

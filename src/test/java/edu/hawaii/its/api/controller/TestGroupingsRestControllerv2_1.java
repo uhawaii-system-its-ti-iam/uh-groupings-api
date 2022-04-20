@@ -15,6 +15,7 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.RemoveMemberResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -175,8 +176,8 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                GroupingsServiceResult.class));
-        membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
+                RemoveMemberResult.class));
+        assertFalse(memberAttributeService.isAdmin(TEST_USERNAMES.get(0)));
     }
 
     @Test
