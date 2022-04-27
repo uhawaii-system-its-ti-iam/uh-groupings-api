@@ -503,4 +503,17 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.numberOfMemberships(currentUser, uid));
     }
+
+    /**
+     * Get a list of owners from a grouping.
+     */
+    @GetMapping(value = "/{path:[\\w-:.]+}/owners/{uidToCheck}")
+    @ResponseBody
+    public ResponseEntity<Boolean> isSoleOwner(@RequestHeader("current_user") String currentUser,
+            @PathVariable String path, @PathVariable String uidToCheck) {
+        logger.info("Entered REST getGroupingOwners...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.isSoleOwner(currentUser, path, uidToCheck));
+    }
 }

@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -707,6 +708,41 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
 
         return helperService.makeGroupings(opts);
+    }
+
+    @Override
+    public List<String> getGroupingOwners(String currentUser, String groupPath) {
+        List<String> owners = new ArrayList<>();
+        List<String> path = new ArrayList<>();
+        path.add(groupPath + OWNERS);
+        WsSubjectLookup lookup = grouperFactoryService.makeWsSubjectLookup(currentUser);
+        WsGetMembersResults wsGetMembersResults = grouperFactoryService.makeWsGetMembersResults(
+                SUBJECT_ATTRIBUTE_NAME_UID,
+                lookup,
+                path,
+                null,
+                null,
+                null,
+                null);
+        List<WsSubject> subjects = Arrays.asList(wsGetMembersResults.getResults()[0].getWsSubjects());
+        subjects.forEach(subject -> {
+            String ownerUid = subject.getAttributeValue(1);
+            //TODO Remove the if statement after old/outdated UH Grouper users have been pruned
+            if (!ownerUid.isEmpty()) {
+                owners.add(ownerUid);
+            }
+        });
+
+        return owners;
+    }
+
+    @Override
+    public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
+        List<String> ownersInGrouping = getGroupingOwners(currentUser, groupPath);
+        if (ownersInGrouping.size() >= 2) {
+            return false;
+        }
+        return ownersInGrouping.contains(uidToCheck);
     }
 
 }
