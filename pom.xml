@@ -19,7 +19,7 @@
     <properties>
         <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
         <java.version>1.8</java.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <commons-dbcp-version>2.1.1</commons-dbcp-version>
         <hibernate-jpa.version>1.0.0.Final</hibernate-jpa.version>
         <hibernate.version>5.4.18.Final</hibernate.version>
