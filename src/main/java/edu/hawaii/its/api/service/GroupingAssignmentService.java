@@ -61,4 +61,8 @@ public interface GroupingAssignmentService {
     List<String> optableGroupings(String optAttr);
 
     List<String> allGroupingsPaths();
+
+    List<String> getGroupingOwners(String currentUser, String groupPath);
+
+    Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck);
 }
