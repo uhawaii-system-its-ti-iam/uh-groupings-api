@@ -186,9 +186,6 @@ public class MembershipServiceImpl implements MembershipService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Autowired
-    private GroupingsMailService groupingsMailService;
-
     public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     // returns true if username is a UH id number
@@ -306,19 +303,6 @@ public class MembershipServiceImpl implements MembershipService {
             }
             logger.info("addGroupMembers; " + addMemberResult.toString());
         }
-        /*
-        if (usersToAdd.size() > 100) {
-            groupingsMailService
-                    .setJavaMailSender(javaMailSender)
-                    .setFrom("no-reply@its.hawaii.edu");
-            groupingsMailService.sendCSVMessage(
-                    "no-reply@its.hawaii.edu",
-                    groupingsMailService.getUserEmail(currentUser),
-                    "Groupings: Add " + groupPath,
-                    "",
-                    "UH-Groupings-Report-" + LocalDateTime.now().toString() + ".csv", addMemberResults);
-        }
-         */
         return addMemberResults;
     }
 
