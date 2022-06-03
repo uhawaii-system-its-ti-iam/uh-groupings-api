@@ -16,7 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 
 
-@ActiveProfiles("localTest")
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 public class GrouperPropertyConfigurerTest {
 
