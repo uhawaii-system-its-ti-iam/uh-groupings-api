@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 @WebAppConfiguration
 public class GroupRepositoryTest {
