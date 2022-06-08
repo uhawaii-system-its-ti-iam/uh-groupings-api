@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@ActiveProfiles("localTest")
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 public class Swagger2MarkupTest {
     @Autowired
