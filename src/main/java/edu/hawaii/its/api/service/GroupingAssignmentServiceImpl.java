@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
@@ -289,9 +290,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     @Override
-    public List<String> optInGroupingsPaths(String owner, String optInUid) {
+    public List<GroupingPath> optInGroupingPaths(String owner, String optInUid) {
         logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
 
+        List<GroupingPath> optInGroupingPaths = new ArrayList<>();
         List<String> groupingsIn = getGroupPaths(owner, optInUid);
         List<String> includes =
                 groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
@@ -303,7 +305,11 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> optInPaths = optableGroupings(OPT_IN);
         optInPaths.removeAll(includes);
         optInPaths.addAll(excludes);
-        return new ArrayList<>(new HashSet<>(optInPaths));
+        optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
+        optInPaths.forEach(path -> {
+            optInGroupingPaths.add(new GroupingPath(path));
+        });
+        return optInGroupingPaths;
     }
 
     /**
