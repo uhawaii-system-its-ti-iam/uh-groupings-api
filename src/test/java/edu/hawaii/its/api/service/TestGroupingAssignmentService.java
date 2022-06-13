@@ -7,6 +7,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -332,7 +333,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void optInOutGroupingsPathsTest() {
         // Test both getOptInGroups and getOptOutGroups()
-        List<String> optInPaths = groupingAssignmentService.optInGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<GroupingPath> optInGroupingsPaths = groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<String> optInPaths = optInGroupingsPaths.stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
         Set<String> intersection =
                 optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());

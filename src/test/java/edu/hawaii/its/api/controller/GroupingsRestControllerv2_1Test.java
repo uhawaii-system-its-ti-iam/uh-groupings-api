@@ -406,16 +406,16 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhUser
-    public void getOptInGroupsTest() throws Exception {
-        List<String> optInGroups = new ArrayList<>();
-        given(groupingAssignmentService.optInGroupingsPaths(ADMIN, "iamtst01")).willReturn(optInGroups);
+    public void getOptInGroupingPathsTest() throws Exception {
+        List<GroupingPath> optInGroupingPaths = new ArrayList<>();
+        given(groupingAssignmentService.optInGroupingPaths(ADMIN, "iamtst01")).willReturn(optInGroupingPaths);
         mockMvc.perform(get(API_BASE + "/groupings/members/iamtst01/opt-in-groups")
                         .with(csrf())
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
         verify(groupingAssignmentService, times(1))
-                .optInGroupingsPaths(ADMIN, "iamtst01");
+                .optInGroupingPaths(ADMIN, "iamtst01");
     }
 
     @Test
