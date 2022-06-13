@@ -196,13 +196,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/groupings/members/{uid}/opt-in-groups")
     @ResponseBody
-    public ResponseEntity<List<String>> getOptInGroups(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<GroupingPath>> optInGroupingPaths(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST optInGroups...");
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService
-                        .optInGroupingsPaths(currentUser, uid));
+                        .optInGroupingPaths(currentUser, uid));
     }
 
     /**

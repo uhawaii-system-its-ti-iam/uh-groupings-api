@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public interface GroupingAssignmentService {
 
     List<String> optOutGroupingsPaths(String owner, String optOutUid);
 
-    List<String> optInGroupingsPaths(String owner, String optInUid);
+    List<GroupingPath> optInGroupingPaths(String owner, String optInUid);
 
     List<String> optableGroupings(String optAttr);
 
