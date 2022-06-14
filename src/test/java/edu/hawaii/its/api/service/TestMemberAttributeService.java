@@ -56,6 +56,8 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN_USER;
 
+    private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
+
     @Autowired
     GroupAttributeService groupAttributeService;
 
@@ -175,11 +177,14 @@ public class TestMemberAttributeService {
         String iamtst01 = TEST_USERNAMES.get(0);
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(iamtst01);
-        // Should return an empty person if user identifier is invalid.
-        Person person = memberAttributeService.getMemberAttributes(ADMIN, "bogus-user");
-        assertNull(person.getName());
-        assertNull(person.getUhUuid());
-        assertNull(person.getUsername());
+        Person person;
+
+        // Should an exception if user identifier is invalid.
+        try {
+            person = memberAttributeService.getMemberAttributes(ADMIN, "bogus-user");
+        } catch (GcWebServiceError e) {
+            assertEquals(SUBJECT_NOT_FOUND, e.getContainerResponseObject());
+        }
 
         // Should return an empty person if current user is not an admin or owner.
         person = memberAttributeService.getMemberAttributes("bogus-owner-admin", null);
