@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -34,6 +35,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
+
+    private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -72,7 +75,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             return isMember(groupPath, person.getUsername());
         }
 
-        List<WsHasMemberResult> hasMemberResults = Arrays.asList(grouperApiService.hasMemberResults(groupPath, person).getResults());
+        List<WsHasMemberResult> hasMemberResults =
+                Arrays.asList(grouperApiService.hasMemberResults(groupPath, person).getResults());
 
         for (WsHasMemberResult hasMemberResult : hasMemberResults) {
             if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
@@ -87,7 +91,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isMemberUuid(String groupPath, String idnum) {
         logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
 
-        List<WsHasMemberResult> hasMemberResults = Arrays.asList(grouperApiService.hasMemberResults(groupPath, idnum).getResults());
+        List<WsHasMemberResult> hasMemberResults =
+                Arrays.asList(grouperApiService.hasMemberResults(groupPath, idnum).getResults());
 
         for (WsHasMemberResult hasMemberResult : hasMemberResults) {
             if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
@@ -126,23 +131,20 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * with null values.
      */
     public Person getMemberAttributes(String currentUser, String userIdentifier) {
-
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
             return new Person(helperService.memberAttributeMapSetKeys());
         }
         Person person = new Person();
-        WsSubjectLookup lookup;
-        WsGetSubjectsResults results;
         int numberOfAttributes = 5;
-        try {
-            lookup = grouperApiService.subjectLookup(userIdentifier);
-            results = grouperApiService.subjectsResults(lookup);
-            for (int i = 0; i < numberOfAttributes; i++) {
-                person.getAttributes()
-                        .put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
-            }
-        } catch (NullPointerException npe) {
-            person.setAttributes(helperService.memberAttributeMapSetKeys());
+        WsSubjectLookup lookup = grouperApiService.subjectLookup(userIdentifier);
+        WsGetSubjectsResults results = grouperApiService.subjectsResults(lookup);
+
+        if (SUBJECT_NOT_FOUND.equals(results.getWsSubjects()[0].getResultCode())) {
+            throw new GcWebServiceError(SUBJECT_NOT_FOUND);
+        }
+        for (int i = 0; i < numberOfAttributes; i++) {
+            person.getAttributes()
+                    .put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
         }
         return person;
     }
