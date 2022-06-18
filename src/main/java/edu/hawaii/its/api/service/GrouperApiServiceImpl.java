@@ -1,9 +1,15 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
-
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -38,13 +44,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service("grouperApiService")
 //@Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
@@ -308,8 +307,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
             Integer pageNumber,
             Integer pageSize,
             String sortString,
-            Boolean isAscending
-    ) {
+            Boolean isAscending) {
         GcGetMembers members = new GcGetMembers();
 
         if (groupPaths != null && groupPaths.size() > 0) {
@@ -333,8 +331,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     @Override
     public WsGetMembersResults membersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
-            List<String> groupPaths
-    ) {
+            List<String> groupPaths) {
         GcGetMembers members = new GcGetMembers();
 
         if (groupPaths != null && groupPaths.size() > 0) {
@@ -370,7 +367,6 @@ public class GrouperApiServiceImpl implements GrouperApiService {
 
     @Override
     public WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup) {
-
         return new GcGetSubjects()
                 .addSubjectAttributeName(USERNAME)
                 .addSubjectAttributeName(COMPOSITE_NAME)
