@@ -1,58 +1,27 @@
 package edu.hawaii.its.api.type;
 
-import org.hibernate.annotations.GenericGenerator;
+public class Membership {
 
-import javax.persistence.*;
-
-@Entity
-public class Membership  {
-
-    @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid")
-    @Column
     private String identifier;
-
-    @ManyToOne
     private Person person;
-
-    @ManyToOne
     private Group group;
-
-    @Column
     private String path;
-
-    @Column
     private String name;
-
-    @Column
     private boolean isSelfOpted = false;
-
-    @Column
     private boolean isOptInEnabled = false;
-
-    @Column
     private boolean isOptOutEnabled = false;
-
-    @Column
     private boolean inBasis = false;
-
-    @Column
     private boolean inInclude = false;
-
-    @Column
     private boolean inExclude = false;
-
-    @Column
     private boolean inOwner = false;
-
-    @Column
     private boolean inBasisAndInclude = false;
 
+    // Constructor.
     public Membership() {
-
+        // Empty.
     }
 
+    // Constructor.
     public Membership(Person person, Group group) {
         this.person = person;
         this.group = group;
@@ -162,7 +131,8 @@ public class Membership  {
         this.inBasisAndInclude = inBasisAndInclude;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Membership{" +
                 "identifier='" + identifier + '\'' +
                 ", person=" + person +
