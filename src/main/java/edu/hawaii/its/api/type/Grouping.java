@@ -1,64 +1,23 @@
 package edu.hawaii.its.api.type;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Entity
-@Table(name = "grouping")
 public class Grouping {
 
-    @Id
-    @Column(name = "path")
     private String path;
-
-    @Column
     private String name;
-
-    @Column
     private String description;
-
-    @OneToOne
     private Group basis;
-
-    @OneToOne
     private Group exclude;
-
-    @OneToOne
     private Group include;
-
-    @OneToOne
     private Group composite;
-
-    @OneToOne
     private Group owners;
-
-    @OneToMany
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @NotFound(action = NotFoundAction.IGNORE)
     private List<SyncDestination> syncDestinations = new ArrayList<>();
-
-    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, Boolean> syncDestinationsState = new HashMap<>();
-
-    @Column
     private boolean isOptInOn = false;
-
-    @Column
     private boolean isOptOutOn = false;
 
     // Constructor.

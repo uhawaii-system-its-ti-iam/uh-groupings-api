@@ -1,23 +1,19 @@
 package edu.hawaii.its.api.type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "syncDestinations")
 public class SyncDestination {
+
     private String name;
     private String description;
     private String tooltip;
     private Boolean synced;
     private Boolean hidden;
 
+    // Constructor.
     public SyncDestination() {
         this("", "");
     }
 
+    // Constructor.
     public SyncDestination(String name, String description) {
         setName(name);
         setDescription(description);
@@ -26,8 +22,6 @@ public class SyncDestination {
         this.synced = false;
     }
 
-    @Id
-    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -36,7 +30,6 @@ public class SyncDestination {
         this.name = name != null ? name : "";
     }
 
-    @Column(name = "description")
     public String getDescription() {
         return description;
     }
@@ -45,7 +38,6 @@ public class SyncDestination {
         this.description = description != null ? description : "";
     }
 
-    @Column(name = "tooltip")
     public String getTooltip() {
         return tooltip;
     }
@@ -70,7 +62,8 @@ public class SyncDestination {
         this.hidden = hidden != null && hidden;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "SyncDestination[" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
