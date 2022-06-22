@@ -1,30 +1,17 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.Proxy;
-
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-@Entity
-@Proxy(lazy = false)
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Person implements Comparable<Person> {
 
-    @Transient
     private static String COMPOSITE_NAME = "cn";
-    @Transient
     private static String FIRST_NAME = "givenName";
-    @Transient
     private static String LAST_NAME = "sn";
-    @Transient
     private static String UHUUID = "uhUuid";
-    @Transient
     private static String USERNAME = "uid";
 
     private Map<String, String> attributes = new HashMap<>();
@@ -67,8 +54,6 @@ public class Person implements Comparable<Person> {
         this.attributes = attributes;
     }
 
-    @Id
-    @Column
     public String getUsername() {
         return attributes.get(USERNAME);
     }
@@ -77,7 +62,6 @@ public class Person implements Comparable<Person> {
         attributes.put(USERNAME, username);
     }
 
-    @Column(name = "FullName")
     public String getName() {
         return attributes.get(COMPOSITE_NAME);
     }
@@ -86,7 +70,6 @@ public class Person implements Comparable<Person> {
         attributes.put(COMPOSITE_NAME, name);
     }
 
-    @Column
     public String getUhUuid() {
         return attributes.get(UHUUID);
     }
@@ -95,7 +78,6 @@ public class Person implements Comparable<Person> {
         attributes.put(UHUUID, uhUuid);
     }
 
-    @Column(name = "FirstName")
     public String getFirstName() {
         return attributes.get(FIRST_NAME);
     }
@@ -104,7 +86,6 @@ public class Person implements Comparable<Person> {
         attributes.put(FIRST_NAME, firstName);
     }
 
-    @Column(name = "LastName")
     public String getLastName() {
         return attributes.get(LAST_NAME);
     }
@@ -114,7 +95,6 @@ public class Person implements Comparable<Person> {
     }
 
     @JsonIgnore
-    @ElementCollection
     public Map<String, String> getAttributes() {
         return attributes;
     }
@@ -123,7 +103,6 @@ public class Person implements Comparable<Person> {
         this.attributes = attributes;
     }
 
-    @Transient
     public String getAttribute(String key) {
         return attributes.get(key);
     }
@@ -198,11 +177,6 @@ public class Person implements Comparable<Person> {
         return 0;
     }
 
-    @Override
-    public String toString() {
-        return "Person [name=" + getName() + ", uhUuid=" + getUhUuid() + ", username=" + getUsername() + "]";
-    }
-
     public String[] toCsv() {
         String[] data = new String[5];
         data[0] = getUsername();
@@ -212,5 +186,10 @@ public class Person implements Comparable<Person> {
         data[4] = getName();
 
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "Person [name=" + getName() + ", uhUuid=" + getUhUuid() + ", username=" + getUsername() + "]";
     }
 }

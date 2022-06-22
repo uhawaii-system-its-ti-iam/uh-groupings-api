@@ -1,21 +1,13 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "groups")
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Group implements Comparable<Group> {
+
     private List<Person> members = new ArrayList<>();
     private String path = "";
 
@@ -44,13 +36,10 @@ public class Group implements Comparable<Group> {
         this.path = path != null ? path : "";
     }
 
-    @Id
-    @Column(name = "path")
     public String getPath() {
         return path;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER)
     public List<Person> getMembers() {
         return members;
     }
@@ -64,13 +53,11 @@ public class Group implements Comparable<Group> {
     }
 
     @JsonIgnore
-    @Transient
     public boolean isMember(Person person) {
         return members.contains(person);
     }
 
     @JsonIgnore
-    @Transient
     public List<String> getNames() {
         return members
                 .parallelStream()
@@ -79,7 +66,6 @@ public class Group implements Comparable<Group> {
     }
 
     @JsonIgnore
-    @Transient
     public List<String> getUhUuids() {
         return members
                 .parallelStream()
@@ -88,7 +74,6 @@ public class Group implements Comparable<Group> {
     }
 
     @JsonIgnore
-    @Transient
     public List<String> getUsernames() {
         return members
                 .parallelStream()
