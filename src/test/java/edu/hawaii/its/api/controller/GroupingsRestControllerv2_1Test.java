@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -36,7 +35,6 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -351,42 +349,16 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void getGrouping() throws Exception {
-        given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, null, null, null, null))
+        given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true))
                 .willReturn(grouping());
 
-        mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING)
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value("bob"))
-                .andExpect(jsonPath("path").value("test:ing:me:bob"))
-                .andExpect(jsonPath("syncDestinations").isEmpty())
-                .andExpect(jsonPath("basis.members", hasSize(3)))
-                .andExpect(jsonPath("basis.members[0].name").value("b0-name"))
-                .andExpect(jsonPath("basis.members[0].uhUuid").value("b0-uuid"))
-
-                .andExpect(jsonPath("basis.members[0].username").value("b0-username"))
-                .andExpect(jsonPath("basis.members[1].name").value("b1-name"))
-                .andExpect(jsonPath("basis.members[1].uhUuid").value("b1-uuid"))
-                .andExpect(jsonPath("basis.members[1].username").value("b1-username"))
-                .andExpect(jsonPath("basis.members[2].name").value("b2-name"))
-                .andExpect(jsonPath("basis.members[2].uhUuid").value("b2-uuid"))
-                .andExpect(jsonPath("basis.members[2].username").value("b2-username"))
-                .andExpect(jsonPath("exclude.members", hasSize(1)))
-                .andExpect(jsonPath("exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("exclude.members[0].name").value("e0-name"))
-                .andExpect(jsonPath("exclude.members[0].uhUuid").value("e0-uuid"))
-                .andExpect(jsonPath("include.members", hasSize(2)))
-                .andExpect(jsonPath("include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("include.members[1].name").value("i1-name"))
-                .andExpect(jsonPath("include.members[1].uhUuid").value("i1-uuid"))
-                .andExpect(jsonPath("owners.members", hasSize(4)))
-                .andExpect(jsonPath("owners.members[3].name").value("o3-name"))
-                .andExpect(jsonPath("owners.members[3].uhUuid").value("o3-uuid"))
-                .andExpect(jsonPath("owners.members[3].username").value("o3-username"))
-                .andExpect(jsonPath("composite.members", hasSize(0)));
+         mockMvc.perform(
+                        get(API_BASE + "/groupings/" + GROUPING + "?page=1&size=1&sortString=name&isAscending=true")
+                                .header(CURRENT_USER, USERNAME))
+                .andExpect(status().isOk()).andReturn();
 
         verify(groupingAssignmentService, times(1))
-                .getPaginatedGrouping(GROUPING, USERNAME, null, null, null, null);
+                .getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true);
     }
 
     @Test
@@ -755,7 +727,7 @@ public class GroupingsRestControllerv2_1Test {
         Grouping group = groupingTwo();
         System.out.println(group.getOwners());
 
-        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/sync-destinations")
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/"+ groupingTwo().getPath()+"/sync-destinations")
                         .header("current_user", "o6-username"))
                 .andDo(print())
                 .andExpect(status().isOk())

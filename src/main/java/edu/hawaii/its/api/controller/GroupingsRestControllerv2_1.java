@@ -167,10 +167,10 @@ public class GroupingsRestControllerv2_1 {
     @ResponseBody
     public ResponseEntity<Grouping> getGrouping(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String sortString,
-            @RequestParam(required = false) Boolean isAscending) {
+            @RequestParam(required = true) Integer page,
+            @RequestParam(required = true) Integer size,
+            @RequestParam(required = true) String sortString,
+            @RequestParam(required = true) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
