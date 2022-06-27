@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
@@ -165,7 +166,7 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void getMembershipAttributesTest() {
+    public void memberAttributesTest() {
 
         TEST_USERNAMES.forEach(testUsername -> {
             Person person = memberAttributeService.getMemberAttributes(ADMIN, testUsername);
@@ -182,8 +183,8 @@ public class TestMemberAttributeService {
         // Should an exception if user identifier is invalid.
         try {
             person = memberAttributeService.getMemberAttributes(ADMIN, "bogus-user");
-        } catch (GcWebServiceError e) {
-            assertEquals(SUBJECT_NOT_FOUND, e.getContainerResponseObject());
+        } catch (UhMemberNotFoundException e) {
+            assertEquals(SUBJECT_NOT_FOUND, e.getReason());
         }
 
         // Should return an empty person if current user is not an admin or owner.

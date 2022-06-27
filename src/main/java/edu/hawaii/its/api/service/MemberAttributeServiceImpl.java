@@ -1,22 +1,23 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SubjectsResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
@@ -57,8 +58,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         if (helperService.isUhUuid(username)) {
             return isMemberUuid(groupPath, username);
         } else {
-            List<WsHasMemberResult> hasMemberResults =
-                    Arrays.asList(grouperApiService.hasMemberResults(groupPath, username).getResults());
+            WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, username);
+            WsHasMemberResult[] whmr = whmrs.getResults();
+            List<WsHasMemberResult> hasMemberResults = Arrays.asList(whmr);
             for (WsHasMemberResult hasMemberResult : hasMemberResults) {
                 if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
                     return true;
@@ -88,6 +90,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     // Returns true if the person is a member of the group
+    @Override
     public boolean isMemberUuid(String groupPath, String idnum) {
         logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
 
@@ -130,22 +133,27 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier or current user will return a mapping
      * with null values.
      */
-    public Person getMemberAttributes(String currentUser, String userIdentifier) {
-        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
-            return new Person(helperService.memberAttributeMapSetKeys());
+    @Override
+    public Person getMemberAttributes(String username, String userIdentifier) {
+        if (!isAdmin(username) && !isOwner(username)) {
+            return new Person();
         }
-        Person person = new Person();
-        int numberOfAttributes = 5;
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(userIdentifier);
-        WsGetSubjectsResults results = grouperApiService.subjectsResults(lookup);
 
-        if (SUBJECT_NOT_FOUND.equals(results.getWsSubjects()[0].getResultCode())) {
-            throw new GcWebServiceError(SUBJECT_NOT_FOUND);
+        WsSubjectLookup lookup = grouperApiService.subjectLookup(userIdentifier);
+        SubjectsResults results = new SubjectsResults(grouperApiService.subjectsResults(lookup));
+
+        if (results.getResultCode().equals(SUBJECT_NOT_FOUND)) {
+            throw new UhMemberNotFoundException(SUBJECT_NOT_FOUND);
         }
+
+        Person person = new Person();
+        int numberOfAttributes = results.getSubjectAttributeNameCount();
         for (int i = 0; i < numberOfAttributes; i++) {
-            person.getAttributes()
-                    .put(results.getSubjectAttributeNames()[i], results.getWsSubjects()[0].getAttributeValues()[i]);
+            String key = results.getSubjectAttributeName(i);
+            String value = results.getAttributeValue(i);
+            person.addAttribute(key, value);
         }
+
         return person;
     }
 

@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,20 +9,21 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PersonTest {
 
     private Person person;
-    private Person person2;
 
     @BeforeEach
-    public void setUp() {
+    public void beforeEach() {
         person = new Person();
     }
 
@@ -35,17 +36,25 @@ public class PersonTest {
         assertNull(person.getFirstName());
         assertNull(person.getLastName());
 
+        assertNull(person.getAttribute(Person.ATTRIBUTE_COMMON_NAME));
+        assertNull(person.getAttribute(Person.ATTRIBUTE_UHUUID));
+        assertNull(person.getAttribute(Person.ATTRIBUTE_USERNAME));
+        assertNull(person.getAttribute(Person.ATTRIBUTE_FIRST_NAME));
+        assertNull(person.getAttribute(Person.ATTRIBUTE_LAST_NAME));
+
         person = new Person("a", "b", "c");
         assertThat(person.getName(), equalTo("a"));
         assertThat(person.getUhUuid(), equalTo("b"));
         assertThat(person.getUsername(), equalTo("c"));
 
-        person2 = new Person("a", "b", "c", "d", "e");
+        Person person2 = new Person("a", "b", "c", "d", "e");
         assertThat(person2.getName(), equalTo("a"));
         assertThat(person2.getUhUuid(), equalTo("b"));
         assertThat(person2.getUsername(), equalTo("c"));
         assertThat(person2.getFirstName(), equalTo("d"));
         assertThat(person2.getLastName(), equalTo("e"));
+
+        assertThat(Person.primaryAttributeCount(), equalTo(5));
     }
 
     @Test
@@ -68,10 +77,18 @@ public class PersonTest {
         assertThat(person.getName(), equalTo("name"));
         assertThat(person.getUhUuid(), equalTo("uhUuid"));
         assertThat(person.getUsername(), equalTo("username"));
+
+        person.setLastName("lastName");
+        assertEquals("lastName", person.getLastName());
+        assertNotNull(person.getLastName());
+
+        person.setFirstName("firstName");
+        assertEquals("firstName", person.getFirstName());
+        assertNotNull(person.getFirstName());
     }
 
-    @SuppressWarnings("unlikely-arg-type")
     @Test
+    @SuppressWarnings("unlikely-arg-type")
     public void equals() {
         Person p0 = new Person();
         assertFalse(p0.equals(null));
@@ -228,6 +245,24 @@ public class PersonTest {
     }
 
     @Test
+    public void addAttribute() {
+        assertThat(person.getAttributes().size(), equalTo(0));
+
+        person.addAttribute(null, null);
+        assertThat(person.getAttributes().size(), equalTo(0));
+
+        person.addAttribute(null, "malcom");
+        assertThat(person.getAttributes().size(), equalTo(0));
+        assertThat(person.getAttribute(null), equalTo(null));
+        assertThat(person.getAttribute(null), is(nullValue()));
+
+        person.addAttribute("angus", "young");
+        assertThat(person.getAttributes().size(), equalTo(1));
+        assertThat(person.getAttribute("angus"), equalTo("young"));
+        assertThat(person.getAttribute(null), is(nullValue()));
+    }
+
+    @Test
     public void getAttributeTest() {
         String username = person.getAttribute("username");
         assertThat(person.getUsername(), equalTo(username));
@@ -247,7 +282,7 @@ public class PersonTest {
         String firstName = "firstName";
         String lastName = "lastName";
         String name = "name";
-        Person person = new Person(name, uhUuid, uid, firstName, lastName);
+        person = new Person(name, uhUuid, uid, firstName, lastName);
         String[] csv = person.toCsv();
         List<String> fields = Arrays.asList(uid, uhUuid, firstName, lastName, name);
         int i = 0;

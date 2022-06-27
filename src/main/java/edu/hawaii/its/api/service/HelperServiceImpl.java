@@ -2,21 +2,20 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 
 @Service("helperService")
 public class HelperServiceImpl implements HelperService {
-
 
     @Value("${groupings.api.basis}")
     private String BASIS;
@@ -71,6 +69,7 @@ public class HelperServiceImpl implements HelperService {
     /**
      * Return true if username is a UH id number
      */
+    @Override
     public boolean isUhUuid(String naming) {
         return naming != null && naming.matches("\\d+");
     }
@@ -85,7 +84,7 @@ public class HelperServiceImpl implements HelperService {
 
             return wsGetMembershipsResults
                     .getWsMemberships()[0]
-                    .getMembershipId();
+                            .getMembershipId();
         }
         return "";
     }
@@ -170,24 +169,13 @@ public class HelperServiceImpl implements HelperService {
     /**
      * Get the name of a grouping from groupPath.
      */
-    @Override public String nameGroupingPath(String groupPath) {
+    @Override
+    public String nameGroupingPath(String groupPath) {
         String parentPath = parentGroupingPath(groupPath);
         if ("".equals(parentPath)) {
             return "";
         }
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
-    }
-
-    /**
-     * Initialize a mapping of member attribute keys with value null.
-     */
-    @Override public Map<String, String> memberAttributeMapSetKeys() {
-        Map<String, String> mapping = new HashMap<>();
-        String[] subjectAttributeNames = { UID, COMPOSITE_NAME, LAST_NAME, FIRST_NAME, UHUUID };
-        for (String subjectAttributeName : subjectAttributeNames) {
-            mapping.put(subjectAttributeName, null);
-        }
-        return mapping;
     }
 
     //makes a group filled with members from membersResults
@@ -227,17 +215,18 @@ public class HelperServiceImpl implements HelperService {
     public Person makePerson(WsSubject subject, String[] attributeNames) {
         if (subject == null || subject.getAttributeValues() == null) {
             return new Person();
-        } else {
-
-            Map<String, String> attributes = new HashMap<>();
-            for (int i = 0; i < subject.getAttributeValues().length; i++) {
-                attributes.put(attributeNames[i], subject.getAttributeValue(i));
-            }
-            // uhUuid is the only attribute not actually in the WsSubject attribute array.
-            attributes.put(UHUUID, subject.getId());
-
-            return new Person(attributes);
         }
+
+        Person person = new Person();
+        for (int i = 0; i < subject.getAttributeValues().length; i++) {
+            person.addAttribute(attributeNames[i], subject.getAttributeValue(i));
+        }
+
+        // uhUuid is the only attribute not actually 
+        // in the WsSubject attribute array.
+        person.addAttribute(UHUUID, subject.getId());
+
+        return person;
     }
 
     @Override
@@ -254,4 +243,3 @@ public class HelperServiceImpl implements HelperService {
         return new ArrayList<>(names);
     }
 }
-

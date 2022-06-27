@@ -4,7 +4,6 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
@@ -32,8 +31,6 @@ public interface HelperService {
     String parentGroupingPath(String group);
 
     String nameGroupingPath(String group);
-
-    Map<String, String> memberAttributeMapSetKeys();
 
     Map<String, Group> makeGroups(WsGetMembersResults membersResults);
 
