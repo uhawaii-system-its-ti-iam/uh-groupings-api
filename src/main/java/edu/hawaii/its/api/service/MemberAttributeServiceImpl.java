@@ -1,15 +1,7 @@
 package edu.hawaii.its.api.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
@@ -19,8 +11,20 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Service("memberAttributeService")
 public class MemberAttributeServiceImpl implements MemberAttributeService {
+
+    public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
+
+    private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -37,18 +41,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
 
-    private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-
     @Autowired
     private GrouperApiService grouperApiService;
 
     @Autowired
-    private HelperService helperService;
-
-    @Autowired
     private GroupingAssignmentService groupingAssignmentService;
 
-    public static final Log logger = LogFactory.getLog(MemberAttributeServiceImpl.class);
+    @Autowired
+    private HelperService helperService;
 
     // Returns true if the user is a member of the group via username or UH id
     @Override
@@ -57,17 +57,18 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         if (helperService.isUhUuid(username)) {
             return isMemberUuid(groupPath, username);
-        } else {
-            WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, username);
-            WsHasMemberResult[] whmr = whmrs.getResults();
-            List<WsHasMemberResult> hasMemberResults = Arrays.asList(whmr);
-            for (WsHasMemberResult hasMemberResult : hasMemberResults) {
-                if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                    return true;
-                }
-            }
-            return false;
         }
+
+        WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, username);
+        WsHasMemberResult[] whmr = whmrs.getResults();
+        List<WsHasMemberResult> hasMemberResults = Arrays.asList(whmr);
+        for (WsHasMemberResult hasMemberResult : hasMemberResults) {
+            if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Returns true if the person is a member of the group

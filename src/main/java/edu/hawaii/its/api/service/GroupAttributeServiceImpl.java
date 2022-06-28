@@ -2,12 +2,12 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.type.AttributeAssignmentsResults;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,19 +202,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     // Check if attribute is on.
     @Override
     public boolean isGroupAttribute(String groupPath, String attributeName) {
-        WsAttributeAssign[] attributeAssigns =
-                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, attributeName, groupPath)
-                        .getWsAttributeAssigns();
-
-        if (attributeAssigns != null) {
-            for (WsAttributeAssign attribute : attributeAssigns) {
-                if (attribute.getAttributeDefNameName() != null && attribute.getAttributeDefNameName()
-                        .equals(attributeName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        AttributeAssignmentsResults attributeAssignmentsResults = new AttributeAssignmentsResults(
+                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, attributeName, groupPath));
+        return attributeAssignmentsResults.isAttributeDefName(attributeName);
     }
 
     //gives the user the privilege for that group
@@ -249,6 +239,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         grouperApiService.updateGroupDescription(groupPath, description);
+
         return helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
     }
 
