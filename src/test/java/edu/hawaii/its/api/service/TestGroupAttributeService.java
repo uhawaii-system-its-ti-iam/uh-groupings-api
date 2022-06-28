@@ -130,7 +130,6 @@ public class TestGroupAttributeService {
         String iamtst01 = TEST_USERNAMES.get(0);
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(iamtst01);
-
         // Should throw an exception if current user is not an owner or and admin.
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
