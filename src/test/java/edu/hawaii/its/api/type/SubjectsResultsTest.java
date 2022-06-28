@@ -10,7 +10,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import edu.hawaii.its.api.type.SubjectsResults;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
