@@ -3,15 +3,13 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.AttributeAssignmentsResults;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import edu.internet2.middleware.grouperClient.ws.StemScope;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -230,23 +228,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
 
-        boolean isOptInOn = false;
-        boolean isOptOutOn = false;
-
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(grouperApiService.groupAttributeDefNames(ASSIGN_TYPE_GROUP, grouping.getPath())
-                        .getWsAttributeDefNames());
-        for (WsAttributeDefName defName : attributeDefNames) {
-            String name = defName.getName();
-            if (name.equals(OPT_IN)) {
-                isOptInOn = true;
-            } else if (name.equals(OPT_OUT)) {
-                isOptOutOn = true;
-            }
-        }
-
-        grouping.setOptInOn(isOptInOn);
-        grouping.setOptOutOn(isOptOutOn);
+        AttributeAssignmentsResults attributeAssignmentsResults = new AttributeAssignmentsResults(
+                grouperApiService.groupAttributeDefNames(ASSIGN_TYPE_GROUP, grouping.getPath()));
+        grouping.setOptInOn(attributeAssignmentsResults.isOptInOn());
+        grouping.setOptOutOn(attributeAssignmentsResults.isOptOutOn());
 
         // Set the sync destinations.
         List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
@@ -320,24 +305,16 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (!optAttr.equals(OPT_IN) && !optAttr.equals(OPT_OUT)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, optAttr);
-        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
-        List<String> optablePaths = new ArrayList<>();
-        attributeAssigns.forEach(attributeAssign -> {
-            if (attributeAssign.getAttributeDefNameName().equals(optAttr)) {
-                optablePaths.add(attributeAssign.getOwnerGroupName());
-            }
-        });
-        return new ArrayList<>(new HashSet<>(optablePaths));
+        AttributeAssignmentsResults attributeAssignmentsResults =
+                new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, optAttr));
+        return attributeAssignmentsResults.getOwnerGroupNames();
     }
 
     @Override
     public List<String> allGroupingsPaths() {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO);
-        List<WsGroup> groups = new ArrayList<>(Arrays.asList(attributeAssignmentsResults.getWsGroups()));
-        return groups.stream().map(WsGroup::getName).collect(Collectors.toList());
+        AttributeAssignmentsResults attributeAssignmentsResults =
+                new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
+        return attributeAssignmentsResults.getGroupNames();
     }
 
     @Override
