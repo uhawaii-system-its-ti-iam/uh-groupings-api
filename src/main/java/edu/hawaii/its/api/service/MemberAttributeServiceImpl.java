@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.SubjectsResults;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;

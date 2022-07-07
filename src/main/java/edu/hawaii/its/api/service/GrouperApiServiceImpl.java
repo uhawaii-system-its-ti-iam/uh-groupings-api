@@ -71,6 +71,9 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     @Value("${groupings.api.person_attributes.username}")
     private String USERNAME;
 
+    @Value("${groupings.api.stem}")
+    private String STEM;
+
     @Autowired
     HelperService helperService;
 
@@ -349,7 +352,9 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsGetGroupsResults groupsResults(String username, WsStemLookup stemLookup, StemScope stemScope) {
+    public WsGetGroupsResults groupsResults(String username) {
+        WsStemLookup stemLookup = stemLookup(STEM);
+        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
 
         if (helperService.isUhUuid(username)) {
             return new GcGetGroups()

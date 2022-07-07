@@ -8,7 +8,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 
-import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -338,12 +337,8 @@ public class TestGrouperApiService {
 
     @Test
     public void groupsResultsTest() {
-        WsGetGroupsResults uhUsernameResults =
-                grouperApiService.groupsResults(TEST_USERNAMES.get(0), grouperApiService.stemLookup(STEM),
-                        StemScope.ALL_IN_SUBTREE);
-        WsGetGroupsResults uhNumberResults =
-                grouperApiService.groupsResults(TEST_UH_NUMBERS.get(0), grouperApiService.stemLookup(STEM),
-                        StemScope.ALL_IN_SUBTREE);
+        WsGetGroupsResults uhUsernameResults = grouperApiService.groupsResults(TEST_USERNAMES.get(0));
+        WsGetGroupsResults uhNumberResults = grouperApiService.groupsResults(TEST_UH_NUMBERS.get(0));
         assertNotNull(uhUsernameResults);
         assertNotNull(uhNumberResults);
         assertNotNull(uhUsernameResults.getResults());
