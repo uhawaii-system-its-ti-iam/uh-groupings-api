@@ -1,6 +1,6 @@
-package edu.hawaii.its.api.type;
+package edu.hawaii.its.api.wrapper;
 
-import static edu.hawaii.its.api.type.SubjectsResults.SUBJECT_NOT_FOUND;
+import static edu.hawaii.its.api.wrapper.SubjectsResults.SUBJECT_NOT_FOUND;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
