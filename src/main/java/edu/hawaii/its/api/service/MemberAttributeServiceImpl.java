@@ -168,7 +168,9 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         for (String path : pathStrings) {
             if (path.endsWith(OWNERS)) {
-                groupingPaths.add(new GroupingPath(helperService.parentGroupingPath(path)));
+                String parentGroupingPath = helperService.parentGroupingPath(path);
+                groupingPaths.add(new GroupingPath(parentGroupingPath,
+                        grouperApiService.descriptionOf(parentGroupingPath)));
             }
         }
         return groupingPaths;

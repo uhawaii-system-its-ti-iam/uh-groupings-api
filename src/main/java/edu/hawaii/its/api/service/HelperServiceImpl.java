@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -63,6 +65,9 @@ public class HelperServiceImpl implements HelperService {
 
     @Value("${groupings.api.stale_subject_id}")
     private String STALE_SUBJECT_ID;
+
+    @Autowired
+    private GrouperApiService grouperApiService;
 
     public static final Log logger = LogFactory.getLog(HelperServiceImpl.class);
 
@@ -137,11 +142,14 @@ public class HelperServiceImpl implements HelperService {
      */
     @Override
     public List<GroupingPath> makePaths(List<String> groupingPaths) {
-        List<GroupingPath> paths = new ArrayList<>();
-        if (groupingPaths.size() > 0) {
-            paths = groupingPaths.stream().map(GroupingPath::new).collect(Collectors.toList());
+        if (groupingPaths == null || groupingPaths.isEmpty()) {
+            return Collections.emptyList();
         }
-        return paths;
+
+        return groupingPaths.parallelStream()
+                .map(path -> new GroupingPath(path,
+                        grouperApiService.descriptionOf(path)))
+                .collect(Collectors.toList());
     }
 
     /**
