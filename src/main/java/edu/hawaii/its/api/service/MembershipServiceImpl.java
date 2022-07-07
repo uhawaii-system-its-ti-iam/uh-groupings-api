@@ -172,6 +172,7 @@ public class MembershipServiceImpl implements MembershipService {
             membership.setPath(groupingPath);
             membership.setOptOutEnabled(optOutList.contains(groupingPath));
             membership.setName(helperService.nameGroupingPath(groupingPath));
+            membership.setDescription(grouperApiService.descriptionOf(groupingPath));
             memberships.add(membership);
         }
         return memberships;

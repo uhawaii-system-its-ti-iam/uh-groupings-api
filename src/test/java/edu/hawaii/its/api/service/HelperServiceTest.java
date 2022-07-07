@@ -21,9 +21,15 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
+import java.util.stream.Collectors;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -78,10 +84,13 @@ public class HelperServiceTest {
     @Autowired
     private HelperService helperService;
 
+    @MockBean
+    private GrouperApiService grouperApiService;
+
     @Test
     public void construction() {
-        //autowired
         assertNotNull(helperService);
+        assertNotNull(grouperApiService);
     }
 
     @Test
@@ -136,20 +145,26 @@ public class HelperServiceTest {
     }
 
     @Test
-    public void makePathsTest() {
-        List<String> strPaths = new ArrayList<>();
-        assertEquals(0, helperService.makePaths(strPaths).size());
-        String[] testPaths = { INCLUDE, EXCLUDE, OWNERS, BASIS };
-        for (String testPath : testPaths) {
-            strPaths.add(PATH_ROOT + testPath);
-        }
+    public void makePaths() {
+        assertThat(helperService.makePaths(null), hasSize(0));
 
-        List<GroupingPath> groupingPaths = helperService.makePaths(strPaths);
-        assertTrue(groupingPaths.size() > 0);
-        Iterator<String> stringIterator = strPaths.iterator();
-        Iterator<GroupingPath> groupingPathIterator = groupingPaths.iterator();
-        while (groupingPathIterator.hasNext() && stringIterator.hasNext()) {
-            assertEquals(stringIterator.next(), groupingPathIterator.next().getPath());
+        List<String> names = new ArrayList<>();
+        assertThat(helperService.makePaths(names), hasSize(0));
+
+        names = Arrays.asList(INCLUDE, EXCLUDE, OWNERS, BASIS);
+        List<GroupingPath> paths = helperService.makePaths(names);
+        assertThat(paths, hasSize(4));
+
+        List<String> expectedPaths = names.stream()
+                .map(n -> PATH_ROOT + n)
+                .collect(Collectors.toList());
+
+        List<GroupingPath> groupingPaths = helperService.makePaths(expectedPaths);
+        assertThat(paths, hasSize(4));
+
+        for (int i = 0; i < expectedPaths.size(); i++) {
+            assertThat(groupingPaths.get(i).getPath(),
+                    equalTo(expectedPaths.get(i)));
         }
     }
 
