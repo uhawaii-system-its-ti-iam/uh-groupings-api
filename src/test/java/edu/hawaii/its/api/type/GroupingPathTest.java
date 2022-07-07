@@ -26,7 +26,8 @@ public class GroupingPathTest {
     @Test
     public void toStringTest() {
         String str = "path: " + path.path + "; " +
-                "name: " + path.name + ";";
+                "name: " + path.name + "; " +
+                "description: " + path.description + ";";
         assertEquals(str, path.toString());
     }
 
@@ -53,4 +54,17 @@ public class GroupingPathTest {
         path.setPath("path");
         assertEquals("path", path.path);
     }
+
+    @Test
+    public void getDescriptionTest() {
+        assertEquals("No description given for this Grouping.", path.description);
+    }
+
+    @Test
+    public void setDescriptionTest() {
+        GroupingPath path = new GroupingPath(PATH_ROOT);
+        path.setDescription("Description");
+        assertEquals("Description", path.description);
+    }
+
 }

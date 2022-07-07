@@ -2,7 +2,7 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.AttributeAssignmentsResults;
+import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -222,6 +222,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                         privilegeName,
                         lookup,
                         isSet);
+
 
         return helperService.makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
     }

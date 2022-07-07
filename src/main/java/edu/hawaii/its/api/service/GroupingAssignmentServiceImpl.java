@@ -3,15 +3,14 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.AttributeAssignmentsResults;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
+import edu.hawaii.its.api.wrapper.GroupsResults;
 
-import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -194,6 +193,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (members.getResults() != null) {
             groupMembers = helperService.makeGroups(members);
         }
+
         return groupMembers;
     }
 
@@ -240,7 +240,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         return grouping;
     }
 
-    // Returns the list of groups that the user is in, searching by username or uhUuid.
+    /**
+     * Return the list of groups that the user is in, searching by username or uhUuid.
+     */
     @Override
     public List<String> getGroupPaths(String ownerUsername, String username) {
         logger.info("getGroupPaths; username: " + username + ";");
@@ -248,11 +250,8 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         if (!ownerUsername.equals(username) && !memberAttributeService.isAdmin(ownerUsername)) {
             return new ArrayList<>();
         }
-        List<WsGroup> groups =
-                Arrays.asList(grouperApiService.groupsResults(username, grouperApiService.stemLookup(STEM),
-                        StemScope.ALL_IN_SUBTREE).getResults()[0].getWsGroups());
-
-        return helperService.extractGroupPaths(groups);
+        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(username));
+        return groupsResults.groupPaths();
     }
 
     /**
@@ -291,9 +290,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         optInPaths.removeAll(includes);
         optInPaths.addAll(excludes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
-        optInPaths.forEach(path -> {
-            optInGroupingPaths.add(new GroupingPath(path));
-        });
+
+        optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
+                grouperApiService.descriptionOf(path))).collect(Collectors.toList());
+
         return optInGroupingPaths;
     }
 

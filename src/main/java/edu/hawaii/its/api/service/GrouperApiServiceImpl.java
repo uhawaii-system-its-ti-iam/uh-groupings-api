@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.FindGroupsResults;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -71,6 +72,9 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     @Value("${groupings.api.person_attributes.username}")
     private String USERNAME;
 
+    @Value("${groupings.api.stem}")
+    private String STEM;
+
     @Autowired
     HelperService helperService;
 
@@ -95,10 +99,8 @@ public class GrouperApiServiceImpl implements GrouperApiService {
 
     @Override
     public String descriptionOf(String groupPath) {
-        WsFindGroupsResults wsFindGroupsResults = findGroupsResults(groupPath);
-
-        return wsFindGroupsResults.getGroupResults()[0].getDescription();
-
+        FindGroupsResults result = new FindGroupsResults(findGroupsResults(groupPath));
+        return result.getDescription();
     }
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
@@ -349,7 +351,9 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsGetGroupsResults groupsResults(String username, WsStemLookup stemLookup, StemScope stemScope) {
+    public WsGetGroupsResults groupsResults(String username) {
+        WsStemLookup stemLookup = stemLookup(STEM);
+        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
 
         if (helperService.isUhUuid(username)) {
             return new GcGetGroups()

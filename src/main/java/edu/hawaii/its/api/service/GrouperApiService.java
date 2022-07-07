@@ -3,7 +3,6 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 
-import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -87,7 +86,7 @@ public interface GrouperApiService {
             WsSubjectLookup lookup,
             List<String> groupPaths);
 
-    WsGetGroupsResults groupsResults(String username, WsStemLookup stemLookup, StemScope stemScope);
+    WsGetGroupsResults groupsResults(String username);
 
     WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup);
 
