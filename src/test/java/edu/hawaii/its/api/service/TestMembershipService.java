@@ -9,7 +9,6 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -336,8 +335,6 @@ public class TestMembershipService {
         bogusUserToAdd.add("bogus-user");
         addMemberResults = membershipService.addGroupMembers(ADMIN, GROUPING_INCLUDE, bogusUserToAdd);
         assertTrue(addMemberResults.stream().allMatch(addMemberResult -> addMemberResult.getResult().equals(FAILURE)));
-        JsonUtil.printJson(addMemberResults);
-
     }
 
     @Test

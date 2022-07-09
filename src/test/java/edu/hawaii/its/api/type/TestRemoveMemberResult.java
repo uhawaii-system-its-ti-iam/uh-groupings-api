@@ -6,8 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MembershipService;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,9 +39,9 @@ public class TestRemoveMemberResult {
 
     @Test
     public void constructorTest() {
-        WsDeleteMemberResults deleteMemberResults = grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
-        assertNotNull(deleteMemberResults);
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(deleteMemberResults);
+        RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
+        assertNotNull(removeMemberResponse);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(removeMemberResponse);
         assertNotNull(removeMemberResult);
         assertTrue(removeMemberResult.isUserWasRemoved());
         assertEquals("SUCCESS", removeMemberResult.getResult());
@@ -51,8 +50,8 @@ public class TestRemoveMemberResult {
         assertEquals(testUsername, removeMemberResult.getUhUuid());
         assertEquals(GROUPING_INCLUDE, removeMemberResult.getPathOfRemoved());
 
-        deleteMemberResults = grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
-        removeMemberResult = new RemoveMemberResult(deleteMemberResults);
+        removeMemberResponse = grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
+        removeMemberResult = new RemoveMemberResult(removeMemberResponse);
         assertNotNull(removeMemberResult);
         assertFalse(removeMemberResult.isUserWasRemoved());
         assertEquals("FAILURE", removeMemberResult.getResult());
