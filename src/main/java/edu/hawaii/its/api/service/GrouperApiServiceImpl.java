@@ -3,11 +3,13 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.AddMemberRequest;
+import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberRequest;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
-import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
-import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
@@ -18,12 +20,10 @@ import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -101,7 +101,6 @@ public class GrouperApiServiceImpl implements GrouperApiService {
         WsFindGroupsResults wsFindGroupsResults = findGroupsResults(groupPath);
 
         return wsFindGroupsResults.getGroupResults()[0].getDescription();
-
     }
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
@@ -119,63 +118,13 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsAddMemberResults addMember(String group, WsSubjectLookup lookup, String newMember) {
-        if (helperService.isUhUuid(newMember)) {
-            return new GcAddMember()
-                    .assignActAsSubject(lookup)
-                    .addSubjectId(newMember)
-                    .assignGroupName(group)
-                    .execute();
-        }
-        return new GcAddMember()
-                .assignActAsSubject(lookup)
-                .addSubjectIdentifier(newMember)
-                .assignGroupName(group)
-                .execute();
+    public AddMemberResponse addMember(String groupPath, String uhIdentifier) {
+        return new AddMemberRequest(groupPath, uhIdentifier).send();
     }
 
     @Override
-    public WsAddMemberResults addMember(String group, String newMember) {
-        if (helperService.isUhUuid(newMember)) {
-            return new GcAddMember()
-                    .addSubjectId(newMember)
-                    .assignGroupName(group)
-                    .execute();
-        }
-        return new GcAddMember()
-                .addSubjectIdentifier(newMember)
-                .assignGroupName(group)
-                .execute();
-    }
-
-    @Override
-    public WsDeleteMemberResults removeMember(String group, String memberToDelete) {
-        if (helperService.isUhUuid(memberToDelete)) {
-            return new GcDeleteMember()
-                    .addSubjectId(memberToDelete)
-                    .assignGroupName(group)
-                    .execute();
-        }
-        return new GcDeleteMember()
-                .addSubjectIdentifier(memberToDelete)
-                .assignGroupName(group)
-                .execute();
-    }
-
-    @Override
-    public WsDeleteMemberResults removeMember(String group, WsSubjectLookup lookup, String memberToDelete) {
-        if (helperService.isUhUuid(memberToDelete)) {
-            return new GcDeleteMember()
-                    .assignActAsSubject(lookup)
-                    .addSubjectId(memberToDelete)
-                    .assignGroupName(group)
-                    .execute();
-        }
-        return new GcDeleteMember()
-                .assignActAsSubject(lookup)
-                .addSubjectIdentifier(memberToDelete)
-                .assignGroupName(group)
-                .execute();
+    public RemoveMemberResponse removeMember(String groupPath, String uhIdentifier) {
+        return new RemoveMemberRequest(groupPath, uhIdentifier).send();
     }
 
     @Override
