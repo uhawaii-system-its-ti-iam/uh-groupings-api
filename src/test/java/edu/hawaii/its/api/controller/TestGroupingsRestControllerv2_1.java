@@ -294,7 +294,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(
+                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AddMemberResult.class));
         membershipService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
     }
@@ -312,7 +313,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(
+                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AddMemberResult.class));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
 

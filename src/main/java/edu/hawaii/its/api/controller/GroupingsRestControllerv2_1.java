@@ -209,7 +209,7 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uid a member of the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<AddMemberResult>> optIn(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<AddMemberResult> optIn(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST optIn...");
         return ResponseEntity
@@ -221,7 +221,7 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uid a member of the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<List<AddMemberResult>> optOut(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<AddMemberResult> optOut(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
