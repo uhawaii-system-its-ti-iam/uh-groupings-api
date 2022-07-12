@@ -901,7 +901,7 @@ public class TestMembershipService {
         String iamstst01 = TEST_USERNAMES.get(0);
         List<String> iamstst01List = new ArrayList<>();
         iamstst01List.add(iamstst01);
-        // Should throw an exception if current user is not and admin or if the uid opting is not equal to current user.
+        // Should throw an exception if current user is not and admin and if the uid opting is not equal to current user.
         try {
             membershipService.optIn(iamstst01, GROUPING, bogusUser);
             fail("Should throw an exception if current user is not and admin or if the uid opting is not equal to current user.");
@@ -915,17 +915,14 @@ public class TestMembershipService {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        AddMemberResult addMemberResult = null;
         try {
-            addMemberResults = membershipService.optIn(iamstst01, GROUPING, iamstst01);
+            addMemberResult = membershipService.optIn(iamstst01, GROUPING, iamstst01);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is not an admin, but current user does equal uid.");
         }
         // User iamtst01 should be in the include group.
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, iamstst01));
-        assertNotNull(addMemberResults);
-        assertEquals(1, addMemberResults.size());
-        AddMemberResult addMemberResult = addMemberResults.get(0);
         assertNotNull(addMemberResult);
         assertTrue(addMemberResult.isUserWasAdded());
         assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
@@ -964,18 +961,15 @@ public class TestMembershipService {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        AddMemberResult addMemberResult = null;
         try {
 
-            addMemberResults = membershipService.optOut(iamstst01, GROUPING, iamstst01);
+            addMemberResult = membershipService.optOut(iamstst01, GROUPING, iamstst01);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is not an admin, but current user does equal uid.");
         }
         // User iamtst01 should be in the exclude group.
         assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, iamstst01));
-        assertNotNull(addMemberResults);
-        assertEquals(1, addMemberResults.size());
-        AddMemberResult addMemberResult = addMemberResults.get(0);
         assertNotNull(addMemberResult);
         assertTrue(addMemberResult.isUserWasAdded());
         assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
@@ -1167,6 +1161,50 @@ public class TestMembershipService {
         membershipService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
         assertTrue(membershipService.getNumberOfMemberships(ADMIN, iamtst01List.get(0)) > 0);
         membershipService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
+    }
+
+    @Test
+    public void addMemberTest() {
+        // Should add a user from username list.
+        AddMemberResult addMemberResult =
+                membershipService.addMember(ADMIN, TEST_USERNAMES.get(0), GROUPING_EXCLUDE, GROUPING_INCLUDE);
+        assertEquals(SUCCESS, addMemberResult.getResult());
+        assertTrue(addMemberResult.isUserWasAdded());
+        assertFalse(addMemberResult.isUserWasRemoved());
+        assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0)));
+
+        // Should add a user from uh numbers list.
+        addMemberResult =
+                membershipService.addMember(ADMIN, TEST_UH_NUMBERS.get(0), GROUPING_EXCLUDE, GROUPING_INCLUDE);
+        assertEquals(SUCCESS, addMemberResult.getResult());
+        assertTrue(addMemberResult.isUserWasAdded());
+        assertFalse(addMemberResult.isUserWasRemoved());
+        assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfAdd());
+        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0)));
+
+        // Should not add users that are already in the group.
+        addMemberResult = membershipService.addMember(ADMIN, TEST_USERNAMES.get(0), GROUPING_EXCLUDE, GROUPING_INCLUDE);
+        assertFalse(addMemberResult.isUserWasAdded());
+
+        // Should move users from include to exclude if adding to exclude and user already exists in include.
+        addMemberResult = membershipService.addMember(ADMIN, TEST_USERNAMES.get(0), GROUPING_INCLUDE, GROUPING_EXCLUDE);
+        assertEquals(SUCCESS, addMemberResult.getResult());
+        assertTrue(addMemberResult.isUserWasAdded());
+        assertTrue(addMemberResult.isUserWasRemoved());
+        assertEquals(GROUPING_INCLUDE, addMemberResult.getPathOfRemoved());
+        assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfAdd());
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0)));
+        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, TEST_USERNAMES.get(0)));
+
+        // Clean up.
+        grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
+        grouperApiService.removeMember(GROUPING_EXCLUDE, TEST_USERNAMES.get(0));
+
+        // Should return a failed AddMemberResult if user to add is invalid.
+        String bogusUserToAdd = "bogus-user";
+        addMemberResult = membershipService.addMember(ADMIN, bogusUserToAdd, GROUPING_EXCLUDE, GROUPING_INCLUDE);
+        assertEquals(FAILURE, addMemberResult.getResult());
     }
 
     /**

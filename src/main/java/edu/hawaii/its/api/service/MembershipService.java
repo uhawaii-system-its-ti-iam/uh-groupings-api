@@ -27,9 +27,9 @@ public interface MembershipService {
 
     List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath, List<String> usersToRemove);
 
-    List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid);
+    AddMemberResult optIn(String currentUser, String groupingPath, String uid);
 
-    List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid);
+    AddMemberResult optOut(String currentUser, String groupingPath, String uid);
 
     AddMemberResult addAdmin(String currentUser, String adminToAdd);
 
@@ -45,4 +45,6 @@ public interface MembershipService {
     UpdateTimestampResult updateLastModifiedTimestamp(String dateTime, String groupPath);
 
     Integer getNumberOfMemberships(String currentUser, String uid);
+    
+    AddMemberResult addMember(String currentUser, String userToAdd, String removalPath, String additionPath);
 }

@@ -200,25 +200,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         for (String userToAdd : usersToAdd) {
-            AddMemberResult addMemberResult;
-            try {
-                WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(removalPath, userToAdd);
-                WsAddMemberResults wsAddMemberResults = grouperApiService.addMember(groupPath, userToAdd);
-                addMemberResult = new AddMemberResult(wsAddMemberResults, wsDeleteMemberResults);
-
-                if (addMemberResult.isUserWasAdded()) {
-                    membershipService.updateLastModified(groupPath);
-                    if (addMemberResult.getUid() == null) {
-                        addMemberResult.setUid(memberAttributeService
-                                .getMemberAttributes(currentUser, addMemberResult.getUhUuid()).getUsername());
-                    }
-                }
-                addMemberResults.add(addMemberResult);
-            } catch (GcWebServiceError | NullPointerException e) {
-                addMemberResult = new AddMemberResult(userToAdd, FAILURE);
-                addMemberResults.add(addMemberResult);
-            }
-            logger.info("addGroupMembers; " + addMemberResult);
+            addMemberResults.add(addMember(currentUser, userToAdd, removalPath, groupPath));
         }
         /*
         if (usersToAdd.size() > 100) {
@@ -395,24 +377,30 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at
      * uid to the include list and removes them from the exclude list.
      */
-    @Override public List<AddMemberResult> optIn(String currentUser, String groupingPath, String uid) {
+    @Override public AddMemberResult optIn(String currentUser, String groupingPath, String uid) {
         logger.info("optIn; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupMembers(currentUser, groupingPath + INCLUDE, Collections.singletonList(uid));
+
+        String removalPath = groupingPath + EXCLUDE;
+        String additionPath = groupingPath + INCLUDE;
+        return addMember(currentUser, uid, removalPath, additionPath);
     }
 
     /**
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting out adds a member/user
      * at uid to the exclude list and removes them from the include list.
      */
-    @Override public List<AddMemberResult> optOut(String currentUser, String groupingPath, String uid) {
+    @Override public AddMemberResult optOut(String currentUser, String groupingPath, String uid) {
         logger.info("optOut; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupMembers(currentUser, groupingPath + EXCLUDE, Collections.singletonList(uid));
+
+        String removalPath = groupingPath + INCLUDE;
+        String additionPath = groupingPath + EXCLUDE;
+        return addMember(currentUser, uid, removalPath, additionPath);
     }
 
     /**
@@ -483,5 +471,30 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
         return membershipResults(currentUser, uid).size();
+    }
+
+    /**
+     * Adds the uid/uhUuid in userToAdd to the group at additionPath and removes userToAdd from the group at
+     * removalPath. If the userToAdd is already in the group at additionPath, it does not get added.
+     */
+    public AddMemberResult addMember(String currentUser, String userToAdd, String removalPath, String additionPath) {
+        AddMemberResult addMemberResult;
+        try {
+            WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(removalPath, userToAdd);
+            WsAddMemberResults wsAddMemberResults = grouperApiService.addMember(additionPath, userToAdd);
+            addMemberResult = new AddMemberResult(wsAddMemberResults, wsDeleteMemberResults);
+
+            if (addMemberResult.isUserWasAdded()) {
+                membershipService.updateLastModified(additionPath);
+                if (addMemberResult.getUid() == null) {
+                    addMemberResult.setUid(memberAttributeService
+                            .getMemberAttributes(currentUser, addMemberResult.getUhUuid()).getUsername());
+                }
+            }
+        } catch (GcWebServiceError | NullPointerException e) {
+            addMemberResult = new AddMemberResult(userToAdd, FAILURE);
+        }
+        logger.info("addGroupMembers; " + addMemberResult);
+        return addMemberResult;
     }
 }
