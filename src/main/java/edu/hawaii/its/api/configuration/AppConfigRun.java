@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-@Profile(value = { "localhost", "test", "integrationTest", "qa" })
+@Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
 @Configuration
 @EnableAsync
 @ComponentScan(basePackages = "edu.hawaii.its")
