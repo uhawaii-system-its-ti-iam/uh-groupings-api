@@ -199,7 +199,7 @@ public class TestGroupAttributeService {
 
         // Should throw an exception if current user is not an owner or and admin.
         try {
-            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_IN, false);
             fail("Should throw an exception if current user is not an owner or and admin.");
         } catch (AccessDeniedException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
@@ -207,7 +207,7 @@ public class TestGroupAttributeService {
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
-            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_IN, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
@@ -216,7 +216,7 @@ public class TestGroupAttributeService {
         // Should not throw an exception if current user is an admin but not an owner.
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
-            groupAttributeService.changeOptInStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_IN, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
@@ -224,7 +224,7 @@ public class TestGroupAttributeService {
 
         // Should throw an exception if an invalid path is passed.
         try {
-            groupAttributeService.changeOptInStatus("bogus-path", iamtst01, false);
+            groupAttributeService.changeOptStatus("bogus-path", iamtst01, OPT_IN, false);
             fail("Should throw an exception if an invalid path is passed.");
         } catch (GcWebServiceError e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
@@ -232,7 +232,7 @@ public class TestGroupAttributeService {
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         List<GroupingsServiceResult> groupingsServiceResults =
-                groupAttributeService.changeOptInStatus(GROUPING, ADMIN, false);
+                groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_IN, false);
         GroupingsServiceResult optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
@@ -240,7 +240,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
-        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_IN, true);
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
@@ -248,7 +248,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_ALLOWED, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
-        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, true);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_IN, true);
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
@@ -256,7 +256,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
-        groupingsServiceResults = groupAttributeService.changeOptInStatus(GROUPING, ADMIN, false);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_IN, false);
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
@@ -272,7 +272,7 @@ public class TestGroupAttributeService {
 
         // Should throw an exception if current user is not an owner or and admin.
         try {
-            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_OUT, false);
             fail("Should throw an exception if current user is not an owner or and admin.");
         } catch (AccessDeniedException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
@@ -280,7 +280,7 @@ public class TestGroupAttributeService {
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
-            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_OUT, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
@@ -289,7 +289,7 @@ public class TestGroupAttributeService {
         // Should not throw an exception if current user is an admin but not an owner.
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
-            groupAttributeService.changeOptOutStatus(GROUPING, iamtst01, false);
+            groupAttributeService.changeOptStatus(GROUPING, iamtst01, OPT_OUT, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
@@ -297,7 +297,7 @@ public class TestGroupAttributeService {
 
         // Should throw an exception if an invalid path is passed.
         try {
-            groupAttributeService.changeOptOutStatus("bogus-path", iamtst01, false);
+            groupAttributeService.changeOptStatus("bogus-path", iamtst01, OPT_OUT, false);
             fail("Should throw an exception if an invalid path is passed.");
         } catch (GcWebServiceError e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
@@ -305,7 +305,7 @@ public class TestGroupAttributeService {
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         List<GroupingsServiceResult> groupingsServiceResults =
-                groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, false);
+                groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_OUT, false);
         GroupingsServiceResult optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
@@ -313,7 +313,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
-        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_OUT, true);
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
@@ -321,7 +321,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_ALLOWED, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
-        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, true);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_OUT, true);
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
@@ -329,7 +329,7 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
-        groupingsServiceResults = groupAttributeService.changeOptOutStatus(GROUPING, ADMIN, false);
+        groupingsServiceResults = groupAttributeService.changeOptStatus(GROUPING, ADMIN, OPT_OUT, false);
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));

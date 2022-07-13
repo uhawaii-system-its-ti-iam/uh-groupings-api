@@ -366,19 +366,9 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String id) {
         logger.info("Entered REST enablePreference");
-        List<GroupingsServiceResult> results;
-
-        if (OPT_IN.equals(id)) {
-            results = groupAttributeService.changeOptInStatus(path, currentUser, true);
-        } else if (OPT_OUT.equals(id)) {
-            results = groupAttributeService.changeOptOutStatus(path, currentUser, true);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-
         return ResponseEntity
                 .ok()
-                .body(results);
+                .body(groupAttributeService.changeOptStatus(path, currentUser, id, true));
     }
 
     /**
@@ -392,18 +382,9 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String path,
             @PathVariable String id) {
         logger.info("Entered REST disablePreference");
-        List<GroupingsServiceResult> results;
-
-        if (OPT_IN.equals(id)) {
-            results = groupAttributeService.changeOptInStatus(path, currentUser, false);
-        } else if (OPT_OUT.equals(id)) {
-            results = groupAttributeService.changeOptOutStatus(path, currentUser, false);
-        } else {
-            throw new UnsupportedOperationException();
-        }
         return ResponseEntity
                 .ok()
-                .body(results);
+                .body(groupAttributeService.changeOptStatus(path, currentUser, id, false));
     }
 
     /**
