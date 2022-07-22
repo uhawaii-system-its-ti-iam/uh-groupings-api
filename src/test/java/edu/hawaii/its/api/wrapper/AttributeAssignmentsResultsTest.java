@@ -3,7 +3,6 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
@@ -39,7 +38,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void construction() {
-        String json = propertyValue("attribute.assignment.result");
+        String json = propertyValue("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -61,7 +60,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getOwnerGroupNamesTest() {
-        String json = propertyValue("attribute.assignment.result");
+        String json = propertyValue("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -80,26 +79,42 @@ public class AttributeAssignmentsResultsTest {
 
         results = new AttributeAssignmentsResults(null);
         assertTrue(results.getOwnerGroupNames().isEmpty());
+
     }
 
     @Test
     public void isAttributeDefNameTest() {
-        String json = propertyValue("attribute.assignment.result");
+        String json = propertyValue("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
         assertNotNull(results);
-
         assertTrue(results.isAttributeDefName(OPT_IN));
         assertFalse(results.isAttributeDefName(OPT_OUT));
 
         results = new AttributeAssignmentsResults(null);
         assertFalse(results.isAttributeDefName(OPT_IN));
+
+        json = propertyValue("attribute.assignment.opt.out.result");
+        wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        assertNotNull(wsResults);
+        results = new AttributeAssignmentsResults(wsResults);
+        assertNotNull(results);
+        assertTrue(results.isAttributeDefName(OPT_OUT));
+        assertFalse(results.isAttributeDefName(OPT_IN));
+
+        json = propertyValue("attribute.assignment.empty.result");
+        wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        assertNotNull(wsResults);
+        results = new AttributeAssignmentsResults(wsResults);
+        assertNotNull(results);
+        assertFalse(results.isAttributeDefName(OPT_OUT));
+        assertFalse(results.isAttributeDefName(OPT_IN));
     }
 
     @Test
     public void getGroupNamesTest() {
-        String json = propertyValue("attribute.assignment.result");
+        String json = propertyValue("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
