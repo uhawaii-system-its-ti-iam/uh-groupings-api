@@ -20,8 +20,8 @@ public class AttributeAssignmentsResults {
     private final static String OPT_OUT = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-out";
     private final WsGetAttributeAssignmentsResults results;
     private String attributeDefName;
-    private boolean optInOn;
-    private boolean optOutOn;
+    private boolean optInOn = false;
+    private boolean optOutOn = false;
 
     public AttributeAssignmentsResults(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
         if (wsGetAttributeAssignmentsResults == null) {
@@ -109,8 +109,12 @@ public class AttributeAssignmentsResults {
         WsAttributeDefName[] defNames = results.getWsAttributeDefNames();
         if (!isEmpty(defNames)) {
             for (WsAttributeDefName attribute : defNames) {
-                optInOn = attribute.getName().equals(OPT_IN);
-                optOutOn = attribute.getName().equals(OPT_OUT);
+                String name = attribute.getName();
+                if (name.equals(OPT_IN)) {
+                    optInOn = true;
+                } else if (name.equals(OPT_OUT)) {
+                    optOutOn = true;
+                }
             }
         }
     }
