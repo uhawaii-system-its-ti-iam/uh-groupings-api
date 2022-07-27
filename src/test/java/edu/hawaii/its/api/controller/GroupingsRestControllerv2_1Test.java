@@ -584,7 +584,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void enablePreferenceSyncDestTest() throws Exception {
-        given(groupAttributeService.changeOptInStatus("grouping", USERNAME, true))
+        given(groupAttributeService.changeOptStatus("grouping", USERNAME, OPT_IN, true))
                 .willReturn(gsrListIn());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OPT_IN + "/enable")
                         .with(csrf())
@@ -594,9 +594,9 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].action").value("member is opted-in"));
 
         verify(groupAttributeService, times(1))
-                .changeOptInStatus("grouping", USERNAME, true);
+                .changeOptStatus("grouping", USERNAME, OPT_IN, true);
 
-        given(groupAttributeService.changeOptOutStatus("grouping", USERNAME, true))
+        given(groupAttributeService.changeOptStatus("grouping", USERNAME, OPT_OUT, true))
                 .willReturn(gsrListOut());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OPT_OUT + "/enable")
                         .with(csrf())
@@ -606,7 +606,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
 
         verify(groupAttributeService, times(1))
-                .changeOptOutStatus("grouping", USERNAME, true);
+                .changeOptStatus("grouping", USERNAME, OPT_OUT, true);
 
         given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
