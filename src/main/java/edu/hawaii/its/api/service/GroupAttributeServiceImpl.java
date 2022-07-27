@@ -111,11 +111,11 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     /**
-     * Turn the ability for users to opt-in to a grouping on or off.
+     * Turn the ability for users to opt-in/opt-out to a grouping on or off.
      */
     @Override
-    public List<GroupingsServiceResult> changeOptInStatus(String groupingPath, String ownerUsername,
-            boolean isOptInOn) {
+    public List<GroupingsServiceResult> changeOptStatus(String groupingPath, String ownerUsername, String preferenceId,
+                                                          boolean isOptOn) {
         List<GroupingsServiceResult> results = new ArrayList<>();
 
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(
@@ -123,30 +123,17 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptInOn));
-        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptInOn));
-        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptInOn));
-
-        return results;
-    }
-
-    /**
-     * Turn the ability for users to opt-out of a grouping on or off.
-     */
-    @Override
-    public List<GroupingsServiceResult> changeOptOutStatus(String groupingPath, String ownerUsername,
-            boolean isOptOutOn) {
-
-        List<GroupingsServiceResult> results = new ArrayList<>();
-
-        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(
-                ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+        if (OPT_IN.equals(preferenceId)) {
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + INCLUDE, isOptOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + EXCLUDE, isOptOn));
+            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_IN, isOptOn));
+        } else if (OPT_OUT.equals(preferenceId)) {
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOn));
+            results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOn));
+            results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOn));
+        } else {
+            throw new UnsupportedOperationException();
         }
-
-        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_IN, groupingPath + EXCLUDE, isOptOutOn));
-        results.add(assignGrouperPrivilege(EVERY_ENTITY, PRIVILEGE_OPT_OUT, groupingPath + INCLUDE, isOptOutOn));
-        results.add(changeGroupAttributeStatus(groupingPath, ownerUsername, OPT_OUT, isOptOutOn));
 
         return results;
     }
