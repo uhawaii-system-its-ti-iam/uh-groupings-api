@@ -142,6 +142,9 @@ public class TestGroupingAssignmentService {
     @Autowired
     public Environment env; // Just for the settings check.
 
+    @Autowired
+    private GrouperFactoryService grouperFactoryService;
+    
     @PostConstruct
     public void init() {
         Assert.hasLength(env.getProperty("grouperClient.webService.url"),
@@ -371,6 +374,8 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
+            //Check that the group path contains the optIn attribute
+            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_IN));
         });
         optOutPaths.forEach(path -> {
             assertTrue(optOutPathsMap.add(path));
@@ -378,8 +383,9 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
+            //Check that the group path contains the optOut attribute
+            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_OUT));
         });
-
     }
 
     @Test
