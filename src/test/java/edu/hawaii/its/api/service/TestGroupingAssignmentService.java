@@ -142,9 +142,6 @@ public class TestGroupingAssignmentService {
     @Autowired
     public Environment env; // Just for the settings check.
 
-    @Autowired
-    private GrouperFactoryService grouperFactoryService;
-    
     @PostConstruct
     public void init() {
         Assert.hasLength(env.getProperty("grouperClient.webService.url"),
