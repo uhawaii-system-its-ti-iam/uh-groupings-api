@@ -349,6 +349,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
+            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_IN));
         });
         optOutPaths.forEach(path -> {
             assertTrue(optOutPathsMap.add(path));
@@ -356,6 +357,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(EXCLUDE));
             assertFalse(path.endsWith(BASIS));
             assertFalse(path.endsWith(OWNERS));
+            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_OUT));
         });
 
     }

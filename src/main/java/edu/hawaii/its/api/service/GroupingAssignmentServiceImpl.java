@@ -281,14 +281,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsIn = getGroupPaths(owner, optInUid);
         List<String> includes =
                 groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
-        List<String> excludes =
-                groupingsIn.stream().filter(path -> path.endsWith(EXCLUDE)).collect(Collectors.toList());
         includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
-        excludes = excludes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
 
         List<String> optInPaths = optableGroupings(OPT_IN);
         optInPaths.removeAll(includes);
-        optInPaths.addAll(excludes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
         optInPaths.forEach(path -> {
             optInGroupingPaths.add(new GroupingPath(path));
