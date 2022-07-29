@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -591,14 +590,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsIn = getGroupPaths(owner, optInUid);
         List<String> includes =
                 groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
-        List<String> excludes =
-                groupingsIn.stream().filter(path -> path.endsWith(EXCLUDE)).collect(Collectors.toList());
         includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
-        excludes = excludes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
 
         List<String> optInPaths = optableGroupings(OPT_IN);
         optInPaths.removeAll(includes);
-        optInPaths.addAll(excludes);
         return new ArrayList<>(new HashSet<>(optInPaths));
     }
 
