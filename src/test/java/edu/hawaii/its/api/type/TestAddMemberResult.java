@@ -7,6 +7,8 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
@@ -52,9 +54,9 @@ public class TestAddMemberResult {
 
     @Test
     public void constructorTest() {
-        WsDeleteMemberResults deleteMemberResults = grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
+        RemoveMemberResponse deleteMemberResults = grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
         assertNotNull(deleteMemberResults);
-        WsAddMemberResults addMemberResults = grouperApiService.addMember(GROUPING_INCLUDE, testUsername);
+        AddMemberResponse addMemberResults = grouperApiService.addMember(GROUPING_INCLUDE, testUsername);
         assertNotNull(addMemberResults);
         AddMemberResult addMemberResult = new AddMemberResult(addMemberResults, deleteMemberResults);
         assertNotNull(addMemberResult);

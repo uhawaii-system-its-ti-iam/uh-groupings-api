@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.type;
 
+import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
@@ -70,6 +73,21 @@ public class AddMemberResult {
         setUid(wsAddMemberResult.getWsSubject().getIdentifierLookup());
         setPathOfAdd(wsAddMemberResults.getWsGroupAssigned().getName());
         setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
+    }
+
+    public AddMemberResult(AddMemberResponse addMemberResponse) {
+        this.userWasAdded = addMemberResponse.isSuccess();
+        setPathOfAdd(addMemberResponse.groupPath());
+        setName(addMemberResponse.name());
+        setUid(addMemberResponse.uid());
+        setUhUuid(addMemberResponse.uhUuid());
+        setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
+    }
+
+    public AddMemberResult(AddMemberResponse addMemberResponse, RemoveMemberResponse removeMemberResponse) {
+        this(addMemberResponse);
+        this.userWasRemoved = removeMemberResponse.isSuccess();
+        setPathOfRemoved(removeMemberResponse.groupPath());
     }
 
     public boolean isUserWasAdded() {
