@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.HasMemberRequestRejectedException;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -167,7 +168,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getGrouping(GROUPING_INCLUDE, ADMIN);
             fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -175,7 +176,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getGrouping("bogus-path", ADMIN);
             fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -240,7 +241,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING_INCLUDE, ADMIN, null, null, null, null);
             fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -248,7 +249,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, null);
             fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
     }
@@ -333,7 +334,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void optInOutGroupingsPathsTest() {
         // Test both getOptInGroups and getOptOutGroups()
-        List<GroupingPath> optInGroupingsPaths = groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<GroupingPath> optInGroupingsPaths =
+                groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
         List<String> optInPaths = optInGroupingsPaths.stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
         Set<String> intersection =

@@ -4,11 +4,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.HasMemberResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service("memberAttributeService")
@@ -54,21 +52,8 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
-
-        if (helperService.isUhUuid(username)) {
-            return isMemberUuid(groupPath, username);
-        }
-
-        WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, username);
-        WsHasMemberResult[] whmr = whmrs.getResults();
-        List<WsHasMemberResult> hasMemberResults = Arrays.asList(whmr);
-        for (WsHasMemberResult hasMemberResult : hasMemberResults) {
-            if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                return true;
-            }
-        }
-
-        return false;
+        HasMemberResult hasMemberResult = new HasMemberResult(grouperApiService.hasMember(groupPath, username));
+        return hasMemberResult.isHasMember();
     }
 
     // Returns true if the person is a member of the group
@@ -76,34 +61,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     public boolean isMember(String groupPath, Person person) {
         if (person.getUsername() != null) {
             return isMember(groupPath, person.getUsername());
+        } else if (person.getUhUuid() != null) {
+            return isMember(groupPath, person.getUhUuid());
+        } else {
+            return false;
         }
-
-        List<WsHasMemberResult> hasMemberResults =
-                Arrays.asList(grouperApiService.hasMemberResults(groupPath, person).getResults());
-
-        for (WsHasMemberResult hasMemberResult : hasMemberResults) {
-            if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                return true;
-            }
-        }
-        return false;
-
-    }
-
-    // Returns true if the person is a member of the group
-    @Override
-    public boolean isMemberUuid(String groupPath, String idnum) {
-        logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
-
-        List<WsHasMemberResult> hasMemberResults =
-                Arrays.asList(grouperApiService.hasMemberResults(groupPath, idnum).getResults());
-
-        for (WsHasMemberResult hasMemberResult : hasMemberResults) {
-            if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Returns true if the user is in the owner group of the grouping

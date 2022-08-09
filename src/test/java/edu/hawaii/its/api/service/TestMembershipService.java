@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.HasMemberRequestRejectedException;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
@@ -394,7 +395,7 @@ public class TestMembershipService {
         try {
             membershipService.addIncludeMembers(ADMIN, GROUPING_INCLUDE, bogusUsersToAdd);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -402,7 +403,7 @@ public class TestMembershipService {
         try {
             membershipService.addIncludeMembers(ADMIN, "bad-path", bogusUsersToAdd);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -479,7 +480,7 @@ public class TestMembershipService {
         try {
             membershipService.addExcludeMembers(ADMIN, GROUPING_INCLUDE, bogusUsersToAdd);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -487,7 +488,7 @@ public class TestMembershipService {
         try {
             membershipService.addExcludeMembers(ADMIN, "bad-path", bogusUsersToAdd);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
         // Should not throw an exception if current user is not an admin but is an owner of the group.
@@ -640,7 +641,7 @@ public class TestMembershipService {
         try {
             membershipService.removeIncludeMembers(ADMIN, GROUPING_INCLUDE, null);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -648,7 +649,7 @@ public class TestMembershipService {
         try {
             membershipService.removeIncludeMembers(iamtst01, "bad-path", null);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
         // Should not throw an exception if current user is not an admin but is an owner of the group.
@@ -726,7 +727,7 @@ public class TestMembershipService {
         try {
             membershipService.removeExcludeMembers(ADMIN, GROUPING_INCLUDE, null);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -734,7 +735,7 @@ public class TestMembershipService {
         try {
             membershipService.removeExcludeMembers(iamtst01, "bad-path", null);
             fail("Should throw an exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
         // Should not throw an exception if current user is not an admin but is an owner of the group.

@@ -40,7 +40,7 @@ public class AddMemberResponseTest {
 
     @Test
     public void accessors() {
-        // When add is queried with a uid.
+        // Request is successfully queried with a UH username.
         String json = propertyValue("ws.add.member.results.success.uid");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMemberResponse addMemberResponse = new AddMemberResponse(wsAddMemberResults);
@@ -62,7 +62,7 @@ public class AddMemberResponseTest {
         assertNotNull(addMemberResponse.name());
         assertEquals("name", addMemberResponse.name());
 
-        // When add is queried with a uhuuid.
+        // Request is successfully queried with a UH number.
         json = propertyValue("ws.add.member.results.success.uhuuid");
         wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         addMemberResponse = new AddMemberResponse(wsAddMemberResults);

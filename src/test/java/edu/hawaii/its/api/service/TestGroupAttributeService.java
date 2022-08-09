@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.HasMemberRequestRejectedException;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.SyncDestination;
@@ -159,7 +160,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.getAllSyncDestinations(ADMIN, "bogus-path");
             fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -226,7 +227,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptStatus("bogus-path", iamtst01, OPT_IN, false);
             fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -299,8 +300,8 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptStatus("bogus-path", iamtst01, OPT_OUT, false);
             fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
+        } catch (HasMemberRequestRejectedException e) {
+            assertTrue(e.getMessage().contains("GROUP_NOT_FOUND"));
         }
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
@@ -373,7 +374,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeGroupAttributeStatus("bogus-path", ADMIN, null, false);
             fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 
@@ -462,7 +463,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION);
             fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
 

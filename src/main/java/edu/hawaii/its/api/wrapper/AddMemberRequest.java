@@ -6,6 +6,7 @@ import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 public class AddMemberRequest {
+
     private final GcAddMember gcAddMember;
 
     public AddMemberRequest(String groupPath, String memberToAdd) {
@@ -59,8 +60,7 @@ public class AddMemberRequest {
         return this;
     }
 
-    private boolean isUhUuid(String naming) {
+   private boolean isUhUuid(String naming) {
         return naming != null && naming.matches("\\d+");
     }
-
 }

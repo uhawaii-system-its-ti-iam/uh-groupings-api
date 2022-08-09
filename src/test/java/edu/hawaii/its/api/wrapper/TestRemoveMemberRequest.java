@@ -22,8 +22,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestRemoveMemberRequest {
+
     @Value("${groupings.api.test.uhuuids}")
     private List<String> TEST_UH_NUMBERS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 

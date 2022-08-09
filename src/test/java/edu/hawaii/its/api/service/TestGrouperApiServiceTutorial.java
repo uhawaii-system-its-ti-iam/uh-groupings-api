@@ -18,9 +18,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.HasMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
@@ -39,8 +39,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -305,94 +303,25 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void hasMemberResultsTest() {
-        // Using uh numbers (one that is a member)
-        grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        WsHasMemberResults hasMemberResultsIsMember =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        assertNotNull(hasMemberResultsIsMember);
-        List<WsHasMemberResult> memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh numbers (one that is not a member)
-        WsHasMemberResults hasMemberResultsNonMember =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
-        assertNotNull(hasMemberResultsNonMember);
-        List<WsHasMemberResult> memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
+    public void hasMemberTest() {
+        String uid = TEST_USERNAMES.get(0);
+        String uhUuid = TEST_UH_NUMBERS.get(0);
 
-        // Using uh usernames (one that is a member)
-        grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
-        hasMemberResultsIsMember =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
-        assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh usernames (one that is not a member)
-        hasMemberResultsNonMember =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
-        assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
+        // With uid.
+        HasMemberResponse hasMemberResponse = grouperApiService.hasMember(GROUPING_INCLUDE, uid);
+        assertFalse(hasMemberResponse.isMember());
+        grouperApiService.addMember(GROUPING_INCLUDE, uid);
+        hasMemberResponse = grouperApiService.hasMember(GROUPING_INCLUDE, uid);
+        assertTrue(hasMemberResponse.isMember());
+        grouperApiService.removeMember(GROUPING_INCLUDE, uid);
 
-        // Using uh number with a person object (one that is a member)
-        hasMemberResultsIsMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), null));
-        assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh number with a person object (one that is not a member)
-        hasMemberResultsNonMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(1), null));
-        assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
-
-        // Using uh username with a person object (one that is a member)
-        hasMemberResultsIsMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), TEST_USERNAMES.get(0)));
-        assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh username with a person object (one that is not a member)
-        hasMemberResultsNonMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), TEST_USERNAMES.get(1)));
-        assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
-
-        try {
-            grouperApiService.hasMemberResults(GROUPING_INCLUDE, new Person(null, null, null)).getResults();
-        } catch (NullPointerException e) {
-            assertEquals("The person is required to have either a username or a uuid", e.getMessage());
-        }
-
-        // cleanup
-        grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
+        // With uhUuid.
+        hasMemberResponse = grouperApiService.hasMember(GROUPING_INCLUDE, uhUuid);
+        assertFalse(hasMemberResponse.isMember());
+        grouperApiService.addMember(GROUPING_INCLUDE, uhUuid);
+        hasMemberResponse = grouperApiService.hasMember(GROUPING_INCLUDE, uhUuid);
+        assertTrue(hasMemberResponse.isMember());
+        grouperApiService.removeMember(GROUPING_INCLUDE, uhUuid);
     }
 
     @Test

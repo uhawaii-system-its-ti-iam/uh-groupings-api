@@ -1,10 +1,11 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberRequest;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.HasMemberRequest;
+import edu.hawaii.its.api.wrapper.HasMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberRequest;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
@@ -18,7 +19,6 @@ import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
-import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -35,7 +35,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -168,33 +167,8 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsHasMemberResults hasMemberResults(String group, String username) {
-        if (helperService.isUhUuid(username)) {
-            return new GcHasMember()
-                    .assignGroupName(group)
-                    .addSubjectId(username)
-                    .execute();
-        }
-        return new GcHasMember()
-                .assignGroupName(group)
-                .addSubjectIdentifier(username)
-                .execute();
-    }
-
-    @Override
-    public WsHasMemberResults hasMemberResults(String group, Person person) {
-        if (person.getUsername() != null) {
-            return hasMemberResults(group, person.getUsername());
-        }
-
-        if (person.getUhUuid() == null) {
-            throw new NullPointerException("The person is required to have either a username or a uuid");
-        }
-
-        return new GcHasMember()
-                .assignGroupName(group)
-                .addSubjectId(person.getUhUuid())
-                .execute();
+    public HasMemberResponse hasMember(String groupPath, String uhIdentifier) {
+        return new HasMemberRequest(groupPath, uhIdentifier).send();
     }
 
     @Override

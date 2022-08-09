@@ -6,6 +6,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.HasMemberResponse;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
@@ -21,9 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +34,9 @@ import static org.mockito.BDDMockito.given;
 public class MemberAttributeServiceTest {
 
     private static Properties properties;
+    private static final String IS_MEMBER = "IS_MEMBER";
+    private static final String IS_MEMBER_FALSE = "IS_MEMBER_FALSE";
+    private static final String NOT_IS_MEMBER = "NOT_IS_MEMBER";
 
     @MockBean
     private GrouperApiService grouperApiService;
@@ -60,10 +64,10 @@ public class MemberAttributeServiceTest {
         final String username = "uuu";
         final String uid = "123";
 
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
+        given(grouperApiService.hasMember(groupAdminPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
+        given(grouperApiService.hasMember(groupOwnerPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
 
         String json = propertyValue("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -80,10 +84,10 @@ public class MemberAttributeServiceTest {
         final String username = "uuu";
         final String uid = "123";
 
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
+        given(grouperApiService.hasMember(groupAdminPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
+        given(grouperApiService.hasMember(groupOwnerPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
 
         String json = propertyValue("subject.not.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -100,10 +104,10 @@ public class MemberAttributeServiceTest {
         final String username = "uuu";
         final String uid = "123";
 
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
+        given(grouperApiService.hasMember(groupAdminPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER_FALSE)));
+        given(grouperApiService.hasMember(groupOwnerPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER_FALSE)));
 
         String json = propertyValue("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -120,10 +124,10 @@ public class MemberAttributeServiceTest {
         final String username = "uuu";
         final String uid = "123";
 
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
+        given(grouperApiService.hasMember(groupAdminPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER_FALSE)));
+        given(grouperApiService.hasMember(groupOwnerPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
 
         String json = propertyValue("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -140,10 +144,10 @@ public class MemberAttributeServiceTest {
         final String username = "uuu";
         final String uid = "123";
 
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
+        given(grouperApiService.hasMember(groupAdminPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(IS_MEMBER)));
+        given(grouperApiService.hasMember(groupOwnerPath, username))
+                .willReturn(new HasMemberResponse(makeWsHasMemberResults(NOT_IS_MEMBER)));
 
         String json = propertyValue("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);

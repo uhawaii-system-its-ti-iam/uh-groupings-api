@@ -24,11 +24,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestAddMemberRequest {
     @Value("${groupings.api.test.uhuuids}")
     private List<String> TEST_UH_NUMBERS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 
     final static private String SUCCESS = "SUCCESS";
     final static private String SUCCESS_ALREADY_EXISTED = "SUCCESS_ALREADY_EXISTED";
+    private String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -97,10 +99,16 @@ public class TestAddMemberRequest {
             fail("Should not throw exception when valid uh identifiers are passed");
         }
 
+    }
+
+    @Test
+    public void exceptionsTest() {
+        String uid = "testiam2";
+
         // Should throw an exception if an invalid uh identifier is passed.
         String bogusIdentifier = "bogus-ident";
         try {
-            response = new AddMemberRequest(GROUPING_INCLUDE, bogusIdentifier).send();
+            new AddMemberRequest(GROUPING_INCLUDE, bogusIdentifier).send();
             fail("Should throw an exception if an invalid uh identifier is passed.");
         } catch (AddMemberRequestRejectedException e) {
             assertNull(e.getCause());
@@ -109,11 +117,11 @@ public class TestAddMemberRequest {
         // Should throw an exception if an invalid group path is passed.
         String badPath = "bad-path";
         try {
-            response = new AddMemberRequest(badPath, uid).send();
+            new AddMemberRequest(badPath, uid).send();
             fail("Should throw an exception if an invalid group path is passed.");
         } catch (AddMemberRequestRejectedException e) {
             assertNull(e.getCause());
+            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
         }
-
     }
 }

@@ -4,12 +4,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.HasMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
-
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -135,7 +134,7 @@ public class TestMemberAttributeService {
         try {
             memberAttributeService.isMember("bad-path", "iamtst01");
             fail(" Should throw an exception if a bad path is passed.");
-        } catch (GcWebServiceError e) {
+        } catch (HasMemberRequestRejectedException e) {
             assertTrue(e.getMessage().contains("GROUP_NOT_FOUND"));
         }
     }

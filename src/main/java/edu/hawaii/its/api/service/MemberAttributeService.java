@@ -11,8 +11,6 @@ public interface MemberAttributeService {
 
     boolean isMember(String groupPath, Person person);
 
-    boolean isMemberUuid(String groupPath, String idnum);
-
     boolean isOwner(String groupingPath, String username);
 
     boolean isOwner(String username);

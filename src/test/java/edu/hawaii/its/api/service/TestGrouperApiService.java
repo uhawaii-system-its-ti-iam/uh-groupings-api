@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
@@ -22,7 +21,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,28 +241,6 @@ public class TestGrouperApiService {
         WsAttributeAssign[] attributeAssigns =
                 grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING).getWsAttributeAssigns();
         assertNotNull(attributeAssigns);
-    }
-
-    @Test
-    public void hasMemberResultsTest() {
-        WsHasMemberResults hasMemberResults =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        assertNotNull(hasMemberResults);
-        assertNotNull(hasMemberResults);
-
-        hasMemberResults =
-                grouperApiService.hasMemberResults(GROUPING_INCLUDE, new Person(null, TEST_USERNAMES.get(0), null));
-        assertNotNull(hasMemberResults);
-
-        hasMemberResults = grouperApiService.hasMemberResults(GROUPING_INCLUDE,
-                new Person(null, TEST_USERNAMES.get(0), TEST_USERNAMES.get(0)));
-        assertNotNull(hasMemberResults);
-
-        try {
-            grouperApiService.hasMemberResults(GROUPING_INCLUDE, new Person(null, null, null)).getResults();
-        } catch (NullPointerException e) {
-            assertEquals("The person is required to have either a username or a uuid", e.getMessage());
-        }
     }
 
     @Test

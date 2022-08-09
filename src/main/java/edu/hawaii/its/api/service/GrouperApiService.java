@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.HasMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -15,7 +15,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -46,9 +45,7 @@ public interface GrouperApiService {
             String attributeDefNameName,
             String group);
 
-    WsHasMemberResults hasMemberResults(String group, String username);
-
-    WsHasMemberResults hasMemberResults(String group, Person person);
+    HasMemberResponse hasMember(String groupPath, String uhIdentifier);
 
     WsAssignAttributesResults assignAttributesResults(String attributeAssignType,
             String attributeAssignOperation,
