@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
@@ -29,6 +31,15 @@ public class RemoveMemberResult {
     public RemoveMemberResult(String userIdentifier, String result) {
         this.userIdentifier = userIdentifier;
         this.result = result;
+    }
+
+    public RemoveMemberResult(RemoveMemberResponse removeMemberResponse) {
+        this.userWasRemoved = removeMemberResponse.isSuccess();
+        setPathOfRemoved(removeMemberResponse.groupPath());
+        setName(removeMemberResponse.name());
+        setUid(removeMemberResponse.uid());
+        setUhUuid(removeMemberResponse.uhUuid());
+        setResult(this.userWasRemoved ? "SUCCESS" : "FAILURE");
     }
 
     public RemoveMemberResult(WsDeleteMemberResults wsDeleteMemberResults) {

@@ -2,16 +2,18 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
+import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
+import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,10 +97,8 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        WsAddMemberResults addMemberResult = grouperApiService.addMember(
-                GROUPING_ADMINS,
-                adminToAdd);
-        return new AddMemberResult(addMemberResult);
+        AddMemberResponse addMemberResponse = grouperApiService.addMember(GROUPING_ADMINS, adminToAdd);
+        return new AddMemberResult(addMemberResponse);
     }
 
     /**
@@ -112,10 +111,8 @@ public class MembershipServiceImpl implements MembershipService {
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        WsDeleteMemberResults deleteMemberResult = grouperApiService.removeMember(
-                GROUPING_ADMINS,
-                adminToRemove);
-        return new RemoveMemberResult(deleteMemberResult);
+        RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(GROUPING_ADMINS, adminToRemove);
+        return new RemoveMemberResult(removeMemberResponse);
     }
 
     /**
@@ -261,14 +258,10 @@ public class MembershipServiceImpl implements MembershipService {
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
         for (String userToRemove : usersToRemove) {
             RemoveMemberResult removeMemberResult;
-            WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(groupPath, userToRemove);
-            removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+            RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(groupPath, userToRemove);
+            removeMemberResult = new RemoveMemberResult(removeMemberResponse);
             if (removeMemberResult.isUserWasRemoved()) {
                 membershipService.updateLastModified(groupPath);
-                if (removeMemberResult.getUid() == null) {
-                    removeMemberResult.setUid(memberAttributeService
-                            .getMemberAttributes(currentUser, removeMemberResult.getUhUuid()).getUsername());
-                }
             }
             removeMemberResults.add(removeMemberResult);
             logger.info("removeGroupMembers; " + removeMemberResult.toString());
@@ -325,13 +318,12 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(actor);
         for (String ownerToRemove : ownersToRemove) {
             RemoveMemberResult ownershipResults;
 
-            WsDeleteMemberResults memberResults =
-                    grouperApiService.removeMember(groupingPath + OWNERS, lookup, ownerToRemove);
-            ownershipResults = new RemoveMemberResult(memberResults);
+            RemoveMemberResponse removeMemberResponse =
+                    grouperApiService.removeMember(groupingPath + OWNERS, ownerToRemove);
+            ownershipResults = new RemoveMemberResult(removeMemberResponse);
             if (ownershipResults.isUserWasRemoved()) {
                 membershipService.updateLastModified(groupingPath);
                 membershipService.updateLastModified(groupingPath + OWNERS);
@@ -361,9 +353,8 @@ public class MembershipServiceImpl implements MembershipService {
 
         for (String ownerToAdd : ownersToAdd) {
             AddMemberResult addOwnerResult;
-            WsAddMemberResults wsAddMemberResults =
-                    grouperApiService.addMember(groupingPath + OWNERS, wsSubjectLookup, ownerToAdd);
-            addOwnerResult = new AddMemberResult(wsAddMemberResults);
+            AddMemberResponse addMemberResponse = grouperApiService.addMember(groupingPath + OWNERS, ownerToAdd);
+            addOwnerResult = new AddMemberResult(addMemberResponse);
             if (addOwnerResult.isUserWasAdded()) {
                 membershipService.updateLastModified(groupingPath);
                 membershipService.updateLastModified(groupingPath + OWNERS);
@@ -480,18 +471,16 @@ public class MembershipServiceImpl implements MembershipService {
     public AddMemberResult addMember(String currentUser, String userToAdd, String removalPath, String additionPath) {
         AddMemberResult addMemberResult;
         try {
-            WsDeleteMemberResults wsDeleteMemberResults = grouperApiService.removeMember(removalPath, userToAdd);
-            WsAddMemberResults wsAddMemberResults = grouperApiService.addMember(additionPath, userToAdd);
-            addMemberResult = new AddMemberResult(wsAddMemberResults, wsDeleteMemberResults);
-
+            RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(removalPath, userToAdd);
+            AddMemberResponse addMemberResponse = grouperApiService.addMember(additionPath, userToAdd);
+            addMemberResult = new AddMemberResult(addMemberResponse, removeMemberResponse);
             if (addMemberResult.isUserWasAdded()) {
                 membershipService.updateLastModified(additionPath);
-                if (addMemberResult.getUid() == null) {
-                    addMemberResult.setUid(memberAttributeService
-                            .getMemberAttributes(currentUser, addMemberResult.getUhUuid()).getUsername());
-                }
             }
-        } catch (GcWebServiceError | NullPointerException e) {
+            if (addMemberResult.isUserWasRemoved()) {
+                membershipService.updateLastModified(removalPath);
+            }
+        } catch (AddMemberRequestRejectedException | RemoveMemberRequestRejectedException e) {
             addMemberResult = new AddMemberResult(userToAdd, FAILURE);
         }
         logger.info("addGroupMembers; " + addMemberResult);

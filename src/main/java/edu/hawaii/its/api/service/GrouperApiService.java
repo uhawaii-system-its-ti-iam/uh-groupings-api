@@ -2,12 +2,12 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.wrapper.AddMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -28,13 +28,9 @@ public interface GrouperApiService {
 
     WsGroupSaveResults updateGroupDescription(String groupPath, String description);
 
-    WsAddMemberResults addMember(String group, WsSubjectLookup lookup, String newMember);
+    AddMemberResponse addMember(String groupPath, String uhIdentifier);
 
-    WsAddMemberResults addMember(String group, String newMember);
-
-    WsDeleteMemberResults removeMember(String group, String memberToDelete);
-
-    WsDeleteMemberResults removeMember(String group, WsSubjectLookup lookup, String memberToDelete);
+    RemoveMemberResponse removeMember(String groupPath, String uhIdentifier);
 
     WsGetAttributeAssignmentsResults groupsOf(String assignType,
             String attributeDefNameName);
