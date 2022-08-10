@@ -21,11 +21,8 @@ public class PatternPropertyChecker {
      * getPatternLocation: checks a file(s) and given file naming convention(.properties, .java, .pom)
      * for a pattern.
      *
-     * @param fileExtension
-     *            The file type(.java, .properties, .pom, etc).
-     * @param folderLocation
-     *            The folder location(/src/main/resources).
-     *
+     * @param fileExtension  The file type(.java, .properties, .pom, etc).
+     * @param folderLocation The folder location(/src/main/resources).
      * @return A list of strings containing locations of the found patterns.
      */
     public List<String> getPatternLocation(String folderLocation, String fileExtension) {
@@ -46,26 +43,24 @@ public class PatternPropertyChecker {
 
                 for (File fr : fileResources) {
                     logger.info("fileLocations; scan file: " + fr);
-
+                    Scanner fileScanner = new Scanner(fr);
                     int lineId = 0;
                     List<Integer> lineNumbers = new ArrayList<>();
 
-                    try (Scanner fileScanner = new Scanner(fr)) {
-                        while (fileScanner.hasNextLine()) {
-                            String line = fileScanner.nextLine();
-                            lineId++;
+                    while (fileScanner.hasNextLine()) {
+                        String line = fileScanner.nextLine();
+                        lineId++;
 
-                            matcher = pat.matcher(line);
+                        matcher = pat.matcher(line);
 
-                            if (matcher.find()) {
-                                lineNumbers.add(lineId);
-                            }
+                        if (matcher.find()) {
+                            lineNumbers.add(lineId);
                         }
-
-                        if (!lineNumbers.isEmpty()) {
-                            for (int li : lineNumbers) {
-                                patternLocation.add(fr.toString() + " on line: " + li);
-                            }
+                    }
+                    fileScanner.close();
+                    if (!lineNumbers.isEmpty()) {
+                        for (int li : lineNumbers) {
+                            patternLocation.add(fr.toString() + " on line: " + li);
                         }
                     }
                 }
