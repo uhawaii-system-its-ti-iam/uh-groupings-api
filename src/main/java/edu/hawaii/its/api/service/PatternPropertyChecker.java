@@ -43,21 +43,21 @@ public class PatternPropertyChecker {
 
                 for (File fr : fileResources) {
                     logger.info("fileLocations; scan file: " + fr);
-                    Scanner fileScanner = new Scanner(fr);
                     int lineId = 0;
                     List<Integer> lineNumbers = new ArrayList<>();
+                    // The try...when closes the scanner after the while loop resolves and exits the try
+                    try (Scanner fileScanner = new Scanner(fr)) {
+                        while (fileScanner.hasNextLine()) {
+                            String line = fileScanner.nextLine();
+                            lineId++;
 
-                    while (fileScanner.hasNextLine()) {
-                        String line = fileScanner.nextLine();
-                        lineId++;
+                            matcher = pat.matcher(line);
 
-                        matcher = pat.matcher(line);
-
-                        if (matcher.find()) {
-                            lineNumbers.add(lineId);
+                            if (matcher.find()) {
+                                lineNumbers.add(lineId);
+                            }
                         }
                     }
-                    fileScanner.close();
                     if (!lineNumbers.isEmpty()) {
                         for (int li : lineNumbers) {
                             patternLocation.add(fr.toString() + " on line: " + li);
