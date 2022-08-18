@@ -3,15 +3,12 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,19 +23,16 @@ public class AttributeAssignmentsResultsTest {
     private final static String OPT_IN = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
     private final static String OPT_OUT = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-out";
 
-    private static Properties properties;
+    private static PropertyLocator propertyLocator;
 
     @BeforeAll
     public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
     public void construction() {
-        String json = propertyValue("attribute.assignment.opt.in.result");
+        String json = propertyLocator.find("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -60,7 +54,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getOwnerGroupNamesTest() {
-        String json = propertyValue("attribute.assignment.opt.in.result");
+        String json = propertyLocator.find("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -84,7 +78,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void isAttributeDefNameTest() {
-        String json = propertyValue("attribute.assignment.opt.in.result");
+        String json = propertyLocator.find("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -95,7 +89,7 @@ public class AttributeAssignmentsResultsTest {
         results = new AttributeAssignmentsResults(null);
         assertFalse(results.isAttributeDefName(OPT_IN));
 
-        json = propertyValue("attribute.assignment.opt.out.result");
+        json = propertyLocator.find("attribute.assignment.opt.out.result");
         wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         results = new AttributeAssignmentsResults(wsResults);
@@ -103,7 +97,7 @@ public class AttributeAssignmentsResultsTest {
         assertTrue(results.isAttributeDefName(OPT_OUT));
         assertFalse(results.isAttributeDefName(OPT_IN));
 
-        json = propertyValue("attribute.assignment.empty.result");
+        json = propertyLocator.find("attribute.assignment.empty.result");
         wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         results = new AttributeAssignmentsResults(wsResults);
@@ -114,7 +108,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getGroupNamesTest() {
-        String json = propertyValue("attribute.assignment.opt.in.result");
+        String json = propertyLocator.find("attribute.assignment.opt.in.result");
         WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
@@ -130,9 +124,5 @@ public class AttributeAssignmentsResultsTest {
         groupNames = results.getGroupNames();
         assertNotNull(groupNames);
         assertTrue(groupNames.isEmpty());
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }
