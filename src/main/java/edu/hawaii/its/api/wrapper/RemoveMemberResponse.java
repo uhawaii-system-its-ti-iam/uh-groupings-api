@@ -1,9 +1,11 @@
 package edu.hawaii.its.api.wrapper;
 
+import static edu.hawaii.its.api.service.ResponseCode.SUCCESS;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 public class RemoveMemberResponse {
-    final static private String SUCCESS = "SUCCESS";
+
     private final WsDeleteMemberResults wsDeleteMemberResults;
 
     public RemoveMemberResponse(WsDeleteMemberResults wsDeleteMemberResults) {
@@ -75,7 +77,8 @@ public class RemoveMemberResponse {
         return o == null || o.length == 0;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return super.toString();
     }
 }

@@ -1,34 +1,34 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
-import edu.hawaii.its.api.service.GrouperApiService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-
+import static edu.hawaii.its.api.service.ResponseCode.SUCCESS;
+import static edu.hawaii.its.api.service.ResponseCode.SUCCESS_WASNT_IMMEDIATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
+import edu.hawaii.its.api.service.GrouperApiService;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestRemoveMemberRequest {
+
     @Value("${groupings.api.test.uhuuids}")
     private List<String> TEST_UH_NUMBERS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
-
-    final static private String SUCCESS = "SUCCESS";
-    final static private String SUCCESS_WASNT_IMMEDIATE = "SUCCESS_WASNT_IMMEDIATE";
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -88,7 +88,6 @@ public class TestRemoveMemberRequest {
             assertEquals(GROUPING_INCLUDE, response.groupPath());
             assertFalse(response.isSuccess());
             assertEquals(SUCCESS_WASNT_IMMEDIATE, response.resultCode());
-
         } catch (RemoveMemberRequestRejectedException e) {
             fail("Should not throw exception when valid uh identifiers are passed");
         }
@@ -103,7 +102,6 @@ public class TestRemoveMemberRequest {
             assertEquals(GROUPING_INCLUDE, response.groupPath());
             assertFalse(response.isSuccess());
             assertEquals(SUCCESS_WASNT_IMMEDIATE, response.resultCode());
-
         } catch (RemoveMemberRequestRejectedException e) {
             fail("Should not throw exception when invalid uh identifiers are passed");
         }
@@ -116,6 +114,5 @@ public class TestRemoveMemberRequest {
         } catch (RemoveMemberRequestRejectedException e) {
             assertNull(e.getCause());
         }
-
     }
 }

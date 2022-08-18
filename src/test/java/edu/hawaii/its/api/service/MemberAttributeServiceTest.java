@@ -1,26 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.util.JsonUtil;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,10 +8,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberAttributeServiceTest {
 
-    private static Properties properties;
+    private PropertyLocator propertyLocator;
 
     @MockBean
     private GrouperApiService grouperApiService;
@@ -40,12 +35,9 @@ public class MemberAttributeServiceTest {
     @Autowired
     private MemberAttributeService memberAttributeService;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
@@ -65,7 +57,7 @@ public class MemberAttributeServiceTest {
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -85,7 +77,7 @@ public class MemberAttributeServiceTest {
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.not.found");
+        String json = propertyLocator.find("subject.not.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -105,7 +97,7 @@ public class MemberAttributeServiceTest {
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -125,7 +117,7 @@ public class MemberAttributeServiceTest {
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -145,16 +137,12 @@ public class MemberAttributeServiceTest {
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
         Person person = memberAttributeService.getMemberAttributes(username, uid);
         assertThat(person, is(notNullValue()));
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 
     private WsHasMemberResults makeWsHasMemberResults(final String resultCode) {
