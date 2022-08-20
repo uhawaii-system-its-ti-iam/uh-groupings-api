@@ -7,6 +7,7 @@ public class Membership {
     private Group group;
     private String path;
     private String name;
+    private String description;
     private boolean isSelfOpted = false;
     private boolean isOptInEnabled = false;
     private boolean isOptOutEnabled = false;
@@ -45,6 +46,10 @@ public class Membership {
 
     public String getPath() {
         return path;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public boolean isInBasis() {
@@ -99,6 +104,10 @@ public class Membership {
         this.name = name;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public void setSelfOpted(boolean isSelfOpted) {
         this.isSelfOpted = isSelfOpted;
     }
@@ -139,6 +148,7 @@ public class Membership {
                 ", group=" + group +
                 ", path='" + path + '\'' +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", isSelfOpted=" + isSelfOpted +
                 ", isOptInEnabled=" + isOptInEnabled +
                 ", isOptOutEnabled=" + isOptOutEnabled +
