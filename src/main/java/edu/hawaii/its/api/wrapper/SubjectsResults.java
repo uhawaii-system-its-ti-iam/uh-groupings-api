@@ -2,12 +2,11 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
-public class SubjectsResults {
+public class SubjectsResults extends Results {
 
     public static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     private WsGetSubjectsResults wsGetSubjectsResults;
-    public String[] args;
 
     // Constructor (temporary; don't depend on it).
     public SubjectsResults(WsGetSubjectsResults wsGetSubjectsResults) {
@@ -18,7 +17,7 @@ public class SubjectsResults {
     }
 
     public String getResultCode() {
-        if (!hasItems(wsGetSubjectsResults.getWsSubjects())) {
+        if (isEmpty(wsGetSubjectsResults.getWsSubjects())) {
             return SUBJECT_NOT_FOUND;
         }
 
@@ -26,7 +25,7 @@ public class SubjectsResults {
     }
 
     public int getSubjectAttributeNameCount() {
-        if (!hasItems(wsGetSubjectsResults.getSubjectAttributeNames())) {
+        if (isEmpty(wsGetSubjectsResults.getSubjectAttributeNames())) {
             return 0;
         }
         return wsGetSubjectsResults.getSubjectAttributeNames().length;
@@ -38,10 +37,6 @@ public class SubjectsResults {
 
     public String getAttributeValue(int index) {
         return wsGetSubjectsResults.getWsSubjects()[0].getAttributeValues()[index];
-    }
-
-    private boolean hasItems(Object[] o) {
-        return o != null && o.length > 0;
     }
 
 }

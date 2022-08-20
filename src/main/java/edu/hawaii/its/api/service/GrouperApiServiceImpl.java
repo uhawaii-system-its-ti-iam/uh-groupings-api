@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -98,9 +99,8 @@ public class GrouperApiServiceImpl implements GrouperApiService {
 
     @Override
     public String descriptionOf(String groupPath) {
-        WsFindGroupsResults wsFindGroupsResults = findGroupsResults(groupPath);
-
-        return wsFindGroupsResults.getGroupResults()[0].getDescription();
+        FindGroupsResults result = new FindGroupsResults(findGroupsResults(groupPath));
+        return result.getDescription();
     }
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
