@@ -15,7 +15,6 @@ public class PatternPropertyChecker {
 
     private static final Log logger = LogFactory.getLog(PatternPropertyChecker.class);
 
-    private String pattern = "^.*password.*\\=(?!\\s*$).+";
 
     /**
      * getPatternLocation: checks a file(s) and given file naming convention(.properties, .java, .pom)
@@ -26,10 +25,11 @@ public class PatternPropertyChecker {
      * @return A list of strings containing locations of the found patterns.
      */
     public List<String> getPatternLocation(String folderLocation, String fileExtension) {
+        final String pattern = "^.*password.*\\=(?!\\s*$).+";
 
         logger.info("fileLocations;  fileExtension: " + fileExtension);
         logger.info("fileLocations; folderLocation: " + folderLocation);
-        logger.info("fileLocations;        pattern: " + this.pattern);
+        logger.info("fileLocations;        pattern: " + pattern);
 
         List<String> patternLocation = new ArrayList<>();
 
@@ -38,29 +38,29 @@ public class PatternPropertyChecker {
 
             File[] fileResources = dir.listFiles((dir1, name) -> name.endsWith(fileExtension));
             if (fileResources != null) {
-                Pattern pat = Pattern.compile(this.pattern);
+                Pattern pat = Pattern.compile(pattern);
                 Matcher matcher;
 
                 for (File fr : fileResources) {
                     logger.info("fileLocations; scan file: " + fr);
-                    Scanner fileScanner = new Scanner(fr);
                     int lineId = 0;
                     List<Integer> lineNumbers = new ArrayList<>();
+                    // The try...when closes the scanner after exiting the try
+                    try (Scanner fileScanner = new Scanner(fr)) {
+                        while (fileScanner.hasNextLine()) {
+                            String line = fileScanner.nextLine();
+                            lineId++;
 
-                    while (fileScanner.hasNextLine()) {
-                        String line = fileScanner.nextLine();
-                        lineId++;
+                            matcher = pat.matcher(line);
 
-                        matcher = pat.matcher(line);
-
-                        if (matcher.find()) {
-                            lineNumbers.add(lineId);
+                            if (matcher.find()) {
+                                lineNumbers.add(lineId);
+                            }
                         }
                     }
-                    fileScanner.close();
                     if (!lineNumbers.isEmpty()) {
                         for (int li : lineNumbers) {
-                            patternLocation.add(fr.toString() + " on line: " + li);
+                            patternLocation.add(fr + " on line: " + li);
                         }
                     }
                 }

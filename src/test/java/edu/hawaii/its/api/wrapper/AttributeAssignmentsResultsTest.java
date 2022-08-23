@@ -37,6 +37,7 @@ public class AttributeAssignmentsResultsTest {
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
         assertNotNull(results);
+        assertEquals(results.getResultCode(), "SUCCESS");
 
         assertNotNull(wsResults.getWsAttributeDefNames());
         assertNotEquals(0, wsResults.getWsAttributeDefNames().length);
@@ -50,6 +51,7 @@ public class AttributeAssignmentsResultsTest {
         assertNull(results.getAttributeDefName());
         assertFalse(results.isOptInOn());
         assertFalse(results.isOptOutOn());
+        assertEquals(results.getResultCode(), null);
     }
 
     @Test

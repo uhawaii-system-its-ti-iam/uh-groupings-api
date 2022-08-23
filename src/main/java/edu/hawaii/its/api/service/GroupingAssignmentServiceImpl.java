@@ -286,9 +286,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> optInPaths = optableGroupings(OPT_IN);
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
-        optInPaths.forEach(path -> {
-            optInGroupingPaths.add(new GroupingPath(path));
-        });
+
+        optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
+                grouperApiService.descriptionOf(path))).collect(Collectors.toList());
+
         return optInGroupingPaths;
     }
 

@@ -66,6 +66,14 @@ public class MembershipTest {
     }
 
     @Test
+    public void getDescriptionTest() {
+        assertNull(membershipEmptyOnConstruction.getDescription());
+        String description = "description";
+        membershipEmptyOnConstruction.setDescription(description);
+        assertEquals(description, membershipEmptyOnConstruction.getDescription());
+    }
+
+    @Test
     public void inBasisTest() {
         assertFalse(membershipEmptyOnConstruction.isInBasis());
         membershipEmptyOnConstruction.setInBasis(true);

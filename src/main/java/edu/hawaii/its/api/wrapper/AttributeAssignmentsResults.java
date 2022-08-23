@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Wrapper for WsAttributeAssignmentsResults.
  */
-public class AttributeAssignmentsResults {
+public class AttributeAssignmentsResults extends Results {
     private final static String OPT_IN = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
     private final static String OPT_OUT = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-out";
     private final WsGetAttributeAssignmentsResults results;
@@ -118,7 +118,9 @@ public class AttributeAssignmentsResults {
             }
         }
     }
-    private boolean isEmpty(Object[] o) {
-        return o == null || o.length == 0;
+
+    @Override
+    public String getResultCode() {
+        return results.getResultMetadata().getResultCode();
     }
 }
