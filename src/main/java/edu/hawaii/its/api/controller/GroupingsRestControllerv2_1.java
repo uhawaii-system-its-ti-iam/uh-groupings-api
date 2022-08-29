@@ -2,20 +2,6 @@ package edu.hawaii.its.api.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.RemoveMemberResult;
-import edu.hawaii.its.api.type.SyncDestination;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -34,8 +20,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
+import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.SyncDestination;
+
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -45,12 +49,6 @@ public class GroupingsRestControllerv2_1 {
 
     @Value("${app.groupings.controller.uuid}")
     private String uuid;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -365,15 +363,30 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path,
             @PathVariable String id) {
+
         logger.info("Entered REST enablePreference");
+
+        OptRequest optInRequest = new OptRequest.Builder()
+                .withUsername(currentUser)
+                .withGroupNameRoot(path)
+                .withPrivilegeType(PrivilegeType.IN)
+                .withOptType(OptType.find(id))
+                .withOptValue(true)
+                .build();
+
+        OptRequest optOutRequest = new OptRequest.Builder()
+                .withUsername(currentUser)
+                .withGroupNameRoot(path)
+                .withPrivilegeType(PrivilegeType.OUT)
+                .withOptType(OptType.find(id))
+                .withOptValue(true)
+                .build();
+
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptStatus(path, currentUser, id, true));
+                .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
     }
 
-    /**
-     * Update grouping to disable given preference.
-     */
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -381,10 +394,28 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path,
             @PathVariable String id) {
+
         logger.info("Entered REST disablePreference");
+
+        OptRequest optInRequest = new OptRequest.Builder()
+                .withUsername(currentUser)
+                .withGroupNameRoot(path)
+                .withPrivilegeType(PrivilegeType.IN)
+                .withOptType(OptType.find(id))
+                .withOptValue(false)
+                .build();
+
+        OptRequest optOutRequest = new OptRequest.Builder()
+                .withUsername(currentUser)
+                .withGroupNameRoot(path)
+                .withPrivilegeType(PrivilegeType.OUT)
+                .withOptType(OptType.find(id))
+                .withOptValue(false)
+                .build();
+
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptStatus(path, currentUser, id, false));
+                .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
     }
 
     /**
@@ -394,8 +425,7 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader(CURRENT_USER) String
-            currentUser,
+    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path) throws Exception {
         logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity
