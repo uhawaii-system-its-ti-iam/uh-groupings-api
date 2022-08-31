@@ -16,6 +16,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.OptType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,12 +68,6 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
     @Value("${groupings.api.test.usernames}")
     private List<String> TEST_USERNAMES;
 
@@ -110,10 +105,10 @@ public class TestGroupingsRestControllerv2_1 {
         });
 
         // Save the starting attribute settings for the test grouping.
-        attributeMap.put(OPT_IN, groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        attributeMap.put(OPT_OUT, groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, false);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, false);
+        attributeMap.put(OptType.IN.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        attributeMap.put(OptType.OUT.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
@@ -123,8 +118,8 @@ public class TestGroupingsRestControllerv2_1 {
     @AfterAll
     public void cleanUp() {
         // Set the test grouping's attribute settings back.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, attributeMap.get(OPT_IN));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, attributeMap.get(OPT_OUT));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), attributeMap.get(OptType.IN.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), attributeMap.get(OptType.OUT.value()));
     }
 
     @Test
@@ -435,7 +430,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enableSyncDestTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destination/" + OPT_IN + "/enable";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destination/" + OptType.IN.value() + "/enable";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
@@ -448,7 +443,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void disableSyncDestTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destination/" + OPT_IN + "/disable";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destination/" + OptType.IN.value() + "/disable";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
@@ -461,7 +456,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void enablePreferenceTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OPT_IN + "/enable";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.IN.value() + "/enable";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
@@ -470,7 +465,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
-        url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OPT_OUT + "/enable";
+        url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.OUT.value() + "/enable";
         mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
@@ -485,7 +480,7 @@ public class TestGroupingsRestControllerv2_1 {
                             .header(CURRENT_USER, ADMIN)
                             .with(user(ADMIN))
                             .with(csrf()))
-                    .andExpect(status().is(501))
+                    .andExpect(status().is(500))
                     .andReturn();
         } catch (UnsupportedOperationException e) {
             assertNotNull(e);
@@ -495,7 +490,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void disablePreferenceTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OPT_IN + "/disable";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.IN.value() + "/disable";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
@@ -504,7 +499,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
-        url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OPT_OUT + "/disable";
+        url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.OUT.value() + "/disable";
         mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .with(user(ADMIN))
