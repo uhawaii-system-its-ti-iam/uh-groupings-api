@@ -22,18 +22,6 @@ import java.util.regex.PatternSyntaxException;
 @Service("groupAttributeService")
 public class GroupAttributeServiceImpl implements GroupAttributeService {
 
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
@@ -42,12 +30,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     @Value("${groupings.api.operation_remove_attribute}")
     private String OPERATION_REMOVE_ATTRIBUTE;
-
-    @Value("${groupings.api.privilege_opt_out}")
-    private String PRIVILEGE_OPT_OUT;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
 
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
