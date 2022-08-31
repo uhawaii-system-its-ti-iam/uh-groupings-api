@@ -58,12 +58,6 @@ import java.util.List;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingsRestControllerv2_1Test {
 
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
     @Value("${groupings.api.listserv}")
     private String LISTSERV;
 
