@@ -6,11 +6,11 @@ import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
+import edu.hawaii.its.api.wrapper.SubjectCommand;
+import edu.hawaii.its.api.wrapper.SubjectResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -143,8 +143,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             return new Person();
         }
 
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(userIdentifier);
-        SubjectsResults results = new SubjectsResults(grouperApiService.subjectsResults(lookup));
+        SubjectResult results = new SubjectCommand(userIdentifier).execute();
 
         if (results.getResultCode().equals(SUBJECT_NOT_FOUND)) {
             throw new UhMemberNotFoundException(SUBJECT_NOT_FOUND);
