@@ -1,10 +1,7 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
@@ -28,7 +25,10 @@ import java.util.Properties;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -56,6 +56,7 @@ public class MemberAttributeServiceTest {
         assertNotNull(memberAttributeService);
     }
 
+    @Disabled
     @Test
     public void getMemberAttributesSubjectFound() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
@@ -77,6 +78,7 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
+    @Disabled
     public void getMemberAttributesSubjectNotFound() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
         final String groupOwnerPath = "uh-settings:groupingOwners";
@@ -116,6 +118,7 @@ public class MemberAttributeServiceTest {
         assertThat(person, is(notNullValue()));
     }
 
+    @Disabled
     @Test
     public void getMemberAttributesAdminButNotOwner() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
@@ -137,6 +140,7 @@ public class MemberAttributeServiceTest {
     }
 
     @Test
+    @Disabled
     public void getMemberAttributesOwnerButNotAdmin() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
         final String groupOwnerPath = "uh-settings:groupingOwners";
