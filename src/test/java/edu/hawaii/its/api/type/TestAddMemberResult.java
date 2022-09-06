@@ -7,11 +7,8 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.wrapper.AddMemberResponse;
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,11 +51,11 @@ public class TestAddMemberResult {
 
     @Test
     public void constructorTest() {
-        RemoveMemberResponse deleteMemberResults = grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
+        RemoveMemberResult deleteMemberResults = grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
         assertNotNull(deleteMemberResults);
-        AddMemberResponse addMemberResults = grouperApiService.addMember(GROUPING_INCLUDE, testUsername);
+        AddMemberResult addMemberResults = grouperApiService.addMember(GROUPING_INCLUDE, testUsername);
         assertNotNull(addMemberResults);
-        AddMemberResult addMemberResult = new AddMemberResult(addMemberResults, deleteMemberResults);
+        UIAddMemberResults addMemberResult = new UIAddMemberResults(addMemberResults, deleteMemberResults);
         assertNotNull(addMemberResult);
         assertTrue(addMemberResult.isUserWasAdded());
         assertTrue(addMemberResult.isUserWasRemoved());
@@ -69,7 +66,7 @@ public class TestAddMemberResult {
         assertEquals(GROUPING_EXCLUDE, addMemberResult.getPathOfRemoved());
         assertEquals("SUCCESS", addMemberResult.getResult());
 
-        addMemberResult = new AddMemberResult(addMemberResults);
+        addMemberResult = new UIAddMemberResults(addMemberResults);
         assertNotNull(addMemberResult);
         assertTrue(addMemberResult.isUserWasAdded());
         assertFalse(addMemberResult.isUserWasRemoved());
@@ -81,7 +78,7 @@ public class TestAddMemberResult {
         assertEquals("SUCCESS", addMemberResult.getResult());
 
         addMemberResults = grouperApiService.addMember(GROUPING_INCLUDE, testUsername);
-        addMemberResult = new AddMemberResult(addMemberResults);
+        addMemberResult = new UIAddMemberResults(addMemberResults);
         assertNotNull(addMemberResult);
         assertFalse(addMemberResult.isUserWasAdded());
         assertFalse(addMemberResult.isUserWasRemoved());

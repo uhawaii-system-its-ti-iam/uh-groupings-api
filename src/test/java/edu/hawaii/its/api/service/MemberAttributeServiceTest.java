@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberAttributeServiceTest {
 
@@ -77,8 +76,8 @@ public class MemberAttributeServiceTest {
         assertThat(person, is(notNullValue()));
     }
 
-    @Test
     @Disabled
+    @Test
     public void getMemberAttributesSubjectNotFound() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
         final String groupOwnerPath = "uh-settings:groupingOwners";
@@ -139,8 +138,8 @@ public class MemberAttributeServiceTest {
         assertThat(person, is(notNullValue()));
     }
 
-    @Test
     @Disabled
+    @Test
     public void getMemberAttributesOwnerButNotAdmin() {
         final String groupAdminPath = "uh-settings:groupingAdmins";
         final String groupOwnerPath = "uh-settings:groupingOwners";

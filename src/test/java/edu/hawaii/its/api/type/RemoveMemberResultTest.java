@@ -10,8 +10,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class RemoveMemberResultTest {
-    private RemoveMemberResult removeMemberResultInstantiatedOnConstruction;
-    private RemoveMemberResult removeMemberResultEmptyOnConstruction;
+    private UIRemoveMemberResults removeMemberResultInstantiatedOnConstruction;
+    private UIRemoveMemberResults removeMemberResultEmptyOnConstruction;
 
     private final String pathOfRemoved = "pathOfRemoved";
     private final String name = "name";
@@ -23,15 +23,15 @@ public class RemoveMemberResultTest {
     @BeforeEach
     public void setUp() {
         removeMemberResultInstantiatedOnConstruction =
-                new RemoveMemberResult(true, pathOfRemoved, name, uhUuid, uid, result, userIdentifier);
-        removeMemberResultEmptyOnConstruction = new RemoveMemberResult();
+                new UIRemoveMemberResults(true, pathOfRemoved, name, uhUuid, uid, result, userIdentifier);
+        removeMemberResultEmptyOnConstruction = new UIRemoveMemberResults();
     }
 
     @Test
     public void construction() {
         assertNotNull(removeMemberResultInstantiatedOnConstruction);
         assertNotNull(removeMemberResultEmptyOnConstruction);
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(result, userIdentifier);
+        UIRemoveMemberResults removeMemberResult = new UIRemoveMemberResults(result, userIdentifier);
         assertNotNull(removeMemberResult);
         assertNotNull(removeMemberResult.getResult());
         assertNotNull(removeMemberResult.getUserIdentifier());

@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import com.opencsv.CSVWriter;
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -55,7 +55,7 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
      */
     @Override
     public void sendCSVMessage(String from, String to, String subject, String text, String path,
-            List<AddMemberResult> res) {
+            List<UIAddMemberResults> res) {
 
         File file = new File(path);
 
@@ -94,12 +94,12 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     /**
      * Build the lines of a CSV file.
      */
-    private List<String[]> toCsvObj(List<AddMemberResult> addMemberResults) {
+    private List<String[]> toCsvObj(List<UIAddMemberResults> addMemberResults) {
         List<String[]> lines = new ArrayList<>();
 
         lines.add(new String[] { "uid", "uhUuid", "name", "result" });
 
-        for (AddMemberResult addMemberResult : addMemberResults) {
+        for (UIAddMemberResults addMemberResult : addMemberResults) {
             lines.add(addMemberResult.toCsv());
         }
         return lines;
