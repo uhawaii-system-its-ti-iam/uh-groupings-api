@@ -45,17 +45,8 @@ public class TestGroupAttributeService {
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
     @Value("Test Many Groups In Basis")
     private String DEFAULT_DESCRIPTION;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
 
     @Value("${groupings.api.test.usernames}")
     private List<String> TEST_USERNAMES;
@@ -98,10 +89,10 @@ public class TestGroupAttributeService {
     @BeforeAll
     public void init() {
         // Save the starting attribute settings for the test grouping.
-        attributeMap.put(OPT_IN, groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        attributeMap.put(OPT_OUT, groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, false);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, false);
+        attributeMap.put(OptType.IN.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        attributeMap.put(OptType.OUT.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         TEST_USERNAMES.forEach(testUsername -> {
             grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
@@ -119,8 +110,8 @@ public class TestGroupAttributeService {
     @AfterAll
     public void cleanUp() {
         // Set the test grouping's attribute settings back.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, attributeMap.get(OPT_IN));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, attributeMap.get(OPT_OUT));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), attributeMap.get(OptType.IN.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), attributeMap.get(OptType.OUT.value()));
     }
 
     @Test
@@ -556,8 +547,8 @@ public class TestGroupAttributeService {
         List<String> optList = new ArrayList<>();
         boolean[] arr = { false, true, true, false };
         List<Boolean> optSwitches = Booleans.asList(arr);
-        optList.add(OPT_IN);
-        optList.add(OPT_OUT);
+        optList.add(OptType.IN.value());
+        optList.add(OptType.OUT.value());
         optSwitches.forEach(bool -> {
             optList.forEach(opt -> assertTrue(
                     groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, opt, bool).getResultCode()
@@ -570,7 +561,7 @@ public class TestGroupAttributeService {
     public void isGroupAttributeTest() {
         // Should throw an exception if an invalid path is passed.
         try {
-            groupAttributeService.isGroupAttribute("bogus-path", OPT_IN);
+            groupAttributeService.isGroupAttribute("bogus-path", OptType.IN.value());
             fail("Should throw an exception if an invalid path is passed.");
         } catch (GcWebServiceError e) {
             assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
@@ -584,20 +575,20 @@ public class TestGroupAttributeService {
         }
 
         // Attributes should be set to false.
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
 
         // Should be true if attributes are turned on.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, true);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, true);
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), true);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), true);
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        assertTrue(groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
 
         // Should be false if attributes are turned off.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_IN, false);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OPT_OUT, false);
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_IN));
-        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OPT_OUT));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
 
     }
 

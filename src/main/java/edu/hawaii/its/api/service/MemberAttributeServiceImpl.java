@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -31,9 +32,6 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     @Value("${groupings.api.grouping_apps}")
     private String GROUPING_APPS;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
 
     @Value("${groupings.api.grouping_owners}")
     private String OWNERS_GROUP;
@@ -109,7 +107,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     // Returns true if the user is in the owner group of the grouping
     @Override
     public boolean isOwner(String groupingPath, String username) {
-        return isMember(groupingPath + OWNERS, username);
+        return isMember(groupingPath + GroupType.OWNERS.value(), username);
     }
 
     @Override
@@ -167,7 +165,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
         List<GroupingPath> groupingPaths = new ArrayList<>();
 
         for (String path : pathStrings) {
-            if (path.endsWith(OWNERS)) {
+            if (path.endsWith(GroupType.OWNERS.value())) {
                 String parentGroupingPath = helperService.parentGroupingPath(path);
                 groupingPaths.add(new GroupingPath(parentGroupingPath,
                         grouperApiService.descriptionOf(parentGroupingPath)));

@@ -9,6 +9,12 @@ import org.junit.jupiter.api.Test;
 public class GroupTypeTest {
 
     @Test
+    public void groupTypeBasis() {
+        assertThat(GroupType.BASIS, equalTo(GroupType.BASIS));
+        assertThat(GroupType.BASIS.value(), equalTo(":basis"));
+    }
+
+    @Test
     public void groupTypeInclude() {
         assertThat(GroupType.INCLUDE, equalTo(GroupType.INCLUDE));
         assertThat(GroupType.INCLUDE.value(), equalTo(":include"));
@@ -21,17 +27,9 @@ public class GroupTypeTest {
     }
 
     @Test
-    public void find() {
-        GroupType includeGroupType = GroupType.find(":include");
-        assertThat(includeGroupType, equalTo(GroupType.INCLUDE));
-
-        GroupType excludeGroupType = GroupType.find(":exclude");
-        assertThat(excludeGroupType, equalTo(GroupType.EXCLUDE));
-
-        // Undefined find.
-        String badValue = "what?";
-        GroupType groupType = GroupType.find(badValue);
-        assertThat(groupType, nullValue());
+    public void groupTypeOwners() {
+        assertThat(GroupType.OWNERS, equalTo(GroupType.OWNERS));
+        assertThat(GroupType.OWNERS.value(), equalTo(":owners"));
     }
 }
 

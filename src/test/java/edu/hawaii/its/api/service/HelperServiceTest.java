@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
@@ -66,18 +67,12 @@ public class HelperServiceTest {
     @Value("${groupings.api.person_attributes.composite_name}")
     private String COMPOSITE_NAME_KEY;
 
-    private static final String PATH_ROOT = "path:to:grouping";
-    private static final String INCLUDE = ":include";
-    private static final String EXCLUDE = ":exclude";
-    private static final String OWNERS = ":owners";
-    private static final String BASIS = ":basis";
-    private static final String BASIS_PLUS_INCLUDE = ":basis+include";
 
-    private static final String GROUPING_INCLUDE = PATH_ROOT + INCLUDE;
-    private static final String GROUPING_EXCLUDE = PATH_ROOT + EXCLUDE;
-    private static final String GROUPING_BASIS = PATH_ROOT + BASIS;
-    private static final String GROUPING_OWNERS = PATH_ROOT + OWNERS;
-    private static final String GROUPING_BASIS_PLUS_INCLUDE = PATH_ROOT + BASIS_PLUS_INCLUDE;
+    private static final String PATH_ROOT = "path:to:grouping";
+    private static final String GROUPING_INCLUDE = PATH_ROOT + GroupType.INCLUDE.value();
+    private static final String GROUPING_EXCLUDE = PATH_ROOT + GroupType.EXCLUDE.value();
+    private static final String GROUPING_BASIS = PATH_ROOT + GroupType.BASIS.value();
+    private static final String GROUPING_OWNERS = PATH_ROOT + GroupType.OWNERS.value();
 
     private static final String GROUPING_0_PATH = PATH_ROOT + 0;
 
@@ -151,7 +146,8 @@ public class HelperServiceTest {
         List<String> names = new ArrayList<>();
         assertThat(helperService.makePaths(names), hasSize(0));
 
-        names = Arrays.asList(INCLUDE, EXCLUDE, OWNERS, BASIS);
+        names = Arrays.asList(
+                GroupType.INCLUDE.value(), GroupType.EXCLUDE.value(), GroupType.OWNERS.value(), GroupType.BASIS.value());
         List<GroupingPath> paths = helperService.makePaths(names);
         assertThat(paths, hasSize(4));
 
@@ -175,7 +171,6 @@ public class HelperServiceTest {
         groupPaths.add(GROUPING_BASIS);
         groupPaths.add(GROUPING_INCLUDE);
         groupPaths.add(GROUPING_EXCLUDE);
-        groupPaths.add(GROUPING_BASIS_PLUS_INCLUDE);
         groupPaths.forEach(groupPath -> {
             assertEquals(PATH_ROOT, helperService.parentGroupingPath(groupPath));
         });

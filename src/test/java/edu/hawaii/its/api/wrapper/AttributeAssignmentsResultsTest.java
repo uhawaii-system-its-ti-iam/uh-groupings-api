@@ -3,6 +3,7 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.type.OptType;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
@@ -22,9 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AttributeAssignmentsResultsTest {
-
-    private final static String OPT_IN = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
-    private final static String OPT_OUT = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-out";
 
     private static Properties properties;
 
@@ -91,27 +89,27 @@ public class AttributeAssignmentsResultsTest {
         assertNotNull(wsResults);
         AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
         assertNotNull(results);
-        assertTrue(results.isAttributeDefName(OPT_IN));
-        assertFalse(results.isAttributeDefName(OPT_OUT));
+        assertTrue(results.isAttributeDefName(OptType.IN.value()));
+        assertFalse(results.isAttributeDefName(OptType.OUT.value()));
 
         results = new AttributeAssignmentsResults(null);
-        assertFalse(results.isAttributeDefName(OPT_IN));
+        assertFalse(results.isAttributeDefName(OptType.IN.value()));
 
         json = propertyValue("attribute.assignment.opt.out.result");
         wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         results = new AttributeAssignmentsResults(wsResults);
         assertNotNull(results);
-        assertTrue(results.isAttributeDefName(OPT_OUT));
-        assertFalse(results.isAttributeDefName(OPT_IN));
+        assertTrue(results.isAttributeDefName(OptType.OUT.value()));
+        assertFalse(results.isAttributeDefName(OptType.IN.value()));
 
         json = propertyValue("attribute.assignment.empty.result");
         wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsResults);
         results = new AttributeAssignmentsResults(wsResults);
         assertNotNull(results);
-        assertFalse(results.isAttributeDefName(OPT_OUT));
-        assertFalse(results.isAttributeDefName(OPT_IN));
+        assertFalse(results.isAttributeDefName(OptType.OUT.value()));
+        assertFalse(results.isAttributeDefName(OptType.IN.value()));
     }
 
     @Test

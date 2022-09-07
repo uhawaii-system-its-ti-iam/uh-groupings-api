@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
@@ -80,12 +82,6 @@ public class TestGrouperApiService {
 
     @Value("${groupings.api.trio}")
     private String TRIO;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -223,7 +219,7 @@ public class TestGrouperApiService {
     @Test
     public void attributeAssignsTest() {
         List<WsAttributeAssign> attributeAssigns = Arrays.asList(
-                grouperApiService.attributeAssigns(ASSIGN_TYPE_GROUP, TRIO, OPT_IN).getWsAttributeAssigns());
+                grouperApiService.attributeAssigns(ASSIGN_TYPE_GROUP, TRIO, OptType.IN.value()).getWsAttributeAssigns());
         assertNotNull(attributeAssigns);
         attributeAssigns.forEach(Assertions::assertNotNull);
         attributeAssigns.forEach(attributeAssign -> assertEquals("group", attributeAssign.getAttributeAssignType()));
@@ -241,7 +237,7 @@ public class TestGrouperApiService {
     @Test
     public void groupAttributeAssignsTest() {
         WsAttributeAssign[] attributeAssigns =
-                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, OPT_IN, GROUPING).getWsAttributeAssigns();
+                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, OptType.IN.value(), GROUPING).getWsAttributeAssigns();
         assertNotNull(attributeAssigns);
     }
 
@@ -286,7 +282,7 @@ public class TestGrouperApiService {
         WsAssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResultsForGroup(
                 ASSIGN_TYPE_GROUP,
                 OPERATION_ASSIGN_ATTRIBUTE,
-                OPT_IN,
+                OptType.IN.value(),
                 GROUPING);
         assertNotNull(assignAttributesResults);
     }
@@ -294,7 +290,7 @@ public class TestGrouperApiService {
     @Test
     public void grouperPrivilegesLiteResultTest() {
         WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult =
-                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PRIVILEGE_OPT_IN,
+                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PrivilegeType.IN.value(),
                         grouperApiService.subjectLookup(ADMIN), true);
         assertNotNull(assignGrouperPrivilegesLiteResult);
     }

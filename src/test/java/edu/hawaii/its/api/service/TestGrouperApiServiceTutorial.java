@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
@@ -98,12 +100,6 @@ public class TestGrouperApiServiceTutorial {
 
     @Value("${groupings.api.trio}")
     private String TRIO;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.privilege_opt_in}")
-    private String PRIVILEGE_OPT_IN;
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -252,7 +248,7 @@ public class TestGrouperApiServiceTutorial {
     @Test
     public void attributeAssignsTest() {
         WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.attributeAssigns(ASSIGN_TYPE_GROUP, TRIO, OPT_IN);
+                grouperApiService.attributeAssigns(ASSIGN_TYPE_GROUP, TRIO, OptType.IN.value());
         assertNotNull(attributeAssignmentsResults);
         List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
         List<WsAttributeDefName> attributeDefNames =
@@ -262,12 +258,12 @@ public class TestGrouperApiServiceTutorial {
         attributeDefNames.forEach(Assertions::assertNotNull);
         assertEquals(attributeDefNames.size(), 2);
         attributeDefNames.forEach(
-                defName -> assertTrue(defName.getName().equals(TRIO) || defName.getName().equals(OPT_IN)));
+                defName -> assertTrue(defName.getName().equals(TRIO) || defName.getName().equals(OptType.IN.value())));
         attributeAssigns.forEach(
                 assignments -> assertEquals(ASSIGN_TYPE_GROUP, assignments.getAttributeAssignType()));
         attributeAssigns.forEach(
                 assignments -> assertTrue(assignments.getAttributeDefNameName().equals(TRIO) ||
-                        assignments.getAttributeDefNameName().equals(OPT_IN)));
+                        assignments.getAttributeDefNameName().equals(OptType.IN.value())));
     }
 
     @Test
@@ -442,7 +438,7 @@ public class TestGrouperApiServiceTutorial {
         WsAssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResultsForGroup(
                 ASSIGN_TYPE_GROUP,
                 OPERATION_ASSIGN_ATTRIBUTE,
-                OPT_IN,
+                OptType.IN.value(),
                 GROUPING);
         assertNotNull(assignAttributesResults);
         List<WsAssignAttributeResult> assignAttributeResult =
@@ -453,7 +449,7 @@ public class TestGrouperApiServiceTutorial {
 
         assignAttributeResult.forEach(Assertions::assertNotNull);
         assertEquals(attributeAssigns.size(), 1);
-        assertEquals(attributeAssigns.get(0).getAttributeDefNameName(), OPT_IN);
+        assertEquals(attributeAssigns.get(0).getAttributeDefNameName(), OptType.IN.value());
         assertEquals(attributeAssigns.get(0).getAttributeAssignType(), ASSIGN_TYPE_GROUP);
         assertEquals(attributeAssigns.get(0).getOwnerGroupName(), GROUPING);
     }
@@ -461,14 +457,14 @@ public class TestGrouperApiServiceTutorial {
     @Test
     public void grouperPrivilegesLiteResultTest() {
         WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult =
-                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PRIVILEGE_OPT_IN,
+                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PrivilegeType.IN.value(),
                         grouperApiService.subjectLookup(ADMIN), true);
         assertNotNull(assignGrouperPrivilegesLiteResult);
         WsGroup groups = assignGrouperPrivilegesLiteResult.getWsGroup();
         assertNotNull(groups);
 
         assertEquals(groups.getName(), GROUPING);
-        assertEquals(assignGrouperPrivilegesLiteResult.getPrivilegeName(), PRIVILEGE_OPT_IN);
+        assertEquals(assignGrouperPrivilegesLiteResult.getPrivilegeName(), PrivilegeType.IN.value());
         assertEquals(assignGrouperPrivilegesLiteResult.getWsSubject().getIdentifierLookup(), ADMIN);
     }
 
