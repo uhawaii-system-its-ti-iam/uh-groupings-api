@@ -8,6 +8,8 @@ import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResponse;
 import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
@@ -36,21 +38,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Value("${groupings.api.yyyymmddThhmm}")
     private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
@@ -131,14 +118,16 @@ public class MembershipServiceImpl implements MembershipService {
         List<String> optOutList;
         try {
             groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
-            optOutList = groupingAssignmentService.optableGroupings(OPT_OUT);
+            optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
         } catch (GcWebServiceError e) {
             return memberships;
         }
         Map<String, List<String>> pathMap = new HashMap<>();
         for (String pathToCheck : groupPaths) {
-            if (!pathToCheck.endsWith(INCLUDE) && !pathToCheck.endsWith(EXCLUDE) && !pathToCheck.endsWith(BASIS)
-                    && !pathToCheck.endsWith(OWNERS)) {
+            if (!pathToCheck.endsWith(GroupType.INCLUDE.value())
+                    && !pathToCheck.endsWith(GroupType.EXCLUDE.value())
+                    && !pathToCheck.endsWith(GroupType.BASIS.value())
+                    && !pathToCheck.endsWith(GroupType.OWNERS.value())) {
                 continue;
             }
             String parentPath = helperService.parentGroupingPath(pathToCheck);
@@ -153,16 +142,16 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> paths = entry.getValue();
             Membership membership = new Membership();
             for (String path : paths) {
-                if (path.endsWith(BASIS)) {
+                if (path.endsWith(GroupType.BASIS.value())) {
                     membership.setInBasis(true);
                 }
-                if (path.endsWith(INCLUDE)) {
+                if (path.endsWith(GroupType.INCLUDE.value())) {
                     membership.setInInclude(true);
                 }
-                if (path.endsWith(EXCLUDE)) {
+                if (path.endsWith(GroupType.EXCLUDE.value())) {
                     membership.setInExclude(true);
                 }
-                if (path.endsWith(OWNERS)) {
+                if (path.endsWith(GroupType.OWNERS.value())) {
                     membership.setInOwner(true);
                 }
             }
@@ -189,10 +178,10 @@ public class MembershipServiceImpl implements MembershipService {
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         String removalPath = helperService.parentGroupingPath(groupPath);
 
-        if (groupPath.endsWith(INCLUDE)) {
-            removalPath += EXCLUDE;
-        } else if (groupPath.endsWith(EXCLUDE)) {
-            removalPath += INCLUDE;
+        if (groupPath.endsWith(GroupType.INCLUDE.value())) {
+            removalPath += GroupType.EXCLUDE.value();
+        } else if (groupPath.endsWith(GroupType.EXCLUDE.value())) {
+            removalPath += GroupType.INCLUDE.value();
         } else {
             throw new GcWebServiceError("404: Invalid group path.");
         }
@@ -227,7 +216,7 @@ public class MembershipServiceImpl implements MembershipService {
                 currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupMembers(currentUser, groupingPath + INCLUDE, usersToAdd);
+        return addGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), usersToAdd);
     }
 
     /**
@@ -241,7 +230,7 @@ public class MembershipServiceImpl implements MembershipService {
                 currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return addGroupMembers(currentUser, groupingPath + EXCLUDE, usersToAdd);
+        return addGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(), usersToAdd);
     }
 
     /**
@@ -253,7 +242,7 @@ public class MembershipServiceImpl implements MembershipService {
             List<String> usersToRemove) {
         logger.info("removeGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToRemove: " + usersToRemove + ";");
-        if (!groupPath.endsWith(INCLUDE) && !groupPath.endsWith(EXCLUDE)) {
+        if (!groupPath.endsWith(GroupType.INCLUDE.value()) && !groupPath.endsWith(GroupType.EXCLUDE.value())) {
             throw new GcWebServiceError("404: Invalid group path.");
         }
         List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
@@ -281,7 +270,7 @@ public class MembershipServiceImpl implements MembershipService {
                 currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return removeGroupMembers(currentUser, groupingPath + INCLUDE, usersToRemove);
+        return removeGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), usersToRemove);
     }
 
     /**
@@ -295,7 +284,7 @@ public class MembershipServiceImpl implements MembershipService {
                 currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        return removeGroupMembers(currentUser, groupingPath + EXCLUDE, usersToRemove);
+        return removeGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(), usersToRemove);
     }
 
     /**
@@ -323,11 +312,11 @@ public class MembershipServiceImpl implements MembershipService {
             RemoveMemberResult ownershipResults;
 
             RemoveMemberResponse removeMemberResponse =
-                    grouperApiService.removeMember(groupingPath + OWNERS, ownerToRemove);
+                    grouperApiService.removeMember(groupingPath + GroupType.OWNERS.value(), ownerToRemove);
             ownershipResults = new RemoveMemberResult(removeMemberResponse);
             if (ownershipResults.isUserWasRemoved()) {
                 membershipService.updateLastModified(groupingPath);
-                membershipService.updateLastModified(groupingPath + OWNERS);
+                membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
             }
             removeMemberResultList.add(ownershipResults);
         }
@@ -354,11 +343,12 @@ public class MembershipServiceImpl implements MembershipService {
 
         for (String ownerToAdd : ownersToAdd) {
             AddMemberResult addOwnerResult;
-            AddMemberResponse addMemberResponse = grouperApiService.addMember(groupingPath + OWNERS, ownerToAdd);
+            AddMemberResponse addMemberResponse =
+                    grouperApiService.addMember(groupingPath + GroupType.OWNERS.value(), ownerToAdd);
             addOwnerResult = new AddMemberResult(addMemberResponse);
             if (addOwnerResult.isUserWasAdded()) {
                 membershipService.updateLastModified(groupingPath);
-                membershipService.updateLastModified(groupingPath + OWNERS);
+                membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
             }
             addOwnerResults.add(addOwnerResult);
         }
@@ -375,8 +365,8 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        String removalPath = groupingPath + EXCLUDE;
-        String additionPath = groupingPath + INCLUDE;
+        String removalPath = groupingPath + GroupType.EXCLUDE.value();
+        String additionPath = groupingPath + GroupType.INCLUDE.value();
         return addMember(currentUser, uid, removalPath, additionPath);
     }
 
@@ -390,8 +380,8 @@ public class MembershipServiceImpl implements MembershipService {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
 
-        String removalPath = groupingPath + INCLUDE;
-        String additionPath = groupingPath + EXCLUDE;
+        String removalPath = groupingPath + GroupType.INCLUDE.value();
+        String additionPath = groupingPath + GroupType.EXCLUDE.value();
         return addMember(currentUser, uid, removalPath, additionPath);
     }
 
@@ -406,7 +396,9 @@ public class MembershipServiceImpl implements MembershipService {
         }
         List<RemoveMemberResult> results = new ArrayList<>();
         for (String groupPath : groupPaths) {
-            if (!groupPath.endsWith(OWNERS) && !groupPath.endsWith(INCLUDE) && !groupPath.endsWith(EXCLUDE)) {
+            if (!groupPath.endsWith(GroupType.OWNERS.value())
+                    && !groupPath.endsWith(GroupType.INCLUDE.value())
+                    && !groupPath.endsWith(GroupType.EXCLUDE.value())) {
                 throw new GcWebServiceError("404: Invalid group path.");
             }
             results.add(new RemoveMemberResult(grouperApiService.removeMember(groupPath, userToRemove)));
@@ -425,10 +417,10 @@ public class MembershipServiceImpl implements MembershipService {
         }
         List<RemoveMemberResult> results = new ArrayList<>();
         if (!uhNumbersInclude.isEmpty()) {
-            results.addAll(removeGroupMembers(currentUser, path + INCLUDE, uhNumbersInclude));
+            results.addAll(removeGroupMembers(currentUser, path + GroupType.INCLUDE.value(), uhNumbersInclude));
         }
         if (!uhNumbersExclude.isEmpty()) {
-            results.addAll(removeGroupMembers(currentUser, path + EXCLUDE, uhNumbersExclude));
+            results.addAll(removeGroupMembers(currentUser, path + GroupType.EXCLUDE.value(), uhNumbersExclude));
         }
         return results;
     }

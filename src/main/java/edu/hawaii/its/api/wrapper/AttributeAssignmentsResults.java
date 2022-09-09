@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.hawaii.its.api.type.OptType;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
@@ -16,8 +18,7 @@ import java.util.stream.Collectors;
  * Wrapper for WsAttributeAssignmentsResults.
  */
 public class AttributeAssignmentsResults extends Results {
-    private final static String OPT_IN = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
-    private final static String OPT_OUT = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-out";
+
     private final WsGetAttributeAssignmentsResults results;
     private String attributeDefName;
     private boolean optInOn = false;
@@ -110,9 +111,9 @@ public class AttributeAssignmentsResults extends Results {
         if (!isEmpty(defNames)) {
             for (WsAttributeDefName attribute : defNames) {
                 String name = attribute.getName();
-                if (name.equals(OPT_IN)) {
+                if (name.equals(OptType.IN.value())) {
                     optInOn = true;
-                } else if (name.equals(OPT_OUT)) {
+                } else if (name.equals(OptType.OUT.value())) {
                     optOutOn = true;
                 }
             }
