@@ -8,6 +8,8 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.GroupType;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -51,24 +53,6 @@ public class TestGroupingAssignmentService {
 
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
@@ -345,19 +329,19 @@ public class TestGroupingAssignmentService {
         Set<String> optOutPathsMap = new HashSet<>();
         optInPaths.forEach(path -> {
             assertTrue(optInPathsMap.add(path));
-            assertFalse(path.endsWith(INCLUDE));
-            assertFalse(path.endsWith(EXCLUDE));
-            assertFalse(path.endsWith(BASIS));
-            assertFalse(path.endsWith(OWNERS));
-            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_IN));
+            assertFalse(path.endsWith(GroupType.INCLUDE.value()));
+            assertFalse(path.endsWith(GroupType.EXCLUDE.value()));
+            assertFalse(path.endsWith(GroupType.BASIS.value()));
+            assertFalse(path.endsWith(GroupType.OWNERS.value()));
+            assertTrue(groupAttributeService.isGroupAttribute(path, OptType.IN.value()));
         });
         optOutPaths.forEach(path -> {
             assertTrue(optOutPathsMap.add(path));
-            assertFalse(path.endsWith(INCLUDE));
-            assertFalse(path.endsWith(EXCLUDE));
-            assertFalse(path.endsWith(BASIS));
-            assertFalse(path.endsWith(OWNERS));
-            assertTrue(groupAttributeService.isGroupAttribute(path, OPT_OUT));
+            assertFalse(path.endsWith(GroupType.INCLUDE.value()));
+            assertFalse(path.endsWith(GroupType.EXCLUDE.value()));
+            assertFalse(path.endsWith(GroupType.BASIS.value()));
+            assertFalse(path.endsWith(GroupType.OWNERS.value()));
+            assertTrue(groupAttributeService.isGroupAttribute(path, OptType.OUT.value()));
         });
 
     }
@@ -370,8 +354,8 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void optableGroupingsTest() {
-        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OPT_IN);
-        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OPT_OUT);
+        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OptType.IN.value());
+        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OptType.OUT.value());
         assertNotNull(optInablePaths);
         assertNotNull(optOutablePaths);
 

@@ -7,6 +7,8 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.wrapper.GroupsResults;
 
@@ -36,35 +38,17 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.trio}")
     private String TRIO;
 
-    @Value("${groupings.api.opt_in}")
-    private String OPT_IN;
-
-    @Value("${groupings.api.opt_out}")
-    private String OPT_OUT;
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
-
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
 
     @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
-    @Value("${groupings.api.stem}")
-    private String STEM;
-
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
+
+    @Value("${groupings.api.stem}")
+    private String STEM;
 
     public static final Log logger = LogFactory.getLog(GroupingAssignmentServiceImpl.class);
 
@@ -94,10 +78,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         }
         compositeGrouping = new Grouping(groupingPath);
 
-        String basis = groupingPath + BASIS;
-        String include = groupingPath + INCLUDE;
-        String exclude = groupingPath + EXCLUDE;
-        String owners = groupingPath + OWNERS;
+        String basis = groupingPath + GroupType.BASIS.value();
+        String include = groupingPath + GroupType.INCLUDE.value();
+        String exclude = groupingPath + GroupType.EXCLUDE.value();
+        String owners = groupingPath + GroupType.OWNERS.value();
 
         String[] paths = { include,
                 exclude,
@@ -134,10 +118,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         Grouping compositeGrouping = new Grouping(groupingPath);
-        String basis = groupingPath + BASIS;
-        String include = groupingPath + INCLUDE;
-        String exclude = groupingPath + EXCLUDE;
-        String owners = groupingPath + OWNERS;
+        String basis = groupingPath + GroupType.BASIS.value();
+        String include = groupingPath + GroupType.INCLUDE.value();
+        String exclude = groupingPath + GroupType.EXCLUDE.value();
+        String owners = groupingPath + GroupType.OWNERS.value();
 
         List<String> paths = new ArrayList<>();
         paths.add(include);
@@ -263,9 +247,9 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> groupingsIn = getGroupPaths(owner, optOutUid);
         List<String> includes =
-                groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
+                groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
         includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
-        List<String> optOutPaths = optableGroupings(OPT_OUT);
+        List<String> optOutPaths = optableGroupings(OptType.OUT.value());
         optOutPaths.retainAll(includes);
         return new ArrayList<>(new HashSet<>(optOutPaths));
     }
@@ -280,10 +264,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<GroupingPath> optInGroupingPaths = new ArrayList<>();
         List<String> groupingsIn = getGroupPaths(owner, optInUid);
         List<String> includes =
-                groupingsIn.stream().filter(path -> path.endsWith(INCLUDE)).collect(Collectors.toList());
+                groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
         includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
 
-        List<String> optInPaths = optableGroupings(OPT_IN);
+        List<String> optInPaths = optableGroupings(OptType.IN.value());
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
@@ -298,7 +282,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
      */
     @Override
     public List<String> optableGroupings(String optAttr) {
-        if (!optAttr.equals(OPT_IN) && !optAttr.equals(OPT_OUT)) {
+        if (!optAttr.equals(OptType.IN.value()) && !optAttr.equals(OptType.OUT.value())) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
         AttributeAssignmentsResults attributeAssignmentsResults =
@@ -317,7 +301,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     public List<String> getGroupingOwners(String currentUser, String groupPath) {
         List<String> owners = new ArrayList<>();
         List<String> path = new ArrayList<>();
-        path.add(groupPath + OWNERS);
+        path.add(groupPath + GroupType.OWNERS.value());
         WsSubjectLookup lookup = grouperApiService.subjectLookup(currentUser);
         WsGetMembersResults wsGetMembersResults = grouperApiService.membersResults(
                 SUBJECT_ATTRIBUTE_NAME_UID,

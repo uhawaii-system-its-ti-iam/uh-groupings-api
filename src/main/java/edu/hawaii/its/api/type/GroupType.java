@@ -2,8 +2,10 @@ package edu.hawaii.its.api.type;
 
 public enum GroupType {
 
+    BASIS(":basis"),
     INCLUDE(":include"),
-    EXCLUDE(":exclude");
+    EXCLUDE(":exclude"),
+    OWNERS(":owners");
 
     private final String value;
 
@@ -13,14 +15,5 @@ public enum GroupType {
 
     public String value() {
         return value;
-    }
-
-    public static GroupType find(String value) {
-        for (GroupType type : GroupType.values()) {
-            if (type.value().equals(value)) {
-                return type;
-            }
-        }
-        return null;
     }
 }

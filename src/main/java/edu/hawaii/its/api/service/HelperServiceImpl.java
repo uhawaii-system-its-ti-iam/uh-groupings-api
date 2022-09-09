@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -29,21 +30,6 @@ import java.util.stream.Collectors;
 
 @Service("helperService")
 public class HelperServiceImpl implements HelperService {
-
-    @Value("${groupings.api.basis}")
-    private String BASIS;
-
-    @Value("${groupings.api.basis_plus_include}")
-    private String BASIS_PLUS_INCLUDE;
-
-    @Value("${groupings.api.exclude}")
-    private String EXCLUDE;
-
-    @Value("${groupings.api.include}")
-    private String INCLUDE;
-
-    @Value("${groupings.api.owners}")
-    private String OWNERS;
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
@@ -158,16 +144,14 @@ public class HelperServiceImpl implements HelperService {
     @Override
     public String parentGroupingPath(String group) {
         if (group != null) {
-            if (group.endsWith(EXCLUDE)) {
-                return group.substring(0, group.length() - EXCLUDE.length());
-            } else if (group.endsWith(INCLUDE)) {
-                return group.substring(0, group.length() - INCLUDE.length());
-            } else if (group.endsWith(OWNERS)) {
-                return group.substring(0, group.length() - OWNERS.length());
-            } else if (group.endsWith(BASIS)) {
-                return group.substring(0, group.length() - BASIS.length());
-            } else if (group.endsWith(BASIS_PLUS_INCLUDE)) {
-                return group.substring(0, group.length() - BASIS_PLUS_INCLUDE.length());
+            if (group.endsWith(GroupType.EXCLUDE.value())) {
+                return group.substring(0, group.length() - GroupType.EXCLUDE.value().length());
+            } else if (group.endsWith(GroupType.INCLUDE.value())) {
+                return group.substring(0, group.length() - GroupType.INCLUDE.value().length());
+            } else if (group.endsWith(GroupType.OWNERS.value())) {
+                return group.substring(0, group.length() - GroupType.OWNERS.value().length());
+            } else if (group.endsWith(GroupType.BASIS.value())) {
+                return group.substring(0, group.length() - GroupType.BASIS.value().length());
             }
             return group;
         }
@@ -205,7 +189,7 @@ public class HelperServiceImpl implements HelperService {
                         continue;
                     }
                     Person personToAdd = makePerson(subject, attributeNames);
-                    if (group.getPath().endsWith(BASIS) && subject.getSourceId() != null
+                    if (group.getPath().endsWith(GroupType.BASIS.value()) && subject.getSourceId() != null
                             && subject.getSourceId().equals(STALE_SUBJECT_ID)) {
                         personToAdd.setUsername("User Not Available.");
                     }
