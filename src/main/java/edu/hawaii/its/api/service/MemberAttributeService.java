@@ -13,6 +13,8 @@ public interface MemberAttributeService {
 
     boolean isMemberUuid(String groupPath, String idnum);
 
+    boolean isUhUuid(String username);
+
     boolean isOwner(String groupingPath, String username);
 
     boolean isOwner(String username);

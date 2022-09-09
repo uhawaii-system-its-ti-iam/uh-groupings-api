@@ -4,6 +4,10 @@ import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.Person;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +39,17 @@ public interface GroupingAssignmentService {
 
     List<String> allGroupingsPaths();
 
+    String parentGroupingPath(String group);
+
+    String nameGroupingPath(String group);
+
     List<String> getGroupingOwners(String currentUser, String groupPath);
 
     Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck);
+
+    Map<String, Group> makeGroups(WsGetMembersResults membersResults);
+
+    Person makePerson(WsSubject subject, String[] attributeNames);
+
+    List<GroupingPath> makePaths(List<String> groupingPaths);
 }

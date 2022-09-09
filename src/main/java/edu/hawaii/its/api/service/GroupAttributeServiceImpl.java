@@ -1,5 +1,12 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import java.util.ArrayList;
@@ -37,6 +41,9 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
+    @Value("${groupings.api.failure}")
+    private String FAILURE;
+
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
@@ -44,9 +51,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    @Autowired
-    private HelperService helperService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;
@@ -141,24 +145,22 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                 grouperApiService.assignAttributesResultsForGroup(ASSIGN_TYPE_GROUP,
                         OPERATION_ASSIGN_ATTRIBUTE, attributeName, groupPath);
 
-                gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
+                gsr = makeGroupingsServiceResult(SUCCESS, action);
 
                 membershipService.updateLastModified(groupPath);
             } else {
-                gsr = helperService
-                        .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
+                gsr = makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
             }
         } else {
             if (isHasAttribute) {
                 grouperApiService.assignAttributesResultsForGroup(ASSIGN_TYPE_GROUP,
                         OPERATION_REMOVE_ATTRIBUTE, attributeName, groupPath);
 
-                gsr = helperService.makeGroupingsServiceResult(SUCCESS, action);
+                gsr = makeGroupingsServiceResult(SUCCESS, action);
 
                 membershipService.updateLastModified(groupPath);
             } else {
-                gsr = helperService
-                        .makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
+                gsr = makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
             }
         }
         return gsr;
@@ -189,7 +191,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
                         lookup,
                         isSet);
 
-        return helperService.makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
+        return makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
@@ -207,7 +209,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
         }
         grouperApiService.updateGroupDescription(groupPath, description);
 
-        return helperService.makeGroupingsServiceResult(SUCCESS + ", description updated", action);
+        return makeGroupingsServiceResult(SUCCESS + ", description updated", action);
     }
 
     //TODO: Move both checkPrivileges helper methods to the Governor class once it's built
@@ -237,6 +239,49 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
             result = desc;
         }
         return result;
+    }
+
+    /**
+     * Make a groupingsServiceResult with the result code from the metadataHolder and the action string.
+     */
+    @Override
+    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action) {
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+        groupingsServiceResult.setAction(action);
+        groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
+
+        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
+            throw new GroupingsServiceResultException(groupingsServiceResult);
+        }
+
+        return groupingsServiceResult;
+    }
+
+    @Override
+    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action,
+                                                             Person person) {
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+        groupingsServiceResult.setAction(action);
+        groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
+        groupingsServiceResult.setPerson(person);
+
+        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
+            throw new GroupingsServiceResultException(groupingsServiceResult);
+        }
+
+        return groupingsServiceResult;
+    }
+
+    @Override
+    public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action) {
+        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+        groupingsServiceResult.setAction(action);
+        groupingsServiceResult.setResultCode(resultCode);
+
+        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
+            throw new GroupingsServiceResultException(groupingsServiceResult);
+        }
+        return groupingsServiceResult;
     }
 
 }

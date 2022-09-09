@@ -1,5 +1,9 @@
 package edu.hawaii.its.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -24,7 +28,6 @@ import java.util.Properties;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -151,6 +154,14 @@ public class MemberAttributeServiceTest {
 
         Person person = memberAttributeService.getMemberAttributes(username, uid);
         assertThat(person, is(notNullValue()));
+    }
+
+    @Test
+    public void isUhUuid() {
+        assertTrue(memberAttributeService.isUhUuid("111111"));
+        assertFalse(memberAttributeService.isUhUuid("111-111"));
+        assertFalse(memberAttributeService.isUhUuid("iamtst01"));
+        assertFalse(memberAttributeService.isUhUuid(null));
     }
 
     private String propertyValue(String key) {

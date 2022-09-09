@@ -80,7 +80,6 @@ public class TestGroupAttributeService {
 
     private Map<String, Boolean> attributeMap = new HashMap<>();
     private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
-
     private final String SUCCESS_NOT_ALLOWED_DIDNT_EXIST = "SUCCESS_NOT_ALLOWED_DIDNT_EXIST";
     private final String SUCCESS_ALLOWED_ALREADY_EXISTED = "SUCCESS_ALLOWED_ALREADY_EXISTED";
     private final String SUCCESS_ALLOWED = "SUCCESS_ALLOWED";

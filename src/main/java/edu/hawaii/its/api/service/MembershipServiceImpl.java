@@ -58,16 +58,10 @@ public class MembershipServiceImpl implements MembershipService {
     private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
-    GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private HelperService helperService;
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private MembershipService membershipService;
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -130,7 +124,7 @@ public class MembershipServiceImpl implements MembershipService {
                     && !pathToCheck.endsWith(GroupType.OWNERS.value())) {
                 continue;
             }
-            String parentPath = helperService.parentGroupingPath(pathToCheck);
+            String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
             if (!pathMap.containsKey(parentPath)) {
                 pathMap.put(parentPath, new ArrayList<>());
             }
@@ -157,7 +151,7 @@ public class MembershipServiceImpl implements MembershipService {
             }
             membership.setPath(groupingPath);
             membership.setOptOutEnabled(optOutList.contains(groupingPath));
-            membership.setName(helperService.nameGroupingPath(groupingPath));
+            membership.setName(groupingAssignmentService.nameGroupingPath(groupingPath));
             membership.setDescription(grouperApiService.descriptionOf(groupingPath));
             memberships.add(membership);
         }
@@ -176,7 +170,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + "usersToAdd: " + usersToAdd + ";");
 
         List<AddMemberResult> addMemberResults = new ArrayList<>();
-        String removalPath = helperService.parentGroupingPath(groupPath);
+        String removalPath = groupingAssignmentService.parentGroupingPath(groupPath);
 
         if (groupPath.endsWith(GroupType.INCLUDE.value())) {
             removalPath += GroupType.EXCLUDE.value();
@@ -251,7 +245,7 @@ public class MembershipServiceImpl implements MembershipService {
             RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(groupPath, userToRemove);
             removeMemberResult = new RemoveMemberResult(removeMemberResponse);
             if (removeMemberResult.isUserWasRemoved()) {
-                membershipService.updateLastModified(groupPath);
+                updateLastModified(groupPath);
             }
             removeMemberResults.add(removeMemberResult);
             logger.info("removeGroupMembers; " + removeMemberResult.toString());
@@ -315,8 +309,8 @@ public class MembershipServiceImpl implements MembershipService {
                     grouperApiService.removeMember(groupingPath + GroupType.OWNERS.value(), ownerToRemove);
             ownershipResults = new RemoveMemberResult(removeMemberResponse);
             if (ownershipResults.isUserWasRemoved()) {
-                membershipService.updateLastModified(groupingPath);
-                membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
+                updateLastModified(groupingPath);
+                updateLastModified(groupingPath + GroupType.OWNERS.value());
             }
             removeMemberResultList.add(ownershipResults);
         }
@@ -347,8 +341,8 @@ public class MembershipServiceImpl implements MembershipService {
                     grouperApiService.addMember(groupingPath + GroupType.OWNERS.value(), ownerToAdd);
             addOwnerResult = new AddMemberResult(addMemberResponse);
             if (addOwnerResult.isUserWasAdded()) {
-                membershipService.updateLastModified(groupingPath);
-                membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
+                updateLastModified(groupingPath);
+                updateLastModified(groupingPath + GroupType.OWNERS.value());
             }
             addOwnerResults.add(addOwnerResult);
         }
@@ -453,7 +447,8 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Get the number of memberships.
      */
-    @Override public Integer getNumberOfMemberships(String currentUser, String uid) {
+    @Override
+    public Integer getNumberOfMemberships(String currentUser, String uid) {
         return membershipResults(currentUser, uid).size();
     }
 
@@ -461,6 +456,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Adds the uid/uhUuid in userToAdd to the group at additionPath and removes userToAdd from the group at
      * removalPath. If the userToAdd is already in the group at additionPath, it does not get added.
      */
+    @Override
     public AddMemberResult addMember(String currentUser, String userToAdd, String removalPath, String additionPath) {
         AddMemberResult addMemberResult;
         try {
@@ -468,10 +464,10 @@ public class MembershipServiceImpl implements MembershipService {
             AddMemberResponse addMemberResponse = grouperApiService.addMember(additionPath, userToAdd);
             addMemberResult = new AddMemberResult(addMemberResponse, removeMemberResponse);
             if (addMemberResult.isUserWasAdded()) {
-                membershipService.updateLastModified(additionPath);
+                updateLastModified(additionPath);
             }
             if (addMemberResult.isUserWasRemoved()) {
-                membershipService.updateLastModified(removalPath);
+                updateLastModified(removalPath);
             }
         } catch (AddMemberRequestRejectedException | RemoveMemberRequestRejectedException e) {
             addMemberResult = new AddMemberResult(userToAdd, FAILURE);
