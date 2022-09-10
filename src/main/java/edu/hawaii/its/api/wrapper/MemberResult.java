@@ -4,10 +4,11 @@ public abstract class MemberResult extends Results implements Resultable {
 
     protected Subject subject;
 
-    protected String getUhUuid() {
+    public String getUhUuid() {
         return subject.getUhUuid();
     }
-    protected String getName() {
+
+    public String getName() {
         return subject.getName();
     }
 }
