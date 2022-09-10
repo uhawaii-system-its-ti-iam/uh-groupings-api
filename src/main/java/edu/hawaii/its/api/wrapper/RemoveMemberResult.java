@@ -2,11 +2,11 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
-public class RemoveMemberResponse {
+public class RemoveMemberResult {
     final static private String SUCCESS = "SUCCESS";
     private final WsDeleteMemberResults wsDeleteMemberResults;
 
-    public RemoveMemberResponse(WsDeleteMemberResults wsDeleteMemberResults) {
+    public RemoveMemberResult(WsDeleteMemberResults wsDeleteMemberResults) {
         if (wsDeleteMemberResults == null) {
             this.wsDeleteMemberResults = new WsDeleteMemberResults();
         } else {

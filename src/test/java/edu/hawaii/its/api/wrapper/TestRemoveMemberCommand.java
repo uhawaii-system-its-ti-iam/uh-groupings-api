@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestRemoveMemberRequest {
+public class TestRemoveMemberCommand {
     @Value("${groupings.api.test.uhuuids}")
     private List<String> TEST_UH_NUMBERS;
     @Value("${groupings.api.test.grouping_many_include}")
@@ -35,13 +35,13 @@ public class TestRemoveMemberRequest {
 
     @Test
     public void constructor() {
-        AddMemberRequest addMemberRequest = new AddMemberRequest();
-        assertNotNull(addMemberRequest);
+        AddMemberCommand addMemberCommand = new AddMemberCommand();
+        assertNotNull(addMemberCommand);
     }
 
     @Test
     public void sendTest() {
-        RemoveMemberResponse response;
+        RemoveMemberResult response;
         String uid = "testiam2";
         String uhUuid = TEST_UH_NUMBERS.get(0);
 
@@ -49,7 +49,7 @@ public class TestRemoveMemberRequest {
         try {
             // Remove uid.
             grouperApiService.addMember(GROUPING_INCLUDE, uid);
-            response = new RemoveMemberRequest(GROUPING_INCLUDE, uid).send();
+            response = new RemoveMemberCommand(GROUPING_INCLUDE, uid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -59,7 +59,7 @@ public class TestRemoveMemberRequest {
             assertEquals(SUCCESS, response.resultCode());
 
             // Remove uid that is not in the group.
-            response = new RemoveMemberRequest(GROUPING_INCLUDE, uid).send();
+            response = new RemoveMemberCommand(GROUPING_INCLUDE, uid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -70,7 +70,7 @@ public class TestRemoveMemberRequest {
 
             // Remove uhUuid.
             grouperApiService.addMember(GROUPING_INCLUDE, uhUuid);
-            response = new RemoveMemberRequest(GROUPING_INCLUDE, uid).send();
+            response = new RemoveMemberCommand(GROUPING_INCLUDE, uid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -80,7 +80,7 @@ public class TestRemoveMemberRequest {
             assertEquals(SUCCESS, response.resultCode());
 
             // Remove uhUuid that is not in the group.
-            response = new RemoveMemberRequest(GROUPING_INCLUDE, uhUuid).send();
+            response = new RemoveMemberCommand(GROUPING_INCLUDE, uhUuid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -97,7 +97,7 @@ public class TestRemoveMemberRequest {
         String bogusIdentifier = "bogus-identifier";
         try {
             // Remove uid.
-            response = new RemoveMemberRequest(GROUPING_INCLUDE, bogusIdentifier).send();
+            response = new RemoveMemberCommand(GROUPING_INCLUDE, bogusIdentifier).send();
             assertNotNull(response);
             assertEquals("", response.uid());
             assertEquals(GROUPING_INCLUDE, response.groupPath());
@@ -111,7 +111,7 @@ public class TestRemoveMemberRequest {
         // Should throw an exception if an invalid group path is passed.
         String badPath = "bad-path";
         try {
-            response = new RemoveMemberRequest(badPath, uid).send();
+            response = new RemoveMemberCommand(badPath, uid).send();
             fail("Should throw an exception if an invalid group path is passed.");
         } catch (RemoveMemberRequestRejectedException e) {
             assertNull(e.getCause());

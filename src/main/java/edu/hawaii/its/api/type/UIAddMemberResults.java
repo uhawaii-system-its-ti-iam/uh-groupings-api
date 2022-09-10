@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.type;
 
-import edu.hawaii.its.api.wrapper.AddMemberResponse;
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
-public class AddMemberResult {
+public class UIAddMemberResults {
     private boolean userWasAdded;
     private boolean userWasRemoved;
     private String pathOfAdd;
@@ -19,10 +19,10 @@ public class AddMemberResult {
     private String result;
     private String userIdentifier;
 
-    public AddMemberResult() {
+    public UIAddMemberResults() {
     }
 
-    public AddMemberResult(boolean userWasAdded, boolean userWasRemoved, String pathOfAdd, String pathOfRemoved,
+    public UIAddMemberResults(boolean userWasAdded, boolean userWasRemoved, String pathOfAdd, String pathOfRemoved,
             String name, String uhUuid, String uid, String result, String userIdentifier) {
         this.userWasAdded = userWasAdded;
         this.userWasRemoved = userWasRemoved;
@@ -35,7 +35,7 @@ public class AddMemberResult {
         this.userIdentifier = userIdentifier;
     }
 
-    public AddMemberResult(boolean userWasAdded, String pathOfAdd,
+    public UIAddMemberResults(boolean userWasAdded, String pathOfAdd,
             String name, String uhUuid, String uid, String result, String userIdentifier) {
         this.userWasAdded = userWasAdded;
         this.pathOfAdd = pathOfAdd;
@@ -46,12 +46,12 @@ public class AddMemberResult {
         this.userIdentifier = userIdentifier;
     }
 
-    public AddMemberResult(String userIdentifier, String result) {
+    public UIAddMemberResults(String userIdentifier, String result) {
         this.result = result;
         this.userIdentifier = userIdentifier;
     }
 
-    public AddMemberResult(WsAddMemberResults wsAddMemberResults, WsDeleteMemberResults wsDeleteMemberResults) {
+    public UIAddMemberResults(WsAddMemberResults wsAddMemberResults, WsDeleteMemberResults wsDeleteMemberResults) {
         WsAddMemberResult wsAddMemberResult = wsAddMemberResults.getResults()[0];
         WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
         this.userWasAdded = "SUCCESS".equals(wsAddMemberResult.getResultMetadata().getResultCode());
@@ -65,7 +65,7 @@ public class AddMemberResult {
 
     }
 
-    public AddMemberResult(WsAddMemberResults wsAddMemberResults) {
+    public UIAddMemberResults(WsAddMemberResults wsAddMemberResults) {
         WsAddMemberResult wsAddMemberResult = wsAddMemberResults.getResults()[0];
         this.userWasAdded = "SUCCESS".equals(wsAddMemberResult.getResultMetadata().getResultCode());
         setUhUuid(wsAddMemberResult.getWsSubject().getId());
@@ -75,19 +75,19 @@ public class AddMemberResult {
         setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
     }
 
-    public AddMemberResult(AddMemberResponse addMemberResponse) {
-        this.userWasAdded = addMemberResponse.isSuccess();
-        setPathOfAdd(addMemberResponse.groupPath());
-        setName(addMemberResponse.name());
-        setUid(addMemberResponse.uid());
-        setUhUuid(addMemberResponse.uhUuid());
+    public UIAddMemberResults(AddMemberResult addMemberResult) {
+        this.userWasAdded = addMemberResult.isSuccess();
+        setPathOfAdd(addMemberResult.groupPath());
+        setName(addMemberResult.name());
+        setUid(addMemberResult.uid());
+        setUhUuid(addMemberResult.uhUuid());
         setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
     }
 
-    public AddMemberResult(AddMemberResponse addMemberResponse, RemoveMemberResponse removeMemberResponse) {
-        this(addMemberResponse);
-        this.userWasRemoved = removeMemberResponse.isSuccess();
-        setPathOfRemoved(removeMemberResponse.groupPath());
+    public UIAddMemberResults(AddMemberResult addMemberResult, RemoveMemberResult removeMemberResult) {
+        this(addMemberResult);
+        this.userWasRemoved = removeMemberResult.isSuccess();
+        setPathOfRemoved(removeMemberResult.groupPath());
     }
 
     public boolean isUserWasAdded() {

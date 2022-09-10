@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
 
@@ -122,7 +122,7 @@ public class TestMembershipService {
         }
 
         // Should not add if username is already in admins list.
-        AddMemberResult addMemberResult;
+        UIAddMemberResults addMemberResult;
         try {
             addMemberResult = membershipService.addAdmin(ADMIN, ADMIN);
             assertNotNull(addMemberResult);
@@ -277,10 +277,10 @@ public class TestMembershipService {
         }
 
         // Should add users from a list of uh usernames.
-        List<AddMemberResult> addMemberResults =
+        List<UIAddMemberResults> addMemberResults =
                 membershipService.addGroupMembers(ADMIN, GROUPING_INCLUDE, TEST_USERNAMES);
         assertEquals(TEST_USERNAMES.size(), addMemberResults.size());
-        assertTrue(addMemberResults.stream().map(AddMemberResult::getUid).collect(Collectors.toList())
+        assertTrue(addMemberResults.stream().map(UIAddMemberResults::getUid).collect(Collectors.toList())
                 .containsAll(TEST_USERNAMES));
         addMemberResults.forEach(addMemberResult -> {
             assertEquals(SUCCESS, addMemberResult.getResult());
@@ -294,7 +294,7 @@ public class TestMembershipService {
         // Should add users from a list of uh numbers.
         addMemberResults = membershipService.addGroupMembers(ADMIN, GROUPING_INCLUDE, TEST_UH_NUMBERS);
         assertEquals(TEST_UH_NUMBERS.size(), addMemberResults.size());
-        assertTrue(addMemberResults.stream().map(AddMemberResult::getUhUuid).collect(Collectors.toList())
+        assertTrue(addMemberResults.stream().map(UIAddMemberResults::getUhUuid).collect(Collectors.toList())
                 .containsAll(TEST_UH_NUMBERS));
         addMemberResults.forEach(addMemberResult -> {
             assertEquals(SUCCESS, addMemberResult.getResult());
@@ -345,7 +345,7 @@ public class TestMembershipService {
         bogusUsersToAdd.add("bogus1");
         bogusUsersToAdd.add("bogus2");
 
-        List<AddMemberResult> addMemberResults = membershipService.addIncludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
+        List<UIAddMemberResults> addMemberResults = membershipService.addIncludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
         assertNotNull(addMemberResults);
         assertEquals(2, addMemberResults.size());
 
@@ -430,7 +430,7 @@ public class TestMembershipService {
         bogusUsersToAdd.add("bogus1");
         bogusUsersToAdd.add("bogus2");
 
-        List<AddMemberResult> addMemberResults = membershipService.addExcludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
+        List<UIAddMemberResults> addMemberResults = membershipService.addExcludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
         assertNotNull(addMemberResults);
         assertEquals(2, addMemberResults.size());
 
@@ -509,7 +509,7 @@ public class TestMembershipService {
 
     @Test
     public void removeGroupMembersTest() {
-        List<RemoveMemberResult> removeMemberResults;
+        List<UIRemoveMemberResults> removeMemberResults;
         // Should remove users by passing uh usernames.
         TEST_USERNAMES.forEach(testUsername -> grouperApiService.addMember(GROUPING_INCLUDE, testUsername));
         removeMemberResults = membershipService.removeGroupMembers(ADMIN, GROUPING_INCLUDE, TEST_USERNAMES);
@@ -753,7 +753,7 @@ public class TestMembershipService {
 
     @Test
     public void removeOwnershipsTest() {
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(TEST_USERNAMES.get(0));
 
@@ -766,7 +766,7 @@ public class TestMembershipService {
         }
         assertNotNull(removeMemberResults);
         assertEquals(1, removeMemberResults.size());
-        RemoveMemberResult removeMemberResult = removeMemberResults.get(0);
+        UIRemoveMemberResults removeMemberResult = removeMemberResults.get(0);
         assertNotNull(removeMemberResult);
         assertEquals(iamtst01List.get(0), removeMemberResult.getUid());
         assertEquals(GROUPING_OWNERS, removeMemberResult.getPathOfRemoved());
@@ -782,7 +782,7 @@ public class TestMembershipService {
         }
         assertNotNull(removeMemberResults);
         assertEquals(TEST_USERNAMES.size(), removeMemberResults.size());
-        for (RemoveMemberResult removeResult : removeMemberResults) {
+        for (UIRemoveMemberResults removeResult : removeMemberResults) {
             assertNotNull(removeResult);
             assertEquals(TEST_USERNAMES.get(removeMemberResults.indexOf(removeResult)), removeResult.getUid());
             assertEquals(GROUPING_OWNERS, removeResult.getPathOfRemoved());
@@ -813,7 +813,7 @@ public class TestMembershipService {
 
     @Test
     public void addOwnershipsTest() {
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(TEST_USERNAMES.get(0));
 
@@ -825,7 +825,7 @@ public class TestMembershipService {
         }
         assertNotNull(addMemberResults);
         assertEquals(1, addMemberResults.size());
-        AddMemberResult addMemberResult = addMemberResults.get(0);
+        UIAddMemberResults addMemberResult = addMemberResults.get(0);
         assertNotNull(addMemberResult);
         assertEquals(iamtst01List.get(0), addMemberResult.getUid());
         assertEquals(GROUPING_OWNERS, addMemberResult.getPathOfAdd());
@@ -842,7 +842,7 @@ public class TestMembershipService {
         }
         assertNotNull(addMemberResults);
         assertEquals(TEST_USERNAMES.size(), addMemberResults.size());
-        for (AddMemberResult addResult : addMemberResults) {
+        for (UIAddMemberResults addResult : addMemberResults) {
             assertNotNull(addResult);
             assertEquals(TEST_USERNAMES.get(addMemberResults.indexOf(addResult)), addResult.getUid());
             assertEquals(GROUPING_OWNERS, addResult.getPathOfAdd());
@@ -912,7 +912,7 @@ public class TestMembershipService {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
-        AddMemberResult addMemberResult = null;
+        UIAddMemberResults addMemberResult = null;
         try {
             addMemberResult = membershipService.optIn(iamstst01, GROUPING, iamstst01);
         } catch (AccessDeniedException e) {
@@ -958,7 +958,7 @@ public class TestMembershipService {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
-        AddMemberResult addMemberResult = null;
+        UIAddMemberResults addMemberResult = null;
         try {
 
             addMemberResult = membershipService.optOut(iamstst01, GROUPING, iamstst01);
@@ -1009,7 +1009,7 @@ public class TestMembershipService {
         // Should remove userToRemove from the groups listed in groupPaths.
         List<String> iamtst01List = new ArrayList<>();
         List<String> pathList = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         iamtst01List.add(TEST_USERNAMES.get(0));
         pathList.add(GROUPING_OWNERS);
         pathList.add(GROUPING_INCLUDE);
@@ -1022,7 +1022,7 @@ public class TestMembershipService {
         }
         assertNotNull(removeMemberResults);
         assertEquals(2, removeMemberResults.size());
-        RemoveMemberResult removeMemberResult = removeMemberResults.get(0);
+        UIRemoveMemberResults removeMemberResult = removeMemberResults.get(0);
         assertNotNull(removeMemberResult);
         assertEquals(GROUPING_OWNERS, removeMemberResult.getPathOfRemoved());
         removeMemberResult = removeMemberResults.get(1);
@@ -1040,10 +1040,10 @@ public class TestMembershipService {
         assertNotNull(membershipService.addExcludeMembers(ADMIN, GROUPING, uhNumbersExclude));
 
         // Should remove all users passed as uhNumbersInclude and uhNumbersExclude.
-        List<RemoveMemberResult> removeMemberResults =
+        List<UIRemoveMemberResults> removeMemberResults =
                 membershipService.resetGroup(ADMIN, GROUPING, uhNumbersInclude, uhNumbersExclude);
         assertEquals(TEST_USERNAMES, removeMemberResults
-                .stream().map(RemoveMemberResult::getUid).collect(Collectors.toList()));
+                .stream().map(UIRemoveMemberResults::getUid).collect(Collectors.toList()));
         assertTrue(removeMemberResults.subList(0, 3).stream()
                 .allMatch(removeMemberResult -> removeMemberResult.getPathOfRemoved().equals(GROUPING_INCLUDE)));
         assertTrue(removeMemberResults.subList(3, 6).stream()
@@ -1163,7 +1163,7 @@ public class TestMembershipService {
     @Test
     public void addMemberTest() {
         // Should add a user from username list.
-        AddMemberResult addMemberResult =
+        UIAddMemberResults addMemberResult =
                 membershipService.addMember(ADMIN, TEST_USERNAMES.get(0), GROUPING_EXCLUDE, GROUPING_INCLUDE);
         assertEquals(SUCCESS, addMemberResult.getResult());
         assertTrue(addMemberResult.isUserWasAdded());

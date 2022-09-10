@@ -10,12 +10,12 @@ import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.OptType;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,7 +156,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                AddMemberResult.class));
+                UIAddMemberResults.class));
         membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
 
@@ -171,7 +171,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                RemoveMemberResult.class));
+                UIRemoveMemberResults.class));
         assertFalse(memberAttributeService.isAdmin(TEST_USERNAMES.get(0)));
     }
 
@@ -290,7 +290,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(
-                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AddMemberResult.class));
+                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), UIAddMemberResults.class));
         membershipService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
     }
@@ -309,7 +309,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(
-                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AddMemberResult.class));
+                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), UIAddMemberResults.class));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
 

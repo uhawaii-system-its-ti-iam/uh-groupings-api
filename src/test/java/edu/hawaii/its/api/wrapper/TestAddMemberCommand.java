@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestAddMemberRequest {
+public class TestAddMemberCommand {
     @Value("${groupings.api.test.uhuuids}")
     private List<String> TEST_UH_NUMBERS;
     @Value("${groupings.api.test.grouping_many_include}")
@@ -35,13 +35,13 @@ public class TestAddMemberRequest {
 
     @Test
     public void constructor() {
-        AddMemberRequest addMemberRequest = new AddMemberRequest();
-        assertNotNull(addMemberRequest);
+        AddMemberCommand addMemberCommand = new AddMemberCommand();
+        assertNotNull(addMemberCommand);
     }
 
     @Test
     public void sendTest() {
-        AddMemberResponse response;
+        AddMemberResult response;
         String uid = "testiam2";
         String uhUuid = TEST_UH_NUMBERS.get(0);
 
@@ -49,7 +49,7 @@ public class TestAddMemberRequest {
         try {
             // Add uid.
             grouperApiService.removeMember(GROUPING_INCLUDE, uid);
-            response = new AddMemberRequest(GROUPING_INCLUDE, uid).send();
+            response = new AddMemberCommand(GROUPING_INCLUDE, uid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -59,7 +59,7 @@ public class TestAddMemberRequest {
             assertEquals(SUCCESS, response.resultCode());
 
             // Add uid that has already been added.
-            response = new AddMemberRequest(GROUPING_INCLUDE, uid).send();
+            response = new AddMemberCommand(GROUPING_INCLUDE, uid).send();
             assertNotNull(response);
             assertEquals(uid, response.uid());
             assertEquals(uhUuid, response.uhUuid());
@@ -72,7 +72,7 @@ public class TestAddMemberRequest {
             grouperApiService.removeMember(GROUPING_INCLUDE, uid);
 
             // Add uhUuid.
-            response = new AddMemberRequest(GROUPING_INCLUDE, uhUuid).send();
+            response = new AddMemberCommand(GROUPING_INCLUDE, uhUuid).send();
             assertNotNull(response);
             assertEquals(uhUuid, response.uhUuid());
             assertEquals(uid, response.uid());
@@ -82,7 +82,7 @@ public class TestAddMemberRequest {
             assertEquals(SUCCESS, response.resultCode());
 
             // Add uhUuid that has already been added.
-            response = new AddMemberRequest(GROUPING_INCLUDE, uhUuid).send();
+            response = new AddMemberCommand(GROUPING_INCLUDE, uhUuid).send();
             assertNotNull(response);
             assertEquals(uhUuid, response.uhUuid());
             assertEquals(uid, response.uid());
@@ -100,7 +100,7 @@ public class TestAddMemberRequest {
         // Should throw an exception if an invalid uh identifier is passed.
         String bogusIdentifier = "bogus-ident";
         try {
-            response = new AddMemberRequest(GROUPING_INCLUDE, bogusIdentifier).send();
+            response = new AddMemberCommand(GROUPING_INCLUDE, bogusIdentifier).send();
             fail("Should throw an exception if an invalid uh identifier is passed.");
         } catch (AddMemberRequestRejectedException e) {
             assertNull(e.getCause());
@@ -109,7 +109,7 @@ public class TestAddMemberRequest {
         // Should throw an exception if an invalid group path is passed.
         String badPath = "bad-path";
         try {
-            response = new AddMemberRequest(badPath, uid).send();
+            response = new AddMemberCommand(badPath, uid).send();
             fail("Should throw an exception if an invalid group path is passed.");
         } catch (AddMemberRequestRejectedException e) {
             assertNull(e.getCause());

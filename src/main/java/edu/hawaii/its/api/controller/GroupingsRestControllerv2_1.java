@@ -24,7 +24,7 @@ import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -34,7 +34,7 @@ import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.SyncDestination;
 
 import java.util.List;
@@ -97,7 +97,7 @@ public class GroupingsRestControllerv2_1 {
      * Create a new admin.
      */
     @PostMapping(value = "/admins/{uid:[\\w-:.]+}")
-    public ResponseEntity<AddMemberResult> addAdmin(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<UIAddMemberResults> addAdmin(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST addAdmin...");
         return ResponseEntity
@@ -109,7 +109,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove an admin.
      */
     @DeleteMapping(value = "/admins/{uid:[\\w-:.]+}")
-    public ResponseEntity<RemoveMemberResult> removeAdmin(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<UIRemoveMemberResults> removeAdmin(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST removeAdmin...");
         return ResponseEntity
@@ -121,7 +121,7 @@ public class GroupingsRestControllerv2_1 {
      * Delete a user from multiple groupings.
      */
     @DeleteMapping(value = "/admins/{paths}/{uid}")
-    public ResponseEntity<List<RemoveMemberResult>> removeFromGroups(
+    public ResponseEntity<List<UIRemoveMemberResults>> removeFromGroups(
             @RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable List<String> paths,
             @PathVariable String uid) {
@@ -135,7 +135,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove all members from basis, include, exclude.
      */
     @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/reset-group")
-    public ResponseEntity<List<RemoveMemberResult>> resetGroup(@RequestHeader(CURRENT_USER) String owner,
+    public ResponseEntity<List<UIRemoveMemberResults>> resetGroup(@RequestHeader(CURRENT_USER) String owner,
             @PathVariable String path,
             @PathVariable List<String> include, @PathVariable List<String> exclude) {
         logger.info("Entered REST resetGroups...");
@@ -207,7 +207,7 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uid a member of the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<AddMemberResult> optIn(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<UIAddMemberResults> optIn(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST optIn...");
         return ResponseEntity
@@ -219,7 +219,7 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uid a member of the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uid:[\\w-:.]+}/self")
-    public ResponseEntity<AddMemberResult> optOut(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<UIAddMemberResults> optOut(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable String uid) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
@@ -231,7 +231,7 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uids}")
-    public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addIncludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable List<String> uids) {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
@@ -243,7 +243,7 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uids}")
-    public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addExcludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable List<String> uids) {
         logger.info("Entered REST addExcludeMembers...");
         return ResponseEntity
@@ -255,7 +255,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove a list of users from the include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uids}")
-    public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
+    public ResponseEntity<List<UIRemoveMemberResults>> removeIncludeMembers(
             @RequestHeader(CURRENT_USER) String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) {
         logger.info("Entered REST removeIncludeMembers...");
@@ -268,7 +268,7 @@ public class GroupingsRestControllerv2_1 {
      * Remove a list of users from the exclude include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uids}")
-    public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
+    public ResponseEntity<List<UIRemoveMemberResults>> removeExcludeMembers(
             @RequestHeader(CURRENT_USER) String currentUser, @PathVariable String path,
             @PathVariable List<String> uids) {
         logger.info("Entered REST removeExcludeMembers...");
@@ -293,7 +293,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add a new owner.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid}")
-    public ResponseEntity<List<AddMemberResult>> addOwners(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addOwners(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path,
             @PathVariable List<String> uid) {
         logger.info("Entered REST addOwner...");
@@ -306,7 +306,7 @@ public class GroupingsRestControllerv2_1 {
      * Delete a grouping owner.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uid}")
-    public ResponseEntity<List<RemoveMemberResult>> removeOwners(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<UIRemoveMemberResults>> removeOwners(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path,
             @PathVariable List<String> uid) {
         logger.info("Entered REST removeOwners");

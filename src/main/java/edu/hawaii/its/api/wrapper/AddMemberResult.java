@@ -2,13 +2,13 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-public class AddMemberResponse {
+public class AddMemberResult {
 
     final static private String SUCCESS = "SUCCESS";
 
     private final WsAddMemberResults wsAddMemberResults;
 
-    public AddMemberResponse(WsAddMemberResults wsAddMemberResults) {
+    public AddMemberResult(WsAddMemberResults wsAddMemberResults) {
         if (wsAddMemberResults == null) {
             this.wsAddMemberResults = new WsAddMemberResults();
         } else {

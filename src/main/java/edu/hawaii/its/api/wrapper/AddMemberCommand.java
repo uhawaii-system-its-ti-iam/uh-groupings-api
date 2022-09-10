@@ -5,31 +5,31 @@ import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-public class AddMemberRequest {
+public class AddMemberCommand {
     private final GcAddMember gcAddMember;
 
-    public AddMemberRequest(String groupPath, String memberToAdd) {
+    public AddMemberCommand(String groupPath, String memberToAdd) {
         gcAddMember = new GcAddMember();
         addUhIdentifier(memberToAdd);
         assignGroupPath(groupPath);
     }
 
-    public AddMemberRequest() {
+    public AddMemberCommand() {
         gcAddMember = new GcAddMember();
     }
 
-    public AddMemberResponse send() {
-        AddMemberResponse addMemberResponse;
+    public AddMemberResult send() {
+        AddMemberResult addMemberResult;
         try {
             WsAddMemberResults wsAddMemberResults = gcAddMember.execute();
-            addMemberResponse = new AddMemberResponse(wsAddMemberResults);
+            addMemberResult = new AddMemberResult(wsAddMemberResults);
         } catch (RuntimeException e) {
             throw new AddMemberRequestRejectedException(e);
         }
-        return addMemberResponse;
+        return addMemberResult;
     }
 
-    private AddMemberRequest addUhIdentifier(String uhIdentifier) {
+    private AddMemberCommand addUhIdentifier(String uhIdentifier) {
         if (isUhUuid(uhIdentifier)) {
             addUhUuid(uhIdentifier);
             includeUhMemberDetails(true);
@@ -39,22 +39,22 @@ public class AddMemberRequest {
         return this;
     }
 
-    private AddMemberRequest addUhUuid(String uhUuid) {
+    private AddMemberCommand addUhUuid(String uhUuid) {
         gcAddMember.addSubjectId(uhUuid);
         return this;
     }
 
-    private AddMemberRequest addUid(String uid) {
+    private AddMemberCommand addUid(String uid) {
         gcAddMember.addSubjectIdentifier(uid);
         return this;
     }
 
-    private AddMemberRequest assignGroupPath(String groupPath) {
+    private AddMemberCommand assignGroupPath(String groupPath) {
         gcAddMember.assignGroupName(groupPath);
         return this;
     }
 
-    private AddMemberRequest includeUhMemberDetails(boolean includeDetails) {
+    private AddMemberCommand includeUhMemberDetails(boolean includeDetails) {
         gcAddMember.assignIncludeSubjectDetail(includeDetails);
         return this;
     }

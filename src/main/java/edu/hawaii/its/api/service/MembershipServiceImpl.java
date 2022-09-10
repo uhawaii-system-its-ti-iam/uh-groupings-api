@@ -4,15 +4,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.RemoveMemberResult;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.wrapper.AddMemberResponse;
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
@@ -78,28 +78,28 @@ public class MembershipServiceImpl implements MembershipService {
      * Add am admin.
      */
     @Override
-    public AddMemberResult addAdmin(String currentUser, String adminToAdd) {
+    public UIAddMemberResults addAdmin(String currentUser, String adminToAdd) {
         logger.info("addAdmin; username: " + currentUser + "; newAdmin: " + adminToAdd + ";");
 
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        AddMemberResponse addMemberResponse = grouperApiService.addMember(GROUPING_ADMINS, adminToAdd);
-        return new AddMemberResult(addMemberResponse);
+        AddMemberResult addMemberResult = grouperApiService.addMember(GROUPING_ADMINS, adminToAdd);
+        return new UIAddMemberResults(addMemberResult);
     }
 
     /**
      * Remove an admin.
      */
     @Override
-    public RemoveMemberResult removeAdmin(String currentUser, String adminToRemove) {
+    public UIRemoveMemberResults removeAdmin(String currentUser, String adminToRemove) {
         logger.info("removeAdmin; username: " + currentUser + "; adminToRemove: " + adminToRemove + ";");
 
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(GROUPING_ADMINS, adminToRemove);
-        return new RemoveMemberResult(removeMemberResponse);
+        RemoveMemberResult removeMemberResult = grouperApiService.removeMember(GROUPING_ADMINS, adminToRemove);
+        return new UIRemoveMemberResults(removeMemberResult);
     }
 
     /**
@@ -171,11 +171,11 @@ public class MembershipServiceImpl implements MembershipService {
      * include or exclude, addGroupMembers will return empty list.
      */
     @Override
-    public List<AddMemberResult> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
+    public List<UIAddMemberResults> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd) {
         logger.info("addGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToAdd: " + usersToAdd + ";");
 
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
         String removalPath = helperService.parentGroupingPath(groupPath);
 
         if (groupPath.endsWith(GroupType.INCLUDE.value())) {
@@ -209,7 +209,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges then call addGroupMembers.
      */
     @Override
-    public List<AddMemberResult> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+    public List<UIAddMemberResults> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
@@ -223,7 +223,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges then call addGroupMembers.
      */
     @Override
-    public List<AddMemberResult> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
+    public List<UIAddMemberResults> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd) {
         logger.info("addExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
@@ -238,18 +238,18 @@ public class MembershipServiceImpl implements MembershipService {
      * from the include and exclude groups only. Passing in other group paths will result in undefined behavior.
      */
     @Override
-    public List<RemoveMemberResult> removeGroupMembers(String currentUser, String groupPath,
+    public List<UIRemoveMemberResults> removeGroupMembers(String currentUser, String groupPath,
             List<String> usersToRemove) {
         logger.info("removeGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToRemove: " + usersToRemove + ";");
         if (!groupPath.endsWith(GroupType.INCLUDE.value()) && !groupPath.endsWith(GroupType.EXCLUDE.value())) {
             throw new GcWebServiceError("404: Invalid group path.");
         }
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         for (String userToRemove : usersToRemove) {
-            RemoveMemberResult removeMemberResult;
-            RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(groupPath, userToRemove);
-            removeMemberResult = new RemoveMemberResult(removeMemberResponse);
+            UIRemoveMemberResults removeMemberResult;
+            RemoveMemberResult removeMemberResponse = grouperApiService.removeMember(groupPath, userToRemove);
+            removeMemberResult = new UIRemoveMemberResults(removeMemberResponse);
             if (removeMemberResult.isUserWasRemoved()) {
                 membershipService.updateLastModified(groupPath);
             }
@@ -262,7 +262,7 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Check if the currentUser has the proper privileges then call removeGroupMembers.
      */
-    @Override public List<RemoveMemberResult> removeIncludeMembers(String currentUser, String groupingPath,
+    @Override public List<UIRemoveMemberResults> removeIncludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
         logger.info("removeIncludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
@@ -276,7 +276,7 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Check if the currentUser has the proper privileges then call removeGroupMembers.
      */
-    @Override public List<RemoveMemberResult> removeExcludeMembers(String currentUser, String groupingPath,
+    @Override public List<UIRemoveMemberResults> removeExcludeMembers(String currentUser, String groupingPath,
             List<String> usersToRemove) {
         logger.info("removeExcludeMembers; currentUser: " + currentUser +
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
@@ -290,7 +290,7 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Remove owner/owners from groupings at groupingPath.
      */
-    public List<RemoveMemberResult> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove) {
+    public List<UIRemoveMemberResults> removeOwnerships(String groupingPath, String actor, List<String> ownersToRemove) {
         logger.info("removeOwnership; grouping: "
                 + groupingPath
                 + "; username: "
@@ -307,13 +307,13 @@ public class MembershipServiceImpl implements MembershipService {
             addOwnerships(groupingPath, ownersToRemove.get(0), Arrays.asList(actor));
         }
 
-        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResultList = new ArrayList<>();
         for (String ownerToRemove : ownersToRemove) {
-            RemoveMemberResult ownershipResults;
+            UIRemoveMemberResults ownershipResults;
 
-            RemoveMemberResponse removeMemberResponse =
+            RemoveMemberResult removeMemberResult =
                     grouperApiService.removeMember(groupingPath + GroupType.OWNERS.value(), ownerToRemove);
-            ownershipResults = new RemoveMemberResult(removeMemberResponse);
+            ownershipResults = new UIRemoveMemberResults(removeMemberResult);
             if (ownershipResults.isUserWasRemoved()) {
                 membershipService.updateLastModified(groupingPath);
                 membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
@@ -326,7 +326,7 @@ public class MembershipServiceImpl implements MembershipService {
     /**
      * Gives ownership to a single or multiple users.
      */
-    public List<AddMemberResult> addOwnerships(String groupingPath, String ownerUsername, List<String> ownersToAdd) {
+    public List<UIAddMemberResults> addOwnerships(String groupingPath, String ownerUsername, List<String> ownersToAdd) {
         logger.info("assignOwnership; groupingPath: "
                 + groupingPath
                 + "; ownerUsername: "
@@ -334,7 +334,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + "; newOwnerUsername: "
                 + ownersToAdd
                 + ";");
-        List<AddMemberResult> addOwnerResults = new ArrayList<>();
+        List<UIAddMemberResults> addOwnerResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperApiService.subjectLookup(ownerUsername);
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService
                 .isAdmin(ownerUsername)) {
@@ -342,10 +342,10 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         for (String ownerToAdd : ownersToAdd) {
-            AddMemberResult addOwnerResult;
-            AddMemberResponse addMemberResponse =
+            UIAddMemberResults addOwnerResult;
+            AddMemberResult addMemberResult =
                     grouperApiService.addMember(groupingPath + GroupType.OWNERS.value(), ownerToAdd);
-            addOwnerResult = new AddMemberResult(addMemberResponse);
+            addOwnerResult = new UIAddMemberResults(addMemberResult);
             if (addOwnerResult.isUserWasAdded()) {
                 membershipService.updateLastModified(groupingPath);
                 membershipService.updateLastModified(groupingPath + GroupType.OWNERS.value());
@@ -359,7 +359,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting in adds a member/user at
      * uid to the include list and removes them from the exclude list.
      */
-    @Override public AddMemberResult optIn(String currentUser, String groupingPath, String uid) {
+    @Override public UIAddMemberResults optIn(String currentUser, String groupingPath, String uid) {
         logger.info("optIn; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
@@ -374,7 +374,7 @@ public class MembershipServiceImpl implements MembershipService {
      * Check if the currentUser has the proper privileges to opt, then call addGroupMembers. Opting out adds a member/user
      * at uid to the exclude list and removes them from the include list.
      */
-    @Override public AddMemberResult optOut(String currentUser, String groupingPath, String uid) {
+    @Override public UIAddMemberResults optOut(String currentUser, String groupingPath, String uid) {
         logger.info("optOut; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
@@ -389,19 +389,19 @@ public class MembershipServiceImpl implements MembershipService {
      * Remove a user from all groups listed in groupPaths
      */
     @Override
-    public List<RemoveMemberResult> removeFromGroups(String adminUsername, String userToRemove,
+    public List<UIRemoveMemberResults> removeFromGroups(String adminUsername, String userToRemove,
             List<String> groupPaths) {
         if (!memberAttributeService.isAdmin(adminUsername)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        List<RemoveMemberResult> results = new ArrayList<>();
+        List<UIRemoveMemberResults> results = new ArrayList<>();
         for (String groupPath : groupPaths) {
             if (!groupPath.endsWith(GroupType.OWNERS.value())
                     && !groupPath.endsWith(GroupType.INCLUDE.value())
                     && !groupPath.endsWith(GroupType.EXCLUDE.value())) {
                 throw new GcWebServiceError("404: Invalid group path.");
             }
-            results.add(new RemoveMemberResult(grouperApiService.removeMember(groupPath, userToRemove)));
+            results.add(new UIRemoveMemberResults(grouperApiService.removeMember(groupPath, userToRemove)));
         }
         return results;
     }
@@ -410,12 +410,12 @@ public class MembershipServiceImpl implements MembershipService {
      * Remove all uses from the include and/or exclude groups of grouping at path.
      */
     @Override
-    public List<RemoveMemberResult> resetGroup(String currentUser, String path, List<String> uhNumbersInclude,
+    public List<UIRemoveMemberResults> resetGroup(String currentUser, String path, List<String> uhNumbersInclude,
             List<String> uhNumbersExclude) {
         if (!memberAttributeService.isAdmin(currentUser) && !memberAttributeService.isOwner(path, currentUser)) {
             throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
         }
-        List<RemoveMemberResult> results = new ArrayList<>();
+        List<UIRemoveMemberResults> results = new ArrayList<>();
         if (!uhNumbersInclude.isEmpty()) {
             results.addAll(removeGroupMembers(currentUser, path + GroupType.INCLUDE.value(), uhNumbersInclude));
         }
@@ -461,12 +461,12 @@ public class MembershipServiceImpl implements MembershipService {
      * Adds the uid/uhUuid in userToAdd to the group at additionPath and removes userToAdd from the group at
      * removalPath. If the userToAdd is already in the group at additionPath, it does not get added.
      */
-    public AddMemberResult addMember(String currentUser, String userToAdd, String removalPath, String additionPath) {
-        AddMemberResult addMemberResult;
+    public UIAddMemberResults addMember(String currentUser, String userToAdd, String removalPath, String additionPath) {
+        UIAddMemberResults addMemberResult;
         try {
-            RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(removalPath, userToAdd);
-            AddMemberResponse addMemberResponse = grouperApiService.addMember(additionPath, userToAdd);
-            addMemberResult = new AddMemberResult(addMemberResponse, removeMemberResponse);
+            RemoveMemberResult removeMemberResult = grouperApiService.removeMember(removalPath, userToAdd);
+            AddMemberResult addMemberResponse = grouperApiService.addMember(additionPath, userToAdd);
+            addMemberResult = new UIAddMemberResults(addMemberResponse, removeMemberResult);
             if (addMemberResult.isUserWasAdded()) {
                 membershipService.updateLastModified(additionPath);
             }
@@ -474,7 +474,7 @@ public class MembershipServiceImpl implements MembershipService {
                 membershipService.updateLastModified(removalPath);
             }
         } catch (AddMemberRequestRejectedException | RemoveMemberRequestRejectedException e) {
-            addMemberResult = new AddMemberResult(userToAdd, FAILURE);
+            addMemberResult = new UIAddMemberResults(userToAdd, FAILURE);
         }
         logger.info("addGroupMembers; " + addMemberResult);
         return addMemberResult;

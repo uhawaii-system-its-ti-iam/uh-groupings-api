@@ -5,32 +5,32 @@ import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
-public class RemoveMemberRequest {
+public class RemoveMemberCommand {
 
     private final GcDeleteMember gcDeleteMember;
 
-    public RemoveMemberRequest() {
+    public RemoveMemberCommand() {
         gcDeleteMember = new GcDeleteMember();
     }
 
-    public RemoveMemberRequest(String groupPath, String uhIdentifier) {
+    public RemoveMemberCommand(String groupPath, String uhIdentifier) {
         this();
         assignGroupPath(groupPath);
         addUhIdentifier(uhIdentifier);
     }
 
-    public RemoveMemberResponse send() {
-        RemoveMemberResponse removeMemberResponse;
+    public RemoveMemberResult send() {
+        RemoveMemberResult removeMemberResult;
         try {
             WsDeleteMemberResults wsDeleteMemberResults = gcDeleteMember.execute();
-            removeMemberResponse = new RemoveMemberResponse(wsDeleteMemberResults);
+            removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
         } catch (RuntimeException e) {
             throw new RemoveMemberRequestRejectedException(e);
         }
-        return removeMemberResponse;
+        return removeMemberResult;
     }
 
-    private RemoveMemberRequest addUhIdentifier(String uhIdentifier) {
+    private RemoveMemberCommand addUhIdentifier(String uhIdentifier) {
         if (isUhUuid(uhIdentifier)) {
             addUhUuid(uhIdentifier);
             includeUhMemberDetails(true);
@@ -40,22 +40,22 @@ public class RemoveMemberRequest {
         return this;
     }
 
-    private RemoveMemberRequest addUhUuid(String uhUuid) {
+    private RemoveMemberCommand addUhUuid(String uhUuid) {
         gcDeleteMember.addSubjectId(uhUuid);
         return this;
     }
 
-    private RemoveMemberRequest addUid(String uid) {
+    private RemoveMemberCommand addUid(String uid) {
         gcDeleteMember.addSubjectIdentifier(uid);
         return this;
     }
 
-    private RemoveMemberRequest assignGroupPath(String groupPath) {
+    private RemoveMemberCommand assignGroupPath(String groupPath) {
         gcDeleteMember.assignGroupName(groupPath);
         return this;
     }
 
-    private RemoveMemberRequest includeUhMemberDetails(boolean includeDetails) {
+    private RemoveMemberCommand includeUhMemberDetails(boolean includeDetails) {
         gcDeleteMember.assignIncludeSubjectDetail(includeDetails);
         return this;
     }

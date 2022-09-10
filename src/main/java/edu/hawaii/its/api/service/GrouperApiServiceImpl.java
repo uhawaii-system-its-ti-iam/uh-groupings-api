@@ -4,10 +4,10 @@ import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.AddMemberRequest;
-import edu.hawaii.its.api.wrapper.AddMemberResponse;
-import edu.hawaii.its.api.wrapper.RemoveMemberRequest;
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+import edu.hawaii.its.api.wrapper.AddMemberCommand;
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -118,13 +118,13 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public AddMemberResponse addMember(String groupPath, String uhIdentifier) {
-        return new AddMemberRequest(groupPath, uhIdentifier).send();
+    public AddMemberResult addMember(String groupPath, String uhIdentifier) {
+        return new AddMemberCommand(groupPath, uhIdentifier).send();
     }
 
     @Override
-    public RemoveMemberResponse removeMember(String groupPath, String uhIdentifier) {
-        return new RemoveMemberRequest(groupPath, uhIdentifier).send();
+    public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
+        return new RemoveMemberCommand(groupPath, uhIdentifier).send();
     }
 
     @Override
