@@ -2,10 +2,9 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 
-public class AddResult extends Results {
+public class AddResult extends MemberResult {
 
     private final WsAddMemberResult wsAddMemberResult;
-    private Subject subject;
 
     public AddResult(WsAddMemberResult wsAddMemberResult) {
         if (wsAddMemberResult == null) {
@@ -22,17 +21,9 @@ public class AddResult extends Results {
         this.wsAddMemberResult = new WsAddMemberResult();
     }
 
-    public String getUhUuid() {
-        return subject.getUhUuid();
-    }
-
     public String getUid() {
         String uid = wsAddMemberResult.getWsSubject().getAttributeValue(0);
         return uid != null ? uid : "";
-    }
-
-    public String getName() {
-        return subject.getName();
     }
 
     @Override
