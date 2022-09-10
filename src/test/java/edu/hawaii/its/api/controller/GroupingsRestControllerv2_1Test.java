@@ -1,5 +1,42 @@
 package edu.hawaii.its.api.controller;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.access.User;
+import edu.hawaii.its.api.access.UserContextService;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.type.UIAddMemberResults;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,41 +56,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
-
-import edu.hawaii.its.api.access.User;
-import edu.hawaii.its.api.access.UserContextService;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AddMemberResult;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.RemoveMemberResult;
-import edu.hawaii.its.api.type.SyncDestination;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingsRestControllerv2_1Test {
@@ -254,7 +256,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "admin")
     public void addAdminTest() throws Exception {
         String adminToAdd = "adminToAdd";
-        AddMemberResult addMemberResult = new AddMemberResult();
+        GroupingsAddResult addMemberResult =  new GroupingsAddResult();
         given(membershipService.addAdmin(ADMIN, adminToAdd)).willReturn(addMemberResult);
         mockMvc.perform(post(API_BASE + "/admins/" + adminToAdd)
                 .with(csrf())
@@ -268,7 +270,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser(username = "admin")
     public void removeAdminTest() throws Exception {
         String adminToRemove = "adminToRemove";
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult();
+        GroupingsRemoveResult removeMemberResult = new GroupingsRemoveResult();
         given(membershipService.removeAdmin(ADMIN, adminToRemove))
                 .willReturn(removeMemberResult);
 
@@ -284,7 +286,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void removeFromGroupsTest() throws Exception {
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         List<String> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             paths.add("grouping" + i);
@@ -304,7 +306,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhUser
     public void resetGroupTest() throws Exception {
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         List<String> includePaths = new ArrayList<>();
         List<String> excludePaths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -415,7 +417,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void addIncludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
@@ -434,7 +436,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
@@ -454,7 +456,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void removeIncludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
@@ -473,7 +475,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void removeExcludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
@@ -514,7 +516,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void addOwnersTest() throws Exception {
         List<String> ownersToAdd = new ArrayList<>();
-        List<AddMemberResult> addMemberResultList = new ArrayList<>();
+        List<UIAddMemberResults> addMemberResultList = new ArrayList<>();
         ownersToAdd.add("tst04name");
         ownersToAdd.add("tst05name");
         ownersToAdd.add("tst06name");
@@ -538,7 +540,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhUser
     public void removeOwnersTest() throws Exception {
         List<String> ownersToRemove = new ArrayList<>();
-        List<RemoveMemberResult> removeMemberResultList = new ArrayList<>();
+        List<UIRemoveMemberResults> removeMemberResultList = new ArrayList<>();
         ownersToRemove.add("tst04name");
         ownersToRemove.add("tst05name");
         ownersToRemove.add("tst06name");

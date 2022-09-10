@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.AddMemberResult;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public interface GroupingsMailService {
 
 
     void sendCSVMessage(String from, String to, String subject, String text, String path,
-            List<AddMemberResult> res);
+            List<UIAddMemberResults> res);
 
     /**
      * Concat UH email suffix onto username

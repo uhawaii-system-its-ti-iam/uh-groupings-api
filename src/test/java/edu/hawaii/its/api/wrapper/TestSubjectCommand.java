@@ -26,7 +26,7 @@ public class TestSubjectCommand {
     }
 
     @Test
-    public void sendTest() {
+    public void executeTest() {
         SubjectCommand subjectCommand = new SubjectCommand(TEST_UH_NUMBERS.get(0));
         SubjectResult subjectResult = subjectCommand.execute();
         assertNotNull(subjectResult);

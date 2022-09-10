@@ -22,8 +22,8 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.wrapper.AddMemberResponse;
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
@@ -178,24 +178,24 @@ public class TestGrouperApiServiceTutorial {
     @Test
     public void addMemberTest() {
         // With uh usernames.
-        AddMemberResponse addMemberResponse = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
-        assertNotNull(addMemberResponse);
+        AddMemberResult addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
+        assertNotNull(addMemberResult);
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0)));
 
-        addMemberResponse = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
-        assertNotNull(addMemberResponse);
+        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
+        assertNotNull(addMemberResult);
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1)));
         //// Clean up
         grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
         grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
 
         // With uh numbers.
-        addMemberResponse = grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        assertNotNull(addMemberResponse);
+        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
+        assertNotNull(addMemberResult);
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0)));
 
-        addMemberResponse = grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
-        assertNotNull(addMemberResponse);
+        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
+        assertNotNull(addMemberResult);
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1)));
         //// Clean up
         grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
@@ -207,22 +207,22 @@ public class TestGrouperApiServiceTutorial {
         // With uh usernames.
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
-        RemoveMemberResponse removeMemberResponse =
+        RemoveMemberResult removeMemberResult =
                 grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
-        assertNotNull(removeMemberResponse);
+        assertNotNull(removeMemberResult);
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0)));
-        removeMemberResponse = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
-        assertNotNull(removeMemberResponse);
+        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
+        assertNotNull(removeMemberResult);
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_USERNAMES.get(1)));
 
         // With uh numbers.
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
-        removeMemberResponse = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        assertNotNull(removeMemberResponse);
+        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
+        assertNotNull(removeMemberResult);
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0)));
-        removeMemberResponse = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
-        assertNotNull(removeMemberResponse);
+        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
+        assertNotNull(removeMemberResult);
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1)));
     }
 

@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddMemberResultTest {
-    private AddMemberResult addMemberResultInstantiatedOnConstruction;
-    private AddMemberResult addMemberResultEmptyOnConstruction;
+    private UIAddMemberResults addMemberResultInstantiatedOnConstruction;
+    private UIAddMemberResults addMemberResultEmptyOnConstruction;
     private final String pathOfAdd = "pathOfAdd";
     private final String pathOfRemoved = "pathOfRemoved";
     private final String name = "name";
@@ -26,16 +26,16 @@ public class AddMemberResultTest {
     @BeforeEach
     public void setUp() {
         addMemberResultInstantiatedOnConstruction =
-                new AddMemberResult(true, true, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
+                new UIAddMemberResults(true, true, pathOfAdd, pathOfRemoved, name, uhUuid, uid, result,
                         userIdentifier);
-        addMemberResultEmptyOnConstruction = new AddMemberResult();
+        addMemberResultEmptyOnConstruction = new UIAddMemberResults();
     }
 
     @Test
     public void construction() {
         assertNotNull(addMemberResultInstantiatedOnConstruction);
         assertNotNull(addMemberResultEmptyOnConstruction);
-        AddMemberResult addMemberResult = new AddMemberResult(result, userIdentifier);
+        UIAddMemberResults addMemberResult = new UIAddMemberResults(result, userIdentifier);
         assertNotNull(addMemberResult);
         assertNotNull(addMemberResult.getResult());
         assertNotNull(addMemberResult.getUserIdentifier());
