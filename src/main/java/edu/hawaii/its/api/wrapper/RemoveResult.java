@@ -22,6 +22,10 @@ public class RemoveResult extends MemberResult {
     }
 
     public String getUid() {
+        String[] attributeValues = wsDeleteMemberResult.getWsSubject().getAttributeValues();
+        if (isEmpty(attributeValues)) {
+            return "";
+        }
         String uid = wsDeleteMemberResult.getWsSubject().getAttributeValue(0);
         return uid != null ? uid : "";
     }

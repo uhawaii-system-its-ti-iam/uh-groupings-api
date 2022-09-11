@@ -2,25 +2,27 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-public class AddMemberResult {
+public class AddMemberResult extends Results {
 
-    final static private String SUCCESS = "SUCCESS";
 
     private final WsAddMemberResults wsAddMemberResults;
+    private final AddResult addResult;
 
     public AddMemberResult(WsAddMemberResults wsAddMemberResults) {
         if (wsAddMemberResults == null) {
             this.wsAddMemberResults = new WsAddMemberResults();
+            addResult = new AddResult();
         } else {
             this.wsAddMemberResults = wsAddMemberResults;
+            if (hasResults()) {
+                addResult = new AddResult(wsAddMemberResults.getResults()[0]);
+            } else {
+                addResult = new AddResult();
+            }
         }
     }
 
-    public boolean isSuccess() {
-        return resultCode().equals(SUCCESS);
-    }
-
-    public String groupPath() {
+    public String getGroupPath() {
         String groupPath = null;
         if (wsAddMemberResults.getWsGroupAssigned() != null) {
             groupPath = wsAddMemberResults.getWsGroupAssigned().getName();
@@ -28,38 +30,21 @@ public class AddMemberResult {
         return (groupPath != null) ? groupPath : "";
     }
 
-    public String resultCode() {
-        if (!hasResults()) {
-            return "";
-        }
-        return wsAddMemberResults.getResults()[0].getResultMetadata().getResultCode();
+    @Override
+    public String getResultCode() {
+        return addResult.getResultCode();
     }
 
-    public String uhUuid() {
-        if (!hasResults()) {
-            return "";
-        }
-        String uhUuid = wsAddMemberResults.getResults()[0].getWsSubject().getId();
-        return (uhUuid != null) ? uhUuid : "";
+    public String getUhUuid() {
+        return addResult.getUhUuid();
     }
 
-    public String uid() {
-        if (!hasResults()) {
-            return "";
-        }
-        String uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
-        if (uid == null && !isEmpty(wsAddMemberResults.getResults()[0].getWsSubject().getAttributeValues())) {
-            uid = wsAddMemberResults.getResults()[0].getWsSubject().getAttributeValues()[0];
-        }
-        return uid != null ? uid : "";
+    public String getUid() {
+        return addResult.getUid();
     }
 
-    public String name() {
-        if (!hasResults()) {
-            return "";
-        }
-        String name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
-        return (name != null) ? name : "";
+    public String getName() {
+        return addResult.getName();
     }
 
     private boolean hasResults() {
@@ -67,9 +52,5 @@ public class AddMemberResult {
             return false;
         }
         return wsAddMemberResults.getResults()[0] != null;
-    }
-
-    private boolean isEmpty(Object[] o) {
-        return o == null || o.length == 0;
     }
 }

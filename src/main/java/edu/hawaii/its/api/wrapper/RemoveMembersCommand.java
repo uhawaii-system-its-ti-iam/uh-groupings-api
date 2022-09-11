@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
@@ -21,15 +20,10 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
 
     }
 
-    public RemoveMembersCommand() {
-        gcDeleteMember = new GcDeleteMember();
-    }
-
     public RemoveMembersResults execute() {
         RemoveMembersResults removeMembersResults;
         try {
             WsDeleteMemberResults wsDeleteMemberResults = gcDeleteMember.execute();
-            JsonUtil.printJson(wsDeleteMemberResults);
             removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         } catch (RuntimeException e) {
             throw new AddMemberRequestRejectedException(e);

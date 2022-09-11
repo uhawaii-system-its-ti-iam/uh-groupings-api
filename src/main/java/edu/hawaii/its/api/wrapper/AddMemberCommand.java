@@ -5,20 +5,17 @@ import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-public class AddMemberCommand {
+public class AddMemberCommand extends GrouperCommand implements Command<AddMemberResult> {
     private final GcAddMember gcAddMember;
 
-    public AddMemberCommand(String groupPath, String memberToAdd) {
+    public AddMemberCommand(String groupPath, String uhIdentifier) {
         gcAddMember = new GcAddMember();
-        addUhIdentifier(memberToAdd);
-        assignGroupPath(groupPath);
+        this.includeUhMemberDetails(true)
+                .assignGroupPath(groupPath)
+                .addUhIdentifier(uhIdentifier);
     }
 
-    public AddMemberCommand() {
-        gcAddMember = new GcAddMember();
-    }
-
-    public AddMemberResult send() {
+    public AddMemberResult execute() {
         AddMemberResult addMemberResult;
         try {
             WsAddMemberResults wsAddMemberResults = gcAddMember.execute();
@@ -58,9 +55,4 @@ public class AddMemberCommand {
         gcAddMember.assignIncludeSubjectDetail(includeDetails);
         return this;
     }
-
-    private boolean isUhUuid(String naming) {
-        return naming != null && naming.matches("\\d+");
-    }
-
 }

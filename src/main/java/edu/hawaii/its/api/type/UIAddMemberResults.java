@@ -76,18 +76,18 @@ public class UIAddMemberResults {
     }
 
     public UIAddMemberResults(AddMemberResult addMemberResult) {
-        this.userWasAdded = addMemberResult.isSuccess();
-        setPathOfAdd(addMemberResult.groupPath());
-        setName(addMemberResult.name());
-        setUid(addMemberResult.uid());
-        setUhUuid(addMemberResult.uhUuid());
+        this.userWasAdded = addMemberResult.getResultCode().equals("SUCCESS");
+        setPathOfAdd(addMemberResult.getGroupPath());
+        setName(addMemberResult.getName());
+        setUid(addMemberResult.getUid());
+        setUhUuid(addMemberResult.getUhUuid());
         setResult(this.userWasAdded ? "SUCCESS" : "FAILURE");
     }
 
     public UIAddMemberResults(AddMemberResult addMemberResult, RemoveMemberResult removeMemberResult) {
         this(addMemberResult);
-        this.userWasRemoved = removeMemberResult.isSuccess();
-        setPathOfRemoved(removeMemberResult.groupPath());
+        this.userWasRemoved = removeMemberResult.getResultCode().equals("SUCCESS");
+        setPathOfRemoved(removeMemberResult.getGroupPath());
     }
 
     public boolean isUserWasAdded() {

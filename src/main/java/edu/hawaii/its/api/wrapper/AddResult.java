@@ -22,6 +22,10 @@ public class AddResult extends MemberResult {
     }
 
     public String getUid() {
+        String[] attributeValues = wsAddMemberResult.getWsSubject().getAttributeValues();
+        if (isEmpty(attributeValues)) {
+            return "";
+        }
         String uid = wsAddMemberResult.getWsSubject().getAttributeValue(0);
         return uid != null ? uid : "";
     }

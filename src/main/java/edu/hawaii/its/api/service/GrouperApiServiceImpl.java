@@ -119,12 +119,12 @@ public class GrouperApiServiceImpl implements GrouperApiService {
 
     @Override
     public AddMemberResult addMember(String groupPath, String uhIdentifier) {
-        return new AddMemberCommand(groupPath, uhIdentifier).send();
+        return new AddMemberCommand(groupPath, uhIdentifier).execute();
     }
 
     @Override
     public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
-        return new RemoveMemberCommand(groupPath, uhIdentifier).send();
+        return new RemoveMemberCommand(groupPath, uhIdentifier).execute();
     }
 
     @Override

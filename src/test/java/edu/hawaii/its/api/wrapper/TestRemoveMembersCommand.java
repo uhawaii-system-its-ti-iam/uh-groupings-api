@@ -3,13 +3,13 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GrouperApiService;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,14 +26,12 @@ public class TestRemoveMembersCommand {
     private GrouperApiService grouperApiService;
 
     @Test
-    public void constructor() {
-        RemoveMembersCommand removeMembersCommand = new RemoveMembersCommand();
-        assertNotNull(removeMembersCommand);
-    }
-
-    @Test
     public void executeTest() {
-        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS).execute();
-        JsonUtil.printJson(removeMembersResults);
+        RemoveMembersResults removeMembersResults =
+                new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS).execute();
+        assertNotNull(removeMembersResults);
+
+        String[] bogus = { "bogus-1", "bogus-2" };
+        removeMembersResults = new RemoveMembersCommand(GROUPING_INCLUDE, Arrays.asList(bogus)).execute();
     }
 }

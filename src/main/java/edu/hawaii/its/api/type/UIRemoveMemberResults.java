@@ -34,11 +34,11 @@ public class UIRemoveMemberResults {
     }
 
     public UIRemoveMemberResults(RemoveMemberResult removeMemberResult) {
-        this.userWasRemoved = removeMemberResult.isSuccess();
-        setPathOfRemoved(removeMemberResult.groupPath());
-        setName(removeMemberResult.name());
-        setUid(removeMemberResult.uid());
-        setUhUuid(removeMemberResult.uhUuid());
+        this.userWasRemoved = removeMemberResult.getResultCode().equals("SUCCESS");
+        setPathOfRemoved(removeMemberResult.getGroupPath());
+        setName(removeMemberResult.getName());
+        setUid(removeMemberResult.getUid());
+        setUhUuid(removeMemberResult.getUhUuid());
         setResult(this.userWasRemoved ? "SUCCESS" : "FAILURE");
     }
 

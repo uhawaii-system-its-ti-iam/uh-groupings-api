@@ -17,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class RemoveMembersResultsTest {
 
     private static Properties properties;
-    final static private String SUCCESS = "SUCCESS";
-    final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @BeforeAll
     public static void beforeAll() throws Exception {
@@ -30,7 +28,7 @@ public class RemoveMembersResultsTest {
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.delete.member.results.failure.attributes");
+        String json = propertyValue("ws.delete.member.results.failure");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
@@ -40,18 +38,18 @@ public class RemoveMembersResultsTest {
 
     @Test
     public void successfulResultsTest() {
-        String json = propertyValue("ws.delete.member.results.success.attributes");
+        String json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
-        assertEquals(SUCCESS, removeMembersResults.getResultCode());
+        assertEquals("SUCCESS", removeMembersResults.getResultCode());
         assertEquals("group-path", removeMembersResults.getGroupPath());
         assertNotNull(removeMembersResults.getResults());
     }
 
     @Test
     public void failedResultsTest() {
-        String json = propertyValue("ws.delete.member.results.failure.attributes");
+        String json = propertyValue("ws.delete.member.results.failure");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
@@ -65,6 +63,7 @@ public class RemoveMembersResultsTest {
         String json = propertyValue("ws.delete.member.results.empty");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
+        assertNotNull(removeMembersResults);
         assertEquals("FAILURE", removeMembersResults.getResultCode());
         assertEquals("group-path", removeMembersResults.getGroupPath());
         assertEquals(0, removeMembersResults.getResults().size());
@@ -75,6 +74,7 @@ public class RemoveMembersResultsTest {
         String json = propertyValue("ws.delete.member.results.null.ws.group");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
+        assertNotNull(removeMembersResults);
         assertEquals("FAILURE", removeMembersResults.getResultCode());
         assertEquals("", removeMembersResults.getGroupPath());
     }
@@ -84,10 +84,10 @@ public class RemoveMembersResultsTest {
         String json = propertyValue("ws.delete.member.results.null.group.path");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
+        assertNotNull(removeMembersResults);
         assertEquals("FAILURE", removeMembersResults.getResultCode());
         assertEquals("", removeMembersResults.getGroupPath());
     }
-
 
     private String propertyValue(String key) {
         return properties.getProperty(key);

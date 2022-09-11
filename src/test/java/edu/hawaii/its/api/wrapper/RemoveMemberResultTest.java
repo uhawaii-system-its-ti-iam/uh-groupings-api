@@ -12,15 +12,11 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoveMemberResultTest {
 
     private static Properties properties;
-    final static private String SUCCESS = "SUCCESS";
-    final static private String SUCCESS_WASNT_IMMEDIATE = "SUCCESS_WASNT_IMMEDIATE";
 
     @BeforeAll
     public static void beforeAll() throws Exception {
@@ -32,77 +28,72 @@ public class RemoveMemberResultTest {
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.delete.member.results.success.uid");
+        String json = propertyValue("ws.delete.member.results.success.single.result");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(removeMemberResult);
+
+        removeMemberResult = new RemoveMemberResult(null);
         assertNotNull(removeMemberResult);
     }
 
     @Test
-    public void accessors() {
-        // When remove is queried with a uid.
-        String json = propertyValue("ws.delete.member.results.success.uid");
+    public void memberRemoveSuccessTest() {
+        String json = propertyValue("ws.delete.member.results.success.single.result");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+
         RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(removeMemberResult);
+        assertNotNull(removeMemberResult.getResultCode());
+        assertNotNull(removeMemberResult.getGroupPath());
+        assertNotNull(removeMemberResult.getUid());
+        assertNotNull(removeMemberResult.getUhUuid());
+        assertNotNull(removeMemberResult.getName());
+        assertEquals("SUCCESS", removeMemberResult.getResultCode());
+        assertEquals("group-path", removeMemberResult.getGroupPath());
+        assertEquals("uid", removeMemberResult.getUid());
+        assertEquals("uhUuid", removeMemberResult.getUhUuid());
+        assertEquals("name", removeMemberResult.getName());
+    }
 
-        assertNotNull(removeMemberResult.resultCode());
-        assertEquals(SUCCESS, removeMemberResult.resultCode());
-        assertTrue(removeMemberResult.isSuccess());
+    @Test
+    public void memberNotInGroupTest() {
+        // The uh identifier passed is valid but is not in the group.
+        String json = propertyValue("ws.delete.member.results.not.in.group.single.result");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
 
-        assertNotNull(removeMemberResult.groupPath());
-        assertEquals("group-path", removeMemberResult.groupPath());
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(removeMemberResult);
+        assertNotNull(removeMemberResult.getResultCode());
+        assertNotNull(removeMemberResult.getGroupPath());
+        assertNotNull(removeMemberResult.getUid());
+        assertNotNull(removeMemberResult.getUhUuid());
+        assertNotNull(removeMemberResult.getName());
+        assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
+        assertEquals("group-path", removeMemberResult.getGroupPath());
+        assertEquals("uid", removeMemberResult.getUid());
+        assertEquals("uhUuid", removeMemberResult.getUhUuid());
+        assertEquals("name", removeMemberResult.getName());
+    }
 
-        assertNotNull(removeMemberResult.uid());
-        assertEquals("uid", removeMemberResult.uid());
+    @Test
+    public void invalidMemberTest() {
+        // The uh identifier passed is invalid.
+        String json = propertyValue("ws.delete.member.results.invalid.single.result");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
 
-        assertNotNull(removeMemberResult.uhUuid());
-        assertEquals("uhuuid", removeMemberResult.uhUuid());
-
-        assertNotNull(removeMemberResult.name());
-        assertEquals("name", removeMemberResult.name());
-
-        // When remove is queried with uhUuid.
-        json = propertyValue("ws.delete.member.results.success.uhuuid");
-        wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-        removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-
-        assertNotNull(removeMemberResult.resultCode());
-        assertEquals(SUCCESS, removeMemberResult.resultCode());
-        assertTrue(removeMemberResult.isSuccess());
-
-        assertNotNull(removeMemberResult.groupPath());
-        assertEquals("group-path", removeMemberResult.groupPath());
-
-        assertNotNull(removeMemberResult.uid());
-        assertEquals("uid", removeMemberResult.uid());
-
-        assertNotNull(removeMemberResult.uhUuid());
-        assertEquals("uhuuid", removeMemberResult.uhUuid());
-
-        assertNotNull(removeMemberResult.name());
-        assertEquals("name", removeMemberResult.name());
-
-        // When grouper result contains null fields.
-        json = propertyValue("ws.delete.member.results.null.values");
-        wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-        removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-
-        assertNotNull(removeMemberResult.resultCode());
-        assertEquals(SUCCESS_WASNT_IMMEDIATE, removeMemberResult.resultCode());
-        assertFalse(removeMemberResult.isSuccess());
-
-        assertNotNull(removeMemberResult.groupPath());
-        assertEquals("", removeMemberResult.groupPath());
-
-        assertNotNull(removeMemberResult.uid());
-        assertEquals("", removeMemberResult.uid());
-
-        assertNotNull(removeMemberResult.uhUuid());
-        assertEquals("", removeMemberResult.uhUuid());
-
-        assertNotNull(removeMemberResult.name());
-        assertEquals("", removeMemberResult.name());
-
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(removeMemberResult);
+        assertNotNull(removeMemberResult.getResultCode());
+        assertNotNull(removeMemberResult.getGroupPath());
+        assertNotNull(removeMemberResult.getUid());
+        assertNotNull(removeMemberResult.getUhUuid());
+        assertNotNull(removeMemberResult.getName());
+        assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
+        assertEquals("group-path", removeMemberResult.getGroupPath());
+        assertEquals("", removeMemberResult.getUid());
+        assertEquals("bogus-name", removeMemberResult.getUhUuid());
+        assertEquals("", removeMemberResult.getName());
     }
 
     private String propertyValue(String key) {

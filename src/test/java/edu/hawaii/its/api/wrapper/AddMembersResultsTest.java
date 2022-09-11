@@ -17,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class AddMembersResultsTest {
 
     private static Properties properties;
-    final static private String SUCCESS = "SUCCESS";
-    final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @BeforeAll
     public static void beforeAll() throws Exception {
@@ -30,7 +28,7 @@ public class AddMembersResultsTest {
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.add.member.results.success.attributes");
+        String json = propertyValue("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
@@ -39,20 +37,19 @@ public class AddMembersResultsTest {
     }
 
     @Test
-    public void successfulResultsTest() {
-        String json = propertyValue("ws.add.member.results.success.attributes");
+    public void addSuccessResultsTest() {
+        String json = propertyValue("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
-        assertEquals(SUCCESS, addMembersResults.getResultCode());
+        assertEquals("SUCCESS", addMembersResults.getResultCode());
         assertEquals("group-path", addMembersResults.getGroupPath());
         assertNotNull(addMembersResults.getResults());
-
     }
 
     @Test
     public void failedResultsTest() {
-        String json = propertyValue("ws.add.member.results.failure.attributes");
+        String json = propertyValue("ws.add.member.results.failure");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
