@@ -45,15 +45,12 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
 
-    @Autowired
-    private HelperService helperService;
-
     // Returns true if the user is a member of the group via username or UH id
     @Override
     public boolean isMember(String groupPath, String username) {
         logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
 
-        if (helperService.isUhUuid(username)) {
+        if (isUhUuid(username)) {
             return isMemberUuid(groupPath, username);
         }
 
@@ -102,6 +99,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
             }
         }
         return false;
+    }
+
+    /**
+     * Return true if username is a UH id number
+     */
+    @Override
+    public boolean isUhUuid(String naming) {
+        return naming != null && naming.matches("\\d+");
     }
 
     // Returns true if the user is in the owner group of the grouping
@@ -166,7 +171,7 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
         for (String path : pathStrings) {
             if (path.endsWith(GroupType.OWNERS.value())) {
-                String parentGroupingPath = helperService.parentGroupingPath(path);
+                String parentGroupingPath = groupingAssignmentService.parentGroupingPath(path);
                 groupingPaths.add(new GroupingPath(parentGroupingPath,
                         grouperApiService.descriptionOf(parentGroupingPath)));
             }
