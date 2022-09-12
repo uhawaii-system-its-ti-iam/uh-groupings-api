@@ -76,7 +76,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     private String STEM;
 
     @Autowired
-    HelperService helperService;
+    MemberAttributeService membershipAttributeService;
 
     @Override
     public List<SyncDestination> syncDestinations() {
@@ -169,7 +169,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
 
     @Override
     public WsHasMemberResults hasMemberResults(String group, String username) {
-        if (helperService.isUhUuid(username)) {
+        if (membershipAttributeService.isUhUuid(username)) {
             return new GcHasMember()
                     .assignGroupName(group)
                     .addSubjectId(username)
@@ -305,7 +305,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
         WsStemLookup stemLookup = stemLookup(STEM);
         StemScope stemScope = StemScope.ALL_IN_SUBTREE;
 
-        if (helperService.isUhUuid(username)) {
+        if (membershipAttributeService.isUhUuid(username)) {
             return new GcGetGroups()
                     .addSubjectId(username)
                     .assignWsStemLookup(stemLookup)
@@ -343,7 +343,7 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     public WsSubjectLookup subjectLookup(String username) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
 
-        if (helperService.isUhUuid(username)) {
+        if (membershipAttributeService.isUhUuid(username)) {
             wsSubjectLookup.setSubjectId(username);
         } else {
             wsSubjectLookup.setSubjectIdentifier(username);

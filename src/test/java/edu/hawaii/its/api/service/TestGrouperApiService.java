@@ -95,9 +95,6 @@ public class TestGrouperApiService {
     @Autowired
     MembershipService membershipService;
 
-    @Autowired
-    HelperService helperService;
-
     @BeforeAll
     public void init() {
         assertTrue(memberAttributeService.isAdmin(ADMIN));

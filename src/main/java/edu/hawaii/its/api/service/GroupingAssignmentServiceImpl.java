@@ -2,19 +2,23 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
+
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.wrapper.GroupsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +49,12 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.subject_attribute_name_uhuuid}")
     private String SUBJECT_ATTRIBUTE_NAME_UID;
 
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
+
+    @Value("${groupings.api.stale_subject_id}")
+    private String STALE_SUBJECT_ID;
+
     @Value("${groupings.api.insufficient_privileges}")
     private String INSUFFICIENT_PRIVILEGES;
 
@@ -56,12 +67,10 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     private GrouperApiService grouperApiService;
 
     @Autowired
-    private HelperService helperService;
-
-    @Autowired
     private MemberAttributeService memberAttributeService;
 
-    @Autowired GroupAttributeService groupAttributeService;
+    @Autowired
+    private GroupAttributeService groupAttributeService;
 
     /**
      * Fetch a grouping from Grouper or the database.
@@ -153,7 +162,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         List<String> adminGrouping = Arrays.asList(GROUPING_ADMINS);
         Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
-        adminListsHolder.setAllGroupingPaths(helperService.makePaths(groupingPathStrings));
+        adminListsHolder.setAllGroupingPaths(makePaths(groupingPathStrings));
         adminListsHolder.setAdminGroup(admin);
         return adminListsHolder;
     }
@@ -175,7 +184,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         Map<String, Group> groupMembers = new HashMap<>();
         if (members.getResults() != null) {
-            groupMembers = helperService.makeGroups(members);
+            groupMembers = makeGroups(members);
         }
 
         return groupMembers;
@@ -201,7 +210,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         Map<String, Group> groupMembers = new HashMap<>();
         if (members.getResults() != null) {
-            groupMembers = helperService.makeGroups(members);
+            groupMembers = makeGroups(members);
         }
 
         return groupMembers;
@@ -248,7 +257,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsIn = getGroupPaths(owner, optOutUid);
         List<String> includes =
                 groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
-        includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
+        includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
         List<String> optOutPaths = optableGroupings(OptType.OUT.value());
         optOutPaths.retainAll(includes);
         return new ArrayList<>(new HashSet<>(optOutPaths));
@@ -265,7 +274,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         List<String> groupingsIn = getGroupPaths(owner, optInUid);
         List<String> includes =
                 groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
-        includes = includes.stream().map(path -> helperService.parentGroupingPath(path)).collect(Collectors.toList());
+        includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
 
         List<String> optInPaths = optableGroupings(OptType.IN.value());
         optInPaths.removeAll(includes);
@@ -295,6 +304,38 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
         return attributeAssignmentsResults.getGroupNames();
+    }
+
+    /**
+     * Remove one of the words (:exclude, :include, :owners ...) from the end of the string.
+     */
+    @Override
+    public String parentGroupingPath(String group) {
+        if (group != null) {
+            if (group.endsWith(GroupType.EXCLUDE.value())) {
+                return group.substring(0, group.length() - GroupType.EXCLUDE.value().length());
+            } else if (group.endsWith(GroupType.INCLUDE.value())) {
+                return group.substring(0, group.length() - GroupType.INCLUDE.value().length());
+            } else if (group.endsWith(GroupType.OWNERS.value())) {
+                return group.substring(0, group.length() - GroupType.OWNERS.value().length());
+            } else if (group.endsWith(GroupType.BASIS.value())) {
+                return group.substring(0, group.length() - GroupType.BASIS.value().length());
+            }
+            return group;
+        }
+        return "";
+    }
+
+    /**
+     * Get the name of a grouping from groupPath.
+     */
+    @Override
+    public String nameGroupingPath(String groupPath) {
+        String parentPath = parentGroupingPath(groupPath);
+        if ("".equals(parentPath)) {
+            return "";
+        }
+        return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
     @Override
@@ -327,5 +368,75 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
             return false;
         }
         return ownersInGrouping.contains(uidToCheck);
+    }
+
+    /**
+     * Makes a group filled with members from membersResults.
+     */
+    @Override
+    public Map<String, Group> makeGroups(WsGetMembersResults membersResults) {
+        Map<String, Group> groups = new HashMap<>();
+        if (membersResults.getResults().length > 0) {
+            String[] attributeNames = membersResults.getSubjectAttributeNames();
+
+            for (WsGetMembersResult result : membersResults.getResults()) {
+                WsSubject[] subjects = result.getWsSubjects();
+                Group group = new Group(result.getWsGroup().getName());
+
+                if (subjects == null || subjects.length == 0) {
+                    continue;
+                }
+                for (WsSubject subject : subjects) {
+                    if (subject == null) {
+                        continue;
+                    }
+                    Person personToAdd = makePerson(subject, attributeNames);
+                    if (group.getPath().endsWith(GroupType.BASIS.value()) && subject.getSourceId() != null
+                            && subject.getSourceId().equals(STALE_SUBJECT_ID)) {
+                        personToAdd.setUsername("User Not Available.");
+                    }
+                    group.addMember(personToAdd);
+                }
+                groups.put(group.getPath(), group);
+            }
+        }
+        // Return empty group if for any unforeseen results.
+        return groups;
+    }
+
+    /**
+     * Makes a person with all attributes in attributeNames.
+     */
+    @Override
+    public Person makePerson(WsSubject subject, String[] attributeNames) {
+        if (subject == null || subject.getAttributeValues() == null) {
+            return new Person();
+        }
+
+        Person person = new Person();
+        for (int i = 0; i < subject.getAttributeValues().length; i++) {
+            person.addAttribute(attributeNames[i], subject.getAttributeValue(i));
+        }
+
+        // uhUuid is the only attribute not actually
+        // in the WsSubject attribute array.
+        person.addAttribute(UHUUID, subject.getId());
+
+        return person;
+    }
+
+    /**
+     * Take a list of grouping path strings and return a list of GroupingPath objects.
+     */
+    @Override
+    public List<GroupingPath> makePaths(List<String> groupingPaths) {
+        if (groupingPaths == null || groupingPaths.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return groupingPaths.parallelStream()
+                .map(path -> new GroupingPath(path,
+                        grouperApiService.descriptionOf(path)))
+                .collect(Collectors.toList());
     }
 }
