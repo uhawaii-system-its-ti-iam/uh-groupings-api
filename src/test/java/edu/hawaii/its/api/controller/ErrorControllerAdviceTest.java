@@ -1,8 +1,6 @@
 package edu.hawaii.its.api.controller;
 
 import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.access.User;
-import edu.hawaii.its.api.access.UserContextService;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
@@ -11,10 +9,9 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.web.firewall.RequestRejectedException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+
+import java.security.AccessControlException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,9 +25,6 @@ public class ErrorControllerAdviceTest {
     @Autowired
     private ErrorControllerAdvice errorControllerAdvice;
 
-    @Autowired
-    private UserContextService userContextService;
-
     /**
      * Testing for the ErrorControllerAdvice class.
      * Will Generate a generic exception for each advice method and assert status code values.
@@ -38,12 +32,8 @@ public class ErrorControllerAdviceTest {
     @Test
     public void ErrorControllerTest() {
 
-        User user = userContextService.getCurrentUser();
-
-        assertThat(user.getName(), is(""));
-
-        AccessDeniedException ade = new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
+        AccessControlException ace = new AccessControlException(INSUFFICIENT_PRIVILEGES);
+        String statusCode = errorControllerAdvice.handleAccessDeniedException(ace).getStatusCode().toString();
         assertThat(statusCode, is("403 FORBIDDEN"));
 
         Exception e = new Exception("FAIL");
@@ -52,10 +42,6 @@ public class ErrorControllerAdviceTest {
 
         statusCode = errorControllerAdvice.handleMessagingException(e).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
-
-        RequestRejectedException rre = new RequestRejectedException("FAIL");
-        statusCode = errorControllerAdvice.handleRequestRejectedException(rre).getStatusCode().toString();
-        assertThat(statusCode, is("400 BAD_REQUEST"));
 
         GcWebServiceError gwse = new GcWebServiceError("FAIL");
         statusCode = errorControllerAdvice.handleGcWebServiceError(gwse).getStatusCode().toString();

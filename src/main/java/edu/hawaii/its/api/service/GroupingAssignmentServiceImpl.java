@@ -18,9 +18,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,7 +74,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) &&
                 !memberAttributeService.isAdmin(ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         compositeGrouping = new Grouping(groupingPath);
 
@@ -115,7 +115,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         Grouping compositeGrouping = new Grouping(groupingPath);
         String basis = groupingPath + GroupType.BASIS.value();
@@ -146,7 +146,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
         if (!memberAttributeService.isAdmin(adminUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
         List<String> groupingPathStrings = allGroupingsPaths();
@@ -283,7 +283,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public List<String> optableGroupings(String optAttr) {
         if (!optAttr.equals(OptType.IN.value()) && !optAttr.equals(OptType.OUT.value())) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, optAttr));

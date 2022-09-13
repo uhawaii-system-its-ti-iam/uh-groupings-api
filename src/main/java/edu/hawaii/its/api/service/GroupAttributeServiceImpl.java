@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.type.Grouping;
@@ -15,6 +14,7 @@ import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
@@ -203,7 +203,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         grouperApiService.updateGroupDescription(groupPath, description);
 
@@ -214,14 +214,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private void checkPrivileges(String groupingPath, String ownerUsername) {
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername)
                 && !memberAttributeService.isAdmin(ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
     }
 
     private void checkPrivileges(String ownerUsername) {
         if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
     }
 
