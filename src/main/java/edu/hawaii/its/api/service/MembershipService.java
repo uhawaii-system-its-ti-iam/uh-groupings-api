@@ -1,7 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.UIAddMemberResults;
+import edu.hawaii.its.api.type.GroupingsAddResults;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 
@@ -17,7 +18,10 @@ public interface MembershipService {
 
     List<UIAddMemberResults> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
+    GroupingsAddResults addGroupMemberss(String currentUser, String groupPath, List<String> usersToAdd);
+
     List<UIAddMemberResults> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
+    GroupingsAddResults addIncludeMemberss(String currentUser, String groupingPath, List<String> usersToAdd);
 
     List<UIAddMemberResults> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 
