@@ -1,42 +1,46 @@
 package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SubjectsResults extends Results {
-
-    public static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-
     private WsGetSubjectsResults wsGetSubjectsResults;
 
-    // Constructor (temporary; don't depend on it).
     public SubjectsResults(WsGetSubjectsResults wsGetSubjectsResults) {
-        this.wsGetSubjectsResults = wsGetSubjectsResults;
-        if (this.wsGetSubjectsResults == null) {
+        if (wsGetSubjectsResults == null) {
             this.wsGetSubjectsResults = new WsGetSubjectsResults();
+        } else {
+            this.wsGetSubjectsResults = wsGetSubjectsResults;
         }
     }
 
-    public String getResultCode() {
-        if (isEmpty(wsGetSubjectsResults.getWsSubjects())) {
-            return SUBJECT_NOT_FOUND;
+    public SubjectsResults() {
+        this.wsGetSubjectsResults = new WsGetSubjectsResults();
+    }
+
+    public List<Subject> getSubjects() {
+        List<Subject> subjects = new ArrayList<>();
+        WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
+        if (isEmpty(wsSubjects)) {
+        } else {
+            for (WsSubject wsSubject : wsSubjects) {
+                subjects.add(new Subject(wsSubject));
+            }
         }
-
-        return wsGetSubjectsResults.getWsSubjects()[0].getResultCode();
+        return subjects;
     }
 
-    public int getSubjectAttributeNameCount() {
-        if (isEmpty(wsGetSubjectsResults.getSubjectAttributeNames())) {
-            return 0;
+    @Override public String getResultCode() {
+        String success = "SUCCESS";
+        String failure = "FAILURE";
+        for (Subject subject : getSubjects()) {
+            if (subject.getResultCode().equals(success)) {
+                return success;
+            }
         }
-        return wsGetSubjectsResults.getSubjectAttributeNames().length;
+        return failure;
     }
-
-    public String getSubjectAttributeName(int index) {
-        return wsGetSubjectsResults.getSubjectAttributeNames()[index];
-    }
-
-    public String getAttributeValue(int index) {
-        return wsGetSubjectsResults.getWsSubjects()[0].getAttributeValues()[index];
-    }
-
 }
