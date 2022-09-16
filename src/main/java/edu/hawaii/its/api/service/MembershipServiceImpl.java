@@ -172,7 +172,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public GroupingsAddResults addGroupMemberss(String currentUser, String groupPath, List<String> usersToAdd) {
+    public GroupingsAddResults addGroupMembersNewImplementation(String currentUser, String groupPath, List<String> usersToAdd) {
         logger.info("addGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
                 + "usersToAdd: " + usersToAdd + ";");
 
@@ -233,18 +233,6 @@ public class MembershipServiceImpl implements MembershipService {
         }
          */
         return addMemberResults;
-    }
-
-    @Override
-    public GroupingsAddResults addIncludeMemberss(String currentUser, String groupingPath, List<String> usersToAdd) {
-        logger.info("addIncludeMembers; currentUser: " + currentUser +
-                "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
-                currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
-        }
-        return addGroupMemberss(currentUser, groupingPath + GroupType.INCLUDE.value(), usersToAdd);
-
     }
 
     /**

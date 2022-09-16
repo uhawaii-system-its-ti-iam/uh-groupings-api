@@ -18,10 +18,9 @@ public interface MembershipService {
 
     List<UIAddMemberResults> addGroupMembers(String currentUser, String groupPath, List<String> usersToAdd);
 
-    GroupingsAddResults addGroupMemberss(String currentUser, String groupPath, List<String> usersToAdd);
+    GroupingsAddResults addGroupMembersNewImplementation(String currentUser, String groupPath, List<String> usersToAdd);
 
     List<UIAddMemberResults> addIncludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
-    GroupingsAddResults addIncludeMemberss(String currentUser, String groupingPath, List<String> usersToAdd);
 
     List<UIAddMemberResults> addExcludeMembers(String currentUser, String groupingPath, List<String> usersToAdd);
 

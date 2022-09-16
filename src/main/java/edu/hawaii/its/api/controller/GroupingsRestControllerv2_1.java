@@ -9,7 +9,6 @@ import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsAddResults;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
@@ -231,12 +230,12 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uids}")
-    public ResponseEntity<GroupingsAddResults> addIncludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addIncludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String path, @PathVariable List<String> uids) {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addIncludeMemberss(currentUser, path, uids));
+                .body(membershipService.addIncludeMembers(currentUser, path, uids));
     }
 
     /**
