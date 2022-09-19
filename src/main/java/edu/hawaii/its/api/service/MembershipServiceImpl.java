@@ -20,9 +20,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.security.AccessControlException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +76,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("addAdmin; username: " + currentUser + "; newAdmin: " + adminToAdd + ";");
 
         if (!memberAttributeService.isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         AddMemberResponse addMemberResponse = grouperApiService.addMember(GROUPING_ADMINS, adminToAdd);
         return new AddMemberResult(addMemberResponse);
@@ -90,7 +90,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info("removeAdmin; username: " + currentUser + "; adminToRemove: " + adminToRemove + ";");
 
         if (!memberAttributeService.isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         RemoveMemberResponse removeMemberResponse = grouperApiService.removeMember(GROUPING_ADMINS, adminToRemove);
         return new RemoveMemberResult(removeMemberResponse);
@@ -105,7 +105,7 @@ public class MembershipServiceImpl implements MembershipService {
         logger.info(action);
 
         if (!memberAttributeService.isAdmin(currentUser) && !currentUser.equals(uid)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         List<Membership> memberships = new ArrayList<>();
         List<String> groupPaths;
@@ -208,7 +208,7 @@ public class MembershipServiceImpl implements MembershipService {
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
                 currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), usersToAdd);
     }
@@ -222,7 +222,7 @@ public class MembershipServiceImpl implements MembershipService {
                 "; groupingPath: " + groupingPath + "; usersToAdd: " + usersToAdd + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
                 currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         return addGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(), usersToAdd);
     }
@@ -262,7 +262,7 @@ public class MembershipServiceImpl implements MembershipService {
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
                 currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), usersToRemove);
     }
@@ -276,7 +276,7 @@ public class MembershipServiceImpl implements MembershipService {
                 "; groupingPath: " + groupingPath + "; usersToRemove: " + usersToRemove + ";");
         if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
                 currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         return removeGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(), usersToRemove);
     }
@@ -294,7 +294,7 @@ public class MembershipServiceImpl implements MembershipService {
                 + ";");
 
         if (!memberAttributeService.isOwner(groupingPath, actor) && !memberAttributeService.isAdmin(actor)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         // Makes the admin also the owner in the event that there are no remaining owners otherwise.
         if (!memberAttributeService.isOwner(groupingPath, actor) && memberAttributeService.isAdmin(actor)) {
@@ -332,7 +332,7 @@ public class MembershipServiceImpl implements MembershipService {
         WsSubjectLookup wsSubjectLookup = grouperApiService.subjectLookup(ownerUsername);
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService
                 .isAdmin(ownerUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
 
         for (String ownerToAdd : ownersToAdd) {
@@ -356,7 +356,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Override public AddMemberResult optIn(String currentUser, String groupingPath, String uid) {
         logger.info("optIn; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
 
         String removalPath = groupingPath + GroupType.EXCLUDE.value();
@@ -371,7 +371,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Override public AddMemberResult optOut(String currentUser, String groupingPath, String uid) {
         logger.info("optOut; currentUser: " + currentUser + "; groupingPath: " + groupingPath + "; uid: " + uid + ";");
         if (!currentUser.equals(uid) && !memberAttributeService.isAdmin(currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
 
         String removalPath = groupingPath + GroupType.INCLUDE.value();
@@ -386,7 +386,7 @@ public class MembershipServiceImpl implements MembershipService {
     public List<RemoveMemberResult> removeFromGroups(String adminUsername, String userToRemove,
             List<String> groupPaths) {
         if (!memberAttributeService.isAdmin(adminUsername)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         List<RemoveMemberResult> results = new ArrayList<>();
         for (String groupPath : groupPaths) {
@@ -407,7 +407,7 @@ public class MembershipServiceImpl implements MembershipService {
     public List<RemoveMemberResult> resetGroup(String currentUser, String path, List<String> uhNumbersInclude,
             List<String> uhNumbersExclude) {
         if (!memberAttributeService.isAdmin(currentUser) && !memberAttributeService.isOwner(path, currentUser)) {
-            throw new AccessDeniedException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
         }
         List<RemoveMemberResult> results = new ArrayList<>();
         if (!uhNumbersInclude.isEmpty()) {
