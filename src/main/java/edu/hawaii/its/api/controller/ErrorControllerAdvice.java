@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.controller;
 
-import edu.hawaii.its.api.access.User;
-import edu.hawaii.its.api.access.UserContextService;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -10,14 +8,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.security.AccessControlException;
 
 @ControllerAdvice
 public class ErrorControllerAdvice {
@@ -25,16 +22,7 @@ public class ErrorControllerAdvice {
     private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
 
     @Autowired
-    private UserContextService userContextService;
-
-    @Autowired
     private EmailService emailService;
-
-    @ExceptionHandler(RequestRejectedException.class)
-    public ResponseEntity<GroupingsHTTPException> handleRequestRejectedException(RequestRejectedException rre) {
-        emailService.sendWithStack(rre, "Request Rejected Exception");
-        return exceptionResponse(rre.getMessage(), rre, 400);
-    }
 
     @ExceptionHandler(GroupingsServiceResultException.class)
     public ResponseEntity<GroupingsHTTPException> handleGroupingsServiceResultException(
@@ -43,11 +31,11 @@ public class ErrorControllerAdvice {
       return exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<GroupingsHTTPException> handleAccessDeniedException(AccessDeniedException ade) {
-      emailService.sendWithStack(ade, "Access Denied Exception");
+    @ExceptionHandler(AccessControlException.class)
+    public ResponseEntity<GroupingsHTTPException> handleAccessDeniedException(AccessControlException ace) {
+      emailService.sendWithStack(ace, "Access Denied Exception");
       return exceptionResponse("The current user does not have permission to " +
-              "perform this action.", ade, 403);
+              "perform this action.", ace, 403);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -89,15 +77,9 @@ public class ErrorControllerAdvice {
     }
 
     private ResponseEntity<GroupingsHTTPException> exceptionResponse(String message, Throwable cause, int status) {
-        String username = null;
-        User user = userContextService.getCurrentUser();
-        if (user != null) {
-            username = user.getUsername();
-        }
-
         GroupingsHTTPException httpException = new GroupingsHTTPException(message, cause, status);
 
-        logger.error("username: " + username + "; Exception: ", httpException.getCause());
+        logger.error("Exception: ", httpException.getCause());
 
         return ResponseEntity.status(status).body(httpException);
     }

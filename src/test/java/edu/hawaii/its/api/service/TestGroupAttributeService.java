@@ -16,12 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -122,14 +122,14 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
             fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -138,7 +138,7 @@ public class TestGroupAttributeService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);
@@ -205,14 +205,14 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
             fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -221,7 +221,7 @@ public class TestGroupAttributeService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);
@@ -358,7 +358,7 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
             fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
@@ -366,7 +366,7 @@ public class TestGroupAttributeService {
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -391,7 +391,7 @@ public class TestGroupAttributeService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);
@@ -513,14 +513,14 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
             fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -529,7 +529,7 @@ public class TestGroupAttributeService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);
@@ -602,14 +602,14 @@ public class TestGroupAttributeService {
         try {
             groupAttributeService.updateDescription(GROUPING, iamtst01, null);
             fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -618,7 +618,7 @@ public class TestGroupAttributeService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);

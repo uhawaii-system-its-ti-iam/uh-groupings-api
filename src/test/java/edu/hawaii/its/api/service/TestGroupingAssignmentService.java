@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -112,13 +112,13 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
             fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         try {
             groupingAssignmentService.getGrouping(GROUPING, "bogus-user");
             fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
@@ -126,7 +126,7 @@ public class TestGroupingAssignmentService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
 
@@ -134,7 +134,7 @@ public class TestGroupingAssignmentService {
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
 
@@ -142,7 +142,7 @@ public class TestGroupingAssignmentService {
         membershipService.removeAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -184,14 +184,14 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
             fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
         // Should throw and exception if current user is not valid.
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, "bogus-user", null, null, null, null);
             fail("Should throw and exception if current user is not valid.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
@@ -199,7 +199,7 @@ public class TestGroupingAssignmentService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
 
@@ -207,7 +207,7 @@ public class TestGroupingAssignmentService {
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
 
@@ -215,7 +215,7 @@ public class TestGroupingAssignmentService {
         membershipService.removeAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -245,7 +245,7 @@ public class TestGroupingAssignmentService {
         try {
             groupingAssignmentService.adminLists(iamtst01);
             fail("Should throw an exception if current user is not an admin.");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
 
@@ -253,7 +253,7 @@ public class TestGroupingAssignmentService {
         membershipService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.adminLists(iamtst01);
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01);
@@ -368,7 +368,7 @@ public class TestGroupingAssignmentService {
         // Should throw an exception if optIn or optOut attribute is not passed.
         try {
             groupingAssignmentService.optableGroupings("bad-attribute");
-        } catch (AccessDeniedException e) {
+        } catch (AccessControlException e) {
             assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
         }
     }
