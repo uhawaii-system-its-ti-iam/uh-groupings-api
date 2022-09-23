@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.AddMemberResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.security.AccessControlException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -70,9 +70,6 @@ public class TestMembershipService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
     @Autowired
     GroupAttributeService groupAttributeService;
 
@@ -117,8 +114,8 @@ public class TestMembershipService {
         try {
             membershipService.addAdmin(testUsername, testUsername);
             fail(" Should throw an exception if current user is not an admin.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not add if username is already in admins list.
@@ -127,7 +124,7 @@ public class TestMembershipService {
             addMemberResult = membershipService.addAdmin(ADMIN, ADMIN);
             assertNotNull(addMemberResult);
             assertEquals(FAILURE, addMemberResult.getResult());
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail(" Should not throw an exception if current user is an admin.");
         }
 
@@ -158,15 +155,15 @@ public class TestMembershipService {
         try {
             membershipService.removeAdmin(testUsername, testUsername);
             fail(" Should throw an exception if current user is not an admin.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should remove an admin via uh username.
         grouperApiService.addMember(GROUPING_ADMINS, testUsername);
         try {
             membershipService.removeAdmin(ADMIN, testUsername);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
         assertFalse(memberAttributeService.isAdmin(testUsername));
@@ -211,22 +208,22 @@ public class TestMembershipService {
         try {
             membershipService.membershipResults(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
             fail("Should throw an exception when a non-admin user attempts to fetch memberships of another member.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should throw an exception if bogus-admin is passed as owner.
         try {
             membershipService.membershipResults("bogus-admin", TEST_USERNAMES.get(0));
             fail("Should throw exception if bogus-admin is passed as owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user matches uid and is not an admin.
         try {
             membershipService.membershipResults(TEST_USERNAMES.get(0), TEST_USERNAMES.get(0));
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user matches uid and is not an admin.");
         }
 
@@ -234,7 +231,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.membershipResults(TEST_USERNAMES.get(0), "bogus-user");
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
         }
 
@@ -242,7 +239,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.membershipResults(TEST_USERNAMES.get(0), TEST_USERNAMES.get(0));
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does match uid.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
@@ -352,7 +349,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin.
         try {
             membershipService.addIncludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
 
@@ -360,7 +357,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
         try {
             membershipService.addIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
 
@@ -368,7 +365,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.addIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
@@ -376,7 +373,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is admin but not an owner.
         try {
             membershipService.addIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is admin but not an owner.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
@@ -386,8 +383,8 @@ public class TestMembershipService {
         try {
             membershipService.addIncludeMembers(iamtst01, GROUPING, bogusUsersToAdd);
             fail("Should throw an exception if currentUser is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should throw an exception if a group path is passed.
@@ -415,7 +412,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isOwner(GROUPING, iamtst01));
         try {
             membershipService.addIncludeMembers(iamtst01, GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is not an admin but is an owner of the group.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -437,7 +434,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin.
         try {
             membershipService.addExcludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
 
@@ -445,7 +442,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
         try {
             membershipService.addExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
 
@@ -453,7 +450,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.addExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
@@ -461,7 +458,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is admin but not an owner.
         try {
             membershipService.addExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is admin but not an owner.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
@@ -471,8 +468,8 @@ public class TestMembershipService {
         try {
             membershipService.addExcludeMembers(iamtst01, GROUPING, bogusUsersToAdd);
             fail("Should throw an exception if currentUser is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should throw an exception if a group path is passed.
@@ -499,7 +496,7 @@ public class TestMembershipService {
         assertTrue(memberAttributeService.isOwner(GROUPING, iamtst01));
         try {
             membershipService.addExcludeMembers(iamtst01, GROUPING, bogusUsersToAdd);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is not an admin but is an owner of the group.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -598,7 +595,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin.
         try {
             membershipService.removeIncludeMembers(ADMIN, GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
 
@@ -606,7 +603,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
         try {
             membershipService.removeIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
 
@@ -614,7 +611,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.removeIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
@@ -622,7 +619,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is admin but not an owner.
         try {
             membershipService.removeIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is admin but not an owner.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
@@ -631,8 +628,8 @@ public class TestMembershipService {
         try {
             membershipService.removeIncludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
             fail("Should throw an exception if currentUser is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
 
@@ -658,7 +655,7 @@ public class TestMembershipService {
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             membershipService.removeIncludeMembers(iamtst01, GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is not an admin but is an owner of the group.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -676,7 +673,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin.
         try {
             membershipService.removeExcludeMembers(ADMIN, GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
 
@@ -684,7 +681,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
         try {
             membershipService.removeExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
 
@@ -692,7 +689,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
         try {
             membershipService.removeExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
@@ -700,7 +697,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is admin but not an owner.
         try {
             membershipService.removeExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is admin but not an owner.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, TEST_USERNAMES.get(0));
@@ -709,8 +706,8 @@ public class TestMembershipService {
         try {
             membershipService.removeExcludeMembers(TEST_USERNAMES.get(0), GROUPING, bogusUsersToRemove);
             fail("Should throw an exception if currentUser is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
         grouperApiService.removeMember(GROUPING_OWNERS, TEST_USERNAMES.get(0));
 
@@ -718,8 +715,8 @@ public class TestMembershipService {
         try {
             membershipService.removeExcludeMembers(iamtst01, GROUPING, null);
             fail("Should throw an exception if currentUser is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should throw an exception if a group path is passed.
@@ -744,7 +741,7 @@ public class TestMembershipService {
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         try {
             membershipService.removeExcludeMembers(iamtst01, GROUPING, bogusUsersToRemove);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is not an admin but is an owner of the group.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -761,7 +758,7 @@ public class TestMembershipService {
         // Should remove a single owner.
         try {
             removeMemberResults = membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception when current user is admin.");
         }
         assertNotNull(removeMemberResults);
@@ -777,7 +774,7 @@ public class TestMembershipService {
         membershipService.addOwnerships(GROUPING, ADMIN, TEST_USERNAMES);
         try {
             removeMemberResults = membershipService.removeOwnerships(GROUPING, ADMIN, TEST_USERNAMES);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception when current user is admin.");
         }
         assertNotNull(removeMemberResults);
@@ -796,8 +793,8 @@ public class TestMembershipService {
         try {
             membershipService.removeOwnerships(GROUPING, iamtst01List.get(0), iamtst01List);
             fail("Should throw an exception if current user is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -806,7 +803,7 @@ public class TestMembershipService {
         // Should not throw an exception if the current user is not an admin but is an owner.
         try {
             membershipService.removeOwnerships(GROUPING, iamtst01List.get(0), iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail(" Should not throw an exception if the current user is not an admin but is an owner.");
         }
     }
@@ -820,7 +817,7 @@ public class TestMembershipService {
         // Should add a single owner.
         try {
             addMemberResults = membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception when current user is admin.");
         }
         assertNotNull(addMemberResults);
@@ -837,7 +834,7 @@ public class TestMembershipService {
         // Should add multiple owners.
         try {
             addMemberResults = membershipService.addOwnerships(GROUPING, ADMIN, TEST_USERNAMES);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception when current user is admin.");
         }
         assertNotNull(addMemberResults);
@@ -858,8 +855,8 @@ public class TestMembershipService {
         try {
             membershipService.addOwnerships(GROUPING, iamtst01List.get(0), null);
             fail("Should throw an exception if current user is not an admin or owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -868,7 +865,7 @@ public class TestMembershipService {
         assertFalse(memberAttributeService.isAdmin(iamtst01List.get(0)));
         try {
             membershipService.addOwnerships(GROUPING, iamtst01List.get(0), iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail(" Should not throw an exception if the current user is not an admin but is an owner.");
         }
 
@@ -876,7 +873,7 @@ public class TestMembershipService {
         grouperApiService.addMember(GROUPING_ADMINS, iamtst01List.get(0));
         try {
             membershipService.addOwnerships(GROUPING, iamtst01List.get(0), iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is an admin an and an owner.");
         }
 
@@ -884,7 +881,7 @@ public class TestMembershipService {
         grouperApiService.removeMember(GROUPING_OWNERS, iamtst01List.get(0));
         try {
             membershipService.addOwnerships(GROUPING, iamtst01List.get(0), iamtst01List);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is an admin an and not an owner.");
         }
         // Clean up.
@@ -902,20 +899,20 @@ public class TestMembershipService {
         try {
             membershipService.optIn(iamstst01, GROUPING, bogusUser);
             fail("Should throw an exception if current user is not and admin or if the uid opting is not equal to current user.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if the uid opting is not equal to current user, but current user is and admin.
         try {
             membershipService.optIn(ADMIN, GROUPING, bogusUser);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
         AddMemberResult addMemberResult = null;
         try {
             addMemberResult = membershipService.optIn(iamstst01, GROUPING, iamstst01);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is not an admin, but current user does equal uid.");
         }
         // User iamtst01 should be in the include group.
@@ -948,13 +945,13 @@ public class TestMembershipService {
         try {
             membershipService.optOut(iamstst01, GROUPING, bogusUser);
             fail("Should throw an exception if current user is not and admin or if the uid opting is not equal to current user.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if the uid opting is not equal to current user, but current user is and admin.
         try {
             membershipService.optOut(ADMIN, GROUPING, bogusUser);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the uid opting is not equal to current user, but current user is an admin.");
         }
         // Should not throw an exception if the current user is not an admin, but current user does equal uid.
@@ -962,7 +959,7 @@ public class TestMembershipService {
         try {
 
             addMemberResult = membershipService.optOut(iamstst01, GROUPING, iamstst01);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if the current user is not an admin, but current user does equal uid.");
         }
         // User iamtst01 should be in the exclude group.
@@ -1002,8 +999,8 @@ public class TestMembershipService {
         try {
             membershipService.removeFromGroups(TEST_USERNAMES.get(0), null, null);
             fail("Should throw an exception if current user is not an admin.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should remove userToRemove from the groups listed in groupPaths.
@@ -1017,7 +1014,7 @@ public class TestMembershipService {
         membershipService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
         try {
             removeMemberResults = membershipService.removeFromGroups(ADMIN, iamtst01List.get(0), pathList);
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception is current user is an admin.");
         }
         assertNotNull(removeMemberResults);
@@ -1057,8 +1054,8 @@ public class TestMembershipService {
         try {
             membershipService.resetGroup(TEST_USERNAMES.get(0), GROUPING, null, null);
             fail("Should throw an exception if current user is not an admin or an owner.");
-        } catch (AccessControlException e) {
-            assertEquals(INSUFFICIENT_PRIVILEGES, e.getMessage());
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         uhNumbersInclude = new ArrayList<>();
@@ -1070,7 +1067,7 @@ public class TestMembershipService {
         try {
             assertTrue(membershipService.resetGroup(iamtst01List.get(0), GROUPING, uhNumbersInclude, uhNumbersExclude)
                     .isEmpty()); // Results should be empty.
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is not an admin but is an owner.");
         }
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -1082,7 +1079,7 @@ public class TestMembershipService {
         try {
             assertTrue(membershipService.resetGroup(iamtst01List.get(0), GROUPING, uhNumbersInclude, uhNumbersExclude)
                     .isEmpty());
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         membershipService.removeAdmin(ADMIN, iamtst01List.get(0));
@@ -1090,7 +1087,7 @@ public class TestMembershipService {
         // Should not throw and exception if user is an admin and an owner.
         try {
             assertTrue(membershipService.resetGroup(ADMIN, GROUPING, uhNumbersInclude, uhNumbersExclude).isEmpty());
-        } catch (AccessControlException e) {
+        } catch (AccessDeniedException e) {
             fail(" Should not throw and exception if user is an admin and an owner.");
         }
     }

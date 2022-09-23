@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.OptRequest;
@@ -18,7 +19,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivileges
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
@@ -43,9 +43,6 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
 
     public static final Log logger = LogFactory.getLog(GroupAttributeServiceImpl.class);
 
@@ -205,7 +202,7 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
 
         if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
         grouperApiService.updateGroupDescription(groupPath, description);
 
@@ -216,14 +213,14 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     private void checkPrivileges(String groupingPath, String ownerUsername) {
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername)
                 && !memberAttributeService.isAdmin(ownerUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
     }
 
     private void checkPrivileges(String ownerUsername) {
         if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
     }
 
