@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -17,11 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,10 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+
+import org.junit.jupiter.api.BeforeEach;
+import edu.hawaii.its.api.util.PropertyLocator;
+
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberAttributeServiceTest {
 
-    private static Properties properties;
+    private PropertyLocator propertyLocator;
 
     @MockBean
     private GrouperApiService grouperApiService;
@@ -42,12 +40,14 @@ public class MemberAttributeServiceTest {
     @Autowired
     private MemberAttributeService memberAttributeService;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    final String groupAdminPath = "uh-settings:groupingAdmins";
+    final String groupOwnerPath = "uh-settings:groupingOwners";
+    final String username = "uuu";
+    final String uid = "123";
+
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
@@ -58,17 +58,12 @@ public class MemberAttributeServiceTest {
     @Disabled
     @Test
     public void getMemberAttributesSubjectFound() {
-        final String groupAdminPath = "uh-settings:groupingAdmins";
-        final String groupOwnerPath = "uh-settings:groupingOwners";
-        final String username = "uuu";
-        final String uid = "123";
-
         given(grouperApiService.hasMemberResults(groupAdminPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -79,17 +74,12 @@ public class MemberAttributeServiceTest {
     @Disabled
     @Test
     public void getMemberAttributesSubjectNotFound() {
-        final String groupAdminPath = "uh-settings:groupingAdmins";
-        final String groupOwnerPath = "uh-settings:groupingOwners";
-        final String username = "uuu";
-        final String uid = "123";
-
         given(grouperApiService.hasMemberResults(groupAdminPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.not.found");
+        String json = propertyLocator.find("subject.not.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -99,17 +89,12 @@ public class MemberAttributeServiceTest {
 
     @Test
     public void getMemberAttributesNotAdminNotOwner() {
-        final String groupAdminPath = "uh-settings:groupingAdmins";
-        final String groupOwnerPath = "uh-settings:groupingOwners";
-        final String username = "uuu";
-        final String uid = "123";
-
         given(grouperApiService.hasMemberResults(groupAdminPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -120,17 +105,12 @@ public class MemberAttributeServiceTest {
     @Disabled
     @Test
     public void getMemberAttributesAdminButNotOwner() {
-        final String groupAdminPath = "uh-settings:groupingAdmins";
-        final String groupOwnerPath = "uh-settings:groupingOwners";
-        final String username = "uuu";
-        final String uid = "123";
-
         given(grouperApiService.hasMemberResults(groupAdminPath, username))
                 .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -141,17 +121,12 @@ public class MemberAttributeServiceTest {
     @Disabled
     @Test
     public void getMemberAttributesOwnerButNotAdmin() {
-        final String groupAdminPath = "uh-settings:groupingAdmins";
-        final String groupOwnerPath = "uh-settings:groupingOwners";
-        final String username = "uuu";
-        final String uid = "123";
-
         given(grouperApiService.hasMemberResults(groupAdminPath, username))
                 .willReturn(makeWsHasMemberResults("IS_MEMBER"));
         given(grouperApiService.hasMemberResults(groupOwnerPath, username))
                 .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
@@ -165,10 +140,6 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isUhUuid("111-111"));
         assertFalse(memberAttributeService.isUhUuid("iamtst01"));
         assertFalse(memberAttributeService.isUhUuid(null));
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 
     private WsHasMemberResults makeWsHasMemberResults(final String resultCode) {
