@@ -1,8 +1,19 @@
 package edu.hawaii.its.api.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
@@ -16,6 +27,7 @@ import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
+
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
@@ -32,19 +44,10 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Service("membershipService")
 public class MembershipServiceImpl implements MembershipService {
+
+    public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -75,8 +78,6 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    public static final Log logger = LogFactory.getLog(MembershipServiceImpl.class);
 
     /**
      * Add am admin.
