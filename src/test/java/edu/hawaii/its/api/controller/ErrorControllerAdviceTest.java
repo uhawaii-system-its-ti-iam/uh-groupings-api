@@ -2,25 +2,20 @@ package edu.hawaii.its.api.controller;
 
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-
-import java.security.AccessControlException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ErrorControllerAdviceTest {
-
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
 
     @Autowired
     private ErrorControllerAdvice errorControllerAdvice;
@@ -32,8 +27,8 @@ public class ErrorControllerAdviceTest {
     @Test
     public void ErrorControllerTest() {
 
-        AccessControlException ace = new AccessControlException(INSUFFICIENT_PRIVILEGES);
-        String statusCode = errorControllerAdvice.handleAccessDeniedException(ace).getStatusCode().toString();
+        AccessDeniedException ade = new AccessDeniedException();
+        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
         assertThat(statusCode, is("403 FORBIDDEN"));
 
         Exception e = new Exception("FAIL");

@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -11,7 +12,6 @@ import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
-
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.wrapper.GroupsResults;
 
@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,9 +54,6 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Value("${groupings.api.stale_subject_id}")
     private String STALE_SUBJECT_ID;
 
-    @Value("${groupings.api.insufficient_privileges}")
-    private String INSUFFICIENT_PRIVILEGES;
-
     @Value("${groupings.api.stem}")
     private String STEM;
 
@@ -83,7 +79,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
 
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) &&
                 !memberAttributeService.isAdmin(ownerUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
         compositeGrouping = new Grouping(groupingPath);
 
@@ -124,7 +120,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
         if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(
                 ownerUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
         Grouping compositeGrouping = new Grouping(groupingPath);
         String basis = groupingPath + GroupType.BASIS.value();
@@ -155,7 +151,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public AdminListsHolder adminLists(String adminUsername) {
         if (!memberAttributeService.isAdmin(adminUsername)) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
         List<String> groupingPathStrings = allGroupingsPaths();
@@ -292,7 +288,7 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
     @Override
     public List<String> optableGroupings(String optAttr) {
         if (!optAttr.equals(OptType.IN.value()) && !optAttr.equals(OptType.OUT.value())) {
-            throw new AccessControlException(INSUFFICIENT_PRIVILEGES);
+            throw new AccessDeniedException();
         }
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, optAttr));

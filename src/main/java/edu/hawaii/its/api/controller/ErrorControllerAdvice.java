@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.GroupingsHTTPException;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.security.AccessControlException;
 
 @ControllerAdvice
 public class ErrorControllerAdvice {
@@ -31,11 +31,11 @@ public class ErrorControllerAdvice {
       return exceptionResponse("Groupings Service resulted in FAILURE", gsre, 400);
     }
 
-    @ExceptionHandler(AccessControlException.class)
-    public ResponseEntity<GroupingsHTTPException> handleAccessDeniedException(AccessControlException ace) {
-      emailService.sendWithStack(ace, "Access Denied Exception");
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<GroupingsHTTPException> handleAccessDeniedException(AccessDeniedException ade) {
+      emailService.sendWithStack(ade, "Access Denied Exception");
       return exceptionResponse("The current user does not have permission to " +
-              "perform this action.", ace, 403);
+              "perform this action.", ade, 403);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
