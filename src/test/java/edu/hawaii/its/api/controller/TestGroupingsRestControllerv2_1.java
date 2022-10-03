@@ -419,9 +419,9 @@ public class TestGroupingsRestControllerv2_1 {
         }
 
         // Current user is not owner or admin.
-        result = mockMvc.perform(get(API_BASE + "members/" + usernames[2])
-                        .header(CURRENT_USER, usernames[2])
-                        .with(user(usernames[2]))
+        result = mockMvc.perform(get(API_BASE + "members/" + usernames[5])
+                        .header(CURRENT_USER, usernames[5])
+                        .with(user(usernames[5]))
                         .with(csrf()))
                 .andReturn();
         person = new ObjectMapper().readValue(result.getResponse().getContentAsByteArray(), Person.class);
