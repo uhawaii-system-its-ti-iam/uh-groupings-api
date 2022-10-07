@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -46,6 +47,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -388,8 +390,10 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst06name");
         given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/" + String.join(",", usersToAdd))
-                .header(CURRENT_USER, USERNAME))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/")
+                .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
@@ -406,8 +410,10 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(addMemberResults);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/" + String.join(",", usersToAdd))
-                .header(CURRENT_USER, USERNAME))
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/")
+                .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
@@ -423,8 +429,10 @@ public class GroupingsRestControllerv2_1Test {
         usersToRemove.add("tst06name");
         given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(removeMemberResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members/" + String.join(",", usersToRemove))
-                .header(CURRENT_USER, USERNAME))
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members/")
+                .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToRemove)))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
@@ -440,8 +448,10 @@ public class GroupingsRestControllerv2_1Test {
         usersToRemove.add("tst06name");
         given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(removeMemberResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members/" + String.join(",", usersToRemove))
-                .header(CURRENT_USER, USERNAME))
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members/")
+                .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToRemove)))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))

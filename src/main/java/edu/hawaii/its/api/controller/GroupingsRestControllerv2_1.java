@@ -230,9 +230,9 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Add a list of users to the include group of grouping at path.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uids}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
     public ResponseEntity<List<AddMemberResult>> addIncludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
-            @PathVariable String path, @PathVariable List<String> uids) {
+            @PathVariable String path, @RequestBody List<String> uids) {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
                 .ok()
@@ -242,9 +242,9 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Add a list of users to the exclude group of grouping at path.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uids}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
     public ResponseEntity<List<AddMemberResult>> addExcludeMembers(@RequestHeader(CURRENT_USER) String currentUser,
-            @PathVariable String path, @PathVariable List<String> uids) {
+            @PathVariable String path, @RequestBody List<String> uids) {
         logger.info("Entered REST addExcludeMembers...");
         return ResponseEntity
                 .ok()
@@ -254,10 +254,10 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Remove a list of users from the include group of grouping at path.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uids}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
     public ResponseEntity<List<RemoveMemberResult>> removeIncludeMembers(
             @RequestHeader(CURRENT_USER) String currentUser, @PathVariable String path,
-            @PathVariable List<String> uids) {
+            @RequestBody List<String> uids) {
         logger.info("Entered REST removeIncludeMembers...");
         return ResponseEntity
                 .ok()
@@ -267,10 +267,10 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Remove a list of users from the exclude include group of grouping at path.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uids}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
     public ResponseEntity<List<RemoveMemberResult>> removeExcludeMembers(
             @RequestHeader(CURRENT_USER) String currentUser, @PathVariable String path,
-            @PathVariable List<String> uids) {
+            @RequestBody List<String> uids) {
         logger.info("Entered REST removeExcludeMembers...");
         return ResponseEntity
                 .ok()
