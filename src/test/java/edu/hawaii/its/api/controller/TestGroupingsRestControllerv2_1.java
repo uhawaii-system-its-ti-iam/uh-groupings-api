@@ -17,10 +17,12 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -284,9 +286,11 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addIncludeMembersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/" + String.join(",", TEST_USERNAMES);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/";
         MvcResult mvcResult = mockMvc.perform(put(url)
-                        .header(CURRENT_USER, ADMIN))
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
@@ -296,9 +300,11 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addExcludeMembersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/" + String.join(",", TEST_USERNAMES);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/";
         MvcResult mvcResult = mockMvc.perform(put(url)
-                        .header(CURRENT_USER, ADMIN))
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
@@ -309,9 +315,11 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void removeIncludeMembersTest() throws Exception {
         membershipService.addIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/" + String.join(",", TEST_USERNAMES);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/";
         MvcResult mvcResult = mockMvc.perform(delete(url)
-                        .header(CURRENT_USER, ADMIN))
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
@@ -322,9 +330,11 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void removeExcludeMembersTest() throws Exception {
         membershipService.addExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/" + String.join(",", TEST_USERNAMES);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/";
         MvcResult mvcResult = mockMvc.perform(delete(url)
-                        .header(CURRENT_USER, ADMIN))
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
