@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.type;
 
-import edu.hawaii.its.api.wrapper.RemoveMemberResponse;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
-public class RemoveMemberResult {
+public class UIRemoveMemberResults {
     private boolean userWasRemoved;
     private String pathOfRemoved;
     private String name;
@@ -14,10 +14,10 @@ public class RemoveMemberResult {
     private String result;
     private String userIdentifier;
 
-    public RemoveMemberResult() {
+    public UIRemoveMemberResults() {
     }
 
-    public RemoveMemberResult(boolean userWasRemoved, String pathOfRemoved, String name, String uhUuid, String uid,
+    public UIRemoveMemberResults(boolean userWasRemoved, String pathOfRemoved, String name, String uhUuid, String uid,
             String result, String userIdentifier) {
         this.userWasRemoved = userWasRemoved;
         this.pathOfRemoved = pathOfRemoved;
@@ -28,21 +28,21 @@ public class RemoveMemberResult {
         this.userIdentifier = userIdentifier;
     }
 
-    public RemoveMemberResult(String userIdentifier, String result) {
+    public UIRemoveMemberResults(String userIdentifier, String result) {
         this.userIdentifier = userIdentifier;
         this.result = result;
     }
 
-    public RemoveMemberResult(RemoveMemberResponse removeMemberResponse) {
-        this.userWasRemoved = removeMemberResponse.isSuccess();
-        setPathOfRemoved(removeMemberResponse.groupPath());
-        setName(removeMemberResponse.name());
-        setUid(removeMemberResponse.uid());
-        setUhUuid(removeMemberResponse.uhUuid());
+    public UIRemoveMemberResults(RemoveMemberResult removeMemberResult) {
+        this.userWasRemoved = removeMemberResult.getResultCode().equals("SUCCESS");
+        setPathOfRemoved(removeMemberResult.getGroupPath());
+        setName(removeMemberResult.getName());
+        setUid(removeMemberResult.getUid());
+        setUhUuid(removeMemberResult.getUhUuid());
         setResult(this.userWasRemoved ? "SUCCESS" : "FAILURE");
     }
 
-    public RemoveMemberResult(WsDeleteMemberResults wsDeleteMemberResults) {
+    public UIRemoveMemberResults(WsDeleteMemberResults wsDeleteMemberResults) {
         WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
         this.userWasRemoved = "SUCCESS".equals(wsDeleteMemberResult.getResultMetadata().getResultCode());
         setResult(this.userWasRemoved ? "SUCCESS" : "FAILURE");
