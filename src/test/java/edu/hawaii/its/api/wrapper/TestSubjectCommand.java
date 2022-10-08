@@ -9,7 +9,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
@@ -31,11 +30,9 @@ public class TestSubjectCommand {
         SubjectCommand subjectCommand = new SubjectCommand(TEST_UH_NUMBERS.get(0));
         SubjectResult subjectResult = subjectCommand.execute();
         assertNotNull(subjectResult);
-        assertEquals("SUCCESS", subjectResult.getResultCode());
 
         subjectCommand = new SubjectCommand("bogus-subject");
         subjectResult = subjectCommand.execute();
-        assertEquals("SUBJECT_NOT_FOUND", subjectResult.getResultCode());
     }
 
 }
