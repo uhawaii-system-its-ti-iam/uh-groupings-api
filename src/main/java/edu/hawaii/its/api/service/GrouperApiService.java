@@ -46,7 +46,7 @@ public interface GrouperApiService {
             String attributeDefNameName,
             String group);
 
-    WsHasMemberResults hasMemberResults(String group, String username);
+    WsHasMemberResults hasMemberResults(String group, String uhIdentifier);
 
     WsHasMemberResults hasMemberResults(String group, Person person);
 
@@ -82,13 +82,13 @@ public interface GrouperApiService {
             WsSubjectLookup lookup,
             List<String> groupPaths);
 
-    WsGetGroupsResults groupsResults(String username);
+    WsGetGroupsResults groupsResults(String uhIdentifier);
 
     WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup);
 
     WsFindGroupsResults findGroupsResults(String groupPath);
 
-    WsSubjectLookup subjectLookup(String username);
+    WsSubjectLookup subjectLookup(String uhIdentifier);
 
     WsStemLookup stemLookup(String stemName);
 

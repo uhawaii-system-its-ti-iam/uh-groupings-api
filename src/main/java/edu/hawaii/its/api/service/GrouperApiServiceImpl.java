@@ -168,16 +168,16 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsHasMemberResults hasMemberResults(String group, String username) {
-        if (membershipAttributeService.isUhUuid(username)) {
+    public WsHasMemberResults hasMemberResults(String group, String uhIdentifier) {
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
             return new GcHasMember()
                     .assignGroupName(group)
-                    .addSubjectId(username)
+                    .addSubjectId(uhIdentifier)
                     .execute();
         }
         return new GcHasMember()
                 .assignGroupName(group)
-                .addSubjectIdentifier(username)
+                .addSubjectIdentifier(uhIdentifier)
                 .execute();
     }
 
@@ -301,20 +301,20 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsGetGroupsResults groupsResults(String username) {
+    public WsGetGroupsResults groupsResults(String uhIdentifier) {
         WsStemLookup stemLookup = stemLookup(STEM);
         StemScope stemScope = StemScope.ALL_IN_SUBTREE;
 
-        if (membershipAttributeService.isUhUuid(username)) {
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
             return new GcGetGroups()
-                    .addSubjectId(username)
+                    .addSubjectId(uhIdentifier)
                     .assignWsStemLookup(stemLookup)
                     .assignStemScope(stemScope)
                     .execute();
         }
 
         return new GcGetGroups()
-                .addSubjectIdentifier(username)
+                .addSubjectIdentifier(uhIdentifier)
                 .assignWsStemLookup(stemLookup)
                 .assignStemScope(stemScope)
                 .execute();
@@ -340,13 +340,13 @@ public class GrouperApiServiceImpl implements GrouperApiService {
     }
 
     @Override
-    public WsSubjectLookup subjectLookup(String username) {
+    public WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
 
-        if (membershipAttributeService.isUhUuid(username)) {
-            wsSubjectLookup.setSubjectId(username);
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
+            wsSubjectLookup.setSubjectId(uhIdentifier);
         } else {
-            wsSubjectLookup.setSubjectIdentifier(username);
+            wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
         }
         return wsSubjectLookup;
     }
