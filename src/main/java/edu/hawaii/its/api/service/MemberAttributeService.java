@@ -7,21 +7,21 @@ import java.util.List;
 
 public interface MemberAttributeService {
 
-    boolean isMember(String groupPath, String username);
+    boolean isMember(String groupPath, String uhIdentifier);
 
     boolean isMember(String groupPath, Person person);
 
-    boolean isMemberUuid(String groupPath, String idnum);
+    boolean isMemberUuid(String groupPath, String uhUuid);
 
-    boolean isUhUuid(String username);
+    boolean isUhUuid(String uhIdentifier);
 
-    boolean isOwner(String groupingPath, String username);
+    boolean isOwner(String groupingPath, String uhIdentifier);
 
-    boolean isOwner(String username);
+    boolean isOwner(String uhIdentifier);
 
-    boolean isAdmin(String username);
+    boolean isAdmin(String uhIdentifier);
 
-    boolean isApp(String username);
+    boolean isApp(String uhIdentifier);
 
     Person getMemberAttributes(String ownerUsername, String uid);
 

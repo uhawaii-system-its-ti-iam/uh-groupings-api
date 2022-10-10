@@ -233,13 +233,13 @@ public class GroupingAssignmentServiceImpl implements GroupingAssignmentService 
      * Return the list of groups that the user is in, searching by username or uhUuid.
      */
     @Override
-    public List<String> getGroupPaths(String ownerUsername, String username) {
-        logger.info("getGroupPaths; username: " + username + ";");
+    public List<String> getGroupPaths(String ownerUsername, String uhIdentifier) {
+        logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";");
 
-        if (!ownerUsername.equals(username) && !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!ownerUsername.equals(uhIdentifier) && !memberAttributeService.isAdmin(ownerUsername)) {
             return new ArrayList<>();
         }
-        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(username));
+        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
         return groupsResults.groupPaths();
     }
 

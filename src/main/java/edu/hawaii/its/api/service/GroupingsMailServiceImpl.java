@@ -124,7 +124,7 @@ public class GroupingsMailServiceImpl implements GroupingsMailService {
     }
 
     /* Concat UH suffix onto username */
-    public String getUserEmail(String username) {
-        return username + "@hawaii.edu";
+    public String getUserEmail(String uid) {
+        return uid + "@hawaii.edu";
     }
 }
