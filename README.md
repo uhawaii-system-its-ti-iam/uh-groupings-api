@@ -11,9 +11,7 @@ UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise a
 [![Build Status](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api.png?branch=master)](https://travis-ci.org/uhawaii-system-its-ti-iam/uh-groupings-api)
 [![Coverage Status](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/blob/badges/jacoco.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/coverage.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg)](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api)
-[![LGTM Alert Badge](https://img.shields.io/lgtm/alerts/github/uhawaii-system-its-ti-iam/uh-groupings-api)](https://lgtm.com/projects/g/uhawaii-system-its-ti-iam/uh-groupings-api/?mode=list)
-[![LGTM JavaScript Badge](https://img.shields.io/lgtm/grade/javascript/github/uhawaii-system-its-ti-iam/uh-groupings-api)](https://lgtm.com/projects/g/uhawaii-system-its-ti-iam/uh-groupings-api/context:javascript)
-[![LGTM Java Badge](https://img.shields.io/lgtm/grade/java/github/uhawaii-system-its-ti-iam/uh-groupings-api)](https://lgtm.com/projects/g/uhawaii-system-its-ti-iam/uh-groupings-api/context:java)
+[![CodeQL](https://github.com/yertsti/uh-groupings-api/actions/workflows/codeql.yml/badge.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/codeql.yml)
 
 ##### Java
 You'll need a Java JDK to build and run the project (version 1.8).
