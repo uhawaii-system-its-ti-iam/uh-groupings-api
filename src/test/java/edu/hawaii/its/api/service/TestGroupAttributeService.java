@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.primitives.Booleans;
-
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -506,7 +504,6 @@ public class TestGroupAttributeService {
 
     @Test
     public void changeGroupAttributeStatus() {
-
         String iamtst01 = TEST_USERNAMES.get(0);
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(iamtst01);
@@ -546,10 +543,15 @@ public class TestGroupAttributeService {
 
         // Should return success no matter what.
         List<String> optList = new ArrayList<>();
-        boolean[] arr = { false, true, true, false };
-        List<Boolean> optSwitches = Booleans.asList(arr);
         optList.add(OptType.IN.value());
         optList.add(OptType.OUT.value());
+
+        List<Boolean> optSwitches = new ArrayList<>();
+        optSwitches.add(false);
+        optSwitches.add(true);
+        optSwitches.add(true);
+        optSwitches.add(false);
+
         optSwitches.forEach(bool -> {
             optList.forEach(opt -> assertTrue(
                     groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, opt, bool).getResultCode()

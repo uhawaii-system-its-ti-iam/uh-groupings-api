@@ -3,21 +3,14 @@ package edu.hawaii.its.api.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.Collections;
-
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @Configuration
-@EnableSwagger2
 public class SwaggerConfig {
-
 
     @Value("${groupings.api.documentation.title}")
     private String TITLE;
@@ -46,28 +39,14 @@ public class SwaggerConfig {
     @Value("${groupings.api.documentation.license.url}")
     private String LICENSE_URL;
 
-
     @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-
-                // do this for all endpoints with .any() on both
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-
-                .build()
-                .apiInfo(apiInfo());
+    public OpenAPI apiInfo() {
+        return new OpenAPI()
+                .info(new Info().title(TITLE)
+                .description(DESCRIPTION)
+                .version(VERSION)
+                .termsOfService(TOS_URL)
+                .contact(new Contact().name(CONTACT_NAME).url(CONTACT_URL).email(CONTACT_EMAIL))
+                .license(new License().name(LICENSE_NAME).url(LICENSE_URL)));
     }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfo(
-                TITLE,
-                DESCRIPTION,
-                VERSION,
-                TOS_URL,
-                new Contact(CONTACT_NAME, CONTACT_URL, CONTACT_EMAIL),
-                LICENSE_NAME, LICENSE_URL, Collections.emptyList());
-    }
-
 }
