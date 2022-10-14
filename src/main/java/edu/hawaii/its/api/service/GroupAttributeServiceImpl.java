@@ -62,11 +62,11 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
      * Get all the sync destinations for a specific grouping.
      */
     @Override
-    public List<SyncDestination> getAllSyncDestinations(String currentUsername, String path) {
+    public List<SyncDestination> getAllSyncDestinations(String currentUser, String path) {
 
-        checkPrivileges(currentUsername);
+        checkPrivileges(currentUser);
 
-        Grouping grouping = groupingAssignmentService.getGrouping(path, currentUsername);
+        Grouping grouping = groupingAssignmentService.getGrouping(path, currentUser);
         List<SyncDestination> finSyncDestList = grouperApiService.syncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
@@ -210,16 +210,16 @@ public class GroupAttributeServiceImpl implements GroupAttributeService {
     }
 
     //TODO: Move both checkPrivileges helper methods to the Governor class once it's built
-    private void checkPrivileges(String groupingPath, String ownerUsername) {
-        if (!memberAttributeService.isOwner(groupingPath, ownerUsername)
-                && !memberAttributeService.isAdmin(ownerUsername)) {
+    private void checkPrivileges(String groupingPath, String ownerIdentifier) {
+        if (!memberAttributeService.isOwner(groupingPath, ownerIdentifier)
+                && !memberAttributeService.isAdmin(ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }
 
-    private void checkPrivileges(String ownerUsername) {
-        if (!memberAttributeService.isOwner(ownerUsername) && !memberAttributeService.isAdmin(
-                ownerUsername)) {
+    private void checkPrivileges(String ownerIdentifier) {
+        if (!memberAttributeService.isOwner(ownerIdentifier) && !memberAttributeService.isAdmin(
+                ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }

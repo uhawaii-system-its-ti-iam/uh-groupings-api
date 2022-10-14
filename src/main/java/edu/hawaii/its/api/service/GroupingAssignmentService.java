@@ -29,7 +29,7 @@ public interface GroupingAssignmentService {
     Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page, Integer size,
             String sortString, Boolean isAscending);
 
-    List<String> getGroupPaths(String ownerUsername, String username);
+    List<String> getGroupPaths(String ownerUsername, String uhIdentifier);
 
     List<String> optOutGroupingsPaths(String owner, String optOutUid);
 
