@@ -25,5 +25,5 @@ public interface GroupingsMailService {
     /**
      * Concat UH email suffix onto username
      */
-    String getUserEmail(String username);
+    String getUserEmail(String uid);
 }

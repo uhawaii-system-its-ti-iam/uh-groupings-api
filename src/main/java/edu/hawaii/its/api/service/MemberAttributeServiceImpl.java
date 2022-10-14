@@ -47,14 +47,14 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // Returns true if the user is a member of the group via username or UH id
     @Override
-    public boolean isMember(String groupPath, String username) {
-        logger.info("isMember; groupPath: " + groupPath + "; username: " + username + ";");
+    public boolean isMember(String groupPath, String uhIdentifier) {
+        logger.info("isMember; groupPath: " + groupPath + "; uhIdentifier: " + uhIdentifier + ";");
 
-        if (isUhUuid(username)) {
-            return isMemberUuid(groupPath, username);
+        if (isUhUuid(uhIdentifier)) {
+            return isMemberUuid(groupPath, uhIdentifier);
         }
 
-        WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, username);
+        WsHasMemberResults whmrs = grouperApiService.hasMemberResults(groupPath, uhIdentifier);
         WsHasMemberResult[] whmr = whmrs.getResults();
         List<WsHasMemberResult> hasMemberResults = Arrays.asList(whmr);
         for (WsHasMemberResult hasMemberResult : hasMemberResults) {
@@ -87,11 +87,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
 
     // Returns true if the person is a member of the group
     @Override
-    public boolean isMemberUuid(String groupPath, String idnum) {
-        logger.info("isMember; groupPath: " + groupPath + "; uuid: " + idnum + ";");
+    public boolean isMemberUuid(String groupPath, String uhUuid) {
+        logger.info("isMember; groupPath: " + groupPath + "; uuid: " + uhUuid + ";");
 
         List<WsHasMemberResult> hasMemberResults =
-                Arrays.asList(grouperApiService.hasMemberResults(groupPath, idnum).getResults());
+                Arrays.asList(grouperApiService.hasMemberResults(groupPath, uhUuid).getResults());
 
         for (WsHasMemberResult hasMemberResult : hasMemberResults) {
             if (hasMemberResult.getResultMetadata().getResultCode().equals(IS_MEMBER)) {
@@ -105,45 +105,45 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
      * Return true if username is a UH id number
      */
     @Override
-    public boolean isUhUuid(String naming) {
-        return naming != null && naming.matches("\\d+");
+    public boolean isUhUuid(String uhIdentifier) {
+        return uhIdentifier != null && uhIdentifier.matches("\\d+");
     }
 
     // Returns true if the user is in the owner group of the grouping
     @Override
-    public boolean isOwner(String groupingPath, String username) {
-        return isMember(groupingPath + GroupType.OWNERS.value(), username);
+    public boolean isOwner(String groupingPath, String uhIdentifier) {
+        return isMember(groupingPath + GroupType.OWNERS.value(), uhIdentifier);
     }
 
     @Override
-    public boolean isOwner(String username) {
-        return isMember(OWNERS_GROUP, username);
+    public boolean isOwner(String uhIdentifier) {
+        return isMember(OWNERS_GROUP, uhIdentifier);
     }
 
     // Returns true if the user is in the admins group
     @Override
-    public boolean isAdmin(String username) {
-        return isMember(GROUPING_ADMINS, username);
+    public boolean isAdmin(String uhIdentifier) {
+        return isMember(GROUPING_ADMINS, uhIdentifier);
     }
 
     // Returns true if the user is in the apps group
     @Override
-    public boolean isApp(String username) {
-        return isMember(GROUPING_APPS, username);
+    public boolean isApp(String uhIdentifier) {
+        return isMember(GROUPING_APPS, uhIdentifier);
     }
 
     /**
      * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
-     * or uhUuid passed through userIdentifier. Passing an invalid userIdentifier or current user will return a mapping
+     * or uhUuid passed through uhIdentifier. Passing an invalid uhIdentifier or current user will return a mapping
      * with null values.
      */
     @Override
-    public Person getMemberAttributes(String username, String userIdentifier) {
-        if (!isAdmin(username) && !isOwner(username)) {
+    public Person getMemberAttributes(String currentUser, String uhIdentifier) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
             return new Person();
         }
 
-        SubjectResult results = new SubjectCommand(userIdentifier).execute();
+        SubjectResult results = new SubjectCommand(uhIdentifier).execute();
 
         if (results.getResultCode().equals(SUBJECT_NOT_FOUND)) {
             throw new UhMemberNotFoundException(SUBJECT_NOT_FOUND);
@@ -161,11 +161,11 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get a list of GroupPaths the user owns.
+     * Get a list of GroupPaths the user owns, by username or uhUuid.
      */
     @Override
-    public List<GroupingPath> getOwnedGroupings(String currentUser, String user) {
-        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, user);
+    public List<GroupingPath> getOwnedGroupings(String currentUser, String uhIdentifier) {
+        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier);
         List<GroupingPath> groupingPaths = new ArrayList<>();
 
         for (String path : pathStrings) {
@@ -179,10 +179,10 @@ public class MemberAttributeServiceImpl implements MemberAttributeService {
     }
 
     /**
-     * Get the number of groupings a user owns.
+     * Get the number of groupings a user owns, by username or uhUuid..
      */
     @Override
-    public Integer getNumberOfGroupings(String currentUser, String uid) {
-        return getOwnedGroupings(currentUser, uid).size();
+    public Integer getNumberOfGroupings(String currentUser, String uhIdentifier) {
+        return getOwnedGroupings(currentUser, uhIdentifier).size();
     }
 }

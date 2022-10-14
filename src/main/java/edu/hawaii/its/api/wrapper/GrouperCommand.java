@@ -4,13 +4,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public abstract class GrouperCommand  {
 
-    protected WsSubjectLookup subjectLookup(String username) {
+    protected WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
 
-        if (isUhUuid(username)) {
-            wsSubjectLookup.setSubjectId(username);
+        if (isUhUuid(uhIdentifier)) {
+            wsSubjectLookup.setSubjectId(uhIdentifier);
         } else {
-            wsSubjectLookup.setSubjectIdentifier(username);
+            wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
         }
         return wsSubjectLookup;
     }
