@@ -63,7 +63,13 @@ public class GroupingsRestControllerv2_1 {
     @Autowired
     private MembershipService membershipService;
 
+    /**
+     * @deprecated Use CURRENT_USER_KEY instead
+     */
+    @Deprecated
     final private static String CURRENT_USER = "current_user";
+
+    final private static String CURRENT_USER_KEY = "current_user";
 
     @PostConstruct
     public void init() {
@@ -361,57 +367,48 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/enable")
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
-            @RequestHeader(CURRENT_USER) String currentUser,
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable String id) {
 
-        logger.info("Entered REST enablePreference");
-
-        OptRequest optInRequest = new OptRequest.Builder()
-                .withUsername(currentUser)
-                .withGroupNameRoot(path)
-                .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(OptType.find(id))
-                .withOptValue(true)
-                .build();
-
-        OptRequest optOutRequest = new OptRequest.Builder()
-                .withUsername(currentUser)
-                .withGroupNameRoot(path)
-                .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(OptType.find(id))
-                .withOptValue(true)
-                .build();
-
-        return ResponseEntity
-                .ok()
-                .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
+        return updatePreference(currentUser, path, id, true);
     }
 
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/disable",
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
-            @RequestHeader(CURRENT_USER) String currentUser,
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable String id) {
 
-        logger.info("Entered REST disablePreference");
+        return updatePreference(currentUser, path, id, false);
+    }
+
+    private ResponseEntity<List<GroupingsServiceResult>> updatePreference(
+            String currentUser,
+            String path,
+            String id,
+            boolean value) {
+
+        logger.info("Entered REST updatePreference");
+
+        OptType optType = OptType.find(id);
 
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(OptType.find(id))
-                .withOptValue(false)
+                .withOptType(optType)
+                .withOptValue(value)
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(OptType.find(id))
-                .withOptValue(false)
+                .withOptType(optType)
+                .withOptValue(value)
                 .build();
 
         return ResponseEntity
