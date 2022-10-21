@@ -1,99 +1,349 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
+import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
+import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
+import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
+import edu.internet2.middleware.grouperClient.api.GcFindGroups;
+import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
+import edu.internet2.middleware.grouperClient.api.GcGetGroups;
+import edu.internet2.middleware.grouperClient.api.GcGetMembers;
+import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
+import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
+import edu.internet2.middleware.grouperClient.api.GcGroupSave;
+import edu.internet2.middleware.grouperClient.api.GcHasMember;
+import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public interface GrouperApiService {
-    List<SyncDestination> syncDestinations();
+@Service("grouperApiService")
+//@Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
+public class GrouperApiService {
 
-    String descriptionOf(String groupPath);
+    @Value("${grouper.api.sync.destinations.location}")
+    private String SYNC_DESTINATIONS_LOCATION;
 
-    WsGroupSaveResults updateGroupDescription(String groupPath, String description);
+    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
+    private String SYNC_DESTINATIONS_CHECKBOXES;
 
-    AddMemberResult addMember(String groupPath, String uhIdentifier);
+    @Value("${groupings.api.person_attributes.first_name}")
+    private String FIRST_NAME;
 
-    RemoveMemberResult removeMember(String groupPath, String uhIdentifier);
+    @Value("${groupings.api.person_attributes.last_name}")
+    private String LAST_NAME;
 
-    WsGetAttributeAssignmentsResults groupsOf(String assignType,
-            String attributeDefNameName);
+    @Value("${groupings.api.person_attributes.composite_name}")
+    private String COMPOSITE_NAME;
 
-    WsGetAttributeAssignmentsResults attributeAssigns(String assignType,
+    @Value("${groupings.api.person_attributes.uhuuid}")
+    private String UHUUID;
+
+    @Value("${groupings.api.person_attributes.username}")
+    private String USERNAME;
+
+    @Value("${groupings.api.stem}")
+    private String STEM;
+
+    @Autowired
+    MemberAttributeService membershipAttributeService;
+
+    public List<SyncDestination> syncDestinations() {
+        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
+                .assignScope(SYNC_DESTINATIONS_LOCATION)
+                .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES)
+                .execute();
+
+        List<SyncDestination> syncDest = new ArrayList<>();
+
+        for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
+            SyncDestination newSyncDest =
+                    new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
+            newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
+            newSyncDest.setName(wsAttributeDefName.getName());
+            syncDest.add(newSyncDest);
+        }
+        return syncDest;
+    }
+
+    public String descriptionOf(String groupPath) {
+        FindGroupsResults result = new FindGroupsResults(findGroupsResults(groupPath));
+        return result.getDescription();
+    }
+
+    public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
+        WsGroup updatedGroup = new WsGroup();
+        updatedGroup.setDescription(description);
+
+        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
+                findGroupsResults(groupPath).getGroupResults()[0].getUuid());
+
+        WsGroupToSave groupToSave = new WsGroupToSave();
+        groupToSave.setWsGroup(updatedGroup);
+        groupToSave.setWsGroupLookup(groupLookup);
+
+        return new GcGroupSave().addGroupToSave(groupToSave).execute();
+    }
+
+    public AddMemberResult addMember(String groupPath, String uhIdentifier) {
+        return new AddMemberCommand(groupPath, uhIdentifier).execute();
+    }
+
+    public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
+        return new RemoveMemberCommand(groupPath, uhIdentifier).execute();
+    }
+
+    public WsGetAttributeAssignmentsResults groupsOf(String assignType,
+            String attributeDefNameName) {
+        return new GcGetAttributeAssignments()
+                .addAttributeDefNameName(attributeDefNameName)
+                .assignAttributeAssignType(assignType)
+                .execute();
+    }
+
+    public WsGetAttributeAssignmentsResults attributeAssigns(String assignType,
             String attributeDefNameName0,
-            String attributeDefNameName1);
+            String attributeDefNameName1) {
+        return new GcGetAttributeAssignments()
+                .addAttributeDefNameName(attributeDefNameName0)
+                .addAttributeDefNameName(attributeDefNameName1)
+                .assignAttributeAssignType(assignType)
+                .execute();
+    }
 
-    WsGetAttributeAssignmentsResults groupAttributeDefNames(String assignType,
-            String group);
+    public WsGetAttributeAssignmentsResults groupAttributeDefNames(String assignType,
+            String group) {
+        return new GcGetAttributeAssignments()
+                .addOwnerGroupName(group)
+                .assignAttributeAssignType(assignType)
+                .execute();
+    }
 
-    WsGetAttributeAssignmentsResults groupAttributeAssigns(String assignType,
+    public WsGetAttributeAssignmentsResults groupAttributeAssigns(String assignType,
             String attributeDefNameName,
-            String group);
+            String group) {
+        return new GcGetAttributeAssignments()
+                .addAttributeDefNameName(attributeDefNameName)
+                .addOwnerGroupName(group)
+                .assignAttributeAssignType(assignType)
+                .execute();
+    }
 
-    WsHasMemberResults hasMemberResults(String group, String uhIdentifier);
+    public WsHasMemberResults hasMemberResults(String group, String uhIdentifier) {
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
+            return new GcHasMember()
+                    .assignGroupName(group)
+                    .addSubjectId(uhIdentifier)
+                    .execute();
+        }
+        return new GcHasMember()
+                .assignGroupName(group)
+                .addSubjectIdentifier(uhIdentifier)
+                .execute();
+    }
 
-    WsHasMemberResults hasMemberResults(String group, Person person);
+    public WsHasMemberResults hasMemberResults(String group, Person person) {
+        if (person.getUsername() != null) {
+            return hasMemberResults(group, person.getUsername());
+        }
 
-    WsAssignAttributesResults assignAttributesResults(String attributeAssignType,
+        if (person.getUhUuid() == null) {
+            throw new IllegalArgumentException("The person is required to have either a username or a uuid");
+        }
+
+        return new GcHasMember()
+                .assignGroupName(group)
+                .addSubjectId(person.getUhUuid())
+                .execute();
+    }
+
+    public WsAssignAttributesResults assignAttributesResults(String attributeAssignType,
             String attributeAssignOperation,
             String ownerGroupName,
             String attributeDefNameName,
             String attributeAssignValueOperation,
-            WsAttributeAssignValue value);
+            WsAttributeAssignValue value) {
 
-    WsAssignAttributesResults assignAttributesResultsForGroup(String attributeAssignType,
+        return new GcAssignAttributes()
+                .assignAttributeAssignType(attributeAssignType)
+                .assignAttributeAssignOperation(attributeAssignOperation)
+                .addOwnerGroupName(ownerGroupName)
+                .addAttributeDefNameName(attributeDefNameName)
+                .assignAttributeAssignValueOperation(attributeAssignValueOperation)
+                .addValue(value)
+                .execute();
+    }
+
+    public WsAssignAttributesResults assignAttributesResultsForGroup(String attributeAssignType,
             String attributeAssignOperation,
             String attributeDefNameName,
-            String ownerGroupName);
+            String ownerGroupName) {
 
-    WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult(String groupName,
+        return new GcAssignAttributes()
+                .assignAttributeAssignType(attributeAssignType)
+                .assignAttributeAssignOperation(attributeAssignOperation)
+                .addAttributeDefNameName(attributeDefNameName)
+                .addOwnerGroupName(ownerGroupName)
+                .execute();
+    }
+
+    public WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult(String groupName,
             String privilegeName,
             WsSubjectLookup lookup,
-            boolean isAllowed);
+            boolean isAllowed) {
 
-    WsGetMembershipsResults membershipsResults(String groupName, WsSubjectLookup lookup);
+        return new GcAssignGrouperPrivilegesLite()
+                .assignGroupName(groupName)
+                .assignPrivilegeName(privilegeName)
+                .assignSubjectLookup(lookup)
+                .assignAllowed(isAllowed)
+                .execute();
+    }
 
-    WsGetMembersResults membersResults(String subjectAttributeName,
+    public WsGetMembershipsResults membershipsResults(String groupName,
+            WsSubjectLookup lookup) {
+
+        return new GcGetMemberships()
+                .addGroupName(groupName)
+                .addWsSubjectLookup(lookup)
+                .execute();
+    }
+
+    public WsGetMembersResults membersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
             List<String> groupPaths,
             Integer pageNumber,
             Integer pageSize,
             String sortString,
-            Boolean isAscending);
+            Boolean isAscending) {
+        GcGetMembers members = new GcGetMembers();
 
-    //Overloaded membersResults, only takes three parameters, no pageNumber, pageSize, sortString and isAscending
-    WsGetMembersResults membersResults(String subjectAttributeName,
+        if (groupPaths != null && groupPaths.size() > 0) {
+            for (String path : groupPaths) {
+                members.addGroupName(path);
+            }
+        }
+
+        members.assignPageNumber(pageNumber);
+        members.assignPageSize(pageSize);
+        members.assignAscending(isAscending);
+        members.assignSortString(sortString);
+
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .assignIncludeSubjectDetail(true)
+                .execute();
+    }
+
+    public WsGetMembersResults membersResults(String subjectAttributeName,
             WsSubjectLookup lookup,
-            List<String> groupPaths);
+            List<String> groupPaths) {
+        GcGetMembers members = new GcGetMembers();
 
-    WsGetGroupsResults groupsResults(String uhIdentifier);
+        if (groupPaths != null && groupPaths.size() > 0) {
+            for (String path : groupPaths) {
+                members.addGroupName(path);
+            }
+        }
 
-    WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup);
+        return members
+                .addSubjectAttributeName(subjectAttributeName)
+                .assignActAsSubject(lookup)
+                .assignIncludeSubjectDetail(true)
+                .execute();
+    }
 
-    WsFindGroupsResults findGroupsResults(String groupPath);
+    public WsGetGroupsResults groupsResults(String uhIdentifier) {
+        WsStemLookup stemLookup = stemLookup(STEM);
+        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
 
-    WsSubjectLookup subjectLookup(String uhIdentifier);
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
+            return new GcGetGroups()
+                    .addSubjectId(uhIdentifier)
+                    .assignWsStemLookup(stemLookup)
+                    .assignStemScope(stemScope)
+                    .execute();
+        }
 
-    WsStemLookup stemLookup(String stemName);
+        return new GcGetGroups()
+                .addSubjectIdentifier(uhIdentifier)
+                .assignWsStemLookup(stemLookup)
+                .assignStemScope(stemScope)
+                .execute();
+    }
 
-    WsStemLookup stemLookup(String stemName, String stemUuid);
+    public WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup) {
+        return new GcGetSubjects()
+                .addSubjectAttributeName(USERNAME)
+                .addSubjectAttributeName(COMPOSITE_NAME)
+                .addSubjectAttributeName(LAST_NAME)
+                .addSubjectAttributeName(FIRST_NAME)
+                .addSubjectAttributeName(UHUUID)
+                .addWsSubjectLookup(lookup)
+                .execute();
+    }
 
-    WsAttributeAssignValue assignAttributeValue(String time);
+    public WsFindGroupsResults findGroupsResults(String groupPath) {
+        return new GcFindGroups()
+                .addGroupName(groupPath)
+                .execute();
+    }
 
+    public WsSubjectLookup subjectLookup(String uhIdentifier) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+
+        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
+            wsSubjectLookup.setSubjectId(uhIdentifier);
+        } else {
+            wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
+        }
+        return wsSubjectLookup;
+    }
+
+    public WsStemLookup stemLookup(String stemName) {
+        return stemLookup(stemName, null);
+    }
+
+    public WsStemLookup stemLookup(String stemName, String stemUuid) {
+        return new WsStemLookup(stemName, stemUuid);
+    }
+
+    public WsAttributeAssignValue assignAttributeValue(String time) {
+
+        WsAttributeAssignValue dateTimeValue = new WsAttributeAssignValue();
+        dateTimeValue.setValueSystem(time);
+
+        return dateTimeValue;
+    }
 }
