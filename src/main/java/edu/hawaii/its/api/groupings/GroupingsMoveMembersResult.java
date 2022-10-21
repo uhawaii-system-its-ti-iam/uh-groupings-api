@@ -10,11 +10,12 @@ public class GroupingsMoveMembersResult extends GroupingsMembersResults {
     public GroupingsMoveMembersResult(AddMembersResults addMembersResults, RemoveMembersResults removeMembersResults) {
         addResults = new GroupingsAddResults(addMembersResults);
         removeResults = new GroupingsRemoveResults(removeMembersResults);
-        this.resultCode = addResults.resultCode;
+        this.resultCode = addResults.getResultCode();
+        groupPath = addResults.getGroupPath();
     }
 
     @Override public String getResultCode() {
-        return resultCode;
+        return this.addResults.getResultCode();
     }
 
     public GroupingsAddResults getAddResults() {

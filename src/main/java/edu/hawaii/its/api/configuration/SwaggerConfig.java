@@ -1,17 +1,11 @@
 package edu.hawaii.its.api.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 
 @Configuration
 public class SwaggerConfig {
-
+/*
     @Value("${groupings.api.documentation.title}")
     private String TITLE;
 
@@ -49,4 +43,5 @@ public class SwaggerConfig {
                 .contact(new Contact().name(CONTACT_NAME).url(CONTACT_URL).email(CONTACT_EMAIL))
                 .license(new License().name(LICENSE_NAME).url(LICENSE_URL)));
     }
+ */
 }

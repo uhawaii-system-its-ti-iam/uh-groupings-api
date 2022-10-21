@@ -66,7 +66,10 @@ public class GroupingsMailService {
     }
 
     /**
+<<<<<<< HEAD
      * Helper - sendCSVMessage
+=======
+>>>>>>> dc98ed9e (- Update props.)
      * Send an SMTP message with a file attachment
      */
     private void sendAttachmentMessage(String from, String to, String subject, String text,
@@ -92,7 +95,10 @@ public class GroupingsMailService {
     }
 
     /**
+<<<<<<< HEAD
      * Helper - sendCSVMessage
+=======
+>>>>>>> dc98ed9e (- Update props.)
      * Build the lines of a CSV file.
      */
     private List<String[]> toCsvObj(List<UIAddMemberResults> addMemberResults) {
@@ -107,7 +113,10 @@ public class GroupingsMailService {
     }
 
     /**
+<<<<<<< HEAD
      * Helper - sendCSVMessage
+=======
+>>>>>>> dc98ed9e (- Update props.)
      * Write Csv data to a file.
      */
     private FileSystemResource toCsv(List<String[]> data, File file) throws IOException {

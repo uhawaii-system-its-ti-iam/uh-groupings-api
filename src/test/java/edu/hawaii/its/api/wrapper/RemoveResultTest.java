@@ -1,30 +1,14 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class RemoveResultTest {
-
-    private static Properties properties;
-
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
-    }
+public class RemoveResultTest extends FetchesProperties {
 
     @Test
     public void construction() {
@@ -70,9 +54,5 @@ public class RemoveResultTest {
         assertEquals("", removeResult.getUid());
         assertEquals("uhUuid", removeResult.getUhUuid());
         assertEquals("", removeResult.getName());
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }

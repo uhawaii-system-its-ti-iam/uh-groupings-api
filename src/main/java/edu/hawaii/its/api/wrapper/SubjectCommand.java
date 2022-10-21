@@ -10,6 +10,7 @@ public class SubjectCommand extends GrouperCommand implements Command<SubjectRes
 
     public SubjectCommand(String uhIdentifier) {
         gcGetSubjects = new GcGetSubjects();
+        gcGetSubjects.assignIncludeSubjectDetail(true);
         this.addSubject(uhIdentifier)
                 .addSubjectAttribute("uhUuid")
                 .addSubjectAttribute("uid")

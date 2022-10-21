@@ -13,20 +13,38 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestSubjectsCommand {
-    @Value("${groupings.api.test.uhuuids}")
-    private List<String> TEST_UH_NUMBERS;
+public class TestSubjectsCommand  {
+    @Value("${groupings.api.test.grouping_many_include}")
+    protected String GROUPING_INCLUDE;
+
+    @Value("${groupings.api.test.uh-usernames}")
+    protected List<String> UH_USERNAMES;
+
+    @Value("${groupings.api.test.uh-numbers}")
+    protected List<String> UH_NUMBERS;
+
+    @Value("${groupings.api.success}")
+    protected String SUCCESS;
 
     @Test
     public void constructorTest() {
-        SubjectsCommand subjectsCommand = new SubjectsCommand(TEST_UH_NUMBERS);
-        assertNotNull(subjectsCommand);
+        assertNotNull(new SubjectsCommand(UH_NUMBERS));
+        assertNotNull(new SubjectsCommand(UH_USERNAMES));
+        assertNotNull(new SubjectsCommand(null));
     }
 
     @Test
     public void executeTest() {
-        SubjectsCommand subjectsCommand = new SubjectsCommand(TEST_UH_NUMBERS);
-        SubjectsResults subjectsResults = subjectsCommand.execute();
-        assertNotNull(subjectsResults);
+        assertNotNull(new SubjectsCommand(UH_NUMBERS).execute());
+        assertNotNull(new SubjectsCommand(UH_USERNAMES).execute());
+        assertNotNull(new SubjectsCommand(null).execute());
+    }
+
+    @Test
+    public void resultsTest() {
+        SubjectsResults resultsFromUsernames = new SubjectsCommand(UH_USERNAMES).execute();
+        SubjectsResults resultsFromNumbers = new SubjectsCommand(UH_NUMBERS).execute();
+        assertNotNull(resultsFromUsernames);
+        assertNotNull(resultsFromNumbers);
     }
 }

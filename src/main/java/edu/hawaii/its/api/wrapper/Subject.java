@@ -24,7 +24,11 @@ public class Subject extends Results {
     }
 
     public String getUid() {
-        String uid = wsSubject.getIdentifierLookup();
+        String[] attributeValues = wsSubject.getAttributeValues();
+        if (isEmpty(attributeValues)) {
+            return "";
+        }
+        String uid = wsSubject.getAttributeValue(1);
         return uid != null ? uid : "";
     }
 

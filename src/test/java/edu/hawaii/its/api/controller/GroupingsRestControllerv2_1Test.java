@@ -22,11 +22,13 @@ import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
+import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -51,10 +53,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import org.springframework.http.MediaType;
-
-import edu.hawaii.its.api.util.JsonUtil;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingsRestControllerv2_1Test {

@@ -17,13 +17,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestAddMemberCommand {
-    @Value("${groupings.api.test.uhuuids}")
-    private List<String> TEST_UH_NUMBERS;
     @Value("${groupings.api.test.grouping_many_include}")
-    private String GROUPING_INCLUDE;
+    protected String GROUPING_INCLUDE;
 
-    @Test public void constructor() {
-        AddMemberCommand addMemberCommand = new AddMemberCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
+    @Value("${groupings.api.test.uh-usernames}")
+    protected List<String> UH_USERNAMES;
+
+    @Value("${groupings.api.test.uh-numbers}")
+    protected List<String> UH_NUMBERS;
+
+    @Value("${groupings.api.success}")
+    protected String SUCCESS;
+
+    @Test public void constructorTest() {
+        AddMemberCommand addMemberCommand = new AddMemberCommand(GROUPING_INCLUDE, UH_NUMBERS.get(0));
         assertNotNull(addMemberCommand);
     }
 
@@ -40,7 +47,7 @@ public class TestAddMemberCommand {
 
         // Should throw an exception if an invalid group path is passed.
         try {
-            new AddMemberCommand("bad-path", TEST_UH_NUMBERS.get(0)).execute();
+            new AddMemberCommand("bad-path", UH_NUMBERS.get(0)).execute();
             fail("Should throw an exception if an invalid group path is passed.");
         } catch (AddMemberRequestRejectedException e) {
             assertNull(e.getCause());

@@ -15,20 +15,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestRemoveMembersCommand {
-    @Value("${groupings.api.test.uhuuids}")
-    private List<String> TEST_UH_NUMBERS;
+
     @Value("${groupings.api.test.grouping_many_include}")
-    private String GROUPING_INCLUDE;
+    protected String GROUPING_INCLUDE;
 
+    @Value("${groupings.api.test.uh-usernames}")
+    protected List<String> UH_USERNAMES;
 
-    @Test public void constructor() {
-        RemoveMembersCommand removeMembersCommand = new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS);
+    @Value("${groupings.api.test.uh-numbers}")
+    protected List<String> UH_NUMBERS;
+
+    @Value("${groupings.api.success}")
+    protected String SUCCESS;
+    @Test public void constructorTest() {
+        RemoveMembersCommand removeMembersCommand = new RemoveMembersCommand(GROUPING_INCLUDE, UH_NUMBERS);
         assertNotNull(removeMembersCommand);
     }
+
     @Test
     public void executeTest() {
         RemoveMembersResults removeMembersResults =
-                new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS).execute();
+                new RemoveMembersCommand(GROUPING_INCLUDE, UH_NUMBERS).execute();
         assertNotNull(removeMembersResults);
 
         String[] bogus = { "bogus-1", "bogus-2" };

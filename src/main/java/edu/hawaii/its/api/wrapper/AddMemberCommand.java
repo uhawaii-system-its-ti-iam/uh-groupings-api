@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
-
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
@@ -17,12 +15,8 @@ public class AddMemberCommand extends GrouperCommand implements Command<AddMembe
 
     public AddMemberResult execute() {
         AddMemberResult addMemberResult;
-        try {
             WsAddMemberResults wsAddMemberResults = gcAddMember.execute();
             addMemberResult = new AddMemberResult(wsAddMemberResults);
-        } catch (RuntimeException e) {
-            throw new AddMemberRequestRejectedException(e);
-        }
         return addMemberResult;
     }
 

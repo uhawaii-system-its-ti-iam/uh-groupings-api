@@ -5,11 +5,13 @@ import edu.hawaii.its.api.wrapper.AddResult;
 
 public class GroupingsAddResult extends GroupingsMemberResult {
 
+
     public GroupingsAddResult(AddMemberResult addMemberResult) {
         resultCode = addMemberResult.getResultCode();
         uid = addMemberResult.getUid();
         name = addMemberResult.getName();
         uhUuid = addMemberResult.getUhUuid();
+        groupPath = addMemberResult.getGroupPath();
     }
 
     public GroupingsAddResult(AddResult addResult) {
@@ -17,6 +19,7 @@ public class GroupingsAddResult extends GroupingsMemberResult {
         uid = addResult.getUid();
         name = addResult.getName();
         uhUuid = addResult.getUhUuid();
+        groupPath = "";
     }
 
     public GroupingsAddResult() {
@@ -25,6 +28,7 @@ public class GroupingsAddResult extends GroupingsMemberResult {
     @Override public String getResultCode() {
         return resultCode;
     }
+
 
     public String getUid() {
         return uid;
@@ -36,6 +40,10 @@ public class GroupingsAddResult extends GroupingsMemberResult {
 
     public String getName() {
         return name;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
     }
 
 }

@@ -18,20 +18,26 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestRemoveMemberCommand {
-    @Value("${groupings.api.test.uhuuids}")
-    private List<String> TEST_UH_NUMBERS;
     @Value("${groupings.api.test.grouping_many_include}")
-    private String GROUPING_INCLUDE;
+    protected String GROUPING_INCLUDE;
+
+    @Value("${groupings.api.test.uh-usernames}")
+    protected List<String> UH_USERNAMES;
+
+    @Value("${groupings.api.test.uh-numbers}")
+    protected List<String> UH_NUMBERS;
+
+    @Value("${groupings.api.success}")
+    protected String SUCCESS;
 
     @Test
-    public void constructor() {
-        RemoveMemberCommand removeMemberCommand = new RemoveMemberCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
+    public void constructorTest() {
+        RemoveMemberCommand removeMemberCommand = new RemoveMemberCommand(GROUPING_INCLUDE, UH_NUMBERS.get(0));
         assertNotNull(removeMemberCommand);
     }
 
     @Test
     public void executeTest() {
-
         RemoveMemberResult response = new RemoveMemberCommand(GROUPING_INCLUDE, "bogus-ident").execute();
         assertNotNull(response);
         assertEquals("", response.getUid());
@@ -40,11 +46,10 @@ public class TestRemoveMemberCommand {
 
         // Should throw an exception if an invalid group path is passed.
         try {
-            new RemoveMemberCommand("bad-path", TEST_UH_NUMBERS.get(0)).execute();
+            new RemoveMemberCommand("bad-path", UH_NUMBERS.get(0)).execute();
             fail("Should throw an exception if an invalid group path is passed.");
         } catch (RemoveMemberRequestRejectedException e) {
             assertNull(e.getCause());
         }
-
     }
 }

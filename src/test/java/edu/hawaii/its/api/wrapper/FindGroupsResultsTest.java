@@ -1,33 +1,16 @@
 package edu.hawaii.its.api.wrapper;
 
+import org.junit.jupiter.api.Test;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+
+import static edu.hawaii.its.api.util.JsonUtil.asObject;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import edu.hawaii.its.api.wrapper.FindGroupsResults;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import static edu.hawaii.its.api.util.JsonUtil.asObject;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
-public class FindGroupsResultsTest {
-
-    private static Properties properties;
-
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
-    }
+public class FindGroupsResultsTest extends FetchesProperties {
 
     @Test
     public void nullConstruction() {
@@ -69,9 +52,5 @@ public class FindGroupsResultsTest {
                 new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
         assertThat(results.getDescription(), equalTo("No description given for this Grouping."));
         assertThat(results.getResultCode(), equalTo("SUCCESS"));
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }

@@ -1,30 +1,15 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AddMembersResultsTest {
+public class AddMembersResultsTest  extends FetchesProperties {
 
-    private static Properties properties;
-
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
-    }
 
     @Test
     public void construction() {
@@ -87,9 +72,5 @@ public class AddMembersResultsTest {
         assertNotNull(addMembersResults);
         assertEquals("FAILURE", addMembersResults.getResultCode());
         assertEquals("", addMembersResults.getGroupPath());
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }
