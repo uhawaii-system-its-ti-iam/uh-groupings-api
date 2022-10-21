@@ -5,14 +5,18 @@ import edu.hawaii.its.api.wrapper.AddResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GroupingsAddResults extends GroupingsMembersResults implements MemberResults<GroupingsAddResult> {
 
-    private final List<GroupingsAddResult> groupingsAddResults;
+    protected final List<GroupingsAddResult> groupingsAddResults;
+    protected final AddMembersResults addMembersResults;
 
     public GroupingsAddResults(AddMembersResults addMembersResults) {
+        Objects.requireNonNull(addMembersResults, "addMembersResults cannot be null");
+        this.addMembersResults = addMembersResults;
         groupingsAddResults = new ArrayList<>();
-        groupPath = addMembersResults.getGroupPath();
+        setGroupPath(addMembersResults.getGroupPath());
         for (AddResult addResult : addMembersResults.getResults()) {
             groupingsAddResults.add(new GroupingsAddResult(addResult));
         }
@@ -35,7 +39,4 @@ public class GroupingsAddResults extends GroupingsMembersResults implements Memb
         return groupingsAddResults;
     }
 
-    public String getGroupPath() {
-        return groupPath;
-    }
 }

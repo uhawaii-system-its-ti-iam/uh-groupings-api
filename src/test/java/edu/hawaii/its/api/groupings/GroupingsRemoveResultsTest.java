@@ -16,7 +16,6 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupingsRemoveResultsTest {
-
     private static Properties properties;
 
     @BeforeAll
