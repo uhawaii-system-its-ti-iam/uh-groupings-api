@@ -379,7 +379,7 @@ public class TestGrouperApiServiceTutorial {
 
         try {
             grouperApiService.hasMemberResults(GROUPING_INCLUDE, new Person(null, null, null)).getResults();
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException e) {
             assertEquals("The person is required to have either a username or a uuid", e.getMessage());
         }
 
