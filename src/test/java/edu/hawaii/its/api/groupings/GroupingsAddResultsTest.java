@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 

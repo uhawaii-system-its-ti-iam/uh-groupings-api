@@ -28,7 +28,7 @@ public class TestRemoveMembersCommand {
     private List<String> UH_NUMBERS;
 
     @Value("${groupings.api.success}")
-    protected String SUCCESS;
+    private String SUCCESS;
     @Test public void constructorTest() {
         RemoveMembersCommand removeMembersCommand = new RemoveMembersCommand(GROUPING_INCLUDE, UH_NUMBERS);
         assertNotNull(removeMembersCommand);

@@ -11,6 +11,7 @@ public class FindGroupCommand extends GrouperCommand implements Command<FindGrou
     public FindGroupCommand(String path) {
         Objects.requireNonNull(path, "path cannot be null");
         gcFindGroups = new GcFindGroups();
+        gcFindGroups.assignIncludeGroupDetail(true);
         this.addPath(path);
     }
 

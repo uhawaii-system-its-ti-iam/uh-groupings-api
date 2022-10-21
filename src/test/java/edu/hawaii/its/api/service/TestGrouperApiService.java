@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.util.Dates;
+import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
@@ -271,6 +272,7 @@ public class TestGrouperApiService {
                 YYYYMMDDTHHMM,
                 OPERATION_REPLACE_VALUES,
                 wsAttributeAssignValue);
+        JsonUtil.printJson(assignAttributesResults);
         assertNotNull(assignAttributesResults);
     }
 

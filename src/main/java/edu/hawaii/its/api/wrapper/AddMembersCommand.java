@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class AddMembersCommand extends GrouperCommand implements Command<AddMembersResults> {
-    private final GcAddMember gcAddMember;
+    protected final GcAddMember gcAddMember;
 
     public AddMembersCommand(String groupPath, List<String> uhIdentifiers) {
         Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
@@ -62,6 +62,11 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
 
     private AddMembersCommand includeUhMemberDetails(boolean includeDetails) {
         gcAddMember.assignIncludeSubjectDetail(includeDetails);
+        return this;
+    }
+
+    protected AddMembersCommand replaceGroupMembers(boolean replaceGroupMembers) {
+        gcAddMember.assignReplaceAllExisting(replaceGroupMembers);
         return this;
     }
 

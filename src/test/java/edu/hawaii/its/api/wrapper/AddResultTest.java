@@ -14,7 +14,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AddResultTest  {
+public class AddResultTest {
 
     private static Properties properties;
 
@@ -39,7 +39,7 @@ public class AddResultTest  {
     @Test
     public void successfulAddResultTest() {
         String json = propertyValue("ws.add.member.result.success");
-        WsAddMemberResult wsAddMemberResult = JsonUtil.asObject(json, WsAddMemberResult .class);
+        WsAddMemberResult wsAddMemberResult = JsonUtil.asObject(json, WsAddMemberResult.class);
         AddResult addResult = new AddResult(wsAddMemberResult);
         assertNotNull(addResult);
         assertEquals("SUCCESS", addResult.getResultCode());
@@ -51,7 +51,7 @@ public class AddResultTest  {
     @Test
     public void memberAlreadyExistedResultTest() {
         String json = propertyValue("ws.add.member.result.already.existed");
-        WsAddMemberResult wsAddMemberResult = JsonUtil.asObject(json, WsAddMemberResult .class);
+        WsAddMemberResult wsAddMemberResult = JsonUtil.asObject(json, WsAddMemberResult.class);
         AddResult addResult = new AddResult(wsAddMemberResult);
         assertNotNull(addResult);
         assertEquals("SUCCESS_ALREADY_EXISTED", addResult.getResultCode());
