@@ -3,14 +3,10 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
 
 import static edu.hawaii.its.api.wrapper.SubjectResult.SUBJECT_NOT_FOUND;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -22,14 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubjectResultTest {
 
-    private static Properties properties;
+    private static PropertyLocator propertyLocator;
 
     @BeforeAll
     public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
@@ -39,7 +32,6 @@ public class SubjectResultTest {
         assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
         assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
     }
-
 
     @Test
     public void emptyConstruction() {
@@ -63,7 +55,7 @@ public class SubjectResultTest {
         assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
         assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
 
-        String json = propertyValue("subject.not.found");
+        String json = propertyLocator.find("subject.not.found");
         wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         results = new SubjectResult(wsGetSubjectsResults);
         assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
@@ -72,7 +64,7 @@ public class SubjectResultTest {
 
     @Test
     public void emptyConstructionFromJson() {
-        String json = propertyValue("subject.not.found");
+        String json = propertyLocator.find("subject.not.found");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         assertThat(wsGetSubjectsResults.getWsSubjects(), is(notNullValue()));
         SubjectResult results = new SubjectResult(wsGetSubjectsResults);
@@ -130,7 +122,7 @@ public class SubjectResultTest {
         assertThat(results.getSubjectAttributeName(1), equalTo("angus"));
         assertThat(results.getSubjectAttributeName(2), equalTo("malcom"));
 
-        String json = propertyValue("subject.found");
+        String json = propertyLocator.find("subject.found");
         wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         results = new SubjectResult(wsGetSubjectsResults);
 
@@ -154,9 +146,5 @@ public class SubjectResultTest {
         WsSubject wsSubject = new WsSubject();
         wsSubject.setResultCode(resultCode);
         return wsSubject;
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }
