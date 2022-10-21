@@ -5,4 +5,5 @@ public abstract class GroupingsMemberResult implements GroupingsResult {
     protected String uid;
     protected String uhUuid;
     protected String name;
+    protected String groupPath;
 }

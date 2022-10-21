@@ -10,6 +10,7 @@ public class GroupingsRemoveResult extends GroupingsMemberResult {
         uid = removeMemberResult.getUid();
         name = removeMemberResult.getName();
         uhUuid = removeMemberResult.getUhUuid();
+        groupPath = removeMemberResult.getGroupPath();
     }
 
     public GroupingsRemoveResult(RemoveResult removeResult) {
@@ -17,8 +18,11 @@ public class GroupingsRemoveResult extends GroupingsMemberResult {
         uid = removeResult.getUid();
         name = removeResult.getName();
         uhUuid = removeResult.getUhUuid();
+        groupPath = "";
     }
-    public GroupingsRemoveResult() {}
+
+    public GroupingsRemoveResult() {
+    }
 
     @Override public String getResultCode() {
         return resultCode;
@@ -34,6 +38,10 @@ public class GroupingsRemoveResult extends GroupingsMemberResult {
 
     public String getName() {
         return name;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
     }
 
 }

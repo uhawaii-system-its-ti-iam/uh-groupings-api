@@ -5,11 +5,15 @@ import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
+import java.util.Objects;
+
 public class RemoveMemberCommand extends GrouperCommand implements Command<RemoveMemberResult> {
 
     private final GcDeleteMember gcDeleteMember;
 
     public RemoveMemberCommand(String groupPath, String uhIdentifier) {
+        Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
+        Objects.requireNonNull(groupPath, "groupPath cannot be null");
         gcDeleteMember = new GcDeleteMember();
         this.includeUhMemberDetails(true)
                 .assignGroupPath(groupPath)

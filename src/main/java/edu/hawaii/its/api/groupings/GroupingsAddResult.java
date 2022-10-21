@@ -10,6 +10,7 @@ public class GroupingsAddResult extends GroupingsMemberResult {
         uid = addMemberResult.getUid();
         name = addMemberResult.getName();
         uhUuid = addMemberResult.getUhUuid();
+        groupPath = addMemberResult.getGroupPath();
     }
 
     public GroupingsAddResult(AddResult addResult) {
@@ -17,6 +18,7 @@ public class GroupingsAddResult extends GroupingsMemberResult {
         uid = addResult.getUid();
         name = addResult.getName();
         uhUuid = addResult.getUhUuid();
+        groupPath = "";
     }
 
     public GroupingsAddResult() {
@@ -38,4 +40,7 @@ public class GroupingsAddResult extends GroupingsMemberResult {
         return name;
     }
 
+    public String getGroupPath() {
+        return groupPath;
+    }
 }
