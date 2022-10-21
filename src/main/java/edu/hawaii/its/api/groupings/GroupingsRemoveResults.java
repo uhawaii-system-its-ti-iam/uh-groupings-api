@@ -12,7 +12,7 @@ public class GroupingsRemoveResults extends GroupingsMembersResults implements M
 
     public GroupingsRemoveResults(RemoveMembersResults removeMembersResults) {
         groupingsRemoveResults = new ArrayList<>();
-        groupPath = removeMembersResults.getGroupPath();
+        setGroupPath(removeMembersResults.getGroupPath());
         for (RemoveResult removeResult : removeMembersResults.getResults()) {
             groupingsRemoveResults.add(new GroupingsRemoveResult(removeResult));
         }
@@ -26,9 +26,8 @@ public class GroupingsRemoveResults extends GroupingsMembersResults implements M
         groupingsRemoveResults.add(groupingsRemoveResult);
     }
 
-
-    public void add(GroupingsRemoveResults groupingsRemoveResults){
-        for(GroupingsRemoveResult result: groupingsRemoveResults.getResults()){
+    public void add(GroupingsRemoveResults groupingsRemoveResults) {
+        for (GroupingsRemoveResult result : groupingsRemoveResults.getResults()) {
             add(result);
         }
     }
@@ -48,9 +47,5 @@ public class GroupingsRemoveResults extends GroupingsMembersResults implements M
     @Override
     public List<GroupingsRemoveResult> getResults() {
         return groupingsRemoveResults;
-    }
-
-    public String getGroupPath() {
-        return groupPath;
     }
 }

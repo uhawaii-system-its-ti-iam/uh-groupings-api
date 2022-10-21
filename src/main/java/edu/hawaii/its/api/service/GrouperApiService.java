@@ -186,7 +186,8 @@ public class GrouperApiService {
                 .execute();
     }
 
-    public WsAssignAttributesResults assignAttributesResults(String attributeAssignType,
+    public WsAssignAttributesResults assignAttributesResults(
+            String attributeAssignType,
             String attributeAssignOperation,
             String ownerGroupName,
             String attributeDefNameName,

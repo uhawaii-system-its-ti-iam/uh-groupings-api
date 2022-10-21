@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -87,7 +88,7 @@ public class TestGroupingsRestControllerv2_1 {
     private UpdateMemberService updateMemberService;
 
     @Autowired
-    private MemberAttributeService memberService;
+    private MemberAttributeService memberAttributeService;
 
     public static final String API_BASE_URL = "/api/groupings/v2.1/";
     private MockMvc mockMvc;
@@ -95,17 +96,17 @@ public class TestGroupingsRestControllerv2_1 {
 
     @BeforeAll
     public void init() {
-        assertTrue(memberService.isAdmin(ADMIN));
+        assertTrue(memberAttributeService.isAdmin(ADMIN));
         TEST_USERNAMES.forEach(testUsername -> updateMemberService.removeAdmin(ADMIN, testUsername));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
         updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
 
         TEST_USERNAMES.forEach(testUsername -> {
-            assertFalse(memberService.isOwner(GROUPING, testUsername));
-            assertFalse(memberService.isMember(GROUPING_INCLUDE, testUsername));
-            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUsername));
-            assertFalse(memberService.isAdmin(testUsername));
+            assertFalse(memberAttributeService.isOwner(GROUPING, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testUsername));
+            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
+            assertFalse(memberAttributeService.isAdmin(testUsername));
         });
 
         // Save the starting attribute settings for the test grouping.
@@ -168,7 +169,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResult.class));
-        assertFalse(memberService.isAdmin(TEST_USERNAMES.get(0)));
+        assertFalse(memberAttributeService.isAdmin(TEST_USERNAMES.get(0)));
     }
 
     @Test
@@ -188,9 +189,44 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
-        assertFalse(memberService.isOwner(GROUPING, iamtst01List.get(0)));
-        assertFalse(memberService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
+        assertFalse(memberAttributeService.isOwner(GROUPING, iamtst01List.get(0)));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
+
+    @Test
+    public void resetIncludeGroup() throws Exception {
+        List<String> uhNumbersInclude = TEST_USERNAMES.subList(0, 3);
+
+        assertNotNull(updateMemberService.addIncludeMembers(ADMIN, GROUPING, uhNumbersInclude));
+
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include";
+        MvcResult mvcResult = mockMvc.perform(delete(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsReplaceGroupMembersResult.class));
+
+        uhNumbersInclude.forEach(num -> assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, num)));
+    }
+
+    @Test
+    public void resetExcludeGroup() throws Exception {
+        List<String> uhNumbersExclude = TEST_USERNAMES.subList(0, 3);
+
+        assertNotNull(updateMemberService.addExcludeMembers(ADMIN, GROUPING, uhNumbersExclude));
+
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude";
+        MvcResult mvcResult = mockMvc.perform(delete(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsReplaceGroupMembersResult.class));
+
+        uhNumbersExclude.forEach(num -> assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, num)));
+    }
+
 
     @Test
     public void resetGroupTest() throws Exception {
@@ -209,8 +245,8 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
-        uhNumbersInclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
-        uhNumbersExclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
+        uhNumbersInclude.forEach(num -> assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, num)));
+        uhNumbersExclude.forEach(num -> assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, num)));
     }
 
     @Test
@@ -324,7 +360,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(
                 new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                         UIAddMemberResults.class));
-        assertFalse(memberService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
+        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
 
     @Test
@@ -337,7 +373,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_INCLUDE, username)));
+        TEST_USERNAMES.forEach(username -> assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, username)));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
     }
 
@@ -351,7 +387,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, username)));
+        TEST_USERNAMES.forEach(username -> assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, username)));
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
     }
 
@@ -367,7 +403,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
         TEST_USERNAMES.forEach(username ->
-                assertFalse(memberService.isMember(GROUPING_INCLUDE, username)));
+                assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username)));
     }
 
     @Test
@@ -382,7 +418,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
         TEST_USERNAMES.forEach(username ->
-                assertFalse(memberService.isMember(GROUPING_EXCLUDE, username)));
+                assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username)));
     }
 
     @Test
@@ -403,7 +439,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isOwner(GROUPING, username)));
+        TEST_USERNAMES.forEach(username -> assertTrue(memberAttributeService.isOwner(GROUPING, username)));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
     }
 
@@ -416,7 +452,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
-        TEST_USERNAMES.forEach(username -> assertFalse(memberService.isOwner(GROUPING, username)));
+        TEST_USERNAMES.forEach(username -> assertFalse(memberAttributeService.isOwner(GROUPING, username)));
     }
 
     @Test
