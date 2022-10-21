@@ -26,7 +26,6 @@ public class GroupPathService {
             throw new InvalidGroupPathException(path);
         }
     }
-
     public boolean isValidPath(String path) {
         FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
         return findGroupResult.isValidPath();

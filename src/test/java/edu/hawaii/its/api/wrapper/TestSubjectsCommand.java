@@ -51,5 +51,4 @@ public class TestSubjectsCommand {
     public void execute() {
         assertNotNull(new SubjectsCommand(UH_NUMBERS).execute());
     }
-
 }

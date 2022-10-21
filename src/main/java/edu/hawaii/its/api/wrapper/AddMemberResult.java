@@ -4,7 +4,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 public class AddMemberResult extends Results {
 
-
     private final WsAddMemberResults wsAddMemberResults;
     private final AddResult addResult;
 

@@ -1,8 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
@@ -16,10 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.BeforeEach;
-
-import edu.hawaii.its.api.util.PropertyLocator;
 
 public class AttributeAssignmentsResultsTest {
 
