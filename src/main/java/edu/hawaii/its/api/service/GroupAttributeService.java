@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-@Service("groupAttributeService")
+@Service
 public class GroupAttributeService {
 
     @Value("${groupings.api.assign_type_group}")
