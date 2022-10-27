@@ -254,8 +254,9 @@ public class TestMemberAttributeService {
     }
 
     /**
+     * Helper - getMembershipResultsTest
      * Create a sublist which contains all memberships whose path contains the currentUsers uh username (ADMIN) and
-     * who is not in basis. This is a helper method for getMembershipResultsTest().
+     * who is not in basis.
      */
     private List<Membership> getMembershipsForCurrentUser(List<Membership> memberships) {
         return memberships
