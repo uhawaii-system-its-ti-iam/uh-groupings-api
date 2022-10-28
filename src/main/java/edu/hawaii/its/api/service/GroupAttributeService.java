@@ -166,6 +166,9 @@ public class GroupAttributeService {
         return attributeAssignmentsResults.isAttributeDefName(attributeName);
     }
 
+    /**
+     * Helper - changeOptStatus
+     */
     public GroupingsServiceResult assignGrouperPrivilege(String privilegeName, String groupName, boolean isSet) {
 
         logger.info("assignGrouperPrivilege; group: " + groupName
@@ -203,6 +206,9 @@ public class GroupAttributeService {
     }
 
     //TODO: Move both checkPrivileges helper methods to the Governor class once it's built
+    /**
+     * Helper - changeOptStatus, changeGroupAttributeStatus
+     */
     private void checkPrivileges(String groupingPath, String ownerIdentifier) {
         if (!memberAttributeService.isOwner(groupingPath, ownerIdentifier)
                 && !memberAttributeService.isAdmin(ownerIdentifier)) {
@@ -210,6 +216,9 @@ public class GroupAttributeService {
         }
     }
 
+    /**
+     * Helper - getAllSyncDestinations
+     */
     private void checkPrivileges(String ownerIdentifier) {
         if (!memberAttributeService.isOwner(ownerIdentifier) && !memberAttributeService.isAdmin(
                 ownerIdentifier)) {
@@ -218,6 +227,7 @@ public class GroupAttributeService {
     }
 
     /**
+     * Helper - getAllSyncDestinations
      * Replace ${} with replace in desc otherwise return desc.
      */
     private String parseKeyVal(String replace, String desc) {

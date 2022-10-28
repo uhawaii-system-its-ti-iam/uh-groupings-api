@@ -282,6 +282,9 @@ public class GroupingAssignmentService {
         return attributeAssignmentsResults.getOwnerGroupNames();
     }
 
+    /**
+     * Helper - adminLists
+     */
     public List<String> allGroupingsPaths() {
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
@@ -308,6 +311,7 @@ public class GroupingAssignmentService {
     }
 
     /**
+     * Helper - membershipResults
      * Get the name of a grouping from groupPath.
      */
     public String nameGroupingPath(String groupPath) {
@@ -318,6 +322,9 @@ public class GroupingAssignmentService {
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
+    /**
+     * Helper - isSoleOwner
+     */
     public List<String> getGroupingOwners(String currentUser, String groupPath) {
         List<String> owners = new ArrayList<>();
         List<String> path = new ArrayList<>();
@@ -382,6 +389,7 @@ public class GroupingAssignmentService {
     }
 
     /**
+     * Helper - makeGroups
      * Makes a person with all attributes in attributeNames.
      */
     public Person makePerson(WsSubject subject, String[] attributeNames) {
@@ -402,6 +410,7 @@ public class GroupingAssignmentService {
     }
 
     /**
+     * Helper - adminLists
      * Take a list of grouping path strings and return a list of GroupingPath objects.
      */
     public List<GroupingPath> makePaths(List<String> groupingPaths) {

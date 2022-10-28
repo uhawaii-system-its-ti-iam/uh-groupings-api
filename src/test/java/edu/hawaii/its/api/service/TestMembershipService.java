@@ -1204,8 +1204,8 @@ public class TestMembershipService {
     }
 
     /**
-     * Create a sublist which contains all memberships whose path contains the currentUsers uh username (ADMIN) and
-     * who is not in basis. This is a helper method for getMembershipResultsTest().
+     * Helper - getMembershipResultsTest()
+     * Create a sublist which contains all memberships whose path contains the currentUsers uh username (ADMIN) and who is not in basis.
      */
     private List<Membership> getMembershipsForCurrentUser(List<Membership> memberships) {
         return memberships
@@ -1215,7 +1215,8 @@ public class TestMembershipService {
     }
 
     /**
-     * Get a random LocalDateTime between start and end. This is a helper method for updateLastModifiedTimestampTest().
+     * Helper - updateLastModifiedTimestampTest
+     * Get a random LocalDateTime between start and end.
      */
     private static LocalDateTime getRandomLocalDateTimeBetween(LocalDateTime start, LocalDateTime end) {
         return LocalDateTime.of(
@@ -1227,7 +1228,8 @@ public class TestMembershipService {
     }
 
     /**
-     * Get a random number between start and end. This is a helper method for getRandomLocalDateTimeBetween().
+     * Helper - getRandomLocalDateTimeBetween
+     * Get a random number between start and end.
      */
     private static int getRandomNumberBetween(int start, int end) {
         return start + (int) Math.round(Math.random() * (end - start));
