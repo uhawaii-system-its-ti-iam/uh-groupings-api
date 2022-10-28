@@ -142,6 +142,9 @@ public class MemberAttributeServiceTest {
         assertFalse(memberAttributeService.isUhUuid(null));
     }
 
+    /**
+     * Helper - getMemberAttributesSubjectFound, getMemberAttributesSubjectNotFound, getMemberAttributesNotAdminNotOwner, getMemberAttributesAdminButNotOwner, getMemberAttributesOwnerButNotAdmin
+     */
     private WsHasMemberResults makeWsHasMemberResults(final String resultCode) {
         return new WsHasMemberResults() {
             @Override

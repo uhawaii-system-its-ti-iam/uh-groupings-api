@@ -17,6 +17,7 @@ public class PatternPropertyChecker {
 
 
     /**
+     * Helper - checkForPasswords
      * getPatternLocation: checks a file(s) and given file naming convention(.properties, .java, .pom)
      * for a pattern.
      *
