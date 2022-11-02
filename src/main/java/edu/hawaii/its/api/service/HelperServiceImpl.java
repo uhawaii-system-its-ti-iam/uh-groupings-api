@@ -204,11 +204,12 @@ public class HelperServiceImpl implements HelperService {
                             TRIO,
                             groupPaths);
 
-            attributeAssignmentsResults
-                    .stream()
-                    .filter(results -> results.getWsAttributeAssigns() != null)
-                    .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
-
+            if (attributeAssignmentsResults != null) {
+                attributeAssignmentsResults
+                        .stream()
+                        .filter(results -> results.getWsAttributeAssigns() != null)
+                        .forEach(results -> attributeAssigns.addAll(Arrays.asList(results.getWsAttributeAssigns())));
+            }
             if (attributeAssigns.size() > 0) {
                 groupings.addAll(attributeAssigns.stream().map(WsAttributeAssign::getOwnerGroupName)
                         .collect(Collectors.toList()));
