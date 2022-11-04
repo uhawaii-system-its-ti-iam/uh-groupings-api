@@ -465,7 +465,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getNumberOfGroupings(currentUser, uid));
+                .body(memberAttributeService.numberOfGroupings(currentUser, uid));
     }
 
     /**
