@@ -2,7 +2,6 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
@@ -137,7 +136,7 @@ public class MemberAttributeService {
         SubjectResult results = new SubjectCommand(uhIdentifier).execute();
 
         if (results.getResultCode().equals(SUBJECT_NOT_FOUND)) {
-            throw new UhMemberNotFoundException(SUBJECT_NOT_FOUND);
+            return new Person();
         }
 
         Person person = new Person();
