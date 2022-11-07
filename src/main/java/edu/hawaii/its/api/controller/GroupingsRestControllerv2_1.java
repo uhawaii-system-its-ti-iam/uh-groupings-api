@@ -369,9 +369,9 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable String id) {
+            @PathVariable("id") OptType optType) {
 
-        return updatePreference(currentUser, path, id, true);
+        return updatePreference(currentUser, path, optType, true);
     }
 
     @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/disable",
@@ -380,20 +380,18 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable String id) {
+            @PathVariable("id") OptType optType) {
 
-        return updatePreference(currentUser, path, id, false);
+        return updatePreference(currentUser, path, optType, false);
     }
 
     private ResponseEntity<List<GroupingsServiceResult>> updatePreference(
             String currentUser,
             String path,
-            String id,
+            OptType optType,
             boolean value) {
 
         logger.info("Entered REST updatePreference");
-
-        OptType optType = OptType.find(id);
 
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
@@ -410,7 +408,7 @@ public class GroupingsRestControllerv2_1 {
                 .withOptType(optType)
                 .withOptValue(value)
                 .build();
-
+        
         return ResponseEntity
                 .ok()
                 .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
