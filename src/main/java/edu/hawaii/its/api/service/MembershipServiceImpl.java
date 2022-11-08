@@ -604,7 +604,7 @@ public class MembershipServiceImpl implements MembershipService {
     @Override public Integer numberOfMemberships(String currentUser, String uid) {
         return getMembershipResults(currentUser, uid)
                 .stream()
-                .filter(membership -> membership.isInInclude() || membership.isInBasis())
+                .filter(membership -> membership.isInInclude() || (membership.isInBasis() && !membership.isInExclude()))
                 .collect(Collectors.toList())
                 .size();
     }
