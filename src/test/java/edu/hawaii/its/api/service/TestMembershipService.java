@@ -1157,6 +1157,16 @@ public class TestMembershipService {
         membershipService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
         assertTrue(membershipService.getNumberOfMemberships(ADMIN, iamtst01List.get(0)) > 0);
         membershipService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
+
+        // Should have groups for user in include, basis, and not exclude only.
+        iamtst01List = new ArrayList<>();
+        iamtst01List.add(TEST_USERNAMES.get(0));
+        membershipService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
+        membershipService.addExcludeMembers(ADMIN, GROUPING, iamtst01List);
+        int membershipResults = membershipService.membershipResults(ADMIN, TEST_USERNAMES.get(0)).size();
+        assertTrue(membershipService.getNumberOfMemberships(ADMIN, TEST_USERNAMES.get(0)) < membershipResults);
+        membershipService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
+        membershipService.removeExcludeMembers(ADMIN, GROUPING, iamtst01List);
     }
 
     @Test

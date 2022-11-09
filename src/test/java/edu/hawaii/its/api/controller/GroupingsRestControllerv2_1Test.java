@@ -667,13 +667,13 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 10; i++) {
             groupingPathList.add(new GroupingPath(path));
         }
-        given(memberAttributeService.getNumberOfGroupings(owner, uid)).willReturn(10);
+        given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
 
         mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
-                .getNumberOfGroupings(owner, uid);
+                .numberOfGroupings(owner, uid);
     }
 
     @Test
