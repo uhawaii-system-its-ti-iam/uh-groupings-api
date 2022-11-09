@@ -30,6 +30,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PreferenceType;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.Subject;
@@ -493,9 +494,11 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
     }
 
+
     /**
      * Update grouping to enable given preference.
      */
+    /*
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/enable")
     public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
@@ -514,6 +517,18 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable("id") OptType optType) {
 
         return updatePreference(currentUser, path, optType, false);
+    }
+
+     */
+
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
+    public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path,
+            @PathVariable("id") OptType optType,
+            @PathVariable("type") PreferenceType preferenceType) {
+
+        return updatePreference(currentUser, path, optType, preferenceType.toggleOn());
     }
 
     private ResponseEntity<List<GroupingsServiceResult>> updatePreference(
