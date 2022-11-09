@@ -495,7 +495,30 @@ public class MembershipService {
      * Get the number of memberships.
      */
     public Integer getNumberOfMemberships(String currentUser, String uid) {
-        return membershipResults(currentUser, uid).size();
+        List<String> groupPaths = fetchGroupPaths(currentUser, uid);
+        int numberOfMemberships = 0;
+
+        for (String pathToCheck : groupPaths) {
+            if (pathToCheck.endsWith(GroupType.INCLUDE.value())
+                    || (!pathToCheck.endsWith(GroupType.EXCLUDE.value())
+                    && pathToCheck.endsWith(GroupType.BASIS.value()))) {
+                numberOfMemberships++;
+            }
+        }
+        return numberOfMemberships;
+    }
+
+    /**
+     * Helper - getNumberOfMemberships
+     */
+    private List<String> fetchGroupPaths(String currentUser, String uid) {
+        List<String> groupPaths = new ArrayList<>();
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
+        } catch (GcWebServiceError e) {
+            // Returning empty list for an expected error
+        }
+        return groupPaths;
     }
 
     /**

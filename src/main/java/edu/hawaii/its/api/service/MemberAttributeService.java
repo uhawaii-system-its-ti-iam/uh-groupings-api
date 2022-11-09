@@ -168,9 +168,16 @@ public class MemberAttributeService {
     }
 
     /**
-     * Get the number of groupings a user owns, by username or uhUuid..
+     * Get the number of groupings a user owns, by username or uhUuid.
      */
-    public Integer getNumberOfGroupings(String currentUser, String uhIdentifier) {
-        return getOwnedGroupings(currentUser, uhIdentifier).size();
+    public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
+        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier);
+        int groupingsOwned = 0;
+        for (String path : pathStrings) {
+            if (path.endsWith(GroupType.OWNERS.value())) {
+                groupingsOwned++;
+            }
+        }
+        return groupingsOwned;
     }
 }
