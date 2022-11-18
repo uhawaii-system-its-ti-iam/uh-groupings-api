@@ -12,14 +12,14 @@ public class PreferenceTypeTest {
     public void preferenceTypeEnable() {
         assertThat(PreferenceType.ENABLE, equalTo(PreferenceType.ENABLE));
         assertThat(PreferenceType.ENABLE.value(), equalTo("enable"));
-        assertThat(PreferenceType.ENABLE.toggleOn(), equalTo(true));
+        assertThat(PreferenceType.ENABLE.toggle(), equalTo(true));
     }
 
     @Test
     public void preferenceTypeDisable() {
         assertThat(PreferenceType.DISABLE, equalTo(PreferenceType.DISABLE));
         assertThat(PreferenceType.DISABLE.value(), equalTo("disable"));
-        assertThat(PreferenceType.DISABLE.toggleOn(), equalTo(false));
+        assertThat(PreferenceType.DISABLE.toggle(), equalTo(false));
     }
 
     @Test

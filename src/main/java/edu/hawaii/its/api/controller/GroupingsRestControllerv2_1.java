@@ -520,22 +520,12 @@ public class GroupingsRestControllerv2_1 {
     }
 
      */
-
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable("id") OptType optType,
+            @PathVariable("id") OptType preferenceId,
             @PathVariable("type") PreferenceType preferenceType) {
-
-        return updatePreference(currentUser, path, optType, preferenceType.toggleOn());
-    }
-
-    private ResponseEntity<List<GroupingsServiceResult>> updatePreference(
-            String currentUser,
-            String path,
-            OptType optType,
-            boolean value) {
 
         logger.info("Entered REST updatePreference");
 
@@ -543,16 +533,16 @@ public class GroupingsRestControllerv2_1 {
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(optType)
-                .withOptValue(value)
+                .withOptType(preferenceId)
+                .withOptValue(preferenceType.toggle())
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(optType)
-                .withOptValue(value)
+                .withOptType(preferenceId)
+                .withOptValue(preferenceType.toggle())
                 .build();
 
         return ResponseEntity

@@ -7,19 +7,19 @@ public enum PreferenceType {
 
     private final String value;
 
-    private final boolean toggleOn;
+    private final boolean toggle;
 
-    PreferenceType(String value, boolean toggleOn) {
+    PreferenceType(String value, boolean toggle) {
         this.value = value;
-        this.toggleOn = toggleOn;
+        this.toggle = toggle;
     }
 
     public String value() {
         return value;
     }
 
-    public boolean toggleOn() {
-        return toggleOn;
+    public boolean toggle() {
+        return toggle;
     }
 
     public static PreferenceType find(String value) {
