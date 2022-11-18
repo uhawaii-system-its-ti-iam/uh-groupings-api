@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -115,7 +116,7 @@ public class MembershipService {
      * Get a list of memberships pertaining to uid.
      */
     public List<Membership> membershipResults(String currentUser, String uid) {
-        String action = "getMembershipResults; currentUser: " + currentUser + "; uid: " + uid + ";";
+        String action = "membershipResults; currentUser: " + currentUser + "; uid: " + uid + ";";
         logger.info(action);
 
         if (!memberAttributeService.isAdmin(currentUser) && !currentUser.equals(uid)) {
@@ -131,8 +132,59 @@ public class MembershipService {
             return memberships;
         }
 
-        Map<String, List<String>> pathMap = createPathMap(groupPaths);
+        List<String> membershipGroupPaths = new ArrayList<>();
+        for (String path : groupPaths) {
+            if (path.endsWith(GroupType.INCLUDE.value()) ||
+                (!path.endsWith(GroupType.EXCLUDE.value()) &&
+                        path.endsWith(GroupType.BASIS.value()))) {
+                membershipGroupPaths.add(path);
+            }
+        }
 
+        return createMembershipList(membershipGroupPaths, optOutList, memberships);
+    }
+
+    /**
+     * Get a list of all groupings pertaining to uid (nonfiltered).
+     */
+    public List<Membership> managePersonResults(String currentUser, String uid) {
+        String action = "managePersonResults; currentUser: " + currentUser + "; uid: " + uid + ";";
+        logger.info(action);
+
+        if (!memberAttributeService.isAdmin(currentUser) && !currentUser.equals(uid)) {
+            throw new AccessDeniedException();
+        }
+        List<Membership> memberships = new ArrayList<>();
+        List<String> groupPaths;
+        List<String> optOutList;
+        try {
+            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
+            optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
+        } catch (GcWebServiceError e) {
+            return memberships;
+        }
+
+        return createMembershipList(groupPaths, optOutList, memberships);
+    }
+
+    /**
+     * Helper - membershipResults, managePersonResults
+     */
+    private List<Membership> createMembershipList(List<String> groupPaths, List<String> optOutList, List<Membership> memberships) {
+        Map<String, List<String>> pathMap = new HashMap<>();
+        for (String pathToCheck : groupPaths) {
+            if (!pathToCheck.endsWith(GroupType.INCLUDE.value())
+                    && !pathToCheck.endsWith(GroupType.EXCLUDE.value())
+                    && !pathToCheck.endsWith(GroupType.BASIS.value())
+                    && !pathToCheck.endsWith(GroupType.OWNERS.value())) {
+                continue;
+            }
+            String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
+            if (!pathMap.containsKey(parentPath)) {
+                pathMap.put(parentPath, new ArrayList<>());
+            }
+            pathMap.get(parentPath).add(pathToCheck);
+        }
         for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
             String groupingPath = entry.getKey();
             List<String> paths = entry.getValue();
@@ -148,28 +200,7 @@ public class MembershipService {
     }
 
     /**
-     * Helper - membershipResults
-     */
-    private Map<String, List<String>> createPathMap(List<String> groupPaths) {
-        Map<String, List<String>> pathMap = new HashMap<>();
-        for (String pathToCheck : groupPaths) {
-            if (!pathToCheck.endsWith(GroupType.INCLUDE.value())
-                    && !pathToCheck.endsWith(GroupType.EXCLUDE.value())
-                    && !pathToCheck.endsWith(GroupType.BASIS.value())
-                    && !pathToCheck.endsWith(GroupType.OWNERS.value())) {
-                continue;
-            }
-            String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
-            if (!pathMap.containsKey(parentPath)) {
-                pathMap.put(parentPath, new ArrayList<>());
-            }
-            pathMap.get(parentPath).add(pathToCheck);
-        }
-        return pathMap;
-    }
-
-    /**
-     * Helper - membershipResults
+     * Helper - membershipResults, managePersonResults
      */
     private void setSubgroups(List<String> paths, Membership membership) {
         for (String path : paths) {
@@ -494,7 +525,7 @@ public class MembershipService {
     /**
      * Get the number of memberships.
      */
-    public Integer getNumberOfMemberships(String currentUser, String uid) {
+    public Integer numberOfMemberships(String currentUser, String uid) {
         List<String> groupPaths = fetchGroupPaths(currentUser, uid);
         int numberOfMemberships = 0;
 

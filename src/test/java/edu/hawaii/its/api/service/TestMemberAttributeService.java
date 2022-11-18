@@ -213,11 +213,11 @@ public class TestMemberAttributeService {
     public void getOwnedGroupingsTest() {
         // Groupings owned by current admin should complement the list of memberships that the current admin is in.
         List<GroupingPath> groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
-        List<Membership> memberships = membershipService.membershipResults(ADMIN, ADMIN);
+        List<Membership> results = membershipService.managePersonResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.forEach(groupingPath -> {
             assertTrue(
-                    memberships.stream().anyMatch(membership -> membership.getPath().equals(groupingPath.getPath())));
+                    results.stream().anyMatch(membership -> membership.getPath().equals(groupingPath.getPath())));
         });
         // Should contain grouping path if user is added as and owner.
         List<String> iamtst01List = new ArrayList<>();

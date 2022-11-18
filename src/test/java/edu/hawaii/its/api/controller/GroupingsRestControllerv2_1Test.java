@@ -352,6 +352,19 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void managePersonResultsTest() throws Exception {
+        List<Membership> results = new ArrayList<>();
+        given(membershipService.managePersonResults(ADMIN, "iamtst01")).willReturn(results);
+
+        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings/all")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk());
+
+        verify(membershipService, times(1))
+                .managePersonResults(ADMIN, "iamtst01");
+    }
+
+    @Test
     public void getOptInGroupingPathsTest() throws Exception {
         List<GroupingPath> optInGroupingPaths = new ArrayList<>();
         given(groupingAssignmentService.optInGroupingPaths(ADMIN, "iamtst01")).willReturn(optInGroupingPaths);
@@ -716,7 +729,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
         String uid = "uid";
-        given(membershipService.getNumberOfMemberships(ADMIN, uid))
+        given(membershipService.numberOfMemberships(ADMIN, uid))
                 .willReturn(369);
 
         mockMvc.perform(get(API_BASE + "/groupings/members/" + uid + "/memberships")
@@ -725,7 +738,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(content().string("369"));
 
         verify(membershipService, times(1))
-                .getNumberOfMemberships(ADMIN, uid);
+                .numberOfMemberships(ADMIN, uid);
     }
 
     @Test
