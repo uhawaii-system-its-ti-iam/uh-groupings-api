@@ -494,32 +494,6 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
     }
 
-
-    /**
-     * Update grouping to enable given preference.
-     */
-    /*
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/enable")
-    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable("id") OptType optType) {
-
-        return updatePreference(currentUser, path, optType, true);
-    }
-
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/disable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable("id") OptType optType) {
-
-        return updatePreference(currentUser, path, optType, false);
-    }
-
-     */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
     public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
