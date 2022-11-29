@@ -184,10 +184,6 @@ public class PersonTest {
         persons.add(new Person("", "n", ""));
         persons.add(new Person("", "m", ""));
 
-        assertThat(persons.get(0).getName(), equalTo(""));
-        assertThat(persons.get(1).getName(), equalTo(""));
-        assertThat(persons.get(2).getName(), equalTo(""));
-        assertThat(persons.get(3).getName(), equalTo(""));
         assertThat(persons.get(0).getUhUuid(), equalTo("p"));
         assertThat(persons.get(1).getUhUuid(), equalTo("o"));
         assertThat(persons.get(2).getUhUuid(), equalTo("n"));
@@ -195,10 +191,6 @@ public class PersonTest {
 
         Collections.sort(persons);
 
-        assertThat(persons.get(0).getName(), equalTo(""));
-        assertThat(persons.get(1).getName(), equalTo(""));
-        assertThat(persons.get(2).getName(), equalTo(""));
-        assertThat(persons.get(3).getName(), equalTo(""));
         assertThat(persons.get(0).getUhUuid(), equalTo("m"));
         assertThat(persons.get(1).getUhUuid(), equalTo("n"));
         assertThat(persons.get(2).getUhUuid(), equalTo("o"));
@@ -225,22 +217,22 @@ public class PersonTest {
 
         // Again.
         persons = new ArrayList<>();
-        persons.add(new Person(null, null, "4"));
-        persons.add(new Person(null, null, "3"));
-        persons.add(new Person(null, null, "2"));
-        persons.add(new Person(null, null, "1"));
+        persons.add(new Person("", "", ""));
+        persons.add(new Person("", "", ""));
+        persons.add(new Person("", "", ""));
+        persons.add(new Person("", "", ""));
 
-        assertThat(persons.get(0).getUsername(), equalTo("4"));
-        assertThat(persons.get(1).getUsername(), equalTo("3"));
-        assertThat(persons.get(2).getUsername(), equalTo("2"));
-        assertThat(persons.get(3).getUsername(), equalTo("1"));
+        assertThat(persons.get(0).getUsername(), equalTo(""));
+        assertThat(persons.get(1).getUsername(), equalTo(""));
+        assertThat(persons.get(2).getUsername(), equalTo(""));
+        assertThat(persons.get(3).getUsername(), equalTo(""));
 
         Collections.sort(persons);
 
-        assertThat(persons.get(0).getUsername(), equalTo("1"));
-        assertThat(persons.get(1).getUsername(), equalTo("2"));
-        assertThat(persons.get(2).getUsername(), equalTo("3"));
-        assertThat(persons.get(3).getUsername(), equalTo("4"));
+        assertThat(persons.get(0).getUsername(), equalTo(""));
+        assertThat(persons.get(1).getUsername(), equalTo(""));
+        assertThat(persons.get(2).getUsername(), equalTo(""));
+        assertThat(persons.get(3).getUsername(), equalTo(""));
     }
 
     @Test
@@ -290,4 +282,13 @@ public class PersonTest {
         }
     }
 
+    @Test
+    public void toStringTest() {
+        String name = "name";
+        String uid = "uid";
+        String uhUuid = "uhUuid";
+        person = new Person(name, uhUuid, uid);
+        String expected = "Person [" + "name=" + name + ", uhUuid=" + uhUuid + ", username=" + uid + "]";
+        assertEquals(expected, person.toString());
+    }
 }
