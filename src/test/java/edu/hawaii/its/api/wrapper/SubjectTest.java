@@ -55,7 +55,7 @@ public class SubjectTest {
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
-        assertEquals("", subject.getUid());
+        assertEquals("uid", subject.getUid());
         assertEquals("uhuuid", subject.getUhUuid());
         assertEquals("name", subject.getName());
         assertEquals(SUCCESS, subject.getResultCode());
@@ -65,7 +65,7 @@ public class SubjectTest {
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
-        assertEquals("invalid-identifier-str", subject.getUid());
+        assertEquals("", subject.getUid());
         assertEquals("", subject.getUhUuid());
         assertEquals("", subject.getName());
         assertEquals(SUBJECT_NOT_FOUND, subject.getResultCode());

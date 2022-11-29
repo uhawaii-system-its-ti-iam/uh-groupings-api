@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -98,8 +99,8 @@ public class MemberAttributeServiceTest {
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
 
-        Person person = memberAttributeService.getMemberAttributes(username, uid);
-        assertThat(person, is(notNullValue()));
+        assertThrows(AccessDeniedException.class,
+                () -> memberAttributeService.getMemberAttributes(username, uid));
     }
 
     @Disabled

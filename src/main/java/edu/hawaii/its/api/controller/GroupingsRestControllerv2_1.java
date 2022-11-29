@@ -35,6 +35,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.MembersAttributesResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
@@ -164,6 +165,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getMemberAttributes(currentUser, uid));
+    }
+
+    /**
+     * Get a list of members' attributes based off a list of usernames or id numbers.
+     */
+    @PostMapping(value = "/members")
+    @ResponseBody
+    public ResponseEntity<MembersAttributesResult> membersAttributes(
+            @RequestHeader(CURRENT_USER) String currentUser,
+            @RequestBody List<String> uids) {
+        logger.info("Entered REST membersAttributes...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getMembersAttributes(currentUser, uids));
     }
 
     /**

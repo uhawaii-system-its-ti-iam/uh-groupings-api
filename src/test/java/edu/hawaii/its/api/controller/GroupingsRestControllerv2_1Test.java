@@ -323,6 +323,23 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void membersAttributesTest() throws Exception {
+        List<String> members = new ArrayList<>();
+        members.add("iamtst01");
+        members.add("iamtst02");
+        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/")
+                        .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(validResult, notNullValue());
+
+        verify(memberAttributeService, times(1))
+                .getMembersAttributes(USERNAME, members);
+    }
+
+    @Test
     public void getGrouping() throws Exception {
         given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true))
                 .willReturn(grouping());

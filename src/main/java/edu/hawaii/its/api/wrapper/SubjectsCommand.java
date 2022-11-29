@@ -13,7 +13,12 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
     public SubjectsCommand(List<String> uhIdentifiers) {
         gcGetSubjects = new GcGetSubjects();
         for (String uhIdentifier : uhIdentifiers) {
-            addSubject(uhIdentifier);
+            addSubject(uhIdentifier)
+                    .addSubjectAttribute("uhUuid")
+                    .addSubjectAttribute("uid")
+                    .addSubjectAttribute("cn")
+                    .addSubjectAttribute("sn")
+                    .addSubjectAttribute("givenName");
         }
     }
 
@@ -31,6 +36,11 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
     private SubjectsCommand addSubject(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = subjectLookup(uhIdentifier);
         gcGetSubjects.addWsSubjectLookup(wsSubjectLookup);
+        return this;
+    }
+
+    private SubjectsCommand addSubjectAttribute(String attribute) {
+        gcGetSubjects.addSubjectAttributeName(attribute);
         return this;
     }
 }

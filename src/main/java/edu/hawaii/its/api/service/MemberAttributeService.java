@@ -2,11 +2,15 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.MembersAttributesResult;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.SubjectCommand;
+import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectResult;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 
@@ -39,6 +44,12 @@ public class MemberAttributeService {
 
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
+
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
+    @Value("${groupings.api.failure}")
+    private String FAILURE;
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -132,7 +143,7 @@ public class MemberAttributeService {
      */
     public Person getMemberAttributes(String currentUser, String uhIdentifier) {
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
-            return new Person();
+            throw new AccessDeniedException();
         }
 
         SubjectResult results = new SubjectCommand(uhIdentifier).execute();
@@ -150,6 +161,37 @@ public class MemberAttributeService {
         }
 
         return person;
+    }
+
+    /**
+     * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
+     * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return a mapping
+     * with null values.
+     */
+    public MembersAttributesResult getMembersAttributes(String currentUser, List<String> uhIdentifiers) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+
+        SubjectsResults results = new SubjectsCommand(uhIdentifiers).execute();
+
+        List<Person> members;
+        MembersAttributesResult membersAttributesResult;
+        if (results.getResultCode().equals(FAILURE)) {
+            members = uhIdentifiers.parallelStream()
+                    .filter(uhIdentifier -> new SubjectCommand(uhIdentifier).execute()
+                            .getResultCode().equals(SUBJECT_NOT_FOUND))
+                    .map(uhIdentifier -> new Person(uhIdentifier, uhIdentifier))
+                    .collect(Collectors.toList());
+            membersAttributesResult = new MembersAttributesResult(members, FAILURE);
+        } else {
+            members = results.getSubjects().parallelStream()
+                    .map(subject -> new Person(subject.getName(), subject.getUhUuid(), subject.getUid()))
+                    .collect(Collectors.toList());
+            membersAttributesResult = new MembersAttributesResult(members, SUCCESS);
+        }
+
+        return membersAttributesResult;
     }
 
     /**

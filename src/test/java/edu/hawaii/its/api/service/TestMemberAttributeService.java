@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.type.MembersAttributesResult;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -55,6 +58,12 @@ public class TestMemberAttributeService {
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN_USER;
+
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
+    @Value("${groupings.api.failure}")
+    private String FAILURE;
 
     private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
@@ -185,11 +194,9 @@ public class TestMemberAttributeService {
         assertNull(person.getUhUuid());
         assertNull(person.getUsername());
 
-        // Should return an empty person if current user is not an admin or owner.
-        person = memberAttributeService.getMemberAttributes("bogus-owner-admin", null);
-        assertNull(person.getName());
-        assertNull(person.getUhUuid());
-        assertNull(person.getUsername());
+        // Should throw AccessDeniedException if current user is not an admin or owner.
+        assertThrows(AccessDeniedException.class,
+                () -> memberAttributeService.getMemberAttributes("bogus-owner-admin", null));
 
         // Should not return an empty person if current user is an owner but not an admin.
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
@@ -207,6 +214,65 @@ public class TestMemberAttributeService {
         assertNotNull(person.getUsername());
         membershipService.removeAdmin(ADMIN, iamtst01);
 
+    }
+
+    @Test
+    public void membersAttributesTest() {
+        MembersAttributesResult result = memberAttributeService.getMembersAttributes(ADMIN, TEST_USERNAMES);
+        assertNotNull(result);
+        assertEquals(result.getResult(), SUCCESS);
+        List<String> personsUsernames = result.getMembersAttributes()
+                .stream()
+                .map(person -> person.getUsername())
+                .collect(Collectors.toList());
+        assertEquals(TEST_USERNAMES, personsUsernames);
+        List<String> personsUhUuids = result.getMembersAttributes()
+                .stream()
+                .map(person -> person.getUhUuid())
+                .collect(Collectors.toList());
+        assertEquals(TEST_USERNAMES, personsUhUuids);
+
+        String iamtst01 = TEST_USERNAMES.get(0);
+        List<String> iamtst01List = new ArrayList<>();
+        iamtst01List.add(iamtst01);
+        Person person;
+
+        // Should return a person array of invalid uhIdentifiers if at least one uhIdentifier is invalid
+        List<String> bogus = new ArrayList<>();
+        bogus.add("bogus-user");
+        result = memberAttributeService.getMembersAttributes(ADMIN, bogus);
+        assertNotNull(result);
+        assertEquals(result.getResult(), FAILURE);
+        assertNull(result.getMembersAttributes().get(0).getName());
+        assertEquals(result.getMembersAttributes().get(0).getUsername(), "bogus-user");
+        assertEquals(result.getMembersAttributes().get(0).getUhUuid(), "bogus-user");
+
+
+        // Should throw AccessDeniedException if current user is not an admin or owner.
+        assertThrows(AccessDeniedException.class,
+                () -> memberAttributeService.getMemberAttributes("bogus-owner-admin", null));
+
+        // Should return result SUCCESS if current user is an owner but not an admin.
+        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        result = memberAttributeService.getMembersAttributes(iamtst01, iamtst01List);
+        assertNotNull(result);
+        assertEquals(result.getResult(), SUCCESS);
+        person = result.getMembersAttributes().get(0);
+        assertNotNull(person.getName());
+        assertNotNull(person.getUhUuid());
+        assertNotNull(person.getUsername());
+        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+
+        // Should not return an empty person array if current user is an admin but not an owner.
+        membershipService.addAdmin(ADMIN, iamtst01);
+        result = memberAttributeService.getMembersAttributes(iamtst01, iamtst01List);
+        assertNotNull(result);
+        assertEquals(result.getResult(), SUCCESS);
+        person = result.getMembersAttributes().get(0);
+        assertNotNull(person.getName());
+        assertNotNull(person.getUhUuid());
+        assertNotNull(person.getUsername());
+        membershipService.removeAdmin(ADMIN, iamtst01);
     }
 
     @Test
@@ -250,12 +316,12 @@ public class TestMemberAttributeService {
 
         // Should equal the size of the list returned from getOwnedGroupings().
         assertEquals(memberAttributeService.getOwnedGroupings(ADMIN_USER, iamtst01).size(), numberOfGroupings);
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        membershipService.addOwnerships(GROUPING, ADMIN_USER, iamtst01List);
 
         // Should increase by one if user is added as owner to a grouping.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        membershipService.addOwnerships(GROUPING, ADMIN_USER, iamtst01List);
         assertEquals(numberOfGroupings + 1, memberAttributeService.numberOfGroupings(ADMIN_USER, iamtst01));
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        membershipService.removeOwnerships(GROUPING, ADMIN_USER, iamtst01List);
 
         // Should decrease by one if user is added as owner to a grouping.
         assertEquals(numberOfGroupings, memberAttributeService.numberOfGroupings(ADMIN_USER, iamtst01));

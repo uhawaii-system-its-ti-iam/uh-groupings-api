@@ -18,14 +18,18 @@ public class Subject extends Results {
         this.wsSubject = new WsSubject();
     }
 
+    public String getUid() {
+        String[] attributeValues = wsSubject.getAttributeValues();
+        if (isEmpty(attributeValues)) {
+            return "";
+        }
+        String uid = wsSubject.getAttributeValue(1);
+        return uid != null ? uid : "";
+    }
+
     public String getUhUuid() {
         String uhUuid = wsSubject.getId();
         return uhUuid != null ? uhUuid : "";
-    }
-
-    public String getUid() {
-        String uid = wsSubject.getIdentifierLookup();
-        return uid != null ? uid : "";
     }
 
     public String getName() {
