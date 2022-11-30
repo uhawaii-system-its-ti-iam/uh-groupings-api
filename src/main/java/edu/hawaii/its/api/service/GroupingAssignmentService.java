@@ -31,7 +31,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 @Service("groupingAssignmentService")
 public class GroupingAssignmentService {
@@ -234,14 +237,27 @@ public class GroupingAssignmentService {
     }
 
     /**
+     * Return the list of groups that the user is in, searching by username or uhUuid
+     * and filtered by a given predicate (can be found in PathFilter)
+     */
+    public List<String> getGroupPaths(String ownerUsername, String uhIdentifier, Predicate<String> predicate) {
+        logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";" + "predicate: " + predicate + ";");
+
+        if (!ownerUsername.equals(uhIdentifier) && !memberAttributeService.isAdmin(ownerUsername)) {
+            return new ArrayList<>();
+        }
+        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
+        List<String> groupPaths =  groupsResults.groupPaths();
+        return groupPaths.stream().filter(predicate).collect(Collectors.toList());
+    }
+
+    /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     public List<String> optOutGroupingsPaths(String owner, String optOutUid) {
         logger.info("optOutGroupingsPaths; owner: " + owner + "; optOutUid: " + optOutUid + ";");
 
-        List<String> groupingsIn = getGroupPaths(owner, optOutUid);
-        List<String> includes =
-                groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
+        List<String> includes = getGroupPaths(owner, optOutUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
         List<String> optOutPaths = optableGroupings(OptType.OUT.value());
         optOutPaths.retainAll(includes);
@@ -255,9 +271,7 @@ public class GroupingAssignmentService {
         logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
 
         List<GroupingPath> optInGroupingPaths = new ArrayList<>();
-        List<String> groupingsIn = getGroupPaths(owner, optInUid);
-        List<String> includes =
-                groupingsIn.stream().filter(path -> path.endsWith(GroupType.INCLUDE.value())).collect(Collectors.toList());
+        List<String> includes = getGroupPaths(owner, optInUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
 
         List<String> optInPaths = optableGroupings(OptType.IN.value());

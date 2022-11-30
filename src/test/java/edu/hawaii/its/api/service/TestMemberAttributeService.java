@@ -211,22 +211,32 @@ public class TestMemberAttributeService {
 
     @Test
     public void getOwnedGroupingsTest() {
-        // Groupings owned by current admin should complement the list of memberships that the current admin is in.
+        // Groupings owned by current admin should complement
+        // the list of memberships that the current admin is in.
         List<GroupingPath> groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
         List<Membership> results = membershipService.managePersonResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.forEach(groupingPath -> {
             assertTrue(
-                    results.stream().anyMatch(membership -> membership.getPath().equals(groupingPath.getPath())));
+                    results.stream()
+                            .anyMatch(membership -> membership
+                                    .getPath().equals(groupingPath.getPath())));
         });
+
         // Should contain grouping path if user is added as and owner.
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(TEST_USERNAMES.get(0));
         groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN_USER, TEST_USERNAMES.get(0));
-        assertFalse(groupingsOwned.stream().anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
+        assertFalse(
+                groupingsOwned.stream()
+                        .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
+
         membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
         groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN_USER, TEST_USERNAMES.get(0));
-        assertTrue(groupingsOwned.stream().anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
+        assertTrue(
+                groupingsOwned.stream()
+                .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
+
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
     }
 
