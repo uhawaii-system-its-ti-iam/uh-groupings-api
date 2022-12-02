@@ -1,26 +1,11 @@
 package edu.hawaii.its.api.controller;
 
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.groupings.GroupingsAddResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIAddMemberResults;
-import edu.hawaii.its.api.type.UIRemoveMemberResults;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -39,8 +24,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
+import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.type.UIAddMemberResults;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -186,7 +187,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a List of memberships as which uid has.
      */
-    @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
+    @GetMapping(value = "/members/{uid:[\\w-:.]+}/memberships")
     @ResponseBody
     public ResponseEntity<List<Membership>> membershipResults(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
@@ -199,7 +200,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of all groupings pertaining to uid (nonfiltered).
      */
-    @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings/all")
+    @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings")
     @ResponseBody
     public ResponseEntity<List<Membership>> managePersonResults(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
@@ -469,7 +470,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of groupings that the current user owns
      */
-    @GetMapping(value = "/owners/{uid:[\\w-:.]+}/grouping")
+    @GetMapping(value = "/owners/{uid:[\\w-:.]+}/groupings/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER) String currentUser,
             @PathVariable String uid) {
@@ -482,7 +483,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of memberships the current user has
      */
-    @GetMapping(value = "/groupings/members/{uid:[\\w-:.<>]+}/memberships")
+    @GetMapping(value = "/members/{uid:[\\w-:.<>]+}/memberships/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String uid) {
