@@ -197,6 +197,19 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a list of all groupings pertaining to uid (nonfiltered).
+     */
+    @GetMapping(value = "/members/{uid:[\\w-:.]+}/groupings/all")
+    @ResponseBody
+    public ResponseEntity<List<Membership>> managePersonResults(@RequestHeader(CURRENT_USER) String currentUser,
+            @PathVariable String uid) {
+        logger.info("Entered REST managePersonResults...");
+        return ResponseEntity
+                .ok()
+                .body(membershipService.managePersonResults(currentUser, uid));
+    }
+
+    /**
      * Get a list of all the paths associated with the groupings which uid as the ability top opt into.
      */
     @GetMapping(value = "/groupings/members/{uid}/opt-in-groups")
@@ -476,7 +489,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.getNumberOfMemberships(currentUser, uid));
+                .body(membershipService.numberOfMemberships(currentUser, uid));
     }
 
     /**
