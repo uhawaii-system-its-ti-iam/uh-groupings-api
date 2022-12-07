@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -104,6 +106,8 @@ public class GrouperFactoryServiceImpl implements GrouperFactoryService {
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
+
+    public static final Log logger = LogFactory.getLog(GrouperFactoryService.class);
 
     // Constructor.
     public GrouperFactoryServiceImpl() {
