@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+
 @Service("memberAttributeService")
 public class MemberAttributeService {
 
@@ -154,16 +156,15 @@ public class MemberAttributeService {
      * Get a list of GroupPaths the user owns, by username or uhUuid.
      */
     public List<GroupingPath> getOwnedGroupings(String currentUser, String uhIdentifier) {
-        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier);
-        List<GroupingPath> groupingPaths = new ArrayList<>();
+        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier, pathHasOwner());
 
+        List<GroupingPath> groupingPaths = new ArrayList<>();
         for (String path : pathStrings) {
-            if (path.endsWith(GroupType.OWNERS.value())) {
-                String parentGroupingPath = groupingAssignmentService.parentGroupingPath(path);
-                groupingPaths.add(new GroupingPath(parentGroupingPath,
-                        grouperApiService.descriptionOf(parentGroupingPath)));
-            }
+            String parentGroupingPath = groupingAssignmentService.parentGroupingPath(path);
+            groupingPaths.add(new GroupingPath(parentGroupingPath,
+                    grouperApiService.descriptionOf(parentGroupingPath)));
         }
+
         return groupingPaths;
     }
 
@@ -171,13 +172,6 @@ public class MemberAttributeService {
      * Get the number of groupings a user owns, by username or uhUuid.
      */
     public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
-        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier);
-        int groupingsOwned = 0;
-        for (String path : pathStrings) {
-            if (path.endsWith(GroupType.OWNERS.value())) {
-                groupingsOwned++;
-            }
-        }
-        return groupingsOwned;
+        return groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier, pathHasOwner()).size();
     }
 }

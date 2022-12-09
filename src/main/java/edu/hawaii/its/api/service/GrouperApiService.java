@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("grouperApiService")
-//@Profile(value = { "localhost", "test", "integrationTest", "qa", "prod" })
 public class GrouperApiService {
 
     @Value("${grouper.api.sync.destinations.location}")
