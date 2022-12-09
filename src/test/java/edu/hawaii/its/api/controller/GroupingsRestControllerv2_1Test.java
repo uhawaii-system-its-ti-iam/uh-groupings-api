@@ -714,9 +714,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void syncDestinationsTest() throws Exception {
-        Grouping group = groupingTwo();
-        System.out.println(group.getOwners());
-
         MvcResult result =
                 mockMvc.perform(get(API_BASE + "/groupings/" + groupingTwo().getPath() + "/sync-destinations")
                                 .header("current_user", "o6-username"))

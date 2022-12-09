@@ -484,7 +484,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/groupings/members/{uid:[\\w-:.<>]+}/memberships")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER) String currentUser,
+    public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String uid) {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
