@@ -8,7 +8,6 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.RemoveMemberResult;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -264,6 +263,8 @@ public class MembershipServiceImpl implements MembershipService {
         List<AddMemberResult> addMemberResults = new ArrayList<>();
         WsSubjectLookup wsSubjectLookup = grouperFS.makeWsSubjectLookup(currentUser);
         String removalPath = helperService.parentGroupingPath(groupPath);
+        boolean updateAddGroupTimeStamp = false;
+        boolean updateRemGroupTimeStamp = false;
 
         if (groupPath.endsWith(INCLUDE)) {
             removalPath += EXCLUDE;
@@ -288,10 +289,13 @@ public class MembershipServiceImpl implements MembershipService {
                 String name = wsAddMemberResults.getResults()[0].getWsSubject().getName();
                 String uid = wsAddMemberResults.getResults()[0].getWsSubject().getIdentifierLookup();
                 if (wasAdded) {
+                    updateAddGroupTimeStamp = true;
                     if (null == uid) {
                         uid = memberAttributeService.getMemberAttributes(currentUser, uhUuid).getUsername();
                     }
-                    membershipService.updateLastModified(groupPath);
+                }
+                if (wasRemoved) {
+                    updateRemGroupTimeStamp = true;
                 }
                 addMemberResult = new AddMemberResult(
                         wasAdded, wasRemoved, groupPath, removalPath, name, uhUuid, uid, SUCCESS, userToAdd);
@@ -301,7 +305,12 @@ public class MembershipServiceImpl implements MembershipService {
                 addMemberResult = new AddMemberResult(userToAdd, FAILURE);
                 addMemberResults.add(addMemberResult);
             }
-            logger.info("addGroupMembers; " + addMemberResult.toString());
+        }
+        if(updateAddGroupTimeStamp) {
+            updateLastModified(groupPath);
+        }
+        if(updateRemGroupTimeStamp) {
+            updateLastModified(removalPath);
         }
         return addMemberResults;
     }
@@ -614,8 +623,7 @@ public class MembershipServiceImpl implements MembershipService {
      */
     @Override
     public UpdateTimestampResult updateLastModified(String groupPath) {
-        logger.info("updateLastModified; group: " + groupPath + ";");
-        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        String dateTime = Dates.formatDate(LocalDateTime.now().plusMinutes(1), "yyyyMMdd'T'HHmm");
         return updateLastModifiedTimestamp(dateTime, groupPath);
     }
 
