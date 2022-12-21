@@ -1,13 +1,13 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.util.JsonUtil;
-
 import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 
 import org.springframework.beans.factory.annotation.Value;
+
+import java.util.Objects;
 
 public class UsersGroupsCommand extends GrouperCommand implements Command<UsersGroupsResult> {
 
@@ -17,6 +17,7 @@ public class UsersGroupsCommand extends GrouperCommand implements Command<UsersG
     private String STEM;
 
     public UsersGroupsCommand(String uhIdentifier) {
+        Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
         gcGetGroups = new GcGetGroups();
         WsStemLookup stemLookup = new WsStemLookup(STEM, null);
         addUhIdentifier(uhIdentifier);
@@ -28,7 +29,6 @@ public class UsersGroupsCommand extends GrouperCommand implements Command<UsersG
     @Override public UsersGroupsResult execute() {
         UsersGroupsResult usersGroupsResult;
         WsGetGroupsResults wsGetGroupsResults = gcGetGroups.execute();
-        JsonUtil.printJson(wsGetGroupsResults);
         usersGroupsResult = new UsersGroupsResult(wsGetGroupsResults);
         return usersGroupsResult;
     }

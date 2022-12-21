@@ -4,15 +4,19 @@ import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 
 import java.util.List;
+import java.util.Objects;
 
 public class HasMembersCommand extends GrouperCommand implements Command<HasMembersResults> {
 
-    private GcHasMember gcHasMember;
+    private final GcHasMember gcHasMember;
 
     public HasMembersCommand(String groupPath, List<String> uhIdentifiers) {
+        Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
+        Objects.requireNonNull(groupPath, "groupPath cannot be null");
         gcHasMember = new GcHasMember();
         gcHasMember.assignIncludeSubjectDetail(true);
         for (String uhIdentifier : uhIdentifiers) {
+            Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
             this.assignGroupPath(groupPath)
                     .addUhIdentifier(uhIdentifier);
         }

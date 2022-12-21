@@ -9,9 +9,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestUsersGroupsResult {
+public class TestUsersGroupsCommand {
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;
 
@@ -28,18 +30,10 @@ public class TestUsersGroupsResult {
     public void constructorTest() {
          new UsersGroupsCommand(UH_USERNAMES.get(0));
          new UsersGroupsCommand(UH_NUMBERS.get(0));
-    }
-
-    @Test
-    public void executeTest() {
-        UsersGroupsCommand usersGroupsCommandUsername = new UsersGroupsCommand(UH_USERNAMES.get(0));
-        UsersGroupsCommand usersGroupsCommandNumber = new UsersGroupsCommand(UH_NUMBERS.get(0));
-
-        UsersGroupsResult usersGroupsResultUsername = usersGroupsCommandUsername.execute();
-        UsersGroupsResult usersGroupsResultNumber = usersGroupsCommandNumber.execute();
-    }
-
-    @Test
-    public void resultsTest() {
+         try {
+             new UsersGroupsCommand(null);
+         }catch (NullPointerException e) {
+             assertEquals("uhIdentifier cannot be null", e.getMessage());
+         }
     }
 }

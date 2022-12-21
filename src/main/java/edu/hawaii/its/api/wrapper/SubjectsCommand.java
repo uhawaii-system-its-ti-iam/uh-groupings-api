@@ -1,37 +1,30 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.util.JsonUtil;
-
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SubjectsCommand extends GrouperCommand implements Command<SubjectsResults> {
 
-    private GcGetSubjects gcGetSubjects;
+    private final GcGetSubjects gcGetSubjects;
 
     public SubjectsCommand(List<String> uhIdentifiers) {
+        Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
         gcGetSubjects = new GcGetSubjects();
         gcGetSubjects.assignIncludeSubjectDetail(true);
-        if (uhIdentifiers != null) {
-            for (String uhIdentifier : uhIdentifiers) {
-                addSubject(uhIdentifier);
-            }
+        for (String uhIdentifier : uhIdentifiers) {
+            Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
+            addSubject(uhIdentifier);
         }
     }
 
     public SubjectsResults execute() {
         SubjectsResults subjectsResults;
-        try {
-            WsGetSubjectsResults wsGetSubjectsResults = gcGetSubjects.execute();
-            JsonUtil.printJson(wsGetSubjectsResults);
-            subjectsResults = new SubjectsResults(wsGetSubjectsResults);
-        } catch (RuntimeException e) {
-            subjectsResults = new SubjectsResults();
-        }
-        return subjectsResults;
+        WsGetSubjectsResults wsGetSubjectsResults = gcGetSubjects.execute();
+        return new SubjectsResults(wsGetSubjectsResults);
     }
 
     private SubjectsCommand addSubject(String uhIdentifier) {

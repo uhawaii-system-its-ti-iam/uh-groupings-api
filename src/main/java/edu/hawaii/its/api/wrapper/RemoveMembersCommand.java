@@ -6,13 +6,17 @@ import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
 
     public RemoveMembersCommand(String groupPath, List<String> uhIdentifiers) {
+        Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
+        Objects.requireNonNull(groupPath, "groupPath cannot be null");
         gcDeleteMember = new GcDeleteMember();
         for (String uhIdentifier : uhIdentifiers) {
+            Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
             addUhIdentifier(uhIdentifier);
         }
         includeUhMemberDetails(true);

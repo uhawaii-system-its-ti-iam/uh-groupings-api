@@ -30,26 +30,10 @@ public class TestSubjectCommand  {
     public void constructorTest() {
         assertNotNull(new SubjectCommand(UH_NUMBERS.get(0)));
         assertNotNull(new SubjectCommand(UH_USERNAMES.get(0)));
-        assertNotNull(new SubjectCommand(null));
-    }
-
-    @Test
-    public void executeTest() {
-        assertNotNull(new SubjectCommand(UH_NUMBERS.get(0)).execute());
-        assertNotNull(new SubjectCommand(UH_USERNAMES.get(0)).execute());
-        assertNotNull(new SubjectCommand(null).execute());
-    }
-
-    @Test
-    public void resultsTest() {
-        String username = UH_USERNAMES.get(0);
-        String number = UH_NUMBERS.get(0);
-        SubjectResult usernameResult = new SubjectCommand(username).execute();
-        SubjectResult numberResult = new SubjectCommand(number).execute();
-
-        assertEquals(number, usernameResult.getUhUuid());
-        assertEquals(number, numberResult.getUhUuid());
-
-        new SubjectCommand("Badfasd-fasdfsad").execute();
+        try{
+            new SubjectCommand(null);
+        }catch (NullPointerException e) {
+            assertEquals("uhIdentifier cannot be null", e.getMessage());
+        }
     }
 }

@@ -13,14 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestFindGroupCommand {
-    @Value("${groupings.api.test.grouping_many_include}")
-    protected String GROUPING_INCLUDE;
-
-    @Value("${groupings.api.test.grouping_many_basis}")
-    protected String GROUPING_BASIS;
-
-    @Value("${groupings.api.test.grouping_many_owners}")
-    protected String GROUPING_OWNERS;
 
     @Value("${groupings.api.test.grouping_many}")
     protected String GROUPING;
@@ -29,32 +21,10 @@ public class TestFindGroupCommand {
     public void constructor() {
         FindGroupCommand findGroupCommand = new FindGroupCommand(GROUPING);
         assertNotNull(findGroupCommand);
-        findGroupCommand = new FindGroupCommand(null);
-        assertNotNull(findGroupCommand);
-    }
-
-    @Test
-    public void execute() {
-        FindGroupCommand findGroupCommand = new FindGroupCommand(GROUPING);
-        assertNotNull(findGroupCommand);
-        FindGroupResult findGroupResult = findGroupCommand.execute();
-        assertNotNull(findGroupResult);
-
-        findGroupCommand = new FindGroupCommand(GROUPING_INCLUDE);
-        assertNotNull(findGroupCommand);
-        findGroupResult = findGroupCommand.execute();
-        assertNotNull(findGroupResult);
-        assertEquals("", findGroupResult.getDescription());
-
-        findGroupCommand = new FindGroupCommand(GROUPING_BASIS);
-        assertNotNull(findGroupCommand);
-        findGroupResult = findGroupCommand.execute();
-        assertNotNull(findGroupResult);
-        assertEquals("", findGroupResult.getDescription());
-
-        findGroupCommand = new FindGroupCommand("invalid-group-path");
-        assertNotNull(findGroupCommand);
-        findGroupResult = findGroupCommand.execute();
-        assertNotNull(findGroupResult);
+        try {
+            findGroupCommand = new FindGroupCommand(null);
+        } catch (NullPointerException e) {
+            assertEquals("path cannot be null", e.getMessage());
+        }
     }
 }

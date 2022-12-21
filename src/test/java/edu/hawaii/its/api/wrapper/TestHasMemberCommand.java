@@ -1,9 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,36 +18,14 @@ public class TestHasMemberCommand {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
-
-    @Value("${groupings.api.test.grouping_many_basis}")
-    private String GROUPING_BASIS;
-
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
-
-    @Value("${groupings.api.test.grouping_many_exclude}")
-    private String GROUPING_EXCLUDE;
-
-    @Value("${groupings.api.test.grouping_many_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
 
     @Value("${groupings.api.test.uh-usernames}")
     private List<String> TEST_USERNAMES;
 
     @Value("${groupings.api.test.uh-numbers}")
     private List<String> TEST_UH_NUMBERS;
-
-    private String TEST_USERNAME;
-    private String TEST_NUMBER;
-
-    @BeforeEach
-    public void beforeEach() {
-        TEST_USERNAME = TEST_USERNAMES.get(0);
-        TEST_NUMBER = TEST_UH_NUMBERS.get(0);
-    }
 
     @Test
     public void constructorTest() {
@@ -61,17 +37,11 @@ public class TestHasMemberCommand {
         } catch (RuntimeException e) {
             assertEquals("groupPath cannot be null", e.getMessage());
         }
-    }
 
-    @Test
-    public void executeTest() {
-        HasMemberResults hasMemberResults = new HasMemberCommand(GROUPING_OWNERS, TEST_UH_NUMBERS.get(0)).execute();
-        assertNotNull(hasMemberResults);
-        JsonUtil.printJson(hasMemberResults);
-
-        /*
-        hasMemberResults = new HasMemberCommand(GROUPING_OWNERS, TEST_USERNAMES.get(0)).execute();
-        assertNotNull(hasMemberResults);
-         */
+        try {
+            new HasMemberCommand(GROUPING_INCLUDE, null);
+        } catch (NullPointerException e) {
+            assertEquals("uhIdentifier cannot be null", e.getMessage());
+        }
     }
 }

@@ -2,7 +2,6 @@ package edu.hawaii.its.api.wrapper;
 
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,14 +42,5 @@ public class TestUpdateTimestampCommand {
         } catch (NullPointerException e) {
             assertEquals("assignType cannot be null", e.getMessage());
         }
-    }
-
-    @Test public void execute() {
-        UpdateTimestampCommand updateTimestampCommand =
-                new UpdateTimestampCommand(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING_INCLUDE,
-                        YYYYMMDDTHHMM, OPERATION_REPLACE_VALUES, LocalDateTime.now());
-
-        UpdateTimestampResults updateTimestampResults = updateTimestampCommand.execute();
-        JsonUtil.printJson(updateTimestampResults);
     }
 }

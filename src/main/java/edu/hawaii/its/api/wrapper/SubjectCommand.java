@@ -4,11 +4,14 @@ import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
+import java.util.Objects;
+
 public class SubjectCommand extends GrouperCommand implements Command<SubjectResult> {
 
     private final GcGetSubjects gcGetSubjects;
 
     public SubjectCommand(String uhIdentifier) {
+        Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
         gcGetSubjects = new GcGetSubjects();
         gcGetSubjects.assignIncludeSubjectDetail(true);
         this.addSubject(uhIdentifier)
@@ -21,13 +24,8 @@ public class SubjectCommand extends GrouperCommand implements Command<SubjectRes
 
     public SubjectResult execute() {
         SubjectResult subjectResult;
-        try {
-            WsGetSubjectsResults wsGetSubjectsResults = gcGetSubjects.execute();
-            subjectResult = new SubjectResult(wsGetSubjectsResults);
-        } catch (RuntimeException e) {
-            subjectResult = new SubjectResult();
-        }
-        return subjectResult;
+        WsGetSubjectsResults wsGetSubjectsResults = gcGetSubjects.execute();
+        return new SubjectResult(wsGetSubjectsResults);
     }
 
     private SubjectCommand addSubject(String uhIdentifier) {
