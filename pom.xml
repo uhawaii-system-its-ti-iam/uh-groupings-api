@@ -130,7 +130,7 @@
                                 <echo>$ ./mvnw clean spring-boot:run</echo>
                                 <echo/>
                                 <echo>To access a list of possible commands:</echo>
-                                <echo>                                    
+                                <echo>
                                     https://uhawaii.atlassian.net/wiki/spaces/SITARd/pages/12944701/Unit+Testing#UnitTesting-RunningYourTest
                                 </echo>
                             </target>
