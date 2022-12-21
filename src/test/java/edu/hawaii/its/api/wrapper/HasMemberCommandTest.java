@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestHasMemberCommand {
+public class HasMemberCommandTest {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;

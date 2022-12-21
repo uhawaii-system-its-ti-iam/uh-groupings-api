@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestRemoveMemberCommand {
+public class SubjectCommandTest {
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;
 
@@ -26,20 +26,12 @@ public class TestRemoveMemberCommand {
 
     @Value("${groupings.api.success}")
     protected String SUCCESS;
-
     @Test
     public void constructorTest() {
-        RemoveMemberCommand removeMemberCommand = new RemoveMemberCommand(GROUPING_INCLUDE, UH_NUMBERS.get(0));
-        assertNotNull(removeMemberCommand);
-
-        try {
-            new RemoveMemberCommand(null, UH_NUMBERS.get(0));
-        }catch (NullPointerException e) {
-            assertEquals("groupPath cannot be null", e.getMessage());
-        }
-
-        try {
-            new RemoveMemberCommand(GROUPING_INCLUDE, null);
+        assertNotNull(new SubjectCommand(UH_NUMBERS.get(0)));
+        assertNotNull(new SubjectCommand(UH_USERNAMES.get(0)));
+        try{
+            new SubjectCommand(null);
         }catch (NullPointerException e) {
             assertEquals("uhIdentifier cannot be null", e.getMessage());
         }

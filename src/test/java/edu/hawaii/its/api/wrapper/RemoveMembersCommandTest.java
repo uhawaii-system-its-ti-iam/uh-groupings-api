@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestRemoveMembersCommand {
+public class RemoveMembersCommandTest {
 
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;

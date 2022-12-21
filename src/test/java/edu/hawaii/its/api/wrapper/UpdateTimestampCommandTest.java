@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestUpdateTimestampCommand {
+public class UpdateTimestampCommandTest {
 
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;

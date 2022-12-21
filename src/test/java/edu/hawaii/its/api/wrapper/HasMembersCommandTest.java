@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,36 +15,31 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 @ActiveProfiles("integrationTest")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestAddMembersCommand  {
-
-
-    @Value("${groupings.api.test.grouping_many_include}")
-    protected String GROUPING_INCLUDE;
-
+public class HasMembersCommandTest {
     @Value("${groupings.api.test.uh-usernames}")
-    protected List<String> UH_USERNAMES;
+    private List<String> TEST_UH_USERNAMES;
 
     @Value("${groupings.api.test.uh-numbers}")
-    protected List<String> UH_NUMBERS;
+    private List<String> TEST_UH_NUMBERS;
 
-    @Value("${groupings.api.success}")
-    protected String SUCCESS;
-    @Test
-    public void constructorTest() {
-        AddMembersCommand addMembersCommand = new AddMembersCommand(GROUPING_INCLUDE, UH_NUMBERS);
-        assertNotNull(addMembersCommand);
+    @Value("${groupings.api.test.grouping_many_include}")
+    private String GROUPING_INCLUDE;
+
+    @Test void Constructor() {
+        HasMembersCommand hasMembersCommand = new HasMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS);
+        assertNotNull(hasMembersCommand);
 
         try {
-            new AddMembersCommand(null, UH_NUMBERS);
+            new HasMembersCommand(null, TEST_UH_NUMBERS );
         }catch (NullPointerException e) {
             assertEquals("groupPath cannot be null", e.getMessage());
         }
 
         try {
-            new AddMembersCommand(GROUPING_INCLUDE, null);
+            new HasMembersCommand(GROUPING_INCLUDE, null);
         }catch (NullPointerException e) {
             assertEquals("uhIdentifiers cannot be null", e.getMessage());
         }
@@ -52,7 +48,7 @@ public class TestAddMembersCommand  {
         List<String> listWithNull = new ArrayList<>(Arrays.asList(array));
 
         try {
-            new AddMembersCommand(GROUPING_INCLUDE, listWithNull);
+            new HasMembersCommand(GROUPING_INCLUDE, listWithNull);
         }catch (NullPointerException e) {
             assertEquals("uhIdentifier cannot be null", e.getMessage());
         }

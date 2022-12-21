@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestUsersGroupsCommand {
+public class UsersGroupsCommandTest {
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;
 

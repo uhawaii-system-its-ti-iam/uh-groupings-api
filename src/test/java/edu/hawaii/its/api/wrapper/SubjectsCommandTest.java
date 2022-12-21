@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestSubjectCommand  {
+public class SubjectsCommandTest {
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;
 
@@ -26,14 +28,23 @@ public class TestSubjectCommand  {
 
     @Value("${groupings.api.success}")
     protected String SUCCESS;
+
     @Test
     public void constructorTest() {
-        assertNotNull(new SubjectCommand(UH_NUMBERS.get(0)));
-        assertNotNull(new SubjectCommand(UH_USERNAMES.get(0)));
-        try{
-            new SubjectCommand(null);
-        }catch (NullPointerException e) {
+        assertNotNull(new SubjectsCommand(UH_NUMBERS));
+        assertNotNull(new SubjectsCommand(UH_USERNAMES));
+        try {
+            new SubjectsCommand(null);
+        } catch (NullPointerException e) {
+            assertEquals("uhIdentifiers cannot be null", e.getMessage());
+        }
+        String[] array = { "uid", "uid", null, "uid" };
+        List<String> listWithNull = new ArrayList<>(Arrays.asList(array));
+        try {
+            new SubjectsCommand(listWithNull);
+        } catch (NullPointerException e) {
             assertEquals("uhIdentifier cannot be null", e.getMessage());
         }
     }
+
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestFindGroupCommand {
+public class FindGroupCommandTest {
 
     @Value("${groupings.api.test.grouping_many}")
     protected String GROUPING;
