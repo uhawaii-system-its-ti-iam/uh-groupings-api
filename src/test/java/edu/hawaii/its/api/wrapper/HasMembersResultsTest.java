@@ -44,7 +44,6 @@ public class HasMembersResultsTest {
         String json = propertyValue("ws.has.member.results.is.members.uhuuid");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
-        JsonUtil.printJson(hasMembersResults);
 
         List<String> testUsernames = getTestUsernames();
         List<String> testNumbers = getTestNumbers();

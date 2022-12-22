@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.UpdateTimestampResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,6 @@ public class TestTimestampService {
         assertEquals(formatDateString(now.plusMinutes(1)), updateTimestampResults.getUpdatedTimestamp());
         updateTimestampResults = timestampService.updateTimestamp(GROUPING_INCLUDE, randomLocalDateTimes.get(1));
         assertNotNull(updateTimestampResults);
-        JsonUtil.printJson(updateTimestampResults);
         assertEquals(formatDateString(now.plusMinutes(1)), updateTimestampResults.getUpdatedTimestamp());
         assertEquals(formatDateString(randomLocalDateTimes.get(1).plusMinutes(1)), updateTimestampResults.getReplacedTimestamp());
 
