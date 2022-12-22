@@ -118,8 +118,6 @@ public class TestUpdateMemberService {
         } catch (UhMemberNotFoundException e) {
             assertNull(e.getCause());
         }
-
-        updateMemberService.addAdmin(null, null);
     }
 
     @Test
