@@ -12,6 +12,7 @@ UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise a
 [![Coverage Status](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/blob/badges/jacoco.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/coverage.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg)](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api)
 [![CodeQL](https://github.com/yertsti/uh-groupings-api/actions/workflows/codeql.yml/badge.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/codeql.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/cd7ffbd709394483a61472a2c87b0aaf)](https://www.codacy.com/gh/uhawaii-system-its-ti-iam/uh-groupings-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uhawaii-system-its-ti-iam/uh-groupings-api&amp;utm_campaign=Badge_Grade)
 
 ##### Java
 You'll need a Java JDK to build and run the project (version 1.8).
