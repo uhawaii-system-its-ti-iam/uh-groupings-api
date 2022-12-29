@@ -1,7 +1,37 @@
 package edu.hawaii.its.api.controller;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
@@ -22,38 +52,6 @@ import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import org.springframework.http.MediaType;
-
 import edu.hawaii.its.api.util.JsonUtil;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -343,7 +341,7 @@ public class GroupingsRestControllerv2_1Test {
         List<Membership> memberships = new ArrayList<>();
         given(membershipService.membershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
-        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
+        mockMvc.perform(get(API_BASE + "/members/iamtst01/memberships")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
@@ -356,7 +354,7 @@ public class GroupingsRestControllerv2_1Test {
         List<Membership> results = new ArrayList<>();
         given(membershipService.managePersonResults(ADMIN, "iamtst01")).willReturn(results);
 
-        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings/all")
+        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
@@ -682,7 +680,7 @@ public class GroupingsRestControllerv2_1Test {
         }
         given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/grouping/grouping")
+        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
@@ -729,7 +727,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.numberOfMemberships(ADMIN, uid))
                 .willReturn(369);
 
-        mockMvc.perform(get(API_BASE + "/groupings/members/" + uid + "/memberships")
+        mockMvc.perform(get(API_BASE + "/members/" + uid + "/memberships/count")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
