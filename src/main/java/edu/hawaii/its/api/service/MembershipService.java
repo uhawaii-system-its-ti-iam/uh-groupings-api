@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,12 +13,11 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.exception.AccessDeniedException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
@@ -30,7 +31,6 @@ import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
-
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
@@ -46,8 +46,6 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-
-import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
 
 @Service("membershipService")
 public class MembershipService {
@@ -133,6 +131,7 @@ public class MembershipService {
             groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid, onlyMembershipPaths());
             optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
         } catch (GcWebServiceError e) {
+            logger.warn("membershipResults;" + e);
             return Collections.emptyList();
         }
 
@@ -157,6 +156,7 @@ public class MembershipService {
             groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
             optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
         } catch (GcWebServiceError e) {
+            logger.warn("membershipResults;" + e);
             return memberships;
         }
 
@@ -166,39 +166,42 @@ public class MembershipService {
     /**
      * Helper - membershipResults, managePersonResults
      */
-    private List<Membership> createMembershipList(List<String> groupPaths, List<String> optOutList, List<Membership> memberships) {
+    private List<Membership> createMembershipList(List<String> groupPaths, List<String> optOutList,
+            List<Membership> memberships) {
         Map<String, List<String>> pathMap = new HashMap<>();
+
         for (String pathToCheck : groupPaths) {
-            if (!pathToCheck.endsWith(GroupType.INCLUDE.value())
-                    && !pathToCheck.endsWith(GroupType.EXCLUDE.value())
-                    && !pathToCheck.endsWith(GroupType.BASIS.value())
-                    && !pathToCheck.endsWith(GroupType.OWNERS.value())) {
-                continue;
+            if (pathToCheck.endsWith(GroupType.INCLUDE.value())
+                    || pathToCheck.endsWith(GroupType.EXCLUDE.value())
+                    || pathToCheck.endsWith(GroupType.BASIS.value())
+                    || pathToCheck.endsWith(GroupType.OWNERS.value())) {
+                String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
+                if (!pathMap.containsKey(parentPath)) {
+                    pathMap.put(parentPath, new ArrayList<>());
+                }
+                pathMap.get(parentPath).add(pathToCheck);
             }
-            String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
-            if (!pathMap.containsKey(parentPath)) {
-                pathMap.put(parentPath, new ArrayList<>());
-            }
-            pathMap.get(parentPath).add(pathToCheck);
         }
+
         for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
             String groupingPath = entry.getKey();
             List<String> paths = entry.getValue();
-            Membership membership = new Membership();
-            setSubgroups(paths, membership);
+            Membership membership = subgroups(paths);
             membership.setPath(groupingPath);
             membership.setOptOutEnabled(optOutList.contains(groupingPath));
             membership.setName(groupingAssignmentService.nameGroupingPath(groupingPath));
             membership.setDescription(grouperApiService.descriptionOf(groupingPath));
             memberships.add(membership);
         }
+
         return memberships;
     }
 
     /**
      * Helper - membershipResults, managePersonResults
      */
-    private void setSubgroups(List<String> paths, Membership membership) {
+    private Membership subgroups(List<String> paths) {
+        Membership membership = new Membership();
         for (String path : paths) {
             if (path.endsWith(GroupType.BASIS.value())) {
                 membership.setInBasis(true);
@@ -213,6 +216,7 @@ public class MembershipService {
                 membership.setInOwner(true);
             }
         }
+        return membership;
     }
 
     public GroupingsMoveMembersResult addGroupMembersNewImplementation(String currentUser, String groupPath,
