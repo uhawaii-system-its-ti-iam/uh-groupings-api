@@ -15,6 +15,8 @@ public class Grouping {
     private Group include;
     private Group composite;
     private Group owners;
+
+    private boolean isEmpty;
     private List<SyncDestination> syncDestinations = new ArrayList<>();
     private Map<String, Boolean> syncDestinationsState = new HashMap<>();
     private boolean isOptInOn = false;
@@ -28,7 +30,6 @@ public class Grouping {
     // Constructor.
     public Grouping(String path) {
         setPath(path);
-
         setDescription("");
         setBasis(new EmptyGroup());
         setExclude(new EmptyGroup());
@@ -150,5 +151,18 @@ public class Grouping {
 
     public void setOptOutOn(boolean isOptOutOn) {
         this.isOptOutOn = isOptOutOn;
+    }
+
+    public boolean isEmpty() {
+        return isEmpty;
+    }
+
+    /* Set the isEmpty field to true if all the groups are empty. */
+    public void setIsEmpty() {
+        this.isEmpty = this.getComposite().isEmpty() &&
+                this.getBasis().isEmpty() &&
+                this.getInclude().isEmpty() &&
+                this.getExclude().isEmpty() &&
+                this.getOwners().isEmpty();
     }
 }
