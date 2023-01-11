@@ -141,6 +141,7 @@ public class GroupingAssignmentService {
         compositeGrouping.setInclude(groups.get(include));
         compositeGrouping.setComposite(groups.get(groupingPath));
         compositeGrouping.setOwners(groups.get(owners));
+        compositeGrouping.setIsEmpty();
 
         return compositeGrouping;
     }

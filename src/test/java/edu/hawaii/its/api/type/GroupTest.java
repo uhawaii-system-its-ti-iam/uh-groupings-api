@@ -1,19 +1,20 @@
 package edu.hawaii.its.api.type;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class GroupTest {
 
@@ -274,4 +275,11 @@ public class GroupTest {
         assertThat(group.toString(), equalTo(expected));
     }
 
+    @Test
+    public void isEmptyTest() {
+        group = new Group();
+        assertTrue(group.isEmpty());
+        group.addMember(new Person("A", "B", "C"));
+        assertFalse(group.isEmpty());
+    }
 }
