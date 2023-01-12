@@ -31,6 +31,7 @@ public class Grouping {
     public Grouping(String path) {
         setPath(path);
         setDescription("");
+        setName("");
         setBasis(new EmptyGroup());
         setExclude(new EmptyGroup());
         setInclude(new EmptyGroup());
@@ -52,12 +53,10 @@ public class Grouping {
     }
 
     public boolean isSyncDestinationOn(String key) {
-
         return syncDestinationsState.get(key);
     }
 
     public void changeSyncDestinationState(String key, Boolean boo) {
-
         syncDestinationsState.replace(key, boo);
 
         for (SyncDestination destination : syncDestinations) {
