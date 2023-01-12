@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Group implements Comparable<Group> {
 
@@ -139,6 +139,10 @@ public class Group implements Comparable<Group> {
     @Override
     public String toString() {
         return "Group [path=" + path + ", members=" + members + "]";
+    }
+
+    public boolean isEmpty() {
+        return this.members.isEmpty();
     }
 
 }
