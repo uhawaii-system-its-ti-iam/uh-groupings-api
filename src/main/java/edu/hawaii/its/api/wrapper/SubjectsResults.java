@@ -24,8 +24,7 @@ public class SubjectsResults extends Results {
     public List<Subject> getSubjects() {
         List<Subject> subjects = new ArrayList<>();
         WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
-        if (isEmpty(wsSubjects)) {
-        } else {
+        if (!isEmpty(wsSubjects)) {
             for (WsSubject wsSubject : wsSubjects) {
                 subjects.add(new Subject(wsSubject));
             }
