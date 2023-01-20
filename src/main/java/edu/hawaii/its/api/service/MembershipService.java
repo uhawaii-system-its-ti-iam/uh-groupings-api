@@ -1,28 +1,12 @@
 package edu.hawaii.its.api.service;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
-import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Membership;
@@ -33,19 +17,28 @@ import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
-import edu.hawaii.its.api.wrapper.AddMembersCommand;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
-import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
-import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectCommand;
 import edu.hawaii.its.api.wrapper.SubjectResult;
-import edu.hawaii.its.api.wrapper.SubjectsCommand;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
 
 @Service("membershipService")
 public class MembershipService {
@@ -219,28 +212,6 @@ public class MembershipService {
         return membership;
     }
 
-    public GroupingsMoveMembersResult addGroupMembersNewImplementation(String currentUser, String groupPath,
-            List<String> usersToAdd) {
-        logger.info("addGroupMembers; currentUser: " + currentUser + "; groupPath: " + groupPath + ";"
-                + "usersToAdd: " + usersToAdd + ";");
-
-        String removalPath = groupingAssignmentService.parentGroupingPath(groupPath);
-
-        if (groupPath.endsWith(GroupType.INCLUDE.value())) {
-            removalPath += GroupType.EXCLUDE.value();
-        } else if (groupPath.endsWith(GroupType.EXCLUDE.value())) {
-            removalPath += GroupType.INCLUDE.value();
-        } else {
-            throw new GcWebServiceError("404: Invalid group path.");
-        }
-        SubjectsResults subjectsResults = new SubjectsCommand(usersToAdd).execute();
-        List<String> validIdentifiers = new SubjectsService(subjectsResults)
-                .check()
-                .validUhUuids();
-        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(removalPath, validIdentifiers).execute();
-        AddMembersResults addMembersResults = new AddMembersCommand(groupPath, validIdentifiers).execute();
-        return new GroupingsMoveMembersResult(addMembersResults, removeMembersResults);
-    }
 
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group
