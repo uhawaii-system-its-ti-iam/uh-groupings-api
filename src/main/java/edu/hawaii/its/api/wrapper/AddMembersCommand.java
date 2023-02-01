@@ -6,13 +6,17 @@ import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 import java.util.List;
+import java.util.Objects;
 
 public class AddMembersCommand extends GrouperCommand implements Command<AddMembersResults> {
     private final GcAddMember gcAddMember;
 
     public AddMembersCommand(String groupPath, List<String> uhIdentifiers) {
+        Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
+        Objects.requireNonNull(groupPath, "groupPath cannot be null");
         gcAddMember = new GcAddMember();
         for (String uhIdentifier : uhIdentifiers) {
+            Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
             addUhIdentifier(uhIdentifier);
         }
         includeUhMemberDetails(true);

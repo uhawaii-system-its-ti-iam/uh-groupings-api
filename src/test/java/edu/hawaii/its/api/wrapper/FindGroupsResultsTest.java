@@ -1,21 +1,20 @@
 package edu.hawaii.its.api.wrapper;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static edu.hawaii.its.api.util.JsonUtil.asObject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import static edu.hawaii.its.api.util.JsonUtil.asObject;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FindGroupsResultsTest {
 

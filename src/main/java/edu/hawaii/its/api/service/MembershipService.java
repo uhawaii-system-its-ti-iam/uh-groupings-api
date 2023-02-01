@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.type.GroupType;
@@ -19,8 +18,6 @@ import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
-import edu.hawaii.its.api.wrapper.SubjectCommand;
-import edu.hawaii.its.api.wrapper.SubjectResult;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
@@ -75,6 +72,9 @@ public class MembershipService {
     @Autowired
     private GrouperApiService grouperApiService;
 
+    @Autowired
+    private SubjectService subjectService;
+
     /**
      * Add am admin.
      */
@@ -84,11 +84,8 @@ public class MembershipService {
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
-        SubjectResult subjectResult = new SubjectCommand(adminToAdd).execute();
-        if (!subjectResult.getResultCode().equals(SUCCESS)) {
-            throw new UhMemberNotFoundException(subjectResult.getResultCode());
-        }
-        return new GroupingsAddResult(new AddMemberCommand(GROUPING_ADMINS, adminToAdd).execute());
+        String validUhUuid = subjectService.getValidUhUuid(adminToAdd);
+        return new GroupingsAddResult(new AddMemberCommand(GROUPING_ADMINS, validUhUuid).execute());
     }
 
     /**
@@ -100,11 +97,8 @@ public class MembershipService {
         if (!memberAttributeService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
-        SubjectResult subjectResult = new SubjectCommand(adminToRemove).execute();
-        if (!subjectResult.getResultCode().equals(SUCCESS)) {
-            throw new UhMemberNotFoundException(subjectResult.getResultCode());
-        }
-        return new GroupingsRemoveResult(new RemoveMemberCommand(GROUPING_ADMINS, adminToRemove).execute());
+        String validUhUuid = subjectService.getValidUhUuid(adminToRemove);
+        return new GroupingsRemoveResult(new RemoveMemberCommand(GROUPING_ADMINS, validUhUuid).execute());
     }
 
     /**
@@ -211,7 +205,6 @@ public class MembershipService {
         }
         return membership;
     }
-
 
     /**
      * Add all uids/uhUuids contained in list usersToAdd to the group at groupPath. When adding to the include group

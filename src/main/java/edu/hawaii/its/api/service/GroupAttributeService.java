@@ -1,23 +1,23 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import java.util.ArrayList;
 import java.util.List;
