@@ -12,6 +12,7 @@ public class GroupingsAddResults extends GroupingsMembersResults implements Memb
 
     public GroupingsAddResults(AddMembersResults addMembersResults) {
         groupingsAddResults = new ArrayList<>();
+        groupPath = addMembersResults.getGroupPath();
         for (AddResult addResult : addMembersResults.getResults()) {
             groupingsAddResults.add(new GroupingsAddResult(addResult));
         }
@@ -32,5 +33,9 @@ public class GroupingsAddResults extends GroupingsMembersResults implements Memb
     @Override
     public List<GroupingsAddResult> getResults() {
         return groupingsAddResults;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
     }
 }

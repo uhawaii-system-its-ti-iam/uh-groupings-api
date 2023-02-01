@@ -1,22 +1,22 @@
 package edu.hawaii.its.api.groupings;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsAddResultTest {
-
+public class GroupingsMoveMemberResultTest {
     private static Properties properties;
 
     @BeforeAll
@@ -32,24 +32,16 @@ public class GroupingsAddResultTest {
         String json = propertyValue("ws.add.member.results.success.single.result");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMemberResult addMemberResult = new AddMemberResult(wsAddMemberResults);
-        GroupingsAddResult groupingsAddResult = new GroupingsAddResult(addMemberResult);
-        assertNotNull(groupingsAddResult);
+        assertNotNull(addMemberResult);
 
-        assertEquals("SUCCESS", groupingsAddResult.resultCode);
-        assertEquals("uid", groupingsAddResult.uid);
-        assertEquals("uhUuid", groupingsAddResult.getUhUuid());
-        assertEquals("name", groupingsAddResult.getName());
+        json = propertyValue("ws.delete.member.results.success.single.result");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(removeMemberResult);
 
-        json = propertyValue("ws.add.member.results.success");
-        wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        groupingsAddResult = new GroupingsAddResult(addMembersResults.getResults().get(0));
-        assertNotNull(groupingsAddResult);
-
-        assertEquals("SUCCESS", groupingsAddResult.resultCode);
-        assertEquals("uid-0", groupingsAddResult.uid);
-        assertEquals("uhUuid-0", groupingsAddResult.getUhUuid());
-        assertEquals("name-0", groupingsAddResult.getName());
+        GroupingsMoveMemberResult groupingsMoveMemberResult =
+                new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
+        assertNotNull(groupingsMoveMemberResult);
     }
 
     private String propertyValue(String key) {
