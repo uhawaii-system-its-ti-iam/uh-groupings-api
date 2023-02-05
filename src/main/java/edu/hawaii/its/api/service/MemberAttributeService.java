@@ -2,11 +2,15 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectCommand;
+import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectResult;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 
@@ -40,11 +45,20 @@ public class MemberAttributeService {
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
 
+    @Value("${groupings.api.success}")
+    private String SUCCESS;
+
+    @Value("${groupings.api.failure}")
+    private String FAILURE;
+
     @Autowired
     private GrouperApiService grouperApiService;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private SubjectService subjectService;
 
     // Returns true if the user is a member of the group via username or UH id
     public boolean isMember(String groupPath, String uhIdentifier) {
@@ -126,13 +140,29 @@ public class MemberAttributeService {
     }
 
     /**
+     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers.
+     * Returns an empty list if all uhIdentifiers are valid.
+     */
+    public List<String> invalidUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+
+        List<String> invalid = uhIdentifiers.parallelStream()
+                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                .collect(Collectors.toList());
+
+        return invalid;
+    }
+
+    /**
      * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
      * or uhUuid passed through uhIdentifier. Passing an invalid uhIdentifier or current user will return a mapping
      * with null values.
      */
     public Person getMemberAttributes(String currentUser, String uhIdentifier) {
         if (!isAdmin(currentUser) && !isOwner(currentUser)) {
-            return new Person();
+            throw new AccessDeniedException();
         }
 
         SubjectResult results = new SubjectCommand(uhIdentifier).execute();
@@ -150,6 +180,27 @@ public class MemberAttributeService {
         }
 
         return person;
+    }
+
+    /**
+     * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
+     * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return an
+     * empty array
+     */
+    public List<Subject> getMembersAttributes(String currentUser, List<String> uhIdentifiers) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+
+        SubjectsResults results = new SubjectsCommand(uhIdentifiers).execute();
+
+        if (results.getResultCode().equals(FAILURE)) {
+            return new ArrayList<>();
+        }
+
+        List<Subject> subjects = results.getSubjects();
+
+        return subjects;
     }
 
     /**
