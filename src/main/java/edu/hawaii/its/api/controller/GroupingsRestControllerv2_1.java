@@ -42,6 +42,7 @@ import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
+import edu.hawaii.its.api.wrapper.Subject;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -148,7 +149,21 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off username or id number.
+     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers.
+     */
+    @PostMapping(value = "/members/invalid")
+    @ResponseBody
+    public ResponseEntity<List<String>> invalidUhIdentifiers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST membersAttributes...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.invalidUhIdentifiers(currentUser, uhIdentifiers));
+    }
+
+    /**
+     * Get a member's attributes based off a uhIdentifier.
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}")
     @ResponseBody
@@ -158,6 +173,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.getMemberAttributes(currentUser, uhIdentifier));
+    }
+
+    /**
+     * Get a list of members' attributes based off a list of uhIdentifiers.
+     */
+    @PostMapping(value = "/members")
+    @ResponseBody
+    public ResponseEntity<List<Subject>> membersAttributes(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST membersAttributes...");
+        return ResponseEntity
+                .ok()
+                .body(memberAttributeService.getMembersAttributes(currentUser, uhIdentifiers));
     }
 
     /**

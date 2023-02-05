@@ -32,7 +32,8 @@ public class SubjectsResults extends Results {
         return subjects;
     }
 
-    @Override public String getResultCode() {
+    @Override
+    public String getResultCode() {
         String success = "SUCCESS";
         String failure = "FAILURE";
         for (Subject subject : getSubjects()) {

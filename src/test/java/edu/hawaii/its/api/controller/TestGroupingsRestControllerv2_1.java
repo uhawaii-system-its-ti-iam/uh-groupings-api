@@ -214,6 +214,18 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void invalidUhIdentifiersTest() throws Exception {
+        String url = API_BASE_URL + "members/invalid/";
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+    }
+
+    @Test
     public void memberAttributesTest() throws Exception {
         String url = API_BASE_URL + "members/" + TEST_USERNAMES.get(0);
         MvcResult mvcResult = mockMvc.perform(get(url)
@@ -221,6 +233,18 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
+    }
+
+    @Test
+    public void membersAttributesTest() throws Exception {
+        String url = API_BASE_URL + "members/";
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
