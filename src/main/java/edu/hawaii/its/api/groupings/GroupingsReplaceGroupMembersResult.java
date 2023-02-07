@@ -14,6 +14,7 @@ public class GroupingsReplaceGroupMembersResult extends GroupingsAddResults {
 
     @Override
     public String getResultCode() {
-        return addMembersResults.getResultCode();
+        String resultCode = addMembersResults.getResultCode();
+        return (resultCode != null) ? resultCode : "";
     }
 }

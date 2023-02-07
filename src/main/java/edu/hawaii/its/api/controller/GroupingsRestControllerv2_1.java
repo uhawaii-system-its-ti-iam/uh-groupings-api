@@ -3,7 +3,9 @@ package edu.hawaii.its.api.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -306,52 +308,52 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
-    public ResponseEntity<List<UIAddMemberResults>> addIncludeMembers(
+    public ResponseEntity<GroupingsMoveMembersResult> addIncludeMembers(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addIncludeMembers(currentUser, path, uhIdentifiers));
+                .body(updateMemberService.addIncludeMembers(currentUser, path, uhIdentifiers));
     }
 
     /**
      * Add a list of users to the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
-    public ResponseEntity<List<UIAddMemberResults>> addExcludeMembers(
+    public ResponseEntity<GroupingsMoveMembersResult> addExcludeMembers(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addExcludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addExcludeMembers(currentUser, path, uhIdentifiers));
+                .body(updateMemberService.addExcludeMembers(currentUser, path, uhIdentifiers));
     }
 
     /**
-     * Remove a list of users from the include group of grouping at path.
+     * Remove a list of users from the Include group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
-    public ResponseEntity<List<UIRemoveMemberResults>> removeIncludeMembers(
+    public ResponseEntity<GroupingsRemoveResults> removeIncludeMembers(
             @RequestHeader(CURRENT_USER_KEY) String currentUser, @PathVariable String path,
             @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST removeIncludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeIncludeMembers(currentUser, path, uhIdentifiers));
+                .body(updateMemberService.removeIncludeMembers(currentUser, path, uhIdentifiers));
     }
 
     /**
-     * Remove a list of users from the exclude include group of grouping at path.
+     * Remove a list of users from the Exclude group of grouping at path.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
-    public ResponseEntity<List<UIRemoveMemberResults>> removeExcludeMembers(
+    public ResponseEntity<GroupingsRemoveResults> removeExcludeMembers(
             @RequestHeader(CURRENT_USER_KEY) String currentUser, @PathVariable String path,
             @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST removeExcludeMembers...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeExcludeMembers(currentUser, path, uhIdentifiers));
+                .body(updateMemberService.removeExcludeMembers(currentUser, path, uhIdentifiers));
     }
 
     /**

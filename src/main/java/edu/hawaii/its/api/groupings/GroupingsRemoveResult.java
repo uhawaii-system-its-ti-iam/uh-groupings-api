@@ -25,23 +25,23 @@ public class GroupingsRemoveResult extends GroupingsMemberResult {
     }
 
     @Override public String getResultCode() {
-        return resultCode;
+        return (resultCode != null) ? resultCode : "";
     }
 
     public String getUid() {
-        return uid;
+        return (uid != null) ? uid : "";
     }
 
     public String getUhUuid() {
-        return uhUuid;
+        return (uhUuid != null) ? uhUuid : "";
     }
 
     public String getName() {
-        return name;
+        return (name != null) ? name : "";
     }
 
     public String getGroupPath() {
-        return groupPath;
+        return (groupPath != null) ? groupPath : "";
     }
 
 }
