@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -466,31 +468,31 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addIncludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
+        GroupingsMoveMembersResult groupingsMoveMembersResult = new GroupingsMoveMembersResult();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(addMemberResults);
+        given(updateMemberService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
+                .willReturn(groupingsMoveMembersResult);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isOk());
 
-        verify(membershipService, times(1))
+        verify(updateMemberService, times(1))
                 .addIncludeMembers(USERNAME, "grouping", usersToAdd);
     }
 
     @Test
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        List<UIAddMemberResults> addMemberResults = new ArrayList<>();
+        GroupingsMoveMembersResult groupingsMoveMembersResult = new GroupingsMoveMembersResult();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
-        given(membershipService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(addMemberResults);
+        given(updateMemberService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
+                .willReturn(groupingsMoveMembersResult);
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/")
                         .header(CURRENT_USER, USERNAME)
@@ -498,45 +500,45 @@ public class GroupingsRestControllerv2_1Test {
                         .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isOk());
 
-        verify(membershipService, times(1))
+        verify(updateMemberService, times(1))
                 .addExcludeMembers(USERNAME, "grouping", usersToAdd);
     }
 
     @Test
     public void removeIncludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
+        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
-        given(membershipService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(removeMemberResults);
+        given(updateMemberService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(groupingsRemoveResults);
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToRemove)))
                 .andExpect(status().isOk());
 
-        verify(membershipService, times(1))
+        verify(updateMemberService, times(1))
                 .removeIncludeMembers(USERNAME, "grouping", usersToRemove);
     }
 
     @Test
     public void removeExcludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
+        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
-        given(membershipService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(removeMemberResults);
+        given(updateMemberService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
+                .willReturn(groupingsRemoveResults);
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToRemove)))
                 .andExpect(status().isOk());
 
-        verify(membershipService, times(1))
+        verify(updateMemberService, times(1))
                 .removeExcludeMembers(USERNAME, "grouping", usersToRemove);
     }
 

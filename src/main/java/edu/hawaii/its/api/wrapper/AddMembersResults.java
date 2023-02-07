@@ -18,6 +18,10 @@ public class AddMembersResults extends Results {
         }
     }
 
+    public AddMembersResults() {
+        wsAddMemberResults = new WsAddMemberResults();
+    }
+
     public String getGroupPath() {
         String groupPath = null;
         if (wsAddMemberResults.getWsGroupAssigned() != null) {
