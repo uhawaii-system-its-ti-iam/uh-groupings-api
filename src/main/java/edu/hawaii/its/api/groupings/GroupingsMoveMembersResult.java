@@ -14,6 +14,11 @@ public class GroupingsMoveMembersResult extends GroupingsMembersResults {
         setResultCode(addResults.getResultCode());
     }
 
+    public GroupingsMoveMembersResult() {
+        addResults = new GroupingsAddResults();
+        removeResults = new GroupingsRemoveResults();
+    }
+
     public GroupingsAddResults getAddResults() {
         return addResults;
     }
