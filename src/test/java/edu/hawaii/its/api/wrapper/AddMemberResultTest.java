@@ -75,4 +75,5 @@ public class AddMemberResultTest {
     private String propertyValue(String key) {
         return properties.getProperty(key);
     }
+
 }

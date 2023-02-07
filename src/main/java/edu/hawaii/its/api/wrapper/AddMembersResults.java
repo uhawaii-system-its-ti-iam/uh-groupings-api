@@ -8,7 +8,7 @@ import java.util.List;
 
 public class AddMembersResults extends Results {
 
-    private final WsAddMemberResults wsAddMemberResults;
+    protected final WsAddMemberResults wsAddMemberResults;
 
     public AddMembersResults(WsAddMemberResults wsAddMemberResults) {
         if (wsAddMemberResults == null) {
@@ -51,5 +51,9 @@ public class AddMembersResults extends Results {
             }
         }
         return failure;
+    }
+
+    public String getResultMessage() {
+        return wsAddMemberResults.getResultMetadata().getResultMessage();
     }
 }

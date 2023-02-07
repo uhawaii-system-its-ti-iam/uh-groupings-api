@@ -206,6 +206,7 @@ public class GroupAttributeService {
     }
 
     //TODO: Move both checkPrivileges helper methods to the Governor class once it's built
+
     /**
      * Helper - changeOptStatus, changeGroupAttributeStatus
      */
@@ -257,7 +258,7 @@ public class GroupAttributeService {
     }
 
     public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action,
-                                                             Person person) {
+            Person person) {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
         groupingsServiceResult.setAction(action);
         groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());

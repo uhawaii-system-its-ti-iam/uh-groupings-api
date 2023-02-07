@@ -1,11 +1,28 @@
 package edu.hawaii.its.api.controller;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.UpdateMemberService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.type.UIAddMemberResults;
+import edu.hawaii.its.api.type.UIRemoveMemberResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -24,25 +41,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.hawaii.its.api.groupings.GroupingsAddResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
-import edu.hawaii.its.api.service.GroupAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIAddMemberResults;
-import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.wrapper.Subject;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -64,6 +66,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private MembershipService membershipService;
+
+    @Autowired
+    private UpdateMemberService updateMemberService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -163,7 +168,33 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off a uhIdentifier.
+     * Remove all members from the include group.
+     */
+    @DeleteMapping(value = "/groupings/{groupingPath}/include")
+    public ResponseEntity<GroupingsReplaceGroupMembersResult> resetIncludeGroup(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath) {
+        logger.info("Entered REST resetIncludeGroup...");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.resetIncludeGroup(currentUser, groupingPath));
+    }
+
+    /**
+     * Remove all members from the exclude group.
+     */
+    @DeleteMapping(value = "/groupings/{groupingPath}/exclude")
+    public ResponseEntity<GroupingsReplaceGroupMembersResult> resetExcludeGroup(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath) {
+        logger.info("Entered REST resetExcludeGroup...");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.resetExcludeGroup(currentUser, groupingPath));
+    }
+
+    /**
+     * Get a member's attributes based off username or id number.
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}")
     @ResponseBody
@@ -275,7 +306,8 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
-    public ResponseEntity<List<UIAddMemberResults>> addIncludeMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addIncludeMembers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addIncludeMembers...");
         return ResponseEntity
@@ -287,7 +319,8 @@ public class GroupingsRestControllerv2_1 {
      * Add a list of users to the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
-    public ResponseEntity<List<UIAddMemberResults>> addExcludeMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<List<UIAddMemberResults>> addExcludeMembers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addExcludeMembers...");
         return ResponseEntity
@@ -445,7 +478,7 @@ public class GroupingsRestControllerv2_1 {
                 .withOptType(optType)
                 .withOptValue(value)
                 .build();
-        
+
         return ResponseEntity
                 .ok()
                 .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
@@ -458,7 +491,8 @@ public class GroupingsRestControllerv2_1 {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<SyncDestination>> getSyncDestinations(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<List<SyncDestination>> getSyncDestinations(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path) throws Exception {
         logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity

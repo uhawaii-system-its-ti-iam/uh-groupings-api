@@ -25,7 +25,7 @@ public class TestRemoveMemberCommand {
     private List<String> UH_NUMBERS;
 
     @Value("${groupings.api.success}")
-    protected String SUCCESS;
+    private String SUCCESS;
 
     @Test
     public void constructorTest() {
