@@ -10,6 +10,7 @@ import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
+import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
@@ -19,6 +20,8 @@ import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
+import edu.hawaii.its.api.wrapper.ReplaceGroupMembersCommand;
+import edu.hawaii.its.api.wrapper.ReplaceGroupMembersResult;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -26,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,13 +43,13 @@ public class UpdateMemberService {
     public static final Log log = LogFactory.getLog(UpdateMemberService.class);
 
     @Autowired
+    private MemberAttributeService memberAttributeService;
+
+    @Autowired
     private SubjectService subjectService;
 
     @Autowired
-    GroupPathService groupPathService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
+    private GroupPathService groupPathService;
 
     @Autowired
     private ExecutorService executor;
@@ -198,19 +200,34 @@ public class UpdateMemberService {
         return groupingsRemoveResults;
     }
 
-    public List<GroupingsRemoveResults> resetGroup(String currentUser, String groupingPath, List<String> includeMembers,
-            List<String> excludeMembers) {
+    /**
+     * Remove all members from the include group at groupingPath.
+     */
+    public GroupingsReplaceGroupMembersResult resetIncludeGroup(String currentUser, String groupingPath) {
+        log.info("resetIncludeGroup; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<GroupingsRemoveResults> groupingsRemoveResults = new ArrayList<>();
-        GroupingsRemoveResults includeResults =
-                removeIncludeMembers(currentUser, groupingPath, subjectService.getValidUhUuids(includeMembers));
-        GroupingsRemoveResults excludeResults =
-                removeExcludeMembers(currentUser, groupingPath, subjectService.getValidUhUuids(excludeMembers));
-        groupingsRemoveResults.add(includeResults);
-        groupingsRemoveResults.add(excludeResults);
-        return groupingsRemoveResults;
+        String groupPath = groupPathService.getIncludeGroup(groupingPath);
+        return resetGroup(groupPath);
+    }
 
+    /**
+     * Remove all members from the exclude group at groupingPath.
+     */
+    public GroupingsReplaceGroupMembersResult resetExcludeGroup(String currentUser, String groupingPath) {
+        log.info("resetExcludeGroup; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
+        groupPathService.checkPath(groupingPath);
+        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        String groupPath = groupPathService.getExcludeGroup(groupingPath);
+        return resetGroup(groupPath);
+    }
+
+    /**
+     * Remove all members from group at groupPath.
+     */
+    private GroupingsReplaceGroupMembersResult resetGroup(String groupPath) {
+        ReplaceGroupMembersResult replaceGroupMembersResult = new ReplaceGroupMembersCommand(groupPath).execute();
+        return new GroupingsReplaceGroupMembersResult(replaceGroupMembersResult);
     }
 
     public void checkIfOwnerOrAdminUser(String currentUser, String groupingPath) {

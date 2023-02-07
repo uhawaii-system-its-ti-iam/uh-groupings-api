@@ -6,6 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -270,20 +270,20 @@ public class TestUpdateMemberService {
     public void resetGroupTest() {
         List<String> includes = TEST_UH_USERNAMES.subList(0, 2);
         List<String> excludes = TEST_UH_USERNAMES.subList(3, 5);
-
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
 
-        updateMemberService.resetGroup(ADMIN, GROUPING, includes, excludes);
+        GroupingsReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroup(ADMIN, GROUPING);
+        GroupingsReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroup(ADMIN, GROUPING);
 
-        Iterator<String> includesIter = includes.iterator();
-        Iterator<String> excludesIter = excludes.iterator();
-
-        while (includesIter.hasNext() && excludesIter.hasNext()) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, includesIter.next()));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, excludesIter.next()));
+        assertEquals(SUCCESS, resultInclude.getResultCode());
+        assertEquals(SUCCESS, resultExclude.getResultCode());
+        for (String str : excludes) {
+            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, str));
         }
-
+        for (String str : includes) {
+            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, str));
+        }
     }
 
     @Test
