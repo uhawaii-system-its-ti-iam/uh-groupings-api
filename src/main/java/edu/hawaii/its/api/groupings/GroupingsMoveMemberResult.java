@@ -6,6 +6,8 @@ import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 public class GroupingsMoveMemberResult extends GroupingsMemberResult {
     private final GroupingsAddResult addResult;
     private final GroupingsRemoveResult removeResult;
+    private static final String SUCCESS = "SUCCESS";
+    private static final String FAILURE = "FAILURE";
 
     public GroupingsMoveMemberResult(AddMemberResult addMemberResult, RemoveMemberResult removeMemberResult) {
         addResult = new GroupingsAddResult(addMemberResult);
@@ -13,8 +15,15 @@ public class GroupingsMoveMemberResult extends GroupingsMemberResult {
         this.resultCode = addResult.getResultCode();
     }
 
-    @Override public String getResultCode() {
-       return this.addResult.getResultCode();
+    public GroupingsMoveMemberResult() {
+        addResult = new GroupingsAddResult();
+        removeResult = new GroupingsRemoveResult();
+    }
+
+    @Override
+    public String getResultCode() {
+        String resultCode = addResult.getResultCode();
+        return (resultCode.equals(SUCCESS)) ? resultCode : FAILURE;
     }
 
     public GroupingsAddResult getAddResult() {
