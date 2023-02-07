@@ -21,6 +21,10 @@ public class GroupingsAddResults extends GroupingsMembersResults implements Memb
             groupingsAddResults.add(new GroupingsAddResult(addResult));
         }
     }
+    public GroupingsAddResults() {
+        addMembersResults  = new AddMembersResults();
+        groupingsAddResults = new ArrayList<>();
+    }
 
     @Override
     public String getResultCode() {
