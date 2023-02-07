@@ -3,6 +3,7 @@ package edu.hawaii.its.api.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
@@ -284,24 +285,24 @@ public class GroupingsRestControllerv2_1 {
      * Make a user of uhIdentifier a member of the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uhIdentifier:[\\w-:.]+}/self")
-    public ResponseEntity<UIAddMemberResults> optIn(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingsMoveMemberResult> optIn(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @PathVariable String uhIdentifier) {
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optIn(currentUser, path, uhIdentifier));
+                .body(updateMemberService.optIn(currentUser, path, uhIdentifier));
     }
 
     /**
      * Make a user of uhIdentifier a member of the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uhIdentifier:[\\w-:.]+}/self")
-    public ResponseEntity<UIAddMemberResults> optOut(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingsMoveMemberResult> optOut(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path, @PathVariable String uhIdentifier) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.optOut(currentUser, path, uhIdentifier));
+                .body(updateMemberService.optOut(currentUser, path, uhIdentifier));
     }
 
     /**
