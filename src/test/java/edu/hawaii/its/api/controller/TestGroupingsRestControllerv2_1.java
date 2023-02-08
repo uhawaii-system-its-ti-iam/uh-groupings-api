@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
@@ -342,7 +343,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(
                 new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                        UIAddMemberResults.class));
+                        GroupingsMoveMemberResult.class));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
     }
@@ -360,7 +361,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(
                 new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                        UIAddMemberResults.class));
+                        GroupingsMoveMemberResult.class));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
 
