@@ -26,6 +26,10 @@ public class GroupingsMoveMemberResult extends GroupingsMemberResult {
         return (resultCode.equals(SUCCESS)) ? resultCode : FAILURE;
     }
 
+    @Override public String getGroupPath() {
+        return (groupPath != null) ? groupPath : "";
+    }
+
     public GroupingsAddResult getAddResult() {
         return addResult;
     }
