@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class AddMembersResultsTest {
 
     private static Properties properties;
-
     @BeforeAll
     public static void beforeAll() throws Exception {
         Path path = Paths.get("src/test/resources");

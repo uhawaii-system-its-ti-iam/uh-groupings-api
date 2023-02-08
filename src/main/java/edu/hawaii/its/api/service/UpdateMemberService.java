@@ -43,7 +43,7 @@ public class UpdateMemberService {
     public static final Log log = LogFactory.getLog(UpdateMemberService.class);
 
     @Autowired
-    private UpdateTimestampService updateTimestamp;
+    private UpdateTimestampService timestampService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;
@@ -151,8 +151,7 @@ public class UpdateMemberService {
         return removeGroupMembers(groupingPath + GroupType.INCLUDE.value(), uhIdentifiers);
     }
 
-    public GroupingsRemoveResult removeIncludeMember(String currentUser, String groupingPath,
-            String uhIdentifier) {
+    public GroupingsRemoveResult removeIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         return removeGroupMember(groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
@@ -227,7 +226,7 @@ public class UpdateMemberService {
     private GroupingsReplaceGroupMembersResult resetGroup(String groupPath) {
         ReplaceGroupMembersResult replaceGroupMembersResult = new ReplaceGroupMembersCommand(groupPath).execute();
         GroupingsReplaceGroupMembersResult result = new GroupingsReplaceGroupMembersResult(replaceGroupMembersResult);
-        updateTimestamp.replaceGroupMembersResult(result);
+        timestampService.update(result);
         return result;
     }
 
@@ -252,69 +251,69 @@ public class UpdateMemberService {
     }
 
     private GroupingsMoveMembersResult moveGroupMembers(String addGroupPath, String removeGroupPath,
-            List<String> usersToAdd) {
-        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(removeGroupPath, usersToAdd).execute();
-        AddMembersResults addMembersResults = new AddMembersCommand(addGroupPath, usersToAdd).execute();
+            List<String> uhIdentifiers) {
+        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(removeGroupPath, uhIdentifiers).execute();
+        AddMembersResults addMembersResults = new AddMembersCommand(addGroupPath, uhIdentifiers).execute();
 
         GroupingsMoveMembersResult result = new GroupingsMoveMembersResult(addMembersResults, removeMembersResults);
-        updateTimestamp.addResults(result.getAddResults());
-        updateTimestamp.removeResults(result.getRemoveResults());
+        timestampService.update(result.getAddResults());
+        timestampService.update(result.getRemoveResults());
         return result;
     }
 
-    private GroupingsMoveMemberResult moveGroupMember(String addGroupPath, String removeGroupPath, String userToAdd) {
-        RemoveMemberResult removeMemberResult = new RemoveMemberCommand(removeGroupPath, userToAdd).execute();
-        AddMemberResult addMemberResult = new AddMemberCommand(addGroupPath, userToAdd).execute();
+    private GroupingsMoveMemberResult moveGroupMember(String addGroupPath, String removeGroupPath,
+            String uhIdentifier) {
+        RemoveMemberResult removeMemberResult = new RemoveMemberCommand(removeGroupPath, uhIdentifier).execute();
+        AddMemberResult addMemberResult = new AddMemberCommand(addGroupPath, uhIdentifier).execute();
         GroupingsMoveMemberResult result = new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
-        updateTimestamp.addResult(result.getAddResult());
-        updateTimestamp.removeResult(result.getRemoveResult());
+        timestampService.update(result.getAddResult());
+        timestampService.update(result.getRemoveResult());
         return result;
     }
 
-    private GroupingsRemoveResults removeGroupMembers(String groupPath, List<String> usersToRemove) {
-        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(groupPath, usersToRemove).execute();
+    private GroupingsRemoveResults removeGroupMembers(String groupPath, List<String> uhIdentifiers) {
+        RemoveMembersResults removeMembersResults = new RemoveMembersCommand(groupPath, uhIdentifiers).execute();
         GroupingsRemoveResults results = new GroupingsRemoveResults(removeMembersResults);
-        updateTimestamp.removeResults(results);
+        timestampService.update(results);
         return results;
     }
 
-    private GroupingsRemoveResult removeGroupMember(String groupPath, String userToRemove) {
-        RemoveMemberResult removeMemberResult = new RemoveMemberCommand(groupPath, userToRemove).execute();
+    private GroupingsRemoveResult removeGroupMember(String groupPath, String uhIdentifier) {
+        RemoveMemberResult removeMemberResult = new RemoveMemberCommand(groupPath, uhIdentifier).execute();
         GroupingsRemoveResult result = new GroupingsRemoveResult(removeMemberResult);
-        updateTimestamp.removeResult(result);
+        timestampService.update(result);
         return result;
     }
 
-    private GroupingsAddResults addOwners(String groupingPath, List<String> usersToAdd) {
+    private GroupingsAddResults addOwners(String groupingPath, List<String> uhIdentifiers) {
         AddMembersResults addMembersResults =
-                new AddMembersCommand(groupingPath + GroupType.OWNERS.value(), usersToAdd).execute();
+                new AddMembersCommand(groupingPath + GroupType.OWNERS.value(), uhIdentifiers).execute();
         GroupingsAddResults results = new GroupingsAddResults(addMembersResults);
-        updateTimestamp.addResults(results);
+        timestampService.update(results);
         return results;
     }
 
-    private GroupingsAddResult addOwner(String groupingPath, String userToAdd) {
+    private GroupingsAddResult addOwner(String groupingPath, String uhIdentifier) {
         AddMemberResult addMemberResult =
-                new AddMemberCommand(groupingPath + GroupType.OWNERS.value(), userToAdd).execute();
+                new AddMemberCommand(groupingPath + GroupType.OWNERS.value(), uhIdentifier).execute();
         GroupingsAddResult result = new GroupingsAddResult(addMemberResult);
-        updateTimestamp.addResult(result);
+        timestampService.update(result);
         return result;
     }
 
-    private GroupingsRemoveResults removeOwners(String groupingPath, List<String> ownersToRemove) {
+    private GroupingsRemoveResults removeOwners(String groupingPath, List<String> uhIdentifier) {
         RemoveMembersResults removeMembersResults =
-                new RemoveMembersCommand(groupingPath + GroupType.OWNERS.value(), ownersToRemove).execute();
+                new RemoveMembersCommand(groupingPath + GroupType.OWNERS.value(), uhIdentifier).execute();
         GroupingsRemoveResults results = new GroupingsRemoveResults(removeMembersResults);
-        updateTimestamp.removeResults(results);
+        timestampService.update(results);
         return results;
     }
 
-    private GroupingsRemoveResult removeOwner(String groupingPath, String ownerToRemove) {
+    private GroupingsRemoveResult removeOwner(String groupingPath, String uhIdentifier) {
         RemoveMemberResult removeMemberResult =
-                new RemoveMemberCommand(groupingPath + GroupType.OWNERS.value(), ownerToRemove).execute();
+                new RemoveMemberCommand(groupingPath + GroupType.OWNERS.value(), uhIdentifier).execute();
         GroupingsRemoveResult result = new GroupingsRemoveResult(removeMemberResult);
-        updateTimestamp.removeResult(result);
+        timestampService.update(result);
         return result;
     }
-
 }

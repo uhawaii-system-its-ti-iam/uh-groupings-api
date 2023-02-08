@@ -1,20 +1,30 @@
-package edu.hawaii.its.api.groupings;
+package edu.hawaii.its.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.groupings.GroupingsAddResults;
+import edu.hawaii.its.api.groupings.GroupingsTimestampResult;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Properties;
 
-public class GroupingsAddResultsTest {
+@SpringBootTest(classes = { SpringBootWebApplication.class })
+public class UpdateTimestampServiceTest {
+
+    @Autowired
+    private UpdateTimestampService timestampService;
 
     private static Properties properties;
 
@@ -27,14 +37,14 @@ public class GroupingsAddResultsTest {
     }
 
     @Test
-    public void constructor() {
-        String json = propertyValue("ws.add.member.results.success");
+    public void update() {
+        String json = propertyValue("ws.add.member.results.failure");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         GroupingsAddResults groupingsAddResults = new GroupingsAddResults(addMembersResults);
-        assertNotNull(groupingsAddResults);
-        List<GroupingsAddResult> results = groupingsAddResults.getResults();
-        assertNotNull(results);
+        GroupingsTimestampResult groupingsTimestampResult = timestampService.update(groupingsAddResults);
+        assertNotNull(timestampService.update(groupingsTimestampResult));
+        assertFalse(groupingsTimestampResult.isTimeUpdated());
     }
 
     private String propertyValue(String key) {

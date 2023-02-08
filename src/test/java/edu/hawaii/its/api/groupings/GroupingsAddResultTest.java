@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -8,16 +10,12 @@ import edu.hawaii.its.api.wrapper.AddMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
 public class GroupingsAddResultTest {
-
     private static Properties properties;
 
     @BeforeAll
