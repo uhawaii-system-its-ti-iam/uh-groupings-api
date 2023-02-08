@@ -174,17 +174,13 @@ public class UpdateMemberService {
 
     public GroupingsMoveMemberResult optIn(String currentUser, String groupingPath, String uhIdentifier) {
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
-
-        return moveGroupMember(groupingPath + GroupType.INCLUDE.value(),
-                groupingPath + GroupType.EXCLUDE.value(),
+        return moveGroupMember(groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
                 uhIdentifier);
     }
 
     public GroupingsMoveMemberResult optOut(String currentUser, String groupingPath, String uhIdentifier) {
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
-
-        return moveGroupMember(groupingPath + GroupType.EXCLUDE.value(),
-                groupingPath + GroupType.INCLUDE.value(),
+        return moveGroupMember(groupingPath + GroupType.EXCLUDE.value(), groupingPath + GroupType.INCLUDE.value(),
                 uhIdentifier);
     }
 
