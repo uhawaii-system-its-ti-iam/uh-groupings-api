@@ -2,11 +2,23 @@ package edu.hawaii.its.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsAddResults;
 import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
@@ -21,7 +33,6 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,18 +49,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -405,7 +404,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingsRemoveResults.class));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username ->
                 assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, username)));
     }
@@ -420,7 +420,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingsRemoveResults.class));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username ->
                 assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, username)));
     }
@@ -442,7 +443,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsAddResults.class));
         TEST_USERNAMES.forEach(username -> assertTrue(memberAttributeService.isOwner(GROUPING, username)));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
     }
@@ -455,7 +457,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username -> assertFalse(memberAttributeService.isOwner(GROUPING, username)));
     }
 
