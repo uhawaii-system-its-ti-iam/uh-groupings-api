@@ -260,11 +260,10 @@ public class TestUpdateMemberService {
 
         try {
             updateMemberService.removeFromGroups(ADMIN, uhNum, groupPaths);
-            fail("Should throw an exception if a grouping path is in the group list");
+            fail("Should throw an exception an invalid groupPath is in the group list");
         } catch (GcWebServiceError e) {
             assertEquals("404: Invalid group path.", e.getContainerResponseObject().toString());
         }
-
     }
 
     @Test

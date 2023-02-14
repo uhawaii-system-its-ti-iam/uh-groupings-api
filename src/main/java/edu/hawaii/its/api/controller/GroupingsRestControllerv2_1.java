@@ -131,14 +131,14 @@ public class GroupingsRestControllerv2_1 {
      * Delete a user from multiple groupings.
      */
     @DeleteMapping(value = "/admins/{paths}/{uhIdentifier}")
-    public ResponseEntity<List<UIRemoveMemberResults>> removeFromGroups(
+    public ResponseEntity<GroupingsRemoveResults> removeFromGroups(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable List<String> paths,
             @PathVariable String uhIdentifier) {
         logger.info("Entered REST removeFromGroups...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeFromGroups(currentUser, uhIdentifier, paths));
+                .body(updateMemberService.removeFromGroups(currentUser, uhIdentifier, paths));
     }
 
     /**
