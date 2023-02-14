@@ -21,13 +21,13 @@ public class TestAddMembersCommand {
 
 
     @Value("${groupings.api.test.grouping_many_include}")
-    protected String GROUPING_INCLUDE;
+    private String GROUPING_INCLUDE;
 
     @Value("${groupings.api.test.uh-usernames}")
-    protected List<String> UH_USERNAMES;
+    private List<String> UH_USERNAMES;
 
     @Value("${groupings.api.test.uh-numbers}")
-    protected List<String> UH_NUMBERS;
+    private List<String> UH_NUMBERS;
 
     @Value("${groupings.api.success}")
     protected String SUCCESS;
