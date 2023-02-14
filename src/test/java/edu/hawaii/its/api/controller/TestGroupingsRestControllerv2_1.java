@@ -189,7 +189,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingsRemoveResults.class));
 
         assertFalse(memberAttributeService.isOwner(GROUPING, iamtst01List.get(0)));
         assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
