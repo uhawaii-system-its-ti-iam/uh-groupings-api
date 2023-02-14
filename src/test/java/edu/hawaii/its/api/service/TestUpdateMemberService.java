@@ -1,5 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -20,12 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -182,6 +181,7 @@ public class TestUpdateMemberService {
             assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
         }
+
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
     }
 
@@ -215,6 +215,7 @@ public class TestUpdateMemberService {
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uid);
         assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
         assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+
         updateMemberService.removeIncludeMember(ADMIN, GROUPING, uid);
     }
 

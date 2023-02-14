@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -14,9 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 public class GroupingsMoveMemberResultTest {
+    private static final String SUCCESS = "SUCCESS";
     private static Properties properties;
 
     @BeforeAll
@@ -28,7 +29,8 @@ public class GroupingsMoveMemberResultTest {
     }
 
     @Test
-    public void test() {
+    public void constructor() {
+        assertNotNull(new GroupingsMoveMemberResult());
         String json = propertyValue("ws.add.member.results.success.single.result");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMemberResult addMemberResult = new AddMemberResult(wsAddMemberResults);
@@ -42,6 +44,24 @@ public class GroupingsMoveMemberResultTest {
         GroupingsMoveMemberResult groupingsMoveMemberResult =
                 new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
         assertNotNull(groupingsMoveMemberResult);
+    }
+
+    @Test
+    public void successfulAccessors() {
+        String json = propertyValue("ws.add.member.results.success.single.result");
+        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
+        AddMemberResult addMemberResult = new AddMemberResult(wsAddMemberResults);
+
+        json = propertyValue("ws.delete.member.results.success.single.result");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+
+        GroupingsMoveMemberResult groupingsMoveMemberResult =
+                new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
+
+        assertEquals(SUCCESS, groupingsMoveMemberResult.getResultCode());
+        assertNotNull(groupingsMoveMemberResult.getAddResult());
+        assertNotNull(groupingsMoveMemberResult.getRemoveResult());
     }
 
     private String propertyValue(String key) {
