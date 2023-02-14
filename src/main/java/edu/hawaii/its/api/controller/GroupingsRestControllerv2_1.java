@@ -25,6 +25,7 @@ import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
+import edu.hawaii.its.api.wrapper.Subject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +44,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import edu.hawaii.its.api.wrapper.Subject;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -113,7 +112,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST addAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addAdmin(currentUser, uhIdentifier));
+                .body(updateMemberService.addAdmin(currentUser, uhIdentifier));
     }
 
     /**
@@ -125,7 +124,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST removeAdmin...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeAdmin(currentUser, uhIdentifier));
+                .body(updateMemberService.removeAdmin(currentUser, uhIdentifier));
     }
 
     /**
