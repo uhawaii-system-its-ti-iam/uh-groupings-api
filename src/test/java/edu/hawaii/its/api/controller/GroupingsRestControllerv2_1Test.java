@@ -273,19 +273,19 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void removeFromGroupsTest() throws Exception {
-        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
+        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
         List<String> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             paths.add("grouping" + i);
         }
         String userToRemove = "userToRemove";
-        given(membershipService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(removeMemberResults);
+        given(updateMemberService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(groupingsRemoveResults);
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + String.join(",", paths) + "/" + userToRemove)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
-        verify(membershipService, times(1)).removeFromGroups(ADMIN, userToRemove, paths);
+        verify(updateMemberService, times(1)).removeFromGroups(ADMIN, userToRemove, paths);
 
     }
 

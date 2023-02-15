@@ -188,11 +188,11 @@ public class UpdateMemberService {
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
         GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
         for (String groupPath : groupPaths) {
-            if (!groupPath.endsWith(GroupType.OWNERS.value()) &&
-                    !groupPath.endsWith(GroupType.EXCLUDE.value()) &&
-                    !groupPath.endsWith(GroupType.INCLUDE.value())) {
+            if (!groupPathService.isGroupPath(groupPath)) {
                 throw new GcWebServiceError("404: Invalid group path.");
             }
+        }
+        for (String groupPath : groupPaths) {
             groupingsRemoveResults.add(removeGroupMember(groupPath, validIdentifier));
         }
         return groupingsRemoveResults;
