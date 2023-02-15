@@ -3,6 +3,7 @@ package edu.hawaii.its.api.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsAddResults;
 import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
@@ -23,7 +24,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.wrapper.Subject;
 
@@ -372,26 +372,26 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add a new owner.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
-    public ResponseEntity<List<UIAddMemberResults>> addOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingsAddResults> addOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.addOwnerships(path, currentUser, uhIdentifier));
+                .body(updateMemberService.addOwnerships(currentUser, path, uhIdentifier));
     }
 
     /**
      * Delete a grouping owner.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
-    public ResponseEntity<List<UIRemoveMemberResults>> removeOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingsRemoveResults> removeOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST removeOwners");
         return ResponseEntity
                 .ok()
-                .body(membershipService.removeOwnerships(path, currentUser, uhIdentifier));
+                .body(updateMemberService.removeOwnerships(currentUser, path, uhIdentifier));
     }
 
     /**

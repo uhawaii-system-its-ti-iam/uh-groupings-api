@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
+import edu.hawaii.its.api.groupings.GroupingsAddResults;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
@@ -41,7 +42,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIAddMemberResults;
 import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.util.JsonUtil;
 
@@ -565,13 +565,13 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addOwnersTest() throws Exception {
         List<String> ownersToAdd = new ArrayList<>();
-        List<UIAddMemberResults> addMemberResultList = new ArrayList<>();
+        GroupingsAddResults groupingsAddResults = new GroupingsAddResults();
         ownersToAdd.add("tst04name");
         ownersToAdd.add("tst05name");
         ownersToAdd.add("tst06name");
 
-        given(membershipService.addOwnerships("grouping", USERNAME, ownersToAdd))
-                .willReturn(addMemberResultList);
+        given(updateMemberService.addOwnerships(USERNAME, "grouping", ownersToAdd))
+                .willReturn(groupingsAddResults);
 
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToAdd))
                         .header(CURRENT_USER, USERNAME))
@@ -579,21 +579,21 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
 
         assertThat(result, notNullValue());
-        verify(membershipService, times(1))
-                .addOwnerships("grouping", USERNAME, ownersToAdd);
+        verify(updateMemberService, times(1))
+                .addOwnerships(USERNAME, "grouping", ownersToAdd);
 
     }
 
     @Test
     public void removeOwnersTest() throws Exception {
         List<String> ownersToRemove = new ArrayList<>();
-        List<UIRemoveMemberResults> removeMemberResultList = new ArrayList<>();
+        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
         ownersToRemove.add("tst04name");
         ownersToRemove.add("tst05name");
         ownersToRemove.add("tst06name");
 
-        given(membershipService.removeOwnerships("grouping", USERNAME, ownersToRemove))
-                .willReturn(removeMemberResultList);
+        given(updateMemberService.removeOwnerships(USERNAME, "grouping", ownersToRemove))
+                .willReturn(groupingsRemoveResults);
 
         MvcResult result =
                 mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToRemove))
@@ -601,8 +601,8 @@ public class GroupingsRestControllerv2_1Test {
                         .andExpect(status().isOk())
                         .andReturn();
         assertNotNull(result);
-        verify(membershipService, times(1))
-                .removeOwnerships("grouping", USERNAME, ownersToRemove);
+        verify(updateMemberService, times(1))
+                .removeOwnerships(USERNAME, "grouping", ownersToRemove);
     }
 
     @Test
