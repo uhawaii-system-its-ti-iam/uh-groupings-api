@@ -30,7 +30,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.PreferenceType;
+import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.Subject;
@@ -499,7 +499,7 @@ public class GroupingsRestControllerv2_1 {
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable("id") OptType preferenceId,
-            @PathVariable("type") PreferenceType preferenceType) {
+            @PathVariable("type") PreferenceStatus PreferenceStatus) {
 
         logger.info("Entered REST updatePreference");
 
@@ -508,7 +508,7 @@ public class GroupingsRestControllerv2_1 {
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceType.toggle())
+                .withOptValue(PreferenceStatus.toggle())
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
@@ -516,7 +516,7 @@ public class GroupingsRestControllerv2_1 {
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceType.toggle())
+                .withOptValue(PreferenceStatus.toggle())
                 .build();
 
         return ResponseEntity
