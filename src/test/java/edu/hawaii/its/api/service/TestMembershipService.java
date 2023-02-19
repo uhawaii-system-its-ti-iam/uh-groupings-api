@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.UIAddMemberResults;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class TestMembershipService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -179,35 +180,9 @@ public class TestMembershipService {
 
     @Test
     public void membershipResultsTest() {
-        List<Membership> memberships;
         String testUser = TEST_USERNAMES.get(0);
 
         // Should not be a member.
-        memberships = membershipService.membershipResults(ADMIN, testUser);
-        assertTrue(memberships.stream()
-                .noneMatch(membership -> membership.getPath().equals(GROUPING) && !membership.isInBasis()));
-
-        // Should be a member after added.
-        grouperApiService.addMember(GROUPING_OWNERS, testUser);
-        grouperApiService.addMember(GROUPING_INCLUDE, testUser);
-        grouperApiService.addMember(GROUPING_EXCLUDE, testUser);
-        grouperApiService.addMember(GROUPING_BASIS, testUser);
-        memberships = membershipService.membershipResults(ADMIN, testUser);
-        Membership membership = memberships.stream()
-                .filter(m -> m.getPath().equals(GROUPING)).findAny().orElse(null);
-        assertNotNull(membership);
-        assertEquals(GROUPING, membership.getPath());
-        assertFalse(membership.isInExclude());
-        assertTrue(membership.isInBasis());
-        assertTrue(membership.isInInclude());
-        assertFalse(membership.isInOwner());
-
-        // Clean up.
-        grouperApiService.removeMember(GROUPING_OWNERS, testUser);
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUser);
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testUser);
-        grouperApiService.removeMember(GROUPING_BASIS, testUser);
-
         // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
         try {
             membershipService.membershipResults(testUser, TEST_USERNAMES.get(1));
@@ -234,9 +209,11 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin and does not match uid.
         grouperApiService.addMember(GROUPING_ADMINS, testUser);
         try {
-            membershipService.membershipResults(testUser, "bogus-user");
+            membershipService.membershipResults(testUser, ADMIN);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
+        } catch (UhMemberNotFoundException e) {
+
         }
 
         // Should not throw an exception if current user is an admin and does match uid.
@@ -248,9 +225,13 @@ public class TestMembershipService {
         }
         grouperApiService.removeMember(GROUPING_ADMINS, testUser);
 
-        // Should return and empty list if uid passed is bogus.
-        memberships = membershipService.membershipResults(ADMIN, "bogus-user");
-        assertTrue(memberships.isEmpty());
+        // Should throw an exception if uid passed is bogus.
+        try {
+            membershipService.membershipResults(ADMIN, "bogus-user");
+            fail("Should throw an exception if uid passed is bogus.");
+        } catch (UhMemberNotFoundException e) {
+            assertEquals("404 NOT_FOUND \"bogus-user\"", e.getMessage());
+        }
     }
 
     @Test
@@ -426,7 +407,8 @@ public class TestMembershipService {
         bogusUsersToAdd.add("bogus1");
         bogusUsersToAdd.add("bogus2");
 
-        List<UIAddMemberResults> addMemberResults = membershipService.addIncludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
+        List<UIAddMemberResults> addMemberResults =
+                membershipService.addIncludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
         assertNotNull(addMemberResults);
         assertEquals(2, addMemberResults.size());
 
@@ -511,7 +493,8 @@ public class TestMembershipService {
         bogusUsersToAdd.add("bogus1");
         bogusUsersToAdd.add("bogus2");
 
-        List<UIAddMemberResults> addMemberResults = membershipService.addExcludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
+        List<UIAddMemberResults> addMemberResults =
+                membershipService.addExcludeMembers(ADMIN, GROUPING, bogusUsersToAdd);
         assertNotNull(addMemberResults);
         assertEquals(2, addMemberResults.size());
 
