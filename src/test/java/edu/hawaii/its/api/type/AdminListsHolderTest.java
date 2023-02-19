@@ -37,14 +37,14 @@ public class AdminListsHolderTest {
         groupingPaths.add(new GroupingPath("path:to:grouping"));
         adminListHolder.setAllGroupingPaths(groupingPaths);
         assertNotNull(adminListHolder.allGroupingPaths);
-        assertEquals("path:to:grouping", adminListHolder.allGroupingPaths.get(0).path);
+        assertEquals("path:to:grouping", adminListHolder.allGroupingPaths.get(0).getPath());
     }
 
     @Test
     public void getAllGroupingPathsTest() {
         assertNotNull(adminListHolder2.getAllGroupingPaths());
         assertTrue(adminListHolder2.getAllGroupingPaths().size() > 0);
-        assertEquals("path:to:grouping", adminListHolder2.getAllGroupingPaths().get(0).path);
+        assertEquals("path:to:grouping", adminListHolder2.getAllGroupingPaths().get(0).getPath());
     }
 
     @Test

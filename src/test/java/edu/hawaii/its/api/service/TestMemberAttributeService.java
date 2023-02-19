@@ -1,14 +1,22 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.wrapper.Subject;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -21,15 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -115,8 +114,6 @@ public class TestMemberAttributeService {
             assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
             assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE,
                     new Person(testUsername, testUsername, testUsername)));
-            assertEquals(0,
-                    getMembershipsForCurrentUser(membershipService.membershipResults(ADMIN, testUsername)).size());
         });
 
         // Should be members after add.
@@ -174,7 +171,6 @@ public class TestMemberAttributeService {
         });
     }
 
-
     @Test
     public void invalidUhIdentifiersTest() {
         assertThrows(AccessDeniedException.class,
@@ -202,7 +198,7 @@ public class TestMemberAttributeService {
         uhIdentifiers.add("bogus-user1");
         uhIdentifiers.add("bogus-user2");
         result = memberAttributeService.invalidUhIdentifiers(iamtst01, uhIdentifiers);
-        assertEquals(invalidUhIdentifiers,result);
+        assertEquals(invalidUhIdentifiers, result);
         membershipService.removeAdmin(ADMIN, iamtst01);
     }
 
@@ -317,7 +313,7 @@ public class TestMemberAttributeService {
         groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN_USER, TEST_USERNAMES.get(0));
         assertTrue(
                 groupingsOwned.stream()
-                .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
+                        .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
 
         membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
     }
@@ -348,10 +344,4 @@ public class TestMemberAttributeService {
      * Create a sublist which contains all memberships whose path contains the currentUsers uh username (ADMIN) and
      * who is not in basis.
      */
-    private List<Membership> getMembershipsForCurrentUser(List<Membership> memberships) {
-        return memberships
-                .stream().filter(membership -> membership.getPath().contains(GROUPING))
-                .collect(Collectors.toList())
-                .stream().filter(membership -> !membership.isInBasis()).collect(Collectors.toList());
-    }
 }

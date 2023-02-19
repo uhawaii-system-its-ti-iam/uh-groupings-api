@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 @Service("groupingAssignmentService")
@@ -244,7 +245,7 @@ public class GroupingAssignmentService {
             return new ArrayList<>();
         }
         GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
-        List<String> groupPaths =  groupsResults.groupPaths();
+        List<String> groupPaths = groupsResults.groupPaths();
         return groupPaths.stream().filter(predicate).collect(Collectors.toList());
     }
 
@@ -299,37 +300,6 @@ public class GroupingAssignmentService {
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
         return attributeAssignmentsResults.getGroupNamesAndDescriptions();
-    }
-
-    /**
-     * Remove one of the words (:exclude, :include, :owners ...) from the end of the string.
-     */
-    public String parentGroupingPath(String group) {
-        if (group != null) {
-            if (group.endsWith(GroupType.EXCLUDE.value())) {
-                return group.substring(0, group.length() - GroupType.EXCLUDE.value().length());
-            } else if (group.endsWith(GroupType.INCLUDE.value())) {
-                return group.substring(0, group.length() - GroupType.INCLUDE.value().length());
-            } else if (group.endsWith(GroupType.OWNERS.value())) {
-                return group.substring(0, group.length() - GroupType.OWNERS.value().length());
-            } else if (group.endsWith(GroupType.BASIS.value())) {
-                return group.substring(0, group.length() - GroupType.BASIS.value().length());
-            }
-            return group;
-        }
-        return "";
-    }
-
-    /**
-     * Helper - membershipResults
-     * Get the name of a grouping from groupPath.
-     */
-    public String nameGroupingPath(String groupPath) {
-        String parentPath = parentGroupingPath(groupPath);
-        if ("".equals(parentPath)) {
-            return "";
-        }
-        return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
 
     /**

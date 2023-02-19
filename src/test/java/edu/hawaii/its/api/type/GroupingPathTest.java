@@ -29,9 +29,9 @@ public class GroupingPathTest {
 
     @Test
     public void toStringTest() {
-        String str = "path: " + path.path + "; " +
-                "name: " + path.name + "; " +
-                "description: " + path.description + ";";
+        String str = "path: " + path.getPath() + "; " +
+                "name: " + path.getName() + "; " +
+                "description: " + path.getDescription() + ";";
         assertEquals(str, path.toString());
     }
 
@@ -44,7 +44,7 @@ public class GroupingPathTest {
     public void setNameTest() {
         GroupingPath path = new GroupingPath(PATH_ROOT);
         path.setName("Name");
-        assertEquals("Name", path.name);
+        assertEquals("Name", path.getName());
     }
 
     @Test
@@ -56,7 +56,7 @@ public class GroupingPathTest {
     public void setPathTest() {
         GroupingPath path = new GroupingPath(PATH_ROOT);
         path.setPath("path");
-        assertEquals("path", path.path);
+        assertEquals("path", path.getPath());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class GroupingPathTest {
     public void setDescriptionTest() {
         GroupingPath path = new GroupingPath(PATH_ROOT);
         path.setDescription("Description");
-        assertEquals("Description", path.description);
+        assertEquals("Description", path.getDescription());
     }
 
 }

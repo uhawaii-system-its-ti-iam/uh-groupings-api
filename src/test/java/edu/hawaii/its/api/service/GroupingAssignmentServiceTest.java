@@ -1,28 +1,27 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Person;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 class GroupingAssignmentServiceTest {
@@ -62,25 +61,6 @@ class GroupingAssignmentServiceTest {
     }
 
     @Test
-    public void parentGroupingPathTest() {
-        List<String> groupPaths = new ArrayList<>();
-        groupPaths.add(GROUPING_OWNERS);
-        groupPaths.add(GROUPING_BASIS);
-        groupPaths.add(GROUPING_INCLUDE);
-        groupPaths.add(GROUPING_EXCLUDE);
-        groupPaths.forEach(groupPath -> {
-            assertEquals(PATH_ROOT, groupingAssignmentService.parentGroupingPath(groupPath));
-        });
-        assertEquals("", groupingAssignmentService.parentGroupingPath(null));
-    }
-
-    @Test
-    public void nameGroupingPathTest() {
-        assertEquals("grouping-test-path", groupingAssignmentService.nameGroupingPath("test:grouping-test-path:include"));
-        assertEquals("", groupingAssignmentService.nameGroupingPath(""));
-    }
-
-    @Test
     public void makeGroupsTest() {
         WsGetMembersResults getMembersResults = new WsGetMembersResults();
         String[] attributeNames =
@@ -98,7 +78,7 @@ class GroupingAssignmentServiceTest {
             list[i] = new WsSubject();
             list[i].setName("testSubject_" + i);
             list[i].setId("testSubject_uuid_" + i);
-            // Attribute values need to match names in order (uuid is set seperately, so it can be blank here
+            // Attribute values need to match names in order (uuid is set separately, so it can be blank here
             list[i].setAttributeValues(new String[] { "testSubject_username_" + i, "", "", "testSubject_" + i, "" });
         }
 
