@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -77,6 +76,9 @@ public class GrouperApiService {
     @Autowired
     MemberAttributeService membershipAttributeService;
 
+    @Autowired
+    private GroupPathService groupPathService;
+
     public List<SyncDestination> syncDestinations() {
         WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
                 .assignScope(SYNC_DESTINATIONS_LOCATION)
@@ -96,8 +98,7 @@ public class GrouperApiService {
     }
 
     public String descriptionOf(String groupPath) {
-        FindGroupsResults result = new FindGroupsResults(findGroupsResults(groupPath));
-        return result.getDescription();
+       return  groupPathService.getGroupingDescription(groupPath);
     }
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
