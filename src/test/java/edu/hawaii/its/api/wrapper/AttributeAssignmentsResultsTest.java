@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.hawaii.its.api.type.GroupingPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.type.OptType;
@@ -124,5 +125,29 @@ public class AttributeAssignmentsResultsTest {
         groupNames = results.getGroupNames();
         assertNotNull(groupNames);
         assertTrue(groupNames.isEmpty());
+    }
+
+    @Test
+    public void getGroupNamesAndDescriptionsTest() {
+        String json = propertyLocator.find("attribute.assignment.opt.in.result");
+        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        assertNotNull(wsResults);
+        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        assertNotNull(results);
+
+        List<GroupingPath> groupNamesAndDescriptions = results.getGroupNamesAndDescriptions();
+        assertNotNull(groupNamesAndDescriptions);
+        assertFalse(groupNamesAndDescriptions.isEmpty());
+        assertEquals(1, groupNamesAndDescriptions.size());
+        GroupingPath groupingPathObj =
+                new GroupingPath("tmp:grouping-path:grouping-path-many", "Test Many Groups In Basis");
+        assertEquals(groupingPathObj.getName(), groupNamesAndDescriptions.get(0).getName());
+        assertEquals(groupingPathObj.getDescription(), groupNamesAndDescriptions.get(0).getDescription());
+
+        results = new AttributeAssignmentsResults(null);
+        groupNamesAndDescriptions = results.getGroupNamesAndDescriptions();
+        assertNotNull(groupNamesAndDescriptions);
+        assertTrue(groupNamesAndDescriptions.isEmpty());
+
     }
 }

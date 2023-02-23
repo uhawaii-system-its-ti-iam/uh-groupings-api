@@ -345,7 +345,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void allGroupingsPathsTest() {
-        List<String> allGroupingsPaths = groupingAssignmentService.allGroupingsPaths();
+        List<GroupingPath> allGroupingsPaths = groupingAssignmentService.allGroupingsPaths();
         assertNotNull(allGroupingsPaths);
     }
 

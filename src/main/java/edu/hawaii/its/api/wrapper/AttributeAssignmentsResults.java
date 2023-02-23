@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -79,6 +80,20 @@ public class AttributeAssignmentsResults extends Results {
             return new ArrayList<>();
         }
         return Arrays.stream(groups).map(WsGroup::getName).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of group names and descriptions from the group.
+     */
+    public List<GroupingPath> getGroupNamesAndDescriptions() {
+        WsGroup[] groups = results.getWsGroups();
+        if (isEmpty(groups)) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(groups)
+                .map(group -> new GroupingPath(group.getName(), group.getDescription()))
+                .collect(Collectors.toList());
     }
 
     public boolean isOptInOn() {
