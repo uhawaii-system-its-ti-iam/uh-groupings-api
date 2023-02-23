@@ -20,7 +20,8 @@ public class FindGroupCommand extends GrouperCommand implements Command<FindGrou
         return this;
     }
 
-    @Override public FindGroupResult execute() {
+    @Override
+    public FindGroupResult execute() {
         FindGroupResult findGroupResult;
         WsFindGroupsResults wsFindGroupsResults = gcFindGroups.execute();
         findGroupResult = new FindGroupResult(wsFindGroupsResults);

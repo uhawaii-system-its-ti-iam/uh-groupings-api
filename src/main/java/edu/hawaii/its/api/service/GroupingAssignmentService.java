@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -151,11 +150,10 @@ public class GroupingAssignmentService {
             throw new AccessDeniedException();
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
-        List<String> groupingPathStrings = allGroupingsPaths();
 
         List<String> adminGrouping = Arrays.asList(GROUPING_ADMINS);
         Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
-        adminListsHolder.setAllGroupingPaths(makePaths(groupingPathStrings));
+        adminListsHolder.setAllGroupingPaths(allGroupingsPaths());
         adminListsHolder.setAdminGroup(admin);
         return adminListsHolder;
     }
@@ -269,7 +267,6 @@ public class GroupingAssignmentService {
     public List<GroupingPath> optInGroupingPaths(String owner, String optInUid) {
         logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
 
-        List<GroupingPath> optInGroupingPaths = new ArrayList<>();
         List<String> includes = getGroupPaths(owner, optInUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
 
@@ -277,7 +274,7 @@ public class GroupingAssignmentService {
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
-        optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
+        List<GroupingPath> optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
                 grouperApiService.descriptionOf(path))).collect(Collectors.toList());
 
         return optInGroupingPaths;
@@ -298,10 +295,10 @@ public class GroupingAssignmentService {
     /**
      * Helper - adminLists
      */
-    public List<String> allGroupingsPaths() {
+    public List<GroupingPath> allGroupingsPaths() {
         AttributeAssignmentsResults attributeAssignmentsResults =
                 new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
-        return attributeAssignmentsResults.getGroupNames();
+        return attributeAssignmentsResults.getGroupNamesAndDescriptions();
     }
 
     /**
@@ -420,20 +417,5 @@ public class GroupingAssignmentService {
         person.addAttribute(UHUUID, subject.getId());
 
         return person;
-    }
-
-    /**
-     * Helper - adminLists
-     * Take a list of grouping path strings and return a list of GroupingPath objects.
-     */
-    public List<GroupingPath> makePaths(List<String> groupingPaths) {
-        if (groupingPaths == null || groupingPaths.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return groupingPaths.parallelStream()
-                .map(path -> new GroupingPath(path,
-                        grouperApiService.descriptionOf(path)))
-                .collect(Collectors.toList());
     }
 }
