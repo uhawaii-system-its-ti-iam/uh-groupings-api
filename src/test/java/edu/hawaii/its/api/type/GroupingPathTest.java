@@ -10,16 +10,20 @@ public class GroupingPathTest {
     private GroupingPath path;
 
     private static final String PATH_ROOT = "path:to:grouping";
+    private static final String DESCRIPTION = "description";
 
     @BeforeEach
     public void setUp() {
-        path = new GroupingPath(PATH_ROOT);
+        path = new GroupingPath(PATH_ROOT, DESCRIPTION);
     }
 
     @Test
     public void construction() {
         GroupingPath groupingPath = new GroupingPath();
         assertNotNull(path);
+        assertNotNull(groupingPath);
+
+        groupingPath = new GroupingPath(PATH_ROOT, "");
         assertNotNull(groupingPath);
     }
 
@@ -33,7 +37,7 @@ public class GroupingPathTest {
 
     @Test
     public void getNameTest() {
-        assertEquals("grouping", path.name);
+        assertEquals("grouping", path.getName());
     }
 
     @Test
@@ -45,7 +49,7 @@ public class GroupingPathTest {
 
     @Test
     public void getPathTest() {
-        assertEquals(PATH_ROOT, path.path);
+        assertEquals(PATH_ROOT, path.getPath());
     }
 
     @Test
@@ -57,7 +61,7 @@ public class GroupingPathTest {
 
     @Test
     public void getDescriptionTest() {
-        assertEquals("No description given for this Grouping.", path.description);
+        assertEquals(DESCRIPTION, path.getDescription());
     }
 
     @Test

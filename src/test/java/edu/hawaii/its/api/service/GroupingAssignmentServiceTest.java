@@ -14,20 +14,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-
-import java.util.stream.Collectors;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -152,30 +145,5 @@ class GroupingAssignmentServiceTest {
         assertEquals(identifier, person.getUsername());
 
         assertNotNull(groupingAssignmentService.makePerson(new WsSubject(), new String[] {}));
-    }
-
-    @Test
-    public void makePaths() {
-        assertThat(groupingAssignmentService.makePaths(null), hasSize(0));
-
-        List<String> names = new ArrayList<>();
-        assertThat(groupingAssignmentService.makePaths(names), hasSize(0));
-
-        names = Arrays.asList(
-                GroupType.INCLUDE.value(), GroupType.EXCLUDE.value(), GroupType.OWNERS.value(), GroupType.BASIS.value());
-        List<GroupingPath> paths = groupingAssignmentService.makePaths(names);
-        assertThat(paths, hasSize(4));
-
-        List<String> expectedPaths = names.stream()
-                .map(n -> PATH_ROOT + n)
-                .collect(Collectors.toList());
-
-        List<GroupingPath> groupingPaths = groupingAssignmentService.makePaths(expectedPaths);
-        assertThat(paths, hasSize(4));
-
-        for (int i = 0; i < expectedPaths.size(); i++) {
-            assertThat(groupingPaths.get(i).getPath(),
-                    equalTo(expectedPaths.get(i)));
-        }
     }
 }
