@@ -45,9 +45,6 @@ public class MemberAttributeService {
     @Value("${groupings.api.is_member}")
     private String IS_MEMBER;
 
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
