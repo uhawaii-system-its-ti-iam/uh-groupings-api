@@ -9,6 +9,7 @@ import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -587,10 +588,10 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void updateDescriptionTest() throws Exception {
-        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
+        GroupingsUpdateDescriptionResult groupingsUpdateDescriptionResult = new GroupingsUpdateDescriptionResult();
 
         given(groupAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
-                groupingsServiceResult);
+                groupingsUpdateDescriptionResult);
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/description")
                         .header(CURRENT_USER, USERNAME)
                         .content("description"))

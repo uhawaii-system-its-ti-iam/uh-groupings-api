@@ -13,8 +13,10 @@ import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GrouperApiService;
+import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.UpdateMemberService;
@@ -96,6 +98,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired GroupingsService groupingsService;
 
     public static final String API_BASE_URL = "/api/groupings/v2.1/";
     private MockMvc mockMvc;
@@ -450,7 +454,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void updateDescriptionTest() throws Exception {
-        String description = grouperApiService.descriptionOf(GROUPING);
+        String description = groupingsService.getGroupingDescription(GROUPING);
         String url = API_BASE_URL + "groupings/" + GROUPING + "/description";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
@@ -458,8 +462,8 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                GroupingsServiceResult.class));
-        assertEquals(DEFAULT_DESCRIPTION, grouperApiService.descriptionOf(GROUPING));
+                GroupingsUpdateDescriptionResult.class));
+        assertEquals(DEFAULT_DESCRIPTION, groupingsService.getGroupingDescription(GROUPING));
         groupAttributeService.updateDescription(GROUPING, ADMIN, description);
     }
 

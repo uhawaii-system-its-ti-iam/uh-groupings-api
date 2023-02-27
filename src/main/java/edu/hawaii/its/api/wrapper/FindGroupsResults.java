@@ -52,4 +52,5 @@ public class FindGroupsResults extends Results {
         return new Group(wsGroups[0]);
     }
 
+
 }

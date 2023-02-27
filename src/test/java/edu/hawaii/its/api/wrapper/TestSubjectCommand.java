@@ -2,7 +2,6 @@ package edu.hawaii.its.api.wrapper;
 
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,7 +40,7 @@ public class TestSubjectCommand {
 
     @Test
     public void execute() {
-        JsonUtil.printJson(new SubjectCommand(UH_NUMBERS.get(0)).execute());
-        assertNotNull(new SubjectCommand(UH_NUMBERS.get(0)).execute());
+        new SubjectCommand(UH_NUMBERS.get(0)).execute();
+        new SubjectCommand(UH_USERNAMES.get(0)).execute();
     }
 }

@@ -70,6 +70,9 @@ public class GroupingAssignmentService {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private GroupingsService groupingsService;
+
     /**
      * Fetch a grouping from Grouper or the database.
      */
@@ -97,7 +100,7 @@ public class GroupingAssignmentService {
 
         compositeGrouping = setGroupingAttributes(compositeGrouping);
 
-        compositeGrouping.setDescription(grouperApiService.descriptionOf(groupingPath));
+        compositeGrouping.setDescription(groupingsService.getGroupingDescription(groupingPath));
         compositeGrouping.setBasis(groups.get(basis));
         compositeGrouping.setExclude(groups.get(exclude));
         compositeGrouping.setInclude(groups.get(include));
@@ -135,7 +138,7 @@ public class GroupingAssignmentService {
         Map<String, Group> groups = getPaginatedMembers(ownerUsername, paths, page, size, sortString, isAscending);
         compositeGrouping = setGroupingAttributes(compositeGrouping);
 
-        compositeGrouping.setDescription(grouperApiService.descriptionOf(groupingPath));
+        compositeGrouping.setDescription(groupingsService.getGroupingDescription(groupingPath));
         compositeGrouping.setBasis(groups.get(basis));
         compositeGrouping.setExclude(groups.get(exclude));
         compositeGrouping.setInclude(groups.get(include));
@@ -277,7 +280,7 @@ public class GroupingAssignmentService {
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
         List<GroupingPath> optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
-                grouperApiService.descriptionOf(path))).collect(Collectors.toList());
+                groupingsService.getGroupingDescription(path))).collect(Collectors.toList());
 
         return optInGroupingPaths;
     }
