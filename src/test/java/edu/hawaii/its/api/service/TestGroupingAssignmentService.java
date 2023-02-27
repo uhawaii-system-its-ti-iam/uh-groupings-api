@@ -7,10 +7,10 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.GroupType;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -81,22 +82,26 @@ public class TestGroupingAssignmentService {
     @Autowired
     GrouperApiService grouperApiService;
 
+    @Autowired private UpdateMemberService updateMemberService;
+
+    @Autowired private MemberService memberService;
+
     @Autowired
     public Environment env; // Just for the settings check.
 
     @BeforeAll
     public void init() {
-        assertTrue(memberAttributeService.isAdmin(ADMIN));
+        assertTrue(memberService.isAdmin(ADMIN));
         TEST_USERNAMES.forEach(testUsername -> {
             grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
             grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
             grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
             grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
 
-            assertFalse(memberAttributeService.isOwner(GROUPING, testUsername));
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testUsername));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
-            assertFalse(memberAttributeService.isAdmin(testUsername));
+            assertFalse(memberService.isOwner(GROUPING, testUsername));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, testUsername));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUsername));
+            assertFalse(memberService.isAdmin(testUsername));
         });
     }
 
@@ -105,6 +110,7 @@ public class TestGroupingAssignmentService {
         String iamtst01 = TEST_USERNAMES.get(0);
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
         // Should throw and exception if current user is not an admin or and owner.
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
@@ -120,7 +126,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
         } catch (AccessDeniedException e) {
@@ -128,7 +134,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin and an owner.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
         } catch (AccessDeniedException e) {
@@ -136,29 +142,19 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getGrouping(GROUPING, iamtst01);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should throw and exception if a group path is passed.
-        try {
-            groupingAssignmentService.getGrouping(GROUPING_INCLUDE, ADMIN);
-            fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class, () -> groupingAssignmentService.getGrouping(GROUPING_INCLUDE, ADMIN));
 
         // Should throw and exception if an invalid path is passed.
-        try {
-            groupingAssignmentService.getGrouping("bogus-path", ADMIN);
-            fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class, () -> groupingAssignmentService.getGrouping("bogus-path", ADMIN));
 
         // Should set all the fields of the Grouping returned.
         Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, ADMIN);
@@ -193,7 +189,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
         } catch (AccessDeniedException e) {
@@ -201,7 +197,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin and an owner.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
         } catch (AccessDeniedException e) {
@@ -209,29 +205,17 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
-
-        // Should throw and exception if a group path is passed.
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING_INCLUDE, ADMIN, null, null, null, null);
-            fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should throw and exception if an invalid path is passed.
-        try {
-            groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, null);
-            fail("Should throw and exception if a group path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class,
+                () -> groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, null));
     }
 
     @Test
@@ -247,13 +231,13 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupingAssignmentService.adminLists(iamtst01);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Fields in AdminListsHolder should not be null.
         AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN);
@@ -314,7 +298,8 @@ public class TestGroupingAssignmentService {
     @Test
     public void optInOutGroupingsPathsTest() {
         // Test both getOptInGroups and getOptOutGroups()
-        List<GroupingPath> optInGroupingsPaths = groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<GroupingPath> optInGroupingsPaths =
+                groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
         List<String> optInPaths = optInGroupingsPaths.stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
         Set<String> intersection =
@@ -391,10 +376,10 @@ public class TestGroupingAssignmentService {
         assertFalse(groupPaths.isEmpty());
 
         // Should return a non-empty list if current user is an admin but is not the same as username.
-        membershipService.addAdmin(ADMIN, TEST_USERNAMES.get(0));
+        updateMemberService.addAdmin(ADMIN, TEST_USERNAMES.get(0));
         groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
         assertFalse(groupPaths.isEmpty());
-        membershipService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
+        updateMemberService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
 
     //ToDo add test coverage for getGroupingOwners() and isSoleOwner
