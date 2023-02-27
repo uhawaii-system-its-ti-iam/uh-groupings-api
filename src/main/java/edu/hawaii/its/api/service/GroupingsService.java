@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.wrapper.*;
 
@@ -23,7 +24,10 @@ public class GroupingsService {
     private String TRIO;
 
     @Autowired
-    private SubjectService subjectService;
+    private GroupPathService groupPathService;
+
+    @Autowired
+    private GrouperApiService grouperApiService;
 
     /**
      * A list of grouping paths for all groupings.
@@ -111,6 +115,20 @@ public class GroupingsService {
      */
     public List<String> filterGroupPaths(List<String> groupPaths, Predicate<String> predicate) {
         return groupPaths.stream().filter(predicate).collect(Collectors.toList());
+    }
+
+    public String getGroupingDescription(String path) {
+        Group group = grouperApiService.findGroupsResults(path).getGroup();
+        if (!groupPathService.isGroupingPath(group)) {
+            return "";
+        }
+        return group.getDescription();
+    }
+
+    public GroupingsUpdateDescriptionResult updateGroupingDescription(String path, String description) {
+        String updatedDescription = getGroupingDescription(path);
+        return new GroupingsUpdateDescriptionResult(grouperApiService.groupSaveResults(path, description),
+                updatedDescription);
     }
 
     /**

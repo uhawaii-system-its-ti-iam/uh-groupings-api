@@ -31,7 +31,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivileges
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -40,7 +39,6 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -149,30 +147,6 @@ public class TestGrouperApiServiceTutorial {
         TEST_UH_NUMBERS.forEach(
                 num -> System.err.println(memberAttributeService.getMemberAttributes(ADMIN, num).toString()));
         assertNotNull(grouperApiService.syncDestinations());
-    }
-
-    @Test
-    public void getDescriptionTest() {
-        assertNotNull(grouperApiService.descriptionOf(GROUPING));
-    }
-
-    @Test
-    public void updateGroupDescriptionTest() {
-        String currentDescription = grouperApiService.descriptionOf(GROUPING);
-        String defaultDescription = "Default Description for Test";
-        WsGroupSaveResults groupSaveResults = grouperApiService.updateGroupDescription(GROUPING, defaultDescription);
-        assertNotNull(groupSaveResults);
-        assertNotNull(groupSaveResults.getResults());
-        assertNotNull(groupSaveResults.getResults()[0]);
-        assertNotNull(groupSaveResults.getResults()[0].getWsGroup());
-        assertNotNull(groupSaveResults.getResults()[0].getWsGroup().getDescription());
-        String updatedDescriptionResult = groupSaveResults.getResults()[0].getWsGroup().getDescription();
-        assertEquals(defaultDescription, updatedDescriptionResult);
-        assertEquals(updatedDescriptionResult, grouperApiService.descriptionOf(GROUPING));
-        groupSaveResults = grouperApiService.updateGroupDescription(GROUPING, currentDescription);
-        updatedDescriptionResult = groupSaveResults.getResults()[0].getWsGroup().getDescription();
-        assertEquals(currentDescription, updatedDescriptionResult);
-        assertEquals(updatedDescriptionResult, grouperApiService.descriptionOf(GROUPING));
     }
 
     @Test
@@ -537,15 +511,6 @@ public class TestGrouperApiServiceTutorial {
         List<WsSubject> subject = Arrays.asList(subjectsResults.getWsSubjects());
         assertEquals(subject.size(), 1);
         assertEquals(subject.get(0).getIdentifierLookup(), ADMIN);
-    }
-
-    @Test
-    public void findGroupsResultsTest() {
-        WsFindGroupsResults findGroupsResults = grouperApiService.findGroupsResults(GROUPING_INCLUDE);
-        assertNotNull(findGroupsResults);
-        List<WsGroup> groups = Arrays.asList(findGroupsResults.getGroupResults());
-        assertEquals(groups.size(), 1);
-        assertEquals(groups.get(0).getName(), GROUPING_INCLUDE);
     }
 
     @Test

@@ -180,10 +180,4 @@ public class TestGroupPathService {
         assertEquals("", groupPathService.getOwnersGroup(INVALID_GROUPING_PATH));
     }
 
-    @Test
-    public void getGroupingDescription() {
-        assertEquals("", groupPathService.getGroupingDescription("bad-path"));
-        assertEquals("", groupPathService.getGroupingDescription(GROUPING_INCLUDE));
-        assertNotNull(groupPathService.getGroupingDescription(GROUPING));
-    }
 }

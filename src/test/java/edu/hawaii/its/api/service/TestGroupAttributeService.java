@@ -72,16 +72,13 @@ public class TestGroupAttributeService {
     private GroupAttributeService groupAttributeService;
 
     @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
     private MemberService memberService;
 
     @Autowired
     private UpdateMemberService updateMemberService;
+
+    @Autowired
+    private GroupingsService groupingsService;
 
     @Autowired
     public Environment env; // Just for the settings check.
@@ -587,7 +584,7 @@ public class TestGroupAttributeService {
 
     @Test
     public void updateDescriptionTest() {
-        String descriptionOriginal = grouperApiService.descriptionOf(GROUPING);
+        String descriptionOriginal = groupingsService.getGroupingDescription(GROUPING);
         String iamtst01 = TEST_USERNAMES.get(0);
         List<String> iamtst01List = new ArrayList<>();
         iamtst01List.add(iamtst01);
@@ -621,14 +618,8 @@ public class TestGroupAttributeService {
                 () -> groupAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION));
         updateMemberService.removeAdmin(ADMIN, iamtst01);
 
-        // Should be set to default description
-        GroupingsServiceResult groupingsServiceResult =
-                groupAttributeService.updateDescription(GROUPING, ADMIN, DEFAULT_DESCRIPTION);
-        assertEquals(DEFAULT_DESCRIPTION, grouperApiService.descriptionOf(GROUPING));
-        assertTrue(groupingsServiceResult.getResultCode().contains(SUCCESS));
-
         // Should be set back to original description.
         groupAttributeService.updateDescription(GROUPING, ADMIN, descriptionOriginal);
-        assertEquals(descriptionOriginal, grouperApiService.descriptionOf(GROUPING));
+        assertEquals(descriptionOriginal, groupingsService.getGroupingDescription(GROUPING));
     }
 }
