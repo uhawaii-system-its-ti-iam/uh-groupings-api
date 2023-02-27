@@ -1,11 +1,15 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
-import edu.hawaii.its.api.wrapper.FindGroupCommand;
-import edu.hawaii.its.api.wrapper.FindGroupResult;
+import edu.hawaii.its.api.wrapper.FindGroupsCommand;
+import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.Group;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * GroupPathService provides a set functions for checking the validity of UH grouping/group paths.
@@ -26,105 +30,119 @@ public class GroupPathService {
             throw new InvalidGroupPathException(path);
         }
     }
+
     public boolean isValidPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return findGroupResult.isValidPath();
+        Group group = new FindGroupsCommand(path).execute().getGroup();
+        return group.isValidPath();
     }
 
     public boolean isGroupingPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupingPath(findGroupResult);
+        Group group = getGroup(path);
+        return isGroupingPath(group);
     }
 
     public boolean isGroupPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupPath(findGroupResult);
+        Group group = getGroup(path);
+        return isGroupPath(group);
     }
 
     public boolean isBasisGroupPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupPath(findGroupResult, "basis");
+        Group group = getGroup(path);
+        return isGroupPath(group, "basis");
     }
 
     public boolean isIncludeGroupPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupPath(findGroupResult, "include");
+        Group group = getGroup(path);
+        return isGroupPath(group, "include");
     }
 
     public boolean isExcludeGroupPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupPath(findGroupResult, "exclude");
+        Group group = getGroup(path);
+        return isGroupPath(group, "exclude");
     }
 
     public boolean isOwnersGroupPath(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return isGroupPath(findGroupResult, "owners");
+        Group group = getGroup(path);
+        return isGroupPath(group, "owners");
     }
 
     public String getGroupingPath(String groupPath) {
-        FindGroupResult findGroupResult = new FindGroupCommand(groupPath).execute();
-        if (isGroupingPath(findGroupResult)) {
-            return findGroupResult.getGroupPath();
+        Group group = getGroup(groupPath);
+        if (isGroupingPath(group)) {
+            return group.getGroupPath();
         }
-        return findGroupResult.getGroupPath().replaceAll(":" + findGroupResult.getExtension(), "");
+        return group.getGroupPath().replaceAll(":" + group.getExtension(), "");
+    }
+
+    public List<Group> getValidGroupings(List<String> groupingPaths) {
+        FindGroupsResults findGroupsResults = new FindGroupsCommand(groupingPaths).execute();
+        return findGroupsResults.getGroups();
     }
 
     public String getIncludeGroup(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return replaceGroup("include", findGroupResult);
+        Group group = getGroup(path);
+        return replaceGroup("include", group);
     }
 
     public String getExcludeGroup(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return replaceGroup("exclude", findGroupResult);
+        Group group = getGroup(path);
+        return replaceGroup("exclude", group);
     }
 
     public String getBasisGroup(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return replaceGroup("basis", findGroupResult);
+        Group group = getGroup(path);
+        return replaceGroup("basis", group);
     }
 
     public String getOwnersGroup(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        return replaceGroup("owners", findGroupResult);
+        Group group = getGroup(path);
+        return replaceGroup("owners", group);
     }
 
-    private String replaceGroup(String rep, FindGroupResult findGroupResult) {
-        if (isGroupPath(findGroupResult)) {
-            return findGroupResult.getGroupPath().replaceAll(findGroupResult.getExtension(), rep);
+    public List<String> getGroupPaths(List<Group> groups) {
+        return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
+    }
+
+    private Group getGroup(String groupPath) {
+        return new FindGroupsCommand(groupPath).execute().getGroup();
+    }
+
+    private String replaceGroup(String rep, Group group) {
+        if (isGroupPath(group)) {
+            return group.getGroupPath().replaceAll(group.getExtension(), rep);
         }
-        if (isGroupingPath(findGroupResult)) {
-            return findGroupResult.getGroupPath() + ":" + rep;
+        if (isGroupingPath(group)) {
+            return group.getGroupPath() + ":" + rep;
         }
         return "";
     }
 
     public String getGroupingDescription(String path) {
-        FindGroupResult findGroupResult = new FindGroupCommand(path).execute();
-        if (!isGroupingPath(findGroupResult)) {
+        Group group = new FindGroupsCommand(path).execute().getGroup();
+        if (!isGroupingPath(group)) {
             return "";
         }
-        return findGroupResult.getDescription();
+        return group.getDescription();
     }
 
-    private boolean isGroupPath(FindGroupResult findGroupResult) {
-        String extension = findGroupResult.getExtension();
-        String result = findGroupResult.getResultCode();
+    private boolean isGroupPath(Group group) {
+        String extension = group.getExtension();
+        String result = group.getResultCode();
 
         return (result.equals("SUCCESS") && isGroupExtension(extension));
     }
 
-    private boolean isGroupPath(FindGroupResult findGroupResult, String expectedExtension) {
-        String extension = findGroupResult.getExtension();
-        String result = findGroupResult.getResultCode();
+    private boolean isGroupPath(Group group, String expectedExtension) {
+        String extension = group.getExtension();
+        String result = group.getResultCode();
 
         return (result.equals("SUCCESS") && isGroupExtension(extension) && isGroupExtension(expectedExtension)
                 && expectedExtension.equals(extension));
     }
 
-    private boolean isGroupingPath(FindGroupResult findGroupResult) {
-        String extension = findGroupResult.getExtension();
-        String result = findGroupResult.getResultCode();
+    private boolean isGroupingPath(Group group) {
+        String extension = group.getExtension();
+        String result = group.getResultCode();
 
         return (result.equals("SUCCESS") && !isGroupExtension(extension));
     }

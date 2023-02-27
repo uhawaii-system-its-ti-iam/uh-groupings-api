@@ -7,13 +7,20 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
+import static edu.hawaii.its.api.service.PathFilter.nameGroupingPath;
+import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPaths;
 import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
 import static edu.hawaii.its.api.service.PathFilter.pathHasExclude;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PathFilterTest {
 
@@ -21,6 +28,8 @@ public class PathFilterTest {
     private String excludePath = "bogus:exclude";
     private String ownerPath = "bogus:owners";
     private String basisPath = "bogus:basis";
+
+    private String groupinPath = "bogus-path";
 
     private List<String> testPathList;
 
@@ -73,18 +82,86 @@ public class PathFilterTest {
     }
 
     @Test
-    public void testOnlyMemberships() {
+    public void testOnlyGroupingPaths() {
         testPathList = new ArrayList<>();
-        assertThat(filterPaths(testPathList, onlyMembershipPaths()).size(), equalTo(0));
-        testPathList.add(includePath);
+        assertThat(filterPaths(testPathList, onlyGroupingPaths()).size(), equalTo(0));
         testPathList.add(includePath);
         testPathList.add(excludePath);
-        testPathList.add(excludePath);
-        testPathList.add(ownerPath);
         testPathList.add(ownerPath);
         testPathList.add(basisPath);
         testPathList.add(basisPath);
-        assertThat(filterPaths(testPathList, onlyMembershipPaths()).size(), equalTo(4));
+        testPathList.add(groupinPath);
+        assertThat(filterPaths(testPathList, onlyGroupingPaths()).size(), equalTo(1));
+    }
+
+    @Test
+    public void testParentGroupingPath() {
+        testPathList = new ArrayList<>();
+        testPathList.add(includePath);
+        testPathList.add(excludePath);
+        testPathList.add(ownerPath);
+        testPathList.add(basisPath);
+        testPathList.add(basisPath);
+
+        for (String testPath : testPathList) {
+            assertThat(parentGroupingPath(testPath), equalTo("bogus"));
+        }
+        assertThat(parentGroupingPath(groupinPath), equalTo(groupinPath));
+
+    }
+
+    @Test
+    public void testParentGroupingPaths() {
+        testPathList = new ArrayList<>();
+        testPathList.add(includePath);
+        testPathList.add(excludePath);
+        testPathList.add(ownerPath);
+        testPathList.add(basisPath);
+        testPathList.add(basisPath);
+
+        List<String> parentPaths = parentGroupingPaths(testPathList);
+        for (String parentPath : parentPaths) {
+            assertThat(parentPath, equalTo("bogus"));
+        }
+
+    }
+
+    @Test
+    public void testRemoveDuplicates() {
+        testPathList = new ArrayList<>();
+        testPathList.add(includePath);
+        testPathList.add(includePath);
+        testPathList.add(includePath);
+        testPathList.add(includePath);
+
+        List<String> duplicatesRemoved = removeDuplicates(testPathList);
+        assertThat(duplicatesRemoved.size(), equalTo(1));
+    }
+
+    @Test
+    public void testDisjoint() {
+        List<String> list1 = new ArrayList<>();
+        list1.add(includePath);
+        list1.add(includePath);
+        list1.add(excludePath);
+        list1.add(ownerPath);
+        list1.add(basisPath);
+        List<String> list2 = new ArrayList<>();
+        list2.add(excludePath);
+        list2.add(excludePath);
+        list2.add(basisPath);
+
+        List<String> disjoint = PathFilter.disjoint(list1, list2);
+        assertTrue(disjoint.contains(includePath));
+        assertTrue(disjoint.contains(ownerPath));
+        assertFalse(disjoint.contains(excludePath));
+        assertFalse(disjoint.contains(basisPath));
+    }
+
+    @Test
+    public void nameGroupingPathTest() {
+        assertEquals("grouping-test-path", nameGroupingPath("test:grouping-test-path:include"));
+        assertEquals("", nameGroupingPath(""));
     }
 
     /**

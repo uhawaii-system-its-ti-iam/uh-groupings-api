@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
 import edu.hawaii.its.api.exception.RemoveMemberRequestRejectedException;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.type.GroupType;
@@ -16,6 +17,7 @@ import edu.hawaii.its.api.type.UpdateTimestampResult;
 import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
@@ -29,13 +31,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyMembershipPaths;
+import static edu.hawaii.its.api.service.PathFilter.disjoint;
+import static edu.hawaii.its.api.service.PathFilter.nameGroupingPath;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPaths;
+import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
+import static edu.hawaii.its.api.service.PathFilter.pathHasExclude;
+import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 @Service("membershipService")
 public class MembershipService {
@@ -74,6 +81,11 @@ public class MembershipService {
 
     @Autowired
     private SubjectService subjectService;
+    @Autowired
+    private GroupingsService groupingsService;
+
+    @Autowired
+    private GroupPathService groupPathService;
 
     /**
      * Add am admin.
@@ -102,7 +114,8 @@ public class MembershipService {
     }
 
     /**
-     * Get a list of memberships pertaining to uid.
+     * Get a list of memberships pertaining to uid. A list of memberships is made up from the groups listings of
+     * (basis + include) - exclude.
      */
     public List<Membership> membershipResults(String currentUser, String uid) {
         String action = "membershipResults; currentUser: " + currentUser + "; uid: " + uid + ";";
@@ -111,19 +124,39 @@ public class MembershipService {
         if (!memberAttributeService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
         }
-
-        List<String> groupPaths;
-        List<String> optOutList;
-        try {
-            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid, onlyMembershipPaths());
-            optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
-        } catch (GcWebServiceError e) {
-            logger.warn("membershipResults;" + e);
-            return Collections.emptyList();
+        String uhUuid = subjectService.getValidUhUuid(uid);
+        if (uhUuid.equals("")) {
+            throw new UhMemberNotFoundException(uid);
         }
+        // Get all basis, include and exclude paths from grouper.
+        List<String> basisIncludeExcludePaths =
+                groupingsService.groupPaths(uid, pathHasBasis().or(pathHasInclude().or(pathHasExclude())));
+        // Get all basis and include paths to check the opt-out attribute.
+        List<String> basisAndInclude =
+                groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasBasis().or(pathHasInclude()));
+        // Get all exclude paths for the disjoint.
+        List<String> excludePaths = groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasExclude());
+        // The disjoint of basis plus include and exclude: (Basis + Include) - Exclude
+        List<String> groupingMembershipPaths = disjoint(parentGroupingPaths(basisIncludeExcludePaths),
+                parentGroupingPaths(excludePaths));
+        // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
+        List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
+        // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
+        List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
+        return createMemberships(membershipGroupings, optOutList);
+    }
 
+    List<Membership> createMemberships(List<Group> membershipGroupings, List<String> optOutList) {
         List<Membership> memberships = new ArrayList<>();
-        return createMembershipList(groupPaths, optOutList, memberships);
+        for (Group grouping : membershipGroupings) {
+            Membership membership = new Membership();
+            membership.setDescription(grouping.getDescription());
+            membership.setPath(grouping.getGroupPath());
+            membership.setName(nameGroupingPath(grouping.getGroupPath()));
+            membership.setOptOutEnabled(optOutList.contains(grouping.getGroupPath()));
+            memberships.add(membership);
+        }
+        return memberships;
     }
 
     /**
@@ -162,7 +195,7 @@ public class MembershipService {
                     || pathToCheck.endsWith(GroupType.EXCLUDE.value())
                     || pathToCheck.endsWith(GroupType.BASIS.value())
                     || pathToCheck.endsWith(GroupType.OWNERS.value())) {
-                String parentPath = groupingAssignmentService.parentGroupingPath(pathToCheck);
+                String parentPath = parentGroupingPath(pathToCheck);
                 if (!pathMap.containsKey(parentPath)) {
                     pathMap.put(parentPath, new ArrayList<>());
                 }
@@ -170,17 +203,18 @@ public class MembershipService {
             }
         }
 
-        for (Map.Entry<String, List<String>> entry : pathMap.entrySet()) {
-            String groupingPath = entry.getKey();
-            List<String> paths = entry.getValue();
+        List<Group> groupingMemberships = groupPathService.getValidGroupings(new ArrayList<>(pathMap.keySet()));
+
+        for (Group group : groupingMemberships) {
+            String groupingPath = group.getGroupPath();
+            List<String> paths = pathMap.get(groupingPath);
             Membership membership = subgroups(paths);
             membership.setPath(groupingPath);
             membership.setOptOutEnabled(optOutList.contains(groupingPath));
-            membership.setName(groupingAssignmentService.nameGroupingPath(groupingPath));
-            membership.setDescription(grouperApiService.descriptionOf(groupingPath));
+            membership.setName(nameGroupingPath(groupingPath));
+            membership.setDescription(group.getDescription());
             memberships.add(membership);
         }
-
         return memberships;
     }
 
@@ -217,7 +251,7 @@ public class MembershipService {
                 + "usersToAdd: " + usersToAdd + ";");
 
         List<UIAddMemberResults> addMemberResults = new ArrayList<>();
-        String removalPath = groupingAssignmentService.parentGroupingPath(groupPath);
+        String removalPath = parentGroupingPath(groupPath);
 
         if (groupPath.endsWith(GroupType.INCLUDE.value())) {
             removalPath += GroupType.EXCLUDE.value();
@@ -490,7 +524,7 @@ public class MembershipService {
      * Get the number of memberships.
      */
     public Integer numberOfMemberships(String currentUser, String uid) {
-        return fetchGroupPaths(currentUser, uid, onlyMembershipPaths()).size();
+        return membershipResults(currentUser, uid).size();
     }
 
     /**

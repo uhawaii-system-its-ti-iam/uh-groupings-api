@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 
 @Service("memberAttributeService")
@@ -211,7 +212,7 @@ public class MemberAttributeService {
 
         List<GroupingPath> groupingPaths = new ArrayList<>();
         for (String path : pathStrings) {
-            String parentGroupingPath = groupingAssignmentService.parentGroupingPath(path);
+            String parentGroupingPath = parentGroupingPath(path);
             groupingPaths.add(new GroupingPath(parentGroupingPath,
                     grouperApiService.descriptionOf(parentGroupingPath)));
         }
