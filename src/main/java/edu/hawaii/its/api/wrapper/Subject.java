@@ -24,17 +24,32 @@ public class Subject extends Results {
     }
 
     public String getUid() {
-        String[] attributeValues = wsSubject.getAttributeValues();
-        if (isEmpty(attributeValues)) {
-            return "";
+        if (wsSubject.getIdentifierLookup() != null) {
+            return wsSubject.getIdentifierLookup();
         }
-        String uid = wsSubject.getAttributeValue(1);
-        return uid != null ? uid : "";
+        return getAttributeValue(0);
     }
 
     public String getName() {
         String name = wsSubject.getName();
         return name != null ? name : "";
+    }
+
+    public String getFirstName() {
+        return getAttributeValue(3);
+    }
+
+    public String getLastName() {
+        return getAttributeValue(2);
+    }
+
+    private String getAttributeValue(int index) {
+        String[] attributeValues = wsSubject.getAttributeValues();
+        if (isEmpty(attributeValues)) {
+            return "";
+        }
+        String attributeValue = wsSubject.getAttributeValue(index);
+        return attributeValue != null ? attributeValue : "";
     }
 
     @Override

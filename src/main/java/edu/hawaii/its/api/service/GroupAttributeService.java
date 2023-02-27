@@ -58,6 +58,9 @@ public class GroupAttributeService {
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
 
+    @Autowired
+    private MemberService memberService;
+
     /**
      * Get all the sync destinations for a specific grouping.
      */
@@ -196,7 +199,7 @@ public class GroupAttributeService {
 
         String action = "Description field of grouping " + groupPath + " has been updated by " + ownerUsername;
 
-        if (!memberAttributeService.isOwner(groupPath, ownerUsername) && !memberAttributeService.isAdmin(
+        if (!memberService.isOwner(groupPath, ownerUsername) && !memberService.isAdmin(
                 ownerUsername)) {
             throw new AccessDeniedException();
         }
@@ -211,8 +214,7 @@ public class GroupAttributeService {
      * Helper - changeOptStatus, changeGroupAttributeStatus
      */
     private void checkPrivileges(String groupingPath, String ownerIdentifier) {
-        if (!memberAttributeService.isOwner(groupingPath, ownerIdentifier)
-                && !memberAttributeService.isAdmin(ownerIdentifier)) {
+        if (!memberService.isOwner(groupingPath, ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }
@@ -221,8 +223,7 @@ public class GroupAttributeService {
      * Helper - getAllSyncDestinations
      */
     private void checkPrivileges(String ownerIdentifier) {
-        if (!memberAttributeService.isOwner(ownerIdentifier) && !memberAttributeService.isAdmin(
-                ownerIdentifier)) {
+        if (!memberService.isOwner(ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }

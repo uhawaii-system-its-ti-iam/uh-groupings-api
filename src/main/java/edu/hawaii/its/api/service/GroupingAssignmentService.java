@@ -67,6 +67,9 @@ public class GroupingAssignmentService {
     @Autowired
     private GroupAttributeService groupAttributeService;
 
+    @Autowired
+    private MemberService memberService;
+
     /**
      * Fetch a grouping from Grouper or the database.
      */
@@ -75,8 +78,7 @@ public class GroupingAssignmentService {
 
         Grouping compositeGrouping;
 
-        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) &&
-                !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!memberService.isOwner(groupingPath, ownerUsername) && !memberService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException();
         }
         compositeGrouping = new Grouping(groupingPath);
@@ -115,8 +117,7 @@ public class GroupingAssignmentService {
         logger.info(
                 "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
                         + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
-        if (!memberAttributeService.isOwner(groupingPath, ownerUsername) && !memberAttributeService.isAdmin(
-                ownerUsername)) {
+        if (!memberService.isOwner(groupingPath, ownerUsername) && !memberService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException();
         }
         Grouping compositeGrouping = new Grouping(groupingPath);
@@ -147,7 +148,7 @@ public class GroupingAssignmentService {
 
     //returns an adminLists object containing the list of all admins and all groupings
     public AdminListsHolder adminLists(String adminUsername) {
-        if (!memberAttributeService.isAdmin(adminUsername)) {
+        if (!memberService.isAdmin(adminUsername)) {
             throw new AccessDeniedException();
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
@@ -227,7 +228,7 @@ public class GroupingAssignmentService {
     public List<String> getGroupPaths(String ownerUsername, String uhIdentifier) {
         logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";");
 
-        if (!ownerUsername.equals(uhIdentifier) && !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!ownerUsername.equals(uhIdentifier) && !memberService.isAdmin(ownerUsername)) {
             return new ArrayList<>();
         }
         GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
@@ -241,7 +242,7 @@ public class GroupingAssignmentService {
     public List<String> getGroupPaths(String ownerUsername, String uhIdentifier, Predicate<String> predicate) {
         logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";" + "predicate: " + predicate + ";");
 
-        if (!ownerUsername.equals(uhIdentifier) && !memberAttributeService.isAdmin(ownerUsername)) {
+        if (!ownerUsername.equals(uhIdentifier) && !memberService.isAdmin(ownerUsername)) {
             return new ArrayList<>();
         }
         GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));

@@ -65,14 +65,24 @@ public class SubjectTest {
         assertEquals(number, subject.getUhUuid());
 
         // Unsuccessful query using uid.
-        json = propertyValue("ws.subject.subject.not.found");
+        json = propertyValue("ws.subject.subject.uid.not.found");
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
         assertEquals(SUBJECT_NOT_FOUND, subject.getResultCode());
-        assertEquals("", subject.getUid());
+        assertEquals(wsSubject.getIdentifierLookup(), subject.getUid());
+        assertEquals("invalid-uid", subject.getUid());
         assertEquals("", subject.getUhUuid());
-        assertEquals("", subject.getName());
+
+        // Unsuccessful query using uhUuid.
+        json = propertyValue("ws.subject.subject.uhuuid.not.found");
+        wsSubject = JsonUtil.asObject(json, WsSubject.class);
+        subject = new Subject(wsSubject);
+        assertNotNull(subject);
+        assertEquals(SUBJECT_NOT_FOUND, subject.getResultCode());
+        assertEquals(wsSubject.getId(), subject.getUhUuid());
+        assertEquals("11111111", subject.getUhUuid());
+        assertEquals("", subject.getUid());
     }
 
     public List<String> getTestUsernames() {
