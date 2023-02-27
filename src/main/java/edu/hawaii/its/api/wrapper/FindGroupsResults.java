@@ -1,38 +1,55 @@
 package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FindGroupsResults extends Results {
+    private final WsFindGroupsResults wsFindGroupsResults;
 
-    private WsFindGroupsResults wsFindGroupsResults;
-    private final boolean isEmpty;
-    private static final String NO_DESCRIPTION_TEXT = "No description given for this Grouping.";
+    private final List<Group> groups;
 
-    // Constructor (temporary; don't depend on it).
     public FindGroupsResults(WsFindGroupsResults wsFindGroupsResults) {
-        this.wsFindGroupsResults = wsFindGroupsResults;
-        if (this.wsFindGroupsResults == null) {
+        groups = new ArrayList<>();
+        if (wsFindGroupsResults == null) {
             this.wsFindGroupsResults = new WsFindGroupsResults();
+        } else {
+            this.wsFindGroupsResults = wsFindGroupsResults;
+            setGroups();
         }
-        isEmpty = isEmpty(this.wsFindGroupsResults.getGroupResults());
     }
 
-    public String getDescription() {
-        if (isEmpty) {
-            return NO_DESCRIPTION_TEXT;
+    @Override public String getResultCode() {
+        for (Group group : getGroups()) {
+            if (group.getResultCode().equals("SUCCESS")) {
+                return "SUCCESS";
+            }
         }
-
-        String description = wsFindGroupsResults.getGroupResults()[0].getDescription();
-        if (description == null || description.length() == 0) {
-            return NO_DESCRIPTION_TEXT;
-        }
-
-        return description;
+        return "FAILURE";
     }
 
-    @Override
-    public String getResultCode() {
-        return wsFindGroupsResults.getResultMetadata().getResultCode();
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    private void setGroups() {
+        WsGroup[] wsGroups = wsFindGroupsResults.getGroupResults();
+        if (isEmpty(wsGroups)) {
+            return;
+        }
+        for (WsGroup wsGroup : wsGroups) {
+            groups.add(new Group(wsGroup));
+        }
+    }
+
+    public Group getGroup() {
+        WsGroup[] wsGroups = wsFindGroupsResults.getGroupResults();
+        if (isEmpty(wsGroups)) {
+            return new Group();
+        }
+        return new Group(wsGroups[0]);
     }
 
 }

@@ -3,25 +3,24 @@ package edu.hawaii.its.api.type;
 import edu.hawaii.its.api.util.Strings;
 
 public class GroupingPath {
-    String path;
-    String name;
-    String description;
+    private String path;
+    private String name;
+    private String description;
     private static final String NO_DESCRIPTION_TEXT = "No description given for this Grouping.";
 
     // Constructor
     public GroupingPath() {
     }
 
-    // Constructor
     public GroupingPath(String path) {
         this.path = path;
-        this.name = makeName();
+        setName();
         this.description = "No description given for this Grouping.";
     }
 
     public GroupingPath(String path, String description) {
         this.path = path;
-        this.name = makeName();
+        setName();
         this.description = Strings.isEmpty(description) ? NO_DESCRIPTION_TEXT : description;
     }
 
@@ -55,8 +54,8 @@ public class GroupingPath {
                 "description: " + description + ";";
     }
 
-    private String makeName() {
-        return path.substring(path.lastIndexOf(":") + 1);
+    private void setName() {
+        name = path.substring(path.lastIndexOf(":") + 1);
     }
 
 }

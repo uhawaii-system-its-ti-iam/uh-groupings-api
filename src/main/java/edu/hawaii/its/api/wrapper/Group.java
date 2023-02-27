@@ -17,7 +17,8 @@ public class Group extends Results {
         this.wsGroup = new WsGroup();
     }
 
-    @Override public String getResultCode() {
+    @Override
+    public String getResultCode() {
         if (getGroupPath().equals("")) {
             return "FAILURE";
         }
