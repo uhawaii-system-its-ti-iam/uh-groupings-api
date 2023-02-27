@@ -16,6 +16,7 @@ import static edu.hawaii.its.api.service.PathFilter.pathHasExclude;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
+import static edu.hawaii.its.api.util.OnlyUniqueItems.onlyUniqueItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -136,6 +137,7 @@ public class PathFilterTest {
 
         List<String> duplicatesRemoved = removeDuplicates(testPathList);
         assertThat(duplicatesRemoved.size(), equalTo(1));
+        assertThat(duplicatesRemoved, onlyUniqueItems());
     }
 
     @Test

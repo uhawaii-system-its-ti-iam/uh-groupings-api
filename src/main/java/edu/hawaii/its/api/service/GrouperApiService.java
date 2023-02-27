@@ -19,6 +19,7 @@ import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -79,6 +80,9 @@ public class GrouperApiService {
     @Autowired
     private GroupPathService groupPathService;
 
+    @Autowired ExecutorService exec;
+
+
     public List<SyncDestination> syncDestinations() {
         WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
                 .assignScope(SYNC_DESTINATIONS_LOCATION)
@@ -98,15 +102,18 @@ public class GrouperApiService {
     }
 
     public String descriptionOf(String groupPath) {
-       return  groupPathService.getGroupingDescription(groupPath);
+        return groupPathService.getGroupingDescription(groupPath);
     }
 
     public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
         WsGroup updatedGroup = new WsGroup();
         updatedGroup.setDescription(description);
 
-        WsGroupLookup groupLookup = new WsGroupLookup(groupPath,
-                findGroupsResults(groupPath).getGroupResults()[0].getUuid());
+        WsFindGroupsResults wsFindGroupsResults = findGroupsResults(groupPath);
+        if (wsFindGroupsResults.getGroupResults() == null) {
+            throw new GcWebServiceError("Invalid group path");
+        }
+        WsGroupLookup groupLookup = new WsGroupLookup(groupPath, wsFindGroupsResults.getGroupResults()[0].getUuid());
 
         WsGroupToSave groupToSave = new WsGroupToSave();
         groupToSave.setWsGroup(updatedGroup);
