@@ -1,10 +1,9 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
-import edu.hawaii.its.api.wrapper.FindGroupsCommand;
-import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.Group;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,9 @@ public class GroupPathService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    @Autowired
+    GrouperApiService grouperApiService;
+
     /**
      * Throw an exception if path is invalid.
      */
@@ -32,7 +34,7 @@ public class GroupPathService {
     }
 
     public boolean isValidPath(String path) {
-        Group group = new FindGroupsCommand(path).execute().getGroup();
+        Group group = grouperApiService.findGroupsResults(path).getGroup();
         return group.isValidPath();
     }
 
@@ -75,8 +77,7 @@ public class GroupPathService {
     }
 
     public List<Group> getValidGroupings(List<String> groupingPaths) {
-        FindGroupsResults findGroupsResults = new FindGroupsCommand(groupingPaths).execute();
-        return findGroupsResults.getGroups();
+        return grouperApiService.findGroupsResults(groupingPaths).getGroups();
     }
 
     public String getIncludeGroup(String path) {
@@ -104,7 +105,7 @@ public class GroupPathService {
     }
 
     private Group getGroup(String groupPath) {
-        return new FindGroupsCommand(groupPath).execute().getGroup();
+        return grouperApiService.findGroupsResults(groupPath).getGroup();
     }
 
     private String replaceGroup(String rep, Group group) {
@@ -115,14 +116,6 @@ public class GroupPathService {
             return group.getGroupPath() + ":" + rep;
         }
         return "";
-    }
-
-    public String getGroupingDescription(String path) {
-        Group group = new FindGroupsCommand(path).execute().getGroup();
-        if (!isGroupingPath(group)) {
-            return "";
-        }
-        return group.getDescription();
     }
 
     private boolean isGroupPath(Group group) {
@@ -140,7 +133,7 @@ public class GroupPathService {
                 && expectedExtension.equals(extension));
     }
 
-    private boolean isGroupingPath(Group group) {
+    public boolean isGroupingPath(Group group) {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
