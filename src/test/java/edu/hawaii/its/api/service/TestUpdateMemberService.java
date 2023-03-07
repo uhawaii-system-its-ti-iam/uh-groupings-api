@@ -1,10 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -25,6 +20,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,6 +71,9 @@ public class TestUpdateMemberService {
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Autowired
+    private MemberService memberService;
+
     private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     private final String SUCCESS_ALREADY_EXISTED = "SUCCESS_ALREADY_EXISTED";
     private final String SUCCESS_WASNT_IMMEDIATE = "SUCCESS_WASNT_IMMEDIATE";
@@ -88,18 +92,18 @@ public class TestUpdateMemberService {
     @Test
     public void addRemoveAdminTest() {
         // With uh number.
-        assertFalse(memberAttributeService.isAdmin(TEST_UH_NUMBERS.get(0)));
+        assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
         updateMemberService.addAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
-        assertTrue(memberAttributeService.isAdmin(TEST_UH_NUMBERS.get(0)));
+        assertTrue(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
         updateMemberService.removeAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
-        assertFalse(memberAttributeService.isAdmin(TEST_UH_NUMBERS.get(0)));
+        assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
 
         // With uh username.
-        assertFalse(memberAttributeService.isAdmin(TEST_UH_USERNAMES.get(0)));
+        assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
         updateMemberService.addAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
-        assertTrue(memberAttributeService.isAdmin(TEST_UH_USERNAMES.get(0)));
+        assertTrue(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
         updateMemberService.removeAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
-        assertFalse(memberAttributeService.isAdmin(TEST_UH_USERNAMES.get(0)));
+        assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
 
         try {
             updateMemberService.addAdmin(ADMIN, "bogus-admin-to-add");
@@ -141,45 +145,45 @@ public class TestUpdateMemberService {
     @Test
     public void uidAddRemoveIncludeExcludeMembersTest() {
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
@@ -188,33 +192,33 @@ public class TestUpdateMemberService {
     @Test
     public void uidAddRemoveIncludeExcludeMemberTest() {
         String uid = TEST_UH_USERNAMES.get(0);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uid);
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.removeIncludeMember(ADMIN, GROUPING, uid);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.addExcludeMember(ADMIN, GROUPING, uid);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.removeExcludeMember(ADMIN, GROUPING, uid);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uid);
         updateMemberService.addExcludeMember(ADMIN, GROUPING, uid);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uid);
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uid));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, uid));
+        assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
         updateMemberService.removeIncludeMember(ADMIN, GROUPING, uid);
     }
@@ -222,19 +226,19 @@ public class TestUpdateMemberService {
     @Test
     public void optTest() {
         String num = TEST_UH_NUMBERS.get(0);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, num));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
 
         updateMemberService.optIn(ADMIN, GROUPING, num);
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, num));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_INCLUDE, num));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, num));
 
         updateMemberService.optOut(ADMIN, GROUPING, num);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, num));
-        assertTrue(memberAttributeService.isMember(GROUPING_EXCLUDE, num));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
 
         updateMemberService.optIn(ADMIN, GROUPING, num);
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, num));
-        assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_INCLUDE, num));
+        assertFalse(memberService.isMember(GROUPING_EXCLUDE, num));
 
         removeGroupMember(GROUPING_INCLUDE, num);
     }
@@ -245,15 +249,15 @@ public class TestUpdateMemberService {
 
         updateMemberService.addOwnership(ADMIN, GROUPING, uhNum);
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uhNum);
-        assertTrue(memberAttributeService.isMember(GROUPING_INCLUDE, uhNum));
-        assertTrue(memberAttributeService.isMember(GROUPING_OWNERS, uhNum));
+        assertTrue(memberService.isMember(GROUPING_INCLUDE, uhNum));
+        assertTrue(memberService.isMember(GROUPING_OWNERS, uhNum));
 
         String[] array = { GROUPING_OWNERS, GROUPING_INCLUDE, GROUPING_EXCLUDE };
         List<String> groupPaths = Arrays.asList(array);
 
         updateMemberService.removeFromGroups(ADMIN, uhNum, groupPaths);
-        assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, uhNum));
-        assertFalse(memberAttributeService.isMember(GROUPING_OWNERS, uhNum));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, uhNum));
+        assertFalse(memberService.isMember(GROUPING_OWNERS, uhNum));
 
         array = new String[] { GROUPING_OWNERS, GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING };
         groupPaths = Arrays.asList(array);
@@ -279,10 +283,10 @@ public class TestUpdateMemberService {
         assertEquals(SUCCESS, resultInclude.getResultCode());
         assertEquals(SUCCESS, resultExclude.getResultCode());
         for (String str : excludes) {
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, str));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, str));
         }
         for (String str : includes) {
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, str));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, str));
         }
     }
 
@@ -290,12 +294,12 @@ public class TestUpdateMemberService {
     public void addRemoveOwnershipsTest() {
         updateMemberService.addOwnerships(ADMIN, GROUPING, TEST_UH_USERNAMES);
         for (String uid : TEST_UH_USERNAMES) {
-            assertTrue(memberAttributeService.isMember(GROUPING_OWNERS, uid));
+            assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         }
         updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_UH_USERNAMES);
 
         for (String uid : TEST_UH_USERNAMES) {
-            assertFalse(memberAttributeService.isMember(GROUPING_OWNERS, uid));
+            assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
         }
     }
 
@@ -303,9 +307,9 @@ public class TestUpdateMemberService {
     public void addRemoveOwnershipTest() {
         String uid = TEST_UH_USERNAMES.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
-        assertTrue(memberAttributeService.isMember(GROUPING_OWNERS, uid));
+        assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
-        assertFalse(memberAttributeService.isMember(GROUPING_OWNERS, uid));
+        assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
     }
 
     @Test

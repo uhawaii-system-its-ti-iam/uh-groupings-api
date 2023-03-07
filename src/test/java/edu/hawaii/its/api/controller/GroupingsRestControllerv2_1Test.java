@@ -12,6 +12,7 @@ import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
@@ -25,7 +26,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.util.JsonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +87,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockBean
     private UpdateMemberService updateMemberService;
+
+    @MockBean
+    private MemberService memberService;
 
     @Autowired
     private WebApplicationContext context;
@@ -316,30 +319,6 @@ public class GroupingsRestControllerv2_1Test {
         assertNotNull(mvcResult);
 
         verify(updateMemberService, times(1)).resetExcludeGroup(ADMIN, "grouping");
-    }
-
-    @Test
-    public void resetGroupTest() throws Exception {
-        List<UIRemoveMemberResults> removeMemberResults = new ArrayList<>();
-        List<String> includePaths = new ArrayList<>();
-        List<String> excludePaths = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            includePaths.add("groupingInclude" + i);
-            excludePaths.add("groupingExclude" + i);
-        }
-        String includePathsStr = String.join(",", includePaths);
-        String excludePathsStr = String.join(",", excludePaths);
-        given(membershipService.resetGroup(ADMIN, "grouping", includePaths, excludePaths)).willReturn(
-                removeMemberResults);
-        MvcResult result =
-                mockMvc.perform(
-                                delete(API_BASE + "/groupings/grouping/" + includePathsStr + "/" + excludePathsStr
-                                        + "/reset-group")
-                                        .header(CURRENT_USER, ADMIN))
-                        .andExpect(status().isOk())
-                        .andReturn();
-        assertNotNull(result);
-        verify(membershipService, times(1)).resetGroup(ADMIN, "grouping", includePaths, excludePaths);
     }
 
     @Test
@@ -714,25 +693,25 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void hasOwnerPrivsTest() throws Exception {
-        given(memberAttributeService.isOwner(CURRENT_USER)).willReturn(false);
+        given(memberService.isOwner(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/owners")
                         .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
-        verify(memberAttributeService, times(1))
+        verify(memberService, times(1))
                 .isOwner(CURRENT_USER);
     }
 
     @Test
     public void hasAdminPrivsTest() throws Exception {
-        given(memberAttributeService.isAdmin(CURRENT_USER)).willReturn(false);
+        given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/admins")
                         .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
-        verify(memberAttributeService, times(1))
+        verify(memberService, times(1))
                 .isAdmin(CURRENT_USER);
     }
 
