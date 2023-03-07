@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -56,6 +55,12 @@ public class UpdateMemberService {
 
     @Autowired
     private ExecutorService executor;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private MemberService memberService;
 
     public GroupingsAddResult addAdmin(String currentUser, String uhIdentifier) {
         checkIfAdminUser(currentUser);
@@ -93,9 +98,6 @@ public class UpdateMemberService {
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && memberAttributeService.isAdmin(currentUser)) {
-            addOwnerships(currentUser, groupingPath, Arrays.asList(currentUser));
-        }
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
         return removeOwners(groupingPath, validIdentifiers);
     }
@@ -103,7 +105,7 @@ public class UpdateMemberService {
     public GroupingsRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && memberAttributeService.isAdmin(currentUser)) {
+        if (!memberService.isOwner(groupingPath, currentUser) && memberService.isAdmin(currentUser)) {
             addOwnership(currentUser, groupingPath, currentUser);
         }
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
@@ -231,21 +233,19 @@ public class UpdateMemberService {
     }
 
     public void checkIfOwnerOrAdminUser(String currentUser, String groupingPath) {
-        if (!memberAttributeService.isOwner(groupingPath, currentUser) && !memberAttributeService.isAdmin(
-                currentUser)) {
+        if (!memberService.isOwner(groupingPath, currentUser) && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
-
     }
 
     public void checkIfAdminUser(String currentUser) {
-        if (!memberAttributeService.isAdmin(currentUser)) {
+        if (!memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
     }
 
     public void checkIfSelfOptOrAdmin(String currentUser, String identifier) {
-        if (!currentUser.equals(identifier) && !memberAttributeService.isAdmin(currentUser)) {
+        if (!currentUser.equals(identifier) && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
     }

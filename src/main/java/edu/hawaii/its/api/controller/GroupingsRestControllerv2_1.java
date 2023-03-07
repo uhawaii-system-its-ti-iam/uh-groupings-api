@@ -12,6 +12,7 @@ import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
@@ -24,7 +25,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.type.UIRemoveMemberResults;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +71,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private UpdateMemberService updateMemberService;
+
+    @Autowired
+    private MemberService memberService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -139,20 +142,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.removeFromGroups(currentUser, uhIdentifier, paths));
-    }
-
-    /**
-     * Remove all members from basis, include, exclude.
-     */
-    @DeleteMapping(value = "/groupings/{path}/{include}/{exclude}/reset-group")
-    public ResponseEntity<List<UIRemoveMemberResults>> resetGroup(@RequestHeader(CURRENT_USER_KEY) String owner,
-            @PathVariable String path,
-            @PathVariable List<String> include, @PathVariable List<String> exclude) {
-        logger.info("Entered REST resetGroups...");
-        return ResponseEntity
-                .ok()
-                .body(membershipService.resetGroup(owner, path,
-                        include, exclude));
     }
 
     /**
@@ -511,7 +500,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST hasOwnerPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.isOwner(currentUser));
+                .body(memberService.isOwner(currentUser));
     }
 
     /**
@@ -523,7 +512,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST hasAdminPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.isAdmin(currentUser));
+                .body(memberService.isAdmin(currentUser));
     }
 
     /**

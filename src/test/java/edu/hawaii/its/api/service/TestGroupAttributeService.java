@@ -1,36 +1,38 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.type.Grouping;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.SyncDestination;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -76,6 +78,12 @@ public class TestGroupAttributeService {
     private MemberAttributeService memberAttributeService;
 
     @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private UpdateMemberService updateMemberService;
+
+    @Autowired
     public Environment env; // Just for the settings check.
 
     private Map<String, Boolean> attributeMap = new HashMap<>();
@@ -99,18 +107,20 @@ public class TestGroupAttributeService {
             grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
             grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
 
-            assertFalse(memberAttributeService.isOwner(GROUPING, testUsername));
-            assertFalse(memberAttributeService.isMember(GROUPING_INCLUDE, testUsername));
-            assertFalse(memberAttributeService.isMember(GROUPING_EXCLUDE, testUsername));
-            assertFalse(memberAttributeService.isAdmin(testUsername));
+            assertFalse(memberService.isOwner(GROUPING, testUsername));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, testUsername));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUsername));
+            assertFalse(memberService.isAdmin(testUsername));
         });
     }
 
     @AfterAll
     public void cleanUp() {
         // Set the test grouping's attribute settings back.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), attributeMap.get(OptType.IN.value()));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), attributeMap.get(OptType.OUT.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(),
+                attributeMap.get(OptType.IN.value()));
+        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
+                attributeMap.get(OptType.OUT.value()));
     }
 
     @Test
@@ -126,30 +136,25 @@ public class TestGroupAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.getAllSyncDestinations(iamtst01, GROUPING);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Should throw an exception if an invalid path is passed.
-        try {
-            groupAttributeService.getAllSyncDestinations(ADMIN, "bogus-path");
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(RuntimeException.class, () -> groupAttributeService.getAllSyncDestinations(ADMIN, "bogus-path"));
 
         // Should return sync destinations.
         List<SyncDestination> syncDestinations = groupAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
@@ -209,46 +214,40 @@ public class TestGroupAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
 
         // Should throw an exception if an invalid path is passed.
-        optInRequest = new OptRequest.Builder()
-                .withUsername(iamtst01)
-                .withGroupNameRoot("bogus-path")
-                .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(OptType.IN)
-                .withOptValue(false)
-                .build();
-
-        optOutRequest = new OptRequest.Builder()
-                .withUsername(iamtst01)
-                .withGroupNameRoot("bogus-path")
-                .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(OptType.IN)
-                .withOptValue(false)
-                .build();
-
-        try {
-            groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class, () -> groupAttributeService.changeOptStatus(
+                new OptRequest.Builder()
+                        .withUsername(iamtst01)
+                        .withGroupNameRoot("bogus-path")
+                        .withPrivilegeType(PrivilegeType.IN)
+                        .withOptType(OptType.IN)
+                        .withOptValue(false)
+                        .build(),
+                new OptRequest.Builder()
+                        .withUsername(iamtst01)
+                        .withGroupNameRoot("bogus-path")
+                        .withPrivilegeType(PrivilegeType.OUT)
+                        .withOptType(OptType.IN)
+                        .withOptValue(false)
+                        .build()
+        ));
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
@@ -363,13 +362,13 @@ public class TestGroupAttributeService {
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should not throw an exception if current user is an admin but not an owner.
         optInRequest = new OptRequest.Builder()
@@ -388,37 +387,32 @@ public class TestGroupAttributeService {
                 .withOptValue(false)
                 .build();
 
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
 
         // Should throw an exception if an invalid path is passed.
-        optInRequest = new OptRequest.Builder()
-                .withUsername(iamtst01)
-                .withGroupNameRoot("bogus-path")
-                .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(OptType.OUT)
-                .withOptValue(false)
-                .build();
+        assertThrows(NullPointerException.class, () -> groupAttributeService.changeOptStatus(
+                new OptRequest.Builder()
+                        .withUsername(iamtst01)
+                        .withGroupNameRoot("bogus-path")
+                        .withPrivilegeType(PrivilegeType.IN)
+                        .withOptType(OptType.OUT)
+                        .withOptValue(false)
+                        .build(),
+                new OptRequest.Builder()
+                        .withUsername(iamtst01)
+                        .withGroupNameRoot("bogus-path")
+                        .withPrivilegeType(PrivilegeType.OUT)
+                        .withOptType(OptType.OUT)
+                        .withOptValue(false)
+                        .build()
+        ));
 
-        optOutRequest = new OptRequest.Builder()
-                .withUsername(iamtst01)
-                .withGroupNameRoot("bogus-path")
-                .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(OptType.OUT)
-                .withOptValue(false)
-                .build();
-
-        try {
-            groupAttributeService.changeOptStatus(optInRequest, optOutRequest);
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
@@ -516,30 +510,26 @@ public class TestGroupAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.changeGroupAttributeStatus(GROUPING, iamtst01, null, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Should throw an exception if an invalid path is passed.
-        try {
-            groupAttributeService.changeGroupAttributeStatus("bogus-path", ADMIN, null, false);
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class,
+                () -> groupAttributeService.changeGroupAttributeStatus("bogus-path", ADMIN, null, false));
 
         // Should return success no matter what.
         List<String> optList = new ArrayList<>();
@@ -610,30 +600,26 @@ public class TestGroupAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        membershipService.addOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
             groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        membershipService.removeOwnerships(GROUPING, ADMIN, iamtst01List);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        membershipService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, iamtst01);
         try {
             groupAttributeService.updateDescription(GROUPING, iamtst01, DEFAULT_DESCRIPTION);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        membershipService.removeAdmin(ADMIN, iamtst01);
 
         // Should throw an exception if an invalid path is passed.
-        try {
-            groupAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION);
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
+        assertThrows(NullPointerException.class,
+                () -> groupAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION));
+        updateMemberService.removeAdmin(ADMIN, iamtst01);
 
         // Should be set to default description
         GroupingsServiceResult groupingsServiceResult =

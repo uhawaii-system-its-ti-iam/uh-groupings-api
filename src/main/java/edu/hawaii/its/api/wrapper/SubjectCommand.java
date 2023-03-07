@@ -14,12 +14,7 @@ public class SubjectCommand extends GrouperCommand implements Command<SubjectRes
         Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
         gcGetSubjects = new GcGetSubjects();
         gcGetSubjects.assignIncludeSubjectDetail(true);
-        this.addSubject(uhIdentifier)
-                .addSubjectAttribute("uhUuid")
-                .addSubjectAttribute("uid")
-                .addSubjectAttribute("cn")
-                .addSubjectAttribute("sn")
-                .addSubjectAttribute("givenName");
+        this.addSubject(uhIdentifier);
     }
 
     public SubjectResult execute() {

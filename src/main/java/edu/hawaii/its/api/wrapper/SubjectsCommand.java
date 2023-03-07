@@ -17,12 +17,7 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
         gcGetSubjects.assignIncludeSubjectDetail(true);
         for (String uhIdentifier : uhIdentifiers) {
             Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
-            addSubject(uhIdentifier)
-                    .addSubjectAttribute("uhUuid")
-                    .addSubjectAttribute("uid")
-                    .addSubjectAttribute("cn")
-                    .addSubjectAttribute("sn")
-                    .addSubjectAttribute("givenName");
+            addSubject(uhIdentifier);
         }
     }
 

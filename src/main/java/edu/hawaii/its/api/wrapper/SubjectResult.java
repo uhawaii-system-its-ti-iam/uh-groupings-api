@@ -58,6 +58,15 @@ public class SubjectResult extends Results {
     public String getName() {
         return subject.getName();
     }
+
+    public String getLastName() {
+        return subject.getLastName();
+    }
+
+    public String getFirstName() {
+        return subject.getFirstName();
+    }
+
     public Subject getSubject() {
         return subject;
     }
