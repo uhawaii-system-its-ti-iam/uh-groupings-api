@@ -56,8 +56,17 @@ public class GroupAttributeCommand extends GrouperCommand implements Command<Gro
 
     @Override
     public GroupAttributeResults execute() {
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = gcGetAttributeAssignments.execute();
-        return new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults = null;
+        try {
+            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = gcGetAttributeAssignments.execute();
+            groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+
+            // Temporary fix, as the wrappers are still under construction.
+        } catch (RuntimeException e) {
+            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
+            groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        }
+        return groupAttributeResults;
     }
 
     private GroupAttributeCommand addAttribute(String attribute) {

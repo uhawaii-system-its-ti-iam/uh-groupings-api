@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -11,6 +11,7 @@ import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -89,7 +90,12 @@ public class TestGroupingAssignmentService {
     @Autowired
     public Environment env; // Just for the settings check.
 
-    @BeforeAll
+    @Autowired
+    private UhIdentifierGenerator uhIdentifierGenerator;
+
+    private Person testPerson;
+
+    @BeforeEach
     public void init() {
         assertTrue(memberService.isAdmin(ADMIN));
         TEST_USERNAMES.forEach(testUsername -> {
@@ -103,17 +109,28 @@ public class TestGroupingAssignmentService {
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUsername));
             assertFalse(memberService.isAdmin(testUsername));
         });
+
+        testPerson = uhIdentifierGenerator.getRandomPerson();
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUsername());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUsername());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUsername());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUsername());
+
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUhUuid());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUhUuid());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUhUuid());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUhUuid());
     }
 
     @Test
     public void getGroupingTest() {
-        String iamtst01 = TEST_USERNAMES.get(0);
+        String testUsername = testPerson.getUsername();
         List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(iamtst01);
-        updateMemberService.removeAdmin(ADMIN, iamtst01);
+        iamtst01List.add(testUsername);
+        updateMemberService.removeAdmin(ADMIN, testUsername);
         // Should throw and exception if current user is not an admin or and owner.
         try {
-            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+            groupingAssignmentService.getGrouping(GROUPING, testUsername);
             fail("Should throw and exception if current user is not an admin or and owner.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
@@ -126,9 +143,9 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+            groupingAssignmentService.getGrouping(GROUPING, testUsername);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
@@ -136,15 +153,15 @@ public class TestGroupingAssignmentService {
         // Should not throw an exception if current user is an admin and an owner.
         updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
-            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+            groupingAssignmentService.getGrouping(GROUPING, testUsername);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.getGrouping(GROUPING, iamtst01);
+            groupingAssignmentService.getGrouping(GROUPING, testUsername);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
@@ -170,12 +187,12 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void getPaginatedGroupingTest() {
-        String iamtst01 = TEST_USERNAMES.get(0);
+        String testUsername = testPerson.getUsername();
         List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(iamtst01);
+        iamtst01List.add(testUsername);
         // Should throw and exception if current user is not an admin or and owner.
         try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUsername, null, null, null, null);
             fail("Should throw and exception if current user is not an admin or and owner.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
@@ -189,9 +206,9 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUsername, null, null, null, null);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
@@ -199,15 +216,15 @@ public class TestGroupingAssignmentService {
         // Should not throw an exception if current user is an admin and an owner.
         updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUsername, null, null, null, null);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, iamtst01, null, null, null, null);
+            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUsername, null, null, null, null);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
@@ -219,24 +236,24 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void adminListsTest() {
-        String iamtst01 = TEST_USERNAMES.get(0);
+        String testUsername = testPerson.getUsername();
 
         // Should throw an exception if current user is not an admin.
         try {
-            groupingAssignmentService.adminLists(iamtst01);
+            groupingAssignmentService.adminLists(testUsername);
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user is an admin.
-        updateMemberService.addAdmin(ADMIN, iamtst01);
+        updateMemberService.addAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.adminLists(iamtst01);
+            groupingAssignmentService.adminLists(testUsername);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdmin(ADMIN, iamtst01);
+        updateMemberService.removeAdmin(ADMIN, testUsername);
 
         // Fields in AdminListsHolder should not be null.
         AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN);
@@ -296,11 +313,12 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void optInOutGroupingsPathsTest() {
+        String testUsername = testPerson.getUsername();
         // Test both getOptInGroups and getOptOutGroups()
         List<GroupingPath> optInGroupingsPaths =
-                groupingAssignmentService.optInGroupingPaths(ADMIN, TEST_USERNAMES.get(0));
+                groupingAssignmentService.optInGroupingPaths(ADMIN, testUsername);
         List<String> optInPaths = optInGroupingsPaths.stream().map(GroupingPath::getPath).collect(Collectors.toList());
-        List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, TEST_USERNAMES.get(0));
+        List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, testUsername);
         Set<String> intersection =
                 optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
         // Should be no intersection between the two lists.
@@ -365,20 +383,21 @@ public class TestGroupingAssignmentService {
     @Test
     public void getGroupPathsTest() {
         List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, ADMIN);
+        String testUsername = testPerson.getUsername();
         assertFalse(groupPaths.isEmpty());
         // Should return an empty list if current user is not an admin and if current user is not the same as username.
-        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
+        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, TEST_USERNAMES.get(1));
         assertTrue(groupPaths.isEmpty());
 
         // Should return a non-empty list if current user is not an admin but is the same as username.
-        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(0));
+        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, testUsername);
         assertFalse(groupPaths.isEmpty());
 
         // Should return a non-empty list if current user is an admin but is not the same as username.
-        updateMemberService.addAdmin(ADMIN, TEST_USERNAMES.get(0));
-        groupPaths = groupingAssignmentService.getGroupPaths(TEST_USERNAMES.get(0), TEST_USERNAMES.get(1));
+        updateMemberService.addAdmin(ADMIN, testUsername);
+        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, TEST_USERNAMES.get(1));
         assertFalse(groupPaths.isEmpty());
-        updateMemberService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
+        updateMemberService.removeAdmin(ADMIN, testUsername);
     }
 
     //ToDo add test coverage for getGroupingOwners() and isSoleOwner
