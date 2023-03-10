@@ -32,11 +32,13 @@ public class GroupingsMoveMembersResultTest {
     public void test() {
         String json = propertyValue("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
+        assertNotNull(wsAddMemberResults);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
 
         json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        assertNotNull(wsDeleteMemberResults);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
 

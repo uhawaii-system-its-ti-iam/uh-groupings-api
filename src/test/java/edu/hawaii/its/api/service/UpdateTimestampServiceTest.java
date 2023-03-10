@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -19,6 +17,9 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class UpdateTimestampServiceTest {

@@ -1,45 +1,59 @@
 package edu.hawaii.its.api.groupings;
 
+import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
-import edu.hawaii.its.api.wrapper.AddResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-public class GroupingsAddResults extends GroupingsMembersResults implements MemberResults<GroupingsAddResult> {
+public class GroupingsAddResults implements GroupingsResult {
 
-    protected final List<GroupingsAddResult> groupingsAddResults;
-    protected final AddMembersResults addMembersResults;
+    protected AddMembersResults addMembersResults;
+
+    private String groupPath;
+    private String resultCode;
 
     public GroupingsAddResults(AddMembersResults addMembersResults) {
-        Objects.requireNonNull(addMembersResults, "addMembersResults cannot be null");
         this.addMembersResults = addMembersResults;
-        groupingsAddResults = new ArrayList<>();
+        setResultCode();
         setGroupPath(addMembersResults.getGroupPath());
-        for (AddResult addResult : addMembersResults.getResults()) {
-            groupingsAddResults.add(new GroupingsAddResult(addResult));
-        }
     }
+
     public GroupingsAddResults() {
-        addMembersResults  = new AddMembersResults();
-        groupingsAddResults = new ArrayList<>();
+        addMembersResults = new AddMembersResults();
+        setResultCode();
+        setGroupPath("");
     }
 
     @Override
     public String getResultCode() {
-        String success = "SUCCESS";
-        String failure = "FAILURE";
-        for (GroupingsAddResult groupingsAddResult : groupingsAddResults) {
-            if (groupingsAddResult.resultCode.equals(success)) {
-                return success;
+        return resultCode;
+    }
+
+    public void setResultCode() {
+        for (AddMemberResult addMemberResult : addMembersResults.getResults()) {
+            if (addMemberResult.getResultCode().equals("SUCCESS")) {
+                this.resultCode = "SUCCESS";
+                return;
             }
         }
-        return failure;
+        this.resultCode = "FAILURE";
     }
 
     @Override
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
+
     public List<GroupingsAddResult> getResults() {
+        List<GroupingsAddResult> groupingsAddResults = new ArrayList<>();
+        for (AddMemberResult addMemberResult : addMembersResults.getResults()) {
+            groupingsAddResults.add(new GroupingsAddResult(addMemberResult));
+        }
         return groupingsAddResults;
     }
 

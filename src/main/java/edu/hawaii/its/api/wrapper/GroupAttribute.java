@@ -2,6 +2,9 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
+/**
+ * A wrapper for WsAttributeAssign.
+ */
 public class GroupAttribute extends Results {
     private final WsAttributeAssign wsAttributeAssign;
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -26,6 +27,7 @@ public class TestHasMembersCommand {
 
     @Value("${groupings.api.test.grouping_many_include}")
     protected String GROUPING_INCLUDE;
+
     @Test
     public void constructor() {
         HasMembersCommand hasMembersCommand = new HasMembersCommand();
@@ -42,11 +44,6 @@ public class TestHasMembersCommand {
 
     @Test
     public void execute() {
-        HasMembersCommand hasMembersCommand = new HasMembersCommand();
-        /*
-        assertThrows(RuntimeException.class, hasMembersCommand::execute);
-         */
-        hasMembersCommand.assignGroupPath(GROUPING_INCLUDE).addUhIdentifier(UH_NUMBERS.get(0)).execute().getResult();
-        hasMembersCommand.assignGroupPath(GROUPING_INCLUDE).addUhIdentifier(UH_USERNAMES.get(0)).execute().getResult();
+        assertThrows(RuntimeException.class, new HasMembersCommand()::execute);
     }
 }

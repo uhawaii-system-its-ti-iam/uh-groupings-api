@@ -2,6 +2,9 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
+/**
+ * A wrapper for WsSubject.
+ */
 public class Subject extends Results {
 
     private final WsSubject wsSubject;
