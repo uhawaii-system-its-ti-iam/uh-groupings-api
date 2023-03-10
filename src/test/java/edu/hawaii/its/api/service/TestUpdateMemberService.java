@@ -7,9 +7,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
-import edu.hawaii.its.api.wrapper.AddMemberCommand;
-import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
-import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -74,19 +71,22 @@ public class TestUpdateMemberService {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private GrouperApiService grouperApiService;
+
     private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     private final String SUCCESS_ALREADY_EXISTED = "SUCCESS_ALREADY_EXISTED";
     private final String SUCCESS_WASNT_IMMEDIATE = "SUCCESS_WASNT_IMMEDIATE";
 
     @BeforeAll
     public void init() {
-        new RemoveMemberCommand(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0)).execute();
-        new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_NUMBERS).execute();
-        new RemoveMembersCommand(GROUPING_EXCLUDE, TEST_UH_NUMBERS).execute();
+        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
+        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_NUMBERS);
+        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_NUMBERS);
 
-        new RemoveMemberCommand(GROUPING_ADMINS, TEST_UH_USERNAMES.get(0)).execute();
-        new RemoveMembersCommand(GROUPING_INCLUDE, TEST_UH_USERNAMES).execute();
-        new RemoveMembersCommand(GROUPING_EXCLUDE, TEST_UH_USERNAMES).execute();
+        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_USERNAMES.get(0));
+        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_USERNAMES);
+        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_USERNAMES);
     }
 
     @Test
@@ -385,11 +385,11 @@ public class TestUpdateMemberService {
     }
 
     private void addGroupMember(String groupPath, String uhIdentifier) {
-        new AddMemberCommand(groupPath, uhIdentifier).execute();
+        grouperApiService.addMember(groupPath, uhIdentifier);
     }
 
     private void removeGroupMember(String groupPath, String uhIdentifier) {
-        new RemoveMemberCommand(groupPath, uhIdentifier).execute();
+        grouperApiService.removeMember(groupPath, uhIdentifier);
     }
 
 }

@@ -1,41 +1,31 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.exception.AddMemberRequestRejectedException;
-
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.util.List;
-import java.util.Objects;
 
 public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
 
-    public RemoveMembersCommand(String groupPath, List<String> uhIdentifiers) {
-        Objects.requireNonNull(uhIdentifiers, "uhIdentifiers cannot be null");
-        Objects.requireNonNull(groupPath, "groupPath cannot be null");
+    public RemoveMembersCommand() {
         gcDeleteMember = new GcDeleteMember();
-        for (String uhIdentifier : uhIdentifiers) {
-            Objects.requireNonNull(uhIdentifier, "uhIdentifier cannot be null");
-            addUhIdentifier(uhIdentifier);
-        }
         includeUhMemberDetails(true);
-        assignGroupPath(groupPath);
-
     }
 
     public RemoveMembersResults execute() {
-        RemoveMembersResults removeMembersResults;
-        try {
-            WsDeleteMemberResults wsDeleteMemberResults = gcDeleteMember.execute();
-            removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
-        } catch (RuntimeException e) {
-            throw new AddMemberRequestRejectedException(e);
-        }
-        return removeMembersResults;
+        WsDeleteMemberResults wsDeleteMemberResults = gcDeleteMember.execute();
+        return new RemoveMembersResults(wsDeleteMemberResults);
     }
 
-    private RemoveMembersCommand addUhIdentifier(String uhIdentifier) {
+    public RemoveMembersCommand addUhIdentifiers(List<String> uhIdentifiers) {
+        for (String uhIdentifier : uhIdentifiers) {
+            addUhIdentifier(uhIdentifier);
+        }
+        return this;
+    }
+
+    public RemoveMembersCommand addUhIdentifier(String uhIdentifier) {
         if (isUhUuid(uhIdentifier)) {
             addUhUuid(uhIdentifier);
             includeUhMemberDetails(true);
@@ -55,12 +45,12 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
         return this;
     }
 
-    private RemoveMembersCommand assignGroupPath(String groupPath) {
+    public RemoveMembersCommand assignGroupPath(String groupPath) {
         gcDeleteMember.assignGroupName(groupPath);
         return this;
     }
 
-    private RemoveMembersCommand includeUhMemberDetails(boolean includeDetails) {
+    public RemoveMembersCommand includeUhMemberDetails(boolean includeDetails) {
         gcDeleteMember.assignIncludeSubjectDetail(includeDetails);
         return this;
     }

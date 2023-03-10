@@ -1,10 +1,5 @@
 package edu.hawaii.its.api.groupings;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
@@ -16,6 +11,12 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GroupingsTimestampResultTest {
     private static Properties properties;
@@ -56,6 +57,7 @@ public class GroupingsTimestampResultTest {
         assertEquals(CURRENT_UPDATED_TIME, groupingsTimestampResult.getCurrentUpdatedTime());
         assertEquals("Timestamp was updated from 19700101T0000 to 19700101T0001.",
                 groupingsTimestampResult.getResultMessage());
+        assertEquals("group-path", groupingsTimestampResult.getGroupPath());
     }
 
     @Test

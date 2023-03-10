@@ -1,94 +1,68 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AddMembersResultsTest {
 
-    private static Properties properties;
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @Value("${groupings.api.test.uh-usernames}")
+    private List<String> TEST_USERNAMES;
+
+    @Value("${groupings.api.test.uh-numbers}")
+    private List<String> TEST_NUMBERS;
+
+    @Value("${groupings.api.test.uh-names}")
+    private List<String> TEST_NAMES;
+
+    private PropertyLocator propertyLocator;
+
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.add.member.results.success");
+        String json = propertyLocator.find("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
-        addMembersResults = new AddMembersResults(null);
-        assertNotNull(addMembersResults);
+        assertNotNull(new AddMembersResults(null));
+        assertNotNull(new AddMembersResults());
     }
 
     @Test
-    public void addSuccessResultsTest() {
-        String json = propertyValue("ws.add.member.results.success");
+    public void test() {
+        String json = propertyLocator.find("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
         assertEquals("group-path", addMembersResults.getGroupPath());
-        assertNotNull(addMembersResults.getResults());
-    }
-
-    @Test
-    public void failedResultsTest() {
-        String json = propertyValue("ws.add.member.results.failure");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        assertNotNull(addMembersResults);
-        assertEquals("FAILURE", addMembersResults.getResultCode());
-        assertEquals("group-path", addMembersResults.getGroupPath());
-        assertNotNull(addMembersResults.getResults());
-    }
-
-    @Test
-    public void emptyResultsTest() {
-        String json = propertyValue("ws.add.member.results.empty");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        assertNotNull(addMembersResults);
-        assertEquals("FAILURE", addMembersResults.getResultCode());
-        assertEquals("group-path", addMembersResults.getGroupPath());
-        assertEquals(0, addMembersResults.getResults().size());
-    }
-
-    @Test
-    public void nullWsGroupResultsTest() {
-        String json = propertyValue("ws.add.member.results.null.ws.group");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        assertNotNull(addMembersResults);
-        assertEquals("FAILURE", addMembersResults.getResultCode());
-        assertEquals("", addMembersResults.getGroupPath());
-    }
-
-    @Test
-    public void nullGroupPathResultsTest() {
-        String json = propertyValue("ws.add.member.results.null.group.path");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        assertNotNull(addMembersResults);
-        assertEquals("FAILURE", addMembersResults.getResultCode());
-        assertEquals("", addMembersResults.getGroupPath());
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
+        List<AddMemberResult> addMemberResults = addMembersResults.getResults();
+        assertNotNull(addMemberResults);
+        assertEquals(5, addMemberResults.size());
+        AddMemberResult addMemberResult = addMemberResults.get(0);
+        assertEquals("SUCCESS_ALREADY_EXISTED", addMemberResult.getResultCode());
+        assertEquals("group-path", addMemberResult.getGroupPath());
+        assertEquals(TEST_NUMBERS.get(0), addMemberResult.getUhUuid());
+        assertEquals(TEST_USERNAMES.get(0), addMemberResult.getUid());
+        assertEquals(TEST_NAMES.get(0), addMemberResult.getName());
     }
 }

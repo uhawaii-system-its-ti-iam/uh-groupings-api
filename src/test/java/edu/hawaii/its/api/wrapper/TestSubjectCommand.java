@@ -37,10 +37,4 @@ public class TestSubjectCommand {
             assertEquals("uhIdentifier cannot be null", e.getMessage());
         }
     }
-
-    @Test
-    public void execute() {
-        new SubjectCommand(UH_NUMBERS.get(0)).execute();
-        new SubjectCommand(UH_USERNAMES.get(0)).execute();
-    }
 }

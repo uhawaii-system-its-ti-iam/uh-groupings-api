@@ -3,7 +3,6 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -12,8 +11,11 @@ import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
-import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
+import edu.hawaii.its.api.wrapper.AddMembersCommand;
+import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
+import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -123,11 +125,34 @@ public class GrouperApiService {
     }
 
     public AddMemberResult addMember(String groupPath, String uhIdentifier) {
-        return new AddMemberCommand(groupPath, uhIdentifier).execute();
+        return exec.execute(new AddMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifier(uhIdentifier)).getResults().get(0);
+    }
+
+    public AddMembersResults addMembers(String groupPath, List<String> uhIdentifiers) {
+        return exec.execute(new AddMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifiers(uhIdentifiers));
     }
 
     public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
-        return new RemoveMemberCommand(groupPath, uhIdentifier).execute();
+        return exec.execute(new RemoveMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifier(uhIdentifier)).getResults().get(0);
+    }
+
+    public AddMembersResults resetGroupMembers(String groupPath) {
+        return exec.execute(new AddMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifiers(new ArrayList<>())
+                .replaceGroupMembers(true));
+    }
+
+    public RemoveMembersResults removeMembers(String groupPath, List<String> uhIdentifiers) {
+        return exec.execute(new RemoveMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifiers(uhIdentifiers));
     }
 
     public WsGetAttributeAssignmentsResults groupsOf(String assignType,

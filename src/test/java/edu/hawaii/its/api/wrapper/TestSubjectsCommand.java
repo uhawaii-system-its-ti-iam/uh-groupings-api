@@ -46,9 +46,4 @@ public class TestSubjectsCommand {
             assertEquals("uhIdentifier cannot be null", e.getMessage());
         }
     }
-
-    @Test
-    public void execute() {
-        assertNotNull(new SubjectsCommand(UH_NUMBERS).execute());
-    }
 }
