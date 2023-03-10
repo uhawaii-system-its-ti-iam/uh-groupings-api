@@ -363,7 +363,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        ObjectMapper mapper = new ObjectMapper();
+        assertNotNull(mapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsMoveMembersResult.class));
         TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_INCLUDE, username)));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);

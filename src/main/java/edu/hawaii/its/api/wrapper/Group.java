@@ -2,6 +2,9 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
+/**
+ * A wrapper for WsGroup.
+ */
 public class Group extends Results {
     private final WsGroup wsGroup;
 

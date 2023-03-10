@@ -1,54 +1,48 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 
 public class RemoveMemberResult extends Results {
-    private final WsDeleteMemberResults wsDeleteMemberResults;
-    private final RemoveResult removeResult;
+    private final WsDeleteMemberResult wsDeleteMemberResult;
+    private final String groupPath;
 
-    public RemoveMemberResult(WsDeleteMemberResults wsDeleteMemberResults) {
-        if (wsDeleteMemberResults == null) {
-            this.wsDeleteMemberResults = new WsDeleteMemberResults();
-            removeResult = new RemoveResult();
+    public RemoveMemberResult(WsDeleteMemberResult wsDeleteMemberResult, String groupPath) {
+        if (wsDeleteMemberResult == null) {
+            this.wsDeleteMemberResult = new WsDeleteMemberResult();
+            this.groupPath = "";
         } else {
-            this.wsDeleteMemberResults = wsDeleteMemberResults;
-            if (hasResults()) {
-                removeResult = new RemoveResult(wsDeleteMemberResults.getResults()[0]);
-            } else {
-                removeResult = new RemoveResult();
-            }
+            this.wsDeleteMemberResult = wsDeleteMemberResult;
+            this.groupPath = groupPath;
         }
     }
 
+    public RemoveMemberResult() {
+        this.wsDeleteMemberResult = new WsDeleteMemberResult();
+        this.groupPath = "";
+    }
+
     public String getGroupPath() {
-        String groupPath = null;
-        if (wsDeleteMemberResults.getWsGroup() != null) {
-            groupPath = wsDeleteMemberResults.getWsGroup().getName();
-        }
-        return (groupPath != null) ? groupPath : "";
+        return groupPath;
     }
 
     @Override
     public String getResultCode() {
-        return removeResult.getResultCode();
+        return wsDeleteMemberResult.getResultMetadata().getResultCode();
     }
 
     public String getUhUuid() {
-        return removeResult.getUhUuid();
+        return getSubject().getUhUuid();
     }
 
     public String getUid() {
-        return removeResult.getUid();
+        return getSubject().getUid();
     }
 
     public String getName() {
-        return removeResult.getName();
+        return getSubject().getName();
     }
 
-    private boolean hasResults() {
-        if (isEmpty(wsDeleteMemberResults.getResults())) {
-            return false;
-        }
-        return wsDeleteMemberResults.getResults()[0] != null;
+    public Subject getSubject() {
+        return new Subject(wsDeleteMemberResult.getWsSubject());
     }
 }

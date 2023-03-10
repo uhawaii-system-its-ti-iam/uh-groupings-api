@@ -3,17 +3,17 @@ package edu.hawaii.its.api.groupings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.ReplaceGroupMembersResult;
+import edu.hawaii.its.api.wrapper.AddMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupingsReplaceGroupMembersResultTest {
     private static Properties properties;
@@ -38,9 +38,9 @@ public class GroupingsReplaceGroupMembersResultTest {
 
         String json = propertyValue("ws.add.member.results.reset.group");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        ReplaceGroupMembersResult replaceGroupMembersResult = new ReplaceGroupMembersResult(wsAddMemberResults);
-        assertNotNull(replaceGroupMembersResult);
-        groupingsReplaceGroupMembersResult = new GroupingsReplaceGroupMembersResult(replaceGroupMembersResult);
+        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
+        assertNotNull(addMembersResults);
+        groupingsReplaceGroupMembersResult = new GroupingsReplaceGroupMembersResult(addMembersResults);
         assertNotNull(groupingsReplaceGroupMembersResult);
     }
 
@@ -48,9 +48,9 @@ public class GroupingsReplaceGroupMembersResultTest {
     public void accessors() {
         String json = propertyValue("ws.add.member.results.reset.group");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        ReplaceGroupMembersResult replaceGroupMembersResult = new ReplaceGroupMembersResult(wsAddMemberResults);
+        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         GroupingsReplaceGroupMembersResult groupingsReplaceGroupMembersResult =
-                new GroupingsReplaceGroupMembersResult(replaceGroupMembersResult);
+                new GroupingsReplaceGroupMembersResult(addMembersResults);
         assertNotNull(groupingsReplaceGroupMembersResult.getGroupPath());
         assertEquals("group-path", groupingsReplaceGroupMembersResult.getGroupPath());
         assertNotNull(groupingsReplaceGroupMembersResult.getResultCode());

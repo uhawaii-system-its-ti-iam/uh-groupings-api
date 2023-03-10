@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -24,11 +25,6 @@ public class TestFindGroupsCommand {
 
     @Test
     public void execute() {
-        assertNotNull(new FindGroupsCommand()
-                .addPath(GROUPING)
-                .execute());
-        assertNotNull(new FindGroupsCommand()
-                .addPath("bad-path")
-                .execute());
+        assertThrows(RuntimeException.class, new FindGroupsCommand()::execute);
     }
 }

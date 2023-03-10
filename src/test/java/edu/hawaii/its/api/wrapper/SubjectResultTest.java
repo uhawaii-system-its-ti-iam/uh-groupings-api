@@ -62,12 +62,21 @@ public class SubjectResultTest {
 
     @Test
     public void failedResultsTest() {
-        String json = propertyValue("ws.get.subject.result.failure");
+        String json = propertyValue("ws.get.subject.result.uid.failure");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-
         SubjectResult subjectResult = new SubjectResult(wsGetSubjectsResults);
         assertEquals("SUBJECT_NOT_FOUND", subjectResult.getResultCode());
         assertEquals("", subjectResult.getUhUuid());
+        assertEquals("bogus-identifier", subjectResult.getUid());
+        assertEquals("", subjectResult.getName());
+        assertEquals("", subjectResult.getLastName());
+        assertEquals("", subjectResult.getFirstName());
+
+        json = propertyValue("ws.get.subject.result.uhuuid.failure");
+        wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        subjectResult = new SubjectResult(wsGetSubjectsResults);
+        assertEquals("SUBJECT_NOT_FOUND", subjectResult.getResultCode());
+        assertEquals("11111111", subjectResult.getUhUuid());
         assertEquals("", subjectResult.getUid());
         assertEquals("", subjectResult.getName());
         assertEquals("", subjectResult.getLastName());
