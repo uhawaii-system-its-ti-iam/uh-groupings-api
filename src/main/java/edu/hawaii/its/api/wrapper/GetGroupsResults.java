@@ -26,6 +26,12 @@ public class GetGroupsResults extends Results {
     }
 
     @Override public String getResultCode() {
+        if (isEmpty(wsGetGroupsResults.getResults())) {
+            return "FAILURE";
+        }
+        if (isEmpty(wsGetGroupsResults.getResults()[0].getWsGroups())) {
+            return "FAILURE";
+        }
         return wsGetGroupsResults.getResultMetadata().getResultCode();
     }
 

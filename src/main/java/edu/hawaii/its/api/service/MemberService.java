@@ -2,8 +2,6 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.HasMemberResult;
-import edu.hawaii.its.api.wrapper.HasMembersCommand;
-import edu.hawaii.its.api.wrapper.HasMembersResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +20,7 @@ public class MemberService {
     private String OWNERS_GROUP;
 
     @Autowired
-    ExecutorService grouperApi;
+    private GrouperApiService grouperApiService;
 
     private static final String SUCCESS = "SUCCESS";
 
@@ -47,14 +45,7 @@ public class MemberService {
     }
 
     public boolean isMember(String groupPath, String uhIdentifier) {
-        HasMemberResult hasMemberResult = memberResult(groupPath, uhIdentifier);
+        HasMemberResult hasMemberResult = grouperApiService.memberResult(groupPath, uhIdentifier);
         return hasMemberResult.getResultCode().equals("IS_MEMBER");
-    }
-
-    private HasMemberResult memberResult(String groupingPath, String uhIdentifier) {
-        HasMembersResults hasMembersResults = grouperApi.execute(new HasMembersCommand()
-                .assignGroupPath(groupingPath)
-                .addUhIdentifier(uhIdentifier));
-        return hasMembersResults.getResult();
     }
 }

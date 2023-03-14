@@ -3,148 +3,107 @@ package edu.hawaii.its.api.wrapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import static edu.hawaii.its.api.wrapper.SubjectResult.SUBJECT_NOT_FOUND;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubjectResultTest {
 
-    private static PropertyLocator propertyLocator;
+    private static Properties properties;
+
+    final static private String SUCCESS = "SUCCESS";
 
     @BeforeAll
     public static void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
+        Path path = Paths.get("src/test/resources");
+        Path file = path.resolve("grouper.test.properties");
+        properties = new Properties();
+        properties.load(new FileInputStream(file.toFile()));
     }
 
     @Test
-    public void nullConstruction() {
-        SubjectResult results = new SubjectResult(null);
-        assertThat(results, is(notNullValue()));
-        assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
-    }
-
-    @Test
-    public void emptyConstruction() {
-        SubjectResult results = new SubjectResult(new WsGetSubjectsResults());
-        assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
-
-        results = new SubjectResult();
-        assertNotNull(results);
-    }
-
-    @Test
-    public void emptyConstructionAgain() {
-        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
-        assertThat(wsGetSubjectsResults.getWsSubjects(), is(nullValue()));
-        WsSubject[] wsSubjects = new WsSubject[0];
-        assertThat(wsSubjects.length, equalTo(0));
-
-        SubjectResult results = new SubjectResult(wsGetSubjectsResults);
-        wsGetSubjectsResults.setWsSubjects(wsSubjects);
-        assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
-
-        String json = propertyLocator.find("subject.not.found");
-        wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        results = new SubjectResult(wsGetSubjectsResults);
-        assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(5));
-    }
-
-    @Test
-    public void emptyConstructionFromJson() {
-        String json = propertyLocator.find("subject.not.found");
+    public void construction() {
+        String json = propertyValue("ws.get.subjects.results.success");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        assertThat(wsGetSubjectsResults.getWsSubjects(), is(notNullValue()));
-        SubjectResult results = new SubjectResult(wsGetSubjectsResults);
-        assertThat(results.getResultCode(), equalTo(SUBJECT_NOT_FOUND));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(5));
+        SubjectResult subjectResult = new SubjectResult(wsGetSubjectsResults);
+        assertNotNull(subjectResult);
+
+        subjectResult = new SubjectResult(null);
+        assertNotNull(subjectResult);
+
+        subjectResult = new SubjectResult();
+        assertNotNull(subjectResult);
     }
 
     @Test
-    public void resultWithoutAttributes() {
-        // Set up backing result.
-        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
-        assertThat(wsGetSubjectsResults.getWsSubjects(), is(nullValue()));
-        final String expectedStatusCode = "rock";
-        WsSubject[] wsSubjects = { makeWsSubject(expectedStatusCode) };
-        assertThat(wsSubjects.length, equalTo(1));
-        wsGetSubjectsResults.setWsSubjects(wsSubjects);
+    public void successfulResultsTest() {
+        String json = propertyValue("ws.get.subject.result.success");
+        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        SubjectResult subjectResult = new SubjectResult(wsGetSubjectsResults);
+        assertEquals(SUCCESS, subjectResult.getResultCode());
+        assertEquals(getTestNumbers().get(0), subjectResult.getUhUuid());
+        assertEquals(getTestUsernames().get(0), subjectResult.getUid());
+        assertEquals(getTestNames().get(0), subjectResult.getName());
+        assertEquals(getTestFirstNames().get(0), subjectResult.getFirstName());
+        assertEquals(getTestLastNames().get(0), subjectResult.getLastName());
 
-        // What we are testing.
-        SubjectResult results = new SubjectResult(wsGetSubjectsResults);
-        wsGetSubjectsResults.setWsSubjects(wsSubjects);
-        assertThat(results.getResultCode(), equalTo(expectedStatusCode));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(0));
+        assertNotNull(subjectResult.getSubject());
     }
 
     @Test
-    public void resultWithAttributes() {
-        // Set up backing result.
-        WsSubject wsSubject = makeWsSubject("rock-n-roll");
-        String[] attributeValues = { "ac", "⚡", "dc" };
-        wsSubject.setAttributeValues(attributeValues);
+    public void failedResultsTest() {
+        String json = propertyValue("ws.get.subject.result.failure");
+        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
 
-        WsSubject rockNRoll = new WsSubject();
-        rockNRoll.setAttributeValues(attributeValues);
-        WsSubject[] wsSubjects = { rockNRoll };
-
-        String[] attributeNames = { "bon", "angus", "malcom" };
-        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
-        wsGetSubjectsResults.setSubjectAttributeNames(attributeNames);
-        wsGetSubjectsResults.setWsSubjects(wsSubjects);
-
-        // What we are testing.
-        SubjectResult results = new SubjectResult(wsGetSubjectsResults);
-
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(3));
-
-        assertThat(results.getSubjectAttributeName(0), equalTo("bon"));
-        assertThat(results.getSubjectAttributeName(1), equalTo("angus"));
-        assertThat(results.getSubjectAttributeName(2), equalTo("malcom"));
-
-        assertThat(results.getAttributeValue(0), equalTo("ac"));
-        assertThat(results.getAttributeValue(1), equalTo("⚡"));
-        assertThat(results.getAttributeValue(2), equalTo("dc"));
-
-        assertThat(results.getSubjectAttributeName(0), equalTo("bon"));
-        assertThat(results.getSubjectAttributeName(1), equalTo("angus"));
-        assertThat(results.getSubjectAttributeName(2), equalTo("malcom"));
-
-        String json = propertyLocator.find("subject.found");
-        wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        results = new SubjectResult(wsGetSubjectsResults);
-
-        assertThat(results.getResultCode(), equalTo("SUCCESS"));
-        assertThat(results.getSubjectAttributeNameCount(), equalTo(5));
-
-        assertThat(results.getSubjectAttributeName(0), equalTo("uid"));
-        assertThat(results.getSubjectAttributeName(1), equalTo("cn"));
-        assertThat(results.getSubjectAttributeName(2), equalTo("sn"));
-        assertThat(results.getSubjectAttributeName(3), equalTo("givenName"));
-        assertThat(results.getSubjectAttributeName(4), equalTo("uhUuid"));
-
-        assertThat(results.getAttributeValue(0), equalTo("iamtst02"));
-        assertThat(results.getAttributeValue(1), equalTo("tst02name"));
-        assertThat(results.getAttributeValue(2), equalTo("tst02name"));
-        assertThat(results.getAttributeValue(3), equalTo("tst02name"));
-        assertThat(results.getAttributeValue(4), equalTo("iamtst02"));
+        SubjectResult subjectResult = new SubjectResult(wsGetSubjectsResults);
+        assertEquals("SUBJECT_NOT_FOUND", subjectResult.getResultCode());
+        assertEquals("", subjectResult.getUhUuid());
+        assertEquals("", subjectResult.getUid());
+        assertEquals("", subjectResult.getName());
+        assertEquals("", subjectResult.getLastName());
+        assertEquals("", subjectResult.getFirstName());
     }
 
-    private WsSubject makeWsSubject(String resultCode) {
-        WsSubject wsSubject = new WsSubject();
-        wsSubject.setResultCode(resultCode);
-        return wsSubject;
+    public List<String> getTestUsernames() {
+        String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
+        return new ArrayList<>(Arrays.asList(array));
     }
+
+    public List<String> getTestNumbers() {
+        String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    public List<String> getTestNames() {
+        String[] array = { "Testf-iwt-a TestIAM-staff", "Testf-iwt-b TestIAM-staff", "Testf-iwt-c TestIAM-staff",
+                "Testf-iwt-d TestIAM-faculty", "Testf-iwt-e TestIAM-student" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    public List<String> getTestLastNames() {
+        String[] array = { "TestIAM-staff", "TestIAM-staff", "TestIAM-staff",
+                "TestIAM-faculty", "TestIAM-student" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    public List<String> getTestFirstNames() {
+        String[] array = { "Testf-iwt-a", "Testf-iwt-b", "Testf-iwt-c",
+                "Testf-iwt-d", "Testf-iwt-e" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    private String propertyValue(String key) {
+        return properties.getProperty(key);
+    }
+
 }

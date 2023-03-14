@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.util.ServiceTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.List;
 import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
 import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestGroupService extends ServiceTest {
+public class TestGroupingService extends ServiceTest {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
     @Value("${groupings.api.test.grouping_many_include}")
@@ -97,6 +99,34 @@ public class TestGroupService extends ServiceTest {
         for (String path : basis) {
             assertTrue(pathHasBasis().test(path));
         }
+    }
+
+    @Test
+    public void getGroupingDescription() {
+        assertEquals("", groupingsService.getGroupingDescription("bad-path"));
+        assertEquals("", groupingsService.getGroupingDescription(GROUPING_INCLUDE));
+        assertNotNull(groupingsService.getGroupingDescription(GROUPING));
+    }
+
+    @Test
+    public void updateGroupingDescription() {
+        String updatedDescription = groupingsService.getGroupingDescription(GROUPING);
+        String description = "abcdefghifklmnopqrstuvwxyz!@##$%%45234543";
+        GroupingsUpdateDescriptionResult result = groupingsService.updateGroupingDescription(GROUPING, description);
+        assertEquals("SUCCESS_UPDATED", result.getResultCode());
+        assertEquals(updatedDescription, result.getUpdatedDescription());
+        assertEquals(description, result.getCurrentDescription());
+        assertEquals(GROUPING, result.getGroupPath());
+
+        result = groupingsService.updateGroupingDescription(GROUPING, description);
+        assertEquals("SUCCESS_NO_CHANGES_NEEDED", result.getResultCode());
+        assertEquals(description, result.getUpdatedDescription());
+        assertEquals(description, result.getCurrentDescription());
+
+       result = groupingsService.updateGroupingDescription(GROUPING, updatedDescription);
+        assertEquals("SUCCESS_UPDATED", result.getResultCode());
+        assertEquals(updatedDescription, result.getCurrentDescription());
+        assertEquals(description, result.getUpdatedDescription());
     }
 
 }

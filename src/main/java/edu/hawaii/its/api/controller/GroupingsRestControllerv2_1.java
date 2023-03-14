@@ -9,6 +9,7 @@ import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -387,7 +388,7 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping description.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/description")
-    public ResponseEntity<GroupingsServiceResult> updateDescription(
+    public ResponseEntity<GroupingsUpdateDescriptionResult> updateDescription(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @RequestBody(required = false) String dtoString) {
