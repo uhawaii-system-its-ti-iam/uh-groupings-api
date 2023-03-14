@@ -17,13 +17,11 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivileges
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -131,30 +129,6 @@ public class TestGrouperApiService {
         TEST_UH_NUMBERS.forEach(
                 num -> System.err.println(memberAttributeService.getMemberAttributes(ADMIN, num).toString()));
         assertNotNull(grouperApiService.syncDestinations());
-    }
-
-    @Test
-    public void getDescriptionTest() {
-        assertNotNull(grouperApiService.descriptionOf(GROUPING));
-    }
-
-    @Test
-    public void updateGroupDescriptionTest() {
-        String currentDescription = grouperApiService.descriptionOf(GROUPING);
-        String defaultDescription = "Default Description for Test";
-        WsGroupSaveResults groupSaveResults = grouperApiService.updateGroupDescription(GROUPING, defaultDescription);
-        assertNotNull(groupSaveResults);
-        assertNotNull(groupSaveResults.getResults());
-        assertNotNull(groupSaveResults.getResults()[0]);
-        assertNotNull(groupSaveResults.getResults()[0].getWsGroup());
-        assertNotNull(groupSaveResults.getResults()[0].getWsGroup().getDescription());
-        String updatedDescriptionResult = groupSaveResults.getResults()[0].getWsGroup().getDescription();
-        assertEquals(defaultDescription, updatedDescriptionResult);
-        assertEquals(updatedDescriptionResult, grouperApiService.descriptionOf(GROUPING));
-        groupSaveResults = grouperApiService.updateGroupDescription(GROUPING, currentDescription);
-        updatedDescriptionResult = groupSaveResults.getResults()[0].getWsGroup().getDescription();
-        assertEquals(currentDescription, updatedDescriptionResult);
-        assertEquals(updatedDescriptionResult, grouperApiService.descriptionOf(GROUPING));
     }
 
     @Test
@@ -346,12 +320,6 @@ public class TestGrouperApiService {
                 grouperApiService.subjectsResults(grouperApiService.subjectLookup(ADMIN));
         assertNotNull(subjectsResults);
 
-    }
-
-    @Test
-    public void findGroupsResultsTest() {
-        WsFindGroupsResults findGroupsResults = grouperApiService.findGroupsResults(GROUPING_INCLUDE);
-        assertNotNull(findGroupsResults);
     }
 
     @Test

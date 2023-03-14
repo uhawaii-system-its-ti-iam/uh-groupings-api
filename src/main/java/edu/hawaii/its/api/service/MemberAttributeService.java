@@ -54,6 +54,9 @@ public class MemberAttributeService {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private GroupingsService groupingsService;
+
     /**
      * Return true if username is a UH id number
      */
@@ -125,7 +128,7 @@ public class MemberAttributeService {
         for (String path : pathStrings) {
             String parentGroupingPath = parentGroupingPath(path);
             groupingPaths.add(new GroupingPath(parentGroupingPath,
-                    grouperApiService.descriptionOf(parentGroupingPath)));
+                    groupingsService.getGroupingDescription(parentGroupingPath)));
         }
 
         return groupingPaths;

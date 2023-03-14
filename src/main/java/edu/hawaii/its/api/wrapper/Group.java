@@ -40,6 +40,11 @@ public class Group extends Results {
         return (extension != null) ? extension : "";
     }
 
+    public String getGrouperUuid() {
+        String uuid = wsGroup.getUuid();
+        return (uuid != null) ? uuid : "";
+    }
+
     public boolean isValidPath() {
         return !getGroupPath().equals("");
     }

@@ -212,7 +212,6 @@ public class TestGroupingAssignmentService {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
         updateMemberService.removeOwnerships(ADMIN, GROUPING, iamtst01List);
-
         // Should throw and exception if an invalid path is passed.
         assertThrows(NullPointerException.class,
                 () -> groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, null));

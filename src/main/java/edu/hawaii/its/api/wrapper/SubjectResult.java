@@ -28,23 +28,7 @@ public class SubjectResult extends Results {
         if (isEmpty(wsGetSubjectsResults.getWsSubjects())) {
             return SUBJECT_NOT_FOUND;
         }
-
-        return wsGetSubjectsResults.getWsSubjects()[0].getResultCode();
-    }
-
-    public int getSubjectAttributeNameCount() {
-        if (isEmpty(wsGetSubjectsResults.getSubjectAttributeNames())) {
-            return 0;
-        }
-        return wsGetSubjectsResults.getSubjectAttributeNames().length;
-    }
-
-    public String getSubjectAttributeName(int index) {
-        return wsGetSubjectsResults.getSubjectAttributeNames()[index];
-    }
-
-    public String getAttributeValue(int index) {
-        return wsGetSubjectsResults.getWsSubjects()[0].getAttributeValues()[index];
+        return getSubject().getResultCode();
     }
 
     public String getUhUuid() {
@@ -72,11 +56,10 @@ public class SubjectResult extends Results {
     }
 
     private void setSubject() {
-        if (isEmpty(wsGetSubjectsResults.getWsSubjects()) || wsGetSubjectsResults.getWsSubjects()[0] == null) {
+        if (isEmpty(wsGetSubjectsResults.getWsSubjects())) {
             this.subject = new Subject(new WsSubject());
         } else {
             this.subject = new Subject(this.wsGetSubjectsResults.getWsSubjects()[0]);
         }
     }
-
 }

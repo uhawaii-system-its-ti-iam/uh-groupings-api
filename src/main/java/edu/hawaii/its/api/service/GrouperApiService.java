@@ -5,37 +5,36 @@ import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberCommand;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.FindGroupsCommand;
+import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GroupSaveCommand;
+import edu.hawaii.its.api.wrapper.GroupSaveResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
+import edu.hawaii.its.api.wrapper.HasMembersCommand;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
 import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
-import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
-import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
@@ -77,11 +76,33 @@ public class GrouperApiService {
     @Autowired
     MemberAttributeService membershipAttributeService;
 
-    @Autowired
-    private GroupPathService groupPathService;
-
     @Autowired ExecutorService exec;
 
+    public HasMemberResult memberResult(String groupingPath, String uhIdentifier) {
+        HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
+                .assignGroupPath(groupingPath)
+                .addUhIdentifier(uhIdentifier));
+        return hasMembersResults.getResult();
+    }
+
+    public GroupSaveResults groupSaveResults(String groupingPath, String description) {
+        GroupSaveResults groupSaveResults = exec.execute(new GroupSaveCommand()
+                .setGroupingPath(groupingPath)
+                .setDescription(description));
+        return groupSaveResults;
+    }
+
+    public FindGroupsResults findGroupsResults(String groupPath) {
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
+                .addPath(groupPath));
+        return findGroupsResults;
+    }
+
+    public FindGroupsResults findGroupsResults(List<String> groupPaths) {
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
+                .addPaths(groupPaths));
+        return findGroupsResults;
+    }
 
     public List<SyncDestination> syncDestinations() {
         WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
@@ -99,27 +120,6 @@ public class GrouperApiService {
             syncDest.add(newSyncDest);
         }
         return syncDest;
-    }
-
-    public String descriptionOf(String groupPath) {
-        return groupPathService.getGroupingDescription(groupPath);
-    }
-
-    public WsGroupSaveResults updateGroupDescription(String groupPath, String description) {
-        WsGroup updatedGroup = new WsGroup();
-        updatedGroup.setDescription(description);
-
-        WsFindGroupsResults wsFindGroupsResults = findGroupsResults(groupPath);
-        if (wsFindGroupsResults.getGroupResults() == null) {
-            throw new GcWebServiceError("Invalid group path");
-        }
-        WsGroupLookup groupLookup = new WsGroupLookup(groupPath, wsFindGroupsResults.getGroupResults()[0].getUuid());
-
-        WsGroupToSave groupToSave = new WsGroupToSave();
-        groupToSave.setWsGroup(updatedGroup);
-        groupToSave.setWsGroupLookup(groupLookup);
-
-        return new GcGroupSave().addGroupToSave(groupToSave).execute();
     }
 
     public AddMemberResult addMember(String groupPath, String uhIdentifier) {
@@ -319,12 +319,6 @@ public class GrouperApiService {
                 .addSubjectAttributeName(FIRST_NAME)
                 .addSubjectAttributeName(UHUUID)
                 .addWsSubjectLookup(lookup)
-                .execute();
-    }
-
-    public WsFindGroupsResults findGroupsResults(String groupPath) {
-        return new GcFindGroups()
-                .addGroupName(groupPath)
                 .execute();
     }
 
