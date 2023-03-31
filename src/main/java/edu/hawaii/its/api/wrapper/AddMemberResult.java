@@ -1,55 +1,49 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 
 public class AddMemberResult extends Results {
 
-    private final WsAddMemberResults wsAddMemberResults;
-    private final AddResult addResult;
+    private final WsAddMemberResult wsAddMemberResult;
+    private final String groupPath;
 
-    public AddMemberResult(WsAddMemberResults wsAddMemberResults) {
-        if (wsAddMemberResults == null) {
-            this.wsAddMemberResults = new WsAddMemberResults();
-            addResult = new AddResult();
+    public AddMemberResult(WsAddMemberResult wsAddMemberResult, String groupPath) {
+        if (wsAddMemberResult == null) {
+            this.wsAddMemberResult = new WsAddMemberResult();
+            this.groupPath = "";
         } else {
-            this.wsAddMemberResults = wsAddMemberResults;
-            if (hasResults()) {
-                addResult = new AddResult(wsAddMemberResults.getResults()[0]);
-            } else {
-                addResult = new AddResult();
-            }
+            this.wsAddMemberResult = wsAddMemberResult;
+            this.groupPath = groupPath;
         }
     }
 
+    public AddMemberResult() {
+        this.wsAddMemberResult = new WsAddMemberResult();
+        this.groupPath = "";
+    }
+
     public String getGroupPath() {
-        String groupPath = null;
-        if (wsAddMemberResults.getWsGroupAssigned() != null) {
-            groupPath = wsAddMemberResults.getWsGroupAssigned().getName();
-        }
-        return (groupPath != null) ? groupPath : "";
+        return groupPath;
     }
 
     @Override
     public String getResultCode() {
-        return addResult.getResultCode();
+        return wsAddMemberResult.getResultMetadata().getResultCode();
     }
 
     public String getUhUuid() {
-        return addResult.getUhUuid();
+        return getSubject().getUhUuid();
     }
 
     public String getUid() {
-        return addResult.getUid();
+        return getSubject().getUid();
     }
 
     public String getName() {
-        return addResult.getName();
+        return getSubject().getName();
     }
 
-    private boolean hasResults() {
-        if (isEmpty(wsAddMemberResults.getResults())) {
-            return false;
-        }
-        return wsAddMemberResults.getResults()[0] != null;
+    public Subject getSubject() {
+        return new Subject(wsAddMemberResult.getWsSubject());
     }
 }

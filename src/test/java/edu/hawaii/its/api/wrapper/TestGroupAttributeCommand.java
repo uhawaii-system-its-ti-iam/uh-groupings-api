@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.wrapper;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -13,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -57,6 +58,5 @@ public class TestGroupAttributeCommand {
         groupAttributeCommand = new GroupAttributeCommand(ATTRIBUTES, PATHS);
         assertNotNull(groupAttributeCommand);
         groupAttributeCommand.execute();
-
     }
 }

@@ -18,38 +18,32 @@ public class RemoveMembersResults extends Results {
         }
     }
 
+    public RemoveMembersResults() {
+        this.wsDeleteMemberResults = new WsDeleteMemberResults();
+    }
+
     public String getGroupPath() {
-        String groupPath = null;
-        if (wsDeleteMemberResults.getWsGroup() != null) {
-            groupPath = wsDeleteMemberResults.getWsGroup().getName();
-        }
-        return (groupPath != null) ? groupPath : "";
+        return getGroup().getGroupPath();
     }
 
-    public List<RemoveResult> getResults() {
-        List<RemoveResult> addResults = new ArrayList<>();
-        WsDeleteMemberResult[] wsResults = wsDeleteMemberResults.getResults();
-        if (isEmpty(wsResults)) {
-        } else {
-            for (WsDeleteMemberResult wsResult : wsResults) {
-                addResults.add(new RemoveResult(wsResult));
-            }
-        }
-        return addResults;
+    public Group getGroup() {
+        return new Group(wsDeleteMemberResults.getWsGroup());
     }
 
-    /**
-     * If none of the subjects were added, failure, otherwise return success.
-     */
+    public List<RemoveMemberResult> getResults() {
+        List<RemoveMemberResult> removeMemberResults = new ArrayList<>();
+        WsDeleteMemberResult[] wsDeleteMemberResults = this.wsDeleteMemberResults.getResults();
+        if (isEmpty(wsDeleteMemberResults)) {
+            return removeMemberResults;
+        }
+        for (WsDeleteMemberResult wsDeleteMemberResult : wsDeleteMemberResults) {
+            removeMemberResults.add(new RemoveMemberResult(wsDeleteMemberResult, getGroupPath()));
+        }
+        return removeMemberResults;
+    }
+
     @Override
     public String getResultCode() {
-        String success = "SUCCESS";
-        String failure = "FAILURE";
-        for (RemoveResult removeResult : getResults()) {
-            if (removeResult.getResultCode().equals(success)) {
-                return success;
-            }
-        }
-        return failure;
+        return wsDeleteMemberResults.getResultMetadata().getResultCode();
     }
 }

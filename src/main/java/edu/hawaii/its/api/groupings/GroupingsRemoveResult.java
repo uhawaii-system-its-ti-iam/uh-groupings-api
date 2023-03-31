@@ -1,47 +1,40 @@
 package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
-import edu.hawaii.its.api.wrapper.RemoveResult;
 
-public class GroupingsRemoveResult extends GroupingsMemberResult {
+public class GroupingsRemoveResult extends MemberResult implements GroupingsResult {
+    private String resultCode;
+    private String groupPath;
 
     public GroupingsRemoveResult(RemoveMemberResult removeMemberResult) {
-        resultCode = removeMemberResult.getResultCode();
-        uid = removeMemberResult.getUid();
-        name = removeMemberResult.getName();
-        uhUuid = removeMemberResult.getUhUuid();
-        groupPath = removeMemberResult.getGroupPath();
-    }
-
-    public GroupingsRemoveResult(RemoveResult removeResult) {
-        resultCode = removeResult.getResultCode();
-        uid = removeResult.getUid();
-        name = removeResult.getName();
-        uhUuid = removeResult.getUhUuid();
-        groupPath = "";
+        setResultCode(removeMemberResult.getResultCode());
+        setGroupPath(removeMemberResult.getGroupPath());
+        setUid(removeMemberResult.getUid());
+        setUhUuid(removeMemberResult.getUhUuid());
+        setName(removeMemberResult.getName());
     }
 
     public GroupingsRemoveResult() {
+        setResultCode("");
+        setGroupPath("");
+        setUid("");
+        setUhUuid("");
+        setName("");
     }
 
     @Override public String getResultCode() {
-        return (resultCode != null) ? resultCode : "";
+        return resultCode;
     }
 
-    public String getUid() {
-        return (uid != null) ? uid : "";
-    }
-
-    public String getUhUuid() {
-        return (uhUuid != null) ? uhUuid : "";
-    }
-
-    public String getName() {
-        return (name != null) ? name : "";
+    public void setResultCode(String resultCode) {
+        this.resultCode = resultCode;
     }
 
     public String getGroupPath() {
-        return (groupPath != null) ? groupPath : "";
+        return groupPath;
     }
 
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
 }
