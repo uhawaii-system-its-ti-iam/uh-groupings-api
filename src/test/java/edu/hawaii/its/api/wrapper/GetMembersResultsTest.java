@@ -162,6 +162,19 @@ public class GetMembersResultsTest {
     }
 
     @Test
+    public void multipleGroupsQueried() {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        assertNotNull(wsGetMembersResults);
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        assertNotNull(getMembersResults);
+        List<GetMembersResult> groupsResult = getMembersResults.getMembersResults();
+        assertEquals(2, groupsResult.size());
+        assertEquals("group-path:exclude", groupsResult.get(0).getGroup().getGroupPath());
+        assertEquals("group-path:include", groupsResult.get(1).getGroup().getGroupPath());
+    }
+
+    @Test
     public void nullValues() {
         String json = propertyLocator.find("ws.get.members.results.null");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);

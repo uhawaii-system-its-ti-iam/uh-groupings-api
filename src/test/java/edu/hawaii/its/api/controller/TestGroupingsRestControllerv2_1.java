@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsAddResults;
+import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
@@ -103,6 +105,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     public static final String API_BASE_URL = "/api/groupings/v2.1/";
     private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper;
     private final Map<String, Boolean> attributeMap = new HashMap<>();
 
     @BeforeAll
@@ -127,6 +131,8 @@ public class TestGroupingsRestControllerv2_1 {
         groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         mockMvc = webAppContextSetup(webApplicationContext).build();
+
+        objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @AfterAll
@@ -154,7 +160,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 AdminListsHolder.class));
     }
 
@@ -165,7 +171,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsAddResult.class));
         updateMemberService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
     }
@@ -178,7 +184,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResult.class));
         assertFalse(memberService.isAdmin(TEST_USERNAMES.get(0)));
     }
@@ -198,7 +204,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResults.class));
 
         assertFalse(memberService.isOwner(GROUPING, iamtst01List.get(0)));
@@ -216,7 +222,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsReplaceGroupMembersResult.class));
 
         uhNumbersInclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
@@ -233,7 +239,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsReplaceGroupMembersResult.class));
 
         uhNumbersExclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
@@ -248,7 +254,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -258,7 +264,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
     }
 
     @Test
@@ -270,7 +276,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -280,7 +286,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Grouping.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Grouping.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "?";
         mvcResult = mockMvc.perform(get(url)
@@ -296,7 +302,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 List.class));
     }
 
@@ -307,7 +313,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -317,7 +323,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -330,9 +336,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(
-                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                        GroupingsMoveMemberResult.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsMoveMemberResult.class));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
     }
@@ -348,9 +353,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(
-                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
-                        GroupingsMoveMemberResult.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsMoveMemberResult.class));
         assertFalse(memberService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
     }
 
@@ -363,8 +367,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        ObjectMapper mapper = new ObjectMapper();
-        assertNotNull(mapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsMoveMembersResult.class));
         TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_INCLUDE, username)));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
@@ -379,7 +382,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsMoveMembersResult.class));
         TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, username)));
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
@@ -395,7 +398,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username ->
                 assertFalse(memberService.isMember(GROUPING_INCLUDE, username)));
@@ -411,7 +414,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(JsonUtil.asJson(TEST_USERNAMES)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username ->
                 assertFalse(memberService.isMember(GROUPING_EXCLUDE, username)));
@@ -424,7 +427,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -434,7 +437,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsAddResults.class));
         TEST_USERNAMES.forEach(username -> assertTrue(memberService.isOwner(GROUPING, username)));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
@@ -448,7 +451,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsRemoveResults.class));
         TEST_USERNAMES.forEach(username -> assertFalse(memberService.isOwner(GROUPING, username)));
     }
@@ -462,7 +465,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .content(DEFAULT_DESCRIPTION)) // Add body data.
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsUpdateDescriptionResult.class));
         assertEquals(DEFAULT_DESCRIPTION, groupingsService.getGroupingDescription(GROUPING));
         groupAttributeService.updateDescription(GROUPING, ADMIN, description);
@@ -475,7 +478,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsServiceResult.class));
     }
 
@@ -486,7 +489,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsServiceResult.class));
     }
 
@@ -497,14 +500,14 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.OUT.value() + "/enable";
         mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + "badPref" + "/enable";
         try {
@@ -514,7 +517,7 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (MissingPathVariableException e) {
             assertNotNull(e);
         }
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -524,14 +527,14 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + OptType.OUT.value() + "/disable";
         mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + "badPref" + "/disable";
         try {
@@ -541,7 +544,7 @@ public class TestGroupingsRestControllerv2_1 {
         } catch (MissingPathVariableException e) {
             assertNotNull(e);
         }
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -551,7 +554,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -561,7 +564,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
     }
 
     @Test
@@ -571,7 +574,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
     }
 
     @Test
@@ -581,7 +584,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
     }
 
     @Test
@@ -591,7 +594,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+
     }
 
     @Test
@@ -600,7 +604,18 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
+
+    }
+
+    @Test
+    public void groupingOwners() throws Exception {
+        String url = API_BASE_URL + "/grouping/" + GROUPING + "/owners";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingsGroupMembers.class));
     }
 }
 

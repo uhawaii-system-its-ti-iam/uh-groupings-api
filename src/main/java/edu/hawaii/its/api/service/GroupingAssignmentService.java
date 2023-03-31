@@ -3,6 +3,8 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.GroupingsGroupMember;
+import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
@@ -306,37 +308,17 @@ public class GroupingAssignmentService {
         return attributeAssignmentsResults.getGroupNamesAndDescriptions();
     }
 
-    /**
-     * Helper - isSoleOwner
-     */
-    public List<String> getGroupingOwners(String currentUser, String groupPath) {
-        List<String> owners = new ArrayList<>();
-        List<String> path = new ArrayList<>();
-        path.add(groupPath + GroupType.OWNERS.value());
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(currentUser);
-        WsGetMembersResults wsGetMembersResults = grouperApiService.membersResults(
-                SUBJECT_ATTRIBUTE_NAME_UID,
-                lookup,
-                path);
-
-        List<WsSubject> subjects = Arrays.asList(wsGetMembersResults.getResults()[0].getWsSubjects());
-        subjects.forEach(subject -> {
-            String ownerUid = subject.getAttributeValue(1);
-            //TODO Remove the if statement after old/outdated UH Grouper users have been pruned
-            if (!ownerUid.isEmpty()) {
-                owners.add(ownerUid);
-            }
-        });
-
-        return owners;
+    public GroupingsGroupMembers groupingOwners(String currentUser, String groupingPath) {
+        return new GroupingsGroupMembers(
+                grouperApiService.getMembersResult(groupingPath + GroupType.OWNERS.value()));
     }
 
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
-        List<String> ownersInGrouping = getGroupingOwners(currentUser, groupPath);
-        if (ownersInGrouping.size() >= 2) {
+        List<GroupingsGroupMember> owners = groupingOwners(currentUser, groupPath).getGroupMembers();
+        if (owners.size() >= 2) {
             return false;
         }
-        return ownersInGrouping.contains(uidToCheck);
+        return owners.stream().anyMatch(owner -> owner.getUid().contains(uidToCheck));
     }
 
     /**
