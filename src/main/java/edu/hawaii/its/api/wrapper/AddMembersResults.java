@@ -23,23 +23,19 @@ public class AddMembersResults extends Results {
     }
 
     public String getGroupPath() {
-        String groupPath = null;
-        if (wsAddMemberResults.getWsGroupAssigned() != null) {
-            groupPath = wsAddMemberResults.getWsGroupAssigned().getName();
-        }
-        return (groupPath != null) ? groupPath : "";
+        return getGroup().getGroupPath();
     }
 
-    public List<AddResult> getResults() {
-        List<AddResult> addResults = new ArrayList<>();
-        WsAddMemberResult[] wsResults = wsAddMemberResults.getResults();
-        if (isEmpty(wsResults)) {
-        } else {
-            for (WsAddMemberResult wsResult : wsResults) {
-                addResults.add(new AddResult(wsResult));
-            }
+    public List<AddMemberResult> getResults() {
+        List<AddMemberResult> addMemberResults = new ArrayList<>();
+        WsAddMemberResult[] wsAddMemberResults = this.wsAddMemberResults.getResults();
+        if (isEmpty(wsAddMemberResults)) {
+            return addMemberResults;
         }
-        return addResults;
+        for (WsAddMemberResult wsAddMemberResult : wsAddMemberResults) {
+            addMemberResults.add(new AddMemberResult(wsAddMemberResult, getGroupPath()));
+        }
+        return addMemberResults;
     }
 
     /**
@@ -47,17 +43,10 @@ public class AddMembersResults extends Results {
      */
     @Override
     public String getResultCode() {
-        String success = "SUCCESS";
-        String failure = "FAILURE";
-        for (AddResult addResult : getResults()) {
-            if (addResult.getResultCode().equals(success)) {
-                return success;
-            }
-        }
-        return failure;
+        return wsAddMemberResults.getResultMetadata().getResultCode();
     }
 
-    public String getResultMessage() {
-        return wsAddMemberResults.getResultMetadata().getResultMessage();
+    public Group getGroup() {
+        return new Group(wsAddMemberResults.getWsGroupAssigned());
     }
 }

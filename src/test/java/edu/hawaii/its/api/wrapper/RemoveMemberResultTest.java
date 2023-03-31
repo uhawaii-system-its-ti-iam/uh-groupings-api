@@ -2,13 +2,18 @@ package edu.hawaii.its.api.wrapper;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
 import edu.hawaii.its.api.util.JsonUtil;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,72 +33,47 @@ public class RemoveMemberResultTest {
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.delete.member.results.success.single.result");
+        String json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
+        assertNotNull(wsDeleteMemberResults);
+        WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
+        assertNotNull(wsDeleteMemberResult);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResult, "group-path");
         assertNotNull(removeMemberResult);
+        assertNotNull(new RemoveMemberResult());
+        assertNotNull(new RemoveMemberResult(null, null));
 
-        removeMemberResult = new RemoveMemberResult(null);
-        assertNotNull(removeMemberResult);
     }
 
     @Test
-    public void memberRemoveSuccessTest() {
-        String json = propertyValue("ws.delete.member.results.success.single.result");
+    public void test() {
+        String json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-        assertNotNull(removeMemberResult);
-        assertNotNull(removeMemberResult.getResultCode());
-        assertNotNull(removeMemberResult.getGroupPath());
-        assertNotNull(removeMemberResult.getUid());
-        assertNotNull(removeMemberResult.getUhUuid());
-        assertNotNull(removeMemberResult.getName());
-        assertEquals("SUCCESS", removeMemberResult.getResultCode());
-        assertEquals("group-path", removeMemberResult.getGroupPath());
-        assertEquals("uid", removeMemberResult.getUid());
-        assertEquals("uhUuid", removeMemberResult.getUhUuid());
-        assertEquals("name", removeMemberResult.getName());
-    }
-
-    @Test
-    public void memberNotInGroupTest() {
-        // The uh identifier passed is valid but is not in the group.
-        String json = propertyValue("ws.delete.member.results.not.in.group.single.result");
-        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-        assertNotNull(removeMemberResult);
-        assertNotNull(removeMemberResult.getResultCode());
-        assertNotNull(removeMemberResult.getGroupPath());
-        assertNotNull(removeMemberResult.getUid());
-        assertNotNull(removeMemberResult.getUhUuid());
-        assertNotNull(removeMemberResult.getName());
+        WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResult, "group-path");
         assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
         assertEquals("group-path", removeMemberResult.getGroupPath());
-        assertEquals("uid", removeMemberResult.getUid());
-        assertEquals("uhUuid", removeMemberResult.getUhUuid());
-        assertEquals("name", removeMemberResult.getName());
+        assertEquals(getTestNumbers().get(0), removeMemberResult.getUhUuid());
+        assertEquals(getTestUsernames().get(0), removeMemberResult.getUid());
+        assertEquals(getTestNames().get(0), removeMemberResult.getName());
+        assertNotNull(removeMemberResult.getSubject());
     }
 
-    @Test
-    public void invalidMemberTest() {
-        // The uh identifier passed is invalid.
-        String json = propertyValue("ws.delete.member.results.invalid.single.result");
-        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
 
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults);
-        assertNotNull(removeMemberResult);
-        assertNotNull(removeMemberResult.getResultCode());
-        assertNotNull(removeMemberResult.getGroupPath());
-        assertNotNull(removeMemberResult.getUid());
-        assertNotNull(removeMemberResult.getUhUuid());
-        assertNotNull(removeMemberResult.getName());
-        assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
-        assertEquals("group-path", removeMemberResult.getGroupPath());
-        assertEquals("", removeMemberResult.getUid());
-        assertEquals("bogus-name", removeMemberResult.getUhUuid());
-        assertEquals("", removeMemberResult.getName());
+    public List<String> getTestUsernames() {
+        String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    public List<String> getTestNumbers() {
+        String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
+        return new ArrayList<>(Arrays.asList(array));
+    }
+
+    public List<String> getTestNames() {
+        String[] array = { "Testf-iwt-a TestIAM-staff", "Testf-iwt-b TestIAM-staff", "Testf-iwt-c TestIAM-staff",
+                "Testf-iwt-d TestIAM-faculty", "Testf-iwt-e TestIAM-student" };
+        return new ArrayList<>(Arrays.asList(array));
     }
 
     private String propertyValue(String key) {

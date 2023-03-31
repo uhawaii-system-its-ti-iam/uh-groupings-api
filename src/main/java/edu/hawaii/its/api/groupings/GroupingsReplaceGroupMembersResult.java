@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.AddMembersResults;
-import edu.hawaii.its.api.wrapper.ReplaceGroupMembersResult;
 
 public class GroupingsReplaceGroupMembersResult extends GroupingsAddResults {
     public GroupingsReplaceGroupMembersResult(AddMembersResults addMembersResults) {
@@ -9,12 +8,11 @@ public class GroupingsReplaceGroupMembersResult extends GroupingsAddResults {
     }
 
     public GroupingsReplaceGroupMembersResult() {
-        super(new ReplaceGroupMembersResult());
+        super(new AddMembersResults());
     }
 
     @Override
     public String getResultCode() {
-        String resultCode = addMembersResults.getResultCode();
-        return (resultCode != null) ? resultCode : "";
+        return addMembersResults.getResultCode();
     }
 }
