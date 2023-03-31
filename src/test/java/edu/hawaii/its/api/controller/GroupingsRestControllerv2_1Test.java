@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsAddResults;
+import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
@@ -795,6 +796,17 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
         verify(groupingAssignmentService, times(1)).isSoleOwner(ADMIN, path, uid);
+    }
+
+    @Test
+    public void groupingOwners() throws Exception {
+        String path = "grouping-path";
+        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingsGroupMembers());
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + path + "/owners")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingAssignmentService, times(1)).groupingOwners(ADMIN, path);
     }
 
     @Test
