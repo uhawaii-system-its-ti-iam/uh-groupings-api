@@ -4,6 +4,8 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.AddMembersCommand;
+import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GroupSaveCommand;
@@ -11,11 +13,12 @@ import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
-import edu.hawaii.its.api.wrapper.AddMembersCommand;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsCommand;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
@@ -104,6 +107,22 @@ public class GrouperApiService {
         FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .addPaths(groupPaths));
         return findGroupsResults;
+    }
+
+    public Subject getSubject(String uhIdentifier) {
+        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
+                .addSubject(uhIdentifier));
+        List<Subject> subjects = subjectsResults.getSubjects();
+        if (subjects.size() == 1) {
+            return subjects.get(0);
+        }
+        return new Subject();
+    }
+
+    public SubjectsResults getSubjects(List<String> uhIdentifiers) {
+        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
+                .addSubjects(uhIdentifiers));
+        return subjectsResults;
     }
 
     public List<SyncDestination> syncDestinations() {
