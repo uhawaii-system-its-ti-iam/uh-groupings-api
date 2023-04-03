@@ -3,11 +3,9 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectCommand;
-import edu.hawaii.its.api.wrapper.SubjectResult;
-import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,17 +23,20 @@ public class SubjectService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    @Autowired
+    private GrouperApiService grouperApiService;
+
     public Person getPerson(String uhIdentifier) {
-        SubjectResult subjectResult = new SubjectCommand(uhIdentifier).execute();
-        if (subjectResult.getResultCode().equals("SUBJECT_NOT_FOUND")) {
+        Subject subject = grouperApiService.getSubject(uhIdentifier);
+        if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
             return new Person();
         }
-        return new Person(subjectResult.getName(), subjectResult.getUhUuid(), subjectResult.getUid(),
-                subjectResult.getFirstName(), subjectResult.getLastName());
+        return new Person(subject.getName(), subject.getUhUuid(), subject.getUid(), subject.getFirstName(),
+                subject.getLastName());
     }
 
     public boolean isValidIdentifier(String uhIdentifier) {
-        return isValidSubject(new SubjectCommand(uhIdentifier).execute());
+        return isValidSubject(grouperApiService.getSubject(uhIdentifier));
     }
 
     public String checkValidSubject(String uhIdentifier) {
@@ -46,15 +47,15 @@ public class SubjectService {
         return validUhUuid;
     }
 
-    private boolean isValidSubject(SubjectResult subjectResult) {
-        return subjectResult.getResultCode().equals(SUCCESS);
+    private boolean isValidSubject(Subject subject) {
+        return subject.getResultCode().equals(SUCCESS);
     }
 
     /**
      * Fetch all valid UH identifiers and return their corresponding UhUuids.
      */
     public List<String> getValidUhUuids(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = new SubjectsCommand(uhIdentifiers).execute();
+        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifiers);
         List<String> results = new ArrayList<>();
         for (Subject subject : subjectsResults.getSubjects()) {
             if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
@@ -66,10 +67,10 @@ public class SubjectService {
     }
 
     public String getValidUhUuid(String uhIdentifier) {
-        SubjectResult subjectResult = new SubjectCommand(uhIdentifier).execute();
-        if (!isValidSubject(subjectResult)) {
+        Subject subject = grouperApiService.getSubject(uhIdentifier);
+        if (!isValidSubject(subject)) {
             return "";
         }
-        return subjectResult.getUhUuid();
+        return subject.getUhUuid();
     }
 }

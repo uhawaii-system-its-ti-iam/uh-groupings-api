@@ -1,18 +1,15 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,19 +18,16 @@ public class SubjectsResultsTest {
 
     final static private String SUCCESS = "SUCCESS";
     final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-    private static Properties properties;
+    private PropertyLocator propertyLocator;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.get.subjects.results.success");
+        String json = propertyLocator.find("ws.get.subjects.results.success");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
         assertNotNull(subjectsResults);
@@ -47,8 +41,9 @@ public class SubjectsResultsTest {
 
     @Test
     public void successfulResultsTest() {
-        String json = propertyValue("ws.get.subjects.results.success");
+        String json = propertyLocator.find("ws.get.subjects.results.success");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        JsonUtil.printJson(wsGetSubjectsResults);
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
         List<Subject> subjects = subjectsResults.getSubjects();
         assertNotNull(subjectsResults);
@@ -69,7 +64,7 @@ public class SubjectsResultsTest {
 
     @Test
     public void failedResultsTest() {
-        String json = propertyValue("ws.get.subjects.results.failure");
+        String json = propertyLocator.find("ws.get.subjects.results.failure");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
         List<Subject> subjects = subjectsResults.getSubjects();
@@ -80,16 +75,12 @@ public class SubjectsResultsTest {
 
     @Test
     public void emptyResultsTest() {
-        String json = propertyValue("ws.get.subjects.results.empty");
+        String json = propertyLocator.find("ws.get.subjects.results.empty");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
         List<Subject> subjects = subjectsResults.getSubjects();
         assertNotNull(subjectsResults);
         assertEquals("FAILURE", subjectsResults.getResultCode());
         assertNotNull(subjects);
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }

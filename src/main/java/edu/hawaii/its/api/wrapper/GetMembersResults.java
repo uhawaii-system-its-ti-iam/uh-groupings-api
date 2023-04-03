@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * A wrapper for WsGetMembersResults, which is returned from grouper when GcGetMembers.execute(wrapped by GetMembersCommand)
- * is called. WsGetMembersResults contains a list of WsGetMembersResult, for each group path queried am WsGetMembersResult
+ * is called. WsGetMembersResults contains a list of WsGetMembersResult, for each group path queried an WsGetMembersResult
  * is added to the list of WsGetMembersResults.
  */
 public class GetMembersResults extends Results {

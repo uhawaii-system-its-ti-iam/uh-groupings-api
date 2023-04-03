@@ -5,6 +5,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.util.List;
 
+/**
+ * A wrapper for GcDeleteMember. When a UH identifier and group path are passed, RemoveMembersCommand on execute deletes,
+ * from grouper, the UH identifier to the listing of the group at group path. The result fetched contains the attributes
+ * of member removed and the group removed from. Multiple UH identifiers can be added to the query, thus multiple
+ * members can be removed using one call to grouper. Only one group can be added to per query. Passing an invalid
+ * identifier, or path will result, on execute, with in a RuntimeException.
+ */
 public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
 
