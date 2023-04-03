@@ -4,7 +4,13 @@ import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 import java.util.List;
-
+/**
+ * A wrapper for GcAddMember. When a UH identifier and group path are passed, AddMembersCommand on execute adds, to
+ * grouper, the UH identifier to the listing of the group at group path. The result fetched contains the attributes of
+ * member added and the group added to. Multiple UH identifiers can be added to the query, thus multiple members can be
+ * added using one call to grouper. Only one group can be added per query. Passing an invalid identifier, or path
+ * will result, on execute, with in a RuntimeException.
+ */
 public class AddMembersCommand extends GrouperCommand implements Command<AddMembersResults> {
     protected final GcAddMember gcAddMember;
 

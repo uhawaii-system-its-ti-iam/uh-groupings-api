@@ -6,7 +6,6 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +106,7 @@ public class MemberAttributeService {
             throw new AccessDeniedException();
         }
 
-        SubjectsResults results = new SubjectsCommand(uhIdentifiers).execute();
+        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
 
         if (results.getResultCode().equals(FAILURE)) {
             return new ArrayList<>();
