@@ -1,39 +1,53 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class SubjectTest {
+
+    @Value("${groupings.api.test.uh-usernames}")
+    private List<String> TEST_USERNAMES;
+
+    @Value("${groupings.api.test.uh-numbers}")
+    private List<String> TEST_NUMBERS;
+
+    @Value("${groupings.api.test.uh-names}")
+    private List<String> TEST_NAMES;
+
+    @Value("${groupings.api.test.uh-first-names}")
+    private List<String> TEST_FIRSTNAMES;
+
+    @Value("${groupings.api.test.uh-last-names}")
+    private List<String> TEST_LASTNAMES;
 
     final static private String SUCCESS = "SUCCESS";
     final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-    private static Properties properties;
+    private PropertyLocator propertyLocator;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.subject.success.uid");
+        String json = propertyLocator.find("ws.subject.success.uid");
         WsSubject wsSubject = JsonUtil.asObject(json, WsSubject.class);
         Subject subject = new Subject(wsSubject);
         assertNotNull(subject);
@@ -44,13 +58,13 @@ public class SubjectTest {
 
     @Test
     public void accessors() {
-        String username = getTestUsernames().get(0);
-        String number = getTestNumbers().get(0);
-        String name = getTestNames().get(0);
-        String firstName = getTestFirstNames().get(0);
-        String lastName = getTestLastNames().get(0);
+        String username = TEST_USERNAMES.get(0);
+        String number = TEST_NUMBERS.get(0);
+        String name = TEST_NAMES.get(0);
+        String firstName = TEST_FIRSTNAMES.get(0);
+        String lastName = TEST_LASTNAMES.get(0);
         // Successful query using a uid.
-        String json = propertyValue("ws.subject.success.uid");
+        String json = propertyLocator.find("ws.subject.success.uid");
         WsSubject wsSubject = JsonUtil.asObject(json, WsSubject.class);
         Subject subject = new Subject(wsSubject);
         assertNotNull(subject);
@@ -62,7 +76,7 @@ public class SubjectTest {
         assertEquals(lastName, subject.getLastName());
 
         // Successful query using a uhUuid.
-        json = propertyValue("ws.subject.success.uhuuid");
+        json = propertyLocator.find("ws.subject.success.uhuuid");
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
@@ -74,7 +88,7 @@ public class SubjectTest {
         assertEquals(lastName, subject.getLastName());
 
         // Unsuccessful query using uid.
-        json = propertyValue("ws.subject.subject.uid.not.found");
+        json = propertyLocator.find("ws.subject.subject.uid.not.found");
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
@@ -87,7 +101,7 @@ public class SubjectTest {
         assertEquals("", subject.getLastName());
 
         // Unsuccessful query using uhUuid.
-        json = propertyValue("ws.subject.subject.uhuuid.not.found");
+        json = propertyLocator.find("ws.subject.subject.uhuuid.not.found");
         wsSubject = JsonUtil.asObject(json, WsSubject.class);
         subject = new Subject(wsSubject);
         assertNotNull(subject);
@@ -98,37 +112,5 @@ public class SubjectTest {
         assertEquals("", subject.getName());
         assertEquals("", subject.getFirstName());
         assertEquals("", subject.getLastName());
-    }
-
-    public List<String> getTestUsernames() {
-        String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestNumbers() {
-        String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestNames() {
-        String[] array = { "Testf-iwt-a TestIAM-staff", "Testf-iwt-b TestIAM-staff", "Testf-iwt-c TestIAM-staff",
-                "Testf-iwt-d TestIAM-faculty", "Testf-iwt-e TestIAM-student" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestLastNames() {
-        String[] array = { "TestIAM-staff", "TestIAM-staff", "TestIAM-staff",
-                "TestIAM-faculty", "TestIAM-student" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestFirstNames() {
-        String[] array = { "Testf-iwt-a", "Testf-iwt-b", "Testf-iwt-c",
-                "Testf-iwt-d", "Testf-iwt-e" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }
