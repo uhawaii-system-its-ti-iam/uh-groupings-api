@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -22,7 +23,7 @@ public class TestGroupAttributeCommand {
     protected String GROUPING;
 
     @Value("${groupings.api.test.uh-numbers}")
-    protected List<String> UH_NUMBERS;
+     List<String> UH_NUMBERS;
 
     @Autowired
     private GroupingsService groupingsService;
@@ -42,21 +43,10 @@ public class TestGroupAttributeCommand {
     public void constructor() {
         GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand();
         assertNotNull(groupAttributeCommand);
+    }
 
-        groupAttributeCommand = new GroupAttributeCommand(TRIO);
-        assertNotNull(groupAttributeCommand);
-
-        groupAttributeCommand = new GroupAttributeCommand(TRIO, GROUPING);
-        assertNotNull(groupAttributeCommand);
-
-        groupAttributeCommand = new GroupAttributeCommand(TRIO, PATHS);
-        assertNotNull(groupAttributeCommand);
-
-        groupAttributeCommand = new GroupAttributeCommand(ATTRIBUTES, GROUPING);
-        assertNotNull(groupAttributeCommand);
-
-        groupAttributeCommand = new GroupAttributeCommand(ATTRIBUTES, PATHS);
-        assertNotNull(groupAttributeCommand);
-        groupAttributeCommand.execute();
+    @Test
+    public void execute() {
+        assertThrows(RuntimeException.class, new GroupAttributeCommand()::execute);
     }
 }

@@ -18,65 +18,33 @@ public class GroupAttributeCommand extends GrouperCommand implements Command<Gro
         this.gcGetAttributeAssignments.assignAttributeAssignType("group");
     }
 
-    public GroupAttributeCommand(String attribute) {
-        this();
-        addAttribute(attribute);
-    }
-
-    public GroupAttributeCommand(String attribute, String groupPath) {
-        this();
-        addAttribute(attribute);
-        addGroup(groupPath);
-    }
-
-    public GroupAttributeCommand(String attribute, List<String> groupPaths) {
-        this(attribute);
-        for (String path : groupPaths) {
-            addGroup(path);
-        }
-    }
-
-    public GroupAttributeCommand(List<String> attributes, String groupPath) {
-        this();
-        addGroup(groupPath);
-        for (String attribute : attributes) {
-            addAttribute(attribute);
-        }
-    }
-
-    public GroupAttributeCommand(List<String> attributes, List<String> groupPaths) {
-        this();
-        for (String path : groupPaths) {
-            addGroup(path);
-        }
-        for (String attribute : attributes) {
-            addAttribute(attribute);
-        }
-    }
-
     @Override
     public GroupAttributeResults execute() {
-        GroupAttributeResults groupAttributeResults = null;
-        try {
-            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = gcGetAttributeAssignments.execute();
-            groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
-
-            // Temporary fix, as the wrappers are still under construction.
-        } catch (RuntimeException e) {
-            WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
-            groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
-        }
-        return groupAttributeResults;
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = gcGetAttributeAssignments.execute();
+        return new GroupAttributeResults(wsGetAttributeAssignmentsResults);
     }
 
-    private GroupAttributeCommand addAttribute(String attribute) {
+    public GroupAttributeCommand addAttribute(String attribute) {
         gcGetAttributeAssignments.addAttributeDefNameName(attribute);
         return this;
     }
 
-    private GroupAttributeCommand addGroup(String groupPath) {
+    public GroupAttributeCommand addAttributes(List<String> attributes) {
+        for (String attribute : attributes) {
+            gcGetAttributeAssignments.addAttributeDefNameName(attribute);
+        }
+        return this;
+    }
+
+    public GroupAttributeCommand addGroup(String groupPath) {
         gcGetAttributeAssignments.addOwnerGroupName(groupPath);
         return this;
     }
 
+    public GroupAttributeCommand addGroups(List<String> groupPaths) {
+        for (String groupPath : groupPaths) {
+            gcGetAttributeAssignments.addOwnerGroupName(groupPath);
+        }
+        return this;
+    }
 }
