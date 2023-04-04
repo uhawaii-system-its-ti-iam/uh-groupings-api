@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,16 +33,11 @@ public class TestGetGroupsCommand {
 
     @Test
     public void constructor() {
-        GetGroupsCommand getGroupsCommand = new GetGroupsCommand(UH_UUID, "");
-        assertNotNull(getGroupsCommand);
-        getGroupsCommand = new GetGroupsCommand(UH_UUID);
-        assertNotNull(getGroupsCommand);
+        assertNotNull(new GetGroupsCommand());
+    }
 
-        assertEquals("uhIdentifier should not be null",
-                assertThrows(NullPointerException.class, () -> new GetGroupsCommand(null, null))
-                        .getMessage());
-        assertEquals("query should not be null",
-                assertThrows(NullPointerException.class, () -> new GetGroupsCommand(UH_UUID, null))
-                        .getMessage());
+    @Test
+    public void execute() {
+        assertThrows(RuntimeException.class, new GetGroupsCommand()::execute);
     }
 }
