@@ -1,38 +1,45 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class HasMembersResultsTest {
 
-    private static Properties properties;
+    @Value("${groupings.api.test.uh-usernames}")
+    private List<String> TEST_USERNAMES;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @Value("${groupings.api.test.uh-numbers}")
+    private List<String> TEST_NUMBERS;
+
+    @Value("${groupings.api.test.uh-names}")
+    private List<String> TEST_NAMES;
+
+    private PropertyLocator propertyLocator;
+
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
     public void construction() {
-        String json = propertyValue("ws.has.member.results.is.members.uhuuid");
+        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
@@ -42,7 +49,7 @@ public class HasMembersResultsTest {
 
     @Test
     public void successfulResults() {
-        String json = propertyValue("ws.has.member.results.is.members.uhuuid");
+        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
@@ -51,35 +58,32 @@ public class HasMembersResultsTest {
         assertNotNull(hasMembersResults.getResults());
         assertNotNull(hasMembersResults.getResult());
 
-        List<String> testUsernames = getTestUsernames();
-        List<String> testNumbers = getTestNumbers();
-        List<String> testNames = getTestNames();
         int i = 0;
         for (HasMemberResult result : hasMembersResults.getResults()) {
             assertEquals("IS_MEMBER", result.getResultCode());
-            assertEquals(testUsernames.get(i), result.getUid());
-            assertEquals(testNumbers.get(i), result.getUhUuid());
-            assertEquals(testNames.get(i), result.getName());
+            assertEquals(TEST_USERNAMES.get(i), result.getUid());
+            assertEquals(TEST_NUMBERS.get(i), result.getUhUuid());
+            assertEquals(TEST_NAMES.get(i), result.getName());
             i++;
         }
 
-        json = propertyValue("ws.has.member.results.is.members.uid");
+        json = propertyLocator.find("ws.has.member.results.is.members.uid");
         wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         hasMembersResults = new HasMembersResults(wsHasMemberResults);
 
         i = 0;
         for (HasMemberResult result : hasMembersResults.getResults()) {
             assertEquals("IS_MEMBER", result.getResultCode());
-            assertEquals(testUsernames.get(i), result.getUid());
-            assertEquals(testNumbers.get(i), result.getUhUuid());
-            assertEquals(testNames.get(i), result.getName());
+            assertEquals(TEST_USERNAMES.get(i), result.getUid());
+            assertEquals(TEST_NUMBERS.get(i), result.getUhUuid());
+            assertEquals(TEST_NAMES.get(i), result.getName());
             i++;
         }
     }
 
     @Test
     public void notMemberResults() {
-        String json = propertyValue("ws.has.member.results.is.not.members");
+        String json = propertyLocator.find("ws.has.member.results.is.not.members");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
@@ -92,7 +96,7 @@ public class HasMembersResultsTest {
 
     @Test
     public void failedResults() {
-        String json = propertyValue("ws.has.member.results.is.members.failure");
+        String json = propertyLocator.find("ws.has.member.results.is.members.failure");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
@@ -102,23 +106,14 @@ public class HasMembersResultsTest {
         assertNotNull(hasMembersResults.getResult());
     }
 
-    public List<String> getTestUsernames() {
-        String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
-        return new ArrayList<>(Arrays.asList(array));
+    @Test
+    public void nullGroup() {
+        String json = propertyLocator.find("ws.has.member.results.null.group");
+        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
+        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        assertNotNull(hasMembersResults);
+        assertEquals("FAILURE", hasMembersResults.getGroup().getResultCode());
+        assertEquals("" , hasMembersResults.getGroupPath());
     }
 
-    public List<String> getTestNumbers() {
-        String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestNames() {
-        String[] array = { "Testf-iwt-a TestIAM-staff", "Testf-iwt-b TestIAM-staff", "Testf-iwt-c TestIAM-staff",
-                "Testf-iwt-d TestIAM-faculty", "Testf-iwt-e TestIAM-student" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
-    }
 }
