@@ -16,6 +16,10 @@ public class GroupAttribute extends Results {
         }
     }
 
+    public GroupAttribute() {
+        this.wsAttributeAssign = new WsAttributeAssign();
+    }
+
     public String getAttributeName() {
         String attributeName = this.wsAttributeAssign.getAttributeDefNameName();
         return attributeName != null ? attributeName : "";
