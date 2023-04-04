@@ -112,5 +112,15 @@ public class SubjectTest {
         assertEquals("", subject.getName());
         assertEquals("", subject.getFirstName());
         assertEquals("", subject.getLastName());
+
+        // Null values
+        json = propertyLocator.find("ws.subject.success.null.values");
+        wsSubject = JsonUtil.asObject(json, WsSubject.class);
+        subject = new Subject(wsSubject);
+        assertNotNull(subject);
+        assertEquals("", subject.getResultCode());
+        assertEquals("", subject.getFirstName());
+        assertEquals("", subject.getLastName());
+
     }
 }

@@ -40,6 +40,7 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
         return new UpdatedTimestampResult(wsAssignAttributesResults);
     }
 
+
     private static class DateTimeAttributeValue {
         public final WsAttributeAssignValue wsAttributeAssignValue;
 
