@@ -1,14 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
 
 import static edu.hawaii.its.api.util.JsonUtil.asObject;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -19,16 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FindGroupsResultsTest {
 
-    private static Properties properties;
     private static final String SUCCESS = "SUCCESS";
     private static final String FAILURE = "FAILURE";
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    private PropertyLocator propertyLocator;
+
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     @Test
@@ -52,7 +46,7 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getDescription() {
-        String json = propertyValue("find.groups.results.description");
+        String json = propertyLocator.find("find.groups.results.description");
         FindGroupsResults results =
                 new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
         assertThat(results.getResultCode(), equalTo(SUCCESS));
@@ -63,7 +57,7 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getNullDescription() {
-        String json = propertyValue("find.groups.results.null.description");
+        String json = propertyLocator.find("find.groups.results.null.description");
         FindGroupsResults results =
                 new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
         assertThat(results.getResultCode(), equalTo(SUCCESS));
@@ -74,16 +68,12 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getEmptyDescription() {
-        String json = propertyValue("find.groups.results.empty.description");
+        String json = propertyLocator.find("find.groups.results.empty.description");
         FindGroupsResults results =
                 new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
         assertThat(results.getResultCode(), equalTo(SUCCESS));
         assertThat(results.getGroup().getDescription(), equalTo(""));
         assertThat(results.getGroup().getResultCode(), equalTo(SUCCESS));
         assertNotNull(results.getGroups());
-    }
-
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
     }
 }
