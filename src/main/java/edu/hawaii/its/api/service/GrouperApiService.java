@@ -8,6 +8,8 @@ import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeCommand;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMemberResult;
@@ -123,6 +125,40 @@ public class GrouperApiService {
         SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .addSubjects(uhIdentifiers));
         return subjectsResults;
+    }
+
+    public GroupAttributeResults groupAttributeResults(String attribute) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttribute(attribute));
+    }
+
+    public GroupAttributeResults groupAttributeResults(List<String> attributes) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttributes(attributes));
+    }
+
+    public GroupAttributeResults groupAttributeResults(String attribute, String groupPath) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttribute(attribute)
+                .addGroup(groupPath));
+    }
+
+    public GroupAttributeResults groupAttributeResults(String attribute, List<String> groupPaths) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttribute(attribute)
+                .addGroups(groupPaths));
+    }
+
+    public GroupAttributeResults groupAttributeResults(List<String> attributes, String groupPath) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttributes(attributes)
+                .addGroup(groupPath));
+    }
+
+    public GroupAttributeResults groupAttributeResults(List<String> attributes, List<String> groupPaths) {
+        return exec.execute(new GroupAttributeCommand()
+                .addAttributes(attributes)
+                .addGroups(groupPaths));
     }
 
     public List<SyncDestination> syncDestinations() {

@@ -75,7 +75,7 @@ public class GroupingsService {
      * A list of all grouping paths of groups containing the optAttribute.
      */
     private List<String> allGroupingPaths(String optAttribute) {
-        GroupAttributeResults groupAttributeResults = new GroupAttributeCommand(optAttribute).execute();
+        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(optAttribute);
         List<String> results = groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
                 .collect(Collectors.toList());
         return removeDuplicates(results);
@@ -85,7 +85,8 @@ public class GroupingsService {
      * A list of grouping paths from the list of groupPaths that contain the optAttribute.
      */
     private List<String> allGroupingPaths(String optAttribute, List<String> groupingPaths) {
-        GroupAttributeResults groupAttributeResults = new GroupAttributeCommand(optAttribute, groupingPaths).execute();
+        GroupAttributeResults groupAttributeResults =
+                grouperApiService.groupAttributeResults(optAttribute, groupingPaths);
         List<String> results = groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
                 .collect(Collectors.toList());
         return removeDuplicates(results);

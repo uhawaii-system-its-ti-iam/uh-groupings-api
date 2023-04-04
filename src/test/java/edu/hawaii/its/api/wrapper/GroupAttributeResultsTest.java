@@ -1,34 +1,29 @@
 package edu.hawaii.its.api.wrapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupAttributeResultsTest {
     private static final String TRIO = "uh-settings:attributes:for-groups:uh-grouping:is-trio";
-    private static Properties properties;
-
     private static final String SUCCESS = "SUCCESS";
     private static final String FAILURE = "FAILURE";
+    private PropertyLocator propertyLocator;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        Path path = Paths.get("src/test/resources");
-        Path file = path.resolve("grouper.test.properties");
-        properties = new Properties();
-        properties.load(new FileInputStream(file.toFile()));
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
+
 
     @Test
     public void constructor() {
@@ -37,9 +32,10 @@ public class GroupAttributeResultsTest {
 
     @Test
     public void successfulResults() {
-        String json = propertyValue("ws.get.attribute.assignment.results.success");
+        String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        JsonUtil.printJson(wsGetAttributeAssignmentsResults);
         assertNotNull(wsGetAttributeAssignmentsResults);
         GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
         assertNotNull(groupAttributeResults);
@@ -55,7 +51,7 @@ public class GroupAttributeResultsTest {
 
     @Test
     public void failedResults() {
-        String json = propertyValue("ws.get.attribute.assignment.results.failure");
+        String json = propertyLocator.find("ws.get.attribute.assignment.results.failure");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         assertNotNull(wsGetAttributeAssignmentsResults);
@@ -64,7 +60,4 @@ public class GroupAttributeResultsTest {
         assertEquals(FAILURE, groupAttributeResults.getResultCode());
     }
 
-    private String propertyValue(String key) {
-        return properties.getProperty(key);
-    }
 }
