@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.util.JsonUtil;
-
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
@@ -22,7 +20,6 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
 
     @Override public GetMembersResults execute() {
         WsGetMembersResults wsGetMembersResults = gcGetMembers.execute();
-        JsonUtil.printJson(wsGetMembersResults);
         return new GetMembersResults(wsGetMembersResults);
     }
 
