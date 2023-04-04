@@ -35,6 +35,7 @@ public class HasMemberResultTest {
         assertEquals("", hasMemberResult.getName());
         assertEquals("", hasMemberResult.getUid());
         assertEquals("", hasMemberResult.getUhUuid());
+        assertEquals("", hasMemberResult.getResultCode());
         assertNotNull(hasMemberResult.getSubject());
     }
 }

@@ -69,11 +69,19 @@ public class FindGroupsResultsTest {
     @Test
     public void getEmptyDescription() {
         String json = propertyLocator.find("find.groups.results.empty.description");
-        FindGroupsResults results =
-                new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
+        WsFindGroupsResults wsFindGroupsResults = asObject(json, WsFindGroupsResults.class);
+        FindGroupsResults results = new FindGroupsResults(wsFindGroupsResults);
         assertThat(results.getResultCode(), equalTo(SUCCESS));
         assertThat(results.getGroup().getDescription(), equalTo(""));
         assertThat(results.getGroup().getResultCode(), equalTo(SUCCESS));
         assertNotNull(results.getGroups());
+    }
+
+    @Test
+    public void onFailure() {
+        String json = propertyLocator.find("find.groups.results.failure");
+        WsFindGroupsResults wsFindGroupsResults = asObject(json, WsFindGroupsResults.class);
+        FindGroupsResults results = new FindGroupsResults(wsFindGroupsResults);
+        assertThat(results.getResultCode(), equalTo(FAILURE));
     }
 }

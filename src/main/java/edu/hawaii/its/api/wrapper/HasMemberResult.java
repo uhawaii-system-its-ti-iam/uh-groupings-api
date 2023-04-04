@@ -2,7 +2,7 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 
-public class HasMemberResult extends MemberResult {
+public class HasMemberResult {
 
     private final WsHasMemberResult wsHasMemberResult;
 
@@ -21,16 +21,16 @@ public class HasMemberResult extends MemberResult {
         return new Subject(wsHasMemberResult.getWsSubject());
     }
 
-    @Override public String getResultCode() {
+    public String getResultCode() {
         String resultCode = wsHasMemberResult.getResultMetadata().getResultCode();
         return resultCode != null ? resultCode : "";
     }
 
-    @Override public String getUhUuid() {
+    public String getUhUuid() {
         return getSubject().getUhUuid();
     }
 
-    @Override public String getName() {
+    public String getName() {
         return getSubject().getName();
     }
 
