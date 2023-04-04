@@ -8,6 +8,8 @@ import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GetGroupsCommand;
+import edu.hawaii.its.api.wrapper.GetGroupsResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeCommand;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveCommand;
@@ -159,6 +161,18 @@ public class GrouperApiService {
         return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes)
                 .addGroups(groupPaths));
+    }
+
+    public GetGroupsResults getGroupsResults(String uhIdentifier) {
+        return exec.execute(new GetGroupsCommand()
+                .addUhIdentifier(uhIdentifier)
+                .query(""));
+    }
+
+    public GetGroupsResults getGroupsResults(String uhIdentifier, String query) {
+        return exec.execute(new GetGroupsCommand()
+                .addUhIdentifier(uhIdentifier)
+                .query(query));
     }
 
     public List<SyncDestination> syncDestinations() {

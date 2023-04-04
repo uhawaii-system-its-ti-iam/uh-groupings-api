@@ -136,7 +136,7 @@ public class GroupingsService {
      * A list of all group paths, in which the uhIdentifier is listed..
      */
     private List<String> allGroupPaths(String uhIdentifier) {
-        List<Group> groups = new GetGroupsCommand(uhIdentifier, "").execute().getGroups();
+        List<Group> groups = grouperApiService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
     }
 }

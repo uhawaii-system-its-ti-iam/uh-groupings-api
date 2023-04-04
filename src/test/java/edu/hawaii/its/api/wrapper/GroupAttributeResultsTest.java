@@ -35,7 +35,6 @@ public class GroupAttributeResultsTest {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        JsonUtil.printJson(wsGetAttributeAssignmentsResults);
         assertNotNull(wsGetAttributeAssignmentsResults);
         GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
         assertNotNull(groupAttributeResults);

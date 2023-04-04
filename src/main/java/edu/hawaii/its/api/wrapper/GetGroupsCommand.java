@@ -5,8 +5,6 @@ import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 
-import java.util.Objects;
-
 /**
  * A wrapper for GcGetGroups. When the uhIdentifier of a UH affiliate is passed, GetGroupsCommand on execute
  * fetches(from grouper) results containing the groups that the affiliate is listed in.
@@ -14,19 +12,8 @@ import java.util.Objects;
 public class GetGroupsCommand extends GrouperCommand implements Command<GetGroupsResults> {
     private final GcGetGroups gcGetGroups;
 
-    public GetGroupsCommand(String uhIdentifier, String query) {
-        Objects.requireNonNull(uhIdentifier, "uhIdentifier should not be null");
-        Objects.requireNonNull(query, "query should not be null");
-        WsStemLookup stemLookup = new WsStemLookup(query, null);
-        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
-        this.gcGetGroups = new GcGetGroups()
-                .assignWsStemLookup(stemLookup)
-                .assignStemScope(stemScope);
-        addUhIdentifier(uhIdentifier);
-    }
-
-    public GetGroupsCommand(String uhIdentifier) {
-        this(uhIdentifier, "");
+    public GetGroupsCommand() {
+        this.gcGetGroups = new GcGetGroups();
     }
 
     @Override
@@ -35,7 +22,7 @@ public class GetGroupsCommand extends GrouperCommand implements Command<GetGroup
         return new GetGroupsResults(wsGetGroupsResults);
     }
 
-    private GetGroupsCommand addUhIdentifier(String uhIdentifier) {
+    public GetGroupsCommand addUhIdentifier(String uhIdentifier) {
         if (isUhUuid(uhIdentifier)) {
             addUhUuid(uhIdentifier);
         } else {
@@ -51,6 +38,14 @@ public class GetGroupsCommand extends GrouperCommand implements Command<GetGroup
 
     private GetGroupsCommand addUid(String uid) {
         gcGetGroups.addSubjectIdentifier(uid);
+        return this;
+    }
+
+    public GetGroupsCommand query(String query) {
+        WsStemLookup stemLookup = new WsStemLookup(query, null);
+        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
+        this.gcGetGroups.assignWsStemLookup(stemLookup);
+        this.gcGetGroups.assignStemScope(stemScope);
         return this;
     }
 
