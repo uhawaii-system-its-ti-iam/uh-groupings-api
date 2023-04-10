@@ -39,4 +39,5 @@ public class TestUpdateTimestampCommand {
     public void execute() {
         assertThrows(RuntimeException.class, new UpdateTimestampCommand()::execute);
     }
+
 }
