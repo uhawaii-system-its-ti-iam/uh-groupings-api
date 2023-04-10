@@ -6,18 +6,11 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestFindGroupsCommand {
-
-    @Test
-    public void constructor() {
-        FindGroupsCommand findGroupsCommand = new FindGroupsCommand();
-        assertNotNull(findGroupsCommand);
-    }
 
     @Test
     public void execute() {

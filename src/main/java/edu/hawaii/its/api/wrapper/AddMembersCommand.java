@@ -4,6 +4,7 @@ import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 import java.util.List;
+
 /**
  * A wrapper for GcAddMember. When a UH identifier and group path are passed, AddMembersCommand on execute adds, to
  * grouper, the UH identifier to the listing of the group at group path. The result fetched contains the attributes of
@@ -22,6 +23,10 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
     public AddMembersResults execute() {
         WsAddMemberResults wsAddMemberResults = gcAddMember.execute();
         return new AddMembersResults(wsAddMemberResults);
+    }
+
+    public GcAddMember getGcAddMember() {
+        return gcAddMember;
     }
 
     public AddMembersCommand addUhIdentifier(String uhIdentifier) {

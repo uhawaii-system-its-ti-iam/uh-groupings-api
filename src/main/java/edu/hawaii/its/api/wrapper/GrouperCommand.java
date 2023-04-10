@@ -2,7 +2,7 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-public abstract class GrouperCommand  {
+public abstract class GrouperCommand<T> {
 
     protected WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
