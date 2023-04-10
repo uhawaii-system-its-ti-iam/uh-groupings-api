@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
@@ -400,6 +401,28 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeAdmin(ADMIN, testUsername);
     }
 
-    //ToDo add test coverage for getGroupingOwners() and isSoleOwner
+    @Test
+    public void groupingOwners() {
+        updateMemberService.removeOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
+        GroupingsGroupMembers groupingsGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        assertNotNull(groupingsGroupMembers);
+        assertFalse(groupingsGroupMembers.getGroupMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(TEST_USERNAMES.get(0))));
+
+        updateMemberService.addOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
+        groupingsGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        assertNotNull(groupingsGroupMembers);
+        assertTrue(groupingsGroupMembers.getGroupMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(TEST_USERNAMES.get(0))));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
+    }
+
+    @Test
+    public void isSoleOwner() {
+        updateMemberService.addOwnership(ADMIN, GROUPING, ADMIN);
+        updateMemberService.addOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
+        assertFalse(groupingAssignmentService.isSoleOwner(ADMIN, GROUPING, ADMIN));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
+    }
 
 }

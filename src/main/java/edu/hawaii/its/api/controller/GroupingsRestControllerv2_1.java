@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.groupings.GroupingsAddResult;
 import edu.hawaii.its.api.groupings.GroupingsAddResults;
+import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
@@ -553,5 +554,17 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.isSoleOwner(currentUser, path, uhIdentifier));
+    }
+
+    /**
+     * A list of all owners listed in grouping.
+     */
+    @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")
+    public ResponseEntity<GroupingsGroupMembers> groupingOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path) {
+        logger.info("Entered REST groupingOwners...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.groupingOwners(currentUser, path));
     }
 }
