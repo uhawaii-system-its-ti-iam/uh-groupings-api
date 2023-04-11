@@ -4,13 +4,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingsUpdatedAttributeResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
+import edu.hawaii.its.api.wrapper.AttributesResult;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -36,6 +41,12 @@ public class GroupAttributeService {
     @Value("${groupings.api.operation_remove_attribute}")
     private String OPERATION_REMOVE_ATTRIBUTE;
 
+    @Value("${grouper.api.sync.destinations.location}")
+    private String SYNC_DESTINATIONS_LOCATION;
+
+    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
+    private String SYNC_DESTINATIONS_CHECKBOXES;
+
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
 
@@ -51,12 +62,6 @@ public class GroupAttributeService {
     private GrouperApiService grouperApiService;
 
     @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
     private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
@@ -64,6 +69,9 @@ public class GroupAttributeService {
 
     @Autowired
     private GroupingsService groupingsService;
+
+    @Autowired
+    private UpdateTimestampService timestampService;
 
     /**
      * Get all the sync destinations for a specific grouping.
@@ -73,7 +81,7 @@ public class GroupAttributeService {
         checkPrivileges(currentUser);
 
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUser);
-        List<SyncDestination> finSyncDestList = grouperApiService.syncDestinations();
+        List<SyncDestination> finSyncDestList = syncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
             dest.setDescription(parseKeyVal(grouping.getName(), dest.getDescription()));
@@ -87,11 +95,24 @@ public class GroupAttributeService {
      * person requesting the information is an owner or superuser as that has already been checked.
      */
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
-        List<SyncDestination> syncDestinations = grouperApiService.syncDestinations();
+        List<SyncDestination> syncDestinations = syncDestinations();
 
         for (SyncDestination destination : syncDestinations) {
             destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
             destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
+        }
+        return syncDestinations;
+    }
+
+    public List<SyncDestination> syncDestinations() {
+        FindAttributesResults findAttributesResults =
+                grouperApiService.findAttributesResults(SYNC_DESTINATIONS_CHECKBOXES, SYNC_DESTINATIONS_LOCATION);
+        List<SyncDestination> syncDestinations = new ArrayList<>();
+        for (AttributesResult attributesResult : findAttributesResults.getResults()) {
+            SyncDestination syncDestination =
+                    JsonUtil.asObject(attributesResult.getDescription(), SyncDestination.class);
+            syncDestination.setName(attributesResult.getName());
+            syncDestinations.add(syncDestination);
         }
         return syncDestinations;
     }
@@ -131,8 +152,8 @@ public class GroupAttributeService {
             String attributeName, boolean turnAttributeOn) {
 
         checkPrivileges(groupPath, ownerUsername);
-        GroupingsServiceResult gsr;
         String verb = "removed from ";
+        String resultCode = SUCCESS;
         if (turnAttributeOn) {
             verb = "added to ";
         }
@@ -142,28 +163,18 @@ public class GroupAttributeService {
 
         if (turnAttributeOn) {
             if (!isHasAttribute) {
-                grouperApiService.assignAttributesResultsForGroup(ASSIGN_TYPE_GROUP,
-                        OPERATION_ASSIGN_ATTRIBUTE, attributeName, groupPath);
-
-                gsr = makeGroupingsServiceResult(SUCCESS, action);
-
-                membershipService.updateLastModified(groupPath);
+                assignAttribute(attributeName, groupPath);
             } else {
-                gsr = makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " already existed", action);
+                resultCode += ", " + attributeName + " already existed";
             }
         } else {
             if (isHasAttribute) {
-                grouperApiService.assignAttributesResultsForGroup(ASSIGN_TYPE_GROUP,
-                        OPERATION_REMOVE_ATTRIBUTE, attributeName, groupPath);
-
-                gsr = makeGroupingsServiceResult(SUCCESS, action);
-
-                membershipService.updateLastModified(groupPath);
+                removeAttribute(attributeName, groupPath);
             } else {
-                gsr = makeGroupingsServiceResult(SUCCESS + ", " + attributeName + " did not exist", action);
+                resultCode += ", " + attributeName + " did not exist";
             }
         }
-        return gsr;
+        return new GroupingsServiceResult(resultCode, action);
     }
 
     // Check if attribute is on.
@@ -171,6 +182,24 @@ public class GroupAttributeService {
         AttributeAssignmentsResults attributeAssignmentsResults = new AttributeAssignmentsResults(
                 grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, attributeName, groupPath));
         return attributeAssignmentsResults.isAttributeDefName(attributeName);
+    }
+
+    public GroupingsUpdatedAttributeResult assignAttribute(String attributeName, String groupingPath) {
+        return updateAttribute(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
+    }
+
+    public GroupingsUpdatedAttributeResult removeAttribute(String attributeName, String groupingPath) {
+        return updateAttribute(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
+    }
+
+    public GroupingsUpdatedAttributeResult updateAttribute(String attributeName, String assignOperation,
+            String groupingPath) {
+        AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
+                ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
+
+        GroupingsUpdatedAttributeResult result = new GroupingsUpdatedAttributeResult(assignAttributesResults);
+        timestampService.update(result);
+        return result;
     }
 
     /**
