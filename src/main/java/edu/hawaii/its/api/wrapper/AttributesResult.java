@@ -22,4 +22,5 @@ public class AttributesResult {
         String description = this.wsAttributeDefName.getDescription();
         return description != null ? description : "";
     }
+
 }

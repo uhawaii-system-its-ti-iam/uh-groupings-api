@@ -247,16 +247,6 @@ public class TestGrouperApiService {
     }
 
     @Test
-    public void assignAttributesResultsForGroupTest() {
-        WsAssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResultsForGroup(
-                ASSIGN_TYPE_GROUP,
-                OPERATION_ASSIGN_ATTRIBUTE,
-                OptType.IN.value(),
-                GROUPING);
-        assertNotNull(assignAttributesResults);
-    }
-
-    @Test
     public void grouperPrivilegesLiteResultTest() {
         WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult =
                 grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PrivilegeType.IN.value(),

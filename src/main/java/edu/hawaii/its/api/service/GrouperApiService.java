@@ -6,6 +6,8 @@ import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.FindAttributesCommand;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.wrapper.AssignAttributesCommand;
+import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsCommand;
@@ -75,6 +77,12 @@ public class GrouperApiService {
 
     @Value("${groupings.api.stem}")
     private String STEM;
+
+    private static final String ASSIGN_TYPE_GROUP = "group";
+    private static final String OPERATION_ASSIGN_ATTRIBUTE = "assign_attr";
+    private static final String YYYYMMDDTHHMM = "uh-settings:attributes:for-groups:last-modified:yyyymmddThhmm";
+    private static final String OPERATION_REPLACE_VALUES = "replace_values";
+    private static final String DATE_FORMAT = "yyyyMMdd'T'HHmm";
 
     @Autowired
     MemberAttributeService membershipAttributeService;
@@ -300,17 +308,13 @@ public class GrouperApiService {
                 .execute();
     }
 
-    public WsAssignAttributesResults assignAttributesResultsForGroup(String attributeAssignType,
-            String attributeAssignOperation,
-            String attributeDefNameName,
-            String ownerGroupName) {
-
-        return new GcAssignAttributes()
-                .assignAttributeAssignType(attributeAssignType)
-                .assignAttributeAssignOperation(attributeAssignOperation)
-                .addAttributeDefNameName(attributeDefNameName)
-                .addOwnerGroupName(ownerGroupName)
-                .execute();
+    public AssignAttributesResults assignAttributesResults(String assignType, String assignOperation, String groupPath,
+            String attributeName) {
+        return exec.execute(new AssignAttributesCommand()
+                .setAssignType(assignType)
+                .setAssignOperation(assignOperation)
+                .addGroupPath(groupPath)
+                .addAttribute(attributeName));
     }
 
     public WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult(String groupName,
