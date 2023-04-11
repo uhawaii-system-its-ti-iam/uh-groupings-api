@@ -143,13 +143,6 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void syncDestinationsTest() {
-        TEST_UH_NUMBERS.forEach(
-                num -> System.err.println(memberAttributeService.getMemberAttributes(ADMIN, num).toString()));
-        assertNotNull(grouperApiService.syncDestinations());
-    }
-
-    @Test
     public void addMemberTest() {
         // With uh usernames.
         AddMemberResult addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));

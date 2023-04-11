@@ -10,7 +10,10 @@ import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
+import edu.hawaii.its.api.wrapper.AttributesResult;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -35,6 +38,12 @@ public class GroupAttributeService {
 
     @Value("${groupings.api.operation_remove_attribute}")
     private String OPERATION_REMOVE_ATTRIBUTE;
+
+    @Value("${grouper.api.sync.destinations.location}")
+    private String SYNC_DESTINATIONS_LOCATION;
+
+    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
+    private String SYNC_DESTINATIONS_CHECKBOXES;
 
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
@@ -73,7 +82,7 @@ public class GroupAttributeService {
         checkPrivileges(currentUser);
 
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUser);
-        List<SyncDestination> finSyncDestList = grouperApiService.syncDestinations();
+        List<SyncDestination> finSyncDestList = syncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
             dest.setDescription(parseKeyVal(grouping.getName(), dest.getDescription()));
@@ -87,11 +96,24 @@ public class GroupAttributeService {
      * person requesting the information is an owner or superuser as that has already been checked.
      */
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
-        List<SyncDestination> syncDestinations = grouperApiService.syncDestinations();
+        List<SyncDestination> syncDestinations = syncDestinations();
 
         for (SyncDestination destination : syncDestinations) {
             destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
             destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
+        }
+        return syncDestinations;
+    }
+
+    public List<SyncDestination> syncDestinations() {
+        FindAttributesResults findAttributesResults =
+                grouperApiService.findAttributesResults(SYNC_DESTINATIONS_CHECKBOXES, SYNC_DESTINATIONS_LOCATION);
+        List<SyncDestination> syncDestinations = new ArrayList<>();
+        for (AttributesResult attributesResult : findAttributesResults.getResults()) {
+            SyncDestination syncDestination =
+                    JsonUtil.asObject(attributesResult.getDescription(), SyncDestination.class);
+            syncDestination.setName(attributesResult.getName());
+            syncDestinations.add(syncDestination);
         }
         return syncDestinations;
     }
