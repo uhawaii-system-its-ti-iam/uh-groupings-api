@@ -1,20 +1,20 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
+import edu.hawaii.its.api.wrapper.FindAttributesCommand;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsCommand;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
-import edu.hawaii.its.api.wrapper.GroupAttributeCommand;
-import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GetMembersCommand;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeCommand;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMemberResult;
@@ -29,7 +29,6 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
-import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
@@ -40,8 +39,6 @@ import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
@@ -60,12 +57,6 @@ import java.util.List;
 
 @Service("grouperApiService")
 public class GrouperApiService {
-
-    @Value("${grouper.api.sync.destinations.location}")
-    private String SYNC_DESTINATIONS_LOCATION;
-
-    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
-    private String SYNC_DESTINATIONS_CHECKBOXES;
 
     @Value("${groupings.api.person_attributes.first_name}")
     private String FIRST_NAME;
@@ -190,22 +181,10 @@ public class GrouperApiService {
         return getMembersResult;
     }
 
-    public List<SyncDestination> syncDestinations() {
-        WsFindAttributeDefNamesResults findAttributeDefNamesResults = new GcFindAttributeDefNames()
-                .assignScope(SYNC_DESTINATIONS_LOCATION)
-                .assignNameOfAttributeDef(SYNC_DESTINATIONS_CHECKBOXES)
-                .execute();
-
-        List<SyncDestination> syncDest = new ArrayList<>();
-
-        for (WsAttributeDefName wsAttributeDefName : findAttributeDefNamesResults.getAttributeDefNameResults()) {
-            SyncDestination newSyncDest =
-                    new SyncDestination(wsAttributeDefName.getName(), wsAttributeDefName.getDescription());
-            newSyncDest = JsonUtil.asObject(newSyncDest.getDescription(), SyncDestination.class);
-            newSyncDest.setName(wsAttributeDefName.getName());
-            syncDest.add(newSyncDest);
-        }
-        return syncDest;
+    public FindAttributesResults findAttributesResults(String attributeName, String searchScope) {
+        return exec.execute(new FindAttributesCommand()
+                .assignAttributeName(attributeName)
+                .assignSearchScope(searchScope));
     }
 
     public AddMemberResult addMember(String groupPath, String uhIdentifier) {
