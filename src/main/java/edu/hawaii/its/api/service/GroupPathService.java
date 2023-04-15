@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,9 @@ public class GroupPathService {
     }
 
     public List<Group> getValidGroupings(List<String> groupingPaths) {
+        if (groupingPaths.isEmpty()) {
+            return new ArrayList<>();
+        }
         return grouperApiService.findGroupsResults(groupingPaths).getGroups();
     }
 
