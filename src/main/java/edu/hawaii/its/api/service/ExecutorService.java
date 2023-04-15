@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 @Service("executor")
 public class ExecutorService {
     protected final Log logger = LogFactory.getLog(getClass());
-    public  <T> T execute(Command<T> command) {
+
+    public <T> T execute(Command<T> command) {
         T result = null;
         String text = "execute; " + command.getClass().getSimpleName() + ": ";
         try {

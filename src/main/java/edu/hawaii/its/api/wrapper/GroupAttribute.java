@@ -30,6 +30,11 @@ public class GroupAttribute extends Results {
         return groupPath != null ? groupPath : "";
     }
 
+    public String getAssignType() {
+        String assignType = this.wsAttributeAssign.getAttributeAssignType();
+        return assignType != null ? assignType : "";
+    }
+
     @Override public String getResultCode() {
         return getAttributeName().equals("") ? "FAILURE" : "SUCCESS";
     }

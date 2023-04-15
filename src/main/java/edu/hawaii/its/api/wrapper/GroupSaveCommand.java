@@ -1,7 +1,5 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.exception.InvalidGroupPathException;
-
 import edu.internet2.middleware.grouperClient.api.GcGroupSave;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
@@ -24,12 +22,8 @@ public class GroupSaveCommand extends GrouperCommand implements Command<GroupSav
     @Override
     public GroupSaveResults execute() {
         gcGroupSave.addGroupToSave(wsGroupToSave);
-        try {
-            WsGroupSaveResults wsGroupSaveResults = gcGroupSave.execute();
-            return new GroupSaveResults(wsGroupSaveResults);
-        } catch (RuntimeException e) {
-            throw new InvalidGroupPathException("");
-        }
+        WsGroupSaveResults wsGroupSaveResults = gcGroupSave.execute();
+        return new GroupSaveResults(wsGroupSaveResults);
     }
 
     public GroupSaveCommand setGroupingPath(String groupingPath) {

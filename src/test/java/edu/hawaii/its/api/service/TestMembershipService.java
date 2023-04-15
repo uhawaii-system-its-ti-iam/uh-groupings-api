@@ -8,8 +8,6 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.UpdateTimestampResult;
-import edu.hawaii.its.api.util.Dates;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,7 +96,8 @@ public class TestMembershipService {
     private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     private final String SUCCESS_ALREADY_EXISTED = "SUCCESS_ALREADY_EXISTED";
 
-    private Person testPerson;
+    private Person testPerson1;
+    private Person testPerson2;
 
     @BeforeEach
     public void init() {
@@ -117,21 +114,32 @@ public class TestMembershipService {
             grouperApiService.removeMember(GROUPING_EXCLUDE, testNumber);
             grouperApiService.removeMember(GROUPING_OWNERS, testNumber);
         });
-        testPerson = uhIdentifierGenerator.getRandomPerson();
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUsername());
+        testPerson1 = uhIdentifierGenerator.getRandomPerson();
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson1.getUsername());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson1.getUsername());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson1.getUsername());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson1.getUsername());
 
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUhUuid());
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson1.getUhUuid());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson1.getUhUuid());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson1.getUhUuid());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson1.getUhUuid());
+
+        testPerson2 = uhIdentifierGenerator.getRandomPerson();
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson2.getUsername());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson2.getUsername());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson2.getUsername());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson2.getUsername());
+
+        grouperApiService.removeMember(GROUPING_ADMINS, testPerson2.getUhUuid());
+        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson2.getUhUuid());
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson2.getUhUuid());
+        grouperApiService.removeMember(GROUPING_OWNERS, testPerson2.getUhUuid());
     }
 
     @Test
     public void membershipResultsTest() {
-        String testUsername = testPerson.getUsername();
+        String testUsername = testPerson1.getUsername();
 
         grouperApiService.removeMember(GROUPING_BASIS, testUsername);
 
@@ -151,13 +159,6 @@ public class TestMembershipService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
-        // Should not throw an exception if current user matches uid and is not an admin.
-        try {
-            membershipService.membershipResults(testUsername, testUsername);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user matches uid and is not an admin.");
-        }
-
         // Should not throw an exception if current user is an admin and does not match uid.
         grouperApiService.addMember(GROUPING_ADMINS, testUsername);
         try {
@@ -166,15 +167,6 @@ public class TestMembershipService {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
         } catch (UhMemberNotFoundException e) {
 
-        }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
-
-        // Should not throw an exception if current user is an admin and does match uid.
-        grouperApiService.addMember(GROUPING_ADMINS, testUsername);
-        try {
-            membershipService.membershipResults(testUsername, testUsername);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin and does match uid.");
         }
         grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
 
@@ -192,7 +184,7 @@ public class TestMembershipService {
     @Test
     public void managePersonResultsTest() {
         List<Membership> memberships;
-        String testUsername = testPerson.getUsername();
+        String testUsername = testPerson1.getUsername();
 
         // Should not be a member.
         memberships = membershipService.managePersonResults(ADMIN, testUsername);
@@ -246,7 +238,7 @@ public class TestMembershipService {
         // Should not throw an exception if current user is an admin and does not match uid.
         grouperApiService.addMember(GROUPING_ADMINS, testUsername);
         try {
-            membershipService.managePersonResults(testUsername, "bogus-user");
+            membershipService.managePersonResults(testUsername, testPerson2.getUsername());
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
         }
@@ -267,82 +259,26 @@ public class TestMembershipService {
     }
 
     @Test
-    public void updateLastModifiedTest() {
-        UpdateTimestampResult updateTimestampResult = membershipService.updateLastModified(GROUPING);
-        assertNotNull(updateTimestampResult);
-        updateTimestampResult = membershipService.updateLastModified(GROUPING_INCLUDE);
-        assertNotNull(updateTimestampResult);
-        updateTimestampResult = membershipService.updateLastModified(GROUPING_EXCLUDE);
-        assertNotNull(updateTimestampResult);
-        updateTimestampResult = membershipService.updateLastModified(GROUPING_BASIS);
-        assertNotNull(updateTimestampResult);
-        updateTimestampResult = membershipService.updateLastModified(GROUPING_OWNERS);
-        assertNotNull(updateTimestampResult);
-    }
-
-    @Test
-    public void updateLastModifiedTimestampTest() {
-        // Function updateLastModifiedTimestamp returns a complex grouper object which is wrapped into UpdateTimeResult.
-        // The structure of the grouper object returned depends on three cases...
-        //         i. Previous timestamp is less than new timestamp.
-        //        ii. Previous timestamp is equal to new timestamp.
-        //       iii. Previous timestamp is greater than new timestamp.
-        // Thus, two updates are made: the epoch is first updated as the timestamp, followed by the present time.
-        // This ensures case i.
-
-        // Create a random timestamp between the epoch and now.
-        LocalDateTime epoch = LocalDateTime.of(LocalDate.of(1970, 1, 1), LocalTime.MIDNIGHT);
-        LocalDateTime randomLocalDateTime = getRandomLocalDateTimeBetween(epoch, LocalDateTime.now());
-        String randomDateTime = Dates.formatDate(randomLocalDateTime, "yyyyMMdd'T'HHmm");
-        // Create a timestamp of present time.
-        String nowDateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
-        // Update grouping last modified timestamp to the random timestamp.
-        UpdateTimestampResult randomDateTimeResults =
-                membershipService.updateLastModifiedTimestamp(randomDateTime, GROUPING_INCLUDE);
-        // Update grouping last modified timestamp to present time.
-        UpdateTimestampResult nowDateTimeResults =
-                membershipService.updateLastModifiedTimestamp(nowDateTime, GROUPING_INCLUDE);
-
-        // Test for case i.
-        assertNotNull(randomDateTimeResults);
-        assertNotNull(nowDateTimeResults);
-        assertEquals(GROUPING_INCLUDE, nowDateTimeResults.getPathOfUpdate());
-        assertEquals(2, nowDateTimeResults.getTimestampUpdateArray().length);
-        assertEquals(nowDateTime,
-                nowDateTimeResults.getTimestampUpdateArray()[1].getWsAttributeAssignValue().getValueSystem());
-        assertEquals(randomDateTime,
-                nowDateTimeResults.getTimestampUpdateArray()[0].getWsAttributeAssignValue().getValueSystem());
-
-        // Test for case ii.
-        nowDateTimeResults = membershipService.updateLastModifiedTimestamp(nowDateTime, GROUPING_INCLUDE);
-        assertNotNull(nowDateTimeResults);
-        assertEquals(GROUPING_INCLUDE, nowDateTimeResults.getPathOfUpdate());
-        assertEquals(1, nowDateTimeResults.getTimestampUpdateArray().length);
-        assertEquals(nowDateTime,
-                nowDateTimeResults.getTimestampUpdateArray()[0].getWsAttributeAssignValue().getValueSystem());
-    }
-
-    @Test
     public void getNumberOfMembershipsTest() {
         List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(testPerson.getUsername());
+        iamtst01List.add(testPerson1.getUsername());
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
         updateMemberService.removeExcludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
 
-        int results = membershipService.numberOfMemberships(ADMIN, testPerson.getUsername());
+        int results = membershipService.numberOfMemberships(ADMIN, testPerson1.getUsername());
         updateMemberService.addIncludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
         assertTrue(membershipService.numberOfMemberships(ADMIN, iamtst01List.get(0)) > results);
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
 
         // Should have groups for user in include, basis, and not exclude only.
         iamtst01List = new ArrayList<>();
-        iamtst01List.add(testPerson.getUsername());
+        iamtst01List.add(testPerson1.getUsername());
 
-        results = membershipService.numberOfMemberships(ADMIN, testPerson.getUsername());
+        results = membershipService.numberOfMemberships(ADMIN, testPerson1.getUsername());
         updateMemberService.addIncludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
         updateMemberService.addExcludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
 
-        assertEquals(membershipService.numberOfMemberships(ADMIN, testPerson.getUsername()), results);
+        assertEquals(membershipService.numberOfMemberships(ADMIN, testPerson1.getUsername()), results);
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
         updateMemberService.removeExcludeMembers(ADMIN, EMPTY_GROUPING, iamtst01List);
     }

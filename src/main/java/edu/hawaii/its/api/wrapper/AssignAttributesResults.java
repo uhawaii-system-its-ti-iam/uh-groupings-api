@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
@@ -43,5 +44,17 @@ public class AssignAttributesResults extends Results {
             }
         }
         return attributesResults;
+    }
+
+    public List<AssignAttributeResult> getAssignAttributeResults() {
+        WsAssignAttributeResult[] wsAssignAttributeResults =
+                this.wsAssignAttributesResults.getWsAttributeAssignResults();
+        List<AssignAttributeResult> assignAttributeResults = new ArrayList<>();
+        if (!isEmpty(wsAssignAttributeResults)) {
+            for (WsAssignAttributeResult wsAssignAttributeResult : wsAssignAttributeResults) {
+                assignAttributeResults.add(new AssignAttributeResult(wsAssignAttributeResult));
+            }
+        }
+        return assignAttributeResults;
     }
 }

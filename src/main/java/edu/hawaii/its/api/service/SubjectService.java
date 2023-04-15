@@ -29,7 +29,7 @@ public class SubjectService {
     private GrouperApiService grouperApiService;
 
     public Person getPerson(String uhIdentifier) {
-        Subject subject = grouperApiService.getSubject(uhIdentifier);
+        Subject subject = getSubject(uhIdentifier);
         if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
             return new Person();
         }
@@ -38,7 +38,7 @@ public class SubjectService {
     }
 
     public boolean isValidIdentifier(String uhIdentifier) {
-        return isValidSubject(grouperApiService.getSubject(uhIdentifier));
+        return isValidSubject(getSubject(uhIdentifier));
     }
 
     public String checkValidSubject(String uhIdentifier) {
@@ -69,10 +69,19 @@ public class SubjectService {
     }
 
     public String getValidUhUuid(String uhIdentifier) {
-        Subject subject = grouperApiService.getSubject(uhIdentifier);
+        Subject subject = getSubject(uhIdentifier);
         if (!isValidSubject(subject)) {
             return "";
         }
         return subject.getUhUuid();
+    }
+
+    private Subject getSubject(String uhIdentifier) {
+        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifier);
+        List<Subject> subjects = subjectsResults.getSubjects();
+        if (subjects.size() == 1) {
+            return subjects.get(0);
+        }
+        return new Subject();
     }
 }

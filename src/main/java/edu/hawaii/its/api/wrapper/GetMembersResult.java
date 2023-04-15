@@ -24,6 +24,10 @@ public class GetMembersResult extends Results {
         }
     }
 
+    public GetMembersResult() {
+        this.wsGetMembersResult = new WsGetMembersResult();
+    }
+
     @Override public String getResultCode() {
         return getGroup().getResultCode();
     }
