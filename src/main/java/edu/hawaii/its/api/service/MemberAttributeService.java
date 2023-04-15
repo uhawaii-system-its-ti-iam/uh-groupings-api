@@ -121,7 +121,7 @@ public class MemberAttributeService {
      * Get a list of GroupPaths the user owns, by username or uhUuid.
      */
     public List<GroupingPath> getOwnedGroupings(String currentUser, String uhIdentifier) {
-        List<String> pathStrings = groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier, pathHasOwner());
+        List<String> pathStrings = groupingsService.groupPaths(uhIdentifier, pathHasOwner());
 
         List<GroupingPath> groupingPaths = new ArrayList<>();
         for (String path : pathStrings) {
@@ -137,6 +137,6 @@ public class MemberAttributeService {
      * Get the number of groupings a user owns, by username or uhUuid.
      */
     public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
-        return groupingAssignmentService.getGroupPaths(currentUser, uhIdentifier, pathHasOwner()).size();
+        return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
     }
 }

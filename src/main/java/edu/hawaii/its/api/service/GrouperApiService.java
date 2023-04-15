@@ -1,13 +1,12 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
-import edu.hawaii.its.api.wrapper.FindAttributesCommand;
-import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesCommand;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.FindAttributesCommand;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsCommand;
@@ -19,39 +18,21 @@ import edu.hawaii.its.api.wrapper.GroupAttributeCommand;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
-import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
-import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
-import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
-import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
-import edu.internet2.middleware.grouperClient.api.GcGetMemberships;
-import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
-import edu.internet2.middleware.grouperClient.api.GcHasMember;
-import edu.internet2.middleware.grouperClient.ws.StemScope;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -60,42 +41,34 @@ import java.util.List;
 @Service("grouperApiService")
 public class GrouperApiService {
 
-    @Value("${groupings.api.person_attributes.first_name}")
-    private String FIRST_NAME;
-
-    @Value("${groupings.api.person_attributes.last_name}")
-    private String LAST_NAME;
-
-    @Value("${groupings.api.person_attributes.composite_name}")
-    private String COMPOSITE_NAME;
-
-    @Value("${groupings.api.person_attributes.uhuuid}")
-    private String UHUUID;
-
-    @Value("${groupings.api.person_attributes.username}")
-    private String USERNAME;
-
-    @Value("${groupings.api.stem}")
-    private String STEM;
-
-    private static final String ASSIGN_TYPE_GROUP = "group";
-    private static final String OPERATION_ASSIGN_ATTRIBUTE = "assign_attr";
-    private static final String YYYYMMDDTHHMM = "uh-settings:attributes:for-groups:last-modified:yyyymmddThhmm";
-    private static final String OPERATION_REPLACE_VALUES = "replace_values";
-    private static final String DATE_FORMAT = "yyyyMMdd'T'HHmm";
-
-    @Autowired
-    MemberAttributeService membershipAttributeService;
+    @Autowired MemberAttributeService membershipAttributeService;
 
     @Autowired ExecutorService exec;
 
-    public HasMemberResult memberResult(String groupingPath, String uhIdentifier) {
+    /**
+     * Check if a UH identifier is listed in a group.
+     */
+    public HasMembersResults hasMemberResults(String groupPath, String uhIdentifier) {
         HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
-                .assignGroupPath(groupingPath)
+                .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier));
-        return hasMembersResults.getResult();
+        return hasMembersResults;
     }
 
+    /**
+     * Check if multiple UH identifiers are listed in a group.
+     */
+    public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifiers(uhIdentifiers));
+        return hasMembersResults;
+
+    }
+
+    /**
+     * Update a groups description.
+     */
     public GroupSaveResults groupSaveResults(String groupingPath, String description) {
         GroupSaveResults groupSaveResults = exec.execute(new GroupSaveCommand()
                 .setGroupingPath(groupingPath)
@@ -103,116 +76,195 @@ public class GrouperApiService {
         return groupSaveResults;
     }
 
+    /**
+     * Check if a group exists.
+     */
     public FindGroupsResults findGroupsResults(String groupPath) {
         FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .addPath(groupPath));
         return findGroupsResults;
     }
 
+    /**
+     * Check if multiple groups exist.
+     */
     public FindGroupsResults findGroupsResults(List<String> groupPaths) {
         FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .addPaths(groupPaths));
         return findGroupsResults;
     }
 
-    public Subject getSubject(String uhIdentifier) {
+    /**
+     * Check if a UH identifier is valid.
+     */
+    public SubjectsResults getSubjects(String uhIdentifier) {
         SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .addSubject(uhIdentifier));
-        List<Subject> subjects = subjectsResults.getSubjects();
-        if (subjects.size() == 1) {
-            return subjects.get(0);
-        }
-        return new Subject();
+        return subjectsResults;
     }
 
+    /**
+     * Check if multiple UH identifiers are valid.
+     */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
         SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .addSubjects(uhIdentifiers));
         return subjectsResults;
     }
 
+    /**
+     * Get all the groups with the specified attribute.
+     */
     public GroupAttributeResults groupAttributeResults(String attribute) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute));
     }
 
+    /**
+     * Get all the groups with the specified attributes.
+     */
     public GroupAttributeResults groupAttributeResults(List<String> attributes) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes));
     }
 
+    /**
+     * Check if a group contains an attribute.
+     */
     public GroupAttributeResults groupAttributeResults(String attribute, String groupPath) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute)
                 .addGroup(groupPath));
     }
 
+    /**
+     * Check if multiple groups contain an attribute.
+     */
     public GroupAttributeResults groupAttributeResults(String attribute, List<String> groupPaths) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute)
                 .addGroups(groupPaths));
     }
 
+    /**
+     * Check if a group contains multiple attributes.
+     */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, String groupPath) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes)
                 .addGroup(groupPath));
     }
 
+    /**
+     * Check if multiple groups contain attributes from the list specified.
+     */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, List<String> groupPaths) {
         return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes)
                 .addGroups(groupPaths));
     }
 
+    /**
+     * Get all listed attributes of a group.
+     */
+    public GroupAttributeResults groupAttributeResult(String groupPath) {
+        GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
+                .addGroup(groupPath);
+        return exec.execute(groupAttributeCommand);
+    }
+
+    /**
+     * Get all groups that a UH identifier is listed in.
+     */
     public GetGroupsResults getGroupsResults(String uhIdentifier) {
         return exec.execute(new GetGroupsCommand()
                 .addUhIdentifier(uhIdentifier)
                 .query(""));
     }
 
+    /**
+     * Get all groups that a UH identifier is listed in with respect to the query string, e.g. passing
+     * getGroupsResults("some-identifier", "tmp") will return all the groups with a group path starting with the string
+     * "tmp" that "some-identifier" is listed in.
+     */
     public GetGroupsResults getGroupsResults(String uhIdentifier, String query) {
         return exec.execute(new GetGroupsCommand()
                 .addUhIdentifier(uhIdentifier)
                 .query(query));
     }
 
+    /**
+     * Get all members listed in a group.
+     */
+    public GetMembersResult getMembersResult(String groupPath) {
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .addGroupPath(groupPath));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
+    }
+
+    /**
+     * Get all members listed in each group.
+     */
     public GetMembersResults getMembersResults(List<String> groupPaths) {
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .addGroupPaths(groupPaths));
         return getMembersResults;
     }
 
-    public GetMembersResult getMembersResult(String groupPath) {
-        GetMembersResult getMembersResult = exec.execute(new GetMembersCommand()
-                .addGroupPath(groupPath)).getMembersResults().get(0);
-        return getMembersResult;
-    }
-
-    public FindAttributesResults findAttributesResults(String attributeName, String searchScope) {
+    /**
+     * Find all group attributes containing the specified attribute type, e.g. passing the sync-dest attribute type name
+     * will return a list of all sync-destinations. All sync-destinations are listed as a distinct attribute each
+     * containing a matching sync-dest attribute type string.
+     */
+    public FindAttributesResults findAttributesResults(String attributeTypeName, String searchScope) {
         return exec.execute(new FindAttributesCommand()
-                .assignAttributeName(attributeName)
+                .assignAttributeName(attributeTypeName)
                 .assignSearchScope(searchScope));
     }
 
+    /**
+     * Add a UH identifier to group listing.
+     */
     public AddMemberResult addMember(String groupPath, String uhIdentifier) {
         return exec.execute(new AddMembersCommand()
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
 
+    /**
+     * Add multiple UH identifiers to a group listing.
+     */
     public AddMembersResults addMembers(String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new AddMembersCommand()
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
     }
 
+    /**
+     * Remove a UH identifier from a group listing.
+     */
     public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
         return exec.execute(new RemoveMembersCommand()
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
 
+    /**
+     * Remove multiple UH identifiers from a group listing.
+     */
+    public RemoveMembersResults removeMembers(String groupPath, List<String> uhIdentifiers) {
+        return exec.execute(new RemoveMembersCommand()
+                .assignGroupPath(groupPath)
+                .addUhIdentifiers(uhIdentifiers));
+    }
+
+    /**
+     * Remove all listed members from a group.
+     */
     public AddMembersResults resetGroupMembers(String groupPath) {
         return exec.execute(new AddMembersCommand()
                 .assignGroupPath(groupPath)
@@ -220,94 +272,10 @@ public class GrouperApiService {
                 .replaceGroupMembers(true));
     }
 
-    public RemoveMembersResults removeMembers(String groupPath, List<String> uhIdentifiers) {
-        return exec.execute(new RemoveMembersCommand()
-                .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
-    }
-
-    public WsGetAttributeAssignmentsResults groupsOf(String assignType,
-            String attributeDefNameName) {
-        return new GcGetAttributeAssignments()
-                .addAttributeDefNameName(attributeDefNameName)
-                .assignAttributeAssignType(assignType)
-                .execute();
-    }
-
-    public WsGetAttributeAssignmentsResults attributeAssigns(String assignType,
-            String attributeDefNameName0,
-            String attributeDefNameName1) {
-        return new GcGetAttributeAssignments()
-                .addAttributeDefNameName(attributeDefNameName0)
-                .addAttributeDefNameName(attributeDefNameName1)
-                .assignAttributeAssignType(assignType)
-                .execute();
-    }
-
-    public WsGetAttributeAssignmentsResults groupAttributeDefNames(String assignType,
-            String group) {
-        return new GcGetAttributeAssignments()
-                .addOwnerGroupName(group)
-                .assignAttributeAssignType(assignType)
-                .execute();
-    }
-
-    public WsGetAttributeAssignmentsResults groupAttributeAssigns(String assignType,
-            String attributeDefNameName,
-            String group) {
-        return new GcGetAttributeAssignments()
-                .addAttributeDefNameName(attributeDefNameName)
-                .addOwnerGroupName(group)
-                .assignAttributeAssignType(assignType)
-                .execute();
-    }
-
-    public WsHasMemberResults hasMemberResults(String group, String uhIdentifier) {
-        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
-            return new GcHasMember()
-                    .assignGroupName(group)
-                    .addSubjectId(uhIdentifier)
-                    .execute();
-        }
-        return new GcHasMember()
-                .assignGroupName(group)
-                .addSubjectIdentifier(uhIdentifier)
-                .execute();
-    }
-
-    public WsHasMemberResults hasMemberResults(String group, Person person) {
-        if (person.getUsername() != null) {
-            return hasMemberResults(group, person.getUsername());
-        }
-
-        if (person.getUhUuid() == null) {
-            throw new IllegalArgumentException("The person is required to have either a username or a uuid");
-        }
-
-        return new GcHasMember()
-                .assignGroupName(group)
-                .addSubjectId(person.getUhUuid())
-                .execute();
-    }
-
-    public WsAssignAttributesResults assignAttributesResults(
-            String attributeAssignType,
-            String attributeAssignOperation,
-            String ownerGroupName,
-            String attributeDefNameName,
-            String attributeAssignValueOperation,
-            WsAttributeAssignValue value) {
-
-        return new GcAssignAttributes()
-                .assignAttributeAssignType(attributeAssignType)
-                .assignAttributeAssignOperation(attributeAssignOperation)
-                .addOwnerGroupName(ownerGroupName)
-                .addAttributeDefNameName(attributeDefNameName)
-                .assignAttributeAssignValueOperation(attributeAssignValueOperation)
-                .addValue(value)
-                .execute();
-    }
-
+    /**
+     * Add or remove an attribute from a group. This is used to update a groupings
+     * preferences.
+     */
     public AssignAttributesResults assignAttributesResults(String assignType, String assignOperation, String groupPath,
             String attributeName) {
         return exec.execute(new AssignAttributesCommand()
@@ -327,15 +295,6 @@ public class GrouperApiService {
                 .assignPrivilegeName(privilegeName)
                 .assignSubjectLookup(lookup)
                 .assignAllowed(isAllowed)
-                .execute();
-    }
-
-    public WsGetMembershipsResults membershipsResults(String groupName,
-            WsSubjectLookup lookup) {
-
-        return new GcGetMemberships()
-                .addGroupName(groupName)
-                .addWsSubjectLookup(lookup)
                 .execute();
     }
 
@@ -366,54 +325,6 @@ public class GrouperApiService {
                 .execute();
     }
 
-    public WsGetMembersResults membersResults(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            List<String> groupPaths) {
-        GcGetMembers members = new GcGetMembers();
-
-        if (groupPaths != null && groupPaths.size() > 0) {
-            for (String path : groupPaths) {
-                members.addGroupName(path);
-            }
-        }
-
-        return members
-                .addSubjectAttributeName(subjectAttributeName)
-                .assignActAsSubject(lookup)
-                .assignIncludeSubjectDetail(true)
-                .execute();
-    }
-
-    public WsGetGroupsResults groupsResults(String uhIdentifier) {
-        WsStemLookup stemLookup = stemLookup(STEM);
-        StemScope stemScope = StemScope.ALL_IN_SUBTREE;
-
-        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
-            return new GcGetGroups()
-                    .addSubjectId(uhIdentifier)
-                    .assignWsStemLookup(stemLookup)
-                    .assignStemScope(stemScope)
-                    .execute();
-        }
-
-        return new GcGetGroups()
-                .addSubjectIdentifier(uhIdentifier)
-                .assignWsStemLookup(stemLookup)
-                .assignStemScope(stemScope)
-                .execute();
-    }
-
-    public WsGetSubjectsResults subjectsResults(WsSubjectLookup lookup) {
-        return new GcGetSubjects()
-                .addSubjectAttributeName(USERNAME)
-                .addSubjectAttributeName(COMPOSITE_NAME)
-                .addSubjectAttributeName(LAST_NAME)
-                .addSubjectAttributeName(FIRST_NAME)
-                .addSubjectAttributeName(UHUUID)
-                .addWsSubjectLookup(lookup)
-                .execute();
-    }
-
     public WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
 
@@ -423,21 +334,5 @@ public class GrouperApiService {
             wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
         }
         return wsSubjectLookup;
-    }
-
-    public WsStemLookup stemLookup(String stemName) {
-        return stemLookup(stemName, null);
-    }
-
-    public WsStemLookup stemLookup(String stemName, String stemUuid) {
-        return new WsStemLookup(stemName, stemUuid);
-    }
-
-    public WsAttributeAssignValue assignAttributeValue(String time) {
-
-        WsAttributeAssignValue dateTimeValue = new WsAttributeAssignValue();
-        dateTimeValue.setValueSystem(time);
-
-        return dateTimeValue;
     }
 }

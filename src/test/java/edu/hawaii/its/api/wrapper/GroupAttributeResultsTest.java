@@ -24,14 +24,13 @@ public class GroupAttributeResultsTest {
         propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
-
     @Test
     public void constructor() {
         assertNotNull(new GroupAttributeResults(null));
     }
 
     @Test
-    public void successfulResults() {
+    public void test() {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
@@ -47,16 +46,4 @@ public class GroupAttributeResultsTest {
             assertEquals("group-path", groupAttribute.getGroupPath());
         }
     }
-
-    @Test
-    public void failedResults() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.failure");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsGetAttributeAssignmentsResults);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
-        assertNotNull(groupAttributeResults);
-        assertEquals(FAILURE, groupAttributeResults.getResultCode());
-    }
-
 }

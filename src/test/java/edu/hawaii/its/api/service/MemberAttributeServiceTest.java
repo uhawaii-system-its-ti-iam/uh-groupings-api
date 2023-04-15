@@ -1,14 +1,10 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
@@ -17,18 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
-import org.junit.jupiter.api.BeforeEach;
-import edu.hawaii.its.api.util.PropertyLocator;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberAttributeServiceTest {
@@ -56,85 +43,6 @@ public class MemberAttributeServiceTest {
         assertNotNull(memberAttributeService);
     }
 
-    @Disabled
-    @Test
-    public void getMemberAttributesSubjectFound() {
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-
-        String json = propertyLocator.find("subject.found");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
-
-        Person person = memberAttributeService.getMemberAttributes(username, uid);
-        assertThat(person, is(notNullValue()));
-    }
-
-    @Disabled
-    @Test
-    public void getMemberAttributesSubjectNotFound() {
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-
-        String json = propertyLocator.find("subject.not.found");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
-
-        assertThrows(UhMemberNotFoundException.class,
-                () -> memberAttributeService.getMemberAttributes(username, uid));
-    }
-
-    @Disabled
-    @Test
-    public void getMemberAttributesNotAdminNotOwner() {
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER_FALSE"));
-
-        String json = propertyLocator.find("subject.found");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
-
-        assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMemberAttributes(username, uid));
-    }
-
-    @Disabled
-    @Test
-    public void getMemberAttributesAdminButNotOwner() {
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-
-        String json = propertyLocator.find("subject.found");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
-
-        Person person = memberAttributeService.getMemberAttributes(username, uid);
-        assertThat(person, is(notNullValue()));
-    }
-
-    @Disabled
-    @Test
-    public void getMemberAttributesOwnerButNotAdmin() {
-        given(grouperApiService.hasMemberResults(groupAdminPath, username))
-                .willReturn(makeWsHasMemberResults("IS_MEMBER"));
-        given(grouperApiService.hasMemberResults(groupOwnerPath, username))
-                .willReturn(makeWsHasMemberResults("NOT_IS_MEMBER"));
-
-        String json = propertyLocator.find("subject.found");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        given(grouperApiService.subjectsResults(any())).willReturn(wsGetSubjectsResults);
-
-        Person person = memberAttributeService.getMemberAttributes(username, uid);
-        assertThat(person, is(notNullValue()));
-    }
 
     @Test
     public void isUhUuid() {

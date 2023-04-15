@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
+import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public abstract class GrouperCommand<T> {
@@ -26,5 +27,13 @@ public abstract class GrouperCommand<T> {
         wsAttributeAssignValue.setValueSystem(value);
 
         return wsAttributeAssignValue;
+    }
+
+    public WsStemLookup stemLookup(String stemName) {
+        return stemLookup(stemName, null);
+    }
+
+    public WsStemLookup stemLookup(String stemName, String stemUuid) {
+        return new WsStemLookup(stemName, stemUuid);
     }
 }

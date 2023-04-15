@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.wrapper.*;
 
@@ -34,6 +35,13 @@ public class GroupingsService {
      */
     public List<String> groupingPaths() {
         return allGroupingPaths(TRIO);
+    }
+
+    public List<GroupingPath> allGroupingPaths() {
+        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(TRIO);
+        return groupAttributeResults.getGroups().stream()
+                .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription())).collect(
+                        Collectors.toList());
     }
 
     /**
@@ -74,7 +82,7 @@ public class GroupingsService {
     /**
      * A list of all grouping paths of groups containing the optAttribute.
      */
-    private List<String> allGroupingPaths(String optAttribute) {
+    public List<String> allGroupingPaths(String optAttribute) {
         GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(optAttribute);
         List<String> results = groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
                 .collect(Collectors.toList());
@@ -135,7 +143,7 @@ public class GroupingsService {
     /**
      * A list of all group paths, in which the uhIdentifier is listed..
      */
-    private List<String> allGroupPaths(String uhIdentifier) {
+    public List<String> allGroupPaths(String uhIdentifier) {
         List<Group> groups = grouperApiService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
     }

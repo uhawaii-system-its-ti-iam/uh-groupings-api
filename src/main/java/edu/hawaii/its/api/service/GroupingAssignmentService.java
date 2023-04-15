@@ -13,8 +13,8 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
-import edu.hawaii.its.api.wrapper.GroupsResults;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
@@ -160,7 +159,7 @@ public class GroupingAssignmentService {
 
         List<String> adminGrouping = Arrays.asList(GROUPING_ADMINS);
         Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
-        adminListsHolder.setAllGroupingPaths(allGroupingsPaths());
+        adminListsHolder.setAllGroupingPaths(groupingsService.allGroupingPaths());
         adminListsHolder.setAdminGroup(admin);
         return adminListsHolder;
     }
@@ -214,11 +213,9 @@ public class GroupingAssignmentService {
     // Sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping.
     public Grouping setGroupingAttributes(Grouping grouping) {
         logger.info("setGroupingAttributes; grouping: " + grouping + ";");
-
-        AttributeAssignmentsResults attributeAssignmentsResults = new AttributeAssignmentsResults(
-                grouperApiService.groupAttributeDefNames(ASSIGN_TYPE_GROUP, grouping.getPath()));
-        grouping.setOptInOn(attributeAssignmentsResults.isOptInOn());
-        grouping.setOptOutOn(attributeAssignmentsResults.isOptOutOn());
+        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResult(grouping.getPath());
+        grouping.setOptInOn(groupAttributeResults.isOptInOn());
+        grouping.setOptOutOn(groupAttributeResults.isOptOutOn());
 
         // Set the sync destinations.
         List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
@@ -228,42 +225,14 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * Return the list of groups that the user is in, searching by username or uhUuid.
-     */
-    public List<String> getGroupPaths(String ownerUsername, String uhIdentifier) {
-        logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";");
-
-        if (!ownerUsername.equals(uhIdentifier) && !memberService.isAdmin(ownerUsername)) {
-            return new ArrayList<>();
-        }
-        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
-        return groupsResults.groupPaths();
-    }
-
-    /**
-     * Return the list of groups that the user is in, searching by username or uhUuid
-     * and filtered by a given predicate (can be found in PathFilter)
-     */
-    public List<String> getGroupPaths(String ownerUsername, String uhIdentifier, Predicate<String> predicate) {
-        logger.info("getGroupPaths; uhIdentifier: " + uhIdentifier + ";" + "predicate: " + predicate + ";");
-
-        if (!ownerUsername.equals(uhIdentifier) && !memberService.isAdmin(ownerUsername)) {
-            return new ArrayList<>();
-        }
-        GroupsResults groupsResults = new GroupsResults(grouperApiService.groupsResults(uhIdentifier));
-        List<String> groupPaths = groupsResults.groupPaths();
-        return groupPaths.stream().filter(predicate).collect(Collectors.toList());
-    }
-
-    /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     public List<String> optOutGroupingsPaths(String owner, String optOutUid) {
         logger.info("optOutGroupingsPaths; owner: " + owner + "; optOutUid: " + optOutUid + ";");
 
-        List<String> includes = getGroupPaths(owner, optOutUid, pathHasInclude());
+        List<String> includes = groupingsService.groupPaths(optOutUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
-        List<String> optOutPaths = optableGroupings(OptType.OUT.value());
+        List<String> optOutPaths = groupingsService.optOutEnabledGroupingPaths();
         optOutPaths.retainAll(includes);
         return new ArrayList<>(new HashSet<>(optOutPaths));
     }
@@ -274,10 +243,10 @@ public class GroupingAssignmentService {
     public List<GroupingPath> optInGroupingPaths(String owner, String optInUid) {
         logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
 
-        List<String> includes = getGroupPaths(owner, optInUid, pathHasInclude());
+        List<String> includes = groupingsService.groupPaths(optInUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
 
-        List<String> optInPaths = optableGroupings(OptType.IN.value());
+        List<String> optInPaths = groupingsService.optInEnabledGroupingPaths();
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
@@ -294,18 +263,9 @@ public class GroupingAssignmentService {
         if (!optAttr.equals(OptType.IN.value()) && !optAttr.equals(OptType.OUT.value())) {
             throw new AccessDeniedException();
         }
-        AttributeAssignmentsResults attributeAssignmentsResults =
-                new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, optAttr));
-        return attributeAssignmentsResults.getOwnerGroupNames();
-    }
-
-    /**
-     * Helper - adminLists
-     */
-    public List<GroupingPath> allGroupingsPaths() {
-        AttributeAssignmentsResults attributeAssignmentsResults =
-                new AttributeAssignmentsResults(grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO));
-        return attributeAssignmentsResults.getGroupNamesAndDescriptions();
+        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(optAttr);
+        return groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
+                .collect(Collectors.toList());
     }
 
     public GroupingsGroupMembers groupingOwners(String currentUser, String groupingPath) {
