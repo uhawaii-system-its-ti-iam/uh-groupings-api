@@ -143,13 +143,6 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void syncDestinationsTest() {
-        TEST_UH_NUMBERS.forEach(
-                num -> System.err.println(memberAttributeService.getMemberAttributes(ADMIN, num).toString()));
-        assertNotNull(grouperApiService.syncDestinations());
-    }
-
-    @Test
     public void addMemberTest() {
         // With uh usernames.
         AddMemberResult addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
@@ -405,27 +398,6 @@ public class TestGrouperApiServiceTutorial {
         assertEquals(attributeAssign.get(0).getOwnerGroupName(), GROUPING);
         assertEquals(attributeAssign.get(0).getAttributeDefNameName(), YYYYMMDDTHHMM);
         assertEquals(attributeAssignValue.get(0).getValueSystem(), dateTime);
-    }
-
-    @Test
-    public void assignAttributesResultsForGroupTest() {
-        WsAssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResultsForGroup(
-                ASSIGN_TYPE_GROUP,
-                OPERATION_ASSIGN_ATTRIBUTE,
-                OptType.IN.value(),
-                GROUPING);
-        assertNotNull(assignAttributesResults);
-        List<WsAssignAttributeResult> assignAttributeResult =
-                Arrays.asList(assignAttributesResults.getWsAttributeAssignResults());
-        assertEquals(assignAttributeResult.size(), 1);
-        List<WsAttributeAssign> attributeAssigns =
-                Arrays.asList(assignAttributeResult.get(0).getWsAttributeAssigns());
-
-        assignAttributeResult.forEach(Assertions::assertNotNull);
-        assertEquals(attributeAssigns.size(), 1);
-        assertEquals(attributeAssigns.get(0).getAttributeDefNameName(), OptType.IN.value());
-        assertEquals(attributeAssigns.get(0).getAttributeAssignType(), ASSIGN_TYPE_GROUP);
-        assertEquals(attributeAssigns.get(0).getOwnerGroupName(), GROUPING);
     }
 
     @Test

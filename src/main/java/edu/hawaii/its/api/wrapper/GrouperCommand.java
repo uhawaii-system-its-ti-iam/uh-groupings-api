@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public abstract class GrouperCommand<T> {
@@ -17,5 +18,13 @@ public abstract class GrouperCommand<T> {
 
     protected boolean isUhUuid(String naming) {
         return naming != null && naming.matches("\\d+");
+    }
+
+    public WsAttributeAssignValue assignAttributeValue(String value) {
+
+        WsAttributeAssignValue wsAttributeAssignValue = new WsAttributeAssignValue();
+        wsAttributeAssignValue.setValueSystem(value);
+
+        return wsAttributeAssignValue;
     }
 }
