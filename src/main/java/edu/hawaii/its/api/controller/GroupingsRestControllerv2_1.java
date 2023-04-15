@@ -9,6 +9,7 @@ import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -71,6 +73,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private UpdateMemberService updateMemberService;
+
+    @Autowired
+    private AsyncJobsManager asyncJobsManager;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -163,10 +168,28 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<List<String>> invalidUhIdentifiers(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST membersAttributes...");
+        logger.info("Entered REST invalidUhIdentifiers...");
         return ResponseEntity
                 .ok()
                 .body(memberAttributeService.invalidUhIdentifiers(currentUser, uhIdentifiers));
+    }
+
+    /**
+     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers asynchronously.
+     */
+    @PostMapping(value = "/members/invalid/async")
+    @ResponseBody
+    public ResponseEntity<Integer> invalidUhIdentifiersAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST invalidUhIdentifiersAsync...");
+        CompletableFuture<List<String>> completableFuture =
+                memberAttributeService.invalidUhIdentifiersAsync(currentUser, uhIdentifiers);
+        Integer hashCode = completableFuture.hashCode();
+        asyncJobsManager.putJob(hashCode, completableFuture);
+        return ResponseEntity
+                .accepted()
+                .body(hashCode);
     }
 
     /**
@@ -183,6 +206,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Remove all members from the include group asynchronously.
+     */
+    @DeleteMapping(value = "/groupings/{groupingPath}/include/async")
+    public ResponseEntity<Integer> resetIncludeGroupAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath) {
+        logger.info("Entered REST resetIncludeGroupAsync...");
+        CompletableFuture<GroupingsReplaceGroupMembersResult> completableFuture =
+                updateMemberService.resetIncludeGroupAsync(currentUser, groupingPath);
+        Integer hashCode = completableFuture.hashCode();
+        asyncJobsManager.putJob(hashCode, completableFuture);
+        return ResponseEntity
+                .accepted()
+                .body(hashCode);
+    }
+
+    /**
      * Remove all members from the exclude group.
      */
     @DeleteMapping(value = "/groupings/{groupingPath}/exclude")
@@ -193,6 +233,23 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.resetExcludeGroup(currentUser, groupingPath));
+    }
+
+    /**
+     * Remove all members from the exclude group asynchronously.
+     */
+    @DeleteMapping(value = "/groupings/{groupingPath}/exclude/async")
+    public ResponseEntity<Integer> resetExcludeGroupAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath) {
+        logger.info("Entered REST resetExcludeGroupAsync...");
+        CompletableFuture<GroupingsReplaceGroupMembersResult> completableFuture =
+                updateMemberService.resetExcludeGroupAsync(currentUser, groupingPath);
+        Integer hashCode = completableFuture.hashCode();
+        asyncJobsManager.putJob(hashCode, completableFuture);
+        return ResponseEntity
+                .accepted()
+                .body(hashCode);
     }
 
     /**
@@ -318,6 +375,23 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Add a list of users to the include group of grouping at path asynchronously.
+     */
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/async")
+    public ResponseEntity<Integer> addIncludeMembersAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST addIncludeMembersAsync...");
+        CompletableFuture<GroupingsMoveMembersResult> completableFuture =
+                updateMemberService.addIncludeMembersAsync(currentUser, path, uhIdentifiers);
+        Integer hashCode = completableFuture.hashCode();
+        asyncJobsManager.putJob(hashCode, completableFuture);
+        return ResponseEntity
+                .accepted()
+                .body(hashCode);
+    }
+
+    /**
      * Add a list of users to the exclude group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
@@ -328,6 +402,23 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.addExcludeMembers(currentUser, path, uhIdentifiers));
+    }
+
+    /**
+     * Add a list of users to the exclude group of grouping at path asynchronously.
+     */
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/async")
+    public ResponseEntity<Integer> addExcludeMembersAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path, @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST addExcludeMembersAsync...");
+        CompletableFuture<GroupingsMoveMembersResult> completableFuture =
+                updateMemberService.addExcludeMembersAsync(currentUser, path, uhIdentifiers);
+        Integer hashCode = completableFuture.hashCode();
+        asyncJobsManager.putJob(hashCode, completableFuture);
+        return ResponseEntity
+                .accepted()
+                .body(hashCode);
     }
 
     /**
@@ -563,5 +654,16 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.isSoleOwner(currentUser, path, uhIdentifier));
+    }
+
+    /**
+     * Get result of async job.
+     */
+    @GetMapping(value = "/jobs/{jobId}")
+    public ResponseEntity getAsyncJobResult(@PathVariable Integer jobId) throws Exception {
+        logger.debug("Entered REST getAsyncJobResult...");
+        return ResponseEntity
+                .ok()
+                .body(asyncJobsManager.getJobResult(jobId));
     }
 }
