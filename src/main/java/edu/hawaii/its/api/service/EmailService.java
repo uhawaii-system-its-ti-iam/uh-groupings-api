@@ -18,8 +18,8 @@ import java.net.UnknownHostException;
 @Service
 public class EmailService {
 
-    @Value("${email.send.to}")
-    private String to;
+    @Value("#{'${email.send.recipient.override:}' == '' ? '${email.send.recipient}' : '${email.send.recipient.override:}'}")
+    private String recipient;
 
     @Value("${email.send.from}")
     private String from;
@@ -47,21 +47,24 @@ public class EmailService {
         String exceptionAsString = sw.toString();
 
         try {
-            ip = InetAddress.getLocalHost();
+            ip = this.getLocalHost();
             hostname = ip.getHostName();
         } catch (UnknownHostException f) {
-            f.printStackTrace();
+            logger.error("Error", f);
         }
 
         if (isEnabled) {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
+            msg.setTo(recipient);
             msg.setFrom(from);
             String text = "";
             String header = "UH Groupings API Error Response";
             text += "Cause of Response: The API threw an exception that has triggered the ErrorControllerAdvice. \n\n";
             text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
             text += "Host Name: " + hostname + ".\n";
+            if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
+                text += "Recipient overridden to: " + recipient + "\n";
+            }
             text += "----------------------------------------------------" + "\n\n";
             text += "API Stack Trace: \n\n" + exceptionAsString;
             msg.setText(text);
@@ -80,6 +83,14 @@ public class EmailService {
 
     public boolean isEnabled() {
         return isEnabled;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
+    }
+
+    public InetAddress getLocalHost() throws UnknownHostException {
+        return InetAddress.getLocalHost();
     }
 
 }
