@@ -21,6 +21,7 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
 import edu.hawaii.its.api.wrapper.Group;
@@ -32,10 +33,8 @@ import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,6 +91,9 @@ public class TestGrouperApiServiceTutorial {
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
+
+    @Value("${groupings.api.every_entity}")
+    private String EVERY_ENTITY;
 
     @Autowired
     GrouperApiService grouperApiService;
@@ -287,17 +289,16 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void grouperPrivilegesLiteResultTest() {
-        WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult =
-                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PrivilegeType.IN.value(),
-                        grouperApiService.subjectLookup(ADMIN), true);
-        assertNotNull(assignGrouperPrivilegesLiteResult);
-        WsGroup groups = assignGrouperPrivilegesLiteResult.getWsGroup();
-        assertNotNull(groups);
-
-        assertEquals(groups.getName(), GROUPING);
-        assertEquals(assignGrouperPrivilegesLiteResult.getPrivilegeName(), PrivilegeType.IN.value());
-        assertEquals(assignGrouperPrivilegesLiteResult.getWsSubject().getIdentifierLookup(), ADMIN);
+    public void assignGrouperPrivilegesLiteResult() {
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                grouperApiService.assignGrouperPrivilegesResult(GROUPING, PrivilegeType.IN.value(), ADMIN, true);
+        assertNotNull(assignGrouperPrivilegesResult);
+        Group group = assignGrouperPrivilegesResult.getGroup();
+        assertNotNull(group);
+        assertEquals(GROUPING, group.getGroupPath());
+        assertEquals(PrivilegeType.IN.value(), assignGrouperPrivilegesResult.getPrivilegeName());
+        assertEquals("access", assignGrouperPrivilegesResult.getPrivilegeType());
+        assertEquals(ADMIN, assignGrouperPrivilegesResult.getSubject().getUid());
     }
 
     @Test

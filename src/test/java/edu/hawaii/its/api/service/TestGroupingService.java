@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
+import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.util.ServiceTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
@@ -82,6 +84,15 @@ public class TestGroupingService extends ServiceTest {
     }
 
     @Test
+    public void getGroupingPaths() {
+        List<GroupingPath> groupingPaths = groupingsService.getGroupingPaths(
+                Arrays.asList(GROUPING, GROUPING_EXCLUDE, GROUPING_INCLUDE, GROUPING_OWNERS));
+        assertEquals(1, groupingPaths.size());
+        assertTrue(groupingPaths.stream().allMatch(
+                groupingPath -> groupingPath.getPath().equals(GROUPING) && groupingPath.getDescription() != null));
+    }
+
+    @Test
     public void ownedGroupingPaths() {
         List<String> results = groupingsService.ownedGroupingPaths(UH_UUID);
         assertTrue(results.stream().allMatch(onlyGroupingPaths()));
@@ -123,7 +134,7 @@ public class TestGroupingService extends ServiceTest {
         assertEquals(description, result.getUpdatedDescription());
         assertEquals(description, result.getCurrentDescription());
 
-       result = groupingsService.updateGroupingDescription(GROUPING, updatedDescription);
+        result = groupingsService.updateGroupingDescription(GROUPING, updatedDescription);
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());

@@ -13,13 +13,12 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -208,22 +207,10 @@ public class GroupAttributeService {
      * Helper - changeOptStatus
      */
     public GroupingsServiceResult assignGrouperPrivilege(String privilegeName, String groupName, boolean isSet) {
-
-        logger.info("assignGrouperPrivilege; group: " + groupName
-                + "; privilegeName: " + privilegeName
-                + " set: " + isSet + ";");
-
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(EVERY_ENTITY);
         String action = "set " + privilegeName + " " + isSet + " for " + EVERY_ENTITY + " in " + groupName;
-
-        WsAssignGrouperPrivilegesLiteResult grouperPrivilegesLiteResult =
-                grouperApiService.assignGrouperPrivilegesLiteResult(
-                        groupName,
-                        privilegeName,
-                        lookup,
-                        isSet);
-
-        return makeGroupingsServiceResult(grouperPrivilegesLiteResult, action);
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                grouperApiService.assignGrouperPrivilegesResult(groupName, privilegeName, EVERY_ENTITY, isSet);
+        return makeGroupingsServiceResult(assignGrouperPrivilegesResult.getResultCode(), action);
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.

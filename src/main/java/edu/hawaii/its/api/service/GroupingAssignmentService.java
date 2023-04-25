@@ -10,10 +10,8 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
@@ -237,6 +235,7 @@ public class GroupingAssignmentService {
         return new ArrayList<>(new HashSet<>(optOutPaths));
     }
 
+
     /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
@@ -250,22 +249,7 @@ public class GroupingAssignmentService {
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
-        List<GroupingPath> optInGroupingPaths = optInPaths.parallelStream().map(path -> new GroupingPath(path,
-                groupingsService.getGroupingDescription(path))).collect(Collectors.toList());
-
-        return optInGroupingPaths;
-    }
-
-    /**
-     * List grouping paths than can be opted into or out of.
-     */
-    public List<String> optableGroupings(String optAttr) {
-        if (!optAttr.equals(OptType.IN.value()) && !optAttr.equals(OptType.OUT.value())) {
-            throw new AccessDeniedException();
-        }
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(optAttr);
-        return groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
-                .collect(Collectors.toList());
+        return groupingsService.getGroupingPaths(optInPaths);
     }
 
     public GroupingsGroupMembers groupingOwners(String currentUser, String groupingPath) {

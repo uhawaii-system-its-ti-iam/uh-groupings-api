@@ -5,6 +5,8 @@ import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesCommand;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesCommand;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesCommand;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsCommand;
@@ -26,9 +28,7 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.api.GcAssignGrouperPrivilegesLite;
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
@@ -285,17 +285,17 @@ public class GrouperApiService {
                 .addAttribute(attributeName));
     }
 
-    public WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult(String groupName,
-            String privilegeName,
-            WsSubjectLookup lookup,
-            boolean isAllowed) {
-
-        return new GcAssignGrouperPrivilegesLite()
-                .assignGroupName(groupName)
-                .assignPrivilegeName(privilegeName)
-                .assignSubjectLookup(lookup)
-                .assignAllowed(isAllowed)
-                .execute();
+    /**
+     * Change a group attribute's privilege to true or false.
+     */
+    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String groupPath, String privilegeName,
+            String uhIdentifier, boolean isAllowed) {
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult = exec.execute(new AssignGrouperPrivilegesCommand()
+                .setGroupPath(groupPath)
+                .setPrivilege(privilegeName)
+                .setSubjectLookup(uhIdentifier)
+                .setIsAllowed(isAllowed));
+        return assignGrouperPrivilegesResult;
     }
 
     public WsGetMembersResults membersResults(String subjectAttributeName,
