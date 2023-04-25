@@ -9,6 +9,7 @@ import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
@@ -24,7 +25,6 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +95,9 @@ public class TestGrouperApiService {
 
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
+
+    @Value("${groupings.api.every_entity}")
+    private String EVERY_ENTITY;
 
     @Autowired
     GrouperApiService grouperApiService;
@@ -543,11 +546,11 @@ public class TestGrouperApiService {
     }
 
     @Test
-    public void grouperPrivilegesLiteResultTest() {
-        WsAssignGrouperPrivilegesLiteResult assignGrouperPrivilegesLiteResult =
-                grouperApiService.assignGrouperPrivilegesLiteResult(GROUPING, PrivilegeType.IN.value(),
-                        grouperApiService.subjectLookup(ADMIN), true);
-        assertNotNull(assignGrouperPrivilegesLiteResult);
+    public void assignGrouperPrivilegesLiteResult() {
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                grouperApiService.assignGrouperPrivilegesResult(GROUPING, PrivilegeType.IN.value(), ADMIN, true);
+        assertNotNull(assignGrouperPrivilegesResult);
+
     }
 
     @Test
