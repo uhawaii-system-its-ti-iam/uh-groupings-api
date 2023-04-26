@@ -1,13 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.exception.PasswordFoundException;
-
-import org.springframework.stereotype.Service;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Service;
+
+import edu.hawaii.its.api.exception.PasswordFoundException;
 
 @Service
 public class PasswordScanner {
