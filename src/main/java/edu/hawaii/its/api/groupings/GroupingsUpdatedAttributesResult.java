@@ -2,10 +2,10 @@ package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 
-public class GroupingsUpdatedAttributeResult implements GroupingsResult {
+public class GroupingsUpdatedAttributesResult implements GroupingsResult {
     private final AssignAttributesResults assignAttributesResults;
 
-    public GroupingsUpdatedAttributeResult(AssignAttributesResults assignAttributesResults) {
+    public GroupingsUpdatedAttributesResult(AssignAttributesResults assignAttributesResults) {
         if (assignAttributesResults == null) {
             this.assignAttributesResults = new AssignAttributesResults();
         } else {
@@ -13,7 +13,7 @@ public class GroupingsUpdatedAttributeResult implements GroupingsResult {
         }
     }
 
-    public GroupingsUpdatedAttributeResult() {
+    public GroupingsUpdatedAttributesResult() {
         this.assignAttributesResults = new AssignAttributesResults();
     }
 

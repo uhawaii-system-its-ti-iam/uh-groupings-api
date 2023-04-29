@@ -56,7 +56,6 @@ public class HasMembersResultsTest {
         assertEquals("SUCCESS", hasMembersResults.getResultCode());
         assertEquals("group-path", hasMembersResults.getGroupPath());
         assertNotNull(hasMembersResults.getResults());
-        assertNotNull(hasMembersResults.getResult());
 
         int i = 0;
         for (HasMemberResult result : hasMembersResults.getResults()) {
@@ -90,8 +89,8 @@ public class HasMembersResultsTest {
         assertEquals("SUCCESS", hasMembersResults.getResultCode());
         assertEquals("group-path", hasMembersResults.getGroupPath());
         assertNotNull(hasMembersResults.getResults());
-        assertNotNull(hasMembersResults.getResult());
-        assertEquals("IS_NOT_MEMBER", hasMembersResults.getResult().getResultCode());
+        assertNotNull(hasMembersResults.getResults().get(0));
+        assertEquals("IS_NOT_MEMBER", hasMembersResults.getResults().get(0).getResultCode());
     }
 
     @Test
@@ -103,7 +102,6 @@ public class HasMembersResultsTest {
         assertEquals("FAILURE", hasMembersResults.getResultCode());
         assertEquals("", hasMembersResults.getGroupPath());
         assertNotNull(hasMembersResults.getResults());
-        assertNotNull(hasMembersResults.getResult());
     }
 
     @Test
@@ -113,7 +111,7 @@ public class HasMembersResultsTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         assertEquals("FAILURE", hasMembersResults.getGroup().getResultCode());
-        assertEquals("" , hasMembersResults.getGroupPath());
+        assertEquals("", hasMembersResults.getGroupPath());
     }
 
 }

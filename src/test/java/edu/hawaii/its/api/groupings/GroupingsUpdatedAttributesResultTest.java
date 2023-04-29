@@ -11,7 +11,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsUpdatedAttributeResultTest {
+public class GroupingsUpdatedAttributesResultTest {
 
     private PropertyLocator propertyLocator;
 
@@ -22,15 +22,15 @@ public class GroupingsUpdatedAttributeResultTest {
 
     @Test
     public void test() {
-        assertNotNull(new GroupingsUpdatedAttributeResult());
+        assertNotNull(new GroupingsUpdatedAttributesResult());
         String json = propertyLocator.find("ws.assign.attributes.results.turn.off.opt.in.success");
         WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
         AssignAttributesResults assignAttributesResults = new AssignAttributesResults(wsAssignAttributesResults);
-        GroupingsUpdatedAttributeResult groupingsUpdatedAttributeResult =
-                new GroupingsUpdatedAttributeResult(assignAttributesResults);
-        assertNotNull(groupingsUpdatedAttributeResult);
-        assertEquals("SUCCESS", groupingsUpdatedAttributeResult.getResultCode());
-        assertEquals("group-path", groupingsUpdatedAttributeResult.getGroupPath());
+        GroupingsUpdatedAttributesResult groupingsUpdatedAttributesResult =
+                new GroupingsUpdatedAttributesResult(assignAttributesResults);
+        assertNotNull(groupingsUpdatedAttributesResult);
+        assertEquals("SUCCESS", groupingsUpdatedAttributesResult.getResultCode());
+        assertEquals("group-path", groupingsUpdatedAttributesResult.getGroupPath());
 
     }
 }

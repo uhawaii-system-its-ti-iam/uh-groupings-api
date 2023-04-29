@@ -14,8 +14,6 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -96,7 +94,6 @@ public class TestGroupAttributeService {
 
     private Person testPerson;
 
-
     @BeforeEach
     public void init() {
         // Save the starting attribute settings for the test grouping.
@@ -167,13 +164,6 @@ public class TestGroupAttributeService {
 
     @Test
     public void getSyncDestinationsTest() {
-        // Should throw and exception if a grouping with an invalid path is passed.
-        try {
-            groupAttributeService.getSyncDestinations(new Grouping("bogus-path"));
-            fail("Should throw and exception if a grouping with an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
 
         // Should return a list of sync destinations with the proper fields set.
         List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(new Grouping(GROUPING));
@@ -499,7 +489,6 @@ public class TestGroupAttributeService {
         assertEquals(SUCCESS_NOT_ALLOWED, optOutResult.getResultCode());
     }
 
-
     @Test
     public void changeGroupAttributeStatus() {
         String testUid = testPerson.getUsername();
@@ -556,20 +545,6 @@ public class TestGroupAttributeService {
 
     @Test
     public void isGroupAttributeTest() {
-        // Should throw an exception if an invalid path is passed.
-        try {
-            groupAttributeService.isGroupAttribute("bogus-path", OptType.IN.value());
-            fail("Should throw an exception if an invalid path is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains(GROUP_NOT_FOUND));
-        }
-        // Should throw an exception if an invalid attribute is passed.
-        try {
-            groupAttributeService.isGroupAttribute(GROUPING, "bogus-attribute");
-            fail("Should throw an exception if an invalid attribute is passed.");
-        } catch (GcWebServiceError e) {
-            assertTrue(e.getMessage().contains("ATTRIBUTE_DEF_NAME_NOT_FOUND"));
-        }
 
         // Attributes should be set to false.
         assertFalse(groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));

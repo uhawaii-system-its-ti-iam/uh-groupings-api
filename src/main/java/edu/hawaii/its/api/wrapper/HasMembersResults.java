@@ -46,12 +46,4 @@ public class HasMembersResults extends Results {
         }
         return new Group(wsGroup);
     }
-
-    public HasMemberResult getResult() {
-        if (getResults().isEmpty()) {
-            return new HasMemberResult();
-        }
-        return getResults().get(0);
-    }
-
 }

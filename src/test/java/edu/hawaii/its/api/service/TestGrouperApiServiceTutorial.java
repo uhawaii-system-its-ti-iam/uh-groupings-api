@@ -19,44 +19,35 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.AttributesResult;
+import edu.hawaii.its.api.wrapper.GetGroupsResults;
+import edu.hawaii.its.api.wrapper.Group;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembershipsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("integrationTest")
@@ -194,210 +185,105 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void groupsOfTest() {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.groupsOf(ASSIGN_TYPE_GROUP, TRIO);
-        assertNotNull(attributeAssignmentsResults);
-        List<WsGroup> groups = Arrays.asList(attributeAssignmentsResults.getWsGroups());
-        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(attributeAssignmentsResults.getWsAttributeDefNames());
-
-        groups.forEach(Assertions::assertNotNull);
-        attributeAssigns.forEach(Assertions::assertNotNull);
-        attributeDefNames.forEach(Assertions::assertNotNull);
-        assertEquals(attributeDefNames.size(), 1);
-        assertEquals(attributeDefNames.get(0).getName(), TRIO);
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getAttributeAssignType(), ASSIGN_TYPE_GROUP));
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getAttributeDefNameName(), TRIO));
-    }
-
-    @Test
-    public void attributeAssignsTest() {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.attributeAssigns(ASSIGN_TYPE_GROUP, TRIO, OptType.IN.value());
-        assertNotNull(attributeAssignmentsResults);
-        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(attributeAssignmentsResults.getWsAttributeDefNames());
-
-        attributeAssigns.forEach(Assertions::assertNotNull);
-        attributeDefNames.forEach(Assertions::assertNotNull);
-        assertEquals(attributeDefNames.size(), 2);
-        attributeDefNames.forEach(
+    public void groupAttributeResults() {
+        // All group with these attributes
+        GroupAttributeResults groupAttributeResults =
+                grouperApiService.groupAttributeResults(Arrays.asList(TRIO, OptType.IN.value()));
+        assertNotNull(groupAttributeResults);
+        List<GroupAttribute> groupAttributes = groupAttributeResults.getGroupAttributes();
+        List<AttributesResult> attributesResults = groupAttributeResults.getAttributesResults();
+        groupAttributes.forEach(Assertions::assertNotNull);
+        attributesResults.forEach(Assertions::assertNotNull);
+        assertEquals(attributesResults.size(), 2);
+        attributesResults.forEach(
                 defName -> assertTrue(defName.getName().equals(TRIO) || defName.getName().equals(OptType.IN.value())));
-        attributeAssigns.forEach(
-                assignments -> assertEquals(ASSIGN_TYPE_GROUP, assignments.getAttributeAssignType()));
-        attributeAssigns.forEach(
-                assignments -> assertTrue(assignments.getAttributeDefNameName().equals(TRIO) ||
-                        assignments.getAttributeDefNameName().equals(OptType.IN.value())));
-    }
+        groupAttributes.forEach(groupAttribute -> assertEquals(ASSIGN_TYPE_GROUP, groupAttribute.getAssignType()));
+        groupAttributes.forEach(groupAttribute -> assertTrue(groupAttribute.getAttributeName().equals(TRIO) ||
+                groupAttribute.getAttributeName().equals(OptType.IN.value())));
 
-    @Test
-    public void groupAttributeDefNamesTest() {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.groupAttributeDefNames(ASSIGN_TYPE_GROUP, GROUPING);
-        assertNotNull(attributeAssignmentsResults);
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(attributeAssignmentsResults.getWsAttributeDefNames());
-        List<WsAttributeAssign> attributeAssigns =
-                Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
+        // Attributes of a single grouping.
+        groupAttributeResults = grouperApiService.groupAttributeResult(GROUPING);
+        assertNotNull(groupAttributes);
+        groupAttributes = groupAttributeResults.getGroupAttributes();
+        attributesResults = groupAttributeResults.getAttributesResults();
+        groupAttributes.forEach(Assertions::assertNotNull);
+        attributesResults.forEach(Assertions::assertNotNull);
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getAssignType(), ASSIGN_TYPE_GROUP));
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getGroupPath(), GROUPING));
 
-        attributeDefNames.forEach(Assertions::assertNotNull);
-        attributeAssigns.forEach(Assertions::assertNotNull);
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getAttributeAssignType(), ASSIGN_TYPE_GROUP));
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getOwnerGroupName(), GROUPING));
-    }
+        // All Groups and there attributes.
+        groupAttributeResults = grouperApiService.groupAttributeResults(TRIO);
+        assertNotNull(groupAttributeResults);
+        List<Group> groups = groupAttributeResults.getGroups();
+        groupAttributes = groupAttributeResults.getGroupAttributes();
+        attributesResults = groupAttributeResults.getAttributesResults();
+        groupAttributes.forEach(Assertions::assertNotNull);
+        attributesResults.forEach(Assertions::assertNotNull);
+        groups.forEach(Assertions::assertNotNull);
+        assertEquals(attributesResults.size(), 1);
+        assertEquals(groupAttributes.get(0).getAttributeName(), TRIO);
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getAssignType(), ASSIGN_TYPE_GROUP));
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getAttributeName(), TRIO));
 
-    @Test
-    public void groupAttributeAssignsTest() {
-        WsGetAttributeAssignmentsResults attributeAssignmentsResults =
-                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, TRIO, GROUPING);
-        assertNotNull(attributeAssignmentsResults);
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(attributeAssignmentsResults.getWsAttributeDefNames());
-        List<WsAttributeAssign> attributeAssigns = Arrays.asList(attributeAssignmentsResults.getWsAttributeAssigns());
-
-        attributeDefNames.forEach(Assertions::assertNotNull);
-        attributeAssigns.forEach(Assertions::assertNotNull);
-        assertEquals(attributeDefNames.size(), 1);
-        assertEquals(attributeDefNames.get(0).getName(), TRIO);
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getAttributeAssignType(), ASSIGN_TYPE_GROUP));
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getAttributeDefNameName(), TRIO));
-        attributeAssigns.forEach(assignments -> assertEquals(assignments.getOwnerGroupName(), GROUPING));
+        // Check if a group has a certain attribute.
+        groupAttributeResults = grouperApiService.groupAttributeResults(TRIO, GROUPING);
+        assertNotNull(groupAttributeResults);
+        groupAttributes = groupAttributeResults.getGroupAttributes();
+        attributesResults = groupAttributeResults.getAttributesResults();
+        groupAttributes.forEach(Assertions::assertNotNull);
+        attributesResults.forEach(Assertions::assertNotNull);
+        assertEquals(attributesResults.size(), 1);
+        assertEquals(attributesResults.get(0).getName(), TRIO);
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getAssignType(), ASSIGN_TYPE_GROUP));
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getAttributeName(), TRIO));
+        groupAttributes.forEach(groupAttribute -> assertEquals(groupAttribute.getGroupPath(), GROUPING));
     }
 
     @Test
     public void hasMemberResultsTest() {
         // Using uh numbers (one that is a member)
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
-        WsHasMemberResults hasMemberResultsIsMember =
+        HasMembersResults hasMemberResultsIsMember =
                 grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
         assertNotNull(hasMemberResultsIsMember);
-        List<WsHasMemberResult> memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
+        List<HasMemberResult> memberResultsIsMember = hasMemberResultsIsMember.getResults();
+        assertEquals(hasMemberResultsIsMember.getGroupPath(), GROUPING_INCLUDE);
         assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
+        assertEquals(memberResultsIsMember.get(0).getUhUuid(), TEST_UH_NUMBERS.get(0));
+        assertEquals(memberResultsIsMember.get(0).getResultCode(), "IS_MEMBER");
         // Using uh numbers (one that is not a member)
-        WsHasMemberResults hasMemberResultsNonMember =
+        HasMembersResults hasMemberResultsNonMember =
                 grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(1));
         assertNotNull(hasMemberResultsNonMember);
-        List<WsHasMemberResult> memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
+        List<HasMemberResult> memberResultsNonMember = hasMemberResultsNonMember.getResults();
+        assertEquals(hasMemberResultsNonMember.getGroupPath(), GROUPING_INCLUDE);
         assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
+        assertEquals(memberResultsNonMember.get(0).getUhUuid(), TEST_UH_NUMBERS.get(1));
+        assertEquals(memberResultsNonMember.get(0).getResultCode(), "IS_NOT_MEMBER");
 
         // Using uh usernames (one that is a member)
         grouperApiService.addMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
         hasMemberResultsIsMember =
                 grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
         assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
+        memberResultsIsMember = hasMemberResultsIsMember.getResults();
+        assertEquals(hasMemberResultsIsMember.getGroupPath(), GROUPING_INCLUDE);
         assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
+        assertEquals(memberResultsIsMember.get(0).getUid(), TEST_USERNAMES.get(0));
+        assertEquals(memberResultsIsMember.get(0).getResultCode(), "IS_MEMBER");
         // Using uh usernames (one that is not a member)
         hasMemberResultsNonMember =
                 grouperApiService.hasMemberResults(GROUPING_INCLUDE, TEST_USERNAMES.get(1));
         assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
+        memberResultsNonMember = hasMemberResultsNonMember.getResults();
+        assertEquals(hasMemberResultsNonMember.getGroupPath(), GROUPING_INCLUDE);
         assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
-
-        // Using uh number with a person object (one that is a member)
-        hasMemberResultsIsMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), null));
-        assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh number with a person object (one that is not a member)
-        hasMemberResultsNonMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(1), null));
-        assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
-
-        // Using uh username with a person object (one that is a member)
-        hasMemberResultsIsMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), TEST_USERNAMES.get(0)));
-        assertNotNull(hasMemberResultsIsMember);
-        memberResultsIsMember = Arrays.asList(hasMemberResultsIsMember.getResults());
-        assertEquals(hasMemberResultsIsMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsIsMember.size(), 1);
-        assertEquals(memberResultsIsMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(0));
-        assertEquals(memberResultsIsMember.get(0).getResultMetadata().getResultCode(), "IS_MEMBER");
-        // Using uh username with a person object (one that is not a member)
-        hasMemberResultsNonMember = grouperApiService.hasMemberResults(
-                GROUPING_INCLUDE, new Person(null, TEST_UH_NUMBERS.get(0), TEST_USERNAMES.get(1)));
-        assertNotNull(hasMemberResultsNonMember);
-        memberResultsNonMember = Arrays.asList(hasMemberResultsNonMember.getResults());
-        assertEquals(hasMemberResultsNonMember.getWsGroup().getName(), GROUPING_INCLUDE);
-        assertEquals(memberResultsNonMember.size(), 1);
-        assertEquals(memberResultsNonMember.get(0).getWsSubject().getId(), TEST_USERNAMES.get(1));
-        assertEquals(memberResultsNonMember.get(0).getResultMetadata().getResultCode(), "IS_NOT_MEMBER");
-
-        try {
-            grouperApiService.hasMemberResults(GROUPING_INCLUDE, new Person(null, null, null)).getResults();
-        } catch (IllegalArgumentException e) {
-            assertEquals("The person is required to have either a username or a uuid", e.getMessage());
-        }
+        assertEquals(memberResultsNonMember.get(0).getUid(), TEST_USERNAMES.get(1));
+        assertEquals(memberResultsNonMember.get(0).getResultCode(), "IS_NOT_MEMBER");
 
         // cleanup
         grouperApiService.removeMember(GROUPING_INCLUDE, TEST_UH_NUMBERS.get(0));
         grouperApiService.removeMember(GROUPING_INCLUDE, TEST_USERNAMES.get(0));
-    }
-
-    @Test
-    public void assignAttributesResultsTest() {
-        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
-        WsAttributeAssignValue wsAttributeAssignValue = grouperApiService.assignAttributeValue(dateTime);
-        WsAssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
-                ASSIGN_TYPE_GROUP,
-                OPERATION_ASSIGN_ATTRIBUTE,
-                GROUPING,
-                YYYYMMDDTHHMM,
-                OPERATION_REPLACE_VALUES,
-                wsAttributeAssignValue);
-        assertNotNull(assignAttributesResults);
-
-        // attributeDefNames
-        List<WsAttributeDefName> attributeDefNames =
-                Arrays.asList(assignAttributesResults.getWsAttributeDefNames());
-        attributeDefNames.forEach(Assertions::assertNotNull);
-        assertEquals(attributeDefNames.size(), 1);
-
-        List<WsAssignAttributeResult> assignAttributeResult =
-                Arrays.asList(assignAttributesResults.getWsAttributeAssignResults());
-        assignAttributeResult.forEach(Assertions::assertNotNull);
-        assertEquals(assignAttributeResult.size(), 1);
-
-        // attribute assignments
-        List<WsAttributeAssign> attributeAssign =
-                Arrays.asList(assignAttributeResult.get(0).getWsAttributeAssigns());
-        attributeAssign.forEach(Assertions::assertNotNull);
-        assertEquals(attributeAssign.size(), 1);
-
-        // values of the attribute assignments
-        List<WsAttributeAssignValue> attributeAssignValue =
-                Arrays.asList(attributeAssign.get(0).getWsAttributeAssignValues());
-        assertEquals(attributeAssignValue.size(), 1);
-
-        assertEquals(attributeDefNames.get(0).getName(), YYYYMMDDTHHMM);
-        assertEquals(attributeAssign.get(0).getAttributeAssignType(), ASSIGN_TYPE_GROUP);
-        assertEquals(attributeAssign.get(0).getOwnerGroupName(), GROUPING);
-        assertEquals(attributeAssign.get(0).getAttributeDefNameName(), YYYYMMDDTHHMM);
-        assertEquals(attributeAssignValue.get(0).getValueSystem(), dateTime);
     }
 
     @Test
@@ -412,13 +298,6 @@ public class TestGrouperApiServiceTutorial {
         assertEquals(groups.getName(), GROUPING);
         assertEquals(assignGrouperPrivilegesLiteResult.getPrivilegeName(), PrivilegeType.IN.value());
         assertEquals(assignGrouperPrivilegesLiteResult.getWsSubject().getIdentifierLookup(), ADMIN);
-    }
-
-    @Test
-    public void membershipsResultsTest() {
-        WsGetMembershipsResults membershipsResults =
-                grouperApiService.membershipsResults(GROUPING, grouperApiService.subjectLookup(ADMIN));
-        assertNotNull(membershipsResults);
     }
 
     @Test
@@ -441,68 +320,28 @@ public class TestGrouperApiServiceTutorial {
                 results -> assertTrue(results.getWsGroup().getName().equals(GROUPING_INCLUDE) ||
                         results.getWsGroup().getName().equals(GROUPING_EXCLUDE)));
         assertEquals(subjectAttributeNames.get(0), ASSIGN_TYPE_GROUP);
-
-        // Overloaded membersResults test, only takes three parameters
-        membersResults = grouperApiService.membersResults(
-                ASSIGN_TYPE_GROUP,
-                grouperApiService.subjectLookup(ADMIN),
-                Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE)
-        );
-        assertNotNull(membersResults);
-        getMembersResult = Arrays.asList(membersResults.getResults());
-        subjectAttributeNames = Arrays.asList(membersResults.getSubjectAttributeNames());
-
-        assertEquals(getMembersResult.size(), 2);
-        getMembersResult.forEach(
-                results -> assertTrue(results.getWsGroup().getName().equals(GROUPING_INCLUDE) ||
-                        results.getWsGroup().getName().equals(GROUPING_EXCLUDE)));
-        assertEquals(subjectAttributeNames.get(0), ASSIGN_TYPE_GROUP);
     }
 
     @Test
     public void groupsResultsTest() {
-        WsGetGroupsResults uhUsernameResults =
-                grouperApiService.groupsResults(TEST_USERNAMES.get(0));
-        WsGetGroupsResults uhNumberResults =
-                grouperApiService.groupsResults(TEST_UH_NUMBERS.get(0));
+        GetGroupsResults getGroupsResultsUserNames = grouperApiService.getGroupsResults(TEST_USERNAMES.get(0));
+        GetGroupsResults getGroupsResultsNumbers = grouperApiService.getGroupsResults(TEST_UH_NUMBERS.get(0));
+        assertNotNull(getGroupsResultsNumbers);
+        assertFalse(getGroupsResultsNumbers.getGroups().isEmpty());
+        assertEquals(TEST_UH_NUMBERS.get(0), getGroupsResultsNumbers.getSubject().getUhUuid());
 
-        List<WsGetGroupsResult> getGroupsResultUsername = Arrays.asList(uhUsernameResults.getResults());
-        assertEquals(getGroupsResultUsername.size(), 1);
-        assertEquals(getGroupsResultUsername.get(0).getWsSubject().getId(), TEST_USERNAMES.get(0));
+        assertNotNull(getGroupsResultsUserNames);
+        assertFalse(getGroupsResultsUserNames.getGroups().isEmpty());
+        assertEquals(TEST_USERNAMES.get(0), getGroupsResultsUserNames.getSubject().getUid());
 
-        List<WsGetGroupsResult> getGroupsResultId = Arrays.asList(uhNumberResults.getResults());
-        assertEquals(getGroupsResultId.size(), 1);
-        assertEquals(getGroupsResultId.get(0).getWsSubject().getId(), TEST_UH_NUMBERS.get(0));
     }
 
     @Test
     public void subjectsResultsTest() {
-        WsGetSubjectsResults subjectsResults =
-                grouperApiService.subjectsResults(grouperApiService.subjectLookup(ADMIN));
-        assertNotNull(subjectsResults);
-        List<WsSubject> subject = Arrays.asList(subjectsResults.getWsSubjects());
-        assertEquals(subject.size(), 1);
-        assertEquals(subject.get(0).getIdentifierLookup(), ADMIN);
+        SubjectsResults subjectsResults = grouperApiService.getSubjects(ADMIN);
+        List<Subject> subjects = subjectsResults.getSubjects();
+        assertEquals(1, subjects.size());
+        assertEquals(ADMIN, subjects.get(0).getUid());
     }
 
-    @Test
-    public void subjectLookupTest() {
-        WsSubjectLookup subjectLookup = grouperApiService.subjectLookup(TEST_USERNAMES.get(0));
-        assertEquals(TEST_USERNAMES.get(0), subjectLookup.getSubjectIdentifier());
-        assertNull(subjectLookup.getSubjectId());
-        assertNull(subjectLookup.getSubjectSourceId());
-
-        subjectLookup = grouperApiService.subjectLookup(TEST_UH_NUMBERS.get(0));
-        assertEquals(TEST_UH_NUMBERS.get(0), subjectLookup.getSubjectId());
-        assertNull(subjectLookup.getSubjectIdentifier());
-        assertNull(subjectLookup.getSubjectSourceId());
-    }
-
-    @Test
-    public void assignAttributeValueTest() {
-        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
-        WsAttributeAssignValue attributeAssignValue = grouperApiService.assignAttributeValue(dateTime);
-        assertNotNull(attributeAssignValue);
-        assertEquals(attributeAssignValue.getValueSystem(), dateTime);
-    }
 }

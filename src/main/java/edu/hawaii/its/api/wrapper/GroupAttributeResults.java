@@ -1,43 +1,84 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.hawaii.its.api.type.OptType;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GroupAttributeResults extends Results {
     private final WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults;
-    private final List<GroupAttribute> groupAttributes;
 
     public GroupAttributeResults(WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults) {
-        groupAttributes = new ArrayList<>();
         if (wsGetAttributeAssignmentsResults == null) {
             this.wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
         } else {
             this.wsGetAttributeAssignmentsResults = wsGetAttributeAssignmentsResults;
-            setGroupAttributes();
         }
+    }
+
+    public GroupAttributeResults() {
+        this.wsGetAttributeAssignmentsResults = new WsGetAttributeAssignmentsResults();
     }
 
     @Override
     public String getResultCode() {
-        return (groupAttributes.isEmpty()) ? "FAILURE" : "SUCCESS";
+        return this.wsGetAttributeAssignmentsResults.getResultMetadata().getResultCode();
     }
 
     public List<GroupAttribute> getGroupAttributes() {
+        WsAttributeAssign[] wsAttributeAssigns = wsGetAttributeAssignmentsResults.getWsAttributeAssigns();
+        List<GroupAttribute> groupAttributes = new ArrayList<>();
+        if (!isEmpty(wsAttributeAssigns)) {
+            for (WsAttributeAssign wsAttributeAssign : wsAttributeAssigns) {
+                groupAttributes.add(new GroupAttribute(wsAttributeAssign));
+            }
+        }
         return groupAttributes;
     }
 
-    private void setGroupAttributes() {
-        WsAttributeAssign[] wsAttributeAssigns = wsGetAttributeAssignmentsResults.getWsAttributeAssigns();
-        if (isEmpty(wsAttributeAssigns)) {
-            return;
+    public List<Group> getGroups() {
+        WsGroup[] wsGroups = wsGetAttributeAssignmentsResults.getWsGroups();
+        List<Group> groups = new ArrayList<>();
+        if (!isEmpty(wsGroups)) {
+            for (WsGroup wsGroup : wsGroups) {
+                groups.add(new Group(wsGroup));
+            }
         }
+        return groups;
+    }
 
-        for (WsAttributeAssign wsAttributeAssign : wsAttributeAssigns) {
-            groupAttributes.add(new GroupAttribute(wsAttributeAssign));
+    public List<AttributesResult> getAttributesResults() {
+        WsAttributeDefName[] wsAttributeDefNames = wsGetAttributeAssignmentsResults.getWsAttributeDefNames();
+        List<AttributesResult> attributesResults = new ArrayList<>();
+        if (!isEmpty(wsAttributeDefNames)) {
+            for (WsAttributeDefName wsAttributeDefName : wsAttributeDefNames) {
+                attributesResults.add(new AttributesResult(wsAttributeDefName));
+            }
         }
+        return attributesResults;
+    }
 
+    public boolean isOptInOn() {
+        return isOptOn(OptType.IN.value());
+
+    }
+
+    public boolean isOptOutOn() {
+        return isOptOn(OptType.OUT.value());
+    }
+
+    public boolean isOptOn(String optAttributeValue) {
+        List<AttributesResult> attributesResults = getAttributesResults();
+        for (AttributesResult attributesResult : attributesResults) {
+            if (attributesResult.getName().equals(optAttributeValue)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

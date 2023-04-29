@@ -347,58 +347,11 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void allGroupingsPathsTest() {
-        List<GroupingPath> allGroupingsPaths = groupingAssignmentService.allGroupingsPaths();
-        assertNotNull(allGroupingsPaths);
-    }
-
-    @Test
-    public void optableGroupingsTest() {
-        List<String> optInablePaths = groupingAssignmentService.optableGroupings(OptType.IN.value());
-        List<String> optOutablePaths = groupingAssignmentService.optableGroupings(OptType.OUT.value());
-        assertNotNull(optInablePaths);
-        assertNotNull(optOutablePaths);
-
-        // Should not have duplicates.
-        Set<String> optInpathMap = new HashSet<>();
-        optInablePaths.forEach(optInablePath -> assertTrue(optInpathMap.add(optInablePath)));
-        Set<String> optOutPathMap = new HashSet<>();
-        optOutablePaths.forEach(optOutablePath -> assertTrue(optOutPathMap.add(optOutablePath)));
-
-        // Should throw an exception if optIn or optOut attribute is not passed.
-        try {
-            groupingAssignmentService.optableGroupings("bad-attribute");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-    }
-
-    @Test
     public void setGroupingAttributesTest() {
         // Should set the sync destinations.
         Grouping grouping = groupingAssignmentService.setGroupingAttributes(new Grouping(GROUPING));
         assertNotNull(grouping);
         assertNotNull(grouping.getSyncDestinations());
-    }
-
-    @Test
-    public void getGroupPathsTest() {
-        List<String> groupPaths = groupingAssignmentService.getGroupPaths(ADMIN, ADMIN);
-        String testUsername = testPerson.getUsername();
-        assertFalse(groupPaths.isEmpty());
-        // Should return an empty list if current user is not an admin and if current user is not the same as username.
-        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, TEST_USERNAMES.get(1));
-        assertTrue(groupPaths.isEmpty());
-
-        // Should return a non-empty list if current user is not an admin but is the same as username.
-        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, testUsername);
-        assertFalse(groupPaths.isEmpty());
-
-        // Should return a non-empty list if current user is an admin but is not the same as username.
-        updateMemberService.addAdmin(ADMIN, testUsername);
-        groupPaths = groupingAssignmentService.getGroupPaths(testUsername, TEST_USERNAMES.get(1));
-        assertFalse(groupPaths.isEmpty());
-        updateMemberService.removeAdmin(ADMIN, testUsername);
     }
 
     @Test
