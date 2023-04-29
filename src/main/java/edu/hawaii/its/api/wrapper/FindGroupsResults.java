@@ -9,16 +9,16 @@ import java.util.List;
 public class FindGroupsResults extends Results {
     private final WsFindGroupsResults wsFindGroupsResults;
 
-    private final List<Group> groups;
-
     public FindGroupsResults(WsFindGroupsResults wsFindGroupsResults) {
-        groups = new ArrayList<>();
         if (wsFindGroupsResults == null) {
             this.wsFindGroupsResults = new WsFindGroupsResults();
         } else {
             this.wsFindGroupsResults = wsFindGroupsResults;
-            setGroups();
         }
+    }
+
+    public FindGroupsResults() {
+        this.wsFindGroupsResults = new WsFindGroupsResults();
     }
 
     @Override public String getResultCode() {
@@ -31,17 +31,14 @@ public class FindGroupsResults extends Results {
     }
 
     public List<Group> getGroups() {
-        return groups;
-    }
-
-    private void setGroups() {
         WsGroup[] wsGroups = wsFindGroupsResults.getGroupResults();
-        if (isEmpty(wsGroups)) {
-            return;
+        List<Group> groups = new ArrayList<>();
+        if (!isEmpty(wsGroups)) {
+            for (WsGroup wsGroup : wsGroups) {
+                groups.add(new Group(wsGroup));
+            }
         }
-        for (WsGroup wsGroup : wsGroups) {
-            groups.add(new Group(wsGroup));
-        }
+        return groups;
     }
 
     public Group getGroup() {
@@ -51,6 +48,5 @@ public class FindGroupsResults extends Results {
         }
         return new Group(wsGroups[0]);
     }
-
 
 }

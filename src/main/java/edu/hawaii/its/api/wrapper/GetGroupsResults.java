@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -10,19 +11,16 @@ import java.util.List;
 public class GetGroupsResults extends Results {
     private final WsGetGroupsResults wsGetGroupsResults;
 
-    private List<Group> groups;
-
-    private Subject subject;
-
     public GetGroupsResults(WsGetGroupsResults wsGetGroupsResults) {
-        groups = new ArrayList<>();
         if (wsGetGroupsResults == null) {
             this.wsGetGroupsResults = new WsGetGroupsResults();
         } else {
             this.wsGetGroupsResults = wsGetGroupsResults;
-            setGroups();
-            setSubject();
         }
+    }
+
+    public GetGroupsResults() {
+        this.wsGetGroupsResults = new WsGetGroupsResults();
     }
 
     @Override public String getResultCode() {
@@ -35,37 +33,28 @@ public class GetGroupsResults extends Results {
         return wsGetGroupsResults.getResultMetadata().getResultCode();
     }
 
-    private void setGroups() {
-        if (isEmpty(wsGetGroupsResults.getResults())) {
-            return;
+    public List<Group> getGroups() {
+        WsGetGroupsResult[] wsGetGroupsResults = this.wsGetGroupsResults.getResults();
+        List<Group> groups = new ArrayList<>();
+        if (!isEmpty(wsGetGroupsResults)) {
+            WsGroup[] wsGroups = wsGetGroupsResults[0].getWsGroups();
+            if (!isEmpty(wsGroups)) {
+                for (WsGroup wsGroup : wsGroups) {
+                    groups.add(new Group(wsGroup));
+                }
+            }
         }
-        WsGroup[] wsGroups = wsGetGroupsResults.getResults()[0].getWsGroups();
-        if (isEmpty(wsGroups)) {
-            return;
-        }
-        for (WsGroup wsGroup : wsGroups) {
-            groups.add(new Group(wsGroup));
-        }
-    }
-
-    private void setSubject() {
-        if (isEmpty(wsGetGroupsResults.getResults())) {
-            this.subject = new Subject();
-            return;
-        }
-        WsSubject wsSubject = wsGetGroupsResults.getResults()[0].getWsSubject();
-        if (wsSubject == null) {
-            this.subject = new Subject();
-            return;
-        }
-        subject = new Subject(wsSubject);
+        return groups;
     }
 
     public Subject getSubject() {
-        return subject;
+        WsGetGroupsResult[] wsGetGroupsResults = this.wsGetGroupsResults.getResults();
+        if (isEmpty(wsGetGroupsResults)) {
+            return new Subject();
+        }
+        WsSubject wsSubject = wsGetGroupsResults[0].getWsSubject();
+        return wsSubject != null ? new Subject(wsSubject) : new Subject();
+
     }
 
-    public List<Group> getGroups() {
-        return groups;
-    }
 }

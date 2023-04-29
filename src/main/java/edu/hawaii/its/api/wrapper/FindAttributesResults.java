@@ -18,6 +18,9 @@ public class FindAttributesResults extends Results {
     }
 
     @Override public String getResultCode() {
+        if (getResults().isEmpty()) {
+            return "FAILURE";
+        }
         return this.wsFindAttributeDefNamesResults.getResultMetadata().getResultCode();
     }
 

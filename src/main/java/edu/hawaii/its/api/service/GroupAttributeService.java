@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
-import edu.hawaii.its.api.groupings.GroupingsUpdatedAttributeResult;
+import edu.hawaii.its.api.groupings.GroupingsUpdatedAttributesResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -13,9 +13,9 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
-import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -179,25 +179,27 @@ public class GroupAttributeService {
 
     // Check if attribute is on.
     public boolean isGroupAttribute(String groupPath, String attributeName) {
-        AttributeAssignmentsResults attributeAssignmentsResults = new AttributeAssignmentsResults(
-                grouperApiService.groupAttributeAssigns(ASSIGN_TYPE_GROUP, attributeName, groupPath));
-        return attributeAssignmentsResults.isAttributeDefName(attributeName);
+        List<GroupAttribute> groupAttributes = grouperApiService
+                .groupAttributeResults(attributeName, groupPath)
+                .getGroupAttributes();
+        return groupAttributes.stream()
+                .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
     }
 
-    public GroupingsUpdatedAttributeResult assignAttribute(String attributeName, String groupingPath) {
+    public GroupingsUpdatedAttributesResult assignAttribute(String attributeName, String groupingPath) {
         return updateAttribute(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingsUpdatedAttributeResult removeAttribute(String attributeName, String groupingPath) {
+    public GroupingsUpdatedAttributesResult removeAttribute(String attributeName, String groupingPath) {
         return updateAttribute(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingsUpdatedAttributeResult updateAttribute(String attributeName, String assignOperation,
+    public GroupingsUpdatedAttributesResult updateAttribute(String attributeName, String assignOperation,
             String groupingPath) {
         AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
                 ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
 
-        GroupingsUpdatedAttributeResult result = new GroupingsUpdatedAttributeResult(assignAttributesResults);
+        GroupingsUpdatedAttributesResult result = new GroupingsUpdatedAttributesResult(assignAttributesResults);
         timestampService.update(result);
         return result;
     }
