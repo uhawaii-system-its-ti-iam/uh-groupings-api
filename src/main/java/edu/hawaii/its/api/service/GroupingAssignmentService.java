@@ -21,6 +21,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,12 +59,15 @@ public class GroupingAssignmentService {
 
     public static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
 
+    @Lazy
     @Autowired
     private GrouperApiService grouperApiService;
 
+    @Lazy
     @Autowired
     private MemberAttributeService memberAttributeService;
 
+    @Lazy
     @Autowired
     private GroupAttributeService groupAttributeService;
 

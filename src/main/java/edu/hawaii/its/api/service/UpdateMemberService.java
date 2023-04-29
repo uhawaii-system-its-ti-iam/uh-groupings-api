@@ -27,10 +27,12 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A service for adding and removing UH grouping members.
@@ -111,12 +113,22 @@ public class UpdateMemberService {
     }
 
     public GroupingsMoveMembersResult addIncludeMembers(String currentUser, String groupingPath,
-            List<String> uhIdentifiers) {
+                                                        List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
         return moveGroupMembers(groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
                 validIdentifiers);
+    }
+
+    @Async
+    public CompletableFuture<GroupingsMoveMembersResult> addIncludeMembersAsync(String currentUser, String groupingPath,
+                                                                           List<String> uhIdentifiers) {
+        groupPathService.checkPath(groupingPath);
+        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
+        return CompletableFuture.completedFuture(moveGroupMembers(groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), validIdentifiers));
     }
 
     public GroupingsMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -134,6 +146,16 @@ public class UpdateMemberService {
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
         return moveGroupMembers(groupingPath + GroupType.EXCLUDE.value(),
                 groupingPath + GroupType.INCLUDE.value(), validIdentifiers);
+    }
+
+    @Async
+    public CompletableFuture<GroupingsMoveMembersResult> addExcludeMembersAsync(String currentUser, String groupingPath,
+                                                                                List<String> uhIdentifiers) {
+        groupPathService.checkPath(groupingPath);
+        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
+        return CompletableFuture.completedFuture(moveGroupMembers(groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), validIdentifiers));
     }
 
     public GroupingsMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -210,6 +232,18 @@ public class UpdateMemberService {
     }
 
     /**
+     * Remove all members from the include group at groupingPath asynchronously.
+     */
+    @Async
+    public CompletableFuture<GroupingsReplaceGroupMembersResult> resetIncludeGroupAsync(String currentUser, String groupingPath) {
+        log.info("resetIncludeGroupAsync; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
+        groupPathService.checkPath(groupingPath);
+        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        String groupPath = groupPathService.getIncludeGroup(groupingPath);
+        return CompletableFuture.completedFuture(resetGroup(groupPath));
+    }
+
+    /**
      * Remove all members from the exclude group at groupingPath.
      */
     public GroupingsReplaceGroupMembersResult resetExcludeGroup(String currentUser, String groupingPath) {
@@ -218,6 +252,18 @@ public class UpdateMemberService {
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String groupPath = groupPathService.getExcludeGroup(groupingPath);
         return resetGroup(groupPath);
+    }
+
+    /**
+     * Remove all members from the exclude group at groupingPath asynchronously.
+     */
+    @Async
+    public CompletableFuture<GroupingsReplaceGroupMembersResult> resetExcludeGroupAsync(String currentUser, String groupingPath) {
+        log.info("resetExcludeGroupAsync; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
+        groupPathService.checkPath(groupingPath);
+        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        String groupPath = groupPathService.getExcludeGroup(groupingPath);
+        return CompletableFuture.completedFuture(resetGroup(groupPath));
     }
 
     /**

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-class AccessDeniedExceptionTest {
+public class AccessDeniedExceptionTest {
 
     @Test
     public void construction() {
