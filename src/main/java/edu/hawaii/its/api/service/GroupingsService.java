@@ -134,6 +134,18 @@ public class GroupingsService {
         return group.getDescription();
     }
 
+    /**
+     * From a list of group paths return a list of GroupingPath objects. The results are fetched from grouper in order to
+     * populate the GroupingPath.description field. The list of groupPaths can contain multiple sub-group paths of a
+     * Grouping, the sub-groups are filtered out after grouper returns.
+     */
+    public List<GroupingPath> getGroupingPaths(List<String> groupPaths) {
+        return grouperApiService.findGroupsResults(groupPaths).getGroups().stream()
+                .filter(group -> groupPathService.isGroupingPath(group)).collect(Collectors.toList()).stream()
+                .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription()))
+                .collect(Collectors.toList());
+    }
+
     public GroupingsUpdateDescriptionResult updateGroupingDescription(String path, String description) {
         String updatedDescription = getGroupingDescription(path);
         return new GroupingsUpdateDescriptionResult(grouperApiService.groupSaveResults(path, description),
