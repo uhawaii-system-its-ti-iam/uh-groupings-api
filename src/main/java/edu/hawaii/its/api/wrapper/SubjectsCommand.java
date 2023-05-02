@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A wrapper for GcGetSubjects. When a string is passed as a UH identifier, SubjectsCommand on execute fetches, from
  * grouper, results containing all the UH attributes pertaining to that UH identifier. Multiple strings can be queried
- * thus multiple UH affiliates can be validated in one call to execute. Unlike, some of the other Grouper GC classes,
+ * thus multiple UH affiliates can be validated in one call to execute. Unlike, some other Grouper GC classes,
  * passing an invalid UH identifier on execute does not throw a RuntimeException, thus making GcGetSubjects a great
  * candidate for checking that validly of UH identifier before it used to query grouper for add and remove.
  */
