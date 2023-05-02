@@ -25,5 +25,7 @@ public class GetMembersCommandTest {
         assertNotNull(getMembersCommand.setPageNumber(1));
         assertNotNull(getMembersCommand.setPageSize(1));
         assertNotNull(getMembersCommand.sortBy(""));
+        assertNotNull(getMembersCommand.setSubject(""));
+        assertNotNull(getMembersCommand.addSubjectAttribute(""));
     }
 }

@@ -2,6 +2,8 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
+import java.util.Arrays;
+
 /**
  * A wrapper for WsSubject.
  */
@@ -59,5 +61,20 @@ public class Subject extends Results {
     public String getResultCode() {
         String resultCode = wsSubject.getResultCode();
         return resultCode != null ? resultCode : "";
+    }
+
+    public String getSourceId() {
+        return wsSubject.getSourceId();
+    }
+
+    /**
+     * A WsSubject containing empty string for all attribute values returns false.
+     */
+    public boolean hasUHAttributes() {
+        String[] attributeValues = this.wsSubject.getAttributeValues();
+        if (attributeValues == null) {
+            return false;
+        }
+        return !Arrays.stream(attributeValues).allMatch(value -> value.equals(""));
     }
 }
