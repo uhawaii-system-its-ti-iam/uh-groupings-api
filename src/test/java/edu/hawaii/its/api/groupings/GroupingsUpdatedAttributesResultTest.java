@@ -22,12 +22,12 @@ public class GroupingsUpdatedAttributesResultTest {
 
     @Test
     public void test() {
-        assertNotNull(new GroupingsUpdatedAttributesResult());
+        assertNotNull(new GroupingUpdatedAttributesResult());
         String json = propertyLocator.find("ws.assign.attributes.results.turn.off.opt.in.success");
         WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
         AssignAttributesResults assignAttributesResults = new AssignAttributesResults(wsAssignAttributesResults);
-        GroupingsUpdatedAttributesResult groupingsUpdatedAttributesResult =
-                new GroupingsUpdatedAttributesResult(assignAttributesResults);
+        GroupingUpdatedAttributesResult groupingsUpdatedAttributesResult =
+                new GroupingUpdatedAttributesResult(assignAttributesResults);
         assertNotNull(groupingsUpdatedAttributesResult);
         assertEquals("SUCCESS", groupingsUpdatedAttributesResult.getResultCode());
         assertEquals("group-path", groupingsUpdatedAttributesResult.getGroupPath());

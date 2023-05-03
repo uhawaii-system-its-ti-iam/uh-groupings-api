@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class GroupingsGroupMemberTest {
+public class GroupingGroupMemberTest {
 
     @Value("${groupings.api.test.uh-usernames}")
     private List<String> TEST_USERNAMES;
@@ -43,13 +43,13 @@ public class GroupingsGroupMemberTest {
         String json = propertyLocator.find("ws.get.members.results.success");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-        GroupingsGroupMembers groupingsGroupMembers = new GroupingsGroupMembers(getMembersResults.getMembersResults()
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResults.getMembersResults()
                 .get(0));
-        assertNotNull(groupingsGroupMembers);
-        GroupingsGroupMember groupingsGroupMember = groupingsGroupMembers.getGroupMembers().get(0);
-        assertNotNull(groupingsGroupMember);
-        assertEquals(TEST_USERNAMES.get(0), groupingsGroupMember.getUid());
-        assertEquals(TEST_NAMES.get(0), groupingsGroupMember.getName());
-        assertEquals(TEST_NUMBERS.get(0), groupingsGroupMember.getUhUuid());
+        assertNotNull(groupingGroupMembers);
+        GroupingGroupMember groupingGroupMember = groupingGroupMembers.getMembers().get(0);
+        assertNotNull(groupingGroupMember);
+        assertEquals(TEST_USERNAMES.get(0), groupingGroupMember.getUid());
+        assertEquals(TEST_NAMES.get(0), groupingGroupMember.getName());
+        assertEquals(TEST_NUMBERS.get(0), groupingGroupMember.getUhUuid());
     }
 }

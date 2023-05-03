@@ -37,11 +37,11 @@ public class GroupingsTimestampResultTest {
         String json = propertyValue("ws.assign.attributes.results.time.changed");
         WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
         UpdatedTimestampResult updatedTimestampResult = new UpdatedTimestampResult(wsAssignAttributesResults);
-        GroupingsTimestampResult groupingsTimestampResult = new GroupingsTimestampResult(updatedTimestampResult);
+        GroupingTimestampResult groupingsTimestampResult = new GroupingTimestampResult(updatedTimestampResult);
         assertNotNull(groupingsTimestampResult);
 
         assertEquals("updateTimestampResult should not be null",
-                assertThrows(NullPointerException.class, () -> new GroupingsTimestampResult(null)).getMessage());
+                assertThrows(NullPointerException.class, () -> new GroupingTimestampResult(null)).getMessage());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class GroupingsTimestampResultTest {
         WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
         UpdatedTimestampResult updatedTimestampResult = new UpdatedTimestampResult(wsAssignAttributesResults);
 
-        GroupingsTimestampResult groupingsTimestampResult = new GroupingsTimestampResult(updatedTimestampResult);
+        GroupingTimestampResult groupingsTimestampResult = new GroupingTimestampResult(updatedTimestampResult);
         assertTrue(groupingsTimestampResult.isTimeUpdated());
         assertEquals("SUCCESS", groupingsTimestampResult.getResultCode());
         assertEquals(PREVIOUS_UPDATED_TIME, groupingsTimestampResult.getPreviousUpdatedTime());
@@ -66,7 +66,7 @@ public class GroupingsTimestampResultTest {
         WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
         UpdatedTimestampResult updatedTimestampResult = new UpdatedTimestampResult(wsAssignAttributesResults);
 
-        GroupingsTimestampResult groupingsTimestampResult = new GroupingsTimestampResult(updatedTimestampResult);
+        GroupingTimestampResult groupingsTimestampResult = new GroupingTimestampResult(updatedTimestampResult);
         assertFalse(groupingsTimestampResult.isTimeUpdated());
         assertEquals("SUCCESS", groupingsTimestampResult.getResultCode());
         assertEquals(PREVIOUS_UPDATED_TIME, groupingsTimestampResult.getPreviousUpdatedTime());

@@ -3,8 +3,8 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingsGroupMember;
-import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupMember;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
@@ -41,15 +41,6 @@ public class GroupingAssignmentService {
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.trio}")
-    private String TRIO;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Value("${groupings.api.person_attributes.uhuuid}")
     private String UHUUID;
@@ -230,13 +221,13 @@ public class GroupingAssignmentService {
         return groupingsService.getGroupingPaths(optInPaths);
     }
 
-    public GroupingsGroupMembers groupingOwners(String currentUser, String groupingPath) {
-        return new GroupingsGroupMembers(
+    public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
+        return new GroupingGroupMembers(
                 grouperApiService.getMembersResult(groupingPath + GroupType.OWNERS.value()));
     }
 
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
-        List<GroupingsGroupMember> owners = groupingOwners(currentUser, groupPath).getGroupMembers();
+        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
         if (owners.size() >= 2) {
             return false;
         }

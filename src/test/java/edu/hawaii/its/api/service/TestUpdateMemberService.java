@@ -6,7 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -277,8 +277,8 @@ public class TestUpdateMemberService {
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
 
-        GroupingsReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroup(ADMIN, GROUPING);
-        GroupingsReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroup(ADMIN, GROUPING);
+        GroupingReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroup(ADMIN, GROUPING);
+        GroupingReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroup(ADMIN, GROUPING);
 
         assertEquals(SUCCESS, resultInclude.getResultCode());
         assertEquals(SUCCESS, resultExclude.getResultCode());

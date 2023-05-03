@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
+import edu.hawaii.its.api.type.GroupType;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -46,7 +48,16 @@ public class GetMembersResult extends Results {
         if (isEmpty(wsSubjects)) {
             return subjects;
         }
+        String groupPath = getGroup().getGroupPath();
         for (WsSubject wsSubject : wsSubjects) {
+            if (groupPath.endsWith(GroupType.BASIS.value()) && wsSubject.getSourceId() != null
+                    && wsSubject.getSourceId().equals("g:gsa")) {
+                continue;
+            }
+            Subject subject = new Subject(wsSubject);
+            if (!subject.hasUHAttributes()) {
+                continue;
+            }
             subjects.add(new Subject(wsSubject));
         }
         return subjects;

@@ -3,25 +3,29 @@ package edu.hawaii.its.api.groupings;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
-public class GroupingsMoveMemberResult implements GroupingsResult {
-    private final GroupingsAddResult addResult;
-    private final GroupingsRemoveResult removeResult;
+/**
+ * GroupingsMoveMemberResult holds the result data on when a listed group member is moved from include to exclude
+ * visa-versa.
+ */
+public class GroupingMoveMemberResult implements GroupingResult {
+    private final GroupingAddResult addResult;
+    private final GroupingRemoveResult removeResult;
     private static final String SUCCESS = "SUCCESS";
     private static final String FAILURE = "FAILURE";
 
     private String resultCode;
     private String groupPath;
 
-    public GroupingsMoveMemberResult(AddMemberResult addMemberResult, RemoveMemberResult removeMemberResult) {
-        addResult = new GroupingsAddResult(addMemberResult);
-        removeResult = new GroupingsRemoveResult(removeMemberResult);
+    public GroupingMoveMemberResult(AddMemberResult addMemberResult, RemoveMemberResult removeMemberResult) {
+        addResult = new GroupingAddResult(addMemberResult);
+        removeResult = new GroupingRemoveResult(removeMemberResult);
         setGroupPath(addMemberResult.getGroupPath());
         setResultCode();
     }
 
-    public GroupingsMoveMemberResult() {
-        addResult = new GroupingsAddResult();
-        removeResult = new GroupingsRemoveResult();
+    public GroupingMoveMemberResult() {
+        addResult = new GroupingAddResult();
+        removeResult = new GroupingRemoveResult();
         setGroupPath("");
         setResultCode();
     }
@@ -44,11 +48,11 @@ public class GroupingsMoveMemberResult implements GroupingsResult {
         this.groupPath = groupPath;
     }
 
-    public GroupingsAddResult getAddResult() {
+    public GroupingAddResult getAddResult() {
         return addResult;
     }
 
-    public GroupingsRemoveResult getRemoveResult() {
+    public GroupingRemoveResult getRemoveResult() {
         return removeResult;
     }
 }

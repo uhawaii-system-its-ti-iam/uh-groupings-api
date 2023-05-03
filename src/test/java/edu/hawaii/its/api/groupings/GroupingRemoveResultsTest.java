@@ -19,7 +19,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsRemoveResultsTest {
+public class GroupingRemoveResultsTest {
     private static Properties properties;
 
     @BeforeAll
@@ -37,8 +37,8 @@ public class GroupingsRemoveResultsTest {
         assertNotNull(wsDeleteMemberResults);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults(removeMembersResults);
-        assertNotNull(groupingsRemoveResults);
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
+        assertNotNull(groupingRemoveResults);
     }
 
     @Test
@@ -46,14 +46,14 @@ public class GroupingsRemoveResultsTest {
         String json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults(removeMembersResults);
-        assertEquals("SUCCESS", groupingsRemoveResults.getResultCode());
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
+        assertEquals("SUCCESS", groupingRemoveResults.getResultCode());
 
         json = propertyValue("ws.delete.member.results.failure");
         wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
-        groupingsRemoveResults = new GroupingsRemoveResults(removeMembersResults);
-        assertEquals("FAILURE", groupingsRemoveResults.getResultCode());
+        groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
+        assertEquals("FAILURE", groupingRemoveResults.getResultCode());
     }
 
     @Test
@@ -61,24 +61,24 @@ public class GroupingsRemoveResultsTest {
         String json = propertyValue("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults(removeMembersResults);
-        List<GroupingsRemoveResult> results = groupingsRemoveResults.getResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
+        List<GroupingRemoveResult> results = groupingRemoveResults.getResults();
         assertNotNull(results);
 
         RemoveMemberResult removeMemberResult =
                 new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], "group-path");
-        GroupingsRemoveResult groupingsRemoveResult = new GroupingsRemoveResult(removeMemberResult);
-        assertEquals(5, groupingsRemoveResults.getResults().size());
-        groupingsRemoveResults.add(groupingsRemoveResult);
-        assertEquals(6, groupingsRemoveResults.getResults().size());
+        GroupingRemoveResult groupingRemoveResult = new GroupingRemoveResult(removeMemberResult);
+        assertEquals(5, groupingRemoveResults.getResults().size());
+        groupingRemoveResults.add(groupingRemoveResult);
+        assertEquals(6, groupingRemoveResults.getResults().size());
 
         json = propertyValue("ws.delete.member.results.success");
         wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
-        GroupingsRemoveResults resultsToAdd = new GroupingsRemoveResults(removeMembersResults);
-        groupingsRemoveResults.add(resultsToAdd);
-        assertNotNull(groupingsRemoveResults);
-        assertEquals(11, groupingsRemoveResults.getResults().size());
+        GroupingRemoveResults resultsToAdd = new GroupingRemoveResults(removeMembersResults);
+        groupingRemoveResults.add(resultsToAdd);
+        assertNotNull(groupingRemoveResults);
+        assertEquals(11, groupingRemoveResults.getResults().size());
     }
 
     public List<String> getTestUsernames() {

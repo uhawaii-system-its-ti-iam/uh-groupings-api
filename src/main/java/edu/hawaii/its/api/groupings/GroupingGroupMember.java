@@ -2,10 +2,13 @@ package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.Subject;
 
-public class GroupingsGroupMember extends MemberResult {
+/**
+ * When getMembers is called, GroupingGroupMember holds the information about a UH affiliate that is listed in a grouping.
+ */
+public class GroupingGroupMember extends MemberResult {
     private String resultCode;
 
-    public GroupingsGroupMember(Subject subject) {
+    public GroupingGroupMember(Subject subject) {
         setUid(subject.getUid());
         setUhUuid(subject.getUhUuid());
         setName(subject.getName());

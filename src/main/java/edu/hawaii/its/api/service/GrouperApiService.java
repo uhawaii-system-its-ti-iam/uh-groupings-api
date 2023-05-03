@@ -29,7 +29,6 @@ import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,9 +40,6 @@ public class GrouperApiService {
     @Autowired MemberAttributeService membershipAttributeService;
 
     @Autowired ExecutorService exec;
-
-    @Value("${groupings.api.subject_attribute_name_uhuuid}")
-    private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     /**
      * Check if a UH identifier is listed in a group.
@@ -81,6 +77,13 @@ public class GrouperApiService {
      */
     public FindGroupsResults findGroupsResults(String groupPath) {
         FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
+                .addPath(groupPath));
+        return findGroupsResults;
+    }
+
+    public FindGroupsResults findGroupsResults(String currentUser, String groupPath) {
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
+                .assignOwner(currentUser)
                 .addPath(groupPath));
         return findGroupsResults;
     }
@@ -155,6 +158,13 @@ public class GrouperApiService {
                 .addGroup(groupPath));
     }
 
+    public GroupAttributeResults groupAttributeResults(String currentUser, List<String> attributes, String groupPath) {
+        return exec.execute(new GroupAttributeCommand()
+                .assignOwner(currentUser)
+                .addAttributes(attributes)
+                .addGroup(groupPath));
+    }
+
     /**
      * Check if multiple groups contain attributes from the list specified.
      */
@@ -169,6 +179,13 @@ public class GrouperApiService {
      */
     public GroupAttributeResults groupAttributeResult(String groupPath) {
         GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
+                .addGroup(groupPath);
+        return exec.execute(groupAttributeCommand);
+    }
+
+    public GroupAttributeResults groupAttributeResult(String currentUser, String groupPath) {
+        GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
+                .assignOwner(currentUser)
                 .addGroup(groupPath);
         return exec.execute(groupAttributeCommand);
     }
@@ -222,6 +239,18 @@ public class GrouperApiService {
      */
     public FindAttributesResults findAttributesResults(String attributeTypeName, String searchScope) {
         return exec.execute(new FindAttributesCommand()
+                .assignAttributeName(attributeTypeName)
+                .assignSearchScope(searchScope));
+    }
+
+    /**
+     * Same as findAttributesResults(String attributeTypeName, String searchScope) except the currentUser is used to
+     * implement the "act-as" requirements."
+     */
+    public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
+            String searchScope) {
+        return exec.execute(new FindAttributesCommand()
+                .assignOwner(currentUser)
                 .assignAttributeName(attributeTypeName)
                 .assignSearchScope(searchScope));
     }
@@ -310,7 +339,7 @@ public class GrouperApiService {
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
         return exec.execute(new GetMembersCommand()
-                .setSubject(currentUser)
+                .assignOwner(currentUser)
                 .addGroupPaths(groupPaths)
                 .setPageNumber(pageNumber)
                 .setPageSize(pageSize)

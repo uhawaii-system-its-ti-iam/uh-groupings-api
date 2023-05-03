@@ -49,6 +49,9 @@ public class TestGrouperApiService {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
+    @Value("${groupings.api.test.grouping_many_basis}")
+    private String GROUPING_BASIS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 
@@ -374,7 +377,6 @@ public class TestGrouperApiService {
 
     @Test
     public void getMembersResults() {
-
         GetMembersResults getMembersResults = grouperApiService.getMembersResults(getGroupPaths());
         assertNotNull(getMembersResults);
         assertEquals("SUCCESS", getMembersResults.getResultCode());
