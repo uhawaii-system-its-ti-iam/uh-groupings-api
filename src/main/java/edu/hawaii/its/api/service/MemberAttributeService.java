@@ -24,8 +24,6 @@ public class MemberAttributeService {
 
     public static final Log logger = LogFactory.getLog(MemberAttributeService.class);
 
-    private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -43,9 +41,6 @@ public class MemberAttributeService {
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private SubjectService subjectService;

@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.wrapper.*;
@@ -146,9 +146,9 @@ public class GroupingsService {
                 .collect(Collectors.toList());
     }
 
-    public GroupingsUpdateDescriptionResult updateGroupingDescription(String path, String description) {
+    public GroupingUpdateDescriptionResult updateGroupingDescription(String path, String description) {
         String updatedDescription = getGroupingDescription(path);
-        return new GroupingsUpdateDescriptionResult(grouperApiService.groupSaveResults(path, description),
+        return new GroupingUpdateDescriptionResult(grouperApiService.groupSaveResults(path, description),
                 updatedDescription);
     }
 

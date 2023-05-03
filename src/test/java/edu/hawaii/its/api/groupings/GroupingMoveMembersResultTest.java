@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsMoveMembersResultTest {
+public class GroupingMoveMembersResultTest {
 
     private static Properties properties;
 
@@ -42,9 +42,9 @@ public class GroupingsMoveMembersResultTest {
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         assertNotNull(removeMembersResults);
 
-        GroupingsMoveMembersResult groupingsMoveMembersResult =
-                new GroupingsMoveMembersResult(addMembersResults, removeMembersResults);
-        assertNotNull(groupingsMoveMembersResult);
+        GroupingMoveMembersResult groupingMoveMembersResult =
+                new GroupingMoveMembersResult(addMembersResults, removeMembersResults);
+        assertNotNull(groupingMoveMembersResult);
     }
 
     private String propertyValue(String key) {

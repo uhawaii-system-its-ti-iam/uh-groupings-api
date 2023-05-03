@@ -32,8 +32,8 @@ public class GroupingsUpdateDescriptionResultTest {
         String json = propertyValue("ws.group.save.results.description.updated");
         WsGroupSaveResults wsGroupSaveResults = JsonUtil.asObject(json, WsGroupSaveResults.class);
         GroupSaveResults groupSaveResults = new GroupSaveResults(wsGroupSaveResults);
-        GroupingsUpdateDescriptionResult result =
-                new GroupingsUpdateDescriptionResult(groupSaveResults, updatedDescription);
+        GroupingUpdateDescriptionResult result =
+                new GroupingUpdateDescriptionResult(groupSaveResults, updatedDescription);
         assertNotNull(result);
         assertEquals(updatedDescription, result.getUpdatedDescription());
         assertEquals("description", result.getCurrentDescription());
@@ -43,14 +43,14 @@ public class GroupingsUpdateDescriptionResultTest {
         json = propertyValue("ws.group.save.results.description.not.updated");
         wsGroupSaveResults = JsonUtil.asObject(json, WsGroupSaveResults.class);
         groupSaveResults = new GroupSaveResults(wsGroupSaveResults);
-        result = new GroupingsUpdateDescriptionResult(groupSaveResults, updatedDescription);
+        result = new GroupingUpdateDescriptionResult(groupSaveResults, updatedDescription);
         assertNotNull(result);
         assertEquals(updatedDescription, result.getUpdatedDescription());
         assertEquals("description", result.getCurrentDescription());
         assertEquals("group-path", result.getGroupPath());
         assertEquals("SUCCESS_NO_CHANGES_NEEDED", result.getResultCode());
 
-        result = new GroupingsUpdateDescriptionResult();
+        result = new GroupingUpdateDescriptionResult();
         assertNotNull(result);
         assertEquals("", result.getUpdatedDescription());
         assertEquals("", result.getCurrentDescription());

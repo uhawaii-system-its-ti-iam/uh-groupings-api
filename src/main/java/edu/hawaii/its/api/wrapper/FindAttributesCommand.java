@@ -30,4 +30,9 @@ public class FindAttributesCommand extends GrouperCommand implements Command<Fin
         this.gcFindAttributeDefNames.assignNameOfAttributeDef(attributeName);
         return this;
     }
+
+    public FindAttributesCommand assignOwner(String uhIdentifier) {
+        this.gcFindAttributeDefNames.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
 }

@@ -16,16 +16,11 @@ public class MemberService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
     @Value("${groupings.api.grouping_owners}")
     private String OWNERS_GROUP;
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    private static final String SUCCESS = "SUCCESS";
 
     public boolean isAdmin(String uhIdentifier) {
         return isMember(GROUPING_ADMINS, uhIdentifier);

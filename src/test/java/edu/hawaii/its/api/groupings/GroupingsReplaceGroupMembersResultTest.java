@@ -32,15 +32,15 @@ public class GroupingsReplaceGroupMembersResultTest {
 
     @Test
     public void constructor() {
-        GroupingsReplaceGroupMembersResult groupingsReplaceGroupMembersResult =
-                new GroupingsReplaceGroupMembersResult();
+        GroupingReplaceGroupMembersResult groupingsReplaceGroupMembersResult =
+                new GroupingReplaceGroupMembersResult();
         assertNotNull(groupingsReplaceGroupMembersResult);
 
         String json = propertyValue("ws.add.member.results.reset.group");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         assertNotNull(addMembersResults);
-        groupingsReplaceGroupMembersResult = new GroupingsReplaceGroupMembersResult(addMembersResults);
+        groupingsReplaceGroupMembersResult = new GroupingReplaceGroupMembersResult(addMembersResults);
         assertNotNull(groupingsReplaceGroupMembersResult);
     }
 
@@ -49,8 +49,8 @@ public class GroupingsReplaceGroupMembersResultTest {
         String json = propertyValue("ws.add.member.results.reset.group");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        GroupingsReplaceGroupMembersResult groupingsReplaceGroupMembersResult =
-                new GroupingsReplaceGroupMembersResult(addMembersResults);
+        GroupingReplaceGroupMembersResult groupingsReplaceGroupMembersResult =
+                new GroupingReplaceGroupMembersResult(addMembersResults);
         assertNotNull(groupingsReplaceGroupMembersResult.getGroupPath());
         assertEquals("group-path", groupingsReplaceGroupMembersResult.getGroupPath());
         assertNotNull(groupingsReplaceGroupMembersResult.getResultCode());
