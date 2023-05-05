@@ -6,14 +6,19 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.UpdateTimestampResult;
+import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.Group;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,8 +106,6 @@ public class MembershipService {
                 parentGroupingPaths(excludePaths));
         // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
         List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
-        System.out.println("dumb"+ membershipGroupings);
-
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
         List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
         return createMemberships(membershipGroupings, optOutList);
@@ -131,15 +134,11 @@ public class MembershipService {
             throw new AccessDeniedException();
         }
         List<Membership> memberships = new ArrayList<>();
-        String uhUuid = subjectService.getValidUhUuid(uid);
-        if (uhUuid.equals("")) {
-            return memberships;
-        }
         List<String> groupPaths;
         List<String> optOutList;
         try {
-            groupPaths = groupingsService.allGroupPaths(uid);
-            optOutList = groupingsService.optOutEnabledGroupingPaths();
+            groupPaths = groupingAssignmentService.getGroupPaths(currentUser, uid);
+            optOutList = groupingAssignmentService.optableGroupings(OptType.OUT.value());
         } catch (GcWebServiceError e) {
             logger.warn("membershipResults;" + e);
             return memberships;
@@ -203,6 +202,29 @@ public class MembershipService {
             }
         }
         return membership;
+    }
+
+    /**
+     * Update the last modified attribute of a group to the current date and time.
+     */
+    public UpdateTimestampResult updateLastModified(String groupPath) {
+        logger.info("updateLastModified; group: " + groupPath + ";");
+        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        return updateLastModifiedTimestamp(dateTime, groupPath);
+    }
+
+    /**
+     * Update the last modified attribute of a group to dateTime.
+     */
+    public UpdateTimestampResult updateLastModifiedTimestamp(String dateTime, String groupPath) {
+        WsAttributeAssignValue wsAttributeAssignValue = grouperApiService.assignAttributeValue(dateTime);
+        return new UpdateTimestampResult(grouperApiService.assignAttributesResults(
+                ASSIGN_TYPE_GROUP,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupPath,
+                YYYYMMDDTHHMM,
+                OPERATION_REPLACE_VALUES,
+                wsAttributeAssignValue));
     }
 
     /**
