@@ -101,6 +101,8 @@ public class MembershipService {
                 parentGroupingPaths(excludePaths));
         // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
         List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
+        System.out.println("dumb"+ membershipGroupings);
+
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
         List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
         return createMemberships(membershipGroupings, optOutList);

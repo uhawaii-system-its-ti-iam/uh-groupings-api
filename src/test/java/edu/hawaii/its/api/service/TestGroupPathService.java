@@ -5,6 +5,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.Group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -185,7 +186,13 @@ public class TestGroupPathService {
     @Test
     public void getValidGroupingsTest() {
         ArrayList<String> emptyList = new ArrayList<String>();
+        ArrayList<String> inputList = new ArrayList<String>();
+        ArrayList<Group> list = new ArrayList<Group>();
         assertEquals(emptyList, groupPathService.getValidGroupings(emptyList));
+        assertEquals(list, groupPathService.getValidGroupings(inputList));
+
+        assertEquals(GROUPING, groupPathService.getValidGroupings(inputList));
+        //System.out.println("dumb"+groupPathService.getValidGroupings(GROUPING));
     }
 
 }
