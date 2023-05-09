@@ -25,8 +25,6 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,6 +57,12 @@ public class TestGrouperApiService {
 
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+
+    @Value("${groupings.api.test.grouping_large_basis}")
+    private String GROUPING_LARGE_BASIS;
+
+    @Value("${groupings.api.test.grouping_large_include}")
+    private String GROUPING_LARGE_INCLUDE;
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
@@ -98,6 +102,9 @@ public class TestGrouperApiService {
 
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
+
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
+    private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     @Autowired
     GrouperApiService grouperApiService;
@@ -367,6 +374,7 @@ public class TestGrouperApiService {
 
     @Test
     public void getMembersResults() {
+
         GetMembersResults getMembersResults = grouperApiService.getMembersResults(getGroupPaths());
         assertNotNull(getMembersResults);
         assertEquals("SUCCESS", getMembersResults.getResultCode());
@@ -380,6 +388,17 @@ public class TestGrouperApiService {
         getMembersResults = grouperApiService.getMembersResults(Arrays.asList("invalid-path"));
         assertNull(getMembersResults); // Todo exception handler.
 
+        getMembersResults = grouperApiService.getMembersResults(
+                ADMIN,
+                Arrays.asList(GROUPING_LARGE_BASIS),
+                1,
+                700,
+                "name",
+                true);
+        assertNotNull(getMembersResults);
+        assertEquals("SUCCESS", getMembersResults.getResultCode());
+        assertEquals(GROUPING_LARGE_BASIS, getMembersResults.getMembersResults().get(0).getGroup().getGroupPath());
+        assertFalse(getMembersResults.getMembersResults().get(0).getSubjects().isEmpty());
     }
 
     @Test
@@ -551,22 +570,6 @@ public class TestGrouperApiService {
                 grouperApiService.assignGrouperPrivilegesResult(GROUPING, PrivilegeType.IN.value(), ADMIN, true);
         assertNotNull(assignGrouperPrivilegesResult);
 
-    }
-
-    @Test
-    public void subjectLookupTest() {
-        for (String testUsername : TEST_USERNAMES) {
-            WsSubjectLookup subjectLookup = grouperApiService.subjectLookup(testUsername);
-            assertEquals(testUsername, subjectLookup.getSubjectIdentifier());
-            assertNull(subjectLookup.getSubjectId());
-            assertNull(subjectLookup.getSubjectSourceId());
-        }
-        for (String testUhNumber : TEST_NUMBERS) {
-            WsSubjectLookup subjectLookup = grouperApiService.subjectLookup(testUhNumber);
-            assertEquals(testUhNumber, subjectLookup.getSubjectId());
-            assertNull(subjectLookup.getSubjectIdentifier());
-            assertNull(subjectLookup.getSubjectSourceId());
-        }
     }
 
     /**

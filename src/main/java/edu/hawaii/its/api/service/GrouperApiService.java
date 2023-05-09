@@ -28,11 +28,8 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.api.GcGetMembers;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,6 +41,9 @@ public class GrouperApiService {
     @Autowired MemberAttributeService membershipAttributeService;
 
     @Autowired ExecutorService exec;
+
+    @Value("${groupings.api.subject_attribute_name_uhuuid}")
+    private String SUBJECT_ATTRIBUTE_NAME_UID;
 
     /**
      * Check if a UH identifier is listed in a group.
@@ -244,6 +244,13 @@ public class GrouperApiService {
                 .addUhIdentifiers(uhIdentifiers));
     }
 
+    public AddMembersResults addMembers(String currentUser, String groupPath, String uhIdentifier) {
+        return exec.execute(new AddMembersCommand()
+                .setPrivilegeHolder(currentUser)
+                .assignGroupPath(groupPath)
+                .addUhIdentifier(uhIdentifier));
+    }
+
     /**
      * Remove a UH identifier from a group listing.
      */
@@ -290,49 +297,24 @@ public class GrouperApiService {
      */
     public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String groupPath, String privilegeName,
             String uhIdentifier, boolean isAllowed) {
-        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult = exec.execute(new AssignGrouperPrivilegesCommand()
+        return exec.execute(new AssignGrouperPrivilegesCommand()
                 .setGroupPath(groupPath)
                 .setPrivilege(privilegeName)
                 .setSubjectLookup(uhIdentifier)
                 .setIsAllowed(isAllowed));
-        return assignGrouperPrivilegesResult;
     }
 
-    public WsGetMembersResults membersResults(String subjectAttributeName,
-            WsSubjectLookup lookup,
-            List<String> groupPaths,
-            Integer pageNumber,
-            Integer pageSize,
-            String sortString,
-            Boolean isAscending) {
-        GcGetMembers members = new GcGetMembers();
-
-        if (groupPaths != null && groupPaths.size() > 0) {
-            for (String path : groupPaths) {
-                members.addGroupName(path);
-            }
-        }
-
-        members.assignPageNumber(pageNumber);
-        members.assignPageSize(pageSize);
-        members.assignAscending(isAscending);
-        members.assignSortString(sortString);
-
-        return members
-                .addSubjectAttributeName(subjectAttributeName)
-                .assignActAsSubject(lookup)
-                .assignIncludeSubjectDetail(true)
-                .execute();
-    }
-
-    public WsSubjectLookup subjectLookup(String uhIdentifier) {
-        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-
-        if (membershipAttributeService.isUhUuid(uhIdentifier)) {
-            wsSubjectLookup.setSubjectId(uhIdentifier);
-        } else {
-            wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
-        }
-        return wsSubjectLookup;
+    /**
+     * Get a list of members for each groupPath.
+     */
+    public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        return exec.execute(new GetMembersCommand()
+                .setSubject(currentUser)
+                .addGroupPaths(groupPaths)
+                .setPageNumber(pageNumber)
+                .setPageSize(pageSize)
+                .setAscending(isAscending)
+                .sortBy(sortString));
     }
 }

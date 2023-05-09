@@ -24,6 +24,8 @@ import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -32,9 +34,6 @@ import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -302,25 +301,20 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
-    public void membersResultsTest() {
-        WsGetMembersResults membersResults = grouperApiService.membersResults(
-                ASSIGN_TYPE_GROUP,
-                grouperApiService.subjectLookup(ADMIN),
+    public void getMembersResults() {
+        GetMembersResults getMembersResults = grouperApiService.getMembersResults(
+                ADMIN,
                 Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE),
                 null,
                 null,
                 "name",
-                true
-        );
-        assertNotNull(membersResults);
-        List<WsGetMembersResult> getMembersResult = Arrays.asList(membersResults.getResults());
-        List<String> subjectAttributeNames = Arrays.asList(membersResults.getSubjectAttributeNames());
-
-        assertEquals(getMembersResult.size(), 2);
-        getMembersResult.forEach(
-                results -> assertTrue(results.getWsGroup().getName().equals(GROUPING_INCLUDE) ||
-                        results.getWsGroup().getName().equals(GROUPING_EXCLUDE)));
-        assertEquals(subjectAttributeNames.get(0), ASSIGN_TYPE_GROUP);
+                true);
+        assertNotNull(getMembersResults);
+        assertEquals("SUCCESS", getMembersResults.getResultCode());
+        List<GetMembersResult> membersResults = getMembersResults.getMembersResults();
+        assertTrue(membersResults.stream().allMatch(getMembersResult ->
+                getMembersResult.getGroup().getGroupPath().equals(GROUPING_INCLUDE) ||
+                        getMembersResult.getGroup().getGroupPath().equals(GROUPING_EXCLUDE)));
     }
 
     @Test
