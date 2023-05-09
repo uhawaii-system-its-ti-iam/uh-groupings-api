@@ -11,7 +11,7 @@ import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
-import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
@@ -76,7 +76,7 @@ public class GroupingsRestControllerv2_1Test {
     private String SUCCESS;
 
     @MockBean
-    private GroupAttributeService groupAttributeService;
+    private GroupingAttributeService groupingAttributeService;
 
     @MockBean
     private GroupingAssignmentService groupingAssignmentService;
@@ -591,7 +591,7 @@ public class GroupingsRestControllerv2_1Test {
     public void updateDescriptionTest() throws Exception {
         GroupingsUpdateDescriptionResult groupingsUpdateDescriptionResult = new GroupingsUpdateDescriptionResult();
 
-        given(groupAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
+        given(groupingAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
                 groupingsUpdateDescriptionResult);
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/description")
                         .header(CURRENT_USER, USERNAME)
@@ -600,7 +600,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andReturn();
         assertNotNull(result);
 
-        verify(groupAttributeService, times(1))
+        verify(groupingAttributeService, times(1))
                 .updateDescription("grouping", USERNAME, "description");
     }
 
@@ -623,14 +623,14 @@ public class GroupingsRestControllerv2_1Test {
                 .withOptValue(true)
                 .build();
 
-        given(groupAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListIn());
+        given(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListIn());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OptType.IN.value() + "/enable")
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-in"));
-        verify(groupAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
+        verify(groupingAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
 
         optInRequest = new OptRequest.Builder()
                 .withOptType(OptType.OUT)
@@ -648,16 +648,16 @@ public class GroupingsRestControllerv2_1Test {
                 .withOptValue(false)
                 .build();
 
-        given(groupAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListOut());
+        given(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListOut());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OptType.OUT.value() + "/disable")
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$[0].action").value("member is opted-out"));
-        verify(groupAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
+        verify(groupingAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
 
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
+        given(groupingAttributeService.changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true))
                 .willReturn(gsrListserv());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/sync-destination/" + LISTSERV + "/enable")
                         .header(CURRENT_USER, USERNAME))
@@ -665,10 +665,10 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$.action").value("listserv status changed"));
 
-        verify(groupAttributeService, times(1))
+        verify(groupingAttributeService, times(1))
                 .changeGroupAttributeStatus("grouping", USERNAME, LISTSERV, true);
 
-        given(groupAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
+        given(groupingAttributeService.changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true))
                 .willReturn(gsrReleasedGrouping());
         mockMvc.perform(put(API_BASE + "/groupings/grouping/sync-destination/" + RELEASED_GROUPING + "/enable")
                         .header(CURRENT_USER, USERNAME))
@@ -676,20 +676,20 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.resultCode").value(SUCCESS))
                 .andExpect(jsonPath("$.action").value("ldap status changed"));
 
-        verify(groupAttributeService, times(1))
+        verify(groupingAttributeService, times(1))
                 .changeGroupAttributeStatus("grouping", USERNAME, RELEASED_GROUPING, true);
     }
 
     @Test
     public void getSyncDestinationsTest() throws Exception {
-        given(groupAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
+        given(groupingAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
                 .willReturn(sdList());
 
         mockMvc.perform(get(API_BASE + "/groupings/grouping/sync-destinations")
                         .header(CURRENT_USER, USERNAME))
                 .andExpect(status().isOk());
 
-        verify(groupAttributeService, times(1))
+        verify(groupingAttributeService, times(1))
                 .getAllSyncDestinations(USERNAME, "grouping");
     }
 
