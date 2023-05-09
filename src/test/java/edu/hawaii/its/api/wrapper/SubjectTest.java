@@ -86,6 +86,7 @@ public class SubjectTest {
         assertEquals(name, subject.getName());
         assertEquals(firstName, subject.getFirstName());
         assertEquals(lastName, subject.getLastName());
+        assertEquals("UH core LDAP", subject.getSourceId());
 
         // Unsuccessful query using uid.
         json = propertyLocator.find("ws.subject.subject.uid.not.found");

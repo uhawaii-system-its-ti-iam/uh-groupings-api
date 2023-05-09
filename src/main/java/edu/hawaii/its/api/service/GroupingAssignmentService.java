@@ -12,12 +12,14 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,9 +61,6 @@ public class GroupingAssignmentService {
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
 
     @Autowired
     private GroupAttributeService groupAttributeService;
@@ -164,48 +163,28 @@ public class GroupingAssignmentService {
 
     //returns a group from grouper or the database
     public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
-        logger.info("getMembers; user: " + ownerUsername + "; groups: " + groupPaths + ";");
-
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperApiService.membersResults(
-                SUBJECT_ATTRIBUTE_NAME_UID,
-                lookup,
-                groupPaths,
-                null,
-                null,
-                null,
-                null);
-
-        Map<String, Group> groupMembers = new HashMap<>();
-        if (members.getResults() != null) {
-            groupMembers = makeGroups(members);
-        }
-
-        return groupMembers;
+        GetMembersResults getMembersResults =
+                grouperApiService.getMembersResults(
+                        ownerUsername,
+                        groupPaths,
+                        null,
+                        null,
+                        null,
+                        false);
+        return makeGroups(getMembersResults);
     }
 
     public Map<String, Group> getPaginatedMembers(String ownerUsername, List<String> groupPaths, Integer page,
             Integer size,
             String sortString, Boolean isAscending) {
-        logger.info("getPaginatedMembers; ownerUsername: " + ownerUsername + "; groups: " + groupPaths +
-                "; page: " + page + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending
-                + ";");
-
-        WsSubjectLookup lookup = grouperApiService.subjectLookup(ownerUsername);
-        WsGetMembersResults members = grouperApiService.membersResults(
-                SUBJECT_ATTRIBUTE_NAME_UID,
-                lookup,
+        GetMembersResults getMembersResults = grouperApiService.getMembersResults(
+                ownerUsername,
                 groupPaths,
                 page,
                 size,
                 sortString,
                 isAscending);
-        Map<String, Group> groupMembers = new HashMap<>();
-        if (members.getResults() != null) {
-            groupMembers = makeGroups(members);
-        }
-
-        return groupMembers;
+        return makeGroups(getMembersResults);
     }
 
     // Sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping.
@@ -235,7 +214,6 @@ public class GroupingAssignmentService {
         return new ArrayList<>(new HashSet<>(optOutPaths));
     }
 
-
     /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
@@ -263,6 +241,29 @@ public class GroupingAssignmentService {
             return false;
         }
         return owners.stream().anyMatch(owner -> owner.getUid().contains(uidToCheck));
+    }
+
+    public Map<String, Group> makeGroups(GetMembersResults getMembersResults) {
+        Map<String, Group> groupMembers = new HashMap<>();
+        List<GetMembersResult> membersResults = getMembersResults.getMembersResults();
+        for (GetMembersResult membersResult : membersResults) {
+            Group group = new Group(membersResult.getGroup().getGroupPath());
+            List<Subject> subjects = membersResult.getSubjects();
+            for (Subject subject : subjects) {
+                if (!subject.hasUHAttributes()) {
+                    continue;
+                }
+                Person person = new Person(subject);
+                if (group.getPath().endsWith(GroupType.BASIS.value()) && subject.getSourceId() != null
+                        && subject.getSourceId()
+                        .equals(STALE_SUBJECT_ID)) {
+                    person.setUsername("User Not Available.");
+                }
+                group.addMember(new Person(subject));
+            }
+            groupMembers.put(group.getPath(), group);
+        }
+        return groupMembers;
     }
 
     /**

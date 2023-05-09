@@ -2,6 +2,8 @@ package edu.hawaii.its.api.type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import edu.hawaii.its.api.wrapper.Subject;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +56,14 @@ public class Person implements Comparable<Person> {
         attributes.put(ATTRIBUTE_LAST_NAME, lastName);
     }
 
+    public Person(Subject subject) {
+        this(subject.getName(),
+                subject.getUhUuid(),
+                subject.getUid(),
+                subject.getFirstName(),
+                subject.getLastName());
+    }
+
     public String getUsername() {
         return attributes.get(ATTRIBUTE_USERNAME);
     }
@@ -81,9 +91,11 @@ public class Person implements Comparable<Person> {
     public String getFirstName() {
         return attributes.get(ATTRIBUTE_FIRST_NAME);
     }
+
     public void setFirstName(String firstName) {
         attributes.put(ATTRIBUTE_FIRST_NAME, firstName);
     }
+
     public void setLastName(String lastName) {
         attributes.put(ATTRIBUTE_LAST_NAME, lastName);
     }
