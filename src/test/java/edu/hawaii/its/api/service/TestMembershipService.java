@@ -67,7 +67,7 @@ public class TestMembershipService {
     private String FAILURE;
 
     @Autowired
-    GroupAttributeService groupAttributeService;
+    GroupingAttributeService groupingAttributeService;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
