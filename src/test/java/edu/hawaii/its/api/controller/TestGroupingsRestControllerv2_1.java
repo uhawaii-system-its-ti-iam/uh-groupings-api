@@ -16,7 +16,7 @@ import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
-import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -88,7 +88,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Autowired
     private GrouperApiService grouperApiService;
     @Autowired
-    private GroupAttributeService groupAttributeService;
+    private GroupingAttributeService groupingAttributeService;
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -125,10 +125,10 @@ public class TestGroupingsRestControllerv2_1 {
         });
 
         // Save the starting attribute settings for the test grouping.
-        attributeMap.put(OptType.IN.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
-        attributeMap.put(OptType.OUT.value(), groupAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
+        attributeMap.put(OptType.IN.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        attributeMap.put(OptType.OUT.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         mockMvc = webAppContextSetup(webApplicationContext).build();
 
@@ -138,9 +138,9 @@ public class TestGroupingsRestControllerv2_1 {
     @AfterAll
     public void cleanUp() {
         // Set the test grouping's attribute settings back.
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(),
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(),
                 attributeMap.get(OptType.IN.value()));
-        groupAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
                 attributeMap.get(OptType.OUT.value()));
     }
 
@@ -468,7 +468,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingsUpdateDescriptionResult.class));
         assertEquals(DEFAULT_DESCRIPTION, groupingsService.getGroupingDescription(GROUPING));
-        groupAttributeService.updateDescription(GROUPING, ADMIN, description);
+        groupingAttributeService.updateDescription(GROUPING, ADMIN, description);
     }
 
     @Test

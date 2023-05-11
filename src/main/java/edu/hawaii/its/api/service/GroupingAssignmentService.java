@@ -63,7 +63,7 @@ public class GroupingAssignmentService {
     private GrouperApiService grouperApiService;
 
     @Autowired
-    private GroupAttributeService groupAttributeService;
+    private GroupingAttributeService groupingAttributeService;
 
     @Autowired
     private MemberService memberService;
@@ -195,7 +195,7 @@ public class GroupingAssignmentService {
         grouping.setOptOutOn(groupAttributeResults.isOptOutOn());
 
         // Set the sync destinations.
-        List<SyncDestination> syncDestinations = groupAttributeService.getSyncDestinations(grouping);
+        List<SyncDestination> syncDestinations = groupingAttributeService.getSyncDestinations(grouping);
         grouping.setSyncDestinations(syncDestinations);
 
         return grouping;
