@@ -11,7 +11,7 @@ import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
-import edu.hawaii.its.api.service.GroupAttributeService;
+import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
@@ -60,7 +60,7 @@ public class GroupingsRestControllerv2_1 {
     private String uuid;
 
     @Autowired
-    private GroupAttributeService groupAttributeService;
+    private GroupingAttributeService groupingAttributeService;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
@@ -396,7 +396,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST updateDescription");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.updateDescription(path, currentUser, dtoString));
+                .body(groupingAttributeService.updateDescription(path, currentUser, dtoString));
     }
 
     /**
@@ -409,7 +409,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String id) {
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, id, true));
+                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, true));
     }
 
     /**
@@ -422,7 +422,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String id) {
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
+                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
     }
 
     /**
@@ -474,7 +474,7 @@ public class GroupingsRestControllerv2_1 {
 
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.changeOptStatus(optInRequest, optOutRequest));
+                .body(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest));
     }
 
     /**
@@ -490,7 +490,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getAllSyncDestinations...");
         return ResponseEntity
                 .ok()
-                .body(groupAttributeService.getAllSyncDestinations(currentUser, path));
+                .body(groupingAttributeService.getAllSyncDestinations(currentUser, path));
     }
 
     /**

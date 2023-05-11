@@ -74,7 +74,7 @@ public class TestGroupingAssignmentService {
     private final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @Autowired
-    GroupAttributeService groupAttributeService;
+    GroupingAttributeService groupingAttributeService;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;
@@ -313,7 +313,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(GroupType.EXCLUDE.value()));
             assertFalse(path.endsWith(GroupType.BASIS.value()));
             assertFalse(path.endsWith(GroupType.OWNERS.value()));
-            assertTrue(groupAttributeService.isGroupAttribute(path, OptType.IN.value()));
+            assertTrue(groupingAttributeService.isGroupAttribute(path, OptType.IN.value()));
         });
         optOutPaths.forEach(path -> {
             assertTrue(optOutPathsMap.add(path));
@@ -321,7 +321,7 @@ public class TestGroupingAssignmentService {
             assertFalse(path.endsWith(GroupType.EXCLUDE.value()));
             assertFalse(path.endsWith(GroupType.BASIS.value()));
             assertFalse(path.endsWith(GroupType.OWNERS.value()));
-            assertTrue(groupAttributeService.isGroupAttribute(path, OptType.OUT.value()));
+            assertTrue(groupingAttributeService.isGroupAttribute(path, OptType.OUT.value()));
         });
 
     }

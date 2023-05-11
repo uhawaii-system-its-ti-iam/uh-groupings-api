@@ -11,21 +11,21 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-class GroupAttributeServiceTest {
+class GroupingAttributeServiceTest {
 
     @Autowired
-    private GroupAttributeService groupAttributeService;
+    private GroupingAttributeService groupingAttributeService;
 
     @Test
     public void construction() {
-        assertNotNull(groupAttributeService);
+        assertNotNull(groupingAttributeService);
     }
 
     @Test
     public void makeGroupingsServiceResultTest() {
         String resultCode = "resultCode";
         String action = "action";
-        GroupingsServiceResult groupingsServiceResult = groupAttributeService.makeGroupingsServiceResult(resultCode, action);
+        GroupingsServiceResult groupingsServiceResult = groupingAttributeService.makeGroupingsServiceResult(resultCode, action);
         assertNotNull(groupingsServiceResult);
         assertEquals(resultCode, groupingsServiceResult.getResultCode());
         assertEquals(action, groupingsServiceResult.getAction());

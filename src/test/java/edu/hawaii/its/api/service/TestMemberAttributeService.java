@@ -63,7 +63,7 @@ public class TestMemberAttributeService {
     private static final String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
 
     @Autowired
-    GroupAttributeService groupAttributeService;
+    GroupingAttributeService groupingAttributeService;
 
     @Autowired
     GroupingAssignmentService groupingAssignmentService;

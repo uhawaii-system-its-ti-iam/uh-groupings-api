@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 @Service
-public class GroupAttributeService {
+public class GroupingAttributeService {
 
     @Value("${groupings.api.assign_type_group}")
     private String ASSIGN_TYPE_GROUP;
@@ -55,7 +55,7 @@ public class GroupAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    public static final Log logger = LogFactory.getLog(GroupAttributeService.class);
+    public static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
     @Autowired
     private GrouperApiService grouperApiService;
