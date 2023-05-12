@@ -4,9 +4,9 @@ import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.wrapper.Group;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,11 +15,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class GroupPathService {
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
 
     @Autowired
     GrouperApiService grouperApiService;
@@ -102,6 +97,14 @@ public class GroupPathService {
 
     public List<String> getGroupPaths(List<Group> groups) {
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
+    }
+
+    public List<String> getGroupPaths(String groupingPath) {
+        return Arrays.asList(
+                getBasisGroup(groupingPath),
+                getIncludeGroup(groupingPath),
+                getExcludeGroup(groupingPath),
+                getOwnersGroup(groupingPath));
     }
 
     private Group getGroup(String groupPath) {

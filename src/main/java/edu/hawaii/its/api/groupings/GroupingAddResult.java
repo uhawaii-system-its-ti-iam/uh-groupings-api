@@ -2,12 +2,15 @@ package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 
-public class GroupingsAddResult extends MemberResult implements GroupingsResult {
+/**
+ * GroupingAddResult shows the results of after a UH affiliate has been added to a group listing.
+ */
+public class GroupingAddResult extends MemberResult implements GroupingResult {
 
     private String resultCode;
     private String groupPath;
 
-    public GroupingsAddResult(AddMemberResult addMemberResult) {
+    public GroupingAddResult(AddMemberResult addMemberResult) {
         setResultCode(addMemberResult.getResultCode());
         setGroupPath(addMemberResult.getGroupPath());
         setUid(addMemberResult.getUid());
@@ -15,7 +18,7 @@ public class GroupingsAddResult extends MemberResult implements GroupingsResult 
         setName(addMemberResult.getName());
     }
 
-    public GroupingsAddResult() {
+    public GroupingAddResult() {
         setResultCode("");
         setGroupPath("");
         setUid("");

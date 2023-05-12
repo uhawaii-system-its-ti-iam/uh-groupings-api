@@ -4,7 +4,10 @@ import edu.hawaii.its.api.wrapper.GroupSaveResults;
 
 import java.util.Objects;
 
-public class GroupingsUpdateDescriptionResult implements GroupingsResult {
+/**
+ * GroupingUpdateDescriptionResult contains results of an updated description.
+ */
+public class GroupingUpdateDescriptionResult implements GroupingResult {
     private final GroupSaveResults groupSaveResults;
 
     private final String updatedDescription;
@@ -15,7 +18,7 @@ public class GroupingsUpdateDescriptionResult implements GroupingsResult {
 
     private String groupPath;
 
-    public GroupingsUpdateDescriptionResult(GroupSaveResults groupSaveResults, String description) {
+    public GroupingUpdateDescriptionResult(GroupSaveResults groupSaveResults, String description) {
         Objects.requireNonNull(groupSaveResults);
         this.groupSaveResults = groupSaveResults;
         this.updatedDescription = description;
@@ -24,7 +27,7 @@ public class GroupingsUpdateDescriptionResult implements GroupingsResult {
         setCurrentDescription();
     }
 
-    public GroupingsUpdateDescriptionResult() {
+    public GroupingUpdateDescriptionResult() {
         this.groupSaveResults = new GroupSaveResults();
         this.updatedDescription = "";
         setResultCode();

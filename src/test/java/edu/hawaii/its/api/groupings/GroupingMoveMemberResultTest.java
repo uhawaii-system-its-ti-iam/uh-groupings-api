@@ -17,7 +17,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsMoveMemberResultTest {
+public class GroupingMoveMemberResultTest {
     private static final String SUCCESS = "SUCCESS";
     private static Properties properties;
 
@@ -31,7 +31,7 @@ public class GroupingsMoveMemberResultTest {
 
     @Test
     public void constructor() {
-        assertNotNull(new GroupingsMoveMemberResult());
+        assertNotNull(new GroupingMoveMemberResult());
 
         String json = propertyValue("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
@@ -46,9 +46,9 @@ public class GroupingsMoveMemberResultTest {
                 new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], "group-path");
         assertNotNull(removeMemberResult);
 
-        GroupingsMoveMemberResult groupingsMoveMemberResult =
-                new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
-        assertNotNull(groupingsMoveMemberResult);
+        GroupingMoveMemberResult groupingMoveMemberResult =
+                new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
+        assertNotNull(groupingMoveMemberResult);
     }
 
     @Test
@@ -62,17 +62,17 @@ public class GroupingsMoveMemberResultTest {
         RemoveMemberResult removeMemberResult =
                 new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], "group-path");
 
-        GroupingsMoveMemberResult groupingsMoveMemberResult =
-                new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
-        assertNotNull(groupingsMoveMemberResult);
-        assertNotNull(groupingsMoveMemberResult.getAddResult());
-        assertNotNull(groupingsMoveMemberResult.getRemoveResult());
-        assertEquals(SUCCESS, groupingsMoveMemberResult.getResultCode());
-        assertEquals("group-path", groupingsMoveMemberResult.getGroupPath());
+        GroupingMoveMemberResult groupingMoveMemberResult =
+                new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
+        assertNotNull(groupingMoveMemberResult);
+        assertNotNull(groupingMoveMemberResult.getAddResult());
+        assertNotNull(groupingMoveMemberResult.getRemoveResult());
+        assertEquals(SUCCESS, groupingMoveMemberResult.getResultCode());
+        assertEquals("group-path", groupingMoveMemberResult.getGroupPath());
 
         addMemberResult = new AddMemberResult(wsAddMemberResults.getResults()[0], "group-path");
-        groupingsMoveMemberResult = new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
-        assertEquals("FAILURE", groupingsMoveMemberResult.getResultCode());
+        groupingMoveMemberResult = new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
+        assertEquals("FAILURE", groupingMoveMemberResult.getResultCode());
 
     }
 

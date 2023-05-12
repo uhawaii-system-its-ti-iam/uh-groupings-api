@@ -55,7 +55,7 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
         return this;
     }
 
-    public GetMembersCommand setSubject(String uhIdentifier) {
+    public GetMembersCommand assignOwner(String uhIdentifier) {
         gcGetMembers.assignActAsSubject(subjectLookup(uhIdentifier));
         return this;
     }

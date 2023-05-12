@@ -5,8 +5,11 @@ import edu.hawaii.its.api.wrapper.UpdatedTimestampResult;
 
 import java.util.Objects;
 
+/**
+ * GroupingTimestampResult contains results of a groupings timestamp being updated.
+ */
 @JsonIgnoreProperties
-public class GroupingsTimestampResult implements GroupingsResult {
+public class GroupingTimestampResult implements GroupingResult {
 
     private final boolean timeUpdated;
     private final String previousUpdatedTime;
@@ -15,7 +18,7 @@ public class GroupingsTimestampResult implements GroupingsResult {
     private final String resultCode;
     private final String groupPath;
 
-    public GroupingsTimestampResult(UpdatedTimestampResult updatedTimestampResult) {
+    public GroupingTimestampResult(UpdatedTimestampResult updatedTimestampResult) {
         Objects.requireNonNull(updatedTimestampResult, "updateTimestampResult should not be null");
         previousUpdatedTime = updatedTimestampResult.getPreviousTimestampResult().getValue();
         currentUpdatedTime = updatedTimestampResult.getCurrentTimestampResult().getValue();
@@ -25,7 +28,7 @@ public class GroupingsTimestampResult implements GroupingsResult {
         setResultMessage();
     }
 
-    public GroupingsTimestampResult() {
+    public GroupingTimestampResult() {
         previousUpdatedTime = "";
         currentUpdatedTime = "";
         timeUpdated = false;

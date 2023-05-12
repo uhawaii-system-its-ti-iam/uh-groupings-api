@@ -22,9 +22,6 @@ public class SubjectService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
     @Autowired
     private GrouperApiService grouperApiService;
 

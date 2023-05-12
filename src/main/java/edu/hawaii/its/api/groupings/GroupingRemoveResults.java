@@ -6,36 +6,39 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupingsRemoveResults implements GroupingsResult {
+/**
+ * GroupingRemoveResults shows the results after multiple UH affiliates have been removed from a group listing.
+ */
+public class GroupingRemoveResults implements GroupingResult {
 
-    private final List<GroupingsRemoveResult> groupingsRemoveResults;
+    private final List<GroupingRemoveResult> groupingRemoveResults;
     private final RemoveMembersResults removeMembersResults;
     private String groupPath;
     private String resultCode;
 
-    public GroupingsRemoveResults(RemoveMembersResults removeMembersResults) {
+    public GroupingRemoveResults(RemoveMembersResults removeMembersResults) {
         this.removeMembersResults = removeMembersResults;
-        groupingsRemoveResults = new ArrayList<>();
+        groupingRemoveResults = new ArrayList<>();
         for (RemoveMemberResult removeMemberResult : removeMembersResults.getResults()) {
-            groupingsRemoveResults.add(new GroupingsRemoveResult(removeMemberResult));
+            groupingRemoveResults.add(new GroupingRemoveResult(removeMemberResult));
         }
         setGroupPath(removeMembersResults.getGroupPath());
         setResultCode();
     }
 
-    public GroupingsRemoveResults() {
-        groupingsRemoveResults = new ArrayList<>();
+    public GroupingRemoveResults() {
+        groupingRemoveResults = new ArrayList<>();
         this.removeMembersResults = new RemoveMembersResults();
         setGroupPath("");
         setResultCode();
     }
 
-    public void add(GroupingsRemoveResult groupingsRemoveResult) {
-        groupingsRemoveResults.add(groupingsRemoveResult);
+    public void add(GroupingRemoveResult groupingRemoveResult) {
+        groupingRemoveResults.add(groupingRemoveResult);
     }
 
-    public void add(GroupingsRemoveResults groupingsRemoveResults) {
-        for (GroupingsRemoveResult result : groupingsRemoveResults.getResults()) {
+    public void add(GroupingRemoveResults groupingRemoveResults) {
+        for (GroupingRemoveResult result : groupingRemoveResults.getResults()) {
             add(result);
         }
     }
@@ -64,7 +67,7 @@ public class GroupingsRemoveResults implements GroupingsResult {
         this.groupPath = groupPath;
     }
 
-    public List<GroupingsRemoveResult> getResults() {
-        return groupingsRemoveResults;
+    public List<GroupingRemoveResult> getResults() {
+        return groupingRemoveResults;
     }
 }

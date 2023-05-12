@@ -3,8 +3,8 @@ package edu.hawaii.its.api.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
-import edu.hawaii.its.api.groupings.GroupingsUpdatedAttributesResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdatedAttributesResult;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
@@ -185,20 +185,20 @@ public class GroupingAttributeService {
                 .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
     }
 
-    public GroupingsUpdatedAttributesResult assignAttribute(String attributeName, String groupingPath) {
+    public GroupingUpdatedAttributesResult assignAttribute(String attributeName, String groupingPath) {
         return updateAttribute(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingsUpdatedAttributesResult removeAttribute(String attributeName, String groupingPath) {
+    public GroupingUpdatedAttributesResult removeAttribute(String attributeName, String groupingPath) {
         return updateAttribute(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingsUpdatedAttributesResult updateAttribute(String attributeName, String assignOperation,
+    public GroupingUpdatedAttributesResult updateAttribute(String attributeName, String assignOperation,
             String groupingPath) {
         AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
                 ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
 
-        GroupingsUpdatedAttributesResult result = new GroupingsUpdatedAttributesResult(assignAttributesResults);
+        GroupingUpdatedAttributesResult result = new GroupingUpdatedAttributesResult(assignAttributesResults);
         timestampService.update(result);
         return result;
     }
@@ -214,7 +214,7 @@ public class GroupingAttributeService {
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
-    public GroupingsUpdateDescriptionResult updateDescription(String groupPath, String ownerUsername,
+    public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUsername,
             String description) {
         logger.info(
                 "updateDescription(); groupPath:" + groupPath + "; ownerUsername:" + ownerUsername + "; description: "

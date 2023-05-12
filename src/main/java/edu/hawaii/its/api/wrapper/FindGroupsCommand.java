@@ -34,4 +34,9 @@ public class FindGroupsCommand extends GrouperCommand implements Command<FindGro
         }
         return this;
     }
+
+    public FindGroupsCommand assignOwner(String uhIdentifier) {
+        this.gcFindGroups.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
 }

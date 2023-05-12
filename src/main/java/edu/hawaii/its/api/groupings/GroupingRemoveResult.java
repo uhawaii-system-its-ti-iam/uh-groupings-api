@@ -2,11 +2,14 @@ package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
-public class GroupingsRemoveResult extends MemberResult implements GroupingsResult {
+/**
+ * GroupingRemoveResult shows the results of after a UH affiliate has been removed from group listing.
+ */
+public class GroupingRemoveResult extends MemberResult implements GroupingResult {
     private String resultCode;
     private String groupPath;
 
-    public GroupingsRemoveResult(RemoveMemberResult removeMemberResult) {
+    public GroupingRemoveResult(RemoveMemberResult removeMemberResult) {
         setResultCode(removeMemberResult.getResultCode());
         setGroupPath(removeMemberResult.getGroupPath());
         setUid(removeMemberResult.getUid());
@@ -14,7 +17,7 @@ public class GroupingsRemoveResult extends MemberResult implements GroupingsResu
         setName(removeMemberResult.getName());
     }
 
-    public GroupingsRemoveResult() {
+    public GroupingRemoveResult() {
         setResultCode("");
         setGroupPath("");
         setUid("");

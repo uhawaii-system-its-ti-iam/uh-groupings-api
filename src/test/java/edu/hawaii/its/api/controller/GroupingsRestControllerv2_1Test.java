@@ -3,16 +3,20 @@ package edu.hawaii.its.api.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.groupings.GroupingsAddResult;
-import edu.hawaii.its.api.groupings.GroupingsAddResults;
-import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
-import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
-import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
-import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
 import edu.hawaii.its.api.service.GroupingAttributeService;
+import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingAddResult;
+import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingDescription;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResults;
+import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
@@ -29,6 +33,14 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +52,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -89,6 +103,8 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockBean
     private UpdateMemberService updateMemberService;
+    @MockBean
+    private GroupingOwnerService groupingOwnerService;
 
     @MockBean
     private MemberService memberService;
@@ -102,10 +118,12 @@ public class GroupingsRestControllerv2_1Test {
     private static final String GROUPING = "grouping";
     private static final String USERNAME = "user";
     private static final String ADMIN = "admin";
+    private PropertyLocator propertyLocator;
 
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(context).build();
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
     }
 
     // Test data.
@@ -253,7 +271,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addAdminTest() throws Exception {
         String adminToAdd = "adminToAdd";
-        GroupingsAddResult addMemberResult = new GroupingsAddResult();
+        GroupingAddResult addMemberResult = new GroupingAddResult();
         given(updateMemberService.addAdmin(ADMIN, adminToAdd)).willReturn(addMemberResult);
         mockMvc.perform(post(API_BASE + "/admins/" + adminToAdd)
                         .header(CURRENT_USER, ADMIN))
@@ -265,7 +283,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void removeAdminTest() throws Exception {
         String adminToRemove = "adminToRemove";
-        GroupingsRemoveResult removeMemberResult = new GroupingsRemoveResult();
+        GroupingRemoveResult removeMemberResult = new GroupingRemoveResult();
         given(updateMemberService.removeAdmin(ADMIN, adminToRemove))
                 .willReturn(removeMemberResult);
 
@@ -279,13 +297,13 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void removeFromGroupsTest() throws Exception {
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         List<String> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             paths.add("grouping" + i);
         }
         String userToRemove = "userToRemove";
-        given(updateMemberService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(groupingsRemoveResults);
+        given(updateMemberService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(groupingRemoveResults);
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + String.join(",", paths) + "/" + userToRemove)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -297,7 +315,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void resetIncludeGroup() throws Exception {
-        GroupingsReplaceGroupMembersResult result = new GroupingsReplaceGroupMembersResult();
+        GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult();
         given(updateMemberService.resetIncludeGroup(ADMIN, "grouping")).willReturn(result);
 
         MvcResult mvcResult = mockMvc.perform(delete(API_BASE + "/groupings/grouping/include")
@@ -311,7 +329,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void resetExcludeGroup() throws Exception {
-        GroupingsReplaceGroupMembersResult result = new GroupingsReplaceGroupMembersResult();
+        GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult();
         given(updateMemberService.resetExcludeGroup(ADMIN, "grouping")).willReturn(result);
 
         MvcResult mvcResult = mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude")
@@ -370,6 +388,30 @@ public class GroupingsRestControllerv2_1Test {
 
         verify(memberAttributeService, times(1))
                 .getMembersAttributes(USERNAME, members);
+    }
+
+    @Test
+    public void ownedGrouping() throws Exception {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        assertNotNull(groupingGroupsMembers);
+        List<String> paths =
+                Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
+        given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true))
+                .willReturn(groupingGroupsMembers);
+        MvcResult result = mockMvc.perform(
+                        post(API_BASE + "/groupings/group?page=1&size=700&sortString=name&isAscending=true")
+                                .header(CURRENT_USER, CURRENT_USER)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
+        verify(groupingOwnerService, times(1))
+                .paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true);
     }
 
     @Test
@@ -449,12 +491,12 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addIncludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        GroupingsMoveMembersResult groupingsMoveMembersResult = new GroupingsMoveMembersResult();
+        GroupingMoveMembersResult groupingMoveMembersResult = new GroupingMoveMembersResult();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
         given(updateMemberService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(groupingsMoveMembersResult);
+                .willReturn(groupingMoveMembersResult);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -468,12 +510,12 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
-        GroupingsMoveMembersResult groupingsMoveMembersResult = new GroupingsMoveMembersResult();
+        GroupingMoveMembersResult groupingMoveMembersResult = new GroupingMoveMembersResult();
         usersToAdd.add("tst04name");
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
         given(updateMemberService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
-                .willReturn(groupingsMoveMembersResult);
+                .willReturn(groupingMoveMembersResult);
 
         mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/")
                         .header(CURRENT_USER, USERNAME)
@@ -488,12 +530,12 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void removeIncludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
         given(updateMemberService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(groupingsRemoveResults);
+                .willReturn(groupingRemoveResults);
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -507,12 +549,12 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void removeExcludeMembersTest() throws Exception {
         List<String> usersToRemove = new ArrayList<>();
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         usersToRemove.add("tst04name");
         usersToRemove.add("tst05name");
         usersToRemove.add("tst06name");
         given(updateMemberService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
-                .willReturn(groupingsRemoveResults);
+                .willReturn(groupingRemoveResults);
         mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members/")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -547,13 +589,13 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void addOwnersTest() throws Exception {
         List<String> ownersToAdd = new ArrayList<>();
-        GroupingsAddResults groupingsAddResults = new GroupingsAddResults();
+        GroupingAddResults groupingAddResults = new GroupingAddResults();
         ownersToAdd.add("tst04name");
         ownersToAdd.add("tst05name");
         ownersToAdd.add("tst06name");
 
         given(updateMemberService.addOwnerships(USERNAME, "grouping", ownersToAdd))
-                .willReturn(groupingsAddResults);
+                .willReturn(groupingAddResults);
 
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToAdd))
                         .header(CURRENT_USER, USERNAME))
@@ -569,13 +611,13 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void removeOwnersTest() throws Exception {
         List<String> ownersToRemove = new ArrayList<>();
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         ownersToRemove.add("tst04name");
         ownersToRemove.add("tst05name");
         ownersToRemove.add("tst06name");
 
         given(updateMemberService.removeOwnerships(USERNAME, "grouping", ownersToRemove))
-                .willReturn(groupingsRemoveResults);
+                .willReturn(groupingRemoveResults);
 
         MvcResult result =
                 mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/" + String.join(",", ownersToRemove))
@@ -589,7 +631,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void updateDescriptionTest() throws Exception {
-        GroupingsUpdateDescriptionResult groupingsUpdateDescriptionResult = new GroupingsUpdateDescriptionResult();
+        GroupingUpdateDescriptionResult groupingsUpdateDescriptionResult = new GroupingUpdateDescriptionResult();
 
         given(groupingAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
                 groupingsUpdateDescriptionResult);
@@ -738,26 +780,42 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void descriptionTest() throws Exception {
-        Grouping groupingTest = grouping();
+    public void getGroupingDescription() throws Exception {
+        String json = propertyLocator.find("find.groups.results.description");
+        WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
+        FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
+        GroupingDescription groupingDescription = new GroupingDescription(findGroupsResults.getGroup());
+        given(groupingOwnerService.groupingsDescription(CURRENT_USER, "grouping-path")).willReturn(
+                groupingDescription);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/grouping-path/description")
+                        .header(CURRENT_USER, CURRENT_USER))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        assertEquals(JsonUtil.asJson(groupingDescription), result.getResponse().getContentAsString());
+        verify(groupingOwnerService, times(1))
+                .groupingsDescription(CURRENT_USER, "grouping-path");
+    }
 
-        // Check that regular member cannot change description
-        MvcResult memberDescriptionResult =
-                mockMvc.perform(get(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
-                                .header(CURRENT_USER, "abc"))
-                        .andDo(print())
-                        .andExpect(status().is4xxClientError())
-                        .andReturn();
-        assertThat(memberDescriptionResult, notNullValue());
-
-        // Admin should be able to change description
-        MvcResult adminDescriptionResult =
-                mockMvc.perform(put(API_BASE + "/groupings/" + groupingTest.getPath() + "/description")
-                                .header(CURRENT_USER, "admin"))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-        assertThat(adminDescriptionResult, notNullValue());
+    @Test
+    public void groupingOptAttributes() throws Exception {
+        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-on");
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
+        assertNotNull(groupingOptAttributes);
+        String groupingPath = "grouping-path";
+        given(groupingOwnerService.groupingOptAttributes(CURRENT_USER, groupingPath))
+                .willReturn(groupingOptAttributes);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/" + groupingPath + "/opt-attributes")
+                        .header(CURRENT_USER, CURRENT_USER))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        assertEquals(JsonUtil.asJson(groupingOptAttributes), result.getResponse().getContentAsString());
+        verify(groupingOwnerService, times(1))
+                .groupingOptAttributes(CURRENT_USER, groupingPath);
     }
 
     @Test
@@ -801,7 +859,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void groupingOwners() throws Exception {
         String path = "grouping-path";
-        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingsGroupMembers());
+        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingGroupMembers());
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + path + "/owners")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();

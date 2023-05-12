@@ -2,6 +2,9 @@ package edu.hawaii.its.api.wrapper;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 
+/**
+ * A wrapper for WsAddMemberResult.
+ */
 public class AddMemberResult extends Results {
 
     private final WsAddMemberResult wsAddMemberResult;
