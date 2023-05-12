@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingsGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
@@ -337,15 +337,15 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingOwners() {
         updateMemberService.removeOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
-        GroupingsGroupMembers groupingsGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
-        assertNotNull(groupingsGroupMembers);
-        assertFalse(groupingsGroupMembers.getGroupMembers().stream()
+        GroupingGroupMembers groupingGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        assertNotNull(groupingGroupMembers);
+        assertFalse(groupingGroupMembers.getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(TEST_USERNAMES.get(0))));
 
         updateMemberService.addOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
-        groupingsGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
-        assertNotNull(groupingsGroupMembers);
-        assertTrue(groupingsGroupMembers.getGroupMembers().stream()
+        groupingGroupMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        assertNotNull(groupingGroupMembers);
+        assertTrue(groupingGroupMembers.getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(TEST_USERNAMES.get(0))));
         updateMemberService.removeOwnership(ADMIN, GROUPING, TEST_USERNAMES.get(0));
     }

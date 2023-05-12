@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.groupings.GroupingsUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.util.ServiceTest;
 
@@ -123,7 +123,7 @@ public class TestGroupingService extends ServiceTest {
     public void updateGroupingDescription() {
         String updatedDescription = groupingsService.getGroupingDescription(GROUPING);
         String description = "abcdefghifklmnopqrstuvwxyz!@##$%%45234543";
-        GroupingsUpdateDescriptionResult result = groupingsService.updateGroupingDescription(GROUPING, description);
+        GroupingUpdateDescriptionResult result = groupingsService.updateGroupingDescription(GROUPING, description);
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getUpdatedDescription());
         assertEquals(description, result.getCurrentDescription());

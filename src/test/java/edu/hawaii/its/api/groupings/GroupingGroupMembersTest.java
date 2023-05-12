@@ -13,7 +13,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsGroupsMembersTest {
+public class GroupingGroupMembersTest {
+
     private PropertyLocator propertyLocator;
 
     @BeforeEach
@@ -23,14 +24,17 @@ public class GroupingsGroupsMembersTest {
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        String json = propertyLocator.find("ws.get.members.results.success");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-        assertNotNull(getMembersResults);
-        GroupingsGroupsMembers groupingsGroupsMembers = new GroupingsGroupsMembers(getMembersResults);
-        List<GroupingsGroupMembers> groupingsGroupMembers = groupingsGroupsMembers.getGroupsMembersList();
-        assertNotNull(groupingsGroupMembers);
-        assertEquals(2, groupingsGroupMembers.size());
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResults.getMembersResults()
+                .get(0));
+        assertNotNull(groupingGroupMembers);
+        assertEquals("grouping-path:include", groupingGroupMembers.getGroupPath());
+        assertEquals("SUCCESS", groupingGroupMembers.getResultCode());
+        List<GroupingGroupMember> results = groupingGroupMembers.getMembers();
+        assertNotNull(results);
+        assertEquals(2, results.size());
+
     }
 }

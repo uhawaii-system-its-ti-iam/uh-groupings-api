@@ -6,6 +6,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A wrapper for AddMembersResults.
+ */
 public class AddMembersResults extends Results {
 
     protected final WsAddMemberResults wsAddMemberResults;

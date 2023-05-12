@@ -16,7 +16,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GroupingsAddResultsTest {
+public class GroupingAddResultsTest {
 
     private static Properties properties;
 
@@ -33,11 +33,11 @@ public class GroupingsAddResultsTest {
         String json = propertyValue("ws.add.member.results.success");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        GroupingsAddResults groupingsAddResults = new GroupingsAddResults(addMembersResults);
-        assertNotNull(groupingsAddResults);
-        List<GroupingsAddResult> results = groupingsAddResults.getResults();
+        GroupingAddResults groupingAddResults = new GroupingAddResults(addMembersResults);
+        assertNotNull(groupingAddResults);
+        List<GroupingAddResult> results = groupingAddResults.getResults();
         assertNotNull(results);
-        assertEquals("SUCCESS", groupingsAddResults.getResultCode());
+        assertEquals("SUCCESS", groupingAddResults.getResultCode());
     }
 
     private String propertyValue(String key) {

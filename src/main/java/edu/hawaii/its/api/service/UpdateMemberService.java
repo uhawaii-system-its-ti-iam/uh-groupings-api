@@ -4,13 +4,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.groupings.GroupingsAddResult;
-import edu.hawaii.its.api.groupings.GroupingsAddResults;
-import edu.hawaii.its.api.groupings.GroupingsMoveMemberResult;
-import edu.hawaii.its.api.groupings.GroupingsMoveMembersResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResult;
-import edu.hawaii.its.api.groupings.GroupingsRemoveResults;
-import edu.hawaii.its.api.groupings.GroupingsReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingAddResult;
+import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
+import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResults;
+import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -39,19 +39,10 @@ public class UpdateMemberService {
     private UpdateTimestampService timestampService;
 
     @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
     private SubjectService subjectService;
 
     @Autowired
     private GroupPathService groupPathService;
-
-    @Autowired
-    private ExecutorService executor;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private MemberService memberService;
@@ -59,39 +50,39 @@ public class UpdateMemberService {
     @Autowired
     private GrouperApiService grouperApiService;
 
-    public GroupingsAddResult addAdmin(String currentUser, String uhIdentifier) {
+    public GroupingAddResult addAdmin(String currentUser, String uhIdentifier) {
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhMemberNotFoundException(validUhUuid);
         }
-        return new GroupingsAddResult(grouperApiService.addMember(GROUPING_ADMINS, uhIdentifier));
+        return new GroupingAddResult(grouperApiService.addMember(GROUPING_ADMINS, uhIdentifier));
     }
 
-    public GroupingsRemoveResult removeAdmin(String currentUser, String uhIdentifier) {
+    public GroupingRemoveResult removeAdmin(String currentUser, String uhIdentifier) {
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhMemberNotFoundException(validUhUuid);
         }
-        return new GroupingsRemoveResult(grouperApiService.removeMember(GROUPING_ADMINS, uhIdentifier));
+        return new GroupingRemoveResult(grouperApiService.removeMember(GROUPING_ADMINS, uhIdentifier));
     }
 
-    public GroupingsAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+    public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
         return addOwners(groupingPath, validIdentifiers);
     }
 
-    public GroupingsAddResult addOwnership(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingAddResult addOwnership(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
         return addOwner(groupingPath, validIdentifier);
     }
 
-    public GroupingsRemoveResults removeOwnerships(String currentUser, String groupingPath,
+    public GroupingRemoveResults removeOwnerships(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
@@ -99,7 +90,7 @@ public class UpdateMemberService {
         return removeOwners(groupingPath, validIdentifiers);
     }
 
-    public GroupingsRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         if (!memberService.isOwner(groupingPath, currentUser) && memberService.isAdmin(currentUser)) {
@@ -109,7 +100,7 @@ public class UpdateMemberService {
         return removeOwner(groupingPath, validIdentifier);
     }
 
-    public GroupingsMoveMembersResult addIncludeMembers(String currentUser, String groupingPath,
+    public GroupingMoveMembersResult addIncludeMembers(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
@@ -118,7 +109,7 @@ public class UpdateMemberService {
                 validIdentifiers);
     }
 
-    public GroupingsMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
@@ -126,7 +117,7 @@ public class UpdateMemberService {
                 validIdentifier);
     }
 
-    public GroupingsMoveMembersResult addExcludeMembers(String currentUser, String groupingPath,
+    public GroupingMoveMembersResult addExcludeMembers(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
@@ -135,7 +126,7 @@ public class UpdateMemberService {
                 groupingPath + GroupType.INCLUDE.value(), validIdentifiers);
     }
 
-    public GroupingsMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
@@ -143,64 +134,64 @@ public class UpdateMemberService {
                 validIdentifier);
     }
 
-    public GroupingsRemoveResults removeIncludeMembers(String currentUser, String groupingPath,
+    public GroupingRemoveResults removeIncludeMembers(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         return removeGroupMembers(groupingPath + GroupType.INCLUDE.value(), uhIdentifiers);
     }
 
-    public GroupingsRemoveResult removeIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingRemoveResult removeIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         return removeGroupMember(groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
     }
 
-    public GroupingsRemoveResults removeExcludeMembers(String currentUser, String groupingPath,
+    public GroupingRemoveResults removeExcludeMembers(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         return removeGroupMembers(groupingPath + GroupType.EXCLUDE.value(), uhIdentifiers);
     }
 
-    public GroupingsRemoveResult removeExcludeMember(String currentUser, String groupingPath,
+    public GroupingRemoveResult removeExcludeMember(String currentUser, String groupingPath,
             String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         return removeGroupMember(groupingPath + GroupType.EXCLUDE.value(), uhIdentifier);
     }
 
-    public GroupingsMoveMemberResult optIn(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingMoveMemberResult optIn(String currentUser, String groupingPath, String uhIdentifier) {
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
         return moveGroupMember(groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
                 uhIdentifier);
     }
 
-    public GroupingsMoveMemberResult optOut(String currentUser, String groupingPath, String uhIdentifier) {
+    public GroupingMoveMemberResult optOut(String currentUser, String groupingPath, String uhIdentifier) {
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
         return moveGroupMember(groupingPath + GroupType.EXCLUDE.value(), groupingPath + GroupType.INCLUDE.value(),
                 uhIdentifier);
     }
 
-    public GroupingsRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {
+    public GroupingRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {
         checkIfAdminUser(currentUser);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
-        GroupingsRemoveResults groupingsRemoveResults = new GroupingsRemoveResults();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         for (String groupPath : groupPaths) {
             if (!groupPathService.isGroupPath(groupPath)) {
                 throw new GcWebServiceError("404: Invalid group path.");
             }
         }
         for (String groupPath : groupPaths) {
-            groupingsRemoveResults.add(removeGroupMember(groupPath, validIdentifier));
+            groupingRemoveResults.add(removeGroupMember(groupPath, validIdentifier));
         }
-        return groupingsRemoveResults;
+        return groupingRemoveResults;
     }
 
     /**
      * Remove all members from the include group at groupingPath.
      */
-    public GroupingsReplaceGroupMembersResult resetIncludeGroup(String currentUser, String groupingPath) {
+    public GroupingReplaceGroupMembersResult resetIncludeGroup(String currentUser, String groupingPath) {
         log.info("resetIncludeGroup; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
@@ -211,7 +202,7 @@ public class UpdateMemberService {
     /**
      * Remove all members from the exclude group at groupingPath.
      */
-    public GroupingsReplaceGroupMembersResult resetExcludeGroup(String currentUser, String groupingPath) {
+    public GroupingReplaceGroupMembersResult resetExcludeGroup(String currentUser, String groupingPath) {
         log.info("resetExcludeGroup; currentUser: " + currentUser + "; groupingPath: " + groupingPath);
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
@@ -222,9 +213,9 @@ public class UpdateMemberService {
     /**
      * Remove all members from group at groupPath.
      */
-    private GroupingsReplaceGroupMembersResult resetGroup(String groupPath) {
+    private GroupingReplaceGroupMembersResult resetGroup(String groupPath) {
         AddMembersResults addMembersResults = grouperApiService.resetGroupMembers(groupPath);
-        GroupingsReplaceGroupMembersResult result = new GroupingsReplaceGroupMembersResult(addMembersResults);
+        GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult(addMembersResults);
         timestampService.update(result);
         return result;
     }
@@ -247,68 +238,68 @@ public class UpdateMemberService {
         }
     }
 
-    private GroupingsMoveMembersResult moveGroupMembers(String addGroupPath, String removeGroupPath,
+    private GroupingMoveMembersResult moveGroupMembers(String addGroupPath, String removeGroupPath,
             List<String> uhIdentifiers) {
         RemoveMembersResults removeMembersResults = grouperApiService.removeMembers(removeGroupPath, uhIdentifiers);
         AddMembersResults addMembersResults = grouperApiService.addMembers(addGroupPath, uhIdentifiers);
-        GroupingsMoveMembersResult result = new GroupingsMoveMembersResult(addMembersResults, removeMembersResults);
+        GroupingMoveMembersResult result = new GroupingMoveMembersResult(addMembersResults, removeMembersResults);
         timestampService.update(result.getAddResults());
         timestampService.update(result.getRemoveResults());
         return result;
     }
 
-    private GroupingsMoveMemberResult moveGroupMember(String addGroupPath, String removeGroupPath,
+    private GroupingMoveMemberResult moveGroupMember(String addGroupPath, String removeGroupPath,
             String uhIdentifier) {
         RemoveMemberResult removeMemberResult = grouperApiService.removeMember(removeGroupPath, uhIdentifier);
         AddMemberResult addMemberResult = grouperApiService.addMember(addGroupPath, uhIdentifier);
-        GroupingsMoveMemberResult result = new GroupingsMoveMemberResult(addMemberResult, removeMemberResult);
+        GroupingMoveMemberResult result = new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
         timestampService.update(result.getAddResult());
         timestampService.update(result.getRemoveResult());
         return result;
     }
 
-    private GroupingsRemoveResults removeGroupMembers(String groupPath, List<String> uhIdentifiers) {
+    private GroupingRemoveResults removeGroupMembers(String groupPath, List<String> uhIdentifiers) {
         RemoveMembersResults removeMembersResults = grouperApiService.removeMembers(groupPath, uhIdentifiers);
-        GroupingsRemoveResults results = new GroupingsRemoveResults(removeMembersResults);
+        GroupingRemoveResults results = new GroupingRemoveResults(removeMembersResults);
         timestampService.update(results);
         return results;
     }
 
-    private GroupingsRemoveResult removeGroupMember(String groupPath, String uhIdentifier) {
+    private GroupingRemoveResult removeGroupMember(String groupPath, String uhIdentifier) {
         RemoveMemberResult removeMemberResult = grouperApiService.removeMember(groupPath, uhIdentifier);
-        GroupingsRemoveResult result = new GroupingsRemoveResult(removeMemberResult);
+        GroupingRemoveResult result = new GroupingRemoveResult(removeMemberResult);
         timestampService.update(result);
         return result;
     }
 
-    private GroupingsAddResults addOwners(String groupingPath, List<String> uhIdentifiers) {
+    private GroupingAddResults addOwners(String groupingPath, List<String> uhIdentifiers) {
         AddMembersResults addMembersResults =
                 grouperApiService.addMembers(groupingPath + GroupType.OWNERS.value(), uhIdentifiers);
-        GroupingsAddResults results = new GroupingsAddResults(addMembersResults);
+        GroupingAddResults results = new GroupingAddResults(addMembersResults);
         timestampService.update(results);
         return results;
     }
 
-    private GroupingsAddResult addOwner(String groupingPath, String uhIdentifier) {
+    private GroupingAddResult addOwner(String groupingPath, String uhIdentifier) {
         AddMemberResult addMemberResult =
                 grouperApiService.addMember(groupingPath + GroupType.OWNERS.value(), uhIdentifier);
-        GroupingsAddResult result = new GroupingsAddResult(addMemberResult);
+        GroupingAddResult result = new GroupingAddResult(addMemberResult);
         timestampService.update(result);
         return result;
     }
 
-    private GroupingsRemoveResults removeOwners(String groupingPath, List<String> uhIdentifiers) {
+    private GroupingRemoveResults removeOwners(String groupingPath, List<String> uhIdentifiers) {
         RemoveMembersResults removeMembersResults =
                 grouperApiService.removeMembers(groupingPath + GroupType.OWNERS.value(), uhIdentifiers);
-        GroupingsRemoveResults results = new GroupingsRemoveResults(removeMembersResults);
+        GroupingRemoveResults results = new GroupingRemoveResults(removeMembersResults);
         timestampService.update(results);
         return results;
     }
 
-    private GroupingsRemoveResult removeOwner(String groupingPath, String uhIdentifier) {
+    private GroupingRemoveResult removeOwner(String groupingPath, String uhIdentifier) {
         RemoveMemberResult removeMemberResult =
                 grouperApiService.removeMember(groupingPath + GroupType.OWNERS.value(), uhIdentifier);
-        GroupingsRemoveResult result = new GroupingsRemoveResult(removeMemberResult);
+        GroupingRemoveResult result = new GroupingRemoveResult(removeMemberResult);
         timestampService.update(result);
         return result;
     }

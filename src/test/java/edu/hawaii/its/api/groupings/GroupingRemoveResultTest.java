@@ -3,10 +3,10 @@ package edu.hawaii.its.api.groupings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.AddMemberResult;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
@@ -18,8 +18,9 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GroupingsAddResultTest {
+public class GroupingRemoveResultTest {
     private static Properties properties;
 
     @BeforeAll
@@ -32,23 +33,20 @@ public class GroupingsAddResultTest {
 
     @Test
     public void test() {
-        String json = propertyValue("ws.add.member.results.success");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        assertNotNull(wsAddMemberResults);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        assertNotNull(addMembersResults);
+        String json = propertyValue("ws.delete.member.results.success");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        assertNotNull(wsDeleteMemberResults);
+        assertTrue(wsDeleteMemberResults.getResults().length > 0);
+        WsDeleteMemberResult wsDeleteMemberResult = wsDeleteMemberResults.getResults()[0];
+        assertNotNull(wsDeleteMemberResult);
+        GroupingRemoveResult groupingRemoveResult =
+                new GroupingRemoveResult(new RemoveMemberResult(wsDeleteMemberResult, "group-path"));
 
-        AddMemberResult addMemberResult = addMembersResults.getResults().get(0);
-        GroupingsAddResult groupingsAddResult = new GroupingsAddResult(addMemberResult);
-        assertNotNull(groupingsAddResult);
-        assertEquals("SUCCESS_ALREADY_EXISTED", groupingsAddResult.getResultCode());
-        assertEquals(getTestUsernames().get(0), groupingsAddResult.getUid());
-        assertEquals(getTestNumbers().get(0), groupingsAddResult.getUhUuid());
-        assertEquals(getTestNames().get(0), groupingsAddResult.getName());
-
-        addMemberResult = addMembersResults.getResults().get(2);
-        groupingsAddResult = new GroupingsAddResult(addMemberResult);
-        assertEquals("SUCCESS", groupingsAddResult.getResultCode());
+        assertNotNull(groupingRemoveResult);
+        assertEquals("SUCCESS_WASNT_IMMEDIATE", groupingRemoveResult.getResultCode());
+        assertEquals(getTestUsernames().get(0), groupingRemoveResult.getUid());
+        assertEquals(getTestNumbers().get(0), groupingRemoveResult.getUhUuid());
+        assertEquals(getTestNames().get(0), groupingRemoveResult.getName());
     }
 
     public List<String> getTestUsernames() {

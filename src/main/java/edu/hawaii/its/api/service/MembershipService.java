@@ -11,7 +11,6 @@ import edu.hawaii.its.api.wrapper.Group;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,38 +31,9 @@ public class MembershipService {
 
     public static final Log logger = LogFactory.getLog(MembershipService.class);
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.yyyymmddThhmm}")
-    private String YYYYMMDDTHHMM;
-
-    @Value("${groupings.api.assign_type_group}")
-    private String ASSIGN_TYPE_GROUP;
-
-    @Value("${groupings.api.operation_assign_attribute}")
-    private String OPERATION_ASSIGN_ATTRIBUTE;
-
-    @Value("${groupings.api.operation_replace_values}")
-    private String OPERATION_REPLACE_VALUES;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
-    private GrouperApiService grouperApiService;
-
     @Autowired
     private SubjectService subjectService;
+
     @Autowired
     private GroupingsService groupingsService;
 

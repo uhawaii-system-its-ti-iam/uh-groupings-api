@@ -6,20 +6,22 @@ import edu.hawaii.its.api.wrapper.AddMembersResults;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupingsAddResults implements GroupingsResult {
+/**
+ * GroupingAddResults shows the results after multiple UH affiliates have been added to a group listing.
+ */
+public class GroupingAddResults implements GroupingResult {
 
     protected AddMembersResults addMembersResults;
-
     private String groupPath;
     private String resultCode;
 
-    public GroupingsAddResults(AddMembersResults addMembersResults) {
+    public GroupingAddResults(AddMembersResults addMembersResults) {
         this.addMembersResults = addMembersResults;
         setResultCode();
         setGroupPath(addMembersResults.getGroupPath());
     }
 
-    public GroupingsAddResults() {
+    public GroupingAddResults() {
         addMembersResults = new AddMembersResults();
         setResultCode();
         setGroupPath("");
@@ -49,12 +51,12 @@ public class GroupingsAddResults implements GroupingsResult {
         this.groupPath = groupPath;
     }
 
-    public List<GroupingsAddResult> getResults() {
-        List<GroupingsAddResult> groupingsAddResults = new ArrayList<>();
+    public List<GroupingAddResult> getResults() {
+        List<GroupingAddResult> groupingAddResults = new ArrayList<>();
         for (AddMemberResult addMemberResult : addMembersResults.getResults()) {
-            groupingsAddResults.add(new GroupingsAddResult(addMemberResult));
+            groupingAddResults.add(new GroupingAddResult(addMemberResult));
         }
-        return groupingsAddResults;
+        return groupingAddResults;
     }
 
 }

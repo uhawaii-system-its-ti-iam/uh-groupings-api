@@ -3,8 +3,8 @@ package edu.hawaii.its.api.service;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.groupings.GroupingsAddResults;
-import edu.hawaii.its.api.groupings.GroupingsTimestampResult;
+import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingTimestampResult;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 
@@ -42,8 +42,8 @@ public class UpdateTimestampServiceTest {
         String json = propertyValue("ws.add.member.results.failure");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
-        GroupingsAddResults groupingsAddResults = new GroupingsAddResults(addMembersResults);
-        GroupingsTimestampResult groupingsTimestampResult = timestampService.update(groupingsAddResults);
+        GroupingAddResults groupingAddResults = new GroupingAddResults(addMembersResults);
+        GroupingTimestampResult groupingsTimestampResult = timestampService.update(groupingAddResults);
         assertNotNull(timestampService.update(groupingsTimestampResult));
         assertFalse(groupingsTimestampResult.isTimeUpdated());
     }

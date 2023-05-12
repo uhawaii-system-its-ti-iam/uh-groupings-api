@@ -65,7 +65,6 @@ public class GroupAttributeResults extends Results {
 
     public boolean isOptInOn() {
         return isOptOn(OptType.IN.value());
-
     }
 
     public boolean isOptOutOn() {
