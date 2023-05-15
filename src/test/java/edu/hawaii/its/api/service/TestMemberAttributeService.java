@@ -54,6 +54,9 @@ public class TestMemberAttributeService {
     @Value("${groupings.api.test.usernames}")
     private List<String> TEST_USERNAMES;
 
+    @Value("${groupings.api.test.uhuuids}")
+    private List<String> TEST_UH_NUMBERS;
+
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
@@ -155,7 +158,6 @@ public class TestMemberAttributeService {
             Person person = memberAttributeService.getMemberAttributes(ADMIN, testUid);
             assertNotNull(person);
             assertEquals(testUid, person.getUsername());
-            assertEquals(testUid, person.getUhUuid());
         });
 
         String testUid = testPerson.getUsername();
@@ -204,7 +206,7 @@ public class TestMemberAttributeService {
                 .stream()
                 .map(subject -> subject.getUhUuid())
                 .collect(Collectors.toList());
-        assertEquals(TEST_USERNAMES, subjectsUhUuids);
+        assertEquals(TEST_UH_NUMBERS, subjectsUhUuids);
 
         String testUid = testPerson.getUsername();
         List<String> testList = new ArrayList<>();
