@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -178,6 +180,17 @@ public class TestGroupPathService {
         assertEquals(GROUPING_OWNERS, groupPathService.getOwnersGroup(GROUPING_OWNERS));
         assertEquals(GROUPING_OWNERS, groupPathService.getOwnersGroup(GROUPING_BASIS));
         assertEquals("", groupPathService.getOwnersGroup(INVALID_GROUPING_PATH));
+    }
+
+    @Test
+    public void getValidGroupingsTest() {
+        ArrayList<String> emptyList = new ArrayList<>();
+        ArrayList<String> inputList = new ArrayList<>();
+        inputList.add(GROUPING);
+
+        assertEquals(emptyList, groupPathService.getValidGroupings(emptyList));
+        assertNotNull(groupPathService.getValidGroupings(inputList));
+
     }
 
 }
