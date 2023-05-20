@@ -7,11 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class AppConfigRunTest {
+public class AppConfigTest {
 
     @Test
     public void construction() {
-        AppConfigRun appConfig = new AppConfigRun();
+        AppConfig appConfig = new AppConfig();
         assertNotNull(appConfig);
     }
 
