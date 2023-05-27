@@ -15,6 +15,7 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -54,6 +55,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -88,6 +90,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
+
+    @MockBean
+    private AsyncJobsManager asyncJobsManager;
 
     @MockBean
     private GroupingAttributeService groupingAttributeService;
@@ -314,7 +319,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void resetIncludeGroup() throws Exception {
+    public void resetIncludeGroupTest() throws Exception {
         GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult();
         given(updateMemberService.resetIncludeGroup(ADMIN, "grouping")).willReturn(result);
 
@@ -328,7 +333,22 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void resetExcludeGroup() throws Exception {
+    public void resetIncludeGroupAsyncTest() throws Exception {
+        CompletableFuture<GroupingReplaceGroupMembersResult> completableFuture = new CompletableFuture<>();
+        given(updateMemberService.resetIncludeGroupAsync(ADMIN, "grouping"))
+                .willReturn(completableFuture);
+
+        MvcResult mvcResult = mockMvc.perform(delete(API_BASE + "/groupings/grouping/include/async")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        assertNotNull(mvcResult);
+
+        verify(updateMemberService, times(1)).resetIncludeGroupAsync(ADMIN, "grouping");
+    }
+
+    @Test
+    public void resetExcludeGroupTest() throws Exception {
         GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult();
         given(updateMemberService.resetExcludeGroup(ADMIN, "grouping")).willReturn(result);
 
@@ -339,6 +359,21 @@ public class GroupingsRestControllerv2_1Test {
         assertNotNull(mvcResult);
 
         verify(updateMemberService, times(1)).resetExcludeGroup(ADMIN, "grouping");
+    }
+
+    @Test
+    public void resetExcludeGroupAsyncTest() throws Exception {
+        CompletableFuture<GroupingReplaceGroupMembersResult> completableFuture = new CompletableFuture<>();
+        given(updateMemberService.resetExcludeGroupAsync(ADMIN, "grouping"))
+                .willReturn(completableFuture);
+
+        MvcResult mvcResult = mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude/async")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        assertNotNull(mvcResult);
+
+        verify(updateMemberService, times(1)).resetExcludeGroupAsync(ADMIN, "grouping");
     }
 
     @Test
@@ -356,6 +391,26 @@ public class GroupingsRestControllerv2_1Test {
 
         verify(memberAttributeService, times(1))
                 .invalidUhIdentifiers(USERNAME, uhIdentifiers);
+    }
+
+    @Test
+    public void invalidUhIdentifiersAsyncTest() throws Exception {
+        List<String> uhIdentifiers = new ArrayList<>();
+        uhIdentifiers.add("iamtst01");
+        uhIdentifiers.add("iamtst02");
+        CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
+        given(memberAttributeService.invalidUhIdentifiersAsync(USERNAME, uhIdentifiers))
+                .willReturn(completableFuture);
+        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/invalid/async")
+                        .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(uhIdentifiers)))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        assertThat(validResult, notNullValue());
+
+        verify(memberAttributeService, times(1))
+                .invalidUhIdentifiersAsync(USERNAME, uhIdentifiers);
     }
 
     @Test
@@ -391,7 +446,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void ownedGrouping() throws Exception {
+    public void ownedGroupingTest() throws Exception {
         String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
@@ -415,7 +470,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void getGrouping() throws Exception {
+    public void getGroupingTest() throws Exception {
         given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true))
                 .willReturn(grouping());
 
@@ -508,6 +563,25 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void addIncludeMembersAsyncTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        CompletableFuture<GroupingMoveMembersResult> completableFuture = new CompletableFuture<>();
+        given(updateMemberService.addIncludeMembersAsync(USERNAME, "grouping", usersToAdd))
+                .willReturn(completableFuture);
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/async")
+                        .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToAdd)))
+                .andExpect(status().isAccepted());
+
+        verify(updateMemberService, times(1))
+                .addIncludeMembersAsync(USERNAME, "grouping", usersToAdd);
+    }
+
+    @Test
     public void addExcludeMembersTest() throws Exception {
         List<String> usersToAdd = new ArrayList<>();
         GroupingMoveMembersResult groupingMoveMembersResult = new GroupingMoveMembersResult();
@@ -525,6 +599,25 @@ public class GroupingsRestControllerv2_1Test {
 
         verify(updateMemberService, times(1))
                 .addExcludeMembers(USERNAME, "grouping", usersToAdd);
+    }
+
+    @Test
+    public void addExcludeMembersAsyncTest() throws Exception {
+        List<String> usersToAdd = new ArrayList<>();
+        usersToAdd.add("tst04name");
+        usersToAdd.add("tst05name");
+        usersToAdd.add("tst06name");
+        CompletableFuture<GroupingMoveMembersResult> completableFuture = new CompletableFuture<>();
+        given(updateMemberService.addExcludeMembersAsync(USERNAME, "grouping", usersToAdd))
+                .willReturn(completableFuture);
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/async")
+                        .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(usersToAdd)))
+                .andExpect(status().isAccepted());
+
+        verify(updateMemberService, times(1))
+                .addExcludeMembersAsync(USERNAME, "grouping", usersToAdd);
     }
 
     @Test
@@ -780,7 +873,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void getGroupingDescription() throws Exception {
+    public void getGroupingDescriptionTest() throws Exception {
         String json = propertyLocator.find("find.groups.results.description");
         WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
         FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
@@ -798,7 +891,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void groupingOptAttributes() throws Exception {
+    public void groupingOptAttributesTest() throws Exception {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-on");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
@@ -857,7 +950,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void groupingOwners() throws Exception {
+    public void groupingOwnersTest() throws Exception {
         String path = "grouping-path";
         given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingGroupMembers());
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + path + "/owners")
@@ -865,6 +958,17 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
         verify(groupingAssignmentService, times(1)).groupingOwners(ADMIN, path);
+    }
+
+    @Test
+    public void getAsyncJobResultTest() throws Exception {
+        CompletableFuture<?> completableFuture = new CompletableFuture<>();
+        Integer jobId = completableFuture.hashCode();
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/jobs/" + jobId)
+                        .header(CURRENT_USER, CURRENT_USER))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(asyncJobsManager, times(1)).getJobResult(CURRENT_USER, jobId);
     }
 
     @Test

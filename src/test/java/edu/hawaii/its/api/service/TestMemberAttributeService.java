@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -148,7 +150,41 @@ public class TestMemberAttributeService {
         uhIdentifiers.add("bogus-user1");
         uhIdentifiers.add("bogus-user2");
         result = memberAttributeService.invalidUhIdentifiers(testUid, uhIdentifiers);
+        assertNotNull(result);
         assertEquals(invalidUhIdentifiers, result);
+        updateMemberService.removeAdmin(ADMIN, testUid);
+    }
+
+    @Test
+    public void invalidUhIdentifiersAsyncTest() {
+
+        assertThrows(ExecutionException.class,
+                () -> memberAttributeService.invalidUhIdentifiersAsync("bogus-owner-admin", null).get());
+
+        CompletableFuture<List<String>> result = memberAttributeService.invalidUhIdentifiersAsync(ADMIN, TEST_USERNAMES);
+        assertNotNull(result);
+        assertEquals(new ArrayList(), result.join());
+
+        String testUid = testPerson.getUsername();
+        List<String> testList = new ArrayList<>();
+        testList.add(testUid);
+
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        List<String> invalidUhIdentifiers = new ArrayList<>();
+        invalidUhIdentifiers.add("bogus-user1");
+        invalidUhIdentifiers.add("bogus-user2");
+        result = memberAttributeService.invalidUhIdentifiersAsync(testUid, invalidUhIdentifiers);
+        assertNotNull(result);
+        assertEquals(invalidUhIdentifiers, result.join());
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+
+        updateMemberService.addAdmin(ADMIN, testUid);
+        List<String> uhIdentifiers = new ArrayList<>(TEST_USERNAMES);
+        uhIdentifiers.add("bogus-user1");
+        uhIdentifiers.add("bogus-user2");
+        result = memberAttributeService.invalidUhIdentifiersAsync(testUid, uhIdentifiers);
+        assertNotNull(result);
+        assertEquals(invalidUhIdentifiers, result.join());
         updateMemberService.removeAdmin(ADMIN, testUid);
     }
 
