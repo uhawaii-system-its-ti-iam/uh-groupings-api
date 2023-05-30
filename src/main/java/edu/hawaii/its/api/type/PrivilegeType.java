@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.type;
 
 public enum PrivilegeType {
-    // UserOptionType (eventually want to make it OwnerPreferenceType to include both optin/out and sync destinations)
 
     IN("optin", InclusionType.IN),
     OUT("optout", InclusionType.OUT);

@@ -1,7 +1,6 @@
 package edu.hawaii.its.api.type;
 
 public enum PreferenceStatus {
-    // PreferenceStatus
 
     ENABLE("enable", true),
     DISABLE("disable", false);
