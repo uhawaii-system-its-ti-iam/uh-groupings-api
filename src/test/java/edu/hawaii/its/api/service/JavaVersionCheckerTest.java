@@ -18,7 +18,7 @@ public class JavaVersionCheckerTest {
     @Autowired
     private JavaVersionChecker javaVersionChecker;
 
-    private String currentJavaVersion = System.getProperty("java.version");
+    private final String currentJavaVersion = System.getProperty("java.version");
 
     @Test
     public void construction() {
