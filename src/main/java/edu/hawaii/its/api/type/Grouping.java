@@ -34,7 +34,6 @@ public class Grouping {
     public Grouping(String path) {
         setPath(path);
         setDescription("");
-        setName("");
         setBasis(new EmptyGroup());
         setExclude(new EmptyGroup());
         setInclude(new EmptyGroup());
