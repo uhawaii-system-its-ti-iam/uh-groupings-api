@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 @Service
@@ -44,7 +45,11 @@ public class GroupAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    @Value("${groupings.api.google.sync.dest.suffix}")
+    private String GOOGLE_SYNC_DEST_SUFFIX;
+
     public static final Log logger = LogFactory.getLog(GroupAttributeService.class);
+    public static final Pattern pattern = Pattern.compile("\\$\\{srhfgs}");
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -69,7 +74,7 @@ public class GroupAttributeService {
         List<SyncDestination> finSyncDestList = grouperApiService.syncDestinations();
 
         for (SyncDestination dest : finSyncDestList) {
-            dest.setDescription(parseKeyVal(grouping.getName(), dest.getDescription()));
+            dest.setDescription(parseKeyVal(grouping.getName(), dest));
         }
 
         return finSyncDestList;
@@ -81,10 +86,9 @@ public class GroupAttributeService {
      */
     public List<SyncDestination> getSyncDestinations(Grouping grouping) {
         List<SyncDestination> syncDestinations = grouperApiService.syncDestinations();
-
         for (SyncDestination destination : syncDestinations) {
+            destination.setDescription(parseKeyVal(grouping.getName(), destination));
             destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-            destination.setDescription(parseKeyVal(grouping.getName(), destination.getDescription()));
         }
         return syncDestinations;
     }
@@ -231,13 +235,16 @@ public class GroupAttributeService {
      * Helper - getAllSyncDestinations
      * Replace ${} with replace in desc otherwise return desc.
      */
-    private String parseKeyVal(String replace, String desc) {
-        final String regex = "(\\$\\{)(.*)(})";
-        String result;
+    private String parseKeyVal(String replace, SyncDestination dest) {
+        String result = replace;
+        if (dest.getName().contains("google-group")) {
+            result += GOOGLE_SYNC_DEST_SUFFIX;
+        }
+
         try {
-            result = desc.replaceFirst(regex, replace);
+            result = pattern.matcher(dest.getDescription()).replaceFirst(result);
         } catch (PatternSyntaxException e) {
-            result = desc;
+            result = dest.getDescription();
         }
         return result;
     }

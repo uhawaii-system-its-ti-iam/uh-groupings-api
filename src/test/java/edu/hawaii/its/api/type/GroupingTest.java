@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingTest {
 
-    static final String groupingPath = "grouping-path";
+    static final String groupingPath = "tmp:grouping";
+    static final String groupingName = "grouping";
 
     @Test
     public void constructor() {
@@ -26,7 +27,7 @@ public class GroupingTest {
         assertNotNull(grouping);
         assertEquals(groupingPath, grouping.getPath());
         assertEquals("", grouping.getDescription());
-        assertEquals("", grouping.getName());
+        assertEquals(groupingName, grouping.getName());
         assertNotNull(grouping.getBasis());
         assertNotNull(grouping.getComposite());
         assertNotNull(grouping.getInclude());
