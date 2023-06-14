@@ -13,7 +13,7 @@ import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.Person;
 
 @PropertySource(value = "classpath:application-integrationTest.properties")
-@Service("uhIdentiferGenerator")
+@Service("UhIdentifierGenerator")
 public class UhIdentifierGenerator {
 
     @Value("${groupings.api.test.grouping_many}")
