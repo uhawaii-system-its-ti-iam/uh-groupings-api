@@ -64,6 +64,9 @@ public class TestGroupingAttributeService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
+    @Value("${groupings.api.google.sync.dest.suffix}")
+    private String GOOGLE_SYNC_DEST_SUFFIX;
+
     @Autowired
     private GrouperApiService grouperApiService;
 
@@ -164,9 +167,9 @@ public class TestGroupingAttributeService {
 
     @Test
     public void getSyncDestinationsTest() {
-
         // Should return a list of sync destinations with the proper fields set.
-        List<SyncDestination> syncDestinations = groupingAttributeService.getSyncDestinations(new Grouping(GROUPING));
+        Grouping grouping = new Grouping(GROUPING);
+        List<SyncDestination> syncDestinations = groupingAttributeService.getSyncDestinations(grouping);
         assertNotNull(syncDestinations);
         syncDestinations.forEach(syncDestination -> {
             assertNotNull(syncDestination.getName());
@@ -175,6 +178,16 @@ public class TestGroupingAttributeService {
             assertNotNull(syncDestination.isSynced());
             assertNotNull(syncDestination.isHidden());
         });
+
+        // Should apply the grouping name and append GOOGLE_SYNC_DEST_SUFFIX to the Google Group sync dest description
+        String googleGroupDescription = "Google-Group: " + grouping.getName() + GOOGLE_SYNC_DEST_SUFFIX;
+        assertTrue(syncDestinations.stream()
+                .anyMatch(syncDestination -> syncDestination.getDescription().equals(googleGroupDescription)));
+
+        // Should contain the grouping name in all sync dest descriptions except CAS/LDAP
+        assertTrue(syncDestinations.stream()
+                .filter(syncDestination -> !syncDestination.getName().contains("uhReleasedGrouping"))
+                .allMatch(syncDestination -> syncDestination.getDescription().contains(grouping.getName())));
     }
 
     @Test
