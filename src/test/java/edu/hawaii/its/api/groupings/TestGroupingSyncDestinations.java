@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +37,11 @@ public class TestGroupingSyncDestinations {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
+    @Value("${groupings.api.google.sync.dest.suffix}")
+    private String googleSyncDestSuffix;
+
+    @Value("#{T(java.util.regex.Pattern).compile('${groupings.api.sync.dest.regex}')}")
+    private Pattern regex;
     @Autowired
     private GrouperApiService grouperApiService;
 
@@ -48,7 +55,7 @@ public class TestGroupingSyncDestinations {
                 GROUPING);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
                 findAttributesResults,
-                groupAttributeResults);
+                groupAttributeResults, new KeyParser(googleSyncDestSuffix, regex));
         assertNotNull(groupingSyncDestinations);
         groupingSyncDestinations = new GroupingSyncDestinations();
         assertNotNull(groupingSyncDestinations);
@@ -64,7 +71,7 @@ public class TestGroupingSyncDestinations {
                 GROUPING);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
                 findAttributesResults,
-                groupAttributeResults);
+                groupAttributeResults, new KeyParser(googleSyncDestSuffix, regex));
 
         assertNotNull(groupingSyncDestinations);
         assertEquals("SUCCESS", groupingSyncDestinations.getResultCode());
@@ -74,7 +81,7 @@ public class TestGroupingSyncDestinations {
         assertTrue(syncDestinations.stream().allMatch(Objects::nonNull));
         assertTrue(syncDestinations.stream().map(GroupingSyncDestination::getName).allMatch(Objects::nonNull));
 
-        assertEquals(syncDestinations.stream().map(GroupingSyncDestination::getName).collect(Collectors.toList()),
+        assertEquals(syncDestinations.stream().sorted(Comparator.comparing(GroupingSyncDestination::getName)).map(GroupingSyncDestination::getName).collect(Collectors.toList()),
                 findAttributesResults.getResults().stream().map(AttributesResult::getName)
                         .collect(Collectors.toList()));
 
@@ -87,7 +94,8 @@ public class TestGroupingSyncDestinations {
     public void failure() {
         GroupingSyncDestinations groupingSyncDestinations =
                 new GroupingSyncDestinations(new FindAttributesResults(new WsFindAttributeDefNamesResults()),
-                        new GroupAttributeResults(new WsGetAttributeAssignmentsResults()));
+                        new GroupAttributeResults(new WsGetAttributeAssignmentsResults()),
+                        new KeyParser(googleSyncDestSuffix, regex));
         assertNotNull(groupingSyncDestinations);
         assertEquals("FAILURE", groupingSyncDestinations.getResultCode());
         assertTrue(groupingSyncDestinations.getSyncDestinations().isEmpty());

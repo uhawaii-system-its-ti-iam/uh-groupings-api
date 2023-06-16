@@ -6,6 +6,7 @@ import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.groupings.KeyParser;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -24,11 +26,18 @@ import java.util.stream.Collectors;
 @Service("ownerService")
 public class GroupingOwnerService {
     public static final Log log = LogFactory.getLog(GroupingOwnerService.class);
+
     @Value("${grouper.api.sync.destinations.location}")
     private String SYNC_DESTINATIONS_LOCATION;
 
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
+
+    @Value("${groupings.api.google.sync.dest.suffix}")
+    private String googleSyncDestSuffix;
+
+    @Value("#{T(java.util.regex.Pattern).compile('${groupings.api.sync.dest.regex}')}")
+    private Pattern regex;
 
     @Autowired private GrouperApiService grouperApiService;
 
@@ -41,13 +50,14 @@ public class GroupingOwnerService {
         log.debug(String.format(
                 "paginatedGrouping; currentUser: %s; groupPaths: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
                 currentUser, groupPaths, pageNumber, pageSize, sortString, isAscending));
-        GetMembersResults getMembersResults = grouperApiService.getMembersResults(
-                currentUser,
-                groupPaths,
-                pageNumber,
-                pageSize,
-                sortString,
-                isAscending);
+        GetMembersResults getMembersResults =
+                grouperApiService.getMembersResults(
+                        currentUser,
+                        groupPaths,
+                        pageNumber,
+                        pageSize,
+                        sortString,
+                        isAscending);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
         groupingGroupsMembers.setPageNumber(pageNumber);
         return groupingGroupsMembers;
@@ -75,14 +85,15 @@ public class GroupingOwnerService {
     public GroupingSyncDestinations groupingsSyncDestinations(String currentUser, String groupingPath) {
         log.debug(String.format("groupingsSyncDestinations; currentUser: %s; groupingPath: %s;", currentUser,
                 groupingPath));
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
-                currentUser,
-                SYNC_DESTINATIONS_CHECKBOXES,
-                SYNC_DESTINATIONS_LOCATION);
+        FindAttributesResults findAttributesResults =
+                grouperApiService.findAttributesResults(currentUser, SYNC_DESTINATIONS_CHECKBOXES,
+                        SYNC_DESTINATIONS_LOCATION);
         GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(
                 currentUser,
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 groupingPath);
-        return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults);
+
+        return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults,
+                new KeyParser(googleSyncDestSuffix, regex));
     }
 }
