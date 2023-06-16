@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @Service
 public class GroupingAttributeService {
@@ -263,11 +262,7 @@ public class GroupingAttributeService {
             result += GOOGLE_SYNC_DEST_SUFFIX;
         }
 
-        try {
-            result = pattern.matcher(dest.getDescription()).replaceFirst(result);
-        } catch (PatternSyntaxException e) {
-            result = dest.getDescription();
-        }
+        result = pattern.matcher(dest.getDescription()).replaceFirst(result);
         return result;
     }
 
