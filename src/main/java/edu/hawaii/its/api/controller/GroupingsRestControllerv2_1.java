@@ -30,6 +30,7 @@ import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.Subject;
@@ -494,50 +495,30 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference.
+     * Update grouping to toggle given preference.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/enable")
-    public ResponseEntity<List<GroupingsServiceResult>> enablePreference(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
+    public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable("id") OptType optType) {
-
-        return updatePreference(currentUser, path, optType, true);
-    }
-
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/disable",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupingsServiceResult>> disablePreference(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable("id") OptType optType) {
-
-        return updatePreference(currentUser, path, optType, false);
-    }
-
-    private ResponseEntity<List<GroupingsServiceResult>> updatePreference(
-            String currentUser,
-            String path,
-            OptType optType,
-            boolean value) {
-
-        logger.info("Entered REST updatePreference");
+            @PathVariable("id") OptType preferenceId,
+            @PathVariable("type") PreferenceStatus preferenceStatus) {
+        logger.info("Entered REST togglePreference");
 
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
-                .withOptType(optType)
-                .withOptValue(value)
+                .withOptType(preferenceId)
+                .withOptValue(preferenceStatus.toggle())
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
                 .withUsername(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
-                .withOptType(optType)
-                .withOptValue(value)
+                .withOptType(preferenceId)
+                .withOptValue(preferenceStatus.toggle())
                 .build();
 
         return ResponseEntity
