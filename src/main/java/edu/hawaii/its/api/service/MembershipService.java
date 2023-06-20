@@ -502,7 +502,7 @@ public class MembershipService {
      */
     public UpdateTimestampResult updateLastModified(String groupPath) {
         logger.info("updateLastModified; group: " + groupPath + ";");
-        String dateTime = Dates.formatDate(LocalDateTime.now(), "yyyyMMdd'T'HHmm");
+        String dateTime = Dates.formatDate(Dates.truncateDatePlus60Seconds(LocalDateTime.now()), "yyyyMMdd'T'HHmm");
         return updateLastModifiedTimestamp(dateTime, groupPath);
     }
 
