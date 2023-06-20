@@ -681,6 +681,15 @@ public class DatesTest {
     }
 
     @Test
+    public void truncateDate() {
+        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime truncatedDate = Dates.truncateDatePlus60Seconds(date);
+        assertThat(truncatedDate.getSecond(), is(0));
+        Integer minutes = date.getMinute() == 59 ? 0 : date.getMinute() + 1;
+        assertThat(truncatedDate.getMinute(), is(minutes));
+    }
+
+    @Test
     public void testConstructorIsPrivate() throws Exception {
         Constructor<Dates> constructor = Dates.class.getDeclaredConstructor();
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
