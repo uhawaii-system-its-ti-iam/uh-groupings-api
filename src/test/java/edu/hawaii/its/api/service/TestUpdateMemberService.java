@@ -190,6 +190,53 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    public void uidAddRemoveIncludeExcludeMembersAsyncTest() {
+        for (String uid : TEST_UH_USERNAMES) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
+        for (String uid : TEST_UH_USERNAMES) {
+            assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
+        for (String uid : TEST_UH_USERNAMES) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
+        for (String uid : TEST_UH_USERNAMES) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
+        for (String uid : TEST_UH_USERNAMES) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
+        for (String uid : TEST_UH_USERNAMES) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
+        for (String uid : TEST_UH_USERNAMES) {
+            assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
+        }
+
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
+    }
+
+    @Test
     public void uidAddRemoveIncludeExcludeMemberTest() {
         String uid = TEST_UH_USERNAMES.get(0);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
@@ -279,6 +326,26 @@ public class TestUpdateMemberService {
 
         GroupingReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroup(ADMIN, GROUPING);
         GroupingReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroup(ADMIN, GROUPING);
+
+        assertEquals(SUCCESS, resultInclude.getResultCode());
+        assertEquals(SUCCESS, resultExclude.getResultCode());
+        for (String str : excludes) {
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, str));
+        }
+        for (String str : includes) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, str));
+        }
+    }
+
+    @Test
+    public void resetGroupAsyncTest() {
+        List<String> includes = TEST_UH_USERNAMES.subList(0, 2);
+        List<String> excludes = TEST_UH_USERNAMES.subList(3, 5);
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
+        updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
+
+        GroupingReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroupAsync(ADMIN, GROUPING).join();
+        GroupingReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroupAsync(ADMIN, GROUPING).join();
 
         assertEquals(SUCCESS, resultInclude.getResultCode());
         assertEquals(SUCCESS, resultExclude.getResultCode());
