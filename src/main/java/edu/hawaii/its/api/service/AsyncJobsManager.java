@@ -3,6 +3,8 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.AsyncJobResult;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class AsyncJobsManager {
 
     @Autowired
     MemberService memberService;
+
+    private static final Log logger = LogFactory.getLog(AsyncJobsManager.class);
 
     private final ConcurrentMap<Integer, CompletableFuture<?>> jobMap;
 
@@ -29,6 +33,8 @@ public class AsyncJobsManager {
     }
 
     public AsyncJobResult getJobResult(String currentUser, Integer jobId) {
+        logger.debug(String.format("getJobResult; currentUser: %s; jobId: %s;", currentUser, jobId));
+
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }

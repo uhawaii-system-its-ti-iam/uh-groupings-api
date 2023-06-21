@@ -48,8 +48,7 @@ public class MembershipService {
      * (basis + include) - exclude.
      */
     public List<Membership> membershipResults(String currentUser, String uid) {
-        String action = "membershipResults; currentUser: " + currentUser + "; uid: " + uid + ";";
-        logger.info(action);
+        logger.info(String.format("membershipResults; currentUser: %s; uid: %s;", currentUser, uid));
 
         if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
@@ -93,8 +92,7 @@ public class MembershipService {
      * Get a list of all groupings pertaining to uid (nonfiltered).
      */
     public List<Membership> managePersonResults(String currentUser, String uid) {
-        String action = "managePersonResults; currentUser: " + currentUser + "; uid: " + uid + ";";
-        logger.info(action);
+        logger.info(String.format("managePersonResults; currentUser: %s; uid: %s;", currentUser, uid));
         if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
         }
@@ -177,6 +175,7 @@ public class MembershipService {
      * Get the number of memberships.
      */
     public Integer numberOfMemberships(String currentUser, String uid) {
+        logger.debug(String.format("numberOfMemberships; currentUser: %s; uid: %s;", currentUser, uid));
         return membershipResults(currentUser, uid).size();
     }
 }

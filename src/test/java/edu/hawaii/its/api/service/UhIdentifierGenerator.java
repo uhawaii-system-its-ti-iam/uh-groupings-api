@@ -69,9 +69,8 @@ public class UhIdentifierGenerator {
                 foundUser = false;
             }
         }
-        logger.info("getRandomUhIdentifier(); name:" + user.getName() +
-                "; uhUuid:" + user.getUhUuid() +
-                "; username: " + user.getUsername() + ";");
+        logger.debug(String.format("getRandomUhIdentifier(); name: %s; uhUuid: %s; username: %s;",
+                user.getName(), user.getUhUuid(), user.getUsername()));
         return user;
     }
 

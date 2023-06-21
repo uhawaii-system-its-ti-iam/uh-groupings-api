@@ -28,9 +28,9 @@ public class PatternPropertyChecker {
     public List<String> getPatternLocation(String folderLocation, String fileExtension) {
         final String pattern = "^.*password.*\\=(?!\\s*$).+";
 
-        logger.info("fileLocations;  fileExtension: " + fileExtension);
-        logger.info("fileLocations; folderLocation: " + folderLocation);
-        logger.info("fileLocations;        pattern: " + pattern);
+        logger.debug("fileLocations;  fileExtension: " + fileExtension);
+        logger.debug("fileLocations; folderLocation: " + folderLocation);
+        logger.debug("fileLocations;        pattern: " + pattern);
 
         List<String> patternLocation = new ArrayList<>();
 
@@ -43,7 +43,7 @@ public class PatternPropertyChecker {
                 Matcher matcher;
 
                 for (File fr : fileResources) {
-                    logger.info("fileLocations; scan file: " + fr);
+                    logger.debug("fileLocations; scan file: " + fr);
                     int lineId = 0;
                     List<Integer> lineNumbers = new ArrayList<>();
                     // The try...when closes the scanner after exiting the try

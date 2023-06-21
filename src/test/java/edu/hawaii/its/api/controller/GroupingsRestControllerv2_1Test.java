@@ -256,7 +256,7 @@ public class GroupingsRestControllerv2_1Test {
         Group adminGroup = new Group(admins);
         AdminListsHolder adminListsHolder = new AdminListsHolder(groupingPaths, adminGroup);
 
-        given(groupingAssignmentService.adminLists("bobo")).willReturn(adminListsHolder);
+        given(groupingAssignmentService.adminsGroupings("bobo")).willReturn(adminListsHolder);
         mockMvc.perform(get(API_BASE + "/admins-and-groupings")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk())
@@ -270,7 +270,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("adminGroup.members[1].name").value("admin1"))
                 .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
         verify(groupingAssignmentService, times(1))
-                .adminLists("bobo");
+                .adminsGroupings("bobo");
     }
 
     @Test

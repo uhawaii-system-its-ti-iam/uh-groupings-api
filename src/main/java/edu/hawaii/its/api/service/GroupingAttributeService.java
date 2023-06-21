@@ -80,7 +80,7 @@ public class GroupingAttributeService {
      * Get all the sync destinations for a specific grouping.
      */
     public List<SyncDestination> getAllSyncDestinations(String currentUser, String path) {
-
+        logger.info(String.format("getAllSyncDestinations; currentUser: %s; path: %s;", currentUser, path));
         checkPrivileges(currentUser);
 
         Grouping grouping = groupingAssignmentService.getGrouping(path, currentUser);
@@ -153,7 +153,8 @@ public class GroupingAttributeService {
      */
     public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
             String attributeName, boolean turnAttributeOn) {
-
+        logger.info(String.format("changeGroupAttributeStatus; groupPath: %s; ownerUsername: %s; attributeName: %s, turnAttributeOn: %s",
+                groupPath, ownerUsername, attributeName, turnAttributeOn));
         checkPrivileges(groupPath, ownerUsername);
         String verb = "removed from ";
         String resultCode = SUCCESS;
@@ -220,9 +221,8 @@ public class GroupingAttributeService {
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
     public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUsername,
             String description) {
-        logger.info(
-                "updateDescription(); groupPath:" + groupPath + "; ownerUsername:" + ownerUsername + "; description: "
-                        + description + ";");
+        logger.info(String.format("updateDescription; groupPath: %s; ownerUsername: %s; description: %s;",
+                groupPath, ownerUsername, description));
 
         if (!memberService.isOwner(groupPath, ownerUsername) && !memberService.isAdmin(
                 ownerUsername)) {

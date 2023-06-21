@@ -16,7 +16,7 @@ public class ExecutorService {
         String text = "execute; " + command.getClass().getSimpleName() + ": ";
         try {
             result = command.execute();
-            logger.info(text + "execution success");
+            logger.debug(text + "execution success");
         } catch (Exception e) {
             logger.error(text + e);
         }

@@ -31,7 +31,7 @@ public class UpdateTimestampService {
     private GroupingTimestampResult updateLastModifiedTimestamp(String groupPath) {
         UpdatedTimestampResult updatedTimestampResult = new UpdateTimestampCommand(groupPath).execute();
         GroupingTimestampResult groupingsTimestampResult = new GroupingTimestampResult(updatedTimestampResult);
-        logger.info("GroupingsTimestampResult; + " + JsonUtil.asJson(groupingsTimestampResult));
+        logger.debug("GroupingsTimestampResult; + " + JsonUtil.asJson(groupingsTimestampResult));
         return groupingsTimestampResult;
     }
 
