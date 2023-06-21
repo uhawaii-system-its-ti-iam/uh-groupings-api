@@ -9,6 +9,7 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
@@ -165,5 +166,11 @@ public final class Dates {
 
     public static Date toDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(zoneId()).toInstant());
+    }
+
+    public static LocalDateTime truncateDatePlus60Seconds(LocalDateTime datetime) {
+        return datetime
+                .truncatedTo(ChronoUnit.MINUTES)
+                .plusMinutes(1);
     }
 }

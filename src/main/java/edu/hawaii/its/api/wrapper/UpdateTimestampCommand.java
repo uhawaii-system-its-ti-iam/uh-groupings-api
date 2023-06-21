@@ -26,8 +26,8 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
                 .addOwnerGroupName(groupPath)
                 .addAttributeDefNameName(YYYYMMDDTHHMM)
                 .assignAttributeAssignValueOperation(OPERATION_REPLACE_VALUES)
-                .addValue(new DateTimeAttributeValue(
-                        Dates.formatDate(LocalDateTime.now(), DATE_FORMAT)).getWsAttributeAssignValue());
+                .addValue(new DateTimeAttributeValue(Dates.formatDate(
+                        Dates.truncateDatePlus60Seconds(LocalDateTime.now()), DATE_FORMAT)).getWsAttributeAssignValue());
     }
 
     public UpdateTimestampCommand() {
