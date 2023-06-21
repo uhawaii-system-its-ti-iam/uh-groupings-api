@@ -10,10 +10,12 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
@@ -72,11 +74,26 @@ public class MemberAttributeService {
             throw new AccessDeniedException();
         }
 
-        List<String> invalid = uhIdentifiers.parallelStream()
+        return uhIdentifiers.parallelStream()
                 .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
                 .collect(Collectors.toList());
+    }
 
-        return invalid;
+    /**
+     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers asynchronously.
+     * Returns an empty list if all uhIdentifiers are valid.
+     */
+    @Async
+    public CompletableFuture<List<String>> invalidUhIdentifiersAsync(String currentUser, List<String> uhIdentifiers) {
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+
+        return CompletableFuture.supplyAsync(() ->
+            uhIdentifiers.parallelStream()
+                    .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                    .collect(Collectors.toList())
+        );
     }
 
     /**
