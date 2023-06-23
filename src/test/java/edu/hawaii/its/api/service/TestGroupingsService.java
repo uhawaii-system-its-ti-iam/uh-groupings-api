@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestGroupingService extends ServiceTest {
+public class TestGroupingsService extends ServiceTest {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
     @Value("${groupings.api.test.grouping_many_include}")
