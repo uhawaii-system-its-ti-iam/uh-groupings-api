@@ -17,6 +17,7 @@ import edu.hawaii.its.api.type.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.BDDMockito.given;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -80,13 +82,13 @@ public class TestGroupingAssignmentService {
     GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
-    private MembershipService membershipService;
-
-    @Autowired
     MemberAttributeService memberAttributeService;
 
     @Autowired
     GrouperApiService grouperApiService;
+
+    @SpyBean
+    GroupingsService groupingsService;
 
     @Autowired private UpdateMemberService updateMemberService;
 
@@ -324,6 +326,14 @@ public class TestGroupingAssignmentService {
             assertTrue(groupingAttributeService.isGroupAttribute(path, OptType.OUT.value()));
         });
 
+    }
+
+    @Test
+    public void noOptInGroupingsPathsTest() {
+        given(groupingsService.optInEnabledGroupingPaths()).willReturn(Collections.emptyList());
+        List<GroupingPath> optInGroupingsPaths =
+                groupingAssignmentService.optInGroupingPaths(ADMIN, testPerson.getUsername());
+        assertEquals(Collections.emptyList(), optInGroupingsPaths);
     }
 
     @Test
