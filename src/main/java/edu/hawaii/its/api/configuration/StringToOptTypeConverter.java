@@ -14,7 +14,7 @@ public class StringToOptTypeConverter implements Converter<String, OptType> {
     public OptType convert(String source) {
         OptType optType = OptType.find(source);
         if (optType == null) {
-            logger.info("Error: Invalid OptType value sent in to converter.");
+            logger.error("Error: Invalid OptType value sent in to converter.");
         }
         return optType;
     }

@@ -66,7 +66,7 @@ public class GroupingAssignmentService {
      * Fetch a grouping from Grouper or the database.
      */
     public Grouping getGrouping(String groupingPath, String ownerUsername) {
-        logger.info("getGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + ";");
+        logger.info(String.format("getGrouping; groupingPath: %s; ownerUsername: %s;", groupingPath, ownerUsername));
 
         Grouping compositeGrouping;
 
@@ -106,9 +106,9 @@ public class GroupingAssignmentService {
      */
     public Grouping getPaginatedGrouping(String groupingPath, String ownerUsername, Integer page, Integer size,
             String sortString, Boolean isAscending) {
-        logger.info(
-                "getPaginatedGrouping; grouping: " + groupingPath + "; username: " + ownerUsername + "; page: " + page
-                        + "; size: " + size + "; sortString: " + sortString + "; isAscending: " + isAscending + ";");
+        logger.info(String.format(
+                "getPaginatedGrouping; grouping: %s; username: %s; page: %s; size: %s; sortString: %s; isAscending: %s;",
+                groupingPath, ownerUsername, page, size, sortString, isAscending));
         if (!memberService.isOwner(groupingPath, ownerUsername) && !memberService.isAdmin(ownerUsername)) {
             throw new AccessDeniedException();
         }
@@ -139,7 +139,8 @@ public class GroupingAssignmentService {
     }
 
     //returns an adminLists object containing the list of all admins and all groupings
-    public AdminListsHolder adminLists(String adminUsername) {
+    public AdminListsHolder adminsGroupings(String adminUsername) {
+        logger.info(String.format("adminsGroupings; adminUsername: %s;", adminUsername));
         if (!memberService.isAdmin(adminUsername)) {
             throw new AccessDeniedException();
         }
@@ -180,7 +181,6 @@ public class GroupingAssignmentService {
 
     // Sets the attributes of a grouping in grouper or the database to match the attributes of the supplied grouping.
     public Grouping setGroupingAttributes(Grouping grouping) {
-        logger.info("setGroupingAttributes; grouping: " + grouping + ";");
         GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResult(grouping.getPath());
         grouping.setOptInOn(groupAttributeResults.isOptInOn());
         grouping.setOptOutOn(groupAttributeResults.isOptOutOn());
@@ -196,7 +196,7 @@ public class GroupingAssignmentService {
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     public List<String> optOutGroupingsPaths(String owner, String optOutUid) {
-        logger.info("optOutGroupingsPaths; owner: " + owner + "; optOutUid: " + optOutUid + ";");
+        logger.info(String.format("optOutGroupingsPaths; owner: %s; optOutUid: %s;", owner, optOutUid));
 
         List<String> includes = groupingsService.groupPaths(optOutUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
@@ -209,7 +209,7 @@ public class GroupingAssignmentService {
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
     public List<GroupingPath> optInGroupingPaths(String owner, String optInUid) {
-        logger.info("optInGroupingsPaths; owner: " + owner + "; optInUid: " + optInUid + ";");
+        logger.info(String.format("optInGroupingsPaths; owner: %s; optInUid: %s;", owner, optInUid));
 
         List<String> includes = groupingsService.groupPaths(optInUid, pathHasInclude());
         includes = includes.stream().map(path -> parentGroupingPath(path)).collect(Collectors.toList());
@@ -222,11 +222,14 @@ public class GroupingAssignmentService {
     }
 
     public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
+        logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingGroupMembers(
                 grouperApiService.getMembersResult(groupingPath + GroupType.OWNERS.value()));
     }
 
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
+        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s",
+                currentUser, groupPath, uidToCheck));
         List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
         if (owners.size() >= 2) {
             return false;

@@ -70,6 +70,8 @@ public class MemberAttributeService {
      * Returns an empty list if all uhIdentifiers are valid.
      */
     public List<String> invalidUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
+        logger.info(String.format("invalidUhIdentifiers; currentUser: %s; uhIdentifiers: %s;", currentUser,
+                uhIdentifiers));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
@@ -85,6 +87,8 @@ public class MemberAttributeService {
      */
     @Async
     public CompletableFuture<List<String>> invalidUhIdentifiersAsync(String currentUser, List<String> uhIdentifiers) {
+        logger.info(String.format("invalidUhIdentifiersAsync; currentUser: %s; uhIdentifiers: %s;", currentUser,
+                uhIdentifiers));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
@@ -102,6 +106,7 @@ public class MemberAttributeService {
      * with null values.
      */
     public Person getMemberAttributes(String currentUser, String uhIdentifier) {
+        logger.info(String.format("getMemberAttributes; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
@@ -114,6 +119,7 @@ public class MemberAttributeService {
      * empty array
      */
     public List<Subject> getMembersAttributes(String currentUser, List<String> uhIdentifiers) {
+        logger.info(String.format("getMembersAttributes; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
@@ -133,6 +139,7 @@ public class MemberAttributeService {
      * Get a list of GroupPaths the user owns, by username or uhUuid.
      */
     public List<GroupingPath> getOwnedGroupings(String currentUser, String uhIdentifier) {
+        logger.info(String.format("getOwnedGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         List<String> pathStrings = groupingsService.groupPaths(uhIdentifier, pathHasOwner());
 
         List<GroupingPath> groupingPaths = new ArrayList<>();
@@ -149,6 +156,7 @@ public class MemberAttributeService {
      * Get the number of groupings a user owns, by username or uhUuid.
      */
     public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
+        logger.debug(String.format("numberOfGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
     }
 }

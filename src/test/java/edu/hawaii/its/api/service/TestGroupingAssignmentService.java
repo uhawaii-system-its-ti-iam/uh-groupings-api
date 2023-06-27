@@ -240,12 +240,12 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void adminListsTest() {
+    public void adminsGroupingsTest() {
         String testUsername = testPerson.getUsername();
 
         // Should throw an exception if current user is not an admin.
         try {
-            groupingAssignmentService.adminLists(testUsername);
+            groupingAssignmentService.adminsGroupings(testUsername);
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
@@ -254,14 +254,14 @@ public class TestGroupingAssignmentService {
         // Should not throw an exception if current user is an admin.
         updateMemberService.addAdmin(ADMIN, testUsername);
         try {
-            groupingAssignmentService.adminLists(testUsername);
+            groupingAssignmentService.adminsGroupings(testUsername);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
         updateMemberService.removeAdmin(ADMIN, testUsername);
 
         // Fields in AdminListsHolder should not be null.
-        AdminListsHolder adminListsHolder = groupingAssignmentService.adminLists(ADMIN);
+        AdminListsHolder adminListsHolder = groupingAssignmentService.adminsGroupings(ADMIN);
         assertNotNull(adminListsHolder.getAdminGroup());
         assertNotNull(adminListsHolder.getAllGroupingPaths());
     }
