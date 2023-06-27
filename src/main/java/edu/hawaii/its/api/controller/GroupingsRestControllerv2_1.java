@@ -118,7 +118,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST adminsGroupings...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.adminLists(currentUser));
+                .body(groupingAssignmentService.adminsGroupings(currentUser));
     }
 
     /**
@@ -341,8 +341,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST optInGroups...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService
-                        .optInGroupingPaths(currentUser, uhIdentifier));
+                .body(groupingAssignmentService.optInGroupingPaths(currentUser, uhIdentifier));
     }
 
     /**
@@ -370,7 +369,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Add a list of users to the include group of grouping at path.
+     * Add a list of uhIdentifiers to the include group of grouping at path.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
     public ResponseEntity<GroupingMoveMembersResult> addIncludeMembers(
@@ -383,7 +382,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Add a list of users to the include group of grouping at path asynchronously.
+     * Add a list of uhIdentifiers to the include group of grouping at path asynchronously.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/async")
     public ResponseEntity<Integer> addIncludeMembersAsync(

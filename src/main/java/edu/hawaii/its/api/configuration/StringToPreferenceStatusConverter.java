@@ -14,7 +14,7 @@ public class StringToPreferenceStatusConverter implements Converter<String, Pref
     public PreferenceStatus convert(String source) {
         PreferenceStatus preferenceStatus = PreferenceStatus.find(source);
         if (preferenceStatus == null) {
-            logger.info("Error: Invalid PreferenceStatus value sent in to converter.");
+            logger.error("Error: Invalid PreferenceStatus value sent in to converter.");
         }
         return preferenceStatus;
     }

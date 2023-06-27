@@ -57,8 +57,7 @@ public class GroupingOwnerService {
      * Get the opt attributes of a selected grouping.
      */
     public GroupingOptAttributes groupingOptAttributes(String currentUser, String groupingPath) {
-        log.debug(
-                String.format("groupingOptAttributes; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        log.debug(String.format("groupingOptAttributes; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingOptAttributes(grouperApiService.groupAttributeResult(currentUser, groupingPath));
     }
 
