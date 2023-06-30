@@ -5,17 +5,12 @@ import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.GroupingUpdatedAttributesResult;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
-import edu.hawaii.its.api.wrapper.AttributesResult;
-import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 
 import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
@@ -26,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Service
 public class GroupingAttributeService {
@@ -40,12 +34,6 @@ public class GroupingAttributeService {
     @Value("${groupings.api.operation_remove_attribute}")
     private String OPERATION_REMOVE_ATTRIBUTE;
 
-    @Value("${grouper.api.sync.destinations.location}")
-    private String SYNC_DESTINATIONS_LOCATION;
-
-    @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
-    private String SYNC_DESTINATIONS_CHECKBOXES;
-
     @Value("${groupings.api.every_entity}")
     private String EVERY_ENTITY;
 
@@ -55,11 +43,7 @@ public class GroupingAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    @Value("${groupings.api.google.sync.dest.suffix}")
-    private String GOOGLE_SYNC_DEST_SUFFIX;
-
     public static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
-    public static final Pattern pattern = Pattern.compile("\\$\\{srhfgs}");
 
     @Autowired
     private GrouperApiService grouperApiService;
@@ -75,50 +59,6 @@ public class GroupingAttributeService {
 
     @Autowired
     private UpdateTimestampService timestampService;
-
-    /**
-     * Get all the sync destinations for a specific grouping.
-     */
-    public List<SyncDestination> getAllSyncDestinations(String currentUser, String path) {
-        logger.info(String.format("getAllSyncDestinations; currentUser: %s; path: %s;", currentUser, path));
-        checkPrivileges(currentUser);
-
-        Grouping grouping = groupingAssignmentService.getGrouping(path, currentUser);
-        List<SyncDestination> finSyncDestList = syncDestinations();
-
-        for (SyncDestination dest : finSyncDestList) {
-            dest.setDescription(parseKeyVal(grouping.getName(), dest));
-        }
-
-        return finSyncDestList;
-    }
-
-    /**
-     * Similar to the getAllSyncDestination except it is called through getGrouping and thus doesn't check to see if
-     * person requesting the information is an owner or superuser as that has already been checked.
-     */
-    public List<SyncDestination> getSyncDestinations(Grouping grouping) {
-        List<SyncDestination> syncDestinations = syncDestinations();
-
-        for (SyncDestination destination : syncDestinations) {
-            destination.setDescription(parseKeyVal(grouping.getName(), destination));
-            destination.setSynced(isGroupAttribute(grouping.getPath(), destination.getName()));
-        }
-        return syncDestinations;
-    }
-
-    public List<SyncDestination> syncDestinations() {
-        FindAttributesResults findAttributesResults =
-                grouperApiService.findAttributesResults(SYNC_DESTINATIONS_CHECKBOXES, SYNC_DESTINATIONS_LOCATION);
-        List<SyncDestination> syncDestinations = new ArrayList<>();
-        for (AttributesResult attributesResult : findAttributesResults.getResults()) {
-            SyncDestination syncDestination =
-                    JsonUtil.asObject(attributesResult.getDescription(), SyncDestination.class);
-            syncDestination.setName(attributesResult.getName());
-            syncDestinations.add(syncDestination);
-        }
-        return syncDestinations;
-    }
 
     /**
      * Turn the ability for users to opt-in/opt-out to a grouping on or off.
@@ -241,29 +181,6 @@ public class GroupingAttributeService {
         if (!memberService.isOwner(groupingPath, ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
             throw new AccessDeniedException();
         }
-    }
-
-    /**
-     * Helper - getAllSyncDestinations
-     */
-    private void checkPrivileges(String ownerIdentifier) {
-        if (!memberService.isOwner(ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
-            throw new AccessDeniedException();
-        }
-    }
-
-    /**
-     * Helper - getAllSyncDestinations
-     * Replace ${} with replace in desc otherwise return desc.
-     */
-    private String parseKeyVal(String replace, SyncDestination dest) {
-        String result = replace;
-        if (dest.getName().contains("google-group")) {
-            result += GOOGLE_SYNC_DEST_SUFFIX;
-        }
-
-        result = pattern.matcher(dest.getDescription()).replaceFirst(result);
-        return result;
     }
 
     /**
