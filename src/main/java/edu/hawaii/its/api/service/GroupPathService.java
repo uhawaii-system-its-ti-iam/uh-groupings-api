@@ -73,9 +73,6 @@ public class GroupPathService {
     }
 
     public List<Group> getValidGroupings(List<String> groupingPaths) {
-        if (groupingPaths.isEmpty()) {
-            return new ArrayList<>();
-        }
         return grouperApiService.findGroupsResults(groupingPaths).getGroups();
     }
 

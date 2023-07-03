@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -143,6 +144,12 @@ public class TestGroupPathService {
     }
 
     @Test
+    public void getValidGroupings() {
+        List<String> groupingPaths = Arrays.asList(GROUPING);
+        assertEquals(GROUPING, groupPathService.getValidGroupings(groupingPaths).get(0).getGroupPath());
+    }
+
+    @Test
     public void getIncludeGroup() {
         assertEquals(GROUPING_INCLUDE, groupPathService.getIncludeGroup(GROUPING));
         assertEquals(GROUPING_INCLUDE, groupPathService.getIncludeGroup(GROUPING_INCLUDE));
@@ -183,14 +190,11 @@ public class TestGroupPathService {
     }
 
     @Test
-    public void getValidGroupingsTest() {
-        ArrayList<String> emptyList = new ArrayList<>();
-        ArrayList<String> inputList = new ArrayList<>();
-        inputList.add(GROUPING);
-
-        assertEquals(emptyList, groupPathService.getValidGroupings(emptyList));
-        assertNotNull(groupPathService.getValidGroupings(inputList));
-
+    public void getGroupPaths() {
+        List<String> groupPaths = groupPathService.getGroupPaths(GROUPING);
+        assertTrue(groupPaths.contains(GROUPING_BASIS));
+        assertTrue(groupPaths.contains(GROUPING_INCLUDE));
+        assertTrue(groupPaths.contains(GROUPING_EXCLUDE));
+        assertTrue(groupPaths.contains(GROUPING_OWNERS));
     }
-
 }
