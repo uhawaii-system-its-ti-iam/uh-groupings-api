@@ -29,6 +29,9 @@ public class FindGroupsCommand extends GrouperCommand implements Command<FindGro
     }
 
     public FindGroupsCommand addPaths(List<String> paths) {
+        if (paths.isEmpty()) {
+            addPath("");
+        }
         for (String path : paths) {
             addPath(path);
         }

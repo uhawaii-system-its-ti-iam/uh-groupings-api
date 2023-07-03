@@ -21,5 +21,6 @@ public class FindGroupsCommandTest {
         strings.add("");
         assertNotNull(findGroupsCommand.addPath(""));
         assertNotNull(findGroupsCommand.addPaths(strings));
+        assertNotNull(findGroupsCommand.addPaths(new ArrayList<>()));
     }
 }
