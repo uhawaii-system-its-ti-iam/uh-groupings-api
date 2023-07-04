@@ -18,7 +18,7 @@ public abstract class GrouperCommand<T> {
     }
 
     protected boolean isUhUuid(String naming) {
-        return naming != null && naming.matches("\\d+");
+        return naming != null && naming.matches("^\\d{8}$");
     }
 
     public WsAttributeAssignValue assignAttributeValue(String value) {

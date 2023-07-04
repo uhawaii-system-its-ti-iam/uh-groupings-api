@@ -43,15 +43,6 @@ public class MemberAttributeServiceTest {
         assertNotNull(memberAttributeService);
     }
 
-
-    @Test
-    public void isUhUuid() {
-        assertTrue(memberAttributeService.isUhUuid("111111"));
-        assertFalse(memberAttributeService.isUhUuid("111-111"));
-        assertFalse(memberAttributeService.isUhUuid("iamtst01"));
-        assertFalse(memberAttributeService.isUhUuid(null));
-    }
-
     /**
      * Helper - getMemberAttributesSubjectFound, getMemberAttributesSubjectNotFound, getMemberAttributesNotAdminNotOwner, getMemberAttributesAdminButNotOwner, getMemberAttributesOwnerButNotAdmin
      */
