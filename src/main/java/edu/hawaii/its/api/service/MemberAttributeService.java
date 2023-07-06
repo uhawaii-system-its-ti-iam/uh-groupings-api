@@ -53,13 +53,6 @@ public class MemberAttributeService {
     @Autowired
     private GroupingsService groupingsService;
 
-    /**
-     * Return true if username is a UH id number
-     */
-    public boolean isUhUuid(String uhIdentifier) {
-        return uhIdentifier != null && uhIdentifier.matches("\\d+");
-    }
-
     // Returns true if the user is in the apps group
     public boolean isApp(String uhIdentifier) {
         return memberService.isMember(GROUPING_APPS, uhIdentifier);
