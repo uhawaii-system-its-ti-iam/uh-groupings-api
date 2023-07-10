@@ -8,6 +8,7 @@ import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.UpdateTimestampCommand;
 import edu.hawaii.its.api.wrapper.UpdatedTimestampResult;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,10 +21,15 @@ import org.springframework.stereotype.Service;
 public class UpdateTimestampService {
 
     public static final Log logger = LogFactory.getLog(MembershipService.class);
+    @Autowired
+    private GroupPathService groupPathService;
 
-    public GroupingTimestampResult update(GroupingResult groupingResult) {
-        if (groupingResult.getResultCode().equals("SUCCESS")) {
-            return updateLastModifiedTimestamp(groupingResult.getGroupPath());
+    public GroupingTimestampResult update(GroupingResult groupingsResult) {
+        if (groupingsResult.getResultCode().equals("SUCCESS")) {
+            if (groupPathService.isOwnersGroupPath(groupingsResult.getGroupPath())) {
+                updateLastModifiedTimestamp(groupPathService.getGroupingPath(groupingsResult.getGroupPath()));
+            }
+            return updateLastModifiedTimestamp(groupingsResult.getGroupPath());
         }
         return new GroupingTimestampResult();
     }
