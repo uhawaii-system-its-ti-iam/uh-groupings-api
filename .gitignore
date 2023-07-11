@@ -6,7 +6,6 @@
 grouperClientFailoverState.bin
 /target
 output.txt
-*-overrides.properties
 *.iml
 src/main/resources/static/javascript/tsconfig.json
 .idea
@@ -19,3 +18,4 @@ hs_err_pid11320.log
 src/docs/html/index.html
 src/docs/pdf/index.pdf
 *.csv
+
