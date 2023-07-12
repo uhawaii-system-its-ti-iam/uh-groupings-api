@@ -64,9 +64,6 @@ public class TestGroupingAttributeService {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Value("${groupings.api.google.sync.dest.suffix}")
-    private String GOOGLE_SYNC_DEST_SUFFIX;
-
     @Autowired
     private GrouperApiService grouperApiService;
 
@@ -124,70 +121,6 @@ public class TestGroupingAttributeService {
                 attributeMap.get(OptType.IN.value()));
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
                 attributeMap.get(OptType.OUT.value()));
-    }
-
-    @Test
-    public void getAllSyncDestinationsTest() {
-        String testUid = testPerson.getUsername();
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-        // Should throw an exception if current user is not an owner or and admin.
-        try {
-            groupingAttributeService.getAllSyncDestinations(testUid, GROUPING);
-            fail("Should throw an exception if current user is not an owner or and admin.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-        // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        try {
-            groupingAttributeService.getAllSyncDestinations(testUid, GROUPING);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an owner but not an admin.");
-        }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-
-        // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
-        try {
-            groupingAttributeService.getAllSyncDestinations(testUid, GROUPING);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin but not an owner.");
-        }
-        updateMemberService.removeAdmin(ADMIN, testUid);
-
-        // Should throw an exception if an invalid path is passed.
-        assertThrows(RuntimeException.class, () -> groupingAttributeService.getAllSyncDestinations(ADMIN, "bogus-path"));
-
-        // Should return sync destinations.
-        List<SyncDestination> syncDestinations = groupingAttributeService.getAllSyncDestinations(ADMIN, GROUPING);
-        assertNotNull(syncDestinations);
-        assertFalse(syncDestinations.isEmpty());
-    }
-
-    @Test
-    public void getSyncDestinationsTest() {
-        // Should return a list of sync destinations with the proper fields set.
-        Grouping grouping = new Grouping(GROUPING);
-        List<SyncDestination> syncDestinations = groupingAttributeService.getSyncDestinations(grouping);
-        assertNotNull(syncDestinations);
-        syncDestinations.forEach(syncDestination -> {
-            assertNotNull(syncDestination.getName());
-            assertNotNull(syncDestination.getDescription());
-            assertNotNull(syncDestination.getTooltip());
-            assertNotNull(syncDestination.isSynced());
-            assertNotNull(syncDestination.isHidden());
-        });
-
-        // Should apply the grouping name and append GOOGLE_SYNC_DEST_SUFFIX to the Google Group sync dest description
-        String googleGroupDescription = "Google-Group: " + grouping.getName() + GOOGLE_SYNC_DEST_SUFFIX;
-        assertTrue(syncDestinations.stream()
-                .anyMatch(syncDestination -> syncDestination.getDescription().equals(googleGroupDescription)));
-
-        // Should contain the grouping name in all sync dest descriptions except CAS/LDAP
-        assertTrue(syncDestinations.stream()
-                .filter(syncDestination -> !syncDestination.getName().contains("uhReleasedGrouping"))
-                .allMatch(syncDestination -> syncDestination.getDescription().contains(grouping.getName())));
     }
 
     @Test

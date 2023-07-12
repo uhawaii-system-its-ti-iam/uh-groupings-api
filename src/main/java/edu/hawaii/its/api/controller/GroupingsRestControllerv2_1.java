@@ -596,22 +596,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get the list of sync destinations.
-     */
-    @RequestMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destinations",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<List<SyncDestination>> getSyncDestinations(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path) throws Exception {
-        logger.info("Entered REST getAllSyncDestinations...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAttributeService.getAllSyncDestinations(currentUser, path));
-    }
-
-    /**
      * True if currentUser is an owner.
      */
     @GetMapping(value = "/owners")
