@@ -9,11 +9,9 @@ import edu.hawaii.its.api.util.PropertyLocator;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupAttributeTest {

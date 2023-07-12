@@ -2,13 +2,11 @@ package edu.hawaii.its.api.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.UnknownHostException;
 
@@ -17,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
-@ExtendWith(SpringExtension.class)
 public class EmailServiceTest {
 
     private static boolean wasSent;

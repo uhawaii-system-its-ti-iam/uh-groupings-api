@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles("localTest") @SpringBootTest(classes = { SpringBootWebApplication.class }) public class GroupTest {
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class }) public class GroupTest {
     private PropertyLocator propertyLocator;
 
     @BeforeEach public void beforeEach() throws Exception {
