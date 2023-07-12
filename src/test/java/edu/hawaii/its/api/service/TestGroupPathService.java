@@ -41,6 +41,7 @@ public class TestGroupPathService {
     protected String GROUPING;
 
     private static final String INVALID_GROUPING_PATH = "invalid-path:include";
+
     @Autowired
     private GroupPathService groupPathService;
 

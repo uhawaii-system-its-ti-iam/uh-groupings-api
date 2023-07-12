@@ -30,25 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestGroupingsService extends ServiceTest {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
+
     @Value("${groupings.api.test.grouping_many_exclude}")
     private String GROUPING_EXCLUDE;
+
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     @Value("${groupings.api.test.uh-numbers}")
     private List<String> TEST_UH_NUMBERS;
 
     @Autowired
     private GroupingsService groupingsService;
 
-    @Autowired
-    private UpdateMemberService updateMemberService;
-
     private static String UH_UUID;
-
-    @Value("${groupings.api.test.admin_user}")
-    private String ADMIN;
 
     @BeforeEach
     public void init() {

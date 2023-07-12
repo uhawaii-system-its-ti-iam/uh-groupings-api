@@ -3,7 +3,9 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.wrapper.*;
+import edu.hawaii.its.api.wrapper.Group;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +18,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static edu.hawaii.its.api.service.PathFilter.*;
+import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 
 @Service
 public class GroupingsService {
