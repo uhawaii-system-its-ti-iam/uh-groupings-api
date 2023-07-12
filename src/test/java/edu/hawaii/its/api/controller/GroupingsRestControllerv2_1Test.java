@@ -193,12 +193,6 @@ public class GroupingsRestControllerv2_1Test {
         return grouping;
     }
 
-    private List<SyncDestination> sdList() {
-        List<SyncDestination> sdList = new ArrayList<>();
-        sdList.add(new SyncDestination(SUCCESS, "retrieved new sync destinations"));
-        return sdList;
-    }
-
     //Test data (2.1 API).
     private List<GroupingsServiceResult> gsrListIn() {
         List<GroupingsServiceResult> gsrList = new ArrayList<>();
@@ -816,19 +810,6 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void getSyncDestinationsTest() throws Exception {
-        given(groupingAttributeService.getAllSyncDestinations(USERNAME, "grouping"))
-                .willReturn(sdList());
-
-        mockMvc.perform(get(API_BASE + "/groupings/grouping/sync-destinations")
-                        .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk());
-
-        verify(groupingAttributeService, times(1))
-                .getAllSyncDestinations(USERNAME, "grouping");
-    }
-
-    @Test
     public void hasOwnerPrivsTest() throws Exception {
         given(memberService.isOwner(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/owners")
@@ -909,17 +890,6 @@ public class GroupingsRestControllerv2_1Test {
         assertEquals(JsonUtil.asJson(groupingOptAttributes), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
                 .groupingOptAttributes(CURRENT_USER, groupingPath);
-    }
-
-    @Test
-    public void syncDestinationsTest() throws Exception {
-        MvcResult result =
-                mockMvc.perform(get(API_BASE + "/groupings/" + groupingTwo().getPath() + "/sync-destinations")
-                                .header("current_user", "o6-username"))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-        assertThat(result, notNullValue());
     }
 
     @Test

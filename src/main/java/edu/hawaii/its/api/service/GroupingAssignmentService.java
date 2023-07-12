@@ -11,7 +11,6 @@ import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -52,9 +51,6 @@ public class GroupingAssignmentService {
 
     @Autowired
     private GrouperApiService grouperApiService;
-
-    @Autowired
-    private GroupingAttributeService groupingAttributeService;
 
     @Autowired
     private MemberService memberService;
@@ -184,10 +180,6 @@ public class GroupingAssignmentService {
         GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResult(grouping.getPath());
         grouping.setOptInOn(groupAttributeResults.isOptInOn());
         grouping.setOptOutOn(groupAttributeResults.isOptOutOn());
-
-        // Set the sync destinations.
-        List<SyncDestination> syncDestinations = groupingAttributeService.getSyncDestinations(grouping);
-        grouping.setSyncDestinations(syncDestinations);
 
         return grouping;
     }

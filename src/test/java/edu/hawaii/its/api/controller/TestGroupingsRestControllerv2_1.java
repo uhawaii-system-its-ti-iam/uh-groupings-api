@@ -694,16 +694,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void getSyncDestinationsTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destinations";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
-    }
-
-    @Test
     public void hasAdminPrivsTest() throws Exception {
         String url = API_BASE_URL + "owners";
         MvcResult mvcResult = mockMvc.perform(get(url)
