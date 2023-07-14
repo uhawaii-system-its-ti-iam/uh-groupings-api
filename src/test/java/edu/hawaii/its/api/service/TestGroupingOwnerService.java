@@ -6,15 +6,21 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.type.Grouping;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Comparator;
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -82,6 +88,15 @@ public class TestGroupingOwnerService {
         assertNotNull(groupingSyncDestinations);
         assertEquals(SUCCESS, groupingSyncDestinations.getResultCode());
         assertNotNull(groupingSyncDestinations.getSyncDestinations());
+
+        assertEquals(groupingSyncDestinations.getSyncDestinations(),
+                groupingSyncDestinations.getSyncDestinations().stream()
+                        .sorted(Comparator.comparing(GroupingSyncDestination::getDescription))
+                        .collect(Collectors.toList()));
+
+        assertTrue(groupingSyncDestinations.getSyncDestinations().stream()
+                .filter(syncDestination -> !syncDestination.getDescription().contains("uhReleasedGrouping"))
+                .allMatch(e -> e.getDescription().contains(new Grouping(GROUPING).getName())));
     }
 
 }
