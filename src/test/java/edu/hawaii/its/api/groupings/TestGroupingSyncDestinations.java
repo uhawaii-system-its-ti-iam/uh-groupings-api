@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -74,7 +75,8 @@ public class TestGroupingSyncDestinations {
         assertTrue(syncDestinations.stream().allMatch(Objects::nonNull));
         assertTrue(syncDestinations.stream().map(GroupingSyncDestination::getName).allMatch(Objects::nonNull));
 
-        assertEquals(syncDestinations.stream().map(GroupingSyncDestination::getName).collect(Collectors.toList()),
+        assertEquals(syncDestinations.stream().sorted(Comparator.comparing(GroupingSyncDestination::getName))
+                        .map(GroupingSyncDestination::getName).collect(Collectors.toList()),
                 findAttributesResults.getResults().stream().map(AttributesResult::getName)
                         .collect(Collectors.toList()));
 
