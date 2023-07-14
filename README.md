@@ -2,7 +2,7 @@
 
 Manage your groupings in one place, use them in many.
 
-A "grouping" is a collection of members. UH Groupings allows you to create groupings, manage grouping memberships, control members' self-service options, designate grouping integrations, and more.
+A "grouping" is a collection of members. UH Groupings allows you to manage grouping memberships, control members' self-service options, designate grouping integrations, and more.
 
 Groupings can be integrated with one or more of the following: email LISTSERV lists, permissions and privilege assignments for access control via CAS, etc, and this list will continue to grow.  Additionally, UH Groupings allows you to leverage existing membership collections, which can substantially reduce the manual overhead of membership management.
 
