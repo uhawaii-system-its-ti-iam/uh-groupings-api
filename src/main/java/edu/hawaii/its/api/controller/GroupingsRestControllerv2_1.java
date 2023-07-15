@@ -1,9 +1,7 @@
 package edu.hawaii.its.api.controller;
 
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
@@ -35,14 +32,6 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
-import edu.hawaii.its.api.service.AsyncJobsManager;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.GroupingAttributeService;
-import edu.hawaii.its.api.service.GroupingOwnerService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MemberService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
@@ -52,6 +41,14 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.service.AsyncJobsManager;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.GroupingAttributeService;
+import edu.hawaii.its.api.service.GroupingOwnerService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MemberService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.wrapper.Subject;
 
 @RestController
@@ -86,6 +83,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
+
+    @Autowired
+    private AnnouncementsService announcementsService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -660,5 +660,13 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(asyncJobsManager.getJobResult(currentUser, jobId));
+    }
+
+    @GetMapping(value = "/announcements/active")
+    public ResponseEntity<List<String>> outageMessage() {
+        logger.info("Entered REST outageMessage...");
+        return ResponseEntity
+                .ok()
+                .body(announcementsService.allAnnouncements());
     }
 }

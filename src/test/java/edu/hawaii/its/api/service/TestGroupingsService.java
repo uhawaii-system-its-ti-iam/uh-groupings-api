@@ -1,16 +1,7 @@
 package edu.hawaii.its.api.service;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
-import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
-import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -18,11 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.util.ServiceTest;
+import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
+import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
+import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -48,7 +45,6 @@ public class TestGroupingsService extends ServiceTest {
 
     @Autowired
     private GroupingsService groupingsService;
-
     private static String UH_UUID;
 
     @BeforeEach
@@ -140,5 +136,4 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
     }
-
 }

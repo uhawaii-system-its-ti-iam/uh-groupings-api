@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.util;
 
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtil {
@@ -19,7 +19,6 @@ public class JsonUtil {
             result = new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
             logger.error("Error: " + e);
-            // Maybe we should throw something?
         }
         return result;
     }
@@ -30,7 +29,17 @@ public class JsonUtil {
             result = new ObjectMapper().readValue(json, type);
         } catch (Exception e) {
             logger.error("Error: " + e);
-            // Maybe we should throw something?
+        }
+        return result;
+    }
+
+    public static <T> List<T> asObjectList(final String json, Class<T> type) {
+        List<T> result = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            result = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, type));
+        } catch (Exception e) {
+            logger.error("Error: " + e);
         }
         return result;
     }
@@ -50,7 +59,6 @@ public class JsonUtil {
             String json = new ObjectMapper()
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(object);
-            System.out.println(json);
         } catch (Exception e) {
             logger.error("Error: " + e);
         }

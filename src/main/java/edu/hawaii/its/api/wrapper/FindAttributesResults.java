@@ -24,6 +24,16 @@ public class FindAttributesResults extends Results {
         return this.wsFindAttributeDefNamesResults.getResultMetadata().getResultCode();
     }
 
+    public AttributesResult getResult() {
+        WsAttributeDefName[] wsAttributeDefNames = this.wsFindAttributeDefNamesResults.getAttributeDefNameResults();
+        AttributesResult attributesResult = new AttributesResult();
+        if (isEmpty(wsAttributeDefNames)) {
+            return attributesResult;
+        }
+        attributesResult = new AttributesResult(wsAttributeDefNames[0]);
+        return attributesResult;
+    }
+
     public List<AttributesResult> getResults() {
         WsAttributeDefName[] wsAttributeDefNames = this.wsFindAttributeDefNamesResults.getAttributeDefNameResults();
         List<AttributesResult> attributesResults = new ArrayList<>();
