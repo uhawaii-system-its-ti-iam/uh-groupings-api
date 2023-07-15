@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
+import org.mockito.internal.matchers.Find;
+
 import edu.internet2.middleware.grouperClient.api.GcFindAttributeDefNames;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 
@@ -23,6 +25,11 @@ public class FindAttributesCommand extends GrouperCommand implements Command<Fin
 
     public FindAttributesCommand assignSearchScope(String scope) {
         this.gcFindAttributeDefNames.assignScope(scope);
+        return this;
+    }
+
+    public FindAttributesCommand addAttribute(String attribute) {
+        this.gcFindAttributeDefNames.addAttributeDefNameName(attribute);
         return this;
     }
 

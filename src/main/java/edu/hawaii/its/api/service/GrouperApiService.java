@@ -34,6 +34,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @Service("grouperApiService")
 public class GrouperApiService {
 
@@ -222,6 +225,10 @@ public class GrouperApiService {
             return new GetMembersResult();
         }
         return result.get(0);
+    }
+
+    public String getMessage() {
+        return PlannedOutage.returnMessage();
     }
 
     /**

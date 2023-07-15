@@ -16,9 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Arrays;
 import java.util.List;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
-import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
-import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import static edu.hawaii.its.api.service.PathFilter.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,7 +46,6 @@ public class TestGroupingsService extends ServiceTest {
 
     @Autowired
     private GroupingsService groupingsService;
-
     private static String UH_UUID;
 
     @BeforeEach
@@ -140,5 +137,4 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
     }
-
 }

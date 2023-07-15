@@ -33,12 +33,9 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.Subject;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +46,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,6 +85,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
+
+    @Autowired
+    private AnnouncementsService announcementsService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -681,5 +680,14 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(asyncJobsManager.getJobResult(currentUser, jobId));
+    }
+
+    @GetMapping(value = "/announcements/active")
+    public ResponseEntity<List<String>> outageMessage() {
+        logger.info("Entered REST outageMessage...");
+        return ResponseEntity
+                .ok()
+                .body(announcementsService.allAnnouncements());
+
     }
 }

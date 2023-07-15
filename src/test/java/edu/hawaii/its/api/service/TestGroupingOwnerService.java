@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.util.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -86,6 +87,8 @@ public class TestGroupingOwnerService {
         GroupingSyncDestinations groupingSyncDestinations = ownerService.groupingsSyncDestinations(
                 ADMIN,
                 GROUPING);
+        JsonUtil.prettyPrint(groupingSyncDestinations.getSyncDestinations());
+
         assertNotNull(groupingSyncDestinations);
         assertEquals(SUCCESS, groupingSyncDestinations.getResultCode());
         assertNotNull(groupingSyncDestinations.getSyncDestinations());
