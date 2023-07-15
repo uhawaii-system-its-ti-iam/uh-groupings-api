@@ -3,8 +3,6 @@ package edu.hawaii.its.api.type;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.AttributesResult;
 
 @Service
 public class Announcements {
@@ -35,12 +33,12 @@ public class Announcements {
         return resultCode;
     }
 
-    public List<String> validMessages(List<Announcement> allAnnouncements) {
+    public List<String> validMessages(List<Announcement> allGroupingsAnnouncements) {
         List<String> validMessages = new ArrayList<>();
-        for (Announcement announcement : allAnnouncements) {
+        for (Announcement groupingsAnnouncement : allGroupingsAnnouncements) {
             //check whether each announcement message is of an Active state
-            if (announcement.getState() == Announcement.State.Active) {
-                validMessages.add(announcement.getMessage());
+            if (groupingsAnnouncement.getState() == Announcement.State.Active) {
+                validMessages.add(groupingsAnnouncement.getMessage());
             }
         }
         return validMessages;

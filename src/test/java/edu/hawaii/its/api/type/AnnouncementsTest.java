@@ -57,6 +57,7 @@ class AnnouncementsTest {
         LocalDateTime start4 = LocalDateTime.parse("2023-01-15T00:00");
         LocalDateTime end4 = LocalDateTime.parse("2024-01-25T00:00");
         announcementsList.add(new Announcement("second valid message", start4, end4));
+
         expectedMessages.add("second valid message");
         assertEquals(expectedMessages, announcements.validMessages(announcementsList));
     }

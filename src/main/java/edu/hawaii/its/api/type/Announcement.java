@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.type;
 
-import java.util.List;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,8 +25,8 @@ public class Announcement {
     }
 
     Announcement(@JsonProperty("message") String message,
-                 @JsonProperty("start") LocalDateTime start,
-                 @JsonProperty("end") LocalDateTime end) {
+                          @JsonProperty("start") LocalDateTime start,
+                          @JsonProperty("end") LocalDateTime end) {
         this.message = message;
         this.start = start;
         this.end = end;
@@ -43,7 +42,6 @@ public class Announcement {
     }
 
     public String getMessage() {
-        List<Announcement> all = new Announcements().getAnnouncements();
         return message;
     }
 
@@ -57,10 +55,6 @@ public class Announcement {
 
     public State getState() {
         return state;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     @Override

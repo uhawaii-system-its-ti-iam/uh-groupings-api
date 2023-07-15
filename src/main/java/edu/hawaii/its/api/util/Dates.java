@@ -12,9 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 
 public final class Dates {
     public static final String DATE_SORT_FORMAT = "yyyy-MM-dd";

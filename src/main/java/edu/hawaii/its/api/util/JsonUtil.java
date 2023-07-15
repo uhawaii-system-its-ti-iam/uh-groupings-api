@@ -33,7 +33,7 @@ public class JsonUtil {
         return result;
     }
 
-    public static <T> List<T> asObjectList(final String json, Class<T> type) {
+    public static <T> List<T> asList(final String json, Class<T> type) {
         List<T> result = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -59,6 +59,7 @@ public class JsonUtil {
             String json = new ObjectMapper()
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(object);
+            System.out.println(json);
         } catch (Exception e) {
             logger.error("Error: " + e);
         }

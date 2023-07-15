@@ -2,7 +2,6 @@ package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
