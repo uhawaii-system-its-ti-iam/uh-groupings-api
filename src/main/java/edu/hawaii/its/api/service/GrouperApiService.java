@@ -22,6 +22,7 @@ import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
+import edu.hawaii.its.api.wrapper.PlannedOutage;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -221,6 +222,11 @@ public class GrouperApiService {
             return new GetMembersResult();
         }
         return result.get(0);
+    }
+
+    public String getMessage() {
+
+        return PlannedOutage.returnMessage();
     }
 
     /**

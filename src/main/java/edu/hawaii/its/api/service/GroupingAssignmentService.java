@@ -226,6 +226,11 @@ public class GroupingAssignmentService {
                 grouperApiService.getMembersResult(groupingPath + GroupType.OWNERS.value()));
     }
 
+    public String outageMessage() {
+
+        return grouperApiService.getMessage();
+    }
+
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
         List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
         if (owners.size() >= 2) {
