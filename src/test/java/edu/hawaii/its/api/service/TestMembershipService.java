@@ -74,16 +74,16 @@ public class TestMembershipService {
         assertTrue(memberService.isAdmin(ADMIN));
         testUids = uhIdentifierGenerator.getRandomMembers(5).getUids();
         testUids.forEach(testUid -> {
-            grouperApiService.removeMember(GROUPING_ADMINS, testUid);
-            grouperApiService.removeMember(GROUPING_INCLUDE, testUid);
-            grouperApiService.removeMember(GROUPING_EXCLUDE, testUid);
-            grouperApiService.removeMember(GROUPING_OWNERS, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         });
     }
 
     @Test
     public void membershipResultsTest() {
-        grouperApiService.removeMember(GROUPING_BASIS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_BASIS, testUids.get(0));
 
         // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
         try {
@@ -102,7 +102,7 @@ public class TestMembershipService {
         }
 
         // Should not throw an exception if current user is an admin and does not match uid.
-        grouperApiService.addMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
         try {
             membershipService.membershipResults(testUids.get(0), ADMIN);
         } catch (AccessDeniedException e) {
@@ -110,7 +110,7 @@ public class TestMembershipService {
         } catch (UhMemberNotFoundException e) {
 
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should throw an exception if uid passed is bogus.
         try {
@@ -120,7 +120,7 @@ public class TestMembershipService {
             assertEquals("404 NOT_FOUND \"bogus-user\"", e.getMessage());
         }
 
-        grouperApiService.addMember(GROUPING_BASIS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_BASIS, testUids.get(0));
     }
 
     @Test
@@ -133,10 +133,10 @@ public class TestMembershipService {
                 .noneMatch(membership -> membership.getPath().equals(GROUPING) && !membership.isInBasis()));
 
         // Should be a member after added.
-        grouperApiService.addMember(GROUPING_OWNERS, testUids.get(0));
-        grouperApiService.addMember(GROUPING_INCLUDE, testUids.get(0));
-        grouperApiService.addMember(GROUPING_EXCLUDE, testUids.get(0));
-        grouperApiService.addMember(GROUPING_BASIS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_OWNERS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_EXCLUDE, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_BASIS, testUids.get(0));
         memberships = membershipService.managePersonResults(ADMIN, testUids.get(0));
         Membership membership = memberships.stream()
                 .filter(m -> m.getPath().equals(GROUPING)).findAny().orElse(null);
@@ -148,10 +148,10 @@ public class TestMembershipService {
         assertTrue(membership.isInOwner());
 
         // Clean up.
-        grouperApiService.removeMember(GROUPING_OWNERS, testUids.get(0));
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUids.get(0));
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testUids.get(0));
-        grouperApiService.removeMember(GROUPING_BASIS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_BASIS, testUids.get(0));
 
         // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
         try {
@@ -177,22 +177,22 @@ public class TestMembershipService {
         }
 
         // Should not throw an exception if current user is an admin and does not match uid.
-        grouperApiService.addMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
         try {
             membershipService.managePersonResults(testUids.get(0), testUids.get(1));
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should not throw an exception if current user is an admin and does match uid.
-        grouperApiService.addMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
         try {
             membershipService.managePersonResults(testUids.get(0), testUids.get(0));
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does match uid.");
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should return and empty list if uid passed is bogus.
         memberships = membershipService.managePersonResults(ADMIN, "bogus-user");

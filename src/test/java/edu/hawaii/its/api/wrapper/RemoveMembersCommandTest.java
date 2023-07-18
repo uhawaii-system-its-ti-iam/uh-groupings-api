@@ -21,7 +21,7 @@ public class RemoveMembersCommandTest {
         assertNotNull(removeMembersCommand.addUhIdentifier("11111111"));
         assertNotNull(removeMembersCommand.assignGroupPath(""));
         assertNotNull(removeMembersCommand.includeUhMemberDetails(true));
-
+        assertNotNull(removeMembersCommand.owner(""));
         List<String> strings = new ArrayList<>();
         strings.add("");
         assertNotNull(removeMembersCommand.addUhIdentifiers(strings));
