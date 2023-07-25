@@ -16,6 +16,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -124,4 +126,29 @@ public class SubjectTest {
         assertEquals("", subject.getLastName());
 
     }
+
+    @Test
+    public void hasUHAttributesTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setAttributeValues(new String[]{"attribute"});
+        Subject subject = new Subject(wsSubject);
+        assertTrue(subject.hasUHAttributes());
+    }
+
+    @Test
+    public void hasUHAttributesNullTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setAttributeValues(null);
+        Subject subject = new Subject(wsSubject);
+        assertFalse(subject.hasUHAttributes());
+    }
+
+    @Test
+    public void hasUHAttributesEmptyTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setAttributeValues(new String[]{""});
+        Subject subject = new Subject(wsSubject);
+        assertFalse(subject.hasUHAttributes());
+    }
+
 }

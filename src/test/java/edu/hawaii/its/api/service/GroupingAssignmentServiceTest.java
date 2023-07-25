@@ -12,16 +12,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -58,6 +55,6 @@ class GroupingAssignmentServiceTest {
         Map<String, Group> groups = groupingAssignmentService.makeGroups(getMembersResults);
         assertFalse(groups.isEmpty());
         Group resultGroup = groups.get(GROUPING_0_PATH);
-
     }
+
 }

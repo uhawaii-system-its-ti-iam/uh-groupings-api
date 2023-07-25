@@ -1,19 +1,41 @@
 package edu.hawaii.its.api.util;
 
 import edu.hawaii.its.api.type.Person;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.mockito.Mockito.mock;
 
 public class JsonUtilTest {
 
+    private static Person person0;
+    private final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
+
+    @BeforeAll
+    public static void beforeAll() {
+        person0 = new Person("name", "uhUuid", "username", "firstName", "lastName");
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        System.setOut(new PrintStream(outStream));
+        System.setErr(new PrintStream(errStream));
+    }
+
     @Test
-    public void basics() {
-        Person person0 = new Person("name", "uhUuid", "username", "firstName", "lastName");
+    public void asJsonAsObject() {
         String personJson = JsonUtil.asJson(person0);
 
         Person person1 = JsonUtil.asObject(personJson, Person.class);
@@ -25,6 +47,22 @@ public class JsonUtilTest {
         assertEquals(person0.getLastName(), person1.getLastName());
         assertEquals(person0.getAttributes(), person1.getAttributes());
         assertEquals(person0.getClass(), person1.getClass());
+        assertDoesNotThrow(() -> JsonUtil.asJson(mock(Object.class)));
+        assertDoesNotThrow(() -> JsonUtil.asObject("", Object.class));
+    }
+
+    @Test
+    public void prettyPrint() {
+        JsonUtil.prettyPrint(person0);
+        assertTrue(outStream.toString().contains("name"));
+        assertDoesNotThrow(() -> JsonUtil.prettyPrint(mock(Object.class)));
+    }
+
+    @Test
+    public void printJson() {
+        JsonUtil.printJson(person0);
+        assertFalse(errStream.toString().trim().isEmpty());
+        assertDoesNotThrow(() -> JsonUtil.printJson(mock(Object.class)));
     }
 
     @Test
@@ -46,4 +84,5 @@ public class JsonUtilTest {
         constructor.setAccessible(true);
         constructor.newInstance();
     }
+
 }

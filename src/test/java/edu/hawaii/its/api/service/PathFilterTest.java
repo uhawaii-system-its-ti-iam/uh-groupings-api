@@ -109,6 +109,9 @@ public class PathFilterTest {
         }
         assertThat(parentGroupingPath(groupinPath), equalTo(groupinPath));
 
+        PathFilter pathFilter = new PathFilter();
+        assertEquals("", pathFilter.parentGroupingPath(null));
+        assertEquals("", pathFilter.parentGroupingPath(""));
     }
 
     @Test

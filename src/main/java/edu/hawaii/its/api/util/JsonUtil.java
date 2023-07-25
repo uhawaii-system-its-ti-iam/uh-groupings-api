@@ -43,6 +43,7 @@ public class JsonUtil {
             logger.error("Error: " + e);
         }
     }
+
     public static void prettyPrint(Object object) {
         try {
             String json = new ObjectMapper()

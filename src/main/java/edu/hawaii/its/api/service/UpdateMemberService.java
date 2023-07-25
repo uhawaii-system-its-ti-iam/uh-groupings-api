@@ -115,8 +115,8 @@ public class UpdateMemberService {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
-        return moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
-                validIdentifiers);
+        return moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), validIdentifiers);
     }
 
     @Async
@@ -137,8 +137,8 @@ public class UpdateMemberService {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
-        return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
-                validIdentifier);
+        return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), validIdentifier);
     }
 
     public GroupingMoveMembersResult addExcludeMembers(String currentUser, String groupingPath,
@@ -170,8 +170,8 @@ public class UpdateMemberService {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
-        return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(), groupingPath + GroupType.INCLUDE.value(),
-                validIdentifier);
+        return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), validIdentifier);
     }
 
     public GroupingRemoveResults removeIncludeMembers(String currentUser, String groupingPath,
@@ -209,16 +209,16 @@ public class UpdateMemberService {
         log.info(String.format("optIn; currentUser: %s; groupingPath: %s; uhIdentifier %s;",
                 currentUser, groupingPath, uhIdentifier));
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
-        return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(),
-                uhIdentifier);
+        return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), uhIdentifier);
     }
 
     public GroupingMoveMemberResult optOut(String currentUser, String groupingPath, String uhIdentifier) {
         log.info(String.format("optOut; currentUser: %s; groupingPath: %s; uhIdentifier %s;",
                 currentUser, groupingPath, uhIdentifier));
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
-        return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(), groupingPath + GroupType.INCLUDE.value(),
-                uhIdentifier);
+        return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
     }
 
     public GroupingRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {

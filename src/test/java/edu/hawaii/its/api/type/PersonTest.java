@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.hawaii.its.api.wrapper.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -290,5 +291,16 @@ public class PersonTest {
         person = new Person(name, uhUuid, uid);
         String expected = "Person [" + "name=" + name + ", uhUuid=" + uhUuid + ", username=" + uid + "]";
         assertEquals(expected, person.toString());
+    }
+
+    @Test
+    public void subjectConstructorTest() {
+        Subject subject = new Subject();
+        Person person = new Person(subject);
+        assertThat(person.getName(), is(subject.getName()));
+        assertThat(person.getUhUuid(), is(subject.getUhUuid()));
+        assertThat(person.getUsername(), is(subject.getUid()));
+        assertThat(person.getFirstName(), is(subject.getFirstName()));
+        assertThat(person.getLastName(), is(subject.getLastName()));
     }
 }

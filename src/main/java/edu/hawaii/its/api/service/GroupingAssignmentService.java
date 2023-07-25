@@ -49,22 +49,26 @@ public class GroupingAssignmentService {
     @Autowired
     private GroupingsService groupingsService;
 
-    //returns an adminLists object containing the list of all admins and all groupings
-    public AdminListsHolder adminsGroupings(String adminUsername) {
-        logger.info(String.format("adminsGroupings; adminUsername: %s;", adminUsername));
-        if (!memberService.isAdmin(adminUsername)) {
+
+    /**
+     * Returns an adminLists object containing the list of all admins and all groupings.
+     */
+    public AdminListsHolder adminsGroupings(String adminUhIdentifier) {
+        logger.info(String.format("adminsGroupings; adminUhIdentifier: %s;", adminUhIdentifier));
+        if (!memberService.isAdmin(adminUhIdentifier)) {
             throw new AccessDeniedException();
         }
         AdminListsHolder adminListsHolder = new AdminListsHolder();
-
         List<String> adminGrouping = Arrays.asList(GROUPING_ADMINS);
-        Group admin = getMembers(adminUsername, adminGrouping).get(GROUPING_ADMINS);
+        Group admin = getMembers(adminUhIdentifier, adminGrouping).get(GROUPING_ADMINS);
         adminListsHolder.setAllGroupingPaths(groupingsService.allGroupingPaths());
         adminListsHolder.setAdminGroup(admin);
         return adminListsHolder;
     }
 
-    //returns a group from grouper or the database
+    /**
+     * Returns a group from grouper or the database.
+     */
     public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
         GetMembersResults getMembersResults =
                 grouperApiService.getMembersResults(
