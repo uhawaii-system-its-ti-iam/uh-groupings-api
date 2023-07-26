@@ -14,6 +14,9 @@ public class CommandFactoryTest {
         assertEquals("Z", commandFactory.create("returnZ").execute());
         assertEquals("B", commandFactory.create("returnB").execute());
         assertEquals("No such command exists", commandFactory.create("").execute());
+        assertThrows(ArithmeticException.class, () -> commandFactory.create("returnArithmeticException").execute(), "returnArithmeticException should throw a ArithmeticException");
+        assertThrows(NullPointerException.class, () -> commandFactory.create("returnNullPointerException").execute(), "returnNullPointerException should throw a NullPointerException");
+
 
     }
 

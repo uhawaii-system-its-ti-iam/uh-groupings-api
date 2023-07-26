@@ -29,6 +29,9 @@ public class CommandFactory {
             case "returnNullPointerException":
                 return returnNullPointerException;
 
+            case "returnArithmeticException":
+                return returnArithmeticException;
+
             default: return returnError;
         }
 
