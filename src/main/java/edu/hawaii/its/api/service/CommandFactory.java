@@ -4,35 +4,35 @@ import edu.hawaii.its.api.wrapper.Command;
 
 public class CommandFactory {
 
-    Command returnZ  = () -> "Z";
-    Command returnA = () -> "A";
-    Command returnB = () -> "B";
-    Command returnError = () -> "No such command exists";
-    Command returnNullPointerException =() -> {String str = null; return str.length(); };
+    Command zCommand  = () -> "Z";
+    Command aCommand = () -> "A";
+    Command bCommand = () -> "B";
+    Command errorCommand = () -> "No such command exists";
+    Command nullPointerExceptionCommand =() -> {throw new NullPointerException();};
 
-    Command returnArithmeticException = () -> 10%0;
+    Command arithmeticExceptionCommand = () -> {throw new ArithmeticException();};
 
     private Command executed;
 
     public Command create(String command) {
 
         switch (command) {
-            case "returnZ":
-                return returnZ;
+            case "zCommand":
+                return zCommand;
 
-            case "returnB":
-                return returnB;
+            case "bCommand":
+                return bCommand;
 
-            case "returnA":
-                return returnA;
+            case "aCommand":
+                return aCommand;
 
-            case "returnNullPointerException":
-                return returnNullPointerException;
+            case "nullPointerExceptionCommand":
+                return nullPointerExceptionCommand;
 
-            case "returnArithmeticException":
-                return returnArithmeticException;
+            case "arithmeticExceptionCommand":
+                return arithmeticExceptionCommand;
 
-            default: return returnError;
+            default: return errorCommand;
         }
 
     }
