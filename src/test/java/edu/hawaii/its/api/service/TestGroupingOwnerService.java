@@ -31,14 +31,15 @@ public class TestGroupingOwnerService {
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
-    @Autowired private GroupingOwnerService ownerService;
-    @Autowired private GroupPathService groupPathService;
+    @Autowired
+    private GroupingOwnerService ownerService;
+
+    @Autowired
+    private GroupPathService groupPathService;
 
     @Test
     public void paginatedGrouping() {
