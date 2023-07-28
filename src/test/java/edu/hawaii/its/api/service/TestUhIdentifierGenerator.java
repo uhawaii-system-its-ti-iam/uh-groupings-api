@@ -2,16 +2,19 @@ package edu.hawaii.its.api.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.groupings.GroupingMember;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -22,21 +25,25 @@ public class TestUhIdentifierGenerator {
     UhIdentifierGenerator uhIdentifierGenerator;
 
     @Test
-    public void getRandomUhIdentiferTest() {
-        ArrayList<Person> arr = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            try {
-                Person person = uhIdentifierGenerator.getRandomPerson();
-                arr.add(person);
-                if (person.getUsername() == null || person.getUsername().equals("")) {
-                    fail("Should not have empty usernames");
-                }
-                if (person.getUhUuid() == null || person.getUhUuid().equals("")) {
-                    fail("Should not have empty uhuuid");
-                }
-            } catch (Exception e) {
-                fail("Should not have thrown an exception");
-            }
+    public void getRandomUhIdentifierTest() {
+        GroupingMember member = uhIdentifierGenerator.getRandomMember();
+        assertNotNull(member);
+        assertNotNull(member.getUid());
+        assertNotEquals("", member.getUid());
+        assertNotNull(member.getUhUuid());
+        assertNotEquals("", member.getUhUuid());
+    }
+
+    @Test
+    public void getRandomUhIdentifiersTest() {
+        List<GroupingMember> randomMembers = uhIdentifierGenerator.getRandomMembers(5).getMembers();
+        assertEquals(5, randomMembers.size());
+        for (GroupingMember member : randomMembers) {
+            assertNotNull(member);
+            assertNotNull(member.getUid());
+            assertNotEquals("", member.getUid());
+            assertNotNull(member.getUhUuid());
+            assertNotEquals("", member.getUhUuid());
         }
     }
 

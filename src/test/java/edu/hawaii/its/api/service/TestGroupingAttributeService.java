@@ -6,21 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,20 +37,18 @@ public class TestGroupingAttributeService {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
-    @Value("${groupings.api.test.grouping_many_basis}")
-    private String GROUPING_BASIS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
+
     @Value("${groupings.api.test.grouping_many_exclude}")
     private String GROUPING_EXCLUDE;
+
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
     @Value("Test Many Groups In Basis")
     private String DEFAULT_DESCRIPTION;
-
-    @Value("${groupings.api.test.usernames}")
-    private List<String> TEST_USERNAMES;
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
@@ -71,28 +66,22 @@ public class TestGroupingAttributeService {
     private GroupingAttributeService groupingAttributeService;
 
     @Autowired
-    private MemberService memberService;
-
-    @Autowired
     private UpdateMemberService updateMemberService;
 
     @Autowired
     private GroupingsService groupingsService;
 
     @Autowired
-    public Environment env; // Just for the settings check.
-
-    @Autowired
     private UhIdentifierGenerator uhIdentifierGenerator;
 
     private Map<String, Boolean> attributeMap = new HashMap<>();
-    private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     private final String SUCCESS_NOT_ALLOWED_DIDNT_EXIST = "SUCCESS_NOT_ALLOWED_DIDNT_EXIST";
     private final String SUCCESS_ALLOWED_ALREADY_EXISTED = "SUCCESS_ALLOWED_ALREADY_EXISTED";
     private final String SUCCESS_ALLOWED = "SUCCESS_ALLOWED";
     private final String SUCCESS_NOT_ALLOWED = "SUCCESS_NOT_ALLOWED";
 
-    private Person testPerson;
+    private String testUid;
+    private List<String> testUidList;
 
     @BeforeEach
     public void init() {
@@ -102,16 +91,12 @@ public class TestGroupingAttributeService {
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
-        testPerson = uhIdentifierGenerator.getRandomPerson();
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUsername());
-
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUhUuid());
+        testUid = uhIdentifierGenerator.getRandomMember().getUid();
+        testUidList = Arrays.asList(testUid);
+        grouperApiService.removeMember(GROUPING_ADMINS, testUid);
+        grouperApiService.removeMember(GROUPING_INCLUDE, testUid);
+        grouperApiService.removeMember(GROUPING_EXCLUDE, testUid);
+        grouperApiService.removeMember(GROUPING_OWNERS, testUid);
     }
 
     @AfterAll
@@ -125,10 +110,6 @@ public class TestGroupingAttributeService {
 
     @Test
     public void changeOptInStatusTest() {
-        String testUid = testPerson.getUsername();
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
         // Should throw an exception if current user is not an owner or and admin.
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUsername(testUid)
@@ -153,13 +134,13 @@ public class TestGroupingAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
         try {
             groupingAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
         updateMemberService.addAdmin(ADMIN, testUid);
@@ -272,10 +253,6 @@ public class TestGroupingAttributeService {
 
     @Test
     public void changeOptOutStatusTest() {
-        String testUid = testPerson.getUsername();
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
         // Should throw an exception if current user is not an owner or and admin.
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUsername(testUid)
@@ -301,13 +278,13 @@ public class TestGroupingAttributeService {
         }
 
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
         try {
             groupingAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
         optInRequest = new OptRequest.Builder()
@@ -437,10 +414,6 @@ public class TestGroupingAttributeService {
 
     @Test
     public void changeGroupAttributeStatus() {
-        String testUid = testPerson.getUsername();
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
         // Should throw an exception if current user is not an owner or and admin.
         try {
             groupingAttributeService.changeGroupAttributeStatus(GROUPING, testUid, null, false);
@@ -449,13 +422,13 @@ public class TestGroupingAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
         try {
             groupingAttributeService.changeGroupAttributeStatus(GROUPING, testUid, null, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
         updateMemberService.addAdmin(ADMIN, testUid);
@@ -513,10 +486,6 @@ public class TestGroupingAttributeService {
     @Test
     public void updateDescriptionTest() {
         String descriptionOriginal = groupingsService.getGroupingDescription(GROUPING);
-        String testUid = testPerson.getUsername();
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
         // Should throw an exception if current user is not an owner or and admin.
         try {
             groupingAttributeService.updateDescription(GROUPING, testUid, null);
@@ -525,13 +494,13 @@ public class TestGroupingAttributeService {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
         // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
         try {
             groupingAttributeService.updateDescription(GROUPING, testUid, DEFAULT_DESCRIPTION);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner but not an admin.");
         }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
         updateMemberService.addAdmin(ADMIN, testUid);

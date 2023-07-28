@@ -18,10 +18,9 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
-import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GroupingsService;
-import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
+import edu.hawaii.its.api.service.UhIdentifierGenerator;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.AsyncJobResult;
@@ -82,14 +81,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
-    @Value("${groupings.api.test.usernames}")
-    private List<String> TEST_USERNAMES;
-
     @Value("Test Many Groups In Basis")
     private String DEFAULT_DESCRIPTION;
 
-    @Autowired
-    private GrouperApiService grouperApiService;
     @Autowired
     private GroupingAttributeService groupingAttributeService;
     @Autowired
@@ -99,13 +93,15 @@ public class TestGroupingsRestControllerv2_1 {
     private UpdateMemberService updateMemberService;
 
     @Autowired
-    private MemberAttributeService memberAttributeService;
-
-    @Autowired
     private MemberService memberService;
 
-    @Autowired GroupingsService groupingsService;
+    @Autowired
+    private GroupingsService groupingsService;
 
+    @Autowired
+    private UhIdentifierGenerator uhIdentifierGenerator;
+
+    private List<String> testUids;
     public static final String API_BASE_URL = "/api/groupings/v2.1/";
     private MockMvc mockMvc;
 
@@ -115,16 +111,18 @@ public class TestGroupingsRestControllerv2_1 {
     @BeforeAll
     public void init() {
         assertTrue(memberService.isAdmin(ADMIN));
-        TEST_USERNAMES.forEach(testUsername -> updateMemberService.removeAdmin(ADMIN, testUsername));
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
-        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
 
-        TEST_USERNAMES.forEach(testUsername -> {
-            assertFalse(memberService.isOwner(GROUPING, testUsername));
-            assertFalse(memberService.isMember(GROUPING_INCLUDE, testUsername));
-            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUsername));
-            assertFalse(memberService.isAdmin(testUsername));
+        testUids = uhIdentifierGenerator.getRandomMembers(4).getUids();
+        testUids.forEach(testUid -> updateMemberService.removeAdmin(ADMIN, testUid));
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
+
+        testUids.forEach(testUid -> {
+            assertFalse(memberService.isOwner(GROUPING, testUid));
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, testUid));
+            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUid));
+            assertFalse(memberService.isAdmin(testUid));
         });
 
         // Save the starting attribute settings for the test grouping.
@@ -169,27 +167,27 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addAdminTest() throws Exception {
-        String url = API_BASE_URL + "admins/" + TEST_USERNAMES.get(0);
+        String url = API_BASE_URL + "admins/" + testUids.get(0);
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingAddResult.class));
-        updateMemberService.removeAdmin(ADMIN, TEST_USERNAMES.get(0));
+        updateMemberService.removeAdmin(ADMIN, testUids.get(0));
     }
 
     @Test
     public void removeAdminTest() throws Exception {
-        String url = API_BASE_URL + "admins/" + TEST_USERNAMES.get(0);
-        updateMemberService.addAdmin(ADMIN, TEST_USERNAMES.get(0));
+        String url = API_BASE_URL + "admins/" + testUids.get(0);
+        updateMemberService.addAdmin(ADMIN, testUids.get(0));
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResult.class));
-        assertFalse(memberService.isAdmin(TEST_USERNAMES.get(0)));
+        assertFalse(memberService.isAdmin(testUids.get(0)));
     }
 
     @Test
@@ -198,7 +196,7 @@ public class TestGroupingsRestControllerv2_1 {
         List<String> pathList = new ArrayList<>();
         pathList.add(GROUPING_OWNERS);
         pathList.add(GROUPING_INCLUDE);
-        iamtst01List.add(TEST_USERNAMES.get(0));
+        iamtst01List.add(testUids.get(0));
         updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
@@ -216,9 +214,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void resetIncludeGroupTest() throws Exception {
-        List<String> uhNumbersInclude = TEST_USERNAMES.subList(0, 3);
-
-        assertNotNull(updateMemberService.addIncludeMembers(ADMIN, GROUPING, uhNumbersInclude));
+        assertNotNull(updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids));
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/include";
         MvcResult mvcResult = mockMvc.perform(delete(url)
@@ -228,14 +224,12 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingReplaceGroupMembersResult.class));
 
-        uhNumbersInclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
+        testUids.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
     }
 
     @Test
     public void resetIncludeGroupAsyncTest() throws Exception {
-        List<String> uhNumbersInclude = TEST_USERNAMES.subList(0, 3);
-
-        assertNotNull(updateMemberService.addIncludeMembers(ADMIN, GROUPING, uhNumbersInclude));
+        assertNotNull(updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids));
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/include/async";
         MvcResult mvcResult = mockMvc.perform(delete(url)
@@ -247,21 +241,21 @@ public class TestGroupingsRestControllerv2_1 {
 
         String jobId = mvcResult.getResponse().getContentAsString();
         url = API_BASE_URL + "jobs/" + jobId;
+        AsyncJobResult asyncJobResult;
         do {
             mvcResult = mockMvc.perform(get(url)
                             .header(CURRENT_USER, ADMIN))
                     .andExpect(status().isOk())
                     .andReturn();
-        } while (!mvcResult.getResponse().getContentAsString().contains("\"status\":\"COMPLETED\""));
+            asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
+        } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
 
-        uhNumbersInclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
+        testUids.forEach(num -> assertFalse(memberService.isMember(GROUPING_INCLUDE, num)));
     }
 
     @Test
     public void resetExcludeGroupTest() throws Exception {
-        List<String> uhNumbersExclude = TEST_USERNAMES.subList(0, 3);
-
-        assertNotNull(updateMemberService.addExcludeMembers(ADMIN, GROUPING, uhNumbersExclude));
+        assertNotNull(updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids));
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude";
         MvcResult mvcResult = mockMvc.perform(delete(url)
@@ -271,14 +265,12 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingReplaceGroupMembersResult.class));
 
-        uhNumbersExclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
+        testUids.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
     }
 
     @Test
     public void resetExcludeGroupAsyncTest() throws Exception {
-        List<String> uhNumbersInclude = TEST_USERNAMES.subList(0, 3);
-
-        assertNotNull(updateMemberService.addExcludeMembers(ADMIN, GROUPING, uhNumbersInclude));
+        assertNotNull(updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids));
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude/async";
         MvcResult mvcResult = mockMvc.perform(delete(url)
@@ -289,15 +281,17 @@ public class TestGroupingsRestControllerv2_1 {
                 Integer.class));
 
         Integer jobId = Integer.valueOf(mvcResult.getResponse().getContentAsString());
-        url = API_BASE_URL + "jobs/" + jobId ;
+        url = API_BASE_URL + "jobs/" + jobId;
+        AsyncJobResult asyncJobResult;
         do {
             mvcResult = mockMvc.perform(get(url)
                             .header(CURRENT_USER, ADMIN))
                     .andExpect(status().isOk())
                     .andReturn();
-        } while (!mvcResult.getResponse().getContentAsString().contains("\"status\":\"COMPLETED\""));
+            asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
+        } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
 
-        uhNumbersInclude.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
+        testUids.forEach(num -> assertFalse(memberService.isMember(GROUPING_EXCLUDE, num)));
     }
 
     @Test
@@ -306,7 +300,7 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
@@ -318,25 +312,28 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isAccepted())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
 
         String jobId = mvcResult.getResponse().getContentAsString();
-        url = API_BASE_URL + "jobs/" + jobId ;
+        url = API_BASE_URL + "jobs/" + jobId;
+        AsyncJobResult asyncJobResult;
         do {
             mvcResult = mockMvc.perform(get(url)
                             .header(CURRENT_USER, ADMIN))
                     .andExpect(status().isOk())
                     .andReturn();
-        } while (!mvcResult.getResponse().getContentAsString().contains("\"status\":\"COMPLETED\""));
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AsyncJobResult.class));
+            asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
+        } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
+        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                AsyncJobResult.class));
     }
 
     @Test
     public void memberAttributesTest() throws Exception {
-        String url = API_BASE_URL + "members/" + TEST_USERNAMES.get(0);
+        String url = API_BASE_URL + "members/" + testUids.get(0);
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -350,7 +347,7 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
@@ -400,7 +397,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void managePersonResultsTest() throws Exception {
-        String url = API_BASE_URL + "members/" + TEST_USERNAMES.get(0) + "/groupings";
+        String url = API_BASE_URL + "members/" + testUids.get(0) + "/groupings";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -410,7 +407,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getOptInGroupsTest() throws Exception {
-        String url = API_BASE_URL + "groupings/members/" + TEST_USERNAMES.get(0) + "/opt-in-groups";
+        String url = API_BASE_URL + "groupings/members/" + testUids.get(0) + "/opt-in-groups";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -421,7 +418,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void optInTest() throws Exception {
         List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(TEST_USERNAMES.get(0));
+        iamtst01List.add(testUids.get(0));
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/" + iamtst01List.get(0) + "/self";
         MvcResult mvcResult = mockMvc.perform(put(url)
@@ -437,10 +434,10 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void optOutTest() throws Exception {
         List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(TEST_USERNAMES.get(0));
+        iamtst01List.add(testUids.get(0));
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
 
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/" + TEST_USERNAMES.get(0) + "/self";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/" + testUids.get(0) + "/self";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -456,13 +453,13 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingMoveMembersResult.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_INCLUDE, username)));
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+        testUids.forEach(testUid -> assertTrue(memberService.isMember(GROUPING_INCLUDE, testUid)));
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
@@ -471,25 +468,27 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isAccepted())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 Integer.class));
 
         String jobId = mvcResult.getResponse().getContentAsString();
-        url = API_BASE_URL + "jobs/" + jobId ;
+        url = API_BASE_URL + "jobs/" + jobId;
+        AsyncJobResult asyncJobResult;
         do {
             mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
+                            .header(CURRENT_USER, ADMIN))
                     .andExpect(status().isOk())
                     .andReturn();
-        } while (!mvcResult.getResponse().getContentAsString().contains("\"status\":\"COMPLETED\""));
+            asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
+        } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 AsyncJobResult.class));
 
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_INCLUDE, username)));
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+        testUids.forEach(testUid -> assertTrue(memberService.isMember(GROUPING_INCLUDE, testUid)));
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
@@ -498,13 +497,13 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingMoveMembersResult.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, username)));
-        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+        testUids.forEach(testUid -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, testUid)));
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
@@ -513,7 +512,7 @@ public class TestGroupingsRestControllerv2_1 {
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isAccepted())
                 .andReturn();
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
@@ -521,49 +520,51 @@ public class TestGroupingsRestControllerv2_1 {
 
         String jobId = mvcResult.getResponse().getContentAsString();
         url = API_BASE_URL + "jobs/" + jobId;
+        AsyncJobResult asyncJobResult;
         do {
             mvcResult = mockMvc.perform(get(url)
                             .header(CURRENT_USER, ADMIN))
                     .andExpect(status().isOk())
                     .andReturn();
-        } while (!mvcResult.getResponse().getContentAsString().contains("\"status\":\"COMPLETED\""));
+            asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
+        } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 AsyncJobResult.class));
-        
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, username)));
-        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+
+        testUids.forEach(testUid -> assertTrue(memberService.isMember(GROUPING_EXCLUDE, testUid)));
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
     public void removeIncludeMembersTest() throws Exception {
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids);
         String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/";
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
-        TEST_USERNAMES.forEach(username ->
-                assertFalse(memberService.isMember(GROUPING_INCLUDE, username)));
+        testUids.forEach(testUid ->
+                assertFalse(memberService.isMember(GROUPING_INCLUDE, testUid)));
     }
 
     @Test
     public void removeExcludeMembersTest() throws Exception {
-        updateMemberService.addExcludeMembers(ADMIN, GROUPING, TEST_USERNAMES);
+        updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids);
         String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/";
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(TEST_USERNAMES)))
+                        .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
-        TEST_USERNAMES.forEach(username ->
-                assertFalse(memberService.isMember(GROUPING_EXCLUDE, username)));
+        testUids.forEach(testUid ->
+                assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUid)));
     }
 
     @Test
@@ -578,28 +579,28 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addOwnersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/" + String.join(",", TEST_USERNAMES);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/" + String.join(",", testUids);
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingAddResults.class));
-        TEST_USERNAMES.forEach(username -> assertTrue(memberService.isOwner(GROUPING, username)));
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
+        testUids.forEach(testUid -> assertTrue(memberService.isOwner(GROUPING, testUid)));
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
     @Test
     public void removeOwnersTest() throws Exception {
-        updateMemberService.addOwnerships(ADMIN, GROUPING, TEST_USERNAMES);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/" + String.join(",", TEST_USERNAMES);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/" + String.join(",", testUids);
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
-        TEST_USERNAMES.forEach(username -> assertFalse(memberService.isOwner(GROUPING, username)));
+        testUids.forEach(testUid -> assertFalse(memberService.isOwner(GROUPING, testUid)));
     }
 
     @Test
@@ -715,7 +716,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfGroupingsTest() throws Exception {
-        String url = API_BASE_URL + "owners/" + TEST_USERNAMES.get(0) + "/groupings/count";
+        String url = API_BASE_URL + "owners/" + testUids.get(0) + "/groupings/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -725,7 +726,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
-        String url = API_BASE_URL + "/members/" + TEST_USERNAMES.get(0) + "/memberships/count";
+        String url = API_BASE_URL + "/members/" + testUids.get(0) + "/memberships/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -761,7 +762,8 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AsyncJobResult.class));
+        assertNotNull(
+                new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(), AsyncJobResult.class));
     }
 }
 

@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,32 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestMemberService {
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
-
-    @Value("${groupings.api.test.grouping_many_basis}")
-    private String GROUPING_BASIS;
-
-    @Value("${groupings.api.test.grouping_many_include}")
-    private String GROUPING_INCLUDE;
-
-    @Value("${groupings.api.test.grouping_many_exclude}")
-    private String GROUPING_EXCLUDE;
-
-    @Value("${groupings.api.test.grouping_many_owners}")
-    private String GROUPING_OWNERS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String OWNERS_GROUP;
-
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_UH_NUMBERS;
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
@@ -57,73 +31,74 @@ public class TestMemberService {
     @Autowired
     private UpdateMemberService updateMemberService;
 
-    private static final String SUCCESS = "SUCCESS";
+    @Autowired
+    private UhIdentifierGenerator uhIdentifierGenerator;
 
-    private static String UH_UUID;
+    private static String testUhUuid;
 
     private static final String BOGUS = "bogus-string";
 
     @BeforeEach
     public void beforeAll() {
-        UH_UUID = TEST_UH_NUMBERS.get(0);
+        testUhUuid = uhIdentifierGenerator.getRandomMember().getUhUuid();
     }
 
     @Test
     public void isOwner() {
-        updateMemberService.removeOwnership(ADMIN, GROUPING, UH_UUID);
-        assertFalse(memberService.isOwner(GROUPING, UH_UUID));
-        updateMemberService.addOwnership(ADMIN, GROUPING, UH_UUID);
-        assertTrue(memberService.isOwner(GROUPING, UH_UUID));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, testUhUuid);
+        assertFalse(memberService.isOwner(GROUPING, testUhUuid));
+        updateMemberService.addOwnership(ADMIN, GROUPING, testUhUuid);
+        assertTrue(memberService.isOwner(GROUPING, testUhUuid));
     }
 
     @Test
     public void isAdmin() {
         assertTrue(memberService.isAdmin(ADMIN));
 
-        updateMemberService.addAdmin(ADMIN, UH_UUID);
-        assertTrue(memberService.isAdmin(UH_UUID));
-        updateMemberService.removeAdmin(ADMIN, UH_UUID);
-        assertFalse(memberService.isAdmin(UH_UUID));
+        updateMemberService.addAdmin(ADMIN, testUhUuid);
+        assertTrue(memberService.isAdmin(testUhUuid));
+        updateMemberService.removeAdmin(ADMIN, testUhUuid);
+        assertFalse(memberService.isAdmin(testUhUuid));
 
         assertFalse(memberService.isAdmin(BOGUS));
     }
 
     @Test
     public void isInclude() {
-        updateMemberService.removeIncludeMember(ADMIN, GROUPING, UH_UUID);
-        assertFalse(memberService.isInclude(GROUPING, UH_UUID));
-        updateMemberService.addIncludeMember(ADMIN, GROUPING, UH_UUID);
-        assertTrue(memberService.isInclude(GROUPING, UH_UUID));
-        updateMemberService.removeIncludeMember(ADMIN, GROUPING, UH_UUID);
+        updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUhUuid);
+        assertFalse(memberService.isInclude(GROUPING, testUhUuid));
+        updateMemberService.addIncludeMember(ADMIN, GROUPING, testUhUuid);
+        assertTrue(memberService.isInclude(GROUPING, testUhUuid));
+        updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUhUuid);
 
         assertFalse(memberService.isInclude(GROUPING, BOGUS));
         assertThrows(RuntimeException.class, () -> memberService.isInclude(BOGUS, BOGUS));
-        assertThrows(RuntimeException.class, () -> memberService.isInclude(BOGUS, UH_UUID));
+        assertThrows(RuntimeException.class, () -> memberService.isInclude(BOGUS, testUhUuid));
     }
 
     @Test
     public void isExclude() {
-        updateMemberService.removeExcludeMember(ADMIN, GROUPING, UH_UUID);
-        assertFalse(memberService.isExclude(GROUPING, UH_UUID));
-        updateMemberService.addExcludeMember(ADMIN, GROUPING, UH_UUID);
-        assertTrue(memberService.isExclude(GROUPING, UH_UUID));
-        updateMemberService.removeExcludeMember(ADMIN, GROUPING, UH_UUID);
+        updateMemberService.removeExcludeMember(ADMIN, GROUPING, testUhUuid);
+        assertFalse(memberService.isExclude(GROUPING, testUhUuid));
+        updateMemberService.addExcludeMember(ADMIN, GROUPING, testUhUuid);
+        assertTrue(memberService.isExclude(GROUPING, testUhUuid));
+        updateMemberService.removeExcludeMember(ADMIN, GROUPING, testUhUuid);
 
         assertFalse(memberService.isExclude(GROUPING, BOGUS));
         assertThrows(RuntimeException.class, () -> memberService.isExclude(BOGUS, BOGUS));
-        assertThrows(RuntimeException.class, () -> memberService.isExclude(BOGUS, UH_UUID));
+        assertThrows(RuntimeException.class, () -> memberService.isExclude(BOGUS, testUhUuid));
     }
 
     @Test
     public void isMember() {
-        updateMemberService.addIncludeMember(ADMIN, GROUPING, UH_UUID);
-        assertTrue(memberService.isMember(GROUPING, UH_UUID));
-        updateMemberService.addExcludeMember(ADMIN, GROUPING, UH_UUID);
-        assertFalse(memberService.isMember(GROUPING, UH_UUID));
-        assertTrue(memberService.isExclude(GROUPING, UH_UUID));
+        updateMemberService.addIncludeMember(ADMIN, GROUPING, testUhUuid);
+        assertTrue(memberService.isMember(GROUPING, testUhUuid));
+        updateMemberService.addExcludeMember(ADMIN, GROUPING, testUhUuid);
+        assertFalse(memberService.isMember(GROUPING, testUhUuid));
+        assertTrue(memberService.isExclude(GROUPING, testUhUuid));
 
         assertFalse(memberService.isMember(GROUPING, BOGUS));
         assertThrows(RuntimeException.class, () -> memberService.isMember(BOGUS, BOGUS));
-        assertThrows(RuntimeException.class, () -> memberService.isMember(BOGUS, UH_UUID));
+        assertThrows(RuntimeException.class, () -> memberService.isMember(BOGUS, testUhUuid));
     }
 }

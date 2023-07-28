@@ -6,6 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
@@ -32,9 +33,6 @@ public class TestUpdateMemberService {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
-    @Value("${groupings.api.test.grouping_many_basis}")
-    private String GROUPING_BASIS;
-
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 
@@ -53,20 +51,8 @@ public class TestUpdateMemberService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Value("${groupings.api.failure}")
-    private String FAILURE;
-
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_UH_NUMBERS;
-
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_UH_USERNAMES;
-
     @Autowired
     private UpdateMemberService updateMemberService;
-
-    @Autowired
-    private MemberAttributeService memberAttributeService;
 
     @Autowired
     private MemberService memberService;
@@ -74,36 +60,38 @@ public class TestUpdateMemberService {
     @Autowired
     private GrouperApiService grouperApiService;
 
-    private final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
-    private final String SUCCESS_ALREADY_EXISTED = "SUCCESS_ALREADY_EXISTED";
-    private final String SUCCESS_WASNT_IMMEDIATE = "SUCCESS_WASNT_IMMEDIATE";
+    @Autowired
+    private UhIdentifierGenerator uhIdentifierGenerator;
+
+    private List<String> testUids;
+    private List<String> testUhUuids;
 
     @BeforeAll
     public void init() {
-        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
-        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_NUMBERS);
-        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_NUMBERS);
+        GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(5);
+        testUids = testGroupingMembers.getUids();
+        testUhUuids = testGroupingMembers.getUhUuids();
 
-        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_USERNAMES.get(0));
-        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_USERNAMES);
-        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_USERNAMES);
+        grouperApiService.removeMember(GROUPING_ADMINS, testUids.get(0));
+        grouperApiService.removeMembers(GROUPING_INCLUDE, testUids);
+        grouperApiService.removeMembers(GROUPING_EXCLUDE, testUids);
     }
 
     @Test
     public void addRemoveAdminTest() {
         // With uh number.
-        assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
-        updateMemberService.addAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
-        assertTrue(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
-        updateMemberService.removeAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
-        assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
+        assertFalse(memberService.isAdmin(testUhUuids.get(0)));
+        updateMemberService.addAdmin(ADMIN, testUhUuids.get(0));
+        assertTrue(memberService.isAdmin(testUhUuids.get(0)));
+        updateMemberService.removeAdmin(ADMIN, testUhUuids.get(0));
+        assertFalse(memberService.isAdmin(testUhUuids.get(0)));
 
         // With uh username.
-        assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
-        updateMemberService.addAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
-        assertTrue(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
-        updateMemberService.removeAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
-        assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
+        assertFalse(memberService.isAdmin(testUids.get(0)));
+        updateMemberService.addAdmin(ADMIN, testUids.get(0));
+        assertTrue(memberService.isAdmin(testUids.get(0)));
+        updateMemberService.removeAdmin(ADMIN, testUids.get(0));
+        assertFalse(memberService.isAdmin(testUids.get(0)));
 
         try {
             updateMemberService.addAdmin(ADMIN, "bogus-admin-to-add");
@@ -123,13 +111,13 @@ public class TestUpdateMemberService {
     @Test
     public void checkIfAdminUserTest() {
         try {
-            updateMemberService.checkIfAdminUser(TEST_UH_NUMBERS.get(0));
+            updateMemberService.checkIfAdminUser(testUhUuids.get(0));
             fail("Should throw an exception if identifier is not an admin.");
         } catch (AccessDeniedException e) {
             assertNull(e.getCause());
         }
         try {
-            updateMemberService.checkIfAdminUser(TEST_UH_USERNAMES.get(0));
+            updateMemberService.checkIfAdminUser(testUids.get(0));
             fail("Should throw an exception if identifier is not an admin.");
         } catch (AccessDeniedException e) {
             assertNull(e.getCause());
@@ -144,101 +132,101 @@ public class TestUpdateMemberService {
 
     @Test
     public void uidAddRemoveIncludeExcludeMembersTest() {
-        for (String uid : TEST_UH_USERNAMES) {
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        updateMemberService.addExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids);
+        updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
     public void uidAddRemoveIncludeExcludeMembersAsyncTest() {
-        for (String uid : TEST_UH_USERNAMES) {
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
-        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, TEST_UH_USERNAMES).join();
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, TEST_UH_USERNAMES);
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
     }
 
     @Test
     public void uidAddRemoveIncludeExcludeMemberTest() {
-        String uid = TEST_UH_USERNAMES.get(0);
+        String uid = testUids.get(0);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
         assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
 
@@ -272,7 +260,7 @@ public class TestUpdateMemberService {
 
     @Test
     public void optTest() {
-        String num = TEST_UH_NUMBERS.get(0);
+        String num = testUhUuids.get(0);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
 
         updateMemberService.optIn(ADMIN, GROUPING, num);
@@ -292,7 +280,7 @@ public class TestUpdateMemberService {
 
     @Test
     public void removeFromGroupsTest() {
-        String uhNum = TEST_UH_NUMBERS.get(0);
+        String uhNum = testUhUuids.get(0);
 
         updateMemberService.addOwnership(ADMIN, GROUPING, uhNum);
         updateMemberService.addIncludeMember(ADMIN, GROUPING, uhNum);
@@ -319,8 +307,8 @@ public class TestUpdateMemberService {
 
     @Test
     public void resetGroupTest() {
-        List<String> includes = TEST_UH_USERNAMES.subList(0, 2);
-        List<String> excludes = TEST_UH_USERNAMES.subList(3, 5);
+        List<String> includes = testUids.subList(0, 2);
+        List<String> excludes = testUids.subList(3, 5);
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
 
@@ -339,8 +327,8 @@ public class TestUpdateMemberService {
 
     @Test
     public void resetGroupAsyncTest() {
-        List<String> includes = TEST_UH_USERNAMES.subList(0, 2);
-        List<String> excludes = TEST_UH_USERNAMES.subList(3, 5);
+        List<String> includes = testUids.subList(0, 2);
+        List<String> excludes = testUids.subList(3, 5);
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
 
@@ -359,20 +347,20 @@ public class TestUpdateMemberService {
 
     @Test
     public void addRemoveOwnershipsTest() {
-        updateMemberService.addOwnerships(ADMIN, GROUPING, TEST_UH_USERNAMES);
-        for (String uid : TEST_UH_USERNAMES) {
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+        for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, TEST_UH_USERNAMES);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
 
-        for (String uid : TEST_UH_USERNAMES) {
+        for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
         }
     }
 
     @Test
     public void addRemoveOwnershipTest() {
-        String uid = TEST_UH_USERNAMES.get(0);
+        String uid = testUids.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
         assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
@@ -389,33 +377,33 @@ public class TestUpdateMemberService {
         }
 
         // Should not throw an exception if current user is an owner of grouping.
-        addGroupMember(GROUPING_OWNERS, TEST_UH_NUMBERS.get(0));
+        addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
         try {
-            updateMemberService.checkIfOwnerOrAdminUser(TEST_UH_NUMBERS.get(0), GROUPING);
+            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner of grouping.");
         }
 
         // Should not throw an exception if current user is an owner of grouping and an admin.
-        addGroupMember(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
+        addGroupMember(GROUPING_ADMINS, testUhUuids.get(0));
         try {
-            updateMemberService.checkIfOwnerOrAdminUser(TEST_UH_NUMBERS.get(0), GROUPING);
+            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an owner of grouping and an admin.");
         }
-        removeGroupMember(GROUPING_OWNERS, TEST_UH_NUMBERS.get(0));
+        removeGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
 
         // Should not throw an exception if current user an admin but not an owner of grouping.
         try {
-            updateMemberService.checkIfOwnerOrAdminUser(TEST_UH_NUMBERS.get(0), GROUPING);
+            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user an admin but not an owner of grouping.");
         }
-        removeGroupMember(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
+        removeGroupMember(GROUPING_ADMINS, testUhUuids.get(0));
 
         // Should throw is not an admin or an owner of grouping.
         try {
-            updateMemberService.checkIfOwnerOrAdminUser(TEST_UH_NUMBERS.get(0), GROUPING);
+            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
             fail("Should throw an exception is not an admin or an owner of grouping.");
         } catch (AccessDeniedException e) {
             assertNull(e.getCause());
@@ -425,14 +413,14 @@ public class TestUpdateMemberService {
     @Test
     public void checkIfSelfOptOrAdminTest() {
         try {
-            updateMemberService.checkIfSelfOptOrAdmin(TEST_UH_NUMBERS.get(0), TEST_UH_NUMBERS.get(1));
+            updateMemberService.checkIfSelfOptOrAdmin(testUhUuids.get(0), testUhUuids.get(1));
             fail("Should throw an exception if currentUser is not admin and currentUser is not self opting.");
         } catch (AccessDeniedException e) {
             assertNull(e.getCause());
         }
 
         try {
-            updateMemberService.checkIfSelfOptOrAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
+            updateMemberService.checkIfSelfOptOrAdmin(ADMIN, testUhUuids.get(0));
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if currentUser is admin but currentUser is not self opting.");
         }
@@ -444,7 +432,7 @@ public class TestUpdateMemberService {
         }
 
         try {
-            updateMemberService.checkIfSelfOptOrAdmin(TEST_UH_NUMBERS.get(0), TEST_UH_NUMBERS.get(0));
+            updateMemberService.checkIfSelfOptOrAdmin(testUhUuids.get(0), testUhUuids.get(0));
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if currentUser is not admin but currentUser is self opting.");
         }
