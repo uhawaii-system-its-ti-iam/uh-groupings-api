@@ -31,6 +31,12 @@ public class GroupingGroupMemberTest {
     @Value("${groupings.api.test.uh-names}")
     private List<String> TEST_NAMES;
 
+    @Value("${groupings.api.test.uh-first-names}")
+    private List<String> TEST_FIRST_NAMES;
+
+    @Value("${groupings.api.test.uh-last-names}")
+    private List<String> TEST_LAST_NAMES;
+
     private PropertyLocator propertyLocator;
 
     @BeforeEach
@@ -51,5 +57,7 @@ public class GroupingGroupMemberTest {
         assertEquals(TEST_USERNAMES.get(0), groupingGroupMember.getUid());
         assertEquals(TEST_NAMES.get(0), groupingGroupMember.getName());
         assertEquals(TEST_NUMBERS.get(0), groupingGroupMember.getUhUuid());
+        assertEquals(TEST_FIRST_NAMES.get(0), groupingGroupMember.getFirstName());
+        assertEquals(TEST_LAST_NAMES.get(0), groupingGroupMember.getLastName());
     }
 }

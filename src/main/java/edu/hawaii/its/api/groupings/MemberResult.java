@@ -4,6 +4,8 @@ public abstract class MemberResult {
     private String uid;
     private String uhUuid;
     private String name;
+    private String firstName;
+    private String lastName;
 
     public String getUid() {
         return uid;
@@ -29,4 +31,19 @@ public abstract class MemberResult {
         this.name = name;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 }
