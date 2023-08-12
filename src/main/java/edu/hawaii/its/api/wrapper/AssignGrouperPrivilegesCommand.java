@@ -43,4 +43,8 @@ public class AssignGrouperPrivilegesCommand extends GrouperCommand implements Co
         return this;
     }
 
+    public AssignGrouperPrivilegesCommand owner(String uhIdentifier) {
+        this.gcAssignGrouperPrivilegesLite.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
 }

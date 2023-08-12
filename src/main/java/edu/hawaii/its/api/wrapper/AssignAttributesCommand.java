@@ -49,4 +49,9 @@ public class AssignAttributesCommand extends GrouperCommand implements Command<A
         this.gcAssignAttributes.addValue(assignAttributeValue(value));
         return this;
     }
+
+    public AssignAttributesCommand owner(String uhIdentifier) {
+        this.gcAssignAttributes.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
 }

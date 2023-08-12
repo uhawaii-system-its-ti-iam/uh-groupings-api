@@ -17,6 +17,7 @@ public class AssignGrouperPrivilegesCommandTest {
         assertNotNull(assignGrouperPrivilegesCommand.setGroupPath(""));
         assertNotNull(assignGrouperPrivilegesCommand.setPrivilege(""));
         assertNotNull(assignGrouperPrivilegesCommand.setSubjectLookup(""));
+        assertNotNull(assignGrouperPrivilegesCommand.owner(""));
         assertNotNull(assignGrouperPrivilegesCommand.setIsAllowed(true));
         assertNotNull(assignGrouperPrivilegesCommand.setIsAllowed(false));
     }

@@ -48,7 +48,7 @@ public class GroupAttributeCommand extends GrouperCommand implements Command<Gro
         return this;
     }
 
-    public GroupAttributeCommand assignOwner(String uhIdentifier) {
+    public GroupAttributeCommand owner(String uhIdentifier) {
         gcGetAttributeAssignments.assignActAsSubject(subjectLookup(uhIdentifier));
         return this;
     }

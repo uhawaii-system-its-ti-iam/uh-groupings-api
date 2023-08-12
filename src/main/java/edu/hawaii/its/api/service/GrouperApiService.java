@@ -83,7 +83,7 @@ public class GrouperApiService {
 
     public FindGroupsResults findGroupsResults(String currentUser, String groupPath) {
         FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
-                .assignOwner(currentUser)
+                .owner(currentUser)
                 .addPath(groupPath));
         return findGroupsResults;
     }
@@ -160,7 +160,7 @@ public class GrouperApiService {
 
     public GroupAttributeResults groupAttributeResults(String currentUser, List<String> attributes, String groupPath) {
         return exec.execute(new GroupAttributeCommand()
-                .assignOwner(currentUser)
+                .owner(currentUser)
                 .addAttributes(attributes)
                 .addGroup(groupPath));
     }
@@ -185,7 +185,7 @@ public class GrouperApiService {
 
     public GroupAttributeResults groupAttributeResult(String currentUser, String groupPath) {
         GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
-                .assignOwner(currentUser)
+                .owner(currentUser)
                 .addGroup(groupPath);
         return exec.execute(groupAttributeCommand);
     }
@@ -213,8 +213,9 @@ public class GrouperApiService {
     /**
      * Get all members listed in a group.
      */
-    public GetMembersResult getMembersResult(String groupPath) {
+    public GetMembersResult getMembersResult(String currentUser, String groupPath) {
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
                 .addGroupPath(groupPath));
         List<GetMembersResult> result = getMembersResults.getMembersResults();
         if (result.isEmpty()) {
@@ -250,7 +251,7 @@ public class GrouperApiService {
     public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
             String searchScope) {
         return exec.execute(new FindAttributesCommand()
-                .assignOwner(currentUser)
+                .owner(currentUser)
                 .assignAttributeName(attributeTypeName)
                 .assignSearchScope(searchScope));
     }
@@ -258,8 +259,9 @@ public class GrouperApiService {
     /**
      * Add a UH identifier to group listing.
      */
-    public AddMemberResult addMember(String groupPath, String uhIdentifier) {
+    public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new AddMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
@@ -267,24 +269,20 @@ public class GrouperApiService {
     /**
      * Add multiple UH identifiers to a group listing.
      */
-    public AddMembersResults addMembers(String groupPath, List<String> uhIdentifiers) {
+    public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new AddMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
-    }
 
-    public AddMembersResults addMembers(String currentUser, String groupPath, String uhIdentifier) {
-        return exec.execute(new AddMembersCommand()
-                .setPrivilegeHolder(currentUser)
-                .assignGroupPath(groupPath)
-                .addUhIdentifier(uhIdentifier));
     }
 
     /**
      * Remove a UH identifier from a group listing.
      */
-    public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
+    public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new RemoveMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
@@ -292,8 +290,9 @@ public class GrouperApiService {
     /**
      * Remove multiple UH identifiers from a group listing.
      */
-    public RemoveMembersResults removeMembers(String groupPath, List<String> uhIdentifiers) {
+    public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new RemoveMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
     }
@@ -312,9 +311,10 @@ public class GrouperApiService {
      * Add or remove an attribute from a group. This is used to update a groupings
      * preferences.
      */
-    public AssignAttributesResults assignAttributesResults(String assignType, String assignOperation, String groupPath,
+    public AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath,
             String attributeName) {
         return exec.execute(new AssignAttributesCommand()
+                .owner(currentUser)
                 .setAssignType(assignType)
                 .setAssignOperation(assignOperation)
                 .addGroupPath(groupPath)
@@ -324,9 +324,10 @@ public class GrouperApiService {
     /**
      * Change a group attribute's privilege to true or false.
      */
-    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String groupPath, String privilegeName,
+    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath, String privilegeName,
             String uhIdentifier, boolean isAllowed) {
         return exec.execute(new AssignGrouperPrivilegesCommand()
+                .owner(currentUser)
                 .setGroupPath(groupPath)
                 .setPrivilege(privilegeName)
                 .setSubjectLookup(uhIdentifier)
@@ -339,7 +340,7 @@ public class GrouperApiService {
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
         return exec.execute(new GetMembersCommand()
-                .assignOwner(currentUser)
+                .owner(currentUser)
                 .addGroupPaths(groupPaths)
                 .setPageNumber(pageNumber)
                 .setPageSize(pageSize)

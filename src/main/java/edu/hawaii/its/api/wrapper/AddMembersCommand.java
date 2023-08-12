@@ -70,7 +70,7 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
         return this;
     }
 
-    public AddMembersCommand setPrivilegeHolder(String uhIdentifier) {
+    public AddMembersCommand owner(String uhIdentifier) {
         gcAddMember.assignActAsSubject(subjectLookup(uhIdentifier));
         return this;
     }

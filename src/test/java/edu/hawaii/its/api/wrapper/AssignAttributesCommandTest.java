@@ -19,6 +19,7 @@ public class AssignAttributesCommandTest {
         assertNotNull(assignAttributesCommand.setAssignOperation(""));
         assertNotNull(assignAttributesCommand.addGroupPath(""));
         assertNotNull(assignAttributesCommand.addAttribute(""));
+        assertNotNull(assignAttributesCommand.owner(""));
         assertNotNull(assignAttributesCommand.setValueOperation(""));
         assertNotNull(assignAttributesCommand.addValue(""));
     }

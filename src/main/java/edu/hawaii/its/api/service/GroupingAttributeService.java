@@ -70,11 +70,13 @@ public class GroupingAttributeService {
         List<GroupingsServiceResult> results = new ArrayList<>();
 
         results.add(assignGrouperPrivilege(
+                optInRequest.getUsername(),
                 optInRequest.getPrivilegeType().value(),
                 optInRequest.getGroupName(),
                 optInRequest.getOptValue()));
 
         results.add(assignGrouperPrivilege(
+                optOutRequest.getUsername(),
                 optOutRequest.getPrivilegeType().value(),
                 optOutRequest.getGroupName(),
                 optOutRequest.getOptValue()));
@@ -91,29 +93,29 @@ public class GroupingAttributeService {
      * Turns the attribute on or off in a group.
      * OPT_IN, OPT_OUT, and sync destinations are allowed.
      */
-    public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUsername,
+    public GroupingsServiceResult changeGroupAttributeStatus(String groupPath, String ownerUhIdentifier,
             String attributeName, boolean turnAttributeOn) {
-        logger.info(String.format("changeGroupAttributeStatus; groupPath: %s; ownerUsername: %s; attributeName: %s, turnAttributeOn: %s",
-                groupPath, ownerUsername, attributeName, turnAttributeOn));
-        checkPrivileges(groupPath, ownerUsername);
+        logger.info(String.format("changeGroupAttributeStatus; groupPath: %s; ownerUhIdentifier: %s; attributeName: %s, turnAttributeOn: %s",
+                groupPath, ownerUhIdentifier, attributeName, turnAttributeOn));
+        checkPrivileges(groupPath, ownerUhIdentifier);
         String verb = "removed from ";
         String resultCode = SUCCESS;
         if (turnAttributeOn) {
             verb = "added to ";
         }
 
-        String action = attributeName + " has been " + verb + groupPath + " by " + ownerUsername;
+        String action = attributeName + " has been " + verb + groupPath + " by " + ownerUhIdentifier;
         boolean isHasAttribute = isGroupAttribute(groupPath, attributeName);
 
         if (turnAttributeOn) {
             if (!isHasAttribute) {
-                assignAttribute(attributeName, groupPath);
+                assignAttribute(ownerUhIdentifier, attributeName, groupPath);
             } else {
                 resultCode += ", " + attributeName + " already existed";
             }
         } else {
             if (isHasAttribute) {
-                removeAttribute(attributeName, groupPath);
+                removeAttribute(ownerUhIdentifier, attributeName, groupPath);
             } else {
                 resultCode += ", " + attributeName + " did not exist";
             }
@@ -130,18 +132,18 @@ public class GroupingAttributeService {
                 .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
     }
 
-    public GroupingUpdatedAttributesResult assignAttribute(String attributeName, String groupingPath) {
-        return updateAttribute(attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
+    public GroupingUpdatedAttributesResult assignAttribute(String currentUser, String attributeName, String groupingPath) {
+        return updateAttribute(currentUser, attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingUpdatedAttributesResult removeAttribute(String attributeName, String groupingPath) {
-        return updateAttribute(attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
+    public GroupingUpdatedAttributesResult removeAttribute(String currentUser, String attributeName, String groupingPath) {
+        return updateAttribute(currentUser, attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingUpdatedAttributesResult updateAttribute(String attributeName, String assignOperation,
+    public GroupingUpdatedAttributesResult updateAttribute(String currentUser, String attributeName, String assignOperation,
             String groupingPath) {
         AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
-                ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
+                currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
 
         GroupingUpdatedAttributesResult result = new GroupingUpdatedAttributesResult(assignAttributesResults);
         timestampService.update(result);
@@ -151,10 +153,10 @@ public class GroupingAttributeService {
     /**
      * Helper - changeOptStatus
      */
-    public GroupingsServiceResult assignGrouperPrivilege(String privilegeName, String groupName, boolean isSet) {
+    public GroupingsServiceResult assignGrouperPrivilege(String currentUser, String privilegeName, String groupName, boolean isSet) {
         String action = "set " + privilegeName + " " + isSet + " for " + EVERY_ENTITY + " in " + groupName;
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                grouperApiService.assignGrouperPrivilegesResult(groupName, privilegeName, EVERY_ENTITY, isSet);
+                grouperApiService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
         return makeGroupingsServiceResult(assignGrouperPrivilegesResult.getResultCode(), action);
     }
 
