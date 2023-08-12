@@ -24,6 +24,7 @@ public class AddMembersCommandTest {
         assertNotNull(addMembersCommand.addUhIdentifier(""));
         assertNotNull(addMembersCommand.addUhIdentifier("11111111"));
         assertNotNull(addMembersCommand.assignGroupPath(""));
+        assertNotNull(addMembersCommand.owner(""));
         assertNotNull(addMembersCommand.includeUhMemberDetails(true));
         assertNotNull(addMembersCommand.replaceGroupMembers(true));
     }

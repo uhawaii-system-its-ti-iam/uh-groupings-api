@@ -105,10 +105,10 @@ public class TestGrouperApiService {
         testUhUuids = testGroupingMembers.getUhUuids();
 
         testUids.forEach(testUid -> {
-            grouperApiService.removeMember(GROUPING_ADMINS, testUid);
-            grouperApiService.removeMember(GROUPING_INCLUDE, testUid);
-            grouperApiService.removeMember(GROUPING_EXCLUDE, testUid);
-            grouperApiService.removeMember(GROUPING_OWNERS, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+            grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
 
             assertFalse(memberService.isOwner(GROUPING, testUid));
             assertFalse(memberService.isMember(GROUPING_INCLUDE, testUid));
@@ -339,7 +339,7 @@ public class TestGrouperApiService {
 
     @Test
     public void getMembersResult() {
-        GetMembersResult getMembersResult = grouperApiService.getMembersResult(GROUPING);
+        GetMembersResult getMembersResult = grouperApiService.getMembersResult(ADMIN, GROUPING);
         assertNotNull(getMembersResult);
         assertEquals("SUCCESS", getMembersResult.getResultCode());
         // Todo exception handler for invalid paths.
@@ -397,40 +397,40 @@ public class TestGrouperApiService {
     @Test
     public void addMemberTest() {
         // With uh usernames.
-        AddMemberResult addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, testUids.get(0));
+        AddMemberResult addMemberResult = grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUids.get(0)));
 
-        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, testUids.get(1));
+        addMemberResult = grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUids.get(1)));
         //// Clean up
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUids.get(0));
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUids.get(1));
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
 
         // With uh numbers.
-        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, testUhUuids.get(0));
+        addMemberResult = grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(0));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUhUuids.get(0)));
 
-        addMemberResult = grouperApiService.addMember(GROUPING_INCLUDE, testUhUuids.get(1));
+        addMemberResult = grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(1));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUhUuids.get(1)));
         //// Clean up
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUhUuids.get(0));
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUhUuids.get(1));
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(0));
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(1));
     }
 
     @Test
     public void addRemoveMembers() {
         // With usernames.
-        AddMembersResults addMembersResults = grouperApiService.addMembers(GROUPING_INCLUDE, testUids);
+        AddMembersResults addMembersResults = grouperApiService.addMembers(ADMIN, GROUPING_INCLUDE, testUids);
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
         for (String username : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, username));
         }
-        RemoveMembersResults removeMembersResults = grouperApiService.removeMembers(GROUPING_INCLUDE, testUids);
+        RemoveMembersResults removeMembersResults = grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
         assertNotNull(removeMembersResults);
         assertEquals("SUCCESS", removeMembersResults.getResultCode());
         for (String username : testUids) {
@@ -438,13 +438,14 @@ public class TestGrouperApiService {
         }
 
         // With numbers.
-        addMembersResults = grouperApiService.addMembers(GROUPING_INCLUDE, testUhUuids);
+        addMembersResults = grouperApiService.addMembers(ADMIN, GROUPING_INCLUDE, testUhUuids);
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
         for (String number : testUhUuids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, number));
         }
-        removeMembersResults = grouperApiService.removeMembers(GROUPING_INCLUDE, testUhUuids);
+
+        removeMembersResults = grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, testUhUuids);
         assertNotNull(removeMembersResults);
         assertEquals("SUCCESS", removeMembersResults.getResultCode());
         for (String number : testUhUuids) {
@@ -452,57 +453,52 @@ public class TestGrouperApiService {
         }
 
         // Invalid identifiers.
-        addMembersResults = grouperApiService.addMembers(GROUPING_INCLUDE, Arrays.asList("invalid-identifier"));
+        addMembersResults = grouperApiService.addMembers(ADMIN, GROUPING_INCLUDE, Arrays.asList("invalid-identifier"));
         assertNull(addMembersResults); // Todo exception handler
-        removeMembersResults = grouperApiService.removeMembers(GROUPING_INCLUDE, Arrays.asList("invalidIdentifier"));
-        /*
-        assertNull(removeMembersResults); // Todo exception handler
-         */
-
-        addMembersResults = grouperApiService.addMembers("invalid-path", testUids);
+        removeMembersResults = grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, Arrays.asList("invalidIdentifier"));
+        /* assertNull(removeMembersResults); // Todo exception handler */
+        addMembersResults = grouperApiService.addMembers(ADMIN,"invalid-path", testUids);
         assertNull(addMembersResults); // Todo exception handler
-        removeMembersResults = grouperApiService.removeMembers("invalid-path", testUids);
+        removeMembersResults = grouperApiService.removeMembers(ADMIN, "invalid-path", testUids);
         assertNull(removeMembersResults); // Todo exception handler
-
     }
 
     @Test
     public void removeMember() {
         // With uh usernames.
-        grouperApiService.addMember(GROUPING_INCLUDE, testUids.get(0));
-        grouperApiService.addMember(GROUPING_INCLUDE, testUids.get(1));
+        grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
         RemoveMemberResult removeMemberResult =
-                grouperApiService.removeMember(GROUPING_INCLUDE, testUids.get(0));
+                grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         assertNotNull(removeMemberResult);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, testUids.get(0)));
-        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, testUids.get(1));
+        removeMemberResult = grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
         assertNotNull(removeMemberResult);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, testUids.get(1)));
 
         // With uh numbers.
-        grouperApiService.addMember(GROUPING_INCLUDE, testUhUuids.get(0));
-        grouperApiService.addMember(GROUPING_INCLUDE, testUhUuids.get(1));
-        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, testUhUuids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(0));
+        grouperApiService.addMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(1));
+        removeMemberResult = grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(0));
         assertNotNull(removeMemberResult);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, testUhUuids.get(0)));
-        removeMemberResult = grouperApiService.removeMember(GROUPING_INCLUDE, testUhUuids.get(1));
+        removeMemberResult = grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUhUuids.get(1));
         assertNotNull(removeMemberResult);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, testUhUuids.get(1)));
     }
 
     @Test
     public void resetGroupMembers() {
-        grouperApiService.addMembers(GROUPING_INCLUDE, testUids);
-        GetMembersResult getMembersResult = grouperApiService.getMembersResult(GROUPING_INCLUDE);
+        grouperApiService.addMembers(ADMIN, GROUPING_INCLUDE, testUids);
+        GetMembersResult getMembersResult = grouperApiService.getMembersResult(ADMIN, GROUPING_INCLUDE);
         List<String> uhUuids =
                 getMembersResult.getSubjects().stream().map(Subject::getUhUuid).collect(Collectors.toList());
         AddMembersResults resetResults = grouperApiService.resetGroupMembers(GROUPING_INCLUDE);
         assertNotNull(resetResults);
         assertEquals("SUCCESS", resetResults.getResultCode());
-        assertTrue(grouperApiService.getMembersResult(GROUPING_INCLUDE).getSubjects().isEmpty());
-        grouperApiService.addMembers(GROUPING_INCLUDE, uhUuids);
-        grouperApiService.removeMembers(GROUPING_INCLUDE, testUids);
-
+        assertTrue(grouperApiService.getMembersResult(ADMIN, GROUPING_INCLUDE).getSubjects().isEmpty());
+        grouperApiService.addMembers(ADMIN, GROUPING_INCLUDE, uhUuids);
+        grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
         resetResults = grouperApiService.resetGroupMembers("invalid-path");
         assertNull(resetResults); // Todo exception handler
     }
@@ -510,28 +506,28 @@ public class TestGrouperApiService {
     @Test
     public void assignAttributesResults() {
         AssignAttributesResults assignAttributesResults =
-                grouperApiService.assignAttributesResults(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
                         OptType.IN.value());
         assertEquals("SUCCESS", assignAttributesResults.getResultCode());
         assertEquals(OptType.IN.value(), assignAttributesResults.getAttributesResults().get(0).getName());
 
         assignAttributesResults =
-                grouperApiService.assignAttributesResults("invalid_assign_type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
+                grouperApiService.assignAttributesResults(ADMIN,"invalid_assign_type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
                         OptType.IN.value());
         assertNull(assignAttributesResults); // Todo exception handler
 
         assignAttributesResults =
-                grouperApiService.assignAttributesResults(ASSIGN_TYPE_GROUP, "invalid-operation", GROUPING,
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, "invalid-operation", GROUPING,
                         OptType.IN.value());
         assertNull(assignAttributesResults); // Todo exception handler
 
         assignAttributesResults =
-                grouperApiService.assignAttributesResults(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, "invalid-path",
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, "invalid-path",
                         OptType.IN.value());
         assertNull(assignAttributesResults); // Todo exception handler
 
         assignAttributesResults =
-                grouperApiService.assignAttributesResults(ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
                         "invalid-attribute");
         assertNull(assignAttributesResults); // Todo exception handler
     }
@@ -539,7 +535,7 @@ public class TestGrouperApiService {
     @Test
     public void assignGrouperPrivilegesLiteResult() {
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                grouperApiService.assignGrouperPrivilegesResult(GROUPING, PrivilegeType.IN.value(), ADMIN, true);
+                grouperApiService.assignGrouperPrivilegesResult(ADMIN, GROUPING, PrivilegeType.IN.value(), ADMIN, true);
         assertNotNull(assignGrouperPrivilegesResult);
 
     }

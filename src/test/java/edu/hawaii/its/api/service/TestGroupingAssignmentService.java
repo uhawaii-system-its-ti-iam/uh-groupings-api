@@ -95,10 +95,10 @@ public class TestGroupingAssignmentService {
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
         testUidList = Arrays.asList(testUid);
-        grouperApiService.removeMember(GROUPING_ADMINS, testUid);
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUid);
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testUid);
-        grouperApiService.removeMember(GROUPING_OWNERS, testUid);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
     }
 
     @Test

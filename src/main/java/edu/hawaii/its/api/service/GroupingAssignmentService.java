@@ -216,7 +216,7 @@ public class GroupingAssignmentService {
     public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingGroupMembers(
-                grouperApiService.getMembersResult(groupingPath + GroupType.OWNERS.value()));
+                grouperApiService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
     }
 
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
