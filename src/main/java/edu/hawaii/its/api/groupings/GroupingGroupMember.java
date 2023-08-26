@@ -12,6 +12,8 @@ public class GroupingGroupMember extends MemberResult {
         setUid(subject.getUid());
         setUhUuid(subject.getUhUuid());
         setName(subject.getName());
+        setFirstName(subject.getFirstName());
+        setLastName(subject.getLastName());
         setResultCode(subject.getResultCode());
     }
 
