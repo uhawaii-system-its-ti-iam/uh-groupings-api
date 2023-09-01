@@ -7,10 +7,14 @@ public class GroupingMember {
     private final String uid;
     private final String uhUuid;
     private final String name;
+    private final String firstName;
+    private final String lastName;
     private final String whereListed;
 
     public GroupingMember(GroupingGroupMember groupingGroupMember, String whereListed) {
         this.name = groupingGroupMember.getName();
+        this.firstName = groupingGroupMember.getFirstName();
+        this.lastName = groupingGroupMember.getLastName();
         this.uhUuid = groupingGroupMember.getUhUuid();
         this.uid = groupingGroupMember.getUid();
         this.whereListed = whereListed;
@@ -18,6 +22,8 @@ public class GroupingMember {
 
     public GroupingMember() {
         this.name = "";
+        this.firstName = "";
+        this.lastName = "";
         this.uhUuid = "";
         this.uid = "";
         this.whereListed = "";
@@ -25,6 +31,14 @@ public class GroupingMember {
 
     public String getName() {
         return name;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getUhUuid() {
