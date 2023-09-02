@@ -7,7 +7,7 @@
 //import java.util.Date;
 //
 ///**
-// * A wrapper for WsAddMemberResult.
+// * A wrapper for WsPlannedOutageResult.
 // */
 //public class PlannedOutageResult extends Results {
 //
@@ -27,27 +27,27 @@
 //
 //    //@Override
 //    public String getResultCode() {
-//        return wsPlannedOutageResult.getResultMetadata().getResultCode();
+//        return this.wsPlannedOutageResults.getResultMetadata().getResultCode();
 //    }
 //
 //    //not really needed? - the announcement as a whole is just an object to be returned
-//    public String getAnnouncement() {
-//        return this.wsPlannedOutageResults.announcement; //if announcement is a property
+//    public String getAnnouncement(int objNum) {
+//        return this.wsPlannedOutageResults[objNum]; //if you want the whole announcement object listed
 ////        return getSubject().getAnnouncement();
 //    }
 //
-//    public String getText() {
-//        return this.wsPlannedOutageResults.announcement.text; //if announcement is a property
+//    public String getMessage(int objNum) {
+//        return this.wsPlannedOutageResults[objNum].message; //if "message" is a property
 ////        return getSubject().getAnnouncement().getText();
 //    }
 //
-//    public Date getFrom() {
-//        return this.wsPlannedOutageResults.announcement.from; //if "from" is a property
+//    public Date getFrom(int objNum) {
+//        return this.wsPlannedOutageResults[objNum].from; //if "from" is a property
 ////        return getSubject().getFrom();
 //    }
 //
-//    public Date getTo() {
-//        return this.wsPlannedOutageResults.announcement.to; //if "to" is a property
+//    public Date getTo(int objNum) {
+//        return this.wsPlannedOutageResults[objNum].to; //if "to" is a property
 ////        return getSubject().getTo();
 //    }
 //
@@ -55,15 +55,15 @@
 //     * is Subject needed?
 //     * @return
 //     */
-////    public Subject getSubject() {
-////        WsPlannedOutageResult wsPlannedOutageResults1 = this.wsPlannedOutageResults.getResults();
-////        if (isEmpty(wsPlannedOutageResults1)) {
-////            return new Subject();
-////        }
-////        //from GetGroupsResults.java
-//////        WsSubject wsSubject = wsGetGroupsResults[0].getWsSubject();
-//////        return wsSubject != null ? new Subject(wsSubject) : new Subject();
-////
-////    }
+//    public Subject getSubject() {
+//        WsPlannedOutageResult wsPlannedOutageResults1 = this.wsPlannedOutageResults.getResults();
+//        if (isEmpty(wsPlannedOutageResults1)) {
+//            return new Subject();
+//        }
+//        //from GetGroupsResults.java
+////        WsSubject wsSubject = wsGetGroupsResults[0].getWsSubject();
+////        return wsSubject != null ? new Subject(wsSubject) : new Subject();
+//
+//    }
 //}
 
