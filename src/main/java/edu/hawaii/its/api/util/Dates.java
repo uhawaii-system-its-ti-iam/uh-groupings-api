@@ -19,7 +19,7 @@ import java.util.Date;
 public final class Dates {
     private static final Log logger = LogFactory.getLog(Dates.class);
     public static final String DATE_SORT_FORMAT = "yyyy-MM-dd";
-    public static final String DATE_FORMAT_PLANNEDOUTAGE = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DATE_FORMAT_PLANNEDOUTAGE = "yyyyMMdd'T'HHmmss";
     // Private constructor; prevent instantiation.
     private Dates() {
         // Emtpy.
