@@ -1,53 +1,53 @@
 //package edu.hawaii.its.api.wrapper;
 //
 //import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
-//import edu.internet2.middleware.grouperClient.ws.beans.WsPlannedOutageResult;
+//import edu.internet2.middleware.grouperClient.ws.beans.WsPlannedoutageResult;
 //import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 //
 //import java.util.Date;
 //
 ///**
-// * A wrapper for WsPlannedOutageResult.
+// * A wrapper for WsPlannedoutageResult.
 // */
-//public class PlannedOutageResult extends Results {
+//public class PlannedoutageResult extends Results {
 //
-//    private final WsPlannedOutageResult wsPlannedOutageResults;
+//    private final WsPlannedoutageResult wsPlannedoutageResults[];
 //
 //    /**
 //     * Constructor.
-//     * @param wsPlannedOutageResults - the whole response from Grouper
+//     * @param wsPlannedoutageResults - the whole response from Grouper
 //     */
-//    public void GetPlannedOutageResult(WsGetPlannedOutageResults wsPlannedOutageResults) {
-//        if (wsPlannedOutageResults == null) {
-//            this.wsPlannedOutageResults = new WsPlannedOutageResults(); //or null
+//    public void GetPlannedoutageResult(WsGetPlannedoutageResults wsPlannedoutageResults) {
+//        if (wsPlannedoutageResults == null) {
+//            this.wsPlannedoutageResults = new WsPlannedoutageResults(); //or null
 //        } else {
-//            this.wsPlannedOutageResults = wsPlannedOutageResults;
+//            this.wsPlannedoutageResults = wsPlannedoutageResults;
 //        }
 //    }
 //
 //    //@Override
 //    public String getResultCode() {
-//        return this.wsPlannedOutageResults.getResultMetadata().getResultCode();
+//        return this.wsPlannedoutageResults.getResultMetadata().getResultCode();
 //    }
 //
 //    //not really needed? - the announcement as a whole is just an object to be returned
 //    public String getAnnouncement(int objNum) {
-//        return this.wsPlannedOutageResults[objNum]; //if you want the whole announcement object listed
+//        return this.wsPlannedoutageResults[objNum]; //if you want the whole announcement object listed
 ////        return getSubject().getAnnouncement();
 //    }
 //
 //    public String getMessage(int objNum) {
-//        return this.wsPlannedOutageResults[objNum].message; //if "message" is a property
+//        return this.wsPlannedoutageResults[objNum].message; //if "message" is a property
 ////        return getSubject().getAnnouncement().getText();
 //    }
 //
 //    public Date getFrom(int objNum) {
-//        return this.wsPlannedOutageResults[objNum].from; //if "from" is a property
+//        return this.wsPlannedoutageResults[objNum].from; //if "from" is a property
 ////        return getSubject().getFrom();
 //    }
 //
 //    public Date getTo(int objNum) {
-//        return this.wsPlannedOutageResults[objNum].to; //if "to" is a property
+//        return this.wsPlannedoutageResults[objNum].to; //if "to" is a property
 ////        return getSubject().getTo();
 //    }
 //
@@ -56,8 +56,8 @@
 //     * @return
 //     */
 //    public Subject getSubject() {
-//        WsPlannedOutageResult wsPlannedOutageResults1 = this.wsPlannedOutageResults.getResults();
-//        if (isEmpty(wsPlannedOutageResults1)) {
+//        WsPlannedoutageResult wsPlannedoutageResults1 = this.wsPlannedoutageResults.getResults();
+//        if (isEmpty(wsPlannedoutageResults1)) {
 //            return new Subject();
 //        }
 //        //from GetGroupsResults.java

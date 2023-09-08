@@ -3,9 +3,7 @@ package edu.hawaii.its.api.wrapper;
 //import jdk.vm.ci.meta.Local;
 import edu.hawaii.its.api.util.Dates;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +23,8 @@ public class PlannedOutage /*extends PlannedOutageResult*/ {
                 }},
                 new HashMap<String, String>() {{
                     put("message", "text to display during date range given by from and to below");
-                    put("from", "20230901T000000");
-                    put("to", "20230903T000000");
+                    put("from", "20230905T000000");
+                    put("to", "20230908T000000");
                 }}
         );
 

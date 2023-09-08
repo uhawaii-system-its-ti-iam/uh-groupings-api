@@ -33,14 +33,10 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
-import edu.hawaii.its.api.wrapper.PlannedOutage;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,13 +47,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
