@@ -226,6 +226,10 @@ public class GrouperApiService {
     }
 
     public String getMessage() {
+<<<<<<< HEAD
+=======
+
+>>>>>>> d2b89f1b02cdd69ec25925815d32aea400204c79
         return PlannedOutage.returnMessage();
     }
 
