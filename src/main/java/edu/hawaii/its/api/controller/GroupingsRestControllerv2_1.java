@@ -34,8 +34,12 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.PlannedOutage;
 import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.UpdateTimestampCommand;
+
+import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +61,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
