@@ -2,6 +2,10 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.wrapper.Command;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service("commandFactory")
 public class CommandFactory {
 
     Command zCommand  = () -> "Z";

@@ -34,6 +34,7 @@ import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.type.SyncDestination;
+import edu.hawaii.its.api.wrapper.Command;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+
+import edu.hawaii.its.api.service.CommandFactory;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -80,6 +83,8 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private MembershipService membershipService;
+
+    private CommandFactory commandFactory;
 
     @Autowired
     private UpdateMemberService updateMemberService;
@@ -330,6 +335,20 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.managePersonResults(currentUser, uhIdentifier));
     }
+
+    /* 1475 Receiving HTTP request */
+
+    @GetMapping(value = "/runs/{uhIdentifier:[\\w-:.]+}/commands")
+    @ResponseBody
+    public ResponseEntity<Command> runsCommand(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String uhIdentifier) {
+        logger.info("Runs Commands...");
+        return ResponseEntity
+                .ok()
+                .body(commandFactory.create("zCommand"));
+    }
+
+    /*  1475 end */
 
     /**
      * Get a list of all the paths associated with the groupings which uhIdentifier as the ability top opt into.
