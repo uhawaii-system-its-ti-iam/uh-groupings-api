@@ -353,6 +353,17 @@
             $scope.removeErrorModalInstance.close();
         };
 
+        /* dev-1475 $cope function */
+
+        $scope.closeRemoveErrorModal = () => {
+            $scope.clearManagePersonCheckboxes();
+            $scope.removeErrorModalInstance.close();
+        };
+
+        /* dev-1475 $cope function */
+
+
+
         /**
          * Saves the needed information managePersonGrouping and personToLookup to sessionStorage for $scope.init()
          * to display the grouping in a new tab. Opens a new /admin page and removes managePersonGrouping from
