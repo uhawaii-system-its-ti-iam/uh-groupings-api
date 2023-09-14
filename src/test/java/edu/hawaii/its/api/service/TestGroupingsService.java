@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingsAnnouncements;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.ServiceTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +141,11 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
+    }
+
+    @Test
+    public void groupingsAnnouncements() {
+        groupingsService.groupingsAnnouncements(ADMIN);
     }
 
 }

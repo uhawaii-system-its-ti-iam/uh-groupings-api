@@ -1,8 +1,11 @@
 package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingsAnnouncements;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -27,6 +30,9 @@ public class GroupingsService {
 
     @Value("${groupings.api.trio}")
     private String TRIO;
+
+    @Value("${groupings.api.announcements}")
+    private String ANNOUNCEMENTS;
 
     @Autowired
     private GroupPathService groupPathService;
@@ -162,5 +168,14 @@ public class GroupingsService {
     public List<String> allGroupPaths(String uhIdentifier) {
         List<Group> groups = grouperApiService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
+    }
+
+    public GroupingsAnnouncements groupingsAnnouncements(String currentUser) {
+        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+                currentUser,
+                "uh-settings:attributes:for-applications:uhgroupings:propertyString",
+                "uh-settings:attributes:for-applications:uhgroupings"
+        );
+        return new GroupingsAnnouncements(findAttributesResults);
     }
 }
