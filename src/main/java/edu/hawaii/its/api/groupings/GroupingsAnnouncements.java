@@ -4,7 +4,6 @@ import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GroupingsAnnouncements {
@@ -25,14 +24,8 @@ public class GroupingsAnnouncements {
     }
 
     private void setAnnouncements(List<AttributesResult> attributesResults) {
-        JsonUtil.prettyPrint(attributesResults);
-        this.announcements = new ArrayList<>();
-        for (AttributesResult attributesResult : attributesResults) {
-            JsonUtil.prettyPrint(attributesResult.getDescription());
-            GroupingsAnnouncement groupingsAnnouncement =
-                    JsonUtil.asObject(attributesResult.getDescription(), GroupingsAnnouncement.class);
-            this.announcements.add(groupingsAnnouncement);
-        }
+        AttributesResult attributesResult = attributesResults.get(0);
+        this.announcements = JsonUtil.asObjectList(attributesResult.getDescription(), GroupingsAnnouncement.class);
     }
 
     private void setResultCode(String resultCode) {

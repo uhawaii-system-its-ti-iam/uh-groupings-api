@@ -1,8 +1,15 @@
 package edu.hawaii.its.api.util;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 public class JsonUtil {
     private static final Log logger = LogFactory.getLog(JsonUtil.class);
@@ -18,7 +25,6 @@ public class JsonUtil {
             result = new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
             logger.error("Error: " + e);
-            // Maybe we should throw something?
         }
         return result;
     }
@@ -29,7 +35,18 @@ public class JsonUtil {
             result = new ObjectMapper().readValue(json, type);
         } catch (Exception e) {
             logger.error("Error: " + e);
-            // Maybe we should throw something?
+        }
+        return result;
+    }
+
+    public static <T> List<T> asObjectList(final String json, Class<T> type) {
+        List<T> result = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper()
+                    .configure(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature(), true);
+            result = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, type));
+        } catch (Exception e) {
+            logger.error("Error: " + e);
         }
         return result;
     }
