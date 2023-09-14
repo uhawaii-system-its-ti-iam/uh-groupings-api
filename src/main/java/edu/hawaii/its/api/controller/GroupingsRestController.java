@@ -345,7 +345,7 @@ public class GroupingsRestController {
         return httpRequestService.makeApiRequest(principal.getName(), uri, HttpMethod.GET);
     }
 
-    /*  1475 runCommands end */
+    /*  1475 runCommands end   THIS IS THE ENDPOINT*/
 
 
     /**
