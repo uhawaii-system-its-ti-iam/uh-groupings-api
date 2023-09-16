@@ -84,6 +84,7 @@ public class GroupingsRestControllerv2_1 {
     @Autowired
     private MembershipService membershipService;
 
+    @Autowired
     private CommandFactory commandFactory;
 
     @Autowired
@@ -335,20 +336,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(membershipService.managePersonResults(currentUser, uhIdentifier));
     }
-
-    /* 1475 Receiving HTTP request */
-
-    @GetMapping(value = "/runs/{uhIdentifier:[\\w-:.]+}/commands")
-    @ResponseBody
-    public ResponseEntity<Command> runsCommand(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
-        logger.info("Runs Commands...");
-        return ResponseEntity
-                .ok()
-                .body(commandFactory.create("zCommand"));
-    }
-
-    /*  1475 end */
 
     /**
      * Get a list of all the paths associated with the groupings which uhIdentifier as the ability top opt into.
@@ -717,4 +704,32 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(asyncJobsManager.getJobResult(currentUser, jobId));
     }
+
+
+
+
+
+
+
+
+
+
+    /* 1475 Receiving HTTP request */
+    @GetMapping(value = "/run/command/{commandName}")
+    @ResponseBody
+    public ResponseEntity<Object> runCommand(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                               @PathVariable String commandName) {
+        logger.info("Entered REST Run Command...");
+        return ResponseEntity
+                .ok()
+                .body(commandFactory.create(commandName).execute());
+    }
+    /*  1475 end */
+
+
+
+
+
+
+
 }
