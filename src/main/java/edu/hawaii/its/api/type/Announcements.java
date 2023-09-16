@@ -15,6 +15,10 @@ public class Announcements {
         setResultCode(findAttributesResults.getResultCode());
     }
 
+    public Announcements() {
+        System.out.println("empty param constructor for announcements");
+    }
+
     public List<Announcement> getAnnouncements() {
         return announcements;
     }

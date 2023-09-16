@@ -1,16 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -219,7 +214,7 @@ public class GroupingAssignmentService {
                 grouperApiService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
     }
 
-    public String outageMessage() {
+    public Announcements outageMessage() {
 
         return grouperApiService.getMessage();
     }

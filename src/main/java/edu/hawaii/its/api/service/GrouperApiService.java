@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
@@ -25,7 +26,7 @@ import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
-import edu.hawaii.its.api.wrapper.PlannedOutage;
+//import edu.hawaii.its.api.wrapper.PlannedOutage;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -233,9 +234,9 @@ public class GrouperApiService {
         return result.get(0);
     }
 
-    public String getMessage() {
-        PlannedOutage testy = new PlannedOutage();
-        return testy.returnMessage();
+    public Announcements getMessage() {
+        AnnouncementService testy = new AnnouncementService();
+        return testy.getAnnouncements("ADMIN");
 //
 //
 //        return PlannedOutage.returnMessage();
@@ -275,6 +276,7 @@ public class GrouperApiService {
      */
     public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
             String searchScope) {
+        System.out.println("inside findAttributesResults");
         return exec.execute(new FindAttributesCommand()
                 .owner(currentUser)
                 .assignAttributeName(attributeTypeName)

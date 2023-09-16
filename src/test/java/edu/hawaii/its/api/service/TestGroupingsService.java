@@ -50,6 +50,8 @@ public class TestGroupingsService extends ServiceTest {
     @Autowired
     private GroupingsService groupingsService;
 
+    @Autowired
+    private AnnouncementService announcementService;
     private static String UH_UUID;
 
     @BeforeEach
@@ -140,6 +142,13 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
+    }
+
+
+
+    @Test
+    public void groupingsAnnouncements() {
+        announcementService.getAnnouncements(ADMIN);
     }
 
 }

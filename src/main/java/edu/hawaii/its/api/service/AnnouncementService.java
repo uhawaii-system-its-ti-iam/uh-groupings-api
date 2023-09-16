@@ -12,12 +12,22 @@ public class AnnouncementService {
     @Autowired
     private GrouperApiService grouperApiService;
 
-    public Announcements getAnnouncements() {
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
-                "uh-settings:attributes:for-applications:uhgroupings:propertyString",
-                "uh-settings:attributes:for-applications:uhgroupings"
-        );
-        return new Announcements(findAttributesResults);
+    public Announcements getAnnouncements(String currUser) {
+        try {
+            System.out.println("the currUser in AnnoucnementService:" + currUser);
+            FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+                    currUser,
+                    /*"uh-settings:attributes:for-applications:uhgroupings:announcements",
+                    "uh-settings:attributes:for-applications:uhgroupings:propertyString"*/
+                    "uh-settings:attributes:for-applications:uhgroupings:propertyString",
+                    "uh-settings:attributes:for-applications:uhgroupings"
+            );
+            System.out.println("done assigning findAttributesResults:" + findAttributesResults);
+            return new Announcements(findAttributesResults);
+        } catch (Exception e) {
+            System.out.println("bad times man");
+            return new Announcements();
+        }
     }
     
 }

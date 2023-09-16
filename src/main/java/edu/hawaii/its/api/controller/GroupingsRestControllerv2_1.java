@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import edu.hawaii.its.api.type.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
@@ -23,19 +24,8 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.type.PreferenceStatus;
-import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.Dates;
-import edu.hawaii.its.api.wrapper.PlannedOutage;
+//import edu.hawaii.its.api.wrapper.PlannedOutage;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.UpdateTimestampCommand;
 
@@ -692,7 +682,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @GetMapping(value = "/outage/apiM")
-    public ResponseEntity<String> outageMessage() {
+    public ResponseEntity<Announcements> outageMessage() {
         logger.info("Entered REST outageMessage...");
         return ResponseEntity
                 .ok()

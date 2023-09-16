@@ -16,8 +16,10 @@ public class ExecutorService {
         String text = "execute; " + command.getClass().getSimpleName() + ": ";
         try {
             result = command.execute();
+            System.out.println("good execution man");
             logger.debug(text + "execution success");
         } catch (Exception e) {
+            System.out.println("bad execution man");
             logger.error(text + e);
         }
         return result;
