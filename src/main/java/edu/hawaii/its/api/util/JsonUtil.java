@@ -42,8 +42,7 @@ public class JsonUtil {
     public static <T> List<T> asObjectList(final String json, Class<T> type) {
         List<T> result = null;
         try {
-            ObjectMapper mapper = new ObjectMapper()
-                    .configure(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature(), true);
+            ObjectMapper mapper = new ObjectMapper();
             result = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, type));
         } catch (Exception e) {
             logger.error("Error: " + e);

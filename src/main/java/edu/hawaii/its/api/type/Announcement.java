@@ -1,4 +1,4 @@
-package edu.hawaii.its.api.groupings;
+package edu.hawaii.its.api.type;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 
-public class GroupingsAnnouncement {
+public class Announcement {
     private String message;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
