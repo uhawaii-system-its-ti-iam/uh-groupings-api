@@ -715,7 +715,7 @@ public class GroupingsRestControllerv2_1 {
 
 
     /* 1475 Receiving HTTP request */
-    @GetMapping(value = "/run/command/{commandName}")
+    @GetMapping(value = "/run/command/{commandName:[\\w-:.]+}")
     @ResponseBody
     public ResponseEntity<Object> runCommand(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                @PathVariable String commandName) {
