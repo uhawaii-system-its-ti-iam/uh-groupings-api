@@ -54,7 +54,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -719,12 +721,15 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void updateDescriptionTest() throws Exception {
         GroupingUpdateDescriptionResult groupingsUpdateDescriptionResult = new GroupingUpdateDescriptionResult();
+        Map<String, String> body = new HashMap<>();
+        body.put("description", "description");
 
         given(groupingAttributeService.updateDescription("grouping", USERNAME, "description")).willReturn(
                 groupingsUpdateDescriptionResult);
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/description")
                         .header(CURRENT_USER, USERNAME)
-                        .content("description"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(body)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);

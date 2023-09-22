@@ -606,10 +606,13 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void updateDescriptionTest() throws Exception {
         String description = groupingsService.getGroupingDescription(GROUPING);
+        Map<String, String> body = new HashMap<>();
+        body.put("description", DEFAULT_DESCRIPTION);
         String url = API_BASE_URL + "groupings/" + GROUPING + "/description";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
-                        .content(DEFAULT_DESCRIPTION)) // Add body data.
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(body)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),

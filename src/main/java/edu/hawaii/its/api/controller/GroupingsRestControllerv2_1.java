@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -530,11 +531,11 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<GroupingUpdateDescriptionResult> updateDescription(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @RequestBody(required = false) String dtoString) {
+            @RequestBody Map<String, String> dtoString) {
         logger.info("Entered REST updateDescription");
         return ResponseEntity
                 .ok()
-                .body(groupingAttributeService.updateDescription(path, currentUser, dtoString));
+                .body(groupingAttributeService.updateDescription(path, currentUser, dtoString.get("description")));
     }
 
     /**
