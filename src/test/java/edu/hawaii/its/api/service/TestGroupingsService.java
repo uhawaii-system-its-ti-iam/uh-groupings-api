@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Announcements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,9 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Arrays;
 import java.util.List;
 
-import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
-import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
-import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import static edu.hawaii.its.api.service.PathFilter.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -148,7 +147,8 @@ public class TestGroupingsService extends ServiceTest {
 
     @Test
     public void groupingsAnnouncements() {
-        announcementService.getAnnouncements(ADMIN);
+        Announcements test = announcementService.getAnnouncements();
+        logger.info("ayo: " + test);
     }
 
 }
