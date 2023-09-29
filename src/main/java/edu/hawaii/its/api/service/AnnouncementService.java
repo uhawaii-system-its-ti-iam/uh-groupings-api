@@ -23,7 +23,7 @@ public class AnnouncementService {
         if (valid != "") {
             return valid;
         }
-        return "no message to display";
+        return "";
     }
 
     public Announcements findAnnouncements() {
@@ -32,10 +32,8 @@ public class AnnouncementService {
                     "uh-settings:attributes:for-applications:uhgroupings:propertyString",
                     "uh-settings:attributes:for-applications:uhgroupings"
             );
-            System.out.println("done assigning findAttributesResults:" + findAttributesResults);
             return new Announcements(findAttributesResults);
         } catch (Exception e) {
-            System.out.println("caught exception in AnnouncementService");
             return new Announcements();
         }
     }
