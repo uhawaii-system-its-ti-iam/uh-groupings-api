@@ -49,9 +49,6 @@ public class TestGroupingsService extends ServiceTest {
 
     @Autowired
     private GroupingsService groupingsService;
-
-    @Autowired
-    private AnnouncementService announcementService;
     private static String UH_UUID;
 
     @BeforeEach
@@ -143,17 +140,4 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
     }
-
-
-
-    @Test
-    public void groupingsAnnouncements() {
-        Announcements test = announcementService.findAnnouncements();
-        logger.info("\n\nall announcements: " + test);
-
-        logger.info("\n\ninside the announcements: " + test.getAnnouncements());
-        JsonUtil.prettyPrint(test.getAnnouncements());
-
-    }
-
 }
