@@ -148,8 +148,17 @@ public class TestGroupingsService extends ServiceTest {
 
     @Test
     public void groupingsAnnouncements() {
-        List<Announcement> test = announcementService.findAnnouncements("mh888").getAnnouncements();
-        logger.info("\n\n" + test);
+        Announcements test = announcementService.findAnnouncements();
+        logger.info("\n\nall announcements: " + test);
+
+        logger.info("\n\nan announcement: " + test.getAnnouncements());
+
+
+
+//        List<Announcement> test = announcementService.findAnnouncements("mh888").getAnnouncements();
+//        logger.info("\n\n" + test);
+
+
     }
 
 }

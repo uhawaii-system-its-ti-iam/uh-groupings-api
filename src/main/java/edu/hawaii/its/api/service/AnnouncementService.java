@@ -18,7 +18,7 @@ public class AnnouncementService {
     private GrouperApiService grouperApiService;
 
     public String getMessage() {
-        this.allAnnouncements = findAnnouncements("mh888").getAnnouncements();
+        this.allAnnouncements = findAnnouncements().getAnnouncements();
         LocalDateTime currDate = LocalDateTime.now();
 
         //was run on a List
@@ -33,20 +33,16 @@ public class AnnouncementService {
         return "no message to display";
     }
 
-    public Announcements findAnnouncements(String currUser) {
+    public Announcements findAnnouncements() {
         try {
-            System.out.println("the currUser in AnnouncementService:" + currUser);
             FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
-                    currUser,
-                    /*"uh-settings:attributes:for-applications:uhgroupings:announcements",
-                    "uh-settings:attributes:for-applications:uhgroupings:propertyString"*/
                     "uh-settings:attributes:for-applications:uhgroupings:propertyString",
                     "uh-settings:attributes:for-applications:uhgroupings"
             );
             System.out.println("done assigning findAttributesResults:" + findAttributesResults);
             return new Announcements(findAttributesResults);
         } catch (Exception e) {
-            System.out.println("bad times man");
+            System.out.println("caught exception in AnnouncementService");
             return new Announcements();
         }
     }
