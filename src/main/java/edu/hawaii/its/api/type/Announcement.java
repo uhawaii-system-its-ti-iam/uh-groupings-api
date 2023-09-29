@@ -12,27 +12,27 @@ import java.util.List;
 public class Announcement {
     private String message;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
-    private LocalDateTime from;
+//    @JsonSerialize(using = LocalDateTimeSerializer.class)
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+//    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
+    private String from;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
-    private LocalDateTime to;
+//    @JsonSerialize(using = LocalDateTimeSerializer.class)
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+//    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
+    private String to;
 
     public String getMessage() {
-        List<Announcement> all = new Announcements().getAnnouncements();
+//        List<Announcement> all = new Announcements().getAnnouncements();
 
         return message;
     }
 
-    public LocalDateTime getFrom() {
+    public String getFrom() {
         return from;
     }
 
-    public LocalDateTime getTo() {
+    public String getTo() {
         return to;
     }
 
@@ -40,11 +40,11 @@ public class Announcement {
         this.message = message;
     }
 
-    public void setFrom(LocalDateTime from) {
-        this.from = from;
-    }
+//    public void setFrom(LocalDateTime from) {
+//        this.from = from;
+//    }
 
-    public void setTo(LocalDateTime to) {
-        this.to = to;
-    }
+//    public void setTo(LocalDateTime to) {
+//        this.to = to;
+//    }
 }

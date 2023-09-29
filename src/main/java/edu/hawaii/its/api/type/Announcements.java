@@ -20,12 +20,6 @@ public class Announcements {
     }
 
     public List<Announcement> getAnnouncements() {
-        Announcement current = new Announcement();
-
-//        for (int i = 0; i < announcements.size(); i++) {
-//            System.out.println("the first item:" + announcements.get(i));
-//        }
-
         return announcements;
     }
 

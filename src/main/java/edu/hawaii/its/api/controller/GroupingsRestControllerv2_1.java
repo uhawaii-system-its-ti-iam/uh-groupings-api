@@ -686,11 +686,11 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @GetMapping(value = "/outage/apiM")
-    public ResponseEntity<List<Announcement>> outageMessage() {
+    public ResponseEntity<String> outageMessage() {
         logger.info("Entered REST outageMessage...");
         return ResponseEntity
                 .ok()
-                .body(announcementService.getAnnouncements());
+                .body(announcementService.getMessage());
 
     }
 }
