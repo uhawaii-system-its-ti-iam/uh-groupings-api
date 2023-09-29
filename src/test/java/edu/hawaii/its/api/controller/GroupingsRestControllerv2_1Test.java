@@ -32,7 +32,6 @@ import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -157,8 +156,6 @@ public class GroupingsRestControllerv2_1Test {
         owners.addMember(new Person("o3-name", "o3-uuid", "o3-username"));
         grouping.setOwners(owners);
 
-        grouping.changeSyncDestinationState(LISTSERV, true);
-
         return grouping;
     }
 
@@ -187,8 +184,6 @@ public class GroupingsRestControllerv2_1Test {
         owners.addMember(new Person("o6-name", "o6-uuid", "o6-username"));
         owners.addMember(new Person("o7-name", "o7-uuid", "o7-username"));
         grouping.setOwners(owners);
-
-        grouping.changeSyncDestinationState(LISTSERV, true);
 
         return grouping;
     }
@@ -461,20 +456,6 @@ public class GroupingsRestControllerv2_1Test {
         assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
                 .paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true);
-    }
-
-    @Test
-    public void getGroupingTest() throws Exception {
-        given(groupingAssignmentService.getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true))
-                .willReturn(grouping());
-
-        mockMvc.perform(
-                        get(API_BASE + "/groupings/" + GROUPING + "?page=1&size=1&sortString=name&isAscending=true")
-                                .header(CURRENT_USER, USERNAME))
-                .andExpect(status().isOk()).andReturn();
-
-        verify(groupingAssignmentService, times(1))
-                .getPaginatedGrouping(GROUPING, USERNAME, 1, 1, "name", true);
     }
 
     @Test

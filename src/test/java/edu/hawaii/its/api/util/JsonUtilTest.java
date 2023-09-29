@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.util;
 
+import edu.hawaii.its.api.type.Person;
 import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.type.SyncDestination;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -13,16 +13,18 @@ public class JsonUtilTest {
 
     @Test
     public void basics() {
-        SyncDestination sd0 = new SyncDestination("name", "description");
-        String sdJson = JsonUtil.asJson(sd0);
+        Person person0 = new Person("name", "uhUuid", "username", "firstName", "lastName");
+        String personJson = JsonUtil.asJson(person0);
 
-        SyncDestination sd1 = JsonUtil.asObject(sdJson, SyncDestination.class);
+        Person person1 = JsonUtil.asObject(personJson, Person.class);
 
-        assertEquals(sd0.getName(), sd1.getName());
-        assertEquals(sd0.getDescription(), sd1.getDescription());
-        assertEquals(sd0.isSynced(), sd1.isSynced());
-        assertEquals(sd0.isHidden(), sd1.isHidden());
-        assertEquals(sd0.getTooltip(), sd1.getTooltip());
+        assertEquals(person0.getName(), person1.getName());
+        assertEquals(person0.getUhUuid(), person1.getUhUuid());
+        assertEquals(person0.getUsername(), person1.getUsername());
+        assertEquals(person0.getFirstName(), person1.getFirstName());
+        assertEquals(person0.getLastName(), person1.getLastName());
+        assertEquals(person0.getAttributes(), person1.getAttributes());
+        assertEquals(person0.getClass(), person1.getClass());
     }
 
     @Test

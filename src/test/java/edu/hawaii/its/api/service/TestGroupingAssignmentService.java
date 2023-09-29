@@ -102,112 +102,6 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void getGroupingTest() {
-        updateMemberService.removeAdmin(ADMIN, testUid);
-        // Should throw and exception if current user is not an admin or and owner.
-        try {
-            groupingAssignmentService.getGrouping(GROUPING, testUid);
-            fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-        try {
-            groupingAssignmentService.getGrouping(GROUPING, "bogus-user");
-            fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
-        try {
-            groupingAssignmentService.getGrouping(GROUPING, testUid);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin but not an owner.");
-        }
-
-        // Should not throw an exception if current user is an admin and an owner.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
-        try {
-            groupingAssignmentService.getGrouping(GROUPING, testUid);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin and an owner.");
-        }
-
-        // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.removeAdmin(ADMIN, testUid);
-        try {
-            groupingAssignmentService.getGrouping(GROUPING, testUid);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an owner but not an admin.");
-        }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
-
-        // Should throw and exception if a group path is passed.
-        assertThrows(NullPointerException.class, () -> groupingAssignmentService.getGrouping(GROUPING_INCLUDE, ADMIN));
-
-        // Should throw and exception if an invalid path is passed.
-        assertThrows(NullPointerException.class, () -> groupingAssignmentService.getGrouping("bogus-path", ADMIN));
-
-        // Should set all the fields of the Grouping returned.
-        Grouping grouping = groupingAssignmentService.getGrouping(GROUPING, ADMIN);
-        assertNotNull(grouping);
-        assertNotNull(grouping.getComposite());
-        assertNotNull(grouping.getPath());
-        assertNotNull(grouping.getOwners());
-        assertNotNull(grouping.getInclude());
-        assertNotNull(grouping.getExclude());
-        assertNotNull(grouping.getBasis());
-        assertNotNull(grouping.getDescription());
-    }
-
-    @Test
-    public void getPaginatedGroupingTest() {
-        // Should throw and exception if current user is not an admin or and owner.
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUid, null, null, null, false);
-            fail("Should throw and exception if current user is not an admin or and owner.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-        // Should throw and exception if current user is not valid.
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, "bogus-user", null, null, null, false);
-            fail("Should throw and exception if current user is not valid.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUid, null, null, "", false);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin but not an owner.");
-        }
-
-        // Should not throw an exception if current user is an admin and an owner.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testUidList);
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUid, null, null, "", false);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin and an owner.");
-        }
-
-        // Should not throw an exception if current user is an owner but not an admin.
-        updateMemberService.removeAdmin(ADMIN, testUid);
-        try {
-            groupingAssignmentService.getPaginatedGrouping(GROUPING, testUid, null, null, null, false);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an owner but not an admin.");
-        }
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
-        // Should throw and exception if an invalid path is passed.
-        assertThrows(NullPointerException.class,
-                () -> groupingAssignmentService.getPaginatedGrouping("bogus-path", ADMIN, null, null, null, false));
-    }
-
-    @Test
     public void adminsGroupingsTest() {
         // Should throw an exception if current user is not an admin.
         try {
@@ -238,24 +132,6 @@ public class TestGroupingAssignmentService {
         Collections.addAll(groupPaths, GROUPING, GROUPING_BASIS, GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
         Map<String, Group> groupMap = groupingAssignmentService.getMembers(ADMIN, groupPaths);
         assertNotNull(groupMap);
-    }
-
-    @Test
-    public void getPaginatedMembersTest() {
-        List<String> groupPaths = Arrays.asList(GROUPING_LARGE_BASIS);
-        Map<String, Group> results = groupingAssignmentService.getPaginatedMembers(
-                ADMIN,
-                groupPaths,
-                1,
-                700,
-                "name",
-                true);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.keySet().stream().allMatch(result -> result.equals(GROUPING_LARGE_BASIS)));
-        assertEquals(GROUPING_LARGE_BASIS, results.get(GROUPING_LARGE_BASIS).getPath());
-        assertNotNull(results.get(GROUPING_LARGE_BASIS).getMembers());
-        assertFalse(results.get(GROUPING_LARGE_BASIS).getMembers().isEmpty());
     }
 
     @Test
@@ -297,14 +173,6 @@ public class TestGroupingAssignmentService {
         List<GroupingPath> optInGroupingsPaths =
                 groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
         assertEquals(Collections.emptyList(), optInGroupingsPaths);
-    }
-
-    @Test
-    public void setGroupingAttributesTest() {
-        // Should set the sync destinations.
-        Grouping grouping = groupingAssignmentService.setGroupingAttributes(new Grouping(GROUPING));
-        assertNotNull(grouping);
-        assertNotNull(grouping.getSyncDestinations());
     }
 
     @Test

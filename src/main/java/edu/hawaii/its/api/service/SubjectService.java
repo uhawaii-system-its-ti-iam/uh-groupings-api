@@ -2,7 +2,6 @@
 
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -36,14 +35,6 @@ public class SubjectService {
 
     public boolean isValidIdentifier(String uhIdentifier) {
         return isValidSubject(getSubject(uhIdentifier));
-    }
-
-    public String checkValidSubject(String uhIdentifier) {
-        String validUhUuid = getValidUhUuid(uhIdentifier);
-        if (validUhUuid.equals("")) {
-            throw new UhMemberNotFoundException(uhIdentifier);
-        }
-        return validUhUuid;
     }
 
     private boolean isValidSubject(Subject subject) {

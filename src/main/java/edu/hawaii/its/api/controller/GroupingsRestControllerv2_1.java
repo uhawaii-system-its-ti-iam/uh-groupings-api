@@ -24,7 +24,6 @@ import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
@@ -33,12 +32,10 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.type.SyncDestination;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -285,24 +282,6 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupingOwnerService
                         .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending));
-    }
-
-    /**
-     * Get a list of a groupings a user is in and can opt into.
-     */
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}")
-    @ResponseBody
-    public ResponseEntity<Grouping> getGrouping(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @RequestParam(required = true) Integer page,
-            @RequestParam(required = true) Integer size,
-            @RequestParam(required = true) String sortString,
-            @RequestParam(required = true) Boolean isAscending) {
-        logger.info("Entered REST getGrouping...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService
-                        .getPaginatedGrouping(path, currentUser, page, size, sortString, isAscending));
     }
 
     /**
