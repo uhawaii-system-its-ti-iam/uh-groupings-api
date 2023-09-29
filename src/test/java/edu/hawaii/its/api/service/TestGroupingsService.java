@@ -151,13 +151,8 @@ public class TestGroupingsService extends ServiceTest {
         Announcements test = announcementService.findAnnouncements();
         logger.info("\n\nall announcements: " + test);
 
-        logger.info("\n\nan announcement: " + test.getAnnouncements());
-
-
-
-//        List<Announcement> test = announcementService.findAnnouncements("mh888").getAnnouncements();
-//        logger.info("\n\n" + test);
-
+        logger.info("\n\ninside the announcements: " + test.getAnnouncements());
+        JsonUtil.prettyPrint(test.getAnnouncements());
 
     }
 

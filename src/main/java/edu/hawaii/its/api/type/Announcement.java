@@ -5,46 +5,53 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import edu.hawaii.its.api.util.Dates;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class Announcement {
     private String message;
-
-//    @JsonSerialize(using = LocalDateTimeSerializer.class)
-//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-//    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private String from;
-
-//    @JsonSerialize(using = LocalDateTimeSerializer.class)
-//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-//    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private String to;
 
-    public String getMessage() {
-//        List<Announcement> all = new Announcements().getAnnouncements();
+    public static String validMessage(List<Announcement> allAnnouncements) {
+        LocalDateTime currDate = LocalDateTime.now();
+        for (int i = 0; i < allAnnouncements.size(); i++) {
+            LocalDateTime dateTo = allAnnouncements.get(i).getTo();
+            LocalDateTime dateFrom = allAnnouncements.get(i).getFrom();
+            if (dateFrom.isBefore(currDate) && dateTo.isAfter(currDate)) {
+                return allAnnouncements.get(i).getMessage();
+            }
+        }
+        return "";
+    }
 
+    public String getMessage() {
         return message;
     }
 
-    public String getFrom() {
-        return from;
+    public LocalDateTime getFrom() {
+        LocalDateTime dateFrom = Dates.toLocalDateTime(from, Dates.DATE_FORMAT_PLANNEDOUTAGE);
+        return dateFrom;
     }
 
-    public String getTo() {
-        return to;
+    public LocalDateTime getTo() {
+        LocalDateTime dateTo = Dates.toLocalDateTime(to, Dates.DATE_FORMAT_PLANNEDOUTAGE);
+        return dateTo;
     }
 
+
+    //not used
     public void setMessage(String message) {
         this.message = message;
     }
 
-//    public void setFrom(LocalDateTime from) {
-//        this.from = from;
-//    }
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
-//    public void setTo(LocalDateTime to) {
-//        this.to = to;
-//    }
+    public void setTo(String to) {
+        this.to = to;
+    }
 }

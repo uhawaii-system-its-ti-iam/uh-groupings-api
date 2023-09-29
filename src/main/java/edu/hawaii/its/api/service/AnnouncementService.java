@@ -18,17 +18,10 @@ public class AnnouncementService {
     private GrouperApiService grouperApiService;
 
     public String getMessage() {
-        this.allAnnouncements = findAnnouncements().getAnnouncements();
-        LocalDateTime currDate = LocalDateTime.now();
-
-        //was run on a List
-        for (int i = 0; i < this.allAnnouncements.size(); i++) {
-            //convert dates here
-            LocalDateTime dateTo = Dates.toLocalDateTime(this.allAnnouncements.get(i).getTo(), Dates.DATE_FORMAT_PLANNEDOUTAGE);
-            LocalDateTime dateFrom = Dates.toLocalDateTime(this.allAnnouncements.get(i).getFrom(), Dates.DATE_FORMAT_PLANNEDOUTAGE);
-            if (dateFrom.isBefore(currDate) && dateTo.isAfter(currDate)) {
-                return this.allAnnouncements.get(i).getMessage();
-            }
+        allAnnouncements = findAnnouncements().getAnnouncements();
+        String valid = Announcement.validMessage(allAnnouncements);
+        if (valid != "") {
+            return valid;
         }
         return "no message to display";
     }
