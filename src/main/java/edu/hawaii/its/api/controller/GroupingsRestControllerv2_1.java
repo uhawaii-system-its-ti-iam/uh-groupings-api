@@ -18,6 +18,7 @@ import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.AnnouncementService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
@@ -87,6 +88,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
+
+    @Autowired
+    private AnnouncementService announcementService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -682,11 +686,11 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @GetMapping(value = "/outage/apiM")
-    public ResponseEntity<Announcements> outageMessage() {
+    public ResponseEntity<List<Announcement>> outageMessage() {
         logger.info("Entered REST outageMessage...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.outageMessage());
+                .body(announcementService.getAnnouncements());
 
     }
 }

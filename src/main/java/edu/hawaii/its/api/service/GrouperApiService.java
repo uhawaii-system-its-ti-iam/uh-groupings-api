@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Announcement;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
@@ -26,7 +27,7 @@ import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
-//import edu.hawaii.its.api.wrapper.PlannedOutage;
+import edu.hawaii.its.api.service.AnnouncementService;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -232,22 +233,6 @@ public class GrouperApiService {
             return new GetMembersResult();
         }
         return result.get(0);
-    }
-
-    public Announcements getMessage() {
-        AnnouncementService testy = new AnnouncementService();
-        return testy.getAnnouncements("ADMIN");
-//
-//
-//        return PlannedOutage.returnMessage();
-//        WsFindAttributeDefNamesResults attribute = ""; //uh-settings:attributes:for-applications:uhgroupings:announcements;
-//        String json = propertyLocator.find("ws.attribute.def.name.results.success");
-//        WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults =
-//                JsonUtil.asObject(json, WsFindAttributeDefNamesResults.class);
-//        AttributesResult attributesResult =
-//                new FindAttributesResults(wsFindAttributeDefNamesResults).getResults().get(0);
-//
-//        return PlannedOutage.returnMessage(attribute);
     }
 
     /**

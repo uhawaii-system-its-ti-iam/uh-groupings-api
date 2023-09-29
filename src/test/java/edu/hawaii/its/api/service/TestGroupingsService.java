@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.type.Announcement;
 import edu.hawaii.its.api.type.Announcements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,8 +148,8 @@ public class TestGroupingsService extends ServiceTest {
 
     @Test
     public void groupingsAnnouncements() {
-        Announcements test = announcementService.getAnnouncements();
-        logger.info("ayo: " + test);
+        List<Announcement> test = announcementService.findAnnouncements(ADMIN).getAnnouncements();
+        logger.info("\n\n" + test);
     }
 
 }
