@@ -354,22 +354,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void getGroupingTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "?page=1&size=1&sortString=name&isAscending=true";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Grouping.class));
-
-        url = API_BASE_URL + "groupings/" + GROUPING + "?";
-        mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().is5xxServerError())
-                .andReturn();
-    }
-
-    @Test
     public void ownedGroupingTest() throws Exception {
         String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
         List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);

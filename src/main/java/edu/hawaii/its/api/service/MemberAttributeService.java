@@ -26,18 +26,6 @@ public class MemberAttributeService {
 
     public static final Log logger = LogFactory.getLog(MemberAttributeService.class);
 
-    @Value("${groupings.api.grouping_admins}")
-    private String GROUPING_ADMINS;
-
-    @Value("${groupings.api.grouping_apps}")
-    private String GROUPING_APPS;
-
-    @Value("${groupings.api.grouping_owners}")
-    private String OWNERS_GROUP;
-
-    @Value("${groupings.api.is_member}")
-    private String IS_MEMBER;
-
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
@@ -52,11 +40,6 @@ public class MemberAttributeService {
 
     @Autowired
     private GroupingsService groupingsService;
-
-    // Returns true if the user is in the apps group
-    public boolean isApp(String uhIdentifier) {
-        return memberService.isMember(GROUPING_APPS, uhIdentifier);
-    }
 
     /**
      * Get a list of invalid uhIdentifiers given a list of uhIdentifiers.
