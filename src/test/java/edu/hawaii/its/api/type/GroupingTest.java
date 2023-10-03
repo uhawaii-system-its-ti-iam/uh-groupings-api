@@ -5,9 +5,6 @@ import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -173,25 +170,5 @@ public class GroupingTest {
         grouping.setOwners(null);
         assertNotNull(grouping.getOwners());
         assertTrue(grouping.getOwners().isEmpty());
-    }
-
-    @Test
-    public void syncDestinations() {
-        Grouping grouping = new Grouping();
-        assertNotNull(grouping.getSyncDestinations());
-        assertTrue(grouping.getSyncDestinations().isEmpty());
-
-        List<SyncDestination> syncDestinations = new ArrayList<>();
-        SyncDestination syncDestination = new SyncDestination("name", "description");
-        syncDestination.setSynced(false);
-        syncDestinations.add(syncDestination);
-        grouping.setSyncDestinations(syncDestinations);
-        assertFalse(grouping.getSyncDestinations().isEmpty());
-        assertFalse(grouping.isSyncDestinationOn("name"));
-        grouping.changeSyncDestinationState("name", true);
-        assertTrue(grouping.isSyncDestinationOn("name"));
-        grouping.changeSyncDestinationState("incorrectKey", true);
-        assertTrue(grouping.isSyncDestinationOn("name"));
-
     }
 }

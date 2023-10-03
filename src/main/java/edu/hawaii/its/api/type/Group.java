@@ -53,10 +53,6 @@ public class Group implements Comparable<Group> {
         members.add(person);
     }
 
-    public boolean isMember(Person person) {
-        return members.contains(person);
-    }
-
     public List<String> getNames() {
         return members
                 .parallelStream()

@@ -185,35 +185,6 @@ public class GroupingAttributeService {
         }
     }
 
-    /**
-     * Make a groupingsServiceResult with the result code from the metadataHolder and the action string.
-     */
-    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action) {
-        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
-        groupingsServiceResult.setAction(action);
-        groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
-
-        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
-            throw new GroupingsServiceResultException(groupingsServiceResult);
-        }
-
-        return groupingsServiceResult;
-    }
-
-    public GroupingsServiceResult makeGroupingsServiceResult(ResultMetadataHolder resultMetadataHolder, String action,
-            Person person) {
-        GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
-        groupingsServiceResult.setAction(action);
-        groupingsServiceResult.setResultCode(resultMetadataHolder.getResultMetadata().getResultCode());
-        groupingsServiceResult.setPerson(person);
-
-        if (groupingsServiceResult.getResultCode().startsWith(FAILURE)) {
-            throw new GroupingsServiceResultException(groupingsServiceResult);
-        }
-
-        return groupingsServiceResult;
-    }
-
     public GroupingsServiceResult makeGroupingsServiceResult(String resultCode, String action) {
         GroupingsServiceResult groupingsServiceResult = new GroupingsServiceResult();
         groupingsServiceResult.setAction(action);

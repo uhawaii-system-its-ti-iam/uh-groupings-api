@@ -37,8 +37,6 @@ import java.util.List;
 @Service("grouperApiService")
 public class GrouperApiService {
 
-    @Autowired MemberAttributeService membershipAttributeService;
-
     @Autowired ExecutorService exec;
 
     /**
