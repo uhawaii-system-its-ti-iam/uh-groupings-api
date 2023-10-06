@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import edu.hawaii.its.api.service.*;
 import edu.hawaii.its.api.type.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,25 +17,10 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
-import edu.hawaii.its.api.service.AsyncJobsManager;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.AnnouncementService;
-import edu.hawaii.its.api.service.GroupingAttributeService;
-import edu.hawaii.its.api.service.GroupingOwnerService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.MemberService;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.util.Dates;
 import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.UpdateTimestampCommand;
-
-import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,10 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -89,7 +72,7 @@ public class GroupingsRestControllerv2_1 {
     private GroupingOwnerService groupingOwnerService;
 
     @Autowired
-    private AnnouncementService announcementService;
+    private AnnouncementsService announcementsService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -685,11 +668,11 @@ public class GroupingsRestControllerv2_1 {
     }
 
     @GetMapping(value = "/outage/apiM")
-    public ResponseEntity<String> outageMessage() {
+    public ResponseEntity<Announcements> outageMessage(/*@RequestHeader(CURRENT_USER_KEY) String currentUser*/) {
         logger.info("Entered REST outageMessage...");
         return ResponseEntity
                 .ok()
-                .body(announcementService.getMessage());
+                .body(announcementsService.oneAnnouncement(/*currentUser*/));
 
     }
 }

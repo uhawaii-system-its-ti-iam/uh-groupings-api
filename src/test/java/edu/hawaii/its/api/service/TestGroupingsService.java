@@ -1,14 +1,11 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Announcement;
-import edu.hawaii.its.api.type.Announcements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.ServiceTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
