@@ -15,8 +15,9 @@ public class GroupSaveCommand extends GrouperCommand implements Command<GroupSav
     private final WsGroupToSave wsGroupToSave;
 
     public GroupSaveCommand() {
-        gcGroupSave = new GcGroupSave();
-        wsGroupToSave = new WsGroupToSave();
+        this.gcGroupSave = new GcGroupSave();
+        this.gcGroupSave.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
+        this.wsGroupToSave = new WsGroupToSave();
     }
 
     @Override

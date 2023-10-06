@@ -17,8 +17,9 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
     private final GcGetSubjects gcGetSubjects;
 
     public SubjectsCommand() {
-        gcGetSubjects = new GcGetSubjects();
-        gcGetSubjects.assignIncludeSubjectDetail(true);
+        this.gcGetSubjects = new GcGetSubjects();
+        this.gcGetSubjects.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
+        this.gcGetSubjects.assignIncludeSubjectDetail(true);
     }
 
     public SubjectsResults execute() {

@@ -12,6 +12,7 @@ public class AssignAttributesCommand extends GrouperCommand implements Command<A
 
     public AssignAttributesCommand() {
         this.gcAssignAttributes = new GcAssignAttributes();
+        this.gcAssignAttributes.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
     }
 
     @Override

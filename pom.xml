@@ -12,13 +12,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.14</version>
+        <version>3.2.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <properties>
-        <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
-        <java.version>1.8</java.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
@@ -38,8 +38,8 @@
         <!-- API documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.13</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
             <artifactId>grouperClient</artifactId>
-            <version>2.4.0</version>
+            <version>4.9.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.2</version>
                 <configuration>
                     <excludes>
                         <exclude>**/Test*.java</exclude>

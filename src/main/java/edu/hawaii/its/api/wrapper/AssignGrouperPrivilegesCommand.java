@@ -13,6 +13,7 @@ public class AssignGrouperPrivilegesCommand extends GrouperCommand implements Co
 
     public AssignGrouperPrivilegesCommand() {
         this.gcAssignGrouperPrivilegesLite = new GcAssignGrouperPrivilegesLite();
+        this.gcAssignGrouperPrivilegesLite.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
         this.gcAssignGrouperPrivilegesLite.assignIncludeSubjectDetail(true);
     }
 

@@ -14,6 +14,7 @@ public class GetGroupsCommand extends GrouperCommand implements Command<GetGroup
 
     public GetGroupsCommand() {
         this.gcGetGroups = new GcGetGroups();
+        this.gcGetGroups.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
     }
 
     @Override
