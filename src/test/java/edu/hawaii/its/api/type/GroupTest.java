@@ -282,4 +282,5 @@ public class GroupTest {
         group.addMember(new Person("A", "B", "C"));
         assertFalse(group.isEmpty());
     }
+
 }

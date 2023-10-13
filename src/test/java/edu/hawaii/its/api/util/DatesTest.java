@@ -657,18 +657,18 @@ public class DatesTest {
 
     @Test
     public void dateToLocalDate() {
-        LocalDate d = Dates.newLocalDate(2016, Month.OCTOBER, 31);
-        assertThat(d.getDayOfMonth(), is(31));
-        assertThat(d.getYear(), is(2016));
-        assertThat(d.getMonth(), is(Month.OCTOBER));
+        LocalDate date = Dates.newLocalDate(2016, Month.OCTOBER, 31);
+        assertThat(date.getDayOfMonth(), is(31));
+        assertThat(date.getYear(), is(2016));
+        assertThat(date.getMonth(), is(Month.OCTOBER));
     }
 
     @Test
     public void dateToLocalDateTime() {
-        LocalDateTime d = Dates.newLocalDateTime(2017, Month.MARCH, 28);
-        assertThat(d.getDayOfMonth(), is(28));
-        assertThat(d.getYear(), is(2017));
-        assertThat(d.getMonth(), is(Month.MARCH));
+        LocalDateTime date = Dates.newLocalDateTime(2017, Month.MARCH, 28);
+        assertThat(date.getDayOfMonth(), is(28));
+        assertThat(date.getYear(), is(2017));
+        assertThat(date.getMonth(), is(Month.MARCH));
     }
 
     @Test
@@ -686,5 +686,17 @@ public class DatesTest {
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    @Test
+    public void testToLocalDate() {
+        java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+        LocalDate date1 = Dates.toLocalDate(sqlDate);
+        assertThat(sqlDate.getTime(), is(sqlDate.getTime()));
+        assertThat(date1.getYear(), is(LocalDate.now().getYear()));
+        assertThat(date1.getMonth(), is(LocalDate.now().getMonth()));
+        assertThat(date1.getDayOfMonth(), is(LocalDate.now().getDayOfMonth()));
+        LocalDate date2 = Dates.toLocalDate(sqlDate);
+        assertThat(date2, is(date1));
     }
 }

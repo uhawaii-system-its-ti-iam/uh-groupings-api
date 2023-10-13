@@ -129,4 +129,25 @@ public class MembershipTest {
         assertTrue(membershipEmptyOnConstruction.isOptOutEnabled());
     }
 
+    @Test
+    public void toStringTest() {
+        Membership membership = new Membership();
+        assertEquals("Membership{" +
+                "identifier='null'" +
+                ", person=null" +
+                ", group=null" +
+                ", path='null'" +
+                ", name='null'" +
+                ", description='null'" +
+                ", isSelfOpted=false" +
+                ", isOptInEnabled=false" +
+                ", isOptOutEnabled=false" +
+                ", inBasis=false" +
+                ", inInclude=false" +
+                ", inExclude=false" +
+                ", inOwner=false" +
+                ", inBasisAndInclude=false" +
+                '}'
+        , membership.toString());
+    }
 }

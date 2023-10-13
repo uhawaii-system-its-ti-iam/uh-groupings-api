@@ -24,6 +24,20 @@ public class GroupingGroupsMembersTest {
     }
 
     @Test
+    public void constructor() {
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers();
+        assertEquals("", groupingGroupsMembers.getGroupPath());
+        assertEquals("", groupingGroupsMembers.getResultCode());
+        assertNotNull(groupingGroupsMembers.getAllMembers());
+        assertFalse(groupingGroupsMembers.isBasis());
+        assertFalse(groupingGroupsMembers.isInclude());
+        assertFalse(groupingGroupsMembers.isExclude());
+        assertFalse(groupingGroupsMembers.isOwners());
+        assertEquals(Integer.valueOf(0), groupingGroupsMembers.getPageNumber());
+        assertTrue(groupingGroupsMembers.isPaginationComplete());
+    }
+
+    @Test
     public void successfulResult() {
         String onlyInclude = "iamtst01";
         String basisAndInclude = "iamtst02";
@@ -168,4 +182,5 @@ public class GroupingGroupsMembersTest {
         assertNotNull(groupingGroupsMembers.getAllMembers().getMembers());
         assertTrue(groupingGroupsMembers.getAllMembers().getMembers().isEmpty());
     }
+
 }

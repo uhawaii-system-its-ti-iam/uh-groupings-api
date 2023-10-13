@@ -81,32 +81,6 @@ public class GroupingRemoveResultsTest {
         assertEquals(11, groupingRemoveResults.getResults().size());
     }
 
-    public List<String> getTestUsernames() {
-        String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestNumbers() {
-        String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestNames() {
-        String[] array = { "Testf-iwt-a TestIAM-staff", "Testf-iwt-b TestIAM-staff", "Testf-iwt-c TestIAM-staff",
-                "Testf-iwt-d TestIAM-faculty", "Testf-iwt-e TestIAM-student" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestFirstNames() {
-        String[] array = { "Testf-iwt-a", "Testf-iwt-b", "Testf-iwt-c", "Testf-iwt-d", "Testf-iwt-e" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
-    public List<String> getTestLastNames() {
-        String[] array = { "TestIAM-staff", "TestIAM-staff", "TestIAM-staff", "TestIAM-faculty", "TestIAM-student" };
-        return new ArrayList<>(Arrays.asList(array));
-    }
-
     private String propertyValue(String key) {
         return properties.getProperty(key);
     }
