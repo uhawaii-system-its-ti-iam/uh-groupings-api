@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class UhMemberNotFoundExceptionTest {
+public class InvalidGroupPathExceptionTest {
 
     @Test
     public void construction() {
-        UhMemberNotFoundException exception = new UhMemberNotFoundException("fail");
+        InvalidGroupPathException exception = new InvalidGroupPathException("fail");
         assertNotNull(exception);
         assertEquals("404 NOT_FOUND \"fail\"", exception.getMessage());
     }

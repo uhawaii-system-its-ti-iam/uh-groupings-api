@@ -1,40 +1,40 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.JavaVersionException;
 
-@EnabledIfSystemProperty(named = "spring.profiles.active", matches = "localhost")
-@SpringBootTest(classes = { SpringBootWebApplication.class })
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class JavaVersionCheckerTest {
-    @Autowired
+
     private JavaVersionChecker javaVersionChecker;
 
-    private final String currentJavaVersion = System.getProperty("java.version");
+    @BeforeEach
+    public void beforeEach() {
+        javaVersionChecker = new JavaVersionChecker();
+        ReflectionTestUtils.setField(javaVersionChecker, "javaSpecificationVersion", "1.8");
+    }
 
     @Test
     public void construction() {
-        Assertions.assertNotNull(javaVersionChecker);
+        assertNotNull(javaVersionChecker);
     }
 
     @Test
-    public void testIncorrectVersion() {
-        System.setProperty("java.version", "xxx");
-        assertThrows(JavaVersionException.class,
-                () -> javaVersionChecker.init());
-        System.setProperty("java.version", currentJavaVersion);
-    }
-
-    @Test
-    public void testCorrectVersion() {
+    public void correctVersionTest() {
+        System.setProperty("java.version", "1.8");
         assertDoesNotThrow(() -> javaVersionChecker.init());
     }
+
+    @Test
+    public void incorrectVersionTest() {
+        System.setProperty("java.version", "1.9");
+        assertThrows(JavaVersionException.class, () -> javaVersionChecker.init());
+    }
+
 }

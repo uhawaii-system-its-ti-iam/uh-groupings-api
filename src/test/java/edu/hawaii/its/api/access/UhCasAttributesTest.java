@@ -218,4 +218,13 @@ public class UhCasAttributesTest {
 
         assertThat(attributes.toString(), containsString("uid=duckart"));
     }
+
+    @Test
+    public void uhCasAttributesTest() {
+        UhCasAttributes attributes = new UhCasAttributes();
+        assertThat(attributes.getUsername(), is(""));
+        assertThat(attributes.getUhUuid(), is(""));
+        assertThat(attributes.getUid(), is(""));
+    }
+
 }
