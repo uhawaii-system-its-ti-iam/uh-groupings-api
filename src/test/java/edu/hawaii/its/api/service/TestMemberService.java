@@ -55,9 +55,9 @@ public class TestMemberService {
     public void isAdmin() {
         assertTrue(memberService.isAdmin(ADMIN));
 
-        updateMemberService.addAdmin(ADMIN, testUhUuid);
+        updateMemberService.addAdminMember(ADMIN, testUhUuid);
         assertTrue(memberService.isAdmin(testUhUuid));
-        updateMemberService.removeAdmin(ADMIN, testUhUuid);
+        updateMemberService.removeAdminMember(ADMIN, testUhUuid);
         assertFalse(memberService.isAdmin(testUhUuid));
 
         assertFalse(memberService.isAdmin(BOGUS));

@@ -265,19 +265,19 @@ public class GroupingsRestControllerv2_1Test {
     public void addAdminTest() throws Exception {
         String adminToAdd = "adminToAdd";
         GroupingAddResult addMemberResult = new GroupingAddResult();
-        given(updateMemberService.addAdmin(ADMIN, adminToAdd)).willReturn(addMemberResult);
+        given(updateMemberService.addAdminMember(ADMIN, adminToAdd)).willReturn(addMemberResult);
         mockMvc.perform(post(API_BASE + "/admins/" + adminToAdd)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
         verify(updateMemberService, times(1))
-                .addAdmin(ADMIN, adminToAdd);
+                .addAdminMember(ADMIN, adminToAdd);
     }
 
     @Test
     public void removeAdminTest() throws Exception {
         String adminToRemove = "adminToRemove";
         GroupingRemoveResult removeMemberResult = new GroupingRemoveResult();
-        given(updateMemberService.removeAdmin(ADMIN, adminToRemove))
+        given(updateMemberService.removeAdminMember(ADMIN, adminToRemove))
                 .willReturn(removeMemberResult);
 
         mockMvc.perform(delete(API_BASE + "/admins/" + adminToRemove)
@@ -285,7 +285,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk());
 
         verify(updateMemberService, times(1))
-                .removeAdmin(ADMIN, adminToRemove);
+                .removeAdminMember(ADMIN, adminToRemove);
     }
 
     @Test
