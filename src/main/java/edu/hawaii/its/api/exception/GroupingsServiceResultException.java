@@ -1,4 +1,6 @@
-package edu.hawaii.its.api.type;
+package edu.hawaii.its.api.exception;
+
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 public class GroupingsServiceResultException extends RuntimeException {
     /**

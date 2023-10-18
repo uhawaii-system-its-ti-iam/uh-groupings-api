@@ -6,14 +6,11 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.GroupingUpdatedAttributesResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
 import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
-
-import edu.internet2.middleware.grouperClient.ws.beans.ResultMetadataHolder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
