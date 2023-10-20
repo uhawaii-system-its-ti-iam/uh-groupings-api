@@ -2,8 +2,8 @@ package edu.hawaii.its.api.controller;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.service.EmailService;
-import edu.hawaii.its.api.type.GroupingsHTTPException;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.GroupingsHTTPException;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

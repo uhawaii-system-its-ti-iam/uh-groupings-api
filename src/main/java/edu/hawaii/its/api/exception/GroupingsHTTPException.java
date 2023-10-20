@@ -1,4 +1,4 @@
-package edu.hawaii.its.api.type;
+package edu.hawaii.its.api.exception;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
