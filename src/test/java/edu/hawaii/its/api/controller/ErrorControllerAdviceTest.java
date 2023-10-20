@@ -3,7 +3,7 @@ package edu.hawaii.its.api.controller;
 import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.type.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
