@@ -44,7 +44,7 @@ public class GroupingDescriptionTest {
         assertNotNull(groupingDescription);
         assertEquals("SUCCESS", groupingDescription.getResultCode());
         assertEquals("Test Many Groups In Basis", groupingDescription.getDescription());
-        assertEquals("tmp:obiwan:obiwan-many", groupingDescription.getGroupPath());
+        assertEquals("tmp:testiwtb:testiwtb-many", groupingDescription.getGroupPath());
     }
 
     @Test
