@@ -265,26 +265,32 @@ public class GrouperApiService {
     }
 
     /**
-     * Add multiple UH identifiers to a group listing.
+     * Add a UH identifier to group listing.
      */
-    public AddMembersResults addMembers(String groupPath, List<String> uhIdentifiers) {
+    public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new AddMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
+                .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
 
-    public AddMembersResults addMembers(String currentUser, String groupPath, String uhIdentifier) {
+    /**
+     * Add multiple UH identifiers to a group listing.
+     */
+    public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new AddMembersCommand()
-                .setPrivilegeHolder(currentUser)
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addUhIdentifier(uhIdentifier));
+                .addUhIdentifiers(uhIdentifiers));
+
     }
 
     /**
      * Remove a UH identifier from a group listing.
      */
-    public RemoveMemberResult removeMember(String groupPath, String uhIdentifier) {
+    public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new RemoveMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
     }
@@ -292,8 +298,9 @@ public class GrouperApiService {
     /**
      * Remove multiple UH identifiers from a group listing.
      */
-    public RemoveMembersResults removeMembers(String groupPath, List<String> uhIdentifiers) {
+    public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new RemoveMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
     }

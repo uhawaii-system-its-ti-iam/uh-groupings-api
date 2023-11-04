@@ -55,4 +55,9 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
         return this;
     }
 
+    public RemoveMembersCommand owner(String uhIdentifier) {
+        gcDeleteMember.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
+
 }

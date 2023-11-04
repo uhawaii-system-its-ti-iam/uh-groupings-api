@@ -80,40 +80,40 @@ public class TestUpdateMemberService {
 
     @BeforeAll
     public void init() {
-        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
-        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_NUMBERS);
-        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_NUMBERS);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, TEST_UH_NUMBERS.get(0));
+        grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, TEST_UH_NUMBERS);
+        grouperApiService.removeMembers(ADMIN, GROUPING_EXCLUDE, TEST_UH_NUMBERS);
 
-        grouperApiService.removeMember(GROUPING_ADMINS, TEST_UH_USERNAMES.get(0));
-        grouperApiService.removeMembers(GROUPING_INCLUDE, TEST_UH_USERNAMES);
-        grouperApiService.removeMembers(GROUPING_EXCLUDE, TEST_UH_USERNAMES);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, TEST_UH_USERNAMES.get(0));
+        grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, TEST_UH_USERNAMES);
+        grouperApiService.removeMembers(ADMIN, GROUPING_EXCLUDE, TEST_UH_USERNAMES);
     }
 
     @Test
     public void addRemoveAdminTest() {
         // With uh number.
         assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
-        updateMemberService.addAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
+        updateMemberService.addAdminMember(ADMIN, TEST_UH_NUMBERS.get(0));
         assertTrue(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
-        updateMemberService.removeAdmin(ADMIN, TEST_UH_NUMBERS.get(0));
+        updateMemberService.removeAdminMember(ADMIN, TEST_UH_NUMBERS.get(0));
         assertFalse(memberService.isAdmin(TEST_UH_NUMBERS.get(0)));
 
         // With uh username.
         assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
-        updateMemberService.addAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
+        updateMemberService.addAdminMember(ADMIN, TEST_UH_USERNAMES.get(0));
         assertTrue(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
-        updateMemberService.removeAdmin(ADMIN, TEST_UH_USERNAMES.get(0));
+        updateMemberService.removeAdminMember(ADMIN, TEST_UH_USERNAMES.get(0));
         assertFalse(memberService.isAdmin(TEST_UH_USERNAMES.get(0)));
 
         try {
-            updateMemberService.addAdmin(ADMIN, "bogus-admin-to-add");
+            updateMemberService.addAdminMember(ADMIN, "bogus-admin-to-add");
             fail("Should throw an exception if an invalid adminToAdd is passed.");
         } catch (UhMemberNotFoundException e) {
             assertNull(e.getCause());
         }
 
         try {
-            updateMemberService.removeAdmin(ADMIN, "bogus-admin-to-remove");
+            updateMemberService.removeAdminMember(ADMIN, "bogus-admin-to-remove");
             fail("Should throw an exception if an invalid adminToRemove is passed.");
         } catch (UhMemberNotFoundException e) {
             assertNull(e.getCause());
@@ -456,7 +456,7 @@ public class TestUpdateMemberService {
     }
 
     private void removeGroupMember(String groupPath, String uhIdentifier) {
-        grouperApiService.removeMember(groupPath, uhIdentifier);
+        grouperApiService.removeMember(ADMIN, groupPath, uhIdentifier);
     }
 
 }

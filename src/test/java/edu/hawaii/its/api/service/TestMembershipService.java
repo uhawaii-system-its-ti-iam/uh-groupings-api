@@ -103,45 +103,45 @@ public class TestMembershipService {
     public void init() {
         assertTrue(memberService.isAdmin(ADMIN));
         TEST_USERNAMES.forEach(testUsername -> {
-            grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
-            grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
-            grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
-            grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
+            grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUsername);
+            grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUsername);
+            grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUsername);
+            grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUsername);
         });
         TEST_UH_NUMBERS.forEach(testNumber -> {
-            grouperApiService.removeMember(GROUPING_ADMINS, testNumber);
-            grouperApiService.removeMember(GROUPING_INCLUDE, testNumber);
-            grouperApiService.removeMember(GROUPING_EXCLUDE, testNumber);
-            grouperApiService.removeMember(GROUPING_OWNERS, testNumber);
+            grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testNumber);
+            grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testNumber);
+            grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testNumber);
+            grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testNumber);
         });
         testPerson1 = uhIdentifierGenerator.getRandomPerson();
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson1.getUsername());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson1.getUsername());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson1.getUsername());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson1.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson1.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson1.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson1.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson1.getUsername());
 
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson1.getUhUuid());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson1.getUhUuid());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson1.getUhUuid());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson1.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson1.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson1.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson1.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson1.getUhUuid());
 
         testPerson2 = uhIdentifierGenerator.getRandomPerson();
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson2.getUsername());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson2.getUsername());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson2.getUsername());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson2.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson2.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson2.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson2.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson2.getUsername());
 
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson2.getUhUuid());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson2.getUhUuid());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson2.getUhUuid());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson2.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson2.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson2.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson2.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson2.getUhUuid());
     }
 
     @Test
     public void membershipResultsTest() {
         String testUsername = testPerson1.getUsername();
 
-        grouperApiService.removeMember(GROUPING_BASIS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_BASIS, testUsername);
 
         // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
         try {
@@ -168,7 +168,7 @@ public class TestMembershipService {
         } catch (UhMemberNotFoundException e) {
 
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUsername);
 
         // Should throw an exception if uid passed is bogus.
         try {
@@ -207,10 +207,10 @@ public class TestMembershipService {
         assertTrue(membership.isInOwner());
 
         // Clean up.
-        grouperApiService.removeMember(GROUPING_OWNERS, testUsername);
-        grouperApiService.removeMember(GROUPING_INCLUDE, testUsername);
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testUsername);
-        grouperApiService.removeMember(GROUPING_BASIS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUsername);
+        grouperApiService.removeMember(ADMIN,GROUPING_EXCLUDE, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_BASIS, testUsername);
 
         // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
         try {
@@ -242,7 +242,7 @@ public class TestMembershipService {
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUsername);
 
         // Should not throw an exception if current user is an admin and does match uid.
         grouperApiService.addMember(GROUPING_ADMINS, testUsername);
@@ -251,7 +251,7 @@ public class TestMembershipService {
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does match uid.");
         }
-        grouperApiService.removeMember(GROUPING_ADMINS, testUsername);
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUsername);
 
         // Should return and empty list if uid passed is bogus.
         memberships = membershipService.managePersonResults(ADMIN, "bogus-user");

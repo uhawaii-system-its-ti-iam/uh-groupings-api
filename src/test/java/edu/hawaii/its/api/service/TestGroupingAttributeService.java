@@ -103,15 +103,15 @@ public class TestGroupingAttributeService {
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         testPerson = uhIdentifierGenerator.getRandomPerson();
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUsername());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson.getUsername());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson.getUsername());
 
-        grouperApiService.removeMember(GROUPING_ADMINS, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_INCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_EXCLUDE, testPerson.getUhUuid());
-        grouperApiService.removeMember(GROUPING_OWNERS, testPerson.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testPerson.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testPerson.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testPerson.getUhUuid());
+        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testPerson.getUhUuid());
     }
 
     @AfterAll
@@ -162,7 +162,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
@@ -186,7 +186,7 @@ public class TestGroupingAttributeService {
                         .withOptValue(false)
                         .build()
         ));
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
@@ -326,7 +326,7 @@ public class TestGroupingAttributeService {
                 .withOptValue(false)
                 .build();
 
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.changeOptStatus(optInRequest, optOutRequest);
         } catch (AccessDeniedException e) {
@@ -351,7 +351,7 @@ public class TestGroupingAttributeService {
                         .build()
         ));
 
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
@@ -458,13 +458,13 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.changeGroupAttributeStatus(GROUPING, testUid, null, false);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Should throw an exception if an invalid path is passed.
         assertThrows(NullPointerException.class,
@@ -534,7 +534,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.updateDescription(GROUPING, testUid, DEFAULT_DESCRIPTION);
         } catch (AccessDeniedException e) {
@@ -544,7 +544,7 @@ public class TestGroupingAttributeService {
         // Should throw an exception if an invalid path is passed.
         assertThrows(NullPointerException.class,
                 () -> groupingAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION));
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Should be set back to original description.
         groupingAttributeService.updateDescription(GROUPING, ADMIN, descriptionOriginal);
