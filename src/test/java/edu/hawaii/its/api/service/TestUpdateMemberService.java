@@ -81,27 +81,27 @@ public class TestUpdateMemberService {
     public void addRemoveAdminTest() {
         // With uh number.
         assertFalse(memberService.isAdmin(testUhUuids.get(0)));
-        updateMemberService.addAdmin(ADMIN, testUhUuids.get(0));
+        updateMemberService.addAdminMember(ADMIN, testUhUuids.get(0));
         assertTrue(memberService.isAdmin(testUhUuids.get(0)));
-        updateMemberService.removeAdmin(ADMIN, testUhUuids.get(0));
+        updateMemberService.removeAdminMember(ADMIN, testUhUuids.get(0));
         assertFalse(memberService.isAdmin(testUhUuids.get(0)));
 
         // With uh username.
         assertFalse(memberService.isAdmin(testUids.get(0)));
-        updateMemberService.addAdmin(ADMIN, testUids.get(0));
+        updateMemberService.addAdminMember(ADMIN, testUids.get(0));
         assertTrue(memberService.isAdmin(testUids.get(0)));
-        updateMemberService.removeAdmin(ADMIN, testUids.get(0));
+        updateMemberService.removeAdminMember(ADMIN, testUids.get(0));
         assertFalse(memberService.isAdmin(testUids.get(0)));
 
         try {
-            updateMemberService.addAdmin(ADMIN, "bogus-admin-to-add");
+            updateMemberService.addAdminMember(ADMIN, "bogus-admin-to-add");
             fail("Should throw an exception if an invalid adminToAdd is passed.");
         } catch (UhMemberNotFoundException e) {
             assertNull(e.getCause());
         }
 
         try {
-            updateMemberService.removeAdmin(ADMIN, "bogus-admin-to-remove");
+            updateMemberService.removeAdminMember(ADMIN, "bogus-admin-to-remove");
             fail("Should throw an exception if an invalid adminToRemove is passed.");
         } catch (UhMemberNotFoundException e) {
             assertNull(e.getCause());
@@ -365,6 +365,9 @@ public class TestUpdateMemberService {
         assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
         assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
+        updateMemberService.addAdminMember(ADMIN, uid);
+        updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
+        updateMemberService.removeAdminMember(ADMIN, uid);
     }
 
     @Test

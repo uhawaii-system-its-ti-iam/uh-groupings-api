@@ -52,24 +52,24 @@ public class UpdateMemberService {
     @Autowired
     private GrouperApiService grouperApiService;
 
-    public GroupingAddResult addAdmin(String currentUser, String uhIdentifier) {
+    public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("addAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhMemberNotFoundException(validUhUuid);
         }
-        return new GroupingAddResult(grouperApiService.addMember(currentUser, GROUPING_ADMINS, uhIdentifier));
+        return addAdmin(currentUser, uhIdentifier);
     }
 
-    public GroupingRemoveResult removeAdmin(String currentUser, String uhIdentifier) {
+    public GroupingRemoveResult removeAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("removeAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhMemberNotFoundException(validUhUuid);
         }
-        return new GroupingRemoveResult(grouperApiService.removeMember(currentUser, GROUPING_ADMINS, uhIdentifier));
+        return removeAdmin(currentUser, uhIdentifier);
     }
 
     public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers) {
@@ -350,6 +350,22 @@ public class UpdateMemberService {
         return result;
     }
 
+    private GroupingAddResult addAdmin(String currentUser, String uhIdentifier) {
+        AddMemberResult addMemberResult =
+                grouperApiService.addMember(currentUser, GROUPING_ADMINS, uhIdentifier);
+        GroupingAddResult result = new GroupingAddResult(addMemberResult);
+        timestampService.update(result);
+        return result;
+    }
+
+    private GroupingRemoveResult removeAdmin(String currentUser, String uhIdentifier) {
+        RemoveMemberResult removeMemberResult =
+                grouperApiService.removeMember(currentUser, GROUPING_ADMINS, uhIdentifier);
+        GroupingRemoveResult result = new GroupingRemoveResult(removeMemberResult);
+        timestampService.update(result);
+        return result;
+    }
+
     private GroupingAddResults addOwners(String currentUser, String groupingPath, List<String> uhIdentifiers) {
         AddMembersResults addMembersResults =
                 grouperApiService.addMembers(currentUser, groupingPath + GroupType.OWNERS.value(), uhIdentifiers);
@@ -381,4 +397,5 @@ public class UpdateMemberService {
         timestampService.update(result);
         return result;
     }
+
 }

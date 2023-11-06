@@ -113,7 +113,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertTrue(memberService.isAdmin(ADMIN));
 
         testUids = uhIdentifierGenerator.getRandomMembers(4).getUids();
-        testUids.forEach(testUid -> updateMemberService.removeAdmin(ADMIN, testUid));
+        testUids.forEach(testUid -> updateMemberService.removeAdminMember(ADMIN, testUid));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
@@ -174,13 +174,13 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingAddResult.class));
-        updateMemberService.removeAdmin(ADMIN, testUids.get(0));
+        updateMemberService.removeAdminMember(ADMIN, testUids.get(0));
     }
 
     @Test
     public void removeAdminTest() throws Exception {
         String url = API_BASE_URL + "admins/" + testUids.get(0);
-        updateMemberService.addAdmin(ADMIN, testUids.get(0));
+        updateMemberService.addAdminMember(ADMIN, testUids.get(0));
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
