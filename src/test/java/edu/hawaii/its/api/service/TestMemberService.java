@@ -80,9 +80,9 @@ public class TestMemberService {
     public void isAdmin() {
         assertTrue(memberService.isAdmin(ADMIN));
 
-        updateMemberService.addAdmin(ADMIN, UH_UUID);
+        updateMemberService.addAdminMember(ADMIN, UH_UUID);
         assertTrue(memberService.isAdmin(UH_UUID));
-        updateMemberService.removeAdmin(ADMIN, UH_UUID);
+        updateMemberService.removeAdminMember(ADMIN, UH_UUID);
         assertFalse(memberService.isAdmin(UH_UUID));
 
         assertFalse(memberService.isAdmin(BOGUS));

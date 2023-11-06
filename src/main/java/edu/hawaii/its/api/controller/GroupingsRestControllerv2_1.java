@@ -130,7 +130,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST addAdmin...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addAdmin(currentUser, uhIdentifier));
+                .body(updateMemberService.addAdminMember(currentUser, uhIdentifier));
     }
 
     /**
@@ -142,7 +142,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST removeAdmin...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.removeAdmin(currentUser, uhIdentifier));
+                .body(updateMemberService.removeAdminMember(currentUser, uhIdentifier));
     }
 
     /**
