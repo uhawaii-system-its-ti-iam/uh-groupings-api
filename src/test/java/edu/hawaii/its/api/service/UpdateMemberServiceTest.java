@@ -13,12 +13,12 @@ import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,7 +84,7 @@ public class UpdateMemberServiceTest {
         doReturn(addMemberResult).when(grouperApiService)
                 .addMember(TEST_USERNAMES.get(1), GROUPING_ADMINS, TEST_USERNAMES.get(0));
 
-        assertNotNull(updateMemberService.addAdmin(TEST_USERNAMES.get(1), TEST_USERNAMES.get(0)));
+        assertNotNull(updateMemberService.addAdminMember(TEST_USERNAMES.get(1), TEST_USERNAMES.get(0)));
 
         json = propertyLocator.find("ws.get.subject.result.uid.failure");
         wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -93,7 +93,7 @@ public class UpdateMemberServiceTest {
         doReturn(subjectsResults).when(grouperApiService).getSubjects("bogus-identifier");
 
         assertThrows(UhMemberNotFoundException.class,
-                () -> updateMemberService.addAdmin(TEST_USERNAMES.get(1), "bogus-identifier"));
+                () -> updateMemberService.addAdminMember(TEST_USERNAMES.get(1), "bogus-identifier"));
     }
 
     @Test
@@ -110,12 +110,14 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperApiService).getSubjects(TEST_USERNAMES.get(0));
 
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult();
+        json = propertyLocator.find("ws.delete.member.results.success");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
         assertNotNull(removeMemberResult);
         doReturn(removeMemberResult).when(grouperApiService)
                 .removeMember(TEST_USERNAMES.get(1), GROUPING_ADMINS, TEST_USERNAMES.get(0));
 
-        assertNotNull(updateMemberService.removeAdmin(TEST_USERNAMES.get(1), TEST_USERNAMES.get(0)));
+        assertNotNull(updateMemberService.removeAdminMember(TEST_USERNAMES.get(1), TEST_USERNAMES.get(0)));
 
         json = propertyLocator.find("ws.get.subject.result.uid.failure");
         wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
@@ -124,7 +126,7 @@ public class UpdateMemberServiceTest {
         doReturn(subjectsResults).when(grouperApiService).getSubjects("bogus-identifier");
 
         assertThrows(UhMemberNotFoundException.class,
-                () -> updateMemberService.removeAdmin(TEST_USERNAMES.get(1), "bogus-identifier"));
+                () -> updateMemberService.removeAdminMember(TEST_USERNAMES.get(1), "bogus-identifier"));
     }
 
     @Test
@@ -158,6 +160,40 @@ public class UpdateMemberServiceTest {
         assertNotNull(updateMemberService.addOwnerships(TEST_USERNAMES.get(0), groupPath, TEST_USERNAMES));
     }
 
+
+    @Test
+    public void addOwnershipTest() {
+        String json = propertyLocator.find("find.groups.results.description");
+        WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
+        FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
+        assertNotNull(findGroupsResults);
+        doReturn(findGroupsResults).when(grouperApiService).findGroupsResults(groupPath);
+
+        json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
+        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
+        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        assertNotNull(hasMembersResults);
+        doReturn(hasMembersResults).when(grouperApiService)
+                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_USERNAMES.get(0));
+        doReturn(hasMembersResults).when(grouperApiService).hasMemberResults(GROUPING_ADMINS, TEST_USERNAMES.get(0));
+
+        json = propertyLocator.find("ws.get.subject.results.success");
+        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        assertNotNull(subjectsResults);
+        doReturn(subjectsResults).when(grouperApiService).getSubjects(TEST_USERNAMES.get(1));
+
+        json = propertyLocator.find("ws.add.member.results.failure");
+        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
+        AddMemberResult addMemberResult = new AddMemberResult(wsAddMemberResults.getResults()[0], groupPath);
+        String validIdentifier = subjectService.getValidUhUuid(TEST_USERNAMES.get(1));
+        doReturn(addMemberResult).when(grouperApiService)
+                .addMember(TEST_USERNAMES.get(0), groupPath + GroupType.OWNERS.value(), validIdentifier);
+
+        assertNotNull(updateMemberService.addOwnership(TEST_USERNAMES.get(0), groupPath, TEST_USERNAMES.get(1)));
+
+    }
+
     @Test
     public void removeOwnershipsTest() {
         String json = propertyLocator.find("find.groups.results.description");
@@ -187,6 +223,39 @@ public class UpdateMemberServiceTest {
                 .removeMembers(TEST_USERNAMES.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
         assertNotNull(updateMemberService.removeOwnerships(TEST_USERNAMES.get(0), groupPath, TEST_USERNAMES));
+    }
+
+    @Test
+    public void removeOwnershipTest() {
+        String json = propertyLocator.find("find.groups.results.description");
+        WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
+        FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
+        assertNotNull(findGroupsResults);
+        doReturn(findGroupsResults).when(grouperApiService).findGroupsResults(groupPath);
+
+        json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
+        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
+        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        assertNotNull(hasMembersResults);
+        doReturn(hasMembersResults).when(grouperApiService)
+                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_USERNAMES.get(0));
+        doReturn(hasMembersResults).when(grouperApiService).hasMemberResults(GROUPING_ADMINS, TEST_USERNAMES.get(0));
+
+        json = propertyLocator.find("ws.get.subject.results.success");
+        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        assertNotNull(subjectsResults);
+        doReturn(subjectsResults).when(grouperApiService).getSubjects(TEST_USERNAMES.get(1));
+
+        json = propertyLocator.find("ws.delete.member.results.failure");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
+        String validIdentifier = subjectService.getValidUhUuid(TEST_USERNAMES.get(1));
+        doReturn(removeMemberResult).when(grouperApiService)
+                .removeMember(TEST_USERNAMES.get(0), groupPath + GroupType.OWNERS.value(), validIdentifier);
+
+        assertNotNull(updateMemberService.removeOwnership(TEST_USERNAMES.get(0), groupPath, TEST_USERNAMES.get(1)));
+
     }
 
     @Test

@@ -9,7 +9,6 @@ import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
@@ -112,13 +110,13 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAssignmentService.adminsGroupings(testUid);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in AdminListsHolder should not be null.
         AdminListsHolder adminListsHolder = groupingAssignmentService.adminsGroupings(ADMIN);

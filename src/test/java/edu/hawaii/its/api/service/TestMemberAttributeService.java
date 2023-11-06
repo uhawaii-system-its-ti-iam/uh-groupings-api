@@ -118,14 +118,14 @@ public class TestMemberAttributeService {
         assertEquals(invalidUhIdentifiers, result);
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         List<String> uhIdentifiers = new ArrayList<>(testUids);
         uhIdentifiers.add("bogus-user1");
         uhIdentifiers.add("bogus-user2");
         result = memberAttributeService.invalidUhIdentifiers(testUid, uhIdentifiers);
         assertNotNull(result);
         assertEquals(invalidUhIdentifiers, result);
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
     }
 
     @Test
@@ -151,14 +151,14 @@ public class TestMemberAttributeService {
         assertEquals(invalidUhIdentifiers, result.join());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         List<String> uhIdentifiers = new ArrayList<>(testUids);
         uhIdentifiers.add("bogus-user1");
         uhIdentifiers.add("bogus-user2");
         result = memberAttributeService.invalidUhIdentifiersAsync(testUid, uhIdentifiers);
         assertNotNull(result);
         assertEquals(invalidUhIdentifiers, result.join());
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
     }
 
     @Test
@@ -193,12 +193,12 @@ public class TestMemberAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not return an empty person if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         person = memberAttributeService.getMemberAttributes(testUid, testUid);
         assertNotNull(person.getName());
         assertNotNull(person.getUhUuid());
         assertNotNull(person.getUsername());
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
 
     }
 
@@ -234,10 +234,10 @@ public class TestMemberAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not return an empty array if current user is an admin but not an owner.
-        updateMemberService.addAdmin(ADMIN, testUid);
+        updateMemberService.addAdminMember(ADMIN, testUid);
         subjects = memberAttributeService.getMembersAttributes(testUid, testList);
         assertNotEquals(new ArrayList(), subjects);
-        updateMemberService.removeAdmin(ADMIN, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
     }
 
     @Test

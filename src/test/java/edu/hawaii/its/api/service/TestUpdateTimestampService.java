@@ -42,7 +42,7 @@ public class TestUpdateTimestampService {
     }
 
     @Test
-    public void update() {
+    public void updateFailure() {
         String json = propertyValue("ws.add.member.results.failure");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
@@ -55,7 +55,7 @@ public class TestUpdateTimestampService {
     }
 
     @Test
-    public void updateNonOwnerList() {
+    public void updateSuccess() {
         String json = propertyValue("ws.add.member.results.success.include.timestamp");
         GroupingAddResults groupingResult = JsonUtil.asObject(json, GroupingAddResults.class);
         GroupingTimestampResults groupingsTimestampResults = timestampService.update(groupingResult);
@@ -74,6 +74,18 @@ public class TestUpdateTimestampService {
                 groupingsTimestampResults.getCurrentUpdatedTimeList().get(1));
         assertEquals("SUCCESS", groupingsTimestampResults.getResultCode());
         assertEquals(2, groupingsTimestampResults.getGroupPaths().size());
+    }
+
+    @Test
+    public void updateAdminTest() {
+        String json = propertyValue("ws.add.member.results.success.admin.timestamp");
+        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
+        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
+        GroupingAddResults groupingAddResults = new GroupingAddResults(addMembersResults);
+        GroupingTimestampResults groupingsTimestampResults = timestampService.update(groupingAddResults);
+
+        assertEquals("SUCCESS", groupingsTimestampResults.getResultCode());
+        assertEquals(1, groupingsTimestampResults.getGroupPaths().size());
     }
 
     private String propertyValue(String key) {
