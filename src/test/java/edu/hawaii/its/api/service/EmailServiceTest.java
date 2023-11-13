@@ -1,8 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
@@ -15,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class EmailServiceTest {
 
     private static boolean wasSent;
@@ -24,6 +28,9 @@ public class EmailServiceTest {
     public EmailService emailService;
 
     public EmailService mockEmailService;
+
+    @Value("${app.environment}")
+    private String environment;
 
     @BeforeEach
     public void setUp() {
@@ -38,6 +45,7 @@ public class EmailServiceTest {
         emailService = new EmailService(sender);
         emailService.setEnabled(true);
         emailService.setRecipient("address");
+        emailService.setEnvironment(environment);
         mockEmailService = spy(new EmailService(sender));
 
         wasSent = false;
@@ -97,4 +105,12 @@ public class EmailServiceTest {
         assertTrue(messageSent.getText().contains("Unknown Host"));
     }
 
+    @Test
+    public void environmentInSubject() {
+        emailService.setEnabled(true);
+        String environment = emailService.getEnvironment();
+        assertTrue(environment.equals("dev"));
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        assertTrue(messageSent.getSubject().contains("(dev)"));
+    }
 }
