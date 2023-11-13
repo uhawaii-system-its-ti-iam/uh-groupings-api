@@ -27,6 +27,9 @@ public class EmailService {
     @Value("${email.is.enabled}")
     private boolean isEnabled;
 
+    @Value("${app.environment}")
+    private String environment;
+
     private static final Log logger = LogFactory.getLog(EmailService.class);
 
     private JavaMailSender javaMailSender;
@@ -58,7 +61,7 @@ public class EmailService {
             msg.setTo(recipient);
             msg.setFrom(from);
             String text = "";
-            String header = "UH Groupings API Error Response";
+            String header =  "(" + environment + ") UH Groupings API Error Response";
             text += "Cause of Response: The API threw an exception that has triggered the ErrorControllerAdvice. \n\n";
             text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
             text += "Host Name: " + hostname + ".\n";
@@ -88,6 +91,10 @@ public class EmailService {
     public void setRecipient(String recipient) {
         this.recipient = recipient;
     }
+
+    public void setEnvironment(String environment) { this.environment = environment; }
+
+    public String getEnvironment() { return environment; }
 
     public InetAddress getLocalHost() throws UnknownHostException {
         return InetAddress.getLocalHost();
