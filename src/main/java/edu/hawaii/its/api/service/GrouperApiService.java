@@ -227,10 +227,6 @@ public class GrouperApiService {
         return result.get(0);
     }
 
-    public String getMessage() {
-        return PlannedOutage.returnMessage();
-    }
-
     /**
      * Get all members listed in each group.
      */
@@ -257,6 +253,7 @@ public class GrouperApiService {
      */
     public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
             String searchScope) {
+        System.out.println("inside findAttributesResults");
         return exec.execute(new FindAttributesCommand()
                 .owner(currentUser)
                 .assignAttributeName(attributeTypeName)

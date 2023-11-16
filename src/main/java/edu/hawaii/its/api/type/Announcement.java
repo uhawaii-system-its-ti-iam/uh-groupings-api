@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Announcement {
     private String message = "";

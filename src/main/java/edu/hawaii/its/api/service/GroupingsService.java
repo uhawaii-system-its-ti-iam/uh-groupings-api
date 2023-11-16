@@ -28,6 +28,9 @@ public class GroupingsService {
     @Value("${groupings.api.trio}")
     private String TRIO;
 
+    @Value("${groupings.api.announcements}")
+    private String ANNOUNCEMENTS;
+
     @Autowired
     private GroupPathService groupPathService;
 

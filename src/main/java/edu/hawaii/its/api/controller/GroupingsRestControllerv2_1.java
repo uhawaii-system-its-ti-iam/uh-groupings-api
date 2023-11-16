@@ -681,6 +681,5 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(announcementsService.allAnnouncements());
-
     }
 }
