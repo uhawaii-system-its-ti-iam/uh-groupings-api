@@ -1,25 +1,25 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
+import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
-import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @Service("memberAttributeService")
 public class MemberAttributeService {

@@ -1,12 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import static edu.hawaii.its.api.service.PathFilter.nameGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
@@ -22,6 +15,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Test;
 
 public class PathFilterTest {
 

@@ -1,15 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.exception.InvalidGroupPathException;
-import edu.hawaii.its.api.wrapper.Group;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import edu.hawaii.its.api.exception.InvalidGroupPathException;
+import edu.hawaii.its.api.wrapper.Group;
 
 /**
  * GroupPathService provides a set functions for checking the validity of UH grouping/group paths.

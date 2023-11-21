@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-
-import java.util.List;
 
 /**
  * A wrapper for GcAddMember. When a UH identifier and group path are passed, AddMembersCommand on execute adds, to

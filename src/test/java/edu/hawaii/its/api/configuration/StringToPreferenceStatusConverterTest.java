@@ -1,11 +1,12 @@
 package edu.hawaii.its.api.configuration;
 
-import edu.hawaii.its.api.type.PreferenceStatus;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.type.PreferenceStatus;
 
 class StringToPreferenceStatusConverterTest {
 

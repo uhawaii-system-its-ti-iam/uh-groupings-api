@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
-import org.springframework.boot.test.context.SpringBootTest;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingTest {

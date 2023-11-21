@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcGetAttributeAssignments;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
-import java.util.List;
 
 /**
  * A wrapper for GcGetAttributeAssignments. When an attribute is passed, GroupAttributeCommand on execute

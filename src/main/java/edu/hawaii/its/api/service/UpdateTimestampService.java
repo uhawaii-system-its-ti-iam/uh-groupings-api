@@ -1,18 +1,18 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.groupings.GroupingResult;
 import edu.hawaii.its.api.groupings.GroupingTimestampResults;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.UpdateTimestampCommand;
 import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Update a groupings timestamp attribute. A groupings timestamp should only be updated after certain queries are

@@ -1,16 +1,16 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValueResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValueResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 public class UpdatedTimestampResults extends Results {
     private WsAssignAttributesResults wsAssignAttributesResults;

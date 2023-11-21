@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcFindGroups;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-
-import java.util.List;
 
 /**
  * A wrapper for GcFindGroups. When a group or grouping path is passed, FindGroupsCommand on execute

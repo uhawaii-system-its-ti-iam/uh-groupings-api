@@ -2,9 +2,9 @@ package edu.hawaii.its.api.configuration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.OptType;
-
 import org.springframework.core.convert.converter.Converter;
+
+import edu.hawaii.its.api.type.OptType;
 
 public class StringToOptTypeConverter implements Converter<String, OptType> {
 

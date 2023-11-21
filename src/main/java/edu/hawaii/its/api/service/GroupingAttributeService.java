@@ -1,23 +1,23 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
-import edu.hawaii.its.api.groupings.GroupingUpdatedAttributesResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.wrapper.AssignAttributesResults;
-import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
-import edu.hawaii.its.api.wrapper.GroupAttribute;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdatedAttributesResult;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
 
 @Service
 public class GroupingAttributeService {

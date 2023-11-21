@@ -1,17 +1,17 @@
 package edu.hawaii.its.api.util;
 
-import org.hamcrest.Description;
-import org.hamcrest.StringDescription;
-import org.junit.jupiter.api.Test;
+import static edu.hawaii.its.api.util.OnlyUniqueItems.onlyUniqueItems;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.hawaii.its.api.util.OnlyUniqueItems.onlyUniqueItems;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.equalTo;
+import org.hamcrest.Description;
+import org.hamcrest.StringDescription;
+import org.junit.jupiter.api.Test;
 
 public class OnlyUniqueItemsTest {
     @Test
