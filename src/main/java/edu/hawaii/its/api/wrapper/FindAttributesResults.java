@@ -2,6 +2,8 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
@@ -26,12 +28,10 @@ public class FindAttributesResults extends Results {
 
     public AttributesResult getResult() {
         WsAttributeDefName[] wsAttributeDefNames = this.wsFindAttributeDefNamesResults.getAttributeDefNameResults();
-        AttributesResult attributesResult = new AttributesResult();
         if (isEmpty(wsAttributeDefNames)) {
-            return attributesResult;
+            return new AttributesResult();
         }
-        attributesResult = new AttributesResult(wsAttributeDefNames[0]);
-        return attributesResult;
+        return new AttributesResult(wsAttributeDefNames[0]);
     }
 
     public List<AttributesResult> getResults() {

@@ -1,22 +1,23 @@
 package edu.hawaii.its.api.type;
 
+import java.util.List;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 public class Announcement {
     private String message = "";
+    private State state;
+
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private LocalDateTime start;
+
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private LocalDateTime end;
-    public State state;
 
     public enum State {
         Active,

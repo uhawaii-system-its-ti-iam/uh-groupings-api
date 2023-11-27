@@ -1,24 +1,17 @@
 package edu.hawaii.its.api.type;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AnnouncementsTest {
     private Announcements emptyAnnouncements;
     private Announcements announcements;
     private List<Announcement> announcementsList;
-    @Value("${groupings.api.announcements}")
-    private String ANNOUNCEMENTS_ATTR_NAME;
-    @Value("${groupings.api.propertystring}")
-    private String ANNOUNCEMENTS_ATTR_DEF;
+
     @BeforeEach
     void setUp() {
         emptyAnnouncements = new Announcements();

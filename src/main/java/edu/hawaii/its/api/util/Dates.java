@@ -1,8 +1,5 @@
 package edu.hawaii.its.api.util;
 
-import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.Log;
-import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.LogFactory;
-
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,11 +12,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 public final class Dates {
-    private static final Log logger = LogFactory.getLog(Dates.class);
     public static final String DATE_SORT_FORMAT = "yyyy-MM-dd";
-    public static final String DATE_FORMAT_PLANNEDOUTAGE = "yyyyMMdd'T'HHmmss";
     // Private constructor; prevent instantiation.
     private Dates() {
         // Emtpy.
@@ -134,16 +132,6 @@ public final class Dates {
 
     private static LocalDateTime toLocalDateTime(LocalDate date) {
         return date != null ? date.atStartOfDay() : null;
-    }
-
-    public static LocalDateTime toLocalDateTime(String s, String format) {
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime = LocalDateTime.parse(s, DateTimeFormatter.ofPattern(format));
-        } catch (Exception e) {
-            logger.warn("toLocalDateTime; error: " + e);
-        }
-        return localDateTime;
     }
 
     // Not sure we really need this method.

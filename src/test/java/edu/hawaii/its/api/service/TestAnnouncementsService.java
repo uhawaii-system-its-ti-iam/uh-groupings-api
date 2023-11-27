@@ -1,20 +1,17 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Announcements;
-
-import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import edu.hawaii.its.api.type.Announcements;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,16 +34,15 @@ public class TestAnnouncementsService {
                 ANNOUNCEMENTS_ATTR_DEF,
                 ANNOUNCEMENTS_ATTR_NAME);
         assertNotNull(findAttributesResults.getResults());
-
-        Announcements results = announcementsService.setAnnouncements(findAttributesResults.getResults());
+        Announcements results = announcementsService.setAnnouncements(findAttributesResults.getResult());
         assertNotNull(results);
         assertNotNull(results.getAnnouncements());
         assertEquals(SUCCESS, results.getResultCode());
     }
 
     @Test
-    public void allAnnouncements() {
-        List<String> results = announcementsService.allAnnouncements();
+    public void activeAnnouncements() {
+        List<String> results = announcementsService.activeAnnouncements();
 
         //only when there is data - will need to keep updating
         assertNotNull(results);

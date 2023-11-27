@@ -27,15 +27,6 @@ public class AttributesResult {
         return description != null ? description : "";
     }
 
-
-    /* for announcements - need to add to wsAttributeDefName for these properties: message, start, end */
-//    public String getMessage() {
-//        String message = this.wsAttributeDefName.getMessage();
-//        return message != null ? message : "";
-//    }
-
-
-
     public String getDefinition() {
         String definition = this.wsAttributeDefName.getAttributeDefName();
         return definition != null ? definition : "";

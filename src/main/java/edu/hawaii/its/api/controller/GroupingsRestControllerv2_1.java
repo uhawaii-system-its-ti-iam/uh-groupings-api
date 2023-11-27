@@ -662,11 +662,14 @@ public class GroupingsRestControllerv2_1 {
                 .body(asyncJobsManager.getJobResult(currentUser, jobId));
     }
 
+    /**
+     * Get the list of active announcements to display.
+     */
     @GetMapping(value = "/announcements/active")
-    public ResponseEntity<List<String>> outageMessage() {
-        logger.info("Entered REST outageMessage...");
+    public ResponseEntity activeAnnouncements() {
+        logger.info("Entered REST activeAnnouncements...");
         return ResponseEntity
                 .ok()
-                .body(announcementsService.allAnnouncements());
+                .body(announcementsService.activeAnnouncements());
     }
 }

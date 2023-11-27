@@ -28,11 +28,6 @@ public class FindAttributesCommand extends GrouperCommand implements Command<Fin
         return this;
     }
 
-    public FindAttributesCommand addAttribute(String attribute) {
-        this.gcFindAttributeDefNames.addAttributeDefNameName(attribute);
-        return this;
-    }
-
     public FindAttributesCommand assignAttributeName(String attributeName) {
         this.gcFindAttributeDefNames.assignNameOfAttributeDef(attributeName);
         return this;
