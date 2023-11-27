@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.groupings;
 
-import edu.hawaii.its.api.wrapper.AddMemberResult;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.hawaii.its.api.wrapper.AddMemberResult;
+import edu.hawaii.its.api.wrapper.AddMembersResults;
 
 /**
  * GroupingAddResults shows the results after multiple UH affiliates have been added to a group listing.

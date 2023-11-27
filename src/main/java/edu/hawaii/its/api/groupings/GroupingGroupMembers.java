@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.groupings;
 
-import edu.hawaii.its.api.wrapper.GetMembersResult;
-import edu.hawaii.its.api.wrapper.Subject;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.Subject;
 
 /**
  * When getMembers is called, GroupingGroupMembers holds the information about UH affiliates that are listed in a

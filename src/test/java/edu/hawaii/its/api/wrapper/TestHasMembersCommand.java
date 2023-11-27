@@ -1,13 +1,13 @@
 package edu.hawaii.its.api.wrapper;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

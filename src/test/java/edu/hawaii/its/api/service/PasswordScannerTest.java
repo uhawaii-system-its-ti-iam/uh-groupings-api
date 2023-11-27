@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.PasswordFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.PasswordFoundException;
 
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })

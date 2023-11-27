@@ -1,18 +1,19 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
 public class SubjectsResultsTest {
 

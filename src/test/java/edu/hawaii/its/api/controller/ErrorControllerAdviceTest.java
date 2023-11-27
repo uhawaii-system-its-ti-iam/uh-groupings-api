@@ -1,18 +1,18 @@
 package edu.hawaii.its.api.controller;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.GroupingsServiceResultException;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ErrorControllerAdviceTest {

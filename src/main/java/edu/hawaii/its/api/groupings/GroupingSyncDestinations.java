@@ -1,15 +1,15 @@
 package edu.hawaii.its.api.groupings;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * GroupingSyncDestinations contains the necessary data hydrate the sync destinations tab in a grouping.

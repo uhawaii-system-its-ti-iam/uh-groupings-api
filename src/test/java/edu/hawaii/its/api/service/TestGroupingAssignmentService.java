@@ -1,22 +1,11 @@
 package edu.hawaii.its.api.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.OptType;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +16,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.BDDMockito.given;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ActiveProfiles;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.Group;
+import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.OptType;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

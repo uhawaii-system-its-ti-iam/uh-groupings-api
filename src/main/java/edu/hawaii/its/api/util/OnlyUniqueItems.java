@@ -1,12 +1,12 @@
 package edu.hawaii.its.api.util;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 public class OnlyUniqueItems extends TypeSafeMatcher<List<String>> {
     @Override

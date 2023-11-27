@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-
-import java.util.List;
 
 /**
  * A wrapper for GcGetMembers. When groupPath(s) are passed, GetMembersCommand on execute fetches, from grouper, results

@@ -1,22 +1,23 @@
 package edu.hawaii.its.api.groupings;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 
 public class GroupingsTimestampResultsTest {
     private static Properties properties;

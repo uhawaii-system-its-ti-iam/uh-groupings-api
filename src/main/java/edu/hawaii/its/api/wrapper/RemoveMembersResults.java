@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
 public class RemoveMembersResults extends Results {
 

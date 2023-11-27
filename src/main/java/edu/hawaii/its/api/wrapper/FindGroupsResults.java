@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 public class FindGroupsResults extends Results {
     private final WsFindGroupsResults wsFindGroupsResults;

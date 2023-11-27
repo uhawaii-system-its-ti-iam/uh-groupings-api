@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-
-import java.util.List;
 
 public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;

@@ -1,24 +1,25 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.hawaii.its.api.type.GroupingPath;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
 public class AttributeAssignmentsResultsTest {
 

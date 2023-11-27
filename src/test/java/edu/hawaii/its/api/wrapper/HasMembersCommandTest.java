@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.wrapper;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
 
 public class HasMembersCommandTest {
 

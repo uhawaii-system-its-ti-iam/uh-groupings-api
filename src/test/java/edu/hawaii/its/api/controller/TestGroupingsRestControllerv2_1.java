@@ -1,51 +1,5 @@
 package edu.hawaii.its.api.controller;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.service.GroupingAttributeService;
-import edu.hawaii.its.api.groupings.GroupingAddResult;
-import edu.hawaii.its.api.groupings.GroupingAddResults;
-import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
-import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
-import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
-import edu.hawaii.its.api.groupings.GroupingRemoveResult;
-import edu.hawaii.its.api.groupings.GroupingRemoveResults;
-import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
-import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
-import edu.hawaii.its.api.service.GroupingsService;
-import edu.hawaii.its.api.service.MemberService;
-import edu.hawaii.its.api.service.UhIdentifierGenerator;
-import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.AdminListsHolder;
-import edu.hawaii.its.api.type.AsyncJobResult;
-import edu.hawaii.its.api.type.Grouping;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.util.JsonUtil;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.bind.MissingPathVariableException;
-import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -57,6 +11,52 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.context.WebApplicationContext;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.groupings.GroupingAddResult;
+import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
+import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingRemoveResults;
+import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.service.GroupingAttributeService;
+import edu.hawaii.its.api.service.GroupingsService;
+import edu.hawaii.its.api.service.MemberService;
+import edu.hawaii.its.api.service.UhIdentifierGenerator;
+import edu.hawaii.its.api.service.UpdateMemberService;
+import edu.hawaii.its.api.type.AdminListsHolder;
+import edu.hawaii.its.api.type.AsyncJobResult;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.util.JsonUtil;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

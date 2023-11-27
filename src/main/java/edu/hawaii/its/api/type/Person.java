@@ -1,12 +1,12 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import edu.hawaii.its.api.wrapper.Subject;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+
+import edu.hawaii.its.api.wrapper.Subject;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Person implements Comparable<Person> {
 

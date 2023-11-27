@@ -2,9 +2,9 @@ package edu.hawaii.its.api.configuration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.PreferenceStatus;
-
 import org.springframework.core.convert.converter.Converter;
+
+import edu.hawaii.its.api.type.PreferenceStatus;
 
 public class StringToPreferenceStatusConverter implements Converter<String, PreferenceStatus> {
 

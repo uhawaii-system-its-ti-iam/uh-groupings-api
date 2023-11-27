@@ -1,19 +1,19 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.wrapper.Command;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.wrapper.Command;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })

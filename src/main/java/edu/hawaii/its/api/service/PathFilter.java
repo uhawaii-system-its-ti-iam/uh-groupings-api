@@ -1,13 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import edu.hawaii.its.api.type.GroupType;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import edu.hawaii.its.api.type.GroupType;
 
 public class PathFilter {
 

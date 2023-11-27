@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.type;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Group implements Comparable<Group> {

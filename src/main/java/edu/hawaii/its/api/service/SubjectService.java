@@ -2,16 +2,16 @@
 
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 /**
  * SubjectService provides a set of functions for checking the validity of UH identifiers.

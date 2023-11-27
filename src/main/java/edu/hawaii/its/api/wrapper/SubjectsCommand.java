@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcGetSubjects;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
-
-import java.util.List;
 
 /**
  * A wrapper for GcGetSubjects. When a string is passed as a UH identifier, SubjectsCommand on execute fetches, from

@@ -1,17 +1,18 @@
 package edu.hawaii.its.api.wrapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GroupAttributeResultsTest {
     private static final String TRIO = "uh-settings:attributes:for-groups:uh-grouping:is-trio";
