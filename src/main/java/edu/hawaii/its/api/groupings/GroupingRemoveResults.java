@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.groupings;
 
-import edu.hawaii.its.api.wrapper.RemoveMemberResult;
-import edu.hawaii.its.api.wrapper.RemoveMembersResults;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
 /**
  * GroupingRemoveResults shows the results after multiple UH affiliates have been removed from a group listing.

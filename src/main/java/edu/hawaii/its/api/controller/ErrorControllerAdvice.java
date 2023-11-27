@@ -1,10 +1,9 @@
 package edu.hawaii.its.api.controller;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.service.EmailService;
-import edu.hawaii.its.api.exception.GroupingsHTTPException;
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+import java.io.IOException;
+
+import javax.mail.MessagingException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,12 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.GroupingsHTTPException;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.service.EmailService;
+
+import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @ControllerAdvice
 public class ErrorControllerAdvice {

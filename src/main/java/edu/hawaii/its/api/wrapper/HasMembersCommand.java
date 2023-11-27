@@ -1,9 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcHasMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-
-import java.util.List;
 
 /**
  * A wrapper for GcHasMember.  When a group path and UH identifier are passed, HasMembersCommand on execute fetches,

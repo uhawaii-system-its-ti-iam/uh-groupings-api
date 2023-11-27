@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
-
 import java.util.Arrays;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 /**
  * A wrapper for WsSubject.

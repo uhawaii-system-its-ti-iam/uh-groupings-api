@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.wrapper.Command;
 
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.Log;
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.LogFactory;
-
-import org.springframework.stereotype.Service;
 
 @Service("executor")
 public class ExecutorService {

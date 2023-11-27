@@ -1,7 +1,15 @@
 package edu.hawaii.its.api.service;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
@@ -18,14 +26,6 @@ import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A service for adding and removing UH grouping members.

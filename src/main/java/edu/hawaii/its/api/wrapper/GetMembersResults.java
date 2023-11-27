@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 /**
  * A wrapper for WsGetMembersResults, which is returned from grouper when GcGetMembers.execute(wrapped by GetMembersCommand)

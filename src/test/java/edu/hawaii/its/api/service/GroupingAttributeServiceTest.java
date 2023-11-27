@@ -3,12 +3,12 @@ package edu.hawaii.its.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingsServiceResult;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 class GroupingAttributeServiceTest {

@@ -1,5 +1,11 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -27,12 +33,6 @@ import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service("grouperApiService")
 public class GrouperApiService {

@@ -1,14 +1,14 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.wrapper.HasMemberResult;
-import edu.hawaii.its.api.wrapper.HasMembersResults;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 
 @Service
 public class MemberService {

@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.groupings;
 
-import edu.hawaii.its.api.wrapper.Group;
-import edu.hawaii.its.api.wrapper.GroupAttributeResults;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.hawaii.its.api.wrapper.Group;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 /**
  * GroupingOptAttributes is used to hydrate the opt attribute toggle switches of a grouping.

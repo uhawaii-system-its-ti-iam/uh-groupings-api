@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.groupings;
 
-import edu.hawaii.its.api.wrapper.GroupSaveResults;
-
 import java.util.Objects;
+
+import edu.hawaii.its.api.wrapper.GroupSaveResults;
 
 /**
  * GroupingUpdateDescriptionResult contains results of an updated description.

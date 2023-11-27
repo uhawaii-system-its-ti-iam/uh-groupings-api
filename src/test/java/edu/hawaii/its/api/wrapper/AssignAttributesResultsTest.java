@@ -1,18 +1,19 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 public class AssignAttributesResultsTest {
     private PropertyLocator propertyLocator;

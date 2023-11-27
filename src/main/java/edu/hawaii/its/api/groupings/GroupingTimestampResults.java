@@ -1,15 +1,16 @@
 package edu.hawaii.its.api.groupings;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import edu.hawaii.its.api.wrapper.AttributeAssignValueResult;
-import edu.hawaii.its.api.wrapper.Group;
-import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import edu.hawaii.its.api.wrapper.AttributeAssignValueResult;
+import edu.hawaii.its.api.wrapper.Group;
+import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * GroupingTimestampResult contains results of a groupings timestamp being updated.

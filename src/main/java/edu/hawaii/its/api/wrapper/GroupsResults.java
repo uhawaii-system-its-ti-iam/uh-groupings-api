@@ -1,12 +1,12 @@
 package edu.hawaii.its.api.wrapper;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 public class GroupsResults {
     private WsGetGroupsResults groupsResults;

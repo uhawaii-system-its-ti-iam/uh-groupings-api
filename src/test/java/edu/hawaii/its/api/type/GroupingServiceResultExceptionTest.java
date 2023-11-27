@@ -1,12 +1,12 @@
 package edu.hawaii.its.api.type;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
 
 public class GroupingServiceResultExceptionTest extends GroupingsServiceResult {
 
