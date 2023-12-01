@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    @Value("#{'${email.send.recipient.override:}' == '' ? '${email.send.recipient}' : '${email.send.recipient.override:}'}")
+    @Value("${email.send.recipient}")
     private String recipient;
 
     @Value("${email.send.from}")
@@ -40,6 +40,10 @@ public class EmailService {
 
     public void sendWithStack(Exception e, String exceptionType) {
         logger.info("Feedback Error email has been triggered.");
+        if (!isEnabled) {
+            logger.warn("Email service is not enabled. Set email.is.enabled property to true");
+            return;
+        }
 
         InetAddress ip;
         String hostname = "Unknown Host";
