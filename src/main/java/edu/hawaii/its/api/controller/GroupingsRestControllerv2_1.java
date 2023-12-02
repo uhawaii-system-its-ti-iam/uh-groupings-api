@@ -35,6 +35,7 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -86,6 +87,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
+
+    @Autowired
+    private AnnouncementsService announcementsService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -660,5 +664,16 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(asyncJobsManager.getJobResult(currentUser, jobId));
+    }
+
+    /**
+     * Get the list of active announcements to display.
+     */
+    @GetMapping(value = "/announcements/active")
+    public ResponseEntity activeAnnouncements() {
+        logger.info("Entered REST activeAnnouncements...");
+        return ResponseEntity
+                .ok()
+                .body(announcementsService.activeAnnouncements());
     }
 }
