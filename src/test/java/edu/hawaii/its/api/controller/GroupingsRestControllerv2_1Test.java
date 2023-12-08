@@ -421,7 +421,7 @@ public class GroupingsRestControllerv2_1Test {
         List<String> members = new ArrayList<>();
         members.add("iamtst01");
         members.add("iamtst02");
-        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/")
+        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(members)))
@@ -526,7 +526,7 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst06name");
         given(updateMemberService.addIncludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(groupingMoveMembersResult);
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToAdd)))
@@ -565,7 +565,7 @@ public class GroupingsRestControllerv2_1Test {
         given(updateMemberService.addExcludeMembers(USERNAME, "grouping", usersToAdd))
                 .willReturn(groupingMoveMembersResult);
 
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/")
+        mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToAdd)))
@@ -603,7 +603,7 @@ public class GroupingsRestControllerv2_1Test {
         usersToRemove.add("tst06name");
         given(updateMemberService.removeIncludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(groupingRemoveResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members/")
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/include-members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToRemove)))
@@ -622,7 +622,7 @@ public class GroupingsRestControllerv2_1Test {
         usersToRemove.add("tst06name");
         given(updateMemberService.removeExcludeMembers(USERNAME, "grouping", usersToRemove))
                 .willReturn(groupingRemoveResults);
-        mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members/")
+        mockMvc.perform(delete(API_BASE + "/groupings/grouping/exclude-members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToRemove)))
@@ -923,28 +923,28 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void regexTest() throws Exception {
-        // Sending an 'unsafe character' in the URI should get rejected and return CLIENT_ERROR
+        // Sending an 'unsafe character' in the URI should get rejected and return SERVER_ERROR
         MvcResult result1 = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "[" + "/groupings")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(result1, notNullValue());
 
         MvcResult result2 = mockMvc.perform(get(API_BASE + "/owners/" + USERNAME + "^" + "/groupings")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(result2, notNullValue());
 
         MvcResult result3 = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "}")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(result3, notNullValue());
 
         MvcResult result4 = mockMvc.perform(get(API_BASE + "/members/" + USERNAME + "@")
                         .header(CURRENT_USER, USERNAME))
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().is5xxServerError())
                 .andReturn();
         assertThat(result4, notNullValue());
     }

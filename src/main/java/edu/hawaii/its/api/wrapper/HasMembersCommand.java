@@ -15,10 +15,12 @@ public class HasMembersCommand extends GrouperCommand implements Command<HasMemb
 
     public HasMembersCommand() {
         this.gcHasMember = new GcHasMember();
+        this.gcHasMember.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
         this.gcHasMember.assignIncludeSubjectDetail(true);
     }
 
-    @Override public HasMembersResults execute() {
+    @Override
+    public HasMembersResults execute() {
         WsHasMemberResults wsHasMemberResults = gcHasMember.execute();
         return new HasMembersResults(wsHasMemberResults);
     }

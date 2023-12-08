@@ -15,6 +15,7 @@ public class GroupAttributeCommand extends GrouperCommand implements Command<Gro
 
     public GroupAttributeCommand() {
         this.gcGetAttributeAssignments = new GcGetAttributeAssignments();
+        this.gcGetAttributeAssignments.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
         this.gcGetAttributeAssignments.assignAttributeAssignType("group");
     }
 
