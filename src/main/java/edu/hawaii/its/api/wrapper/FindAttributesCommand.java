@@ -14,9 +14,11 @@ public class FindAttributesCommand extends GrouperCommand implements Command<Fin
 
     public FindAttributesCommand() {
         this.gcFindAttributeDefNames = new GcFindAttributeDefNames();
+        this.gcFindAttributeDefNames.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
     }
 
-    @Override public FindAttributesResults execute() {
+    @Override
+    public FindAttributesResults execute() {
         WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults = this.gcFindAttributeDefNames.execute();
         return new FindAttributesResults(wsFindAttributeDefNamesResults);
     }

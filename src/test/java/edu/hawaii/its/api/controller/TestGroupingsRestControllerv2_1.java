@@ -296,7 +296,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void invalidUhIdentifiersTest() throws Exception {
-        String url = API_BASE_URL + "members/invalid/";
+        String url = API_BASE_URL + "members/invalid";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -343,7 +343,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void membersAttributesTest() throws Exception {
-        String url = API_BASE_URL + "members/";
+        String url = API_BASE_URL + "members";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -433,7 +433,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addIncludeMembersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -477,7 +477,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void addExcludeMembersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -522,7 +522,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void removeIncludeMembersTest() throws Exception {
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, testUids);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members";
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -538,7 +538,7 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     public void removeExcludeMembersTest() throws Exception {
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, testUids);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members";
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -641,14 +641,9 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + "badPref" + "/enable";
-        try {
-            mockMvc.perform(put(url)
-                    .header(CURRENT_USER, ADMIN));
-            fail("Should not reach here");
-        } catch (MissingPathVariableException e) {
-            assertNotNull(e);
-        }
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().is5xxServerError());
     }
 
     @Test
@@ -668,14 +663,9 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/preference/" + "badPref" + "/disable";
-        try {
-            mockMvc.perform(put(url)
-                    .header(CURRENT_USER, ADMIN));
-            fail("Should not reach here");
-        } catch (MissingPathVariableException e) {
-            assertNotNull(e);
-        }
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().is5xxServerError());
     }
 
     @Test

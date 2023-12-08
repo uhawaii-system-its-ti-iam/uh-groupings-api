@@ -9,7 +9,8 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
     private final GcDeleteMember gcDeleteMember;
 
     public RemoveMembersCommand() {
-        gcDeleteMember = new GcDeleteMember();
+        this.gcDeleteMember = new GcDeleteMember();
+        this.gcDeleteMember.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
         includeUhMemberDetails(true);
     }
 

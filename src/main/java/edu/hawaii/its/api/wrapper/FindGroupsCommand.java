@@ -13,8 +13,9 @@ public class FindGroupsCommand extends GrouperCommand implements Command<FindGro
     private final GcFindGroups gcFindGroups;
 
     public FindGroupsCommand() {
-        gcFindGroups = new GcFindGroups();
-        gcFindGroups.assignIncludeGroupDetail(true);
+        this.gcFindGroups = new GcFindGroups();
+        this.gcFindGroups.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
+        this.gcFindGroups.assignIncludeGroupDetail(true);
     }
 
     @Override

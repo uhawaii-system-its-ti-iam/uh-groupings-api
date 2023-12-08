@@ -22,6 +22,7 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
     public UpdateTimestampCommand(String groupPath) {
         Objects.requireNonNull(groupPath, "groupPath cannot be null");
         this.gcAssignAttributes = new GcAssignAttributes()
+                .assignContentType("text/x-json") // Remove after upgrading to Grouper 4
                 .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
                 .assignAttributeAssignOperation(OPERATION_ASSIGN_ATTRIBUTE)
                 .addOwnerGroupName(groupPath)
@@ -37,6 +38,7 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
             throw new IllegalStateException("groupPaths cannot be empty");
         }
         this.gcAssignAttributes = new GcAssignAttributes()
+                .assignContentType("text/x-json") // Remove after upgrading to Grouper 4
                 .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
                 .assignAttributeAssignOperation(OPERATION_ASSIGN_ATTRIBUTE)
                 .addAttributeDefNameName(YYYYMMDDTHHMM)

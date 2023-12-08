@@ -14,11 +14,13 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
     private final GcGetMembers gcGetMembers;
 
     public GetMembersCommand() {
-        gcGetMembers = new GcGetMembers();
-        gcGetMembers.assignIncludeSubjectDetail(true);
+        this.gcGetMembers = new GcGetMembers();
+        this.gcGetMembers.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
+        this.gcGetMembers.assignIncludeSubjectDetail(true);
     }
 
-    @Override public GetMembersResults execute() {
+    @Override
+    public GetMembersResults execute() {
         WsGetMembersResults wsGetMembersResults = gcGetMembers.execute();
         return new GetMembersResults(wsGetMembersResults);
     }

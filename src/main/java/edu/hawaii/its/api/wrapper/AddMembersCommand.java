@@ -17,6 +17,7 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
 
     public AddMembersCommand() {
         this.gcAddMember = new GcAddMember();
+        this.gcAddMember.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
         includeUhMemberDetails(true);
     }
 
