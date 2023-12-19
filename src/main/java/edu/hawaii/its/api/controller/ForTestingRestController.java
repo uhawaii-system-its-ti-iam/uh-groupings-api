@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.controller;
 
+import edu.hawaii.its.api.type.ApiValidationError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +13,17 @@ import edu.hawaii.its.api.exception.ExceptionForTesting;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1/testing")
-public class GroupingsRestControllerv2_1ForTesting {
+public class ForTestingRestController {
 
-    private static final Log logger = LogFactory.getLog(GroupingsRestControllerv2_1ForTesting.class);
+    private static final Log logger = LogFactory.getLog(ForTestingRestController.class);
 
     @GetMapping(value = "/exception")
     @ResponseBody
     public ResponseEntity throwException() {
         logger.debug("Entered REST throwException");
-        throw new ExceptionForTesting("Test exception");
+            ExceptionForTesting exception = new ExceptionForTesting("Exception for test failed")
+                .addSubError(new ApiValidationError("testing object 1", "membership service", "id: 12", "Membership access denied"))
+                .addSubError(new ApiValidationError("testing object 2", "member service", "id: 30", "There is no member"));
+        throw exception;
     }
 }
