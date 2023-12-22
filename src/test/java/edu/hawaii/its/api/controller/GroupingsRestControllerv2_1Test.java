@@ -46,6 +46,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.InvalidUhIdentifiersResults;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -59,7 +61,6 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
@@ -365,7 +366,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void invalidUhIdentifiersTest() throws Exception {
+    public void invalidUhIdentifiersResultsTest() throws Exception {
         List<String> uhIdentifiers = new ArrayList<>();
         uhIdentifiers.add("iamtst01");
         uhIdentifiers.add("iamtst02");
@@ -378,7 +379,7 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(validResult, notNullValue());
 
         verify(memberAttributeService, times(1))
-                .invalidUhIdentifiers(USERNAME, uhIdentifiers);
+                .invalidUhIdentifiersResults(USERNAME, uhIdentifiers);
     }
 
     @Test
@@ -386,7 +387,7 @@ public class GroupingsRestControllerv2_1Test {
         List<String> uhIdentifiers = new ArrayList<>();
         uhIdentifiers.add("iamtst01");
         uhIdentifiers.add("iamtst02");
-        CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
+        CompletableFuture<InvalidUhIdentifiersResults> completableFuture = new CompletableFuture<>();
         given(memberAttributeService.invalidUhIdentifiersAsync(USERNAME, uhIdentifiers))
                 .willReturn(completableFuture);
         MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/invalid/async")
@@ -417,7 +418,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void membersAttributesTest() throws Exception {
+    public void memberAttributeResultsTest() throws Exception {
         List<String> members = new ArrayList<>();
         members.add("iamtst01");
         members.add("iamtst02");
@@ -430,7 +431,7 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(validResult, notNullValue());
 
         verify(memberAttributeService, times(1))
-                .getMembersAttributes(USERNAME, members);
+                .getMemberAttributeResults(USERNAME, members);
     }
 
     @Test
@@ -459,7 +460,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void membershipResultsTest() throws Exception {
-        List<Membership> memberships = new ArrayList<>();
+        MembershipResults memberships = new MembershipResults();
         given(membershipService.membershipResults(ADMIN, "iamtst01")).willReturn(memberships);
 
         mockMvc.perform(get(API_BASE + "/members/iamtst01/memberships")
@@ -472,7 +473,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void managePersonResultsTest() throws Exception {
-        List<Membership> results = new ArrayList<>();
+        MembershipResults results = new MembershipResults();
         given(membershipService.managePersonResults(ADMIN, "iamtst01")).willReturn(results);
 
         mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")

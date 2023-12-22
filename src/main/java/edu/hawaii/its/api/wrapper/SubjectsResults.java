@@ -1,10 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+
+import java.util.ArrayList;
+import java.util.List;
 /**
  * A wrapper for WsGetSubjectsResults, which is returned from grouper when GcGetSubjects.execute(wrapped by
  * SubjectsCommand) is called. WsGetSubjectsResults contains a list of WsSubject(wrapped by Subject), for each UH

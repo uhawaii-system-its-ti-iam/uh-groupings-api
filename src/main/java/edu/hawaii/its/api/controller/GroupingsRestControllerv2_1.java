@@ -35,6 +35,9 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.InvalidUhIdentifiersResults;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -47,14 +50,11 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.wrapper.Subject;
-
 @RestController
 @RequestMapping("/api/groupings/v2.1")
 public class GroupingsRestControllerv2_1 {
@@ -127,7 +127,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PostMapping(value = "/admins/{uhIdentifier:[\\w-:.]+}")
     public ResponseEntity<GroupingAddResult> addAdmin(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                      @PathVariable String uhIdentifier) {
         logger.info("Entered REST addAdmin...");
         return ResponseEntity
                 .ok()
@@ -139,7 +139,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @DeleteMapping(value = "/admins/{uhIdentifier:[\\w-:.]+}")
     public ResponseEntity<GroupingRemoveResult> removeAdmin(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                            @PathVariable String uhIdentifier) {
         logger.info("Entered REST removeAdmin...");
         return ResponseEntity
                 .ok()
@@ -165,13 +165,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @PostMapping(value = "/members/invalid")
     @ResponseBody
-    public ResponseEntity<List<String>> invalidUhIdentifiers(
+    public ResponseEntity<InvalidUhIdentifiersResults> invalidUhIdentifiersResults(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST invalidUhIdentifiers...");
+        logger.info("Entered REST invalidUhIdentifiersResults...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.invalidUhIdentifiers(currentUser, uhIdentifiers));
+                .body(memberAttributeService.invalidUhIdentifiersResults(currentUser, uhIdentifiers));
     }
 
     /**
@@ -246,7 +246,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}")
     @ResponseBody
     public ResponseEntity<Person> memberAttributes(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                   @PathVariable String uhIdentifier) {
         logger.info("Entered REST memberAttributes...");
         return ResponseEntity
                 .ok()
@@ -258,13 +258,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @PostMapping(value = "/members")
     @ResponseBody
-    public ResponseEntity<List<Subject>> membersAttributes(
+    public ResponseEntity<MemberAttributeResults> memberAttributeResults(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST membersAttributes...");
+        logger.info("Entered REST memberAttributeResults...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getMembersAttributes(currentUser, uhIdentifiers));
+                .body(memberAttributeService.getMemberAttributeResults(currentUser, uhIdentifiers));
     }
 
     /**
@@ -276,11 +276,11 @@ public class GroupingsRestControllerv2_1 {
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody List<String> groupPaths,
-            @RequestParam(required = true) Integer page,
-            @RequestParam(required = true) Integer size,
-            @RequestParam(required = true) String sortString,
-            @RequestParam(required = true) Boolean isAscending) {
+                                                               @RequestBody List<String> groupPaths,
+                                                               @RequestParam(required = true) Integer page,
+                                                               @RequestParam(required = true) Integer size,
+                                                               @RequestParam(required = true) String sortString,
+                                                               @RequestParam(required = true) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
@@ -293,8 +293,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/memberships")
     @ResponseBody
-    public ResponseEntity<List<Membership>> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+    public ResponseEntity<MembershipResults> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                              @PathVariable String uhIdentifier) {
         logger.info("Entered REST membershipResults...");
         return ResponseEntity
                 .ok()
@@ -306,8 +306,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<List<Membership>> managePersonResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+    public ResponseEntity<MembershipResults> managePersonResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                @PathVariable String uhIdentifier) {
         logger.info("Entered REST managePersonResults...");
         return ResponseEntity
                 .ok()
@@ -320,7 +320,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/groupings/members/{uhIdentifier}/opt-in-groups")
     @ResponseBody
     public ResponseEntity<List<GroupingPath>> optInGroupingPaths(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                                 @PathVariable String uhIdentifier) {
         logger.info("Entered REST optInGroups...");
         return ResponseEntity
                 .ok()
@@ -332,7 +332,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uhIdentifier:[\\w-:.]+}/self")
     public ResponseEntity<GroupingMoveMemberResult> optIn(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path, @PathVariable String uhIdentifier) {
+                                                          @PathVariable String path, @PathVariable String uhIdentifier) {
         logger.info("Entered REST optIn...");
         return ResponseEntity
                 .ok()
@@ -344,7 +344,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uhIdentifier:[\\w-:.]+}/self")
     public ResponseEntity<GroupingMoveMemberResult> optOut(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path, @PathVariable String uhIdentifier) {
+                                                           @PathVariable String path, @PathVariable String uhIdentifier) {
         logger.info("Entered REST optOut...");
         return ResponseEntity
                 .ok()
@@ -434,7 +434,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping("/owners/{uhIdentifier:[\\w-:.]+}/groupings")
     public ResponseEntity<List<GroupingPath>> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                             @PathVariable String uhIdentifier) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
@@ -446,8 +446,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     public ResponseEntity<GroupingAddResults> addOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uhIdentifier) {
+                                                        @PathVariable String path,
+                                                        @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
@@ -459,8 +459,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     public ResponseEntity<GroupingRemoveResults> removeOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable List<String> uhIdentifier) {
+                                                              @PathVariable String path,
+                                                              @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST removeOwners");
         return ResponseEntity
                 .ok()
@@ -608,7 +608,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/owners/{uhIdentifier:[\\w-:.]+}/groupings/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                        @PathVariable String uhIdentifier) {
         logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
@@ -621,7 +621,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}/memberships/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String uhIdentifier) {
+                                                          @PathVariable String uhIdentifier) {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
                 .ok()
@@ -634,7 +634,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     @ResponseBody
     public ResponseEntity<Boolean> isSoleOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path, @PathVariable String uhIdentifier) {
+                                               @PathVariable String path, @PathVariable String uhIdentifier) {
         logger.info("Entered REST getGroupingOwners...");
         return ResponseEntity
                 .ok()
@@ -646,8 +646,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")
     public ResponseEntity<GroupingGroupMembers> groupingOwners(@RequestHeader(CURRENT_USER_KEY) String
-            currentUser,
-            @PathVariable String path) {
+                                                                       currentUser,
+                                                               @PathVariable String path) {
         logger.info("Entered REST groupingOwners...");
         return ResponseEntity
                 .ok()
@@ -659,7 +659,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/jobs/{jobId}")
     public ResponseEntity getAsyncJobResult(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable Integer jobId) {
+                                            @PathVariable Integer jobId) {
         logger.debug("Entered REST getAsyncJobResult...");
         return ResponseEntity
                 .ok()

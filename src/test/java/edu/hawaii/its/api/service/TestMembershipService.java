@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.type.Membership;
 
 @ActiveProfiles("integrationTest")
@@ -125,11 +126,11 @@ public class TestMembershipService {
 
     @Test
     public void managePersonResultsTest() {
-        List<Membership> memberships;
+        MembershipResults memberships;
 
         // Should not be a member.
         memberships = membershipService.managePersonResults(ADMIN, testUids.get(0));
-        assertTrue(memberships.stream()
+        assertTrue(memberships.getResults().stream()
                 .noneMatch(membership -> membership.getPath().equals(GROUPING) && !membership.isInBasis()));
 
         // Should be a member after added.
@@ -138,7 +139,7 @@ public class TestMembershipService {
         grouperApiService.addMember(ADMIN, GROUPING_EXCLUDE, testUids.get(0));
         grouperApiService.addMember(ADMIN, GROUPING_BASIS, testUids.get(0));
         memberships = membershipService.managePersonResults(ADMIN, testUids.get(0));
-        Membership membership = memberships.stream()
+        Membership membership = memberships.getResults().stream()
                 .filter(m -> m.getPath().equals(GROUPING)).findAny().orElse(null);
         assertNotNull(membership);
         assertEquals(GROUPING, membership.getPath());
@@ -196,7 +197,7 @@ public class TestMembershipService {
 
         // Should return and empty list if uid passed is bogus.
         memberships = membershipService.managePersonResults(ADMIN, "bogus-user");
-        assertTrue(memberships.isEmpty());
+        assertTrue(memberships.getResults().isEmpty());
     }
 
     @Test

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,8 +28,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
@@ -54,9 +55,6 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.JsonUtil;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -295,7 +293,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void invalidUhIdentifiersTest() throws Exception {
+    public void invalidUhIdentifiersResultsTest() throws Exception {
         String url = API_BASE_URL + "members/invalid";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
@@ -342,7 +340,7 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void membersAttributesTest() throws Exception {
+    public void memberAttributeResultsTest() throws Exception {
         String url = API_BASE_URL + "members";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
