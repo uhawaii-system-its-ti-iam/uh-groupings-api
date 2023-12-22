@@ -16,9 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @Service("memberAttributeService")
@@ -94,21 +94,13 @@ public class MemberAttributeService {
      * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return an
      * empty array
      */
-    public List<Subject> getMembersAttributes(String currentUser, List<String> uhIdentifiers) {
+    public MemberAttributeResults getMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
         logger.info(String.format("getMembersAttributes; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
-
         SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
-
-        if (results.getResultCode().equals(FAILURE)) {
-            return new ArrayList<>();
-        }
-
-        List<Subject> subjects = results.getSubjects();
-
-        return subjects;
+        return new MemberAttributeResults(results);
     }
 
     /**

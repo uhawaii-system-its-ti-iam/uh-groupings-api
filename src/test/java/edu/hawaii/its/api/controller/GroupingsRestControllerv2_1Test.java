@@ -417,7 +417,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void membersAttributesTest() throws Exception {
+    public void memberAttributeResultsTest() throws Exception {
         List<String> members = new ArrayList<>();
         members.add("iamtst01");
         members.add("iamtst02");
@@ -430,7 +430,7 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(validResult, notNullValue());
 
         verify(memberAttributeService, times(1))
-                .getMembersAttributes(USERNAME, members);
+                .getMemberAttributeResults(USERNAME, members);
     }
 
     @Test

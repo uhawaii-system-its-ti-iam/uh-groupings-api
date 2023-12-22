@@ -1,8 +1,8 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,10 +25,11 @@ import org.springframework.test.context.ActiveProfiles;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MemberResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -203,40 +204,41 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void membersAttributesTest() {
-        List<Subject> subjects = memberAttributeService.getMembersAttributes(ADMIN, testUids);
-        assertNotNull(subjects);
+    public void memberAttributeResultsTest() {
+        MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(ADMIN, testUids);
+        assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
         HashSet<String> testUhUuidsSet = new HashSet(testUhUuids);
-        for (Subject subject : subjects) {
-            assertTrue(testUidsSet.contains(subject.getUid()));
-            assertTrue(testUhUuidsSet.contains(subject.getUhUuid()));
+
+        for (MemberResult memberResult : results.getResults()) {
+            assertTrue(testUidsSet.contains(memberResult.getUid()));
+            assertTrue(testUhUuidsSet.contains(memberResult.getUhUuid()));
         }
 
         String testUid = testUids.get(0);
         List<String> testList = new ArrayList<>();
         testList.add(testUid);
 
-        // Should return an empty array if at least one uhIdentifier is invalid.
+        // Should not contain memberResult of invalid uhIdentifier.
         List<String> uhIdentifiers = new ArrayList<>();
         uhIdentifiers.add("bogus-user");
-        subjects = memberAttributeService.getMembersAttributes(ADMIN, uhIdentifiers);
-        assertEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(ADMIN, uhIdentifiers);
+        assertEquals(0, results.getResults().size());
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMembersAttributes("bogus-owner-admin", null));
+                () -> memberAttributeService.getMemberAttributeResults("bogus-owner-admin", null));
 
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        subjects = memberAttributeService.getMembersAttributes(testUid, testList);
-        assertNotEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
+        assertNotEquals(0, results.getResults().size());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not return an empty array if current user is an admin but not an owner.
         updateMemberService.addAdminMember(ADMIN, testUid);
-        subjects = memberAttributeService.getMembersAttributes(testUid, testList);
-        assertNotEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
+        assertNotEquals(0, results.getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
     }
 

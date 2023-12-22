@@ -35,6 +35,7 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -52,7 +53,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.wrapper.Subject;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -254,13 +254,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @PostMapping(value = "/members")
     @ResponseBody
-    public ResponseEntity<List<Subject>> membersAttributes(
+    public ResponseEntity<MemberAttributeResults> memberAttributeResults(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST membersAttributes...");
+        logger.info("Entered REST memberAttributeResults...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getMembersAttributes(currentUser, uhIdentifiers));
+                .body(memberAttributeService.getMemberAttributeResults(currentUser, uhIdentifiers));
     }
 
     /**
