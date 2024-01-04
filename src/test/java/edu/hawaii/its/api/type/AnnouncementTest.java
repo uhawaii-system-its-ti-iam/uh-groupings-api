@@ -12,6 +12,7 @@ class AnnouncementTest {
     private Announcement expiredAnnouncement;
     private Announcement activeAnnouncement;
     private Announcement futureAnnouncement;
+    private LocalDateTime currentDateTime = LocalDateTime.now();
 
     @BeforeEach
     void setUp() {
@@ -20,12 +21,12 @@ class AnnouncementTest {
         LocalDateTime end1 = LocalDateTime.parse("2023-06-15T00:00");
         expiredAnnouncement = new Announcement("expired message", start1, end1);
         // Valid - start date is before the current local date time and end date is after the current local date time.
-        LocalDateTime start2 = LocalDateTime.parse("2023-11-07T00:00");
-        LocalDateTime end2 = LocalDateTime.parse("2023-12-25T00:00");
+        LocalDateTime start2 = currentDateTime.plusDays(-5);
+        LocalDateTime end2 = currentDateTime.plusDays(5);
         activeAnnouncement = new Announcement("valid message", start2, end2);
         // Future - start and date is after the current local date time.
-        LocalDateTime start3 = LocalDateTime.parse("2023-12-30T00:00");
-        LocalDateTime end3 = LocalDateTime.parse("2024-01-25T00:00");
+        LocalDateTime start3 = currentDateTime.plusDays(5);
+        LocalDateTime end3 = currentDateTime.plusDays(10);
         futureAnnouncement = new Announcement("future message", start3, end3);
     }
 
@@ -40,12 +41,12 @@ class AnnouncementTest {
         assertEquals("future message", futureAnnouncement.getMessage());
 
         assertEquals(LocalDateTime.parse("2023-06-07T00:00"), expiredAnnouncement.getStart());
-        assertEquals(LocalDateTime.parse("2023-11-07T00:00"), activeAnnouncement.getStart());
-        assertEquals(LocalDateTime.parse("2023-12-30T00:00"), futureAnnouncement.getStart());
+        assertEquals(currentDateTime.plusDays(-5), activeAnnouncement.getStart());
+        assertEquals(currentDateTime.plusDays(5), futureAnnouncement.getStart());
 
         assertEquals(LocalDateTime.parse("2023-06-15T00:00"), expiredAnnouncement.getEnd());
-        assertEquals(LocalDateTime.parse("2023-12-25T00:00"), activeAnnouncement.getEnd());
-        assertEquals(LocalDateTime.parse("2024-01-25T00:00"), futureAnnouncement.getEnd());
+        assertEquals(currentDateTime.plusDays(5), activeAnnouncement.getEnd());
+        assertEquals(currentDateTime.plusDays(10), futureAnnouncement.getEnd());
 
         assertEquals(Announcement.State.Expired, expiredAnnouncement.getState());
         assertEquals(Announcement.State.Active, activeAnnouncement.getState());
