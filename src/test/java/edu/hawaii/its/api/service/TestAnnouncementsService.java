@@ -48,7 +48,6 @@ public class TestAnnouncementsService {
         List<String> results = announcementsService.activeAnnouncements();
         // Only when Grouper has this case specific data (will need to keep updating).
         assertNotNull(results);
-        assertEquals("first valid message", results.get(0));
-        assertEquals("second valid message", results.get(1));
+        assertEquals("Test is now running on VMs featuring Java 17 (hello Spring Boot3)", results.get(0));
     }
 }

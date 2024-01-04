@@ -13,6 +13,7 @@ class AnnouncementsTest {
     private Announcements emptyAnnouncements;
     private Announcements announcements;
     private List<Announcement> announcementsList;
+    private LocalDateTime currentDateTime = LocalDateTime.now();
 
     @BeforeEach
     void setUp() {
@@ -21,10 +22,10 @@ class AnnouncementsTest {
 
         LocalDateTime start1 = LocalDateTime.parse("2023-06-07T00:00");
         LocalDateTime end1 = LocalDateTime.parse("2023-06-15T00:00");
-        LocalDateTime start2 = LocalDateTime.parse("2023-12-06T00:00");
-        LocalDateTime end2 = LocalDateTime.parse("2023-12-08T00:00");
-        LocalDateTime start3 = LocalDateTime.parse("2023-12-08T00:00");
-        LocalDateTime end3 = LocalDateTime.parse("2024-02-15T00:00");
+        LocalDateTime start2 = currentDateTime.plusDays(-5);
+        LocalDateTime end2 = currentDateTime.plusDays(5);
+        LocalDateTime start3 = currentDateTime.plusDays(5);
+        LocalDateTime end3 = currentDateTime.plusDays(10);
 
         announcementsList.add(new Announcement("old message", start1, end1));
         announcementsList.add(new Announcement("Test will be down for migration to new VMs featuring Java 17 (required for Spring Boot 3)", start2, end2));
@@ -52,12 +53,12 @@ class AnnouncementsTest {
 
         // Returns one valid message.
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("Test is now running on VMs featuring Java 17 (hello Spring Boot3)");
+        expectedMessages.add("Test will be down for migration to new VMs featuring Java 17 (required for Spring Boot 3)");
         assertEquals(expectedMessages, announcements.validMessages(announcementsList));
 
         // Returns all valid messages.
-        LocalDateTime start4 = LocalDateTime.parse("2023-01-15T00:00");
-        LocalDateTime end4 = LocalDateTime.parse("2024-01-25T00:00");
+        LocalDateTime start4 = currentDateTime.plusDays(-2);
+        LocalDateTime end4 = currentDateTime.plusDays(5);
         announcementsList.add(new Announcement("second valid message", start4, end4));
         expectedMessages.add("second valid message");
         assertEquals(expectedMessages, announcements.validMessages(announcementsList));
