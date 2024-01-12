@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-public class GroupingsRestControllerv2_1ForTestingTest {
+public class ForTestingRestControllerTest {
 
     private static final String API_BASE = "/api/groupings/v2.1/testing";
     @Autowired
