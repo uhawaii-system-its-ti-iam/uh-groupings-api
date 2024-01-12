@@ -367,8 +367,8 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void invalidUhIdentifiersTest() throws Exception {
         List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("iamtst01");
-        uhIdentifiers.add("iamtst02");
+        uhIdentifiers.add("testiwta");
+        uhIdentifiers.add("testiwtb");
         MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/invalid")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -384,8 +384,8 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void invalidUhIdentifiersAsyncTest() throws Exception {
         List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("iamtst01");
-        uhIdentifiers.add("iamtst02");
+        uhIdentifiers.add("testiwta");
+        uhIdentifiers.add("testiwtb");
         CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
         given(memberAttributeService.invalidUhIdentifiersAsync(USERNAME, uhIdentifiers))
                 .willReturn(completableFuture);
@@ -419,8 +419,8 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void membersAttributesTest() throws Exception {
         List<String> members = new ArrayList<>();
-        members.add("iamtst01");
-        members.add("iamtst02");
+        members.add("testiwta");
+        members.add("testiwtb");
         MvcResult validResult = mockMvc.perform(post(API_BASE + "/members")
                         .header(CURRENT_USER, USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -460,39 +460,39 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void membershipResultsTest() throws Exception {
         List<Membership> memberships = new ArrayList<>();
-        given(membershipService.membershipResults(ADMIN, "iamtst01")).willReturn(memberships);
+        given(membershipService.membershipResults(ADMIN, "testiwta")).willReturn(memberships);
 
-        mockMvc.perform(get(API_BASE + "/members/iamtst01/memberships")
+        mockMvc.perform(get(API_BASE + "/members/testiwta/memberships")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .membershipResults(ADMIN, "iamtst01");
+                .membershipResults(ADMIN, "testiwta");
     }
 
     @Test
     public void managePersonResultsTest() throws Exception {
         List<Membership> results = new ArrayList<>();
-        given(membershipService.managePersonResults(ADMIN, "iamtst01")).willReturn(results);
+        given(membershipService.managePersonResults(ADMIN, "testiwta")).willReturn(results);
 
-        mockMvc.perform(get(API_BASE + "/members/iamtst01/groupings")
+        mockMvc.perform(get(API_BASE + "/members/testiwta/groupings")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .managePersonResults(ADMIN, "iamtst01");
+                .managePersonResults(ADMIN, "testiwta");
     }
 
     @Test
     public void getOptInGroupingPathsTest() throws Exception {
         List<GroupingPath> optInGroupingPaths = new ArrayList<>();
-        given(groupingAssignmentService.optInGroupingPaths(ADMIN, "iamtst01")).willReturn(optInGroupingPaths);
-        mockMvc.perform(get(API_BASE + "/groupings/members/iamtst01/opt-in-groups")
+        given(groupingAssignmentService.optInGroupingPaths(ADMIN, "testiwta")).willReturn(optInGroupingPaths);
+        mockMvc.perform(get(API_BASE + "/groupings/members/testiwta/opt-in-groups")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk());
 
         verify(groupingAssignmentService, times(1))
-                .optInGroupingPaths(ADMIN, "iamtst01");
+                .optInGroupingPaths(ADMIN, "testiwta");
     }
 
     @Test

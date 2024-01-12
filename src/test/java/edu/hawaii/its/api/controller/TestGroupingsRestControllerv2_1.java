@@ -192,15 +192,15 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void removeFromGroupsTest() throws Exception {
-        List<String> iamtst01List = new ArrayList<>();
+        List<String> testiwtaList = new ArrayList<>();
         List<String> pathList = new ArrayList<>();
         pathList.add(GROUPING_OWNERS);
         pathList.add(GROUPING_INCLUDE);
-        iamtst01List.add(testUids.get(0));
-        updateMemberService.addOwnerships(ADMIN, GROUPING, iamtst01List);
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
+        testiwtaList.add(testUids.get(0));
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testiwtaList);
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testiwtaList);
 
-        String url = API_BASE_URL + "admins/" + String.join(",", pathList) + "/" + iamtst01List.get(0);
+        String url = API_BASE_URL + "admins/" + String.join(",", pathList) + "/" + testiwtaList.get(0);
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -208,8 +208,8 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
 
-        assertFalse(memberService.isOwner(GROUPING, iamtst01List.get(0)));
-        assertFalse(memberService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
+        assertFalse(memberService.isOwner(GROUPING, testiwtaList.get(0)));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, testiwtaList.get(0)));
     }
 
     @Test
@@ -401,25 +401,25 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void optInTest() throws Exception {
-        List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(testUids.get(0));
+        List<String> testiwtaList = new ArrayList<>();
+        testiwtaList.add(testUids.get(0));
 
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/" + iamtst01List.get(0) + "/self";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/include-members/" + testiwtaList.get(0) + "/self";
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingMoveMemberResult.class));
-        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, iamtst01List);
+        updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testiwtaList);
 
     }
 
     @Test
     public void optOutTest() throws Exception {
-        List<String> iamtst01List = new ArrayList<>();
-        iamtst01List.add(testUids.get(0));
-        updateMemberService.addIncludeMembers(ADMIN, GROUPING, iamtst01List);
+        List<String> testiwtaList = new ArrayList<>();
+        testiwtaList.add(testUids.get(0));
+        updateMemberService.addIncludeMembers(ADMIN, GROUPING, testiwtaList);
 
         String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/" + testUids.get(0) + "/self";
         MvcResult mvcResult = mockMvc.perform(put(url)
@@ -428,7 +428,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingMoveMemberResult.class));
-        assertFalse(memberService.isMember(GROUPING_INCLUDE, iamtst01List.get(0)));
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, testiwtaList.get(0)));
     }
 
     @Test

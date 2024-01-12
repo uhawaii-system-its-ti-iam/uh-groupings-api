@@ -40,12 +40,12 @@ public class GroupingGroupsMembersTest {
 
     @Test
     public void successfulResult() {
-        String onlyInclude = "iamtst01";
-        String basisAndInclude = "iamtst02";
-        String onlyExclude = "iamtst03";
-        String basisAndExclude = "iamtst04";
-        String owner = "iamtst05";
-        String onlyBasis = "iamtst06";
+        String onlyInclude = "testiwta";
+        String basisAndInclude = "testiwtb";
+        String onlyExclude = "testiwtc";
+        String basisAndExclude = "testiwtd";
+        String owner = "testiwte";
+        String onlyBasis = "testiwtf";
 
         String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
