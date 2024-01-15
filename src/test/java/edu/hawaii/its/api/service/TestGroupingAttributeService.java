@@ -60,7 +60,7 @@ public class TestGroupingAttributeService {
     private String ADMIN;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private GroupingAttributeService groupingAttributeService;
@@ -93,10 +93,10 @@ public class TestGroupingAttributeService {
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
         testUidList = Arrays.asList(testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
     }
 
     @AfterAll

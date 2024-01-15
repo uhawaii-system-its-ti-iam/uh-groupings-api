@@ -31,7 +31,7 @@ public class MemberAttributeService {
     private String FAILURE;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private SubjectService subjectService;
@@ -58,7 +58,7 @@ public class MemberAttributeService {
         if (!invalidUhIdentifiers.isEmpty()) {
             return new MemberAttributeResults(invalidUhIdentifiers);
         }
-        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
+        SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
         return new MemberAttributeResults(results);
     }
 
@@ -80,7 +80,7 @@ public class MemberAttributeService {
         if (!invalid.isEmpty()) {
             return CompletableFuture.completedFuture(new MemberAttributeResults(invalid));
         }
-        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
+        SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
         return CompletableFuture.completedFuture(new MemberAttributeResults(results));
     }
 
@@ -90,13 +90,13 @@ public class MemberAttributeService {
     public GroupingPaths getOwnedGroupings(String currentUser, String uhIdentifier) {
         logger.info(String.format("getOwnedGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         List<String> pathStrings = groupingsService.groupPaths(uhIdentifier, pathHasOwner());
-
         List<GroupingPath> groupingPaths = new ArrayList<>();
         for (String path : pathStrings) {
             String parentGroupingPath = parentGroupingPath(path);
             groupingPaths.add(new GroupingPath(parentGroupingPath,
                     groupingsService.getGroupingDescription(parentGroupingPath)));
         }
+
         return new GroupingPaths(groupingPaths);
     }
 
@@ -104,6 +104,11 @@ public class MemberAttributeService {
      * Get the number of groupings a user owns, by username or uhUuid.
      */
     public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
+        logger.debug(String.format("numberOfGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
+        return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
+    }
+
+    public Integer numberOfGroupings(String currentUser, String uhIdentifier, String groupPath) {
         logger.debug(String.format("numberOfGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
     }

@@ -21,7 +21,7 @@ public class MemberAttributeServiceTest {
     private PropertyLocator propertyLocator;
 
     @MockBean
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private MemberAttributeService memberAttributeService;

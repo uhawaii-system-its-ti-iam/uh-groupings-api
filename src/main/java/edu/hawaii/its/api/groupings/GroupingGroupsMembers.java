@@ -190,4 +190,8 @@ public class GroupingGroupsMembers implements GroupingResult {
         }
         return new GroupingGroupMembers();
     }
+
+    public void setPaginationCompleteTrue() {
+        this.paginationComplete = true;
+    }
 }

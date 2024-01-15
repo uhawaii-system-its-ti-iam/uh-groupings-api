@@ -60,7 +60,7 @@ public class TestMemberAttributeService {
     private MembershipService membershipService;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private UpdateMemberService updateMemberService;
@@ -84,10 +84,10 @@ public class TestMemberAttributeService {
         testUhUuids = testGroupingMembers.getUhUuids();
 
         testUids.forEach(testUid -> {
-            grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
-            grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
-            grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
-            grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+            grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+            grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+            grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+            grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
 
             assertFalse(memberService.isOwner(GROUPING, testUid));
             assertFalse(memberService.isMember(GROUPING_INCLUDE, testUid));

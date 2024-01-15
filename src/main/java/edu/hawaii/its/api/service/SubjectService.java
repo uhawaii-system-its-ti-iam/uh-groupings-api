@@ -2,16 +2,17 @@
 
 package edu.hawaii.its.api.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SubjectService provides a set of functions for checking the validity of UH identifiers.
@@ -22,7 +23,9 @@ public class SubjectService {
     private String SUCCESS;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
+
+    private static final Log logger = LogFactory.getLog(SubjectService.class);
 
     public Person getPerson(String uhIdentifier) {
         Subject subject = getSubject(uhIdentifier);
@@ -45,7 +48,7 @@ public class SubjectService {
      * Fetch all valid UH identifiers and return their corresponding UhUuids.
      */
     public List<String> getValidUhUuids(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifiers);
+        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifiers);
         List<String> results = new ArrayList<>();
         for (Subject subject : subjectsResults.getSubjects()) {
             if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
@@ -65,12 +68,11 @@ public class SubjectService {
     }
 
     private Subject getSubject(String uhIdentifier) {
-        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifier);
-        if (subjectsResults == null) {
-            return new Subject();
-        }
+        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
+
         List<Subject> subjects = subjectsResults.getSubjects();
-        if (subjects.size() == 1) {
+
+        if (subjects.size() >= 1) {
             return subjects.get(0);
         }
         return new Subject();

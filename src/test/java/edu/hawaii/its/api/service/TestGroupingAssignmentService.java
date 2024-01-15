@@ -67,7 +67,7 @@ public class TestGroupingAssignmentService {
     private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @SpyBean
     private GroupingsService groupingsService;
@@ -90,10 +90,10 @@ public class TestGroupingAssignmentService {
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
         testUidList = Arrays.asList(testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
-        grouperApiService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
     }
 
     @Test
