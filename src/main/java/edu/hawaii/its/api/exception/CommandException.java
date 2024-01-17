@@ -9,7 +9,7 @@ public class CommandException extends RuntimeException {
     private final List<ApiSubError> subErrors;
 
     public CommandException() {
-        super("Insufficient Privileges");
+        super("Command Error");
         this.subErrors = new ArrayList<>();
     }
 

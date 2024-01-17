@@ -1,12 +1,16 @@
 package edu.hawaii.its.api.exception;
 
+import edu.hawaii.its.api.type.ApiSubError;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 public class GroupingsHTTPException extends RuntimeException{
     /**
    * 
    */
+    private List<ApiSubError> subErrors;
     private static final long serialVersionUID = -5579769846632452949L;
     private Integer statusCode = null;
     private String string = null;
@@ -41,5 +45,14 @@ public class GroupingsHTTPException extends RuntimeException{
 
     public String getString() {
         return string;
+    }
+
+    public List<ApiSubError> getSubErrors() {
+        return subErrors;
+    }
+
+    public GroupingsHTTPException addSubError(ApiSubError subError) {
+        this.subErrors.add(subError);
+        return this;
     }
 }
