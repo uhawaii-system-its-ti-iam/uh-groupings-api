@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.CommandException;
 import edu.hawaii.its.api.exception.ExceptionForTesting;
+import edu.hawaii.its.api.exception.GroupingsHTTPException;
 import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.InvalidGroupPathException;
+import edu.hawaii.its.api.exception.PatternFoundException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.type.ApiError;
 import jakarta.mail.MessagingException;
@@ -37,36 +41,6 @@ public class ErrorControllerAdvice {
     private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
-
-    @ExceptionHandler(GroupingsServiceResultException.class)
-    public ResponseEntity<ApiError> handleGroupingsServiceResultException(
-        GroupingsServiceResultException gsre) {
-        emailService.sendWithStack(gsre, "Groupings ServiceResult Exception");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .message("Groupings ServiceResult Exception")
-                .debugMessage("Groupings Service resulted in FAILURE.")
-                .timestamp(LocalDateTime.now());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
-      emailService.sendWithStack(ade, "Access Denied Exception");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("Access Denied Exception")
-                .debugMessage("The current user does not have permission to perform this action.")
-                .timestamp(LocalDateTime.now());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae) {
         emailService.sendWithStack(iae, "Illegal Argument Exception");
@@ -180,6 +154,86 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
                 .debugMessage("This is not the validation error from frontend, check Sub Error to see the reason in the backend")
+                .timestamp(LocalDateTime.now());
+
+        errorBuilder.addAllSubErrors(ex.getSubErrors());
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
+        emailService.sendWithStack(ade, "Access Denied Exception");
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.FORBIDDEN)
+                .message("Access Denied Exception")
+                .debugMessage("The current user does not have permission to perform this action.")
+                .timestamp(LocalDateTime.now());
+
+        errorBuilder.addAllSubErrors(ade.getSubErrors());
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(CommandException.class)
+    public ResponseEntity<ApiError> handleCommandException(CommandException ce) {
+        emailService.sendWithStack(ce, "Command Exception");
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.)
+                .message("Command Exception")
+                .debugMessage("There's an error from the command of grouper or grouping")
+                .timestamp(LocalDateTime.now());
+
+        errorBuilder.addAllSubErrors(ce.getSubErrors());
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+    @ExceptionHandler(GroupingsHTTPException.class)
+    public ResponseEntity<ApiError> handleGroupingsHTTPException(GroupingsHTTPException ghe) {
+        emailService.sendWithStack(ghe, "Groupings HTTP Exception");
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.FORBIDDEN)
+                .message("Groupings HTTP Exception")
+                .debugMessage("The current user does not have permission to perform this action.")
+                .timestamp(LocalDateTime.now());
+
+        errorBuilder.addAllSubErrors(ghe.getSubErrors());
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+    @ExceptionHandler(GroupingsServiceResultException.class)
+    public ResponseEntity<ApiError> handleGroupingsServiceResultException(
+            GroupingsServiceResultException gsre) {
+        emailService.sendWithStack(gsre, "Groupings ServiceResult Exception");
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .message("Groupings ServiceResult Exception")
+                .debugMessage("Groupings Service resulted in FAILURE.")
+                .timestamp(LocalDateTime.now());
+
+        errorBuilder.addAllSubErrors(gsre.getSubErrors());
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(InvalidGroupPathException.class)
+    public ResponseEntity<ApiError> handleInvalidGroupPathException(
+            InvalidGroupPathException ex) {
+        emailService.sendWithStack(ex, "Invalid Group Path Exception");
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Invalid Group Path Exception")
+                .debugMessage("The group path you are using is wrong")
                 .timestamp(LocalDateTime.now());
 
         errorBuilder.addAllSubErrors(ex.getSubErrors());
