@@ -32,7 +32,7 @@ public class GroupingPaths {
     public void setGroupingPaths(GroupAttributeResults groupAttributeResults) {
         this.groupingPaths = new ArrayList<>();
         for (Group group : groupAttributeResults.getGroups()) {
-            this.groupingPaths.add(new GroupingPath(group.getGroupPath()));
+            this.groupingPaths.add(new GroupingPath(group.getGroupPath(), group.getDescription()));
         }
     }
 
