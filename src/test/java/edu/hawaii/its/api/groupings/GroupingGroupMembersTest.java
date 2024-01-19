@@ -36,6 +36,5 @@ public class GroupingGroupMembersTest {
         List<GroupingGroupMember> results = groupingGroupMembers.getMembers();
         assertNotNull(results);
         assertEquals(2, results.size());
-
     }
 }

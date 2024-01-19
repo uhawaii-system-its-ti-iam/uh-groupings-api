@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
@@ -44,7 +45,6 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
@@ -111,15 +111,27 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of all admins and a list of all groupings.
+     * Get a list of all admins.
      */
-    @GetMapping(value = "/admins-and-groupings")
+    @GetMapping(value = "/grouping-admins")
     @ResponseBody
-    public ResponseEntity<AdminListsHolder> adminsGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
-        logger.info("Entered REST adminsGroupings...");
+    public ResponseEntity<GroupingGroupMembers> groupingAdmins(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
+        logger.info("Entered REST groupingAdmins...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.adminsGroupings(currentUser));
+                .body(groupingAssignmentService.groupingAdmins(currentUser));
+    }
+
+    /**
+     * Get a list of all groupings.
+     */
+    @GetMapping(value = "/all-groupings")
+    @ResponseBody
+    public ResponseEntity<GroupingPaths> allGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
+        logger.info("Entered REST allGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.allGroupingPaths(currentUser));
     }
 
     /**

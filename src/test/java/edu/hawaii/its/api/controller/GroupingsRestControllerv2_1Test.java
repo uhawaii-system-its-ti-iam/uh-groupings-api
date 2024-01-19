@@ -42,6 +42,7 @@ import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -54,7 +55,6 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -234,31 +234,35 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void adminsGroupingsTest() throws Exception {
-        List<GroupingPath> groupingPaths = new ArrayList<>();
-        List<Person> admins = new ArrayList<>();
+    public void groupingPathsTest() throws Exception {
+        List<GroupingPath> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            groupingPaths.add(new GroupingPath("path:to:grouping" + i));
-            admins.add(new Person("admin" + i));
+            paths.add(new GroupingPath("path:to:grouping" + i));
         }
-        Group adminGroup = new Group(admins);
-        AdminListsHolder adminListsHolder = new AdminListsHolder(groupingPaths, adminGroup);
-
-        given(groupingAssignmentService.adminsGroupings("bobo")).willReturn(adminListsHolder);
-        mockMvc.perform(get(API_BASE + "/admins-and-groupings")
+        GroupingPaths groupingPaths = new GroupingPaths();
+        groupingPaths.setGroupingPaths(paths);
+        given(groupingAssignmentService.allGroupingPaths("bobo")).willReturn(groupingPaths);
+        mockMvc.perform(get(API_BASE + "/all-groupings")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("allGroupingPaths[0].name").value("grouping0"))
-                .andExpect(jsonPath("allGroupingPaths[1].name").value("grouping1"))
-                .andExpect(jsonPath("allGroupingPaths[2].name").value("grouping2"))
-                .andExpect(jsonPath("allGroupingPaths[0].path").value("path:to:grouping0"))
-                .andExpect(jsonPath("allGroupingPaths[1].path").value("path:to:grouping1"))
-                .andExpect(jsonPath("allGroupingPaths[2].path").value("path:to:grouping2"))
-                .andExpect(jsonPath("adminGroup.members[0].name").value("admin0"))
-                .andExpect(jsonPath("adminGroup.members[1].name").value("admin1"))
-                .andExpect(jsonPath("adminGroup.members[2].name").value("admin2"));
+                .andExpect(jsonPath("groupingPaths[0].name").value("grouping0"))
+                .andExpect(jsonPath("groupingPaths[1].name").value("grouping1"))
+                .andExpect(jsonPath("groupingPaths[2].name").value("grouping2"))
+                .andExpect(jsonPath("groupingPaths[0].path").value("path:to:grouping0"))
+                .andExpect(jsonPath("groupingPaths[1].path").value("path:to:grouping1"))
+                .andExpect(jsonPath("groupingPaths[2].path").value("path:to:grouping2"));
         verify(groupingAssignmentService, times(1))
-                .adminsGroupings("bobo");
+                .allGroupingPaths("bobo");
+    }
+
+    @Test
+    public void groupingAdminsTest() throws Exception {
+        given(groupingAssignmentService.groupingAdmins("bobo")).willReturn(new GroupingGroupMembers());
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping-admins")
+                        .header(CURRENT_USER, "bobo"))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingAssignmentService, times(1)).groupingAdmins("bobo");
     }
 
     @Test

@@ -47,6 +47,10 @@ public class GroupingsService {
                 .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription())).collect(
                         Collectors.toList());
     }
+    public GroupAttributeResults allGroupAttributeResults() {
+        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(TRIO);
+        return groupAttributeResults;
+    }
 
     /**
      * A list of grouping paths for all opt out enabled Groupings.
