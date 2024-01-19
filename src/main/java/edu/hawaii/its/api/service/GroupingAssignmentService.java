@@ -4,23 +4,22 @@ import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.type.AdminListsHolder;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -41,29 +40,34 @@ public class GroupingAssignmentService {
     public static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private MemberService memberService;
 
     @Autowired
-    private MemberService memberService;
+    private GrouperApiService grouperApiService;
 
     @Autowired
     private GroupingsService groupingsService;
 
-
     /**
-     * Returns an adminLists object containing the list of all admins and all groupings.
+     * A list of grouping paths for all groupings, restricted to admins' use only.
      */
-    public AdminListsHolder adminsGroupings(String adminUhIdentifier) {
-        logger.info(String.format("adminsGroupings; adminUhIdentifier: %s;", adminUhIdentifier));
+    public GroupingPaths allGroupingPaths(String adminUhIdentifier) {
+        logger.info(String.format("allGroupings; adminUhIdentifier: %s;", adminUhIdentifier));
         if (!memberService.isAdmin(adminUhIdentifier)) {
             throw new AccessDeniedException();
         }
-        AdminListsHolder adminListsHolder = new AdminListsHolder();
-        List<String> adminGrouping = Arrays.asList(GROUPING_ADMINS);
-        Group admin = getMembers(adminUhIdentifier, adminGrouping).get(GROUPING_ADMINS);
-        adminListsHolder.setAllGroupingPaths(groupingsService.allGroupingPaths());
-        adminListsHolder.setAdminGroup(admin);
-        return adminListsHolder;
+        return new GroupingPaths(groupingsService.allGroupAttributeResults());
+    }
+
+    /**
+     * Returns groupingsAdmins object containing the list of all admins.
+     */
+    public GroupingGroupMembers groupingAdmins(String adminUhIdentifier) {
+        logger.info(String.format("groupingAdmins; adminUhIdentifier: %s;", adminUhIdentifier));
+        if (!memberService.isAdmin(adminUhIdentifier)) {
+            throw new AccessDeniedException();
+        }
+        return new GroupingGroupMembers(grouperApiService.getMembersResult(adminUhIdentifier, GROUPING_ADMINS));
     }
 
     /**
