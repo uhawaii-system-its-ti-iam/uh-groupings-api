@@ -31,7 +31,6 @@ public class UpdatedTimestampResults extends Results {
         groups = Collections.emptyList();
         previousTimestampResults = Collections.emptyList();
         currentTimestampResults = Collections.emptyList();
-
     }
 
     @Override
