@@ -3,43 +3,47 @@ package edu.hawaii.its.api.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-@Service
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.AttributesResult;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
+
 public class Announcements {
     private String resultCode;
-    private List<Announcement> announcements = new ArrayList<>();
+    private List<Announcement> announcements;
+
+    public Announcements(FindAttributesResults findAttributesResults) {
+        setResultCode(findAttributesResults.getResultCode());
+        setAnnouncements(findAttributesResults.getResult());
+    }
 
     public Announcements(List<Announcement> announcements) {
-        if (announcements != null) {
-            for (Announcement a : announcements) {
-                this.announcements.add(a);
-            }
-            setResultCode("SUCCESS");
-        }
+        setResultCode("SUCCESS");
+        setAnnouncements(announcements);
     }
 
     public Announcements() {
         setResultCode("FAILURE");
+        setAnnouncements(new ArrayList<>());
+    }
+
+    public String getResultCode() {
+        return resultCode;
+    }
+
+    public List<Announcement> getAnnouncements() {
+        return announcements;
     }
 
     private void setResultCode(String resultCode) {
         this.resultCode = resultCode;
     }
 
-    public List<Announcement> getAnnouncements() {
-        return announcements;
-    }
-    public String getResultCode() {
-        return resultCode;
+    private void setAnnouncements(AttributesResult attributesResult) {
+        this.announcements = JsonUtil.asList(attributesResult.getDescription(), Announcement.class);
     }
 
-    public List<String> validMessages(List<Announcement> allGroupingsAnnouncements) {
-        List<String> validMessages = new ArrayList<>();
-        for (Announcement groupingsAnnouncement : allGroupingsAnnouncements) {
-            if (groupingsAnnouncement.getState() == Announcement.State.Active) {
-                validMessages.add(groupingsAnnouncement.getMessage());
-            }
-        }
-        return validMessages;
+    private void setAnnouncements(List<Announcement> announcements) {
+        this.announcements = announcements;
     }
+
 }
