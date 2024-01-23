@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +115,7 @@ public class MemberAttributeService {
     /**
      * Get a list of GroupPaths the user owns, by username or uhUuid.
      */
-    public List<GroupingPath> getOwnedGroupings(String currentUser, String uhIdentifier) {
+    public GroupingPaths getOwnedGroupings(String currentUser, String uhIdentifier) {
         logger.info(String.format("getOwnedGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
         List<String> pathStrings = groupingsService.groupPaths(uhIdentifier, pathHasOwner());
 
@@ -124,8 +125,7 @@ public class MemberAttributeService {
             groupingPaths.add(new GroupingPath(parentGroupingPath,
                     groupingsService.getGroupingDescription(parentGroupingPath)));
         }
-
-        return groupingPaths;
+        return new GroupingPaths(groupingPaths);
     }
 
     /**
