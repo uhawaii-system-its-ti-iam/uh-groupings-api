@@ -489,7 +489,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getOptInGroupingPathsTest() throws Exception {
-        List<GroupingPath> optInGroupingPaths = new ArrayList<>();
+        GroupingPaths optInGroupingPaths = new GroupingPaths();
         given(groupingAssignmentService.optInGroupingPaths(ADMIN, "testiwta")).willReturn(optInGroupingPaths);
         mockMvc.perform(get(API_BASE + "/groupings/members/testiwta/opt-in-groups")
                         .header(CURRENT_USER, ADMIN))
@@ -642,16 +642,19 @@ public class GroupingsRestControllerv2_1Test {
         final String admin = "bobo";
 
         String path = "path:to:grouping";
+        String description = "description";
 
-        List<GroupingPath> groupingPathList = new ArrayList<>();
-        groupingPathList.add(new GroupingPath(path));
+        GroupingPaths groupingPaths = new GroupingPaths();
+        groupingPaths.addGroupingPath(new GroupingPath(path, description));
 
         given(memberAttributeService.getOwnedGroupings(admin, uid))
-                .willReturn(groupingPathList);
+                .willReturn(groupingPaths);
         mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
                         .header(CURRENT_USER, admin)).andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].path").value(path))
-                .andExpect(jsonPath("$[0].name").value("grouping"));
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.groupingPaths[0].path").value(path))
+                .andExpect(jsonPath("$.groupingPaths[0].name").value("grouping"))
+                .andExpect(jsonPath("$.groupingPaths[0].description").value("description"));
 
         verify(memberAttributeService, times(1))
                 .getOwnedGroupings(admin, uid);
