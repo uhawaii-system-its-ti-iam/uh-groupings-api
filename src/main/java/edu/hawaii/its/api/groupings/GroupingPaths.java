@@ -24,6 +24,11 @@ public class GroupingPaths {
         setResultCode(groupAttributeResults.getResultCode());
     }
 
+    public GroupingPaths(List<GroupingPath> groupingPaths) {
+        this.groupingPaths = groupingPaths;
+        setResultCode("SUCCESS");
+    }
+
     @JsonSetter
     public void setGroupingPaths(List<GroupingPath> groupingPaths) {
         this.groupingPaths = groupingPaths;
@@ -38,6 +43,11 @@ public class GroupingPaths {
 
     public List<GroupingPath> getGroupingPaths() {
         return this.groupingPaths;
+    }
+
+    public void addGroupingPath(GroupingPath groupingPath) {
+        this.groupingPaths.add(groupingPath);
+        this.setResultCode("SUCCESS");
     }
 
     public void setResultCode(String resultCode) {
