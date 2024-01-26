@@ -101,7 +101,7 @@ public class GroupingAssignmentService {
     /**
      * As a group owner, get a list of grouping paths pertaining to the groups which optInUid can opt into.
      */
-    public List<GroupingPath> optInGroupingPaths(String owner, String optInUid) {
+    public GroupingPaths optInGroupingPaths(String owner, String optInUid) {
         logger.info(String.format("optInGroupingsPaths; owner: %s; optInUid: %s;", owner, optInUid));
 
         List<String> includes = groupingsService.groupPaths(optInUid, pathHasInclude());
@@ -111,7 +111,7 @@ public class GroupingAssignmentService {
         optInPaths.removeAll(includes);
         optInPaths = new ArrayList<>(new HashSet<>(optInPaths));
 
-        return groupingsService.getGroupingPaths(optInPaths);
+        return new GroupingPaths(groupingsService.getGroupingPaths(optInPaths));
     }
 
     public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {

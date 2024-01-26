@@ -327,11 +327,11 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of all the paths associated with the groupings which uhIdentifier as the ability top opt into.
+     * Get a list of all the paths associated with the groupings which uhIdentifier has the ability to opt into.
      */
     @GetMapping(value = "/groupings/members/{uhIdentifier}/opt-in-groups")
     @ResponseBody
-    public ResponseEntity<List<GroupingPath>> optInGroupingPaths(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingPaths> optInGroupingPaths(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                                  @PathVariable String uhIdentifier) {
         logger.info("Entered REST optInGroups...");
         return ResponseEntity
@@ -445,7 +445,7 @@ public class GroupingsRestControllerv2_1 {
      * Get an owner's owned groupings by username or UH id number.
      */
     @GetMapping("/owners/{uhIdentifier:[\\w-:.]+}/groupings")
-    public ResponseEntity<List<GroupingPath>> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                              @PathVariable String uhIdentifier) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
