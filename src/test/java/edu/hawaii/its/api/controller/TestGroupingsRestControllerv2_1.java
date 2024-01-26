@@ -405,7 +405,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingPaths.class));
     }
 
     @Test
@@ -567,7 +567,7 @@ public class TestGroupingsRestControllerv2_1 {
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingPaths.class));
     }
 
     @Test

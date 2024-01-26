@@ -155,9 +155,9 @@ public class TestGroupingAssignmentService {
     @Test
     public void optInOutGroupingsPathsTest() {
         // Test both getOptInGroups and getOptOutGroups()
-        List<GroupingPath> optInGroupingsPaths =
+        GroupingPaths optInGroupingsPaths =
                 groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
-        List<String> optInPaths = optInGroupingsPaths.stream().map(GroupingPath::getPath).collect(Collectors.toList());
+        List<String> optInPaths = optInGroupingsPaths.getGroupingPaths().stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, testUid);
         Set<String> intersection =
                 optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
@@ -188,9 +188,9 @@ public class TestGroupingAssignmentService {
     @Test
     public void noOptInGroupingsPathsTest() {
         given(groupingsService.optInEnabledGroupingPaths()).willReturn(Collections.emptyList());
-        List<GroupingPath> optInGroupingsPaths =
+        GroupingPaths optInGroupingsPaths =
                 groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
-        assertEquals(Collections.emptyList(), optInGroupingsPaths);
+        assertEquals(Collections.emptyList(), optInGroupingsPaths.getGroupingPaths());
     }
 
     @Test
