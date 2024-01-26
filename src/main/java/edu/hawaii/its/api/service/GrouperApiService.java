@@ -37,7 +37,8 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 @Service("grouperApiService")
 public class GrouperApiService {
 
-    @Autowired ExecutorService exec;
+    @Autowired
+    private ExecutorService exec;
 
     /**
      * Check if a UH identifier is listed in a group.
