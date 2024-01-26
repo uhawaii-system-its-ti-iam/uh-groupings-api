@@ -14,24 +14,25 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.Command;
+import edu.hawaii.its.api.wrapper.MockResults;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ExecutorServiceTest {
 
     @Mock
-    private Command<String> mockCommand;
+    private Command<MockResults> mockCommand;
 
     @Autowired
     private ExecutorService executorService;
 
     @Test
     public void executeTest() {
-        doReturn("execution success").when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
         assertNotNull(executorService.execute(mockCommand));
-        assertEquals("execution success", executorService.execute(mockCommand));
+        assertEquals("SUCCESS", executorService.execute(mockCommand).getResultCode());
 
-        doThrow(new RuntimeException("execution error")).when(mockCommand).execute();
+        doThrow(new RuntimeException()).when(mockCommand).execute();
         assertNull(executorService.execute(mockCommand));
     }
 

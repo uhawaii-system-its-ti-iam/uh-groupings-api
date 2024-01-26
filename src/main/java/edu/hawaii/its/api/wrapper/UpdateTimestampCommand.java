@@ -19,41 +19,28 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
     private static final String DATE_FORMAT = "yyyyMMdd'T'HHmm";
     protected final GcAssignAttributes gcAssignAttributes;
 
-    public UpdateTimestampCommand(String groupPath) {
-        Objects.requireNonNull(groupPath, "groupPath cannot be null");
-        this.gcAssignAttributes = new GcAssignAttributes()
-                .assignContentType("text/x-json") // Remove after upgrading to Grouper 4
-                .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
-                .assignAttributeAssignOperation(OPERATION_ASSIGN_ATTRIBUTE)
-                .addOwnerGroupName(groupPath)
-                .addAttributeDefNameName(YYYYMMDDTHHMM)
-                .assignAttributeAssignValueOperation(OPERATION_REPLACE_VALUES)
-                .addValue(new DateTimeAttributeValue(Dates.formatDate(
-                        Dates.truncateDatePlus60Seconds(LocalDateTime.now()),
-                        DATE_FORMAT)).getWsAttributeAssignValue());
-    }
-
-    public UpdateTimestampCommand(List<String> groupPaths) {
-        if (groupPaths.isEmpty()) {
-            throw new IllegalStateException("groupPaths cannot be empty");
-        }
-        this.gcAssignAttributes = new GcAssignAttributes()
-                .assignContentType("text/x-json") // Remove after upgrading to Grouper 4
-                .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
-                .assignAttributeAssignOperation(OPERATION_ASSIGN_ATTRIBUTE)
-                .addAttributeDefNameName(YYYYMMDDTHHMM)
-                .assignAttributeAssignValueOperation(OPERATION_REPLACE_VALUES)
-                .addValue(new DateTimeAttributeValue(Dates.formatDate(
-                        Dates.truncateDatePlus60Seconds(LocalDateTime.now()),
-                        DATE_FORMAT)).getWsAttributeAssignValue());
-        for (String path : groupPaths) {
-            Objects.requireNonNull(path, "Path cannot be null");
-            this.gcAssignAttributes.addOwnerGroupName(path);
-        }
-    }
-
     public UpdateTimestampCommand() {
-        this.gcAssignAttributes = new GcAssignAttributes();
+        this.gcAssignAttributes = new GcAssignAttributes()
+                .assignContentType("text/x-json") // Remove after upgrading to Grouper 4
+                .assignAttributeAssignType(ASSIGN_TYPE_GROUP)
+                .assignAttributeAssignOperation(OPERATION_ASSIGN_ATTRIBUTE)
+                .addAttributeDefNameName(YYYYMMDDTHHMM)
+                .assignAttributeAssignValueOperation(OPERATION_REPLACE_VALUES)
+                .addValue(new DateTimeAttributeValue(Dates.formatDate(
+                        Dates.truncateDatePlus60Seconds(LocalDateTime.now()),
+                        DATE_FORMAT)).getWsAttributeAssignValue());
+    }
+
+    public UpdateTimestampCommand addGroupPath(String groupPath) {
+        this.gcAssignAttributes.addOwnerGroupName(groupPath);
+        return this;
+    }
+
+    public UpdateTimestampCommand addGroupPaths(List<String> groupPaths) {
+        for (String groupPath : groupPaths) {
+            this.gcAssignAttributes.addOwnerGroupName(groupPath);
+        }
+        return this;
     }
 
     @Override
