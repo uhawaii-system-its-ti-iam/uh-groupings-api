@@ -30,6 +30,9 @@ public class TestSubjectService {
     @Value("${groupings.api.test.uh-numbers}")
     private List<String> TEST_UH_NUMBERS;
 
+    @Value("${groupings.api.test.dept-uh-usernames}")
+    private List<String> TEST_DEPT_UH_USERNAMES;
+
     @Test
     public void constructor() {
         assertNotNull(subjectService);
@@ -43,6 +46,8 @@ public class TestSubjectService {
         for (String number : TEST_UH_NUMBERS) {
             assertTrue(subjectService.isValidIdentifier(number));
         }
+        assertFalse(subjectService.isValidIdentifier(TEST_DEPT_UH_USERNAMES.get(0))); // testiwt1 is invalid
+        assertTrue(subjectService.isValidIdentifier(TEST_DEPT_UH_USERNAMES.get(1))); // testiwt2 is valid
         assertFalse(subjectService.isValidIdentifier("invalid-identifier"));
     }
 
