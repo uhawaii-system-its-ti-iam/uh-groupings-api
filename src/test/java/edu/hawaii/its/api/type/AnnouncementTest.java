@@ -15,7 +15,7 @@ class AnnouncementTest {
     private LocalDateTime currentDateTime = LocalDateTime.now();
 
     @BeforeEach
-    void setUp() {
+    public void setup() {
         // Expired - start and end date is before the current local date time.
         LocalDateTime start1 = LocalDateTime.parse("2023-06-07T00:00");
         LocalDateTime end1 = LocalDateTime.parse("2023-06-15T00:00");
@@ -31,7 +31,7 @@ class AnnouncementTest {
     }
 
     @Test
-    void accessors() {
+    public void accessors() {
         assertNotNull(expiredAnnouncement);
         assertNotNull(activeAnnouncement);
         assertNotNull(futureAnnouncement);

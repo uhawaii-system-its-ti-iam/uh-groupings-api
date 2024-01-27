@@ -669,11 +669,11 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the list of active announcements to display.
      */
-    @GetMapping(value = "/announcements/active")
-    public ResponseEntity activeAnnouncements() {
+    @GetMapping(value = "/announcements")
+    public ResponseEntity getAnnouncements() {
         logger.info("Entered REST activeAnnouncements...");
         return ResponseEntity
                 .ok()
-                .body(announcementsService.activeAnnouncements());
+                .body(announcementsService.getAnnouncements());
     }
 }
