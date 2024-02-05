@@ -183,7 +183,7 @@ public class ErrorControllerAdvice {
     public ResponseEntity<ApiError> handleCommandException(CommandException ce) {
         emailService.sendWithStack(ce, "Command Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.)
+                .status(HttpStatus.NOT_ACCEPTABLE)
                 .message("Command Exception")
                 .debugMessage("There's an error from the command of grouper or grouping")
                 .timestamp(LocalDateTime.now());
