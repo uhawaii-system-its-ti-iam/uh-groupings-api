@@ -30,7 +30,7 @@ public class GroupingOwnerService {
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
 
-    @Autowired private GrouperApiService grouperApiService;
+    @Autowired private GroupingPropertiesService groupingPropertiesService;
 
     /**
      * Get all members listed in the groups in groupsPath. This should be used iteratively from the UI to get all
@@ -41,7 +41,7 @@ public class GroupingOwnerService {
         log.debug(String.format(
                 "paginatedGrouping; currentUser: %s; groupPaths: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
                 currentUser, groupPaths, pageNumber, pageSize, sortString, isAscending));
-        GetMembersResults getMembersResults = grouperApiService.getMembersResults(
+        GetMembersResults getMembersResults = groupingPropertiesService.getGrouperService().getMembersResults(
                 currentUser,
                 groupPaths,
                 pageNumber,
@@ -58,7 +58,7 @@ public class GroupingOwnerService {
      */
     public GroupingOptAttributes groupingOptAttributes(String currentUser, String groupingPath) {
         log.debug(String.format("groupingOptAttributes; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
-        return new GroupingOptAttributes(grouperApiService.groupAttributeResult(currentUser, groupingPath));
+        return new GroupingOptAttributes(groupingPropertiesService.getGrouperService().groupAttributeResult(currentUser, groupingPath));
     }
 
     /**
@@ -66,7 +66,7 @@ public class GroupingOwnerService {
      */
     public GroupingDescription groupingsDescription(String currentUser, String groupingPath) {
         log.debug(String.format("groupingsDescription; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
-        return new GroupingDescription(grouperApiService.findGroupsResults(currentUser, groupingPath).getGroup());
+        return new GroupingDescription(groupingPropertiesService.getGrouperService().findGroupsResults(currentUser, groupingPath).getGroup());
     }
 
     /**
@@ -75,11 +75,11 @@ public class GroupingOwnerService {
     public GroupingSyncDestinations groupingsSyncDestinations(String currentUser, String groupingPath) {
         log.debug(String.format("groupingsSyncDestinations; currentUser: %s; groupingPath: %s;", currentUser,
                 groupingPath));
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+        FindAttributesResults findAttributesResults = groupingPropertiesService.getGrouperService().findAttributesResults(
                 currentUser,
                 SYNC_DESTINATIONS_CHECKBOXES,
                 SYNC_DESTINATIONS_LOCATION);
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(
+        GroupAttributeResults groupAttributeResults = groupingPropertiesService.getGrouperService().groupAttributeResults(
                 currentUser,
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 groupingPath);

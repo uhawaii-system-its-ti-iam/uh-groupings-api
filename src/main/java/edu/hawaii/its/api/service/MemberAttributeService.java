@@ -31,7 +31,7 @@ public class MemberAttributeService {
     private String FAILURE;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GroupingPropertiesService groupingPropertiesService;
 
     @Autowired
     private SubjectService subjectService;
@@ -101,7 +101,7 @@ public class MemberAttributeService {
             throw new AccessDeniedException();
         }
 
-        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
+        SubjectsResults results = groupingPropertiesService.getGrouperService().getSubjects(uhIdentifiers);
 
         if (results.getResultCode().equals(FAILURE)) {
             return new ArrayList<>();

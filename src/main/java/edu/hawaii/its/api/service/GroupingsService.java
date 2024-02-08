@@ -32,7 +32,7 @@ public class GroupingsService {
     private GroupPathService groupPathService;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GroupingPropertiesService groupingPropertiesService;
 
     /**
      * A list of grouping paths for all groupings.
@@ -42,7 +42,7 @@ public class GroupingsService {
     }
 
     public List<GroupingPath> allGroupingPaths() {
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(TRIO);
+        GroupAttributeResults groupAttributeResults = groupingPropertiesService.getGrouperService().groupAttributeResults(TRIO);
         return groupAttributeResults.getGroups().stream()
                 .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription())).collect(
                         Collectors.toList());
@@ -91,7 +91,7 @@ public class GroupingsService {
      * A list of all grouping paths of groups containing the optAttribute.
      */
     public List<String> allGroupingPaths(String optAttribute) {
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(optAttribute);
+        GroupAttributeResults groupAttributeResults = groupingPropertiesService.getGrouperService().groupAttributeResults(optAttribute);
         List<String> results = groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
                 .collect(Collectors.toList());
         return removeDuplicates(results);
@@ -102,7 +102,7 @@ public class GroupingsService {
      */
     private List<String> allGroupingPaths(String optAttribute, List<String> groupingPaths) {
         GroupAttributeResults groupAttributeResults =
-                grouperApiService.groupAttributeResults(optAttribute, groupingPaths);
+                groupingPropertiesService.getGrouperService().groupAttributeResults(optAttribute, groupingPaths);
         List<String> results = groupAttributeResults.getGroupAttributes().stream().map(GroupAttribute::getGroupPath)
                 .collect(Collectors.toList());
         return removeDuplicates(results);
@@ -135,7 +135,7 @@ public class GroupingsService {
     }
 
     public String getGroupingDescription(String path) {
-        Group group = grouperApiService.findGroupsResults(path).getGroup();
+        Group group = groupingPropertiesService.getGrouperService().findGroupsResults(path).getGroup();
         if (!groupPathService.isGroupingPath(group)) {
             return "";
         }
@@ -148,7 +148,7 @@ public class GroupingsService {
      * Grouping, the sub-groups are filtered out after grouper returns.
      */
     public List<GroupingPath> getGroupingPaths(List<String> groupPaths) {
-        return grouperApiService.findGroupsResults(groupPaths).getGroups().stream()
+        return groupingPropertiesService.getGrouperService().findGroupsResults(groupPaths).getGroups().stream()
                 .filter(group -> groupPathService.isGroupingPath(group)).collect(Collectors.toList()).stream()
                 .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription()))
                 .collect(Collectors.toList());
@@ -156,7 +156,7 @@ public class GroupingsService {
 
     public GroupingUpdateDescriptionResult updateGroupingDescription(String path, String description) {
         String updatedDescription = getGroupingDescription(path);
-        return new GroupingUpdateDescriptionResult(grouperApiService.groupSaveResults(path, description),
+        return new GroupingUpdateDescriptionResult(groupingPropertiesService.getGrouperService().groupSaveResults(path, description),
                 updatedDescription);
     }
 
@@ -164,7 +164,7 @@ public class GroupingsService {
      * A list of all group paths, in which the uhIdentifier is listed..
      */
     public List<String> allGroupPaths(String uhIdentifier) {
-        List<Group> groups = grouperApiService.getGroupsResults(uhIdentifier).getGroups();
+        List<Group> groups = groupingPropertiesService.getGrouperService().getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
     }
 }

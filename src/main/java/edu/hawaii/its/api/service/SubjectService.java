@@ -22,7 +22,7 @@ public class SubjectService {
     private String SUCCESS;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GroupingPropertiesService groupingPropertiesService;
 
     public Person getPerson(String uhIdentifier) {
         Subject subject = getSubject(uhIdentifier);
@@ -45,7 +45,7 @@ public class SubjectService {
      * Fetch all valid UH identifiers and return their corresponding UhUuids.
      */
     public List<String> getValidUhUuids(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifiers);
+        SubjectsResults subjectsResults = groupingPropertiesService.getGrouperService().getSubjects(uhIdentifiers);
         List<String> results = new ArrayList<>();
         for (Subject subject : subjectsResults.getSubjects()) {
             if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
@@ -65,10 +65,7 @@ public class SubjectService {
     }
 
     private Subject getSubject(String uhIdentifier) {
-        SubjectsResults subjectsResults = grouperApiService.getSubjects(uhIdentifier);
-        if (subjectsResults == null) {
-            return new Subject();
-        }
+        SubjectsResults subjectsResults = groupingPropertiesService.getGrouperService().getSubjects(uhIdentifier);
         List<Subject> subjects = subjectsResults.getSubjects();
         if (subjects.size() == 1) {
             return subjects.get(0);

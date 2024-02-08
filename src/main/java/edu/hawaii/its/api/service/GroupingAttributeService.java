@@ -43,7 +43,7 @@ public class GroupingAttributeService {
     public static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GroupingPropertiesService groupingPropertiesService;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
@@ -122,7 +122,7 @@ public class GroupingAttributeService {
 
     // Check if attribute is on.
     public boolean isGroupAttribute(String groupPath, String attributeName) {
-        List<GroupAttribute> groupAttributes = grouperApiService
+        List<GroupAttribute> groupAttributes = groupingPropertiesService.getGrouperService()
                 .groupAttributeResults(attributeName, groupPath)
                 .getGroupAttributes();
         return groupAttributes.stream()
@@ -139,7 +139,7 @@ public class GroupingAttributeService {
 
     public GroupingUpdatedAttributesResult updateAttribute(String currentUser, String attributeName, String assignOperation,
             String groupingPath) {
-        AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
+        AssignAttributesResults assignAttributesResults = groupingPropertiesService.getGrouperService().assignAttributesResults(
                 currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
 
         GroupingUpdatedAttributesResult result = new GroupingUpdatedAttributesResult(assignAttributesResults);
@@ -153,7 +153,7 @@ public class GroupingAttributeService {
     public GroupingsServiceResult assignGrouperPrivilege(String currentUser, String privilegeName, String groupName, boolean isSet) {
         String action = "set " + privilegeName + " " + isSet + " for " + EVERY_ENTITY + " in " + groupName;
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                grouperApiService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
+                groupingPropertiesService.getGrouperService().assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
         return makeGroupingsServiceResult(assignGrouperPrivilegesResult.getResultCode(), action);
     }
 

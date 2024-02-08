@@ -43,6 +43,9 @@ public class GroupingAssignmentService {
     private MemberService memberService;
 
     @Autowired
+    private GroupingPropertiesService groupingPropertiesService;
+
+    @Autowired
     private GrouperApiService grouperApiService;
 
     @Autowired
@@ -67,7 +70,7 @@ public class GroupingAssignmentService {
         if (!memberService.isAdmin(adminUhIdentifier)) {
             throw new AccessDeniedException();
         }
-        return new GroupingGroupMembers(grouperApiService.getMembersResult(adminUhIdentifier, GROUPING_ADMINS));
+        return new GroupingGroupMembers(groupingPropertiesService.getGrouperService().getMembersResult(adminUhIdentifier, GROUPING_ADMINS));
     }
 
     /**
@@ -75,7 +78,7 @@ public class GroupingAssignmentService {
      */
     public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
         GetMembersResults getMembersResults =
-                grouperApiService.getMembersResults(
+                groupingPropertiesService.getGrouperService().getMembersResults(
                         ownerUsername,
                         groupPaths,
                         null,
@@ -117,7 +120,7 @@ public class GroupingAssignmentService {
     public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingGroupMembers(
-                grouperApiService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
+                groupingPropertiesService.getGrouperService().getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
     }
 
     public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {

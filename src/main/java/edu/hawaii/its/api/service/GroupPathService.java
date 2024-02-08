@@ -16,8 +16,11 @@ import edu.hawaii.its.api.wrapper.Group;
 @Service
 public class GroupPathService {
 
+//    @Autowired
+//    GrouperApiService grouperApiService;
+
     @Autowired
-    GrouperApiService grouperApiService;
+    private GroupingPropertiesService groupingPropertiesService;
 
     /**
      * Throw an exception if path is invalid.
@@ -29,7 +32,8 @@ public class GroupPathService {
     }
 
     public boolean isValidPath(String path) {
-        Group group = grouperApiService.findGroupsResults(path).getGroup();
+//        Group group = grouperApiService.findGroupsResults(path).getGroup();
+        Group group = groupingPropertiesService.getGrouperService().findGroupsResults(path).getGroup();
         return group.isValidPath();
     }
 
@@ -72,7 +76,8 @@ public class GroupPathService {
     }
 
     public List<Group> getValidGroupings(List<String> groupingPaths) {
-        return grouperApiService.findGroupsResults(groupingPaths).getGroups();
+//        return grouperApiService.findGroupsResults(groupingPaths).getGroups();
+        return groupingPropertiesService.getGrouperService().findGroupsResults(groupingPaths).getGroups();
     }
 
     public String getIncludeGroup(String path) {
@@ -108,7 +113,7 @@ public class GroupPathService {
     }
 
     private Group getGroup(String groupPath) {
-        return grouperApiService.findGroupsResults(groupPath).getGroup();
+        return groupingPropertiesService.getGrouperService().findGroupsResults(groupPath).getGroup();
     }
 
     private String replaceGroup(String rep, Group group) {
