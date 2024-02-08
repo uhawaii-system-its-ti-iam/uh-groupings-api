@@ -7,12 +7,18 @@ import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
+import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,6 +72,31 @@ class GroupingPropertyConfigurer {
         WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
         FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
         return findGroupsResults;
+    }
+
+    @Bean(name = "GroupSaveResultsOOTBBean")
+//    @ConditionalOnProperty(name = "grouper.findGroupsResults.enabled", havingValue = "true")
+    public GroupSaveResults grouperGroupSaveResultsOOTB() throws IOException {
+        String json = propertyLocator.find(" ws.group.save.results.description.updated");
+        WsGroupSaveResults wsGroupSaveResults = JsonUtil.asObject(json, WsGroupSaveResults.class);
+        GroupSaveResults groupSaveResults = new GroupSaveResults(wsGroupSaveResults);
+        return groupSaveResults;
+    }
+
+    @Bean(name = "AssignAttributesOOTBBean")
+    public AssignAttributesResults grouperAssignAttributesResultsOOTB() throws IOException {
+        String json = propertyLocator.find("ws.assign.attributes.results.time.changed");
+        WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
+        AssignAttributesResults assignAttributesResults = new AssignAttributesResults(wsAssignAttributesResults);
+        return assignAttributesResults;
+    }
+
+    @Bean(name = "GetMembersResultsOOTBBean")
+    public GetMembersResults grouperGetMembersResultsOOTB() throws IOException {
+        String json = propertyLocator.find("ws.get.members.results.success");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        return getMembersResults;
     }
 
 
