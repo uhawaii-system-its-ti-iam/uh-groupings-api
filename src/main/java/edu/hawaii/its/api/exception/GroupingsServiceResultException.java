@@ -3,6 +3,7 @@ package edu.hawaii.its.api.exception;
 import edu.hawaii.its.api.type.ApiSubError;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GroupingsServiceResultException extends RuntimeException {
@@ -14,7 +15,7 @@ public class GroupingsServiceResultException extends RuntimeException {
     private GroupingsServiceResult gsr = null;
 
     public GroupingsServiceResultException() {
-        //empty
+        this.subErrors = new ArrayList<>();
     }
 
     public GroupingsServiceResultException(GroupingsServiceResult gsr) {
