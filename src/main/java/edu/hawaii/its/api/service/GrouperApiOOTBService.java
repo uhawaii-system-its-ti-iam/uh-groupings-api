@@ -58,9 +58,7 @@ public class GrouperApiOOTBService implements GrouperService {
      * Check if multiple UH identifiers are listed in a group.
      */
     public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
-        HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
-                .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
+        HasMembersResults hasMembersResults = groupingPropertiesService.getHasMembersResultsBean();
         return hasMembersResults;
     }
 
@@ -68,9 +66,7 @@ public class GrouperApiOOTBService implements GrouperService {
      * Update a groups description.
      */
     public GroupSaveResults groupSaveResults(String groupingPath, String description) {
-        GroupSaveResults groupSaveResults = exec.execute(new GroupSaveCommand()
-                .setGroupingPath(groupingPath)
-                .setDescription(description));
+        GroupSaveResults groupSaveResults = groupingPropertiesService.getGroupSaveResults();
         return groupSaveResults;
     }
 
@@ -99,8 +95,7 @@ public class GrouperApiOOTBService implements GrouperService {
      * Check if a UH identifier is valid.
      */
     public SubjectsResults getSubjects(String uhIdentifier) {
-        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
-                .addSubject(uhIdentifier));
+        SubjectsResults subjectsResults = groupingPropertiesService.getSubjectsResults();
         return subjectsResults;
     }
 
@@ -108,8 +103,7 @@ public class GrouperApiOOTBService implements GrouperService {
      * Check if multiple UH identifiers are valid.
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
-                .addSubjects(uhIdentifiers));
+        SubjectsResults subjectsResults = groupingPropertiesService.getSubjectsResults();
         return subjectsResults;
     }
 
@@ -117,75 +111,57 @@ public class GrouperApiOOTBService implements GrouperService {
      * Get all the groups with the specified attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttribute(attribute));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Get all the groups with the specified attributes.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttributes(attributes));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Check if a group contains an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, String groupPath) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttribute(attribute)
-                .addGroup(groupPath));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Check if multiple groups contain an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, List<String> groupPaths) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttribute(attribute)
-                .addGroups(groupPaths));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Check if a group contains multiple attributes.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, String groupPath) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttributes(attributes)
-                .addGroup(groupPath));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     public GroupAttributeResults groupAttributeResults(String currentUser, List<String> attributes, String groupPath) {
-        return exec.execute(new GroupAttributeCommand()
-                .owner(currentUser)
-                .addAttributes(attributes)
-                .addGroup(groupPath));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Check if multiple groups contain attributes from the list specified.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, List<String> groupPaths) {
-        return exec.execute(new GroupAttributeCommand()
-                .addAttributes(attributes)
-                .addGroups(groupPaths));
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
      * Get all listed attributes of a group.
      */
     public GroupAttributeResults groupAttributeResult(String groupPath) {
-        GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
-                .addGroup(groupPath);
-        return exec.execute(groupAttributeCommand);
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     public GroupAttributeResults groupAttributeResult(String currentUser, String groupPath) {
-        GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
-                .owner(currentUser)
-                .addGroup(groupPath);
-        return exec.execute(groupAttributeCommand);
+        return groupingPropertiesService.getGroupAttributeResults();
     }
 
     /**
@@ -212,22 +188,14 @@ public class GrouperApiOOTBService implements GrouperService {
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
-        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
-                .owner(currentUser)
-                .addGroupPath(groupPath));
-        List<GetMembersResult> result = getMembersResults.getMembersResults();
-        if (result.isEmpty()) {
-            return new GetMembersResult();
-        }
-        return result.get(0);
+        return groupingPropertiesService.getMembersResults().getMembersResults().get(0);
     }
 
     /**
      * Get all members listed in each group.
      */
     public GetMembersResults getMembersResults(List<String> groupPaths) {
-        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
-                .addGroupPaths(groupPaths));
+        GetMembersResults getMembersResults = groupingPropertiesService.getMembersResults();
         return getMembersResults;
     }
 
@@ -258,51 +226,35 @@ public class GrouperApiOOTBService implements GrouperService {
      * Add a UH identifier to group listing.
      */
     public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
-        return exec.execute(new AddMembersCommand()
-                .owner(currentUser)
-                .assignGroupPath(groupPath)
-                .addUhIdentifier(uhIdentifier)).getResults().get(0);
+        return groupingPropertiesService.getAddMembersResults().getResults().get(0);
     }
 
     /**
      * Add multiple UH identifiers to a group listing.
      */
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        return exec.execute(new AddMembersCommand()
-                .owner(currentUser)
-                .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
-
+        return groupingPropertiesService.getAddMembersResults();
     }
 
     /**
      * Remove a UH identifier from a group listing.
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
-        return exec.execute(new RemoveMembersCommand()
-                .owner(currentUser)
-                .assignGroupPath(groupPath)
-                .addUhIdentifier(uhIdentifier)).getResults().get(0);
+        return groupingPropertiesService.getRemoveMembersResults().getResults().get(0);
     }
 
     /**
      * Remove multiple UH identifiers from a group listing.
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        return exec.execute(new RemoveMembersCommand()
-                .owner(currentUser)
-                .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
+        return groupingPropertiesService.getRemoveMembersResults();
     }
 
     /**
      * Remove all listed members from a group.
      */
     public AddMembersResults resetGroupMembers(String groupPath) {
-        return exec.execute(new AddMembersCommand()
-                .assignGroupPath(groupPath)
-                .addUhIdentifiers(new ArrayList<>())
-                .replaceGroupMembers(true));
+        return groupingPropertiesService.getAddMembersResults();
     }
 
     /**
@@ -311,12 +263,7 @@ public class GrouperApiOOTBService implements GrouperService {
      */
     public AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath,
                                                            String attributeName) {
-        return exec.execute(new AssignAttributesCommand()
-                .owner(currentUser)
-                .setAssignType(assignType)
-                .setAssignOperation(assignOperation)
-                .addGroupPath(groupPath)
-                .addAttribute(attributeName));
+        return groupingPropertiesService.getAssignAttributesResults();
     }
 
     /**
@@ -337,12 +284,6 @@ public class GrouperApiOOTBService implements GrouperService {
      */
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
                                                Integer pageSize, String sortString, Boolean isAscending) {
-        return exec.execute(new GetMembersCommand()
-                .owner(currentUser)
-                .addGroupPaths(groupPaths)
-                .setPageNumber(pageNumber)
-                .setPageSize(pageSize)
-                .setAscending(isAscending)
-                .sortBy(sortString));
+        return groupingPropertiesService.getMembersResults();
     }
 }
