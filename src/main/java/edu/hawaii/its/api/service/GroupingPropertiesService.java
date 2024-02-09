@@ -1,10 +1,13 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
+import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,6 +45,22 @@ public class GroupingPropertiesService {
     @Qualifier("GetMembersResultsOOTBBean")
     private GetMembersResults getMembersResults;
 
+    @Autowired
+    @Qualifier("AddMemberResultsOOTBBean")
+    private AddMembersResults addMembersResults;
+
+    @Autowired
+    @Qualifier("RemoveMembersResultsOOTBBean")
+    private RemoveMembersResults removeMembersResults;
+
+    @Autowired
+    @Qualifier("AttributeAssignmentResultsOOTBBean")
+    private GroupAttributeResults groupAttributeResults;
+
+//    @Autowired
+//    @Qualifier("GetMembersResultsOOTBBean")
+//    private GetMembersResults getMembersResults;
+
     public GrouperService getGrouperService() {
         GrouperService grouperService1 = grouperService;
         return grouperService1;
@@ -59,5 +78,14 @@ public class GroupingPropertiesService {
     public AssignAttributesResults getAssignAttributesResults() { return this.assignAttributesResults; }
     public GetMembersResults getMembersResults() { return this.getMembersResults; }
 
+    public AddMembersResults getAddMembersResults() {
+        return this.addMembersResults;
+    }
+    public RemoveMembersResults getRemoveMembersResults() {
+        return removeMembersResults;
+    }
+    public GroupAttributeResults getGroupAttributeResults() {
+        return groupAttributeResults;
+    }
 }
 

@@ -10,12 +10,16 @@ import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
+import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
@@ -98,6 +102,22 @@ class GroupingPropertyConfigurer {
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         return getMembersResults;
     }
+
+    @Bean(name = "RemoveMembersResultsOOTBBean")
+    public RemoveMembersResults grouperRemoveMembersResultsOOTB() throws IOException {
+        String json = propertyLocator.find("ws.delete.member.results.success");
+        WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
+        RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
+        return removeMembersResults;
+    }
+    @Bean(name = "AttributeAssignmentResultsOOTBBean")
+    public GroupAttributeResults grouperGroupAttributeResultsOOTB() throws IOException {
+        String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        return groupAttributeResults;
+    }
+
 
 
 
