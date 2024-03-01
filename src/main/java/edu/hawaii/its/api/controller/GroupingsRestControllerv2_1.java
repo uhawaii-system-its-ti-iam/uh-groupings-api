@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
-import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -45,7 +45,8 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.Announcements;
+import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
@@ -670,7 +671,7 @@ public class GroupingsRestControllerv2_1 {
      * Get result of async job.
      */
     @GetMapping(value = "/jobs/{jobId}")
-    public ResponseEntity getAsyncJobResult(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<AsyncJobResult> getAsyncJobResult(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                             @PathVariable Integer jobId) {
         logger.debug("Entered REST getAsyncJobResult...");
         return ResponseEntity
@@ -682,7 +683,7 @@ public class GroupingsRestControllerv2_1 {
      * Get the list of active announcements to display.
      */
     @GetMapping(value = "/announcements")
-    public ResponseEntity getAnnouncements() {
+    public ResponseEntity<Announcements> getAnnouncements() {
         logger.info("Entered REST activeAnnouncements...");
         return ResponseEntity
                 .ok()

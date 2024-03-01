@@ -3,11 +3,6 @@ package edu.hawaii.its.api.controller;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.ExceptionForTesting;
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.type.ApiError;
 import jakarta.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +16,12 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.ExceptionForTesting;
+import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.service.EmailService;
+import edu.hawaii.its.api.type.ApiError;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -55,7 +55,7 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
-      emailService.sendWithStack(ade, "Access Denied Exception");
+        emailService.sendWithStack(ade, "Access Denied Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access Denied Exception")
