@@ -36,6 +36,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -54,7 +56,6 @@ import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
-import edu.hawaii.its.api.wrapper.Subject;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -174,34 +175,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers.
-     */
-    @PostMapping(value = "/members/invalid")
-    @ResponseBody
-    public ResponseEntity<List<String>> invalidUhIdentifiers(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST invalidUhIdentifiers...");
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.invalidUhIdentifiers(currentUser, uhIdentifiers));
-    }
-
-    /**
-     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers asynchronously.
-     */
-    @PostMapping(value = "/members/invalid/async")
-    @ResponseBody
-    public ResponseEntity<Integer> invalidUhIdentifiersAsync(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST invalidUhIdentifiersAsync...");
-        return ResponseEntity
-                .accepted()
-                .body(asyncJobsManager.putJob(memberAttributeService.invalidUhIdentifiersAsync(currentUser, uhIdentifiers)));
-    }
-
-    /**
      * Remove all members from the include group.
      */
     @DeleteMapping(value = "/groupings/{groupingPath}/include")
@@ -271,13 +244,27 @@ public class GroupingsRestControllerv2_1 {
      */
     @PostMapping(value = "/members")
     @ResponseBody
-    public ResponseEntity<List<Subject>> membersAttributes(
+    public ResponseEntity<MemberAttributeResults> memberAttributeResults(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @RequestBody List<String> uhIdentifiers) {
-        logger.info("Entered REST membersAttributes...");
+        logger.info("Entered REST memberAttributeResults...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getMembersAttributes(currentUser, uhIdentifiers));
+                .body(memberAttributeService.getMemberAttributeResults(currentUser, uhIdentifiers));
+    }
+
+    /**
+     * Get a list of members' attributes based off a list of uhIdentifiers asynchronously.
+     */
+    @PostMapping(value = "/members/async")
+    @ResponseBody
+    public ResponseEntity<Integer> memberAttributeResultsAsync(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST memberAttributeResultsAsync...");
+        return ResponseEntity
+                .accepted()
+                .body(asyncJobsManager.putJob(memberAttributeService.getMemberAttributeResultsAsync(currentUser, uhIdentifiers)));
     }
 
     /**
@@ -306,7 +293,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/memberships")
     @ResponseBody
-    public ResponseEntity<List<Membership>> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<MembershipResults> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String uhIdentifier) {
         logger.info("Entered REST membershipResults...");
         return ResponseEntity

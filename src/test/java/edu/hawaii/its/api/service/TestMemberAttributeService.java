@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +26,10 @@ import org.springframework.test.context.ActiveProfiles;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
-import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MemberResult;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -98,71 +98,6 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void invalidUhIdentifiersTest() {
-        assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.invalidUhIdentifiers("bogus-owner-admin", null));
-
-        List<String> result = memberAttributeService.invalidUhIdentifiers(ADMIN, testUids);
-        assertNotNull(result);
-        assertEquals(new ArrayList(), result);
-
-        String testUid = testUids.get(0);
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        List<String> invalidUhIdentifiers = new ArrayList<>();
-        invalidUhIdentifiers.add("bogus-user1");
-        invalidUhIdentifiers.add("bogus-user2");
-        result = memberAttributeService.invalidUhIdentifiers(testUid, invalidUhIdentifiers);
-        assertNotNull(result);
-        assertEquals(invalidUhIdentifiers, result);
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-
-        updateMemberService.addAdminMember(ADMIN, testUid);
-        List<String> uhIdentifiers = new ArrayList<>(testUids);
-        uhIdentifiers.add("bogus-user1");
-        uhIdentifiers.add("bogus-user2");
-        result = memberAttributeService.invalidUhIdentifiers(testUid, uhIdentifiers);
-        assertNotNull(result);
-        assertEquals(invalidUhIdentifiers, result);
-        updateMemberService.removeAdminMember(ADMIN, testUid);
-    }
-
-    @Test
-    public void invalidUhIdentifiersAsyncTest() {
-
-        assertThrows(ExecutionException.class,
-                () -> memberAttributeService.invalidUhIdentifiersAsync("bogus-owner-admin", null).get());
-
-        CompletableFuture<List<String>> result = memberAttributeService.invalidUhIdentifiersAsync(ADMIN, testUids);
-        assertNotNull(result);
-        assertEquals(new ArrayList(), result.join());
-
-        String testUid = testUids.get(0);
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        List<String> invalidUhIdentifiers = new ArrayList<>();
-        invalidUhIdentifiers.add("bogus-user1");
-        invalidUhIdentifiers.add("bogus-user2");
-        result = memberAttributeService.invalidUhIdentifiersAsync(testUid, invalidUhIdentifiers);
-        assertNotNull(result);
-        assertEquals(invalidUhIdentifiers, result.join());
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-
-        updateMemberService.addAdminMember(ADMIN, testUid);
-        List<String> uhIdentifiers = new ArrayList<>(testUids);
-        uhIdentifiers.add("bogus-user1");
-        uhIdentifiers.add("bogus-user2");
-        result = memberAttributeService.invalidUhIdentifiersAsync(testUid, uhIdentifiers);
-        assertNotNull(result);
-        assertEquals(invalidUhIdentifiers, result.join());
-        updateMemberService.removeAdminMember(ADMIN, testUid);
-    }
-
-    @Test
     public void memberAttributesTest() {
         testUids.forEach(testUid -> {
             Person person = memberAttributeService.getMemberAttributes(ADMIN, testUid);
@@ -204,40 +139,82 @@ public class TestMemberAttributeService {
     }
 
     @Test
-    public void membersAttributesTest() {
-        List<Subject> subjects = memberAttributeService.getMembersAttributes(ADMIN, testUids);
-        assertNotNull(subjects);
+    public void memberAttributeResultsTest() {
+        MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(ADMIN, testUids);
+        assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
         HashSet<String> testUhUuidsSet = new HashSet(testUhUuids);
-        for (Subject subject : subjects) {
-            assertTrue(testUidsSet.contains(subject.getUid()));
-            assertTrue(testUhUuidsSet.contains(subject.getUhUuid()));
+
+        for (MemberResult memberResult : results.getResults()) {
+            assertTrue(testUidsSet.contains(memberResult.getUid()));
+            assertTrue(testUhUuidsSet.contains(memberResult.getUhUuid()));
         }
 
         String testUid = testUids.get(0);
         List<String> testList = new ArrayList<>();
         testList.add(testUid);
 
-        // Should return an empty array if at least one uhIdentifier is invalid.
+        // Should not contain any invalid uhIdentifiers.
         List<String> uhIdentifiers = new ArrayList<>();
         uhIdentifiers.add("bogus-user");
-        subjects = memberAttributeService.getMembersAttributes(ADMIN, uhIdentifiers);
-        assertEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(ADMIN, uhIdentifiers);
+        assertEquals(Collections.emptyList(), results.getResults());
+        assertEquals(uhIdentifiers, results.getInvalid());
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMembersAttributes("bogus-owner-admin", null));
+                () -> memberAttributeService.getMemberAttributeResults("bogus-owner-admin", null));
 
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        subjects = memberAttributeService.getMembersAttributes(testUid, testList);
-        assertNotEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
+        assertNotEquals(0, results.getResults().size());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should not return an empty array if current user is an admin but not an owner.
         updateMemberService.addAdminMember(ADMIN, testUid);
-        subjects = memberAttributeService.getMembersAttributes(testUid, testList);
-        assertNotEquals(new ArrayList(), subjects);
+        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
+        assertNotEquals(0, results.getResults().size());
+        updateMemberService.removeAdminMember(ADMIN, testUid);
+    }
+
+    @Test
+    public void memberAttributeResultsAsyncTest() {
+        CompletableFuture<MemberAttributeResults> results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, testUids);
+        assertNotNull(results);
+        HashSet<String> testUidsSet = new HashSet(testUids);
+        HashSet<String> testUhUuidsSet = new HashSet(testUhUuids);
+
+        for (MemberResult memberResult : results.join().getResults()) {
+            assertTrue(testUidsSet.contains(memberResult.getUid()));
+            assertTrue(testUhUuidsSet.contains(memberResult.getUhUuid()));
+        }
+
+        String testUid = testUids.get(0);
+        List<String> testList = new ArrayList<>();
+        testList.add(testUid);
+
+        // Should not contain any invalid uhIdentifiers.
+        List<String> uhIdentifiers = new ArrayList<>();
+        uhIdentifiers.add("bogus-user");
+        results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, uhIdentifiers);
+        assertNotNull(results.join().getResults());
+        assertTrue(results.join().getResults().isEmpty());
+
+        // Should throw AccessDeniedException if current user is not an admin or owner.
+        assertThrows(AccessDeniedException.class,
+                () -> memberAttributeService.getMemberAttributeResults("bogus-owner-admin", null));
+
+        // Should not return an empty array of subjects if current user is an owner but not an admin.
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
+        assertNotEquals(0, results.join().getResults().size());
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+
+        // Should not return an empty array if current user is an admin but not an owner.
+        updateMemberService.addAdminMember(ADMIN, testUid);
+        results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
+        assertNotEquals(0, results.join().getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
     }
 

@@ -17,9 +17,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
-import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @Service("memberAttributeService")
@@ -43,41 +43,6 @@ public class MemberAttributeService {
     private GroupingsService groupingsService;
 
     /**
-     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers.
-     * Returns an empty list if all uhIdentifiers are valid.
-     */
-    public List<String> invalidUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
-        logger.info(String.format("invalidUhIdentifiers; currentUser: %s; uhIdentifiers: %s;", currentUser,
-                uhIdentifiers));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
-            throw new AccessDeniedException();
-        }
-
-        return uhIdentifiers.parallelStream()
-                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a list of invalid uhIdentifiers given a list of uhIdentifiers asynchronously.
-     * Returns an empty list if all uhIdentifiers are valid.
-     */
-    @Async
-    public CompletableFuture<List<String>> invalidUhIdentifiersAsync(String currentUser, List<String> uhIdentifiers) {
-        logger.info(String.format("invalidUhIdentifiersAsync; currentUser: %s; uhIdentifiers: %s;", currentUser,
-                uhIdentifiers));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
-            throw new AccessDeniedException();
-        }
-
-        return CompletableFuture.supplyAsync(() ->
-            uhIdentifiers.parallelStream()
-                    .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
-                    .collect(Collectors.toList())
-        );
-    }
-
-    /**
      * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
      * or uhUuid passed through uhIdentifier. Passing an invalid uhIdentifier or current user will return a mapping
      * with null values.
@@ -95,21 +60,41 @@ public class MemberAttributeService {
      * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return an
      * empty array
      */
-    public List<Subject> getMembersAttributes(String currentUser, List<String> uhIdentifiers) {
-        logger.info(String.format("getMembersAttributes; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
+    public MemberAttributeResults getMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
+        logger.info(String.format("getMemberAttributeResults; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
         }
-
-        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
-
-        if (results.getResultCode().equals(FAILURE)) {
-            return new ArrayList<>();
+        List<String> invalidUhIdentifiers = uhIdentifiers.parallelStream()
+                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                .collect(Collectors.toList());
+        if (!invalidUhIdentifiers.isEmpty()) {
+            return new MemberAttributeResults(invalidUhIdentifiers);
         }
+        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
+        return new MemberAttributeResults(results);
+    }
 
-        List<Subject> subjects = results.getSubjects();
-
-        return subjects;
+    /**
+     * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
+     * or uhUuid passed through uhIdentifiers asynchronously. Passing a single invalid uhIdentifier or current user will return an
+     * empty array
+     */
+    @Async
+    public CompletableFuture<MemberAttributeResults> getMemberAttributeResultsAsync(String currentUser, List<String> uhIdentifiers) {
+        logger.info(String.format("getMemberAttributeResultsAsync; currentUser: %s; uhIdentifiers: %s;", currentUser,
+                uhIdentifiers));
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+        List<String> invalid = uhIdentifiers.parallelStream()
+                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                .collect(Collectors.toList());
+        if (!invalid.isEmpty()) {
+            return CompletableFuture.completedFuture(new MemberAttributeResults(invalid));
+        }
+        SubjectsResults results = grouperApiService.getSubjects(uhIdentifiers);
+        return CompletableFuture.completedFuture(new MemberAttributeResults(results));
     }
 
     /**
