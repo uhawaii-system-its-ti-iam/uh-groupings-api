@@ -94,49 +94,6 @@ public class EmailService {
         return new EmailResult(msg);
     }
 
-    public EmailResult sendStackTrace(String currentUser, String stackTrace) {
-        logger.info("Feedback Error email has been triggered.");
-
-        if (!subjectService.isValidIdentifier(currentUser)) {
-            throw new AccessDeniedException();
-        }
-
-        if (!isEnabled) {
-            logger.warn("Email service is not enabled. Set email.is.enabled property to true");
-            return new EmailResult();
-        }
-
-        String hostname = "Unknown Host";
-
-        try {
-            InetAddress ip = this.getLocalHost();
-            hostname = ip.getHostName();
-        } catch (UnknownHostException f) {
-            logger.error("Error", f);
-        }
-
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(recipient);
-        msg.setFrom(from);
-        String text = "";
-        String header =  "(" + environment + ") UH Groupings UI Error Response";
-        text += "Cause of Response: The UI threw an exception while making a request to the API. \n\n";
-        text += "Host Name: " + hostname + ".\n";
-        if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
-            text += "Recipient overridden to: " + recipient + "\n";
-        }
-        text += "----------------------------------------------------" + "\n\n";
-        text += "UI Stack Trace: \n\n" + stackTrace;
-        msg.setText(text);
-        msg.setSubject(header);
-        try {
-            javaMailSender.send(msg);
-        } catch (MailException ex) {
-            logger.error("Error", ex);
-        }
-        return new EmailResult(msg);
-    }
-
     public void sendWithStack(Exception e, String exceptionType) {
         logger.info("Feedback Error email has been triggered.");
         if (!isEnabled) {

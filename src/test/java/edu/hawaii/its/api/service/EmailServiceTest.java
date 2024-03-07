@@ -91,7 +91,6 @@ public class EmailServiceTest {
         doReturn(false).when(subjectService).isValidIdentifier(TEST_USERNAMES.get(0));
 
         assertThrows(AccessDeniedException.class, () -> emailService.sendFeedback(TEST_USERNAMES.get(0), feedback));
-        assertThrows(AccessDeniedException.class, () -> emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace"));
     }
 
     @Test
@@ -99,8 +98,6 @@ public class EmailServiceTest {
         emailService.setEnabled(false);
         assertFalse(emailService.isEnabled());
         emailService.sendFeedback(TEST_USERNAMES.get(0), feedback);
-        assertFalse(wasSent);
-        emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace");
         assertFalse(wasSent);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
         assertFalse(wasSent);
@@ -111,15 +108,11 @@ public class EmailServiceTest {
         emailService.setRecipient("its-iam-web-app-dev-help-l@lists.hawaii.edu");
         emailService.sendFeedback(TEST_USERNAMES.get(0), feedback);
         assertFalse(messageSent.getText().contains("Recipient overridden"));
-        emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace");
-        assertFalse(messageSent.getText().contains("Recipient overridden"));
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
         assertFalse(messageSent.getText().contains("Recipient overridden"));
 
         emailService.setRecipient("override@email.com");
         emailService.sendFeedback(TEST_USERNAMES.get(0), feedback);
-        assertTrue(messageSent.getText().contains("Recipient overridden"));
-        emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace");
         assertTrue(messageSent.getText().contains("Recipient overridden"));
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
         assertTrue(messageSent.getText().contains("Recipient overridden"));
@@ -158,8 +151,6 @@ public class EmailServiceTest {
 
         emailService.sendFeedback(TEST_USERNAMES.get(0), feedback);
         assertFalse(wasSent);
-        emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace");
-        assertFalse(wasSent);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
         assertFalse(wasSent);
     }
@@ -169,8 +160,6 @@ public class EmailServiceTest {
         doThrow(UnknownHostException.class).when(emailService).getLocalHost();
 
         emailService.sendFeedback(TEST_USERNAMES.get(0), feedback);
-        assertTrue(messageSent.getText().contains("Unknown Host"));
-        emailService.sendStackTrace(TEST_USERNAMES.get(0), "stackTrace");
         assertTrue(messageSent.getText().contains("Unknown Host"));
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
         assertTrue(messageSent.getText().contains("Unknown Host"));

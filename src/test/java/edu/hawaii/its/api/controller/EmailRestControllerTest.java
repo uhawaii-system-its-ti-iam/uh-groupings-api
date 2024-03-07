@@ -65,19 +65,4 @@ class EmailRestControllerTest {
 
         verify(emailService, times(1)).sendFeedback(eq(ADMIN), refEq(feedback));
     }
-
-    @Test
-    public void sendStackTraceTest() throws Exception {
-        String stackTrace = "stackTrace";
-        given(emailService.sendStackTrace(ADMIN, stackTrace)).willReturn(new EmailResult());
-
-        MvcResult mvcResult = mockMvc.perform(post(BASE_URL + "/send/stack-trace")
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.TEXT_PLAIN_VALUE)
-                        .content(stackTrace))
-                .andExpect(status().isOk()).andReturn();
-        assertNotNull(mvcResult);
-
-        verify(emailService, times(1)).sendStackTrace(ADMIN, stackTrace);
-    }
 }

@@ -3,7 +3,6 @@ package edu.hawaii.its.api.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,16 +35,5 @@ public class EmailRestController {
         return ResponseEntity
                 .ok()
                 .body(emailService.sendFeedback(currentUser, feedback));
-    }
-
-    @PostMapping(value = "/send/stack-trace", consumes = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
-    public ResponseEntity<EmailResult> sendStackTrace(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody String stackTrace) {
-        logger.info("Entered REST sendStackTrace...");
-        return ResponseEntity
-                .ok()
-                .body(emailService.sendStackTrace(currentUser, stackTrace));
     }
 }
