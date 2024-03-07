@@ -45,6 +45,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberService;
@@ -304,20 +306,30 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void invalidUhIdentifiersTest() throws Exception {
-        String url = API_BASE_URL + "members/invalid";
+    public void memberAttributesTest() throws Exception {
+        String url = API_BASE_URL + "members/" + testUids.get(0);
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
+    }
+
+    @Test
+    public void memberAttributeResultsTest() throws Exception {
+        String url = API_BASE_URL + "members";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), MemberAttributeResults.class));
     }
 
     @Test
-    public void invalidUhIdentifiersAsyncTest() throws Exception {
-        String url = API_BASE_URL + "members/invalid/async";
+    public void memberAttributeResultsAsyncTest() throws Exception {
+        String url = API_BASE_URL + "members/async";
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -338,28 +350,6 @@ public class TestGroupingsRestControllerv2_1 {
         } while (asyncJobResult.getStatus().equals("IN_PROGRESS"));
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 AsyncJobResult.class));
-    }
-
-    @Test
-    public void memberAttributesTest() throws Exception {
-        String url = API_BASE_URL + "members/" + testUids.get(0);
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
-    }
-
-    @Test
-    public void membersAttributesTest() throws Exception {
-        String url = API_BASE_URL + "members";
-        MvcResult mvcResult = mockMvc.perform(post(url)
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(testUids)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), List.class));
     }
 
     @Test
@@ -385,7 +375,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
-                List.class));
+                MembershipResults.class));
     }
 
     @Test

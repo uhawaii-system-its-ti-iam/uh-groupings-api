@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.wrapper.Group;
@@ -47,7 +48,7 @@ public class MembershipService {
      * Get a list of memberships pertaining to uid. A list of memberships is made up from the groups listings of
      * (basis + include) - exclude.
      */
-    public List<Membership> membershipResults(String currentUser, String uid) {
+    public MembershipResults membershipResults(String currentUser, String uid) {
         logger.info(String.format("membershipResults; currentUser: %s; uid: %s;", currentUser, uid));
 
         if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
@@ -72,7 +73,9 @@ public class MembershipService {
         List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
         List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
-        return createMemberships(membershipGroupings, optOutList);
+
+        List<Membership> memberships = createMemberships(membershipGroupings, optOutList);
+        return new MembershipResults(memberships);
     }
 
     private List<Membership> createMemberships(List<Group> membershipGroupings, List<String> optOutList) {
@@ -176,6 +179,6 @@ public class MembershipService {
      */
     public Integer numberOfMemberships(String currentUser, String uid) {
         logger.debug(String.format("numberOfMemberships; currentUser: %s; uid: %s;", currentUser, uid));
-        return membershipResults(currentUser, uid).size();
+        return membershipResults(currentUser, uid).getResults().size();
     }
 }

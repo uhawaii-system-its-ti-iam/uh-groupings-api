@@ -47,6 +47,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -369,43 +371,6 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void invalidUhIdentifiersTest() throws Exception {
-        List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("testiwta");
-        uhIdentifiers.add("testiwtb");
-        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/invalid")
-                        .header(CURRENT_USER, USERNAME)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(uhIdentifiers)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(validResult, notNullValue());
-
-        verify(memberAttributeService, times(1))
-                .invalidUhIdentifiers(USERNAME, uhIdentifiers);
-    }
-
-    @Test
-    public void invalidUhIdentifiersAsyncTest() throws Exception {
-        List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("testiwta");
-        uhIdentifiers.add("testiwtb");
-        CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
-        given(memberAttributeService.invalidUhIdentifiersAsync(USERNAME, uhIdentifiers))
-                .willReturn(completableFuture);
-        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/invalid/async")
-                        .header(CURRENT_USER, USERNAME)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(uhIdentifiers)))
-                .andExpect(status().isAccepted())
-                .andReturn();
-        assertThat(validResult, notNullValue());
-
-        verify(memberAttributeService, times(1))
-                .invalidUhIdentifiersAsync(USERNAME, uhIdentifiers);
-    }
-
-    @Test
     public void memberAttributesTest() throws Exception {
         MvcResult validResult = mockMvc.perform(get(API_BASE + "/members/i0-uuid")
                         .header(CURRENT_USER, "0o0-username"))
@@ -421,7 +386,7 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void membersAttributesTest() throws Exception {
+    public void memberAttributeResultsTest() throws Exception {
         List<String> members = new ArrayList<>();
         members.add("testiwta");
         members.add("testiwtb");
@@ -434,7 +399,27 @@ public class GroupingsRestControllerv2_1Test {
         assertThat(validResult, notNullValue());
 
         verify(memberAttributeService, times(1))
-                .getMembersAttributes(USERNAME, members);
+                .getMemberAttributeResults(USERNAME, members);
+    }
+
+    @Test
+    public void memberAttributeResultsAsyncTest() throws Exception {
+        List<String> members = new ArrayList<>();
+        members.add("testiwta");
+        members.add("testiwtb");
+        CompletableFuture<MemberAttributeResults> completableFuture = new CompletableFuture<>();
+        given(memberAttributeService.getMemberAttributeResultsAsync(USERNAME, members))
+                .willReturn(completableFuture);
+        MvcResult validResult = mockMvc.perform(post(API_BASE + "/members/async")
+                        .header(CURRENT_USER, USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        assertThat(validResult, notNullValue());
+
+        verify(memberAttributeService, times(1))
+                .getMemberAttributeResultsAsync(USERNAME, members);
     }
 
     @Test
@@ -463,7 +448,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void membershipResultsTest() throws Exception {
-        List<Membership> memberships = new ArrayList<>();
+        MembershipResults memberships = new MembershipResults();
         given(membershipService.membershipResults(ADMIN, "testiwta")).willReturn(memberships);
 
         mockMvc.perform(get(API_BASE + "/members/testiwta/memberships")
