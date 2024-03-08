@@ -43,19 +43,6 @@ public class MemberAttributeService {
     private GroupingsService groupingsService;
 
     /**
-     * Get a mapping of all user attributes (uid, composite name, last name, first name, uhUuid) pertaining to the uid
-     * or uhUuid passed through uhIdentifier. Passing an invalid uhIdentifier or current user will return a mapping
-     * with null values.
-     */
-    public Person getMemberAttributes(String currentUser, String uhIdentifier) {
-        logger.info(String.format("getMemberAttributes; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
-            throw new AccessDeniedException();
-        }
-        return subjectService.getPerson(uhIdentifier);
-    }
-
-    /**
      * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
      * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return an
      * empty array

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -95,47 +94,6 @@ public class TestMemberAttributeService {
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUid));
             assertFalse(memberService.isAdmin(testUid));
         });
-    }
-
-    @Test
-    public void memberAttributesTest() {
-        testUids.forEach(testUid -> {
-            Person person = memberAttributeService.getMemberAttributes(ADMIN, testUid);
-            assertNotNull(person);
-            assertEquals(testUid, person.getUsername());
-        });
-
-        String testUid = testUids.get(0);
-        List<String> testList = new ArrayList<>();
-        testList.add(testUid);
-        Person person;
-
-        // Should return an empty person if user identifier is invalid.
-        person = memberAttributeService.getMemberAttributes(ADMIN, "bogus-user");
-        assertNull(person.getName());
-        assertNull(person.getUhUuid());
-        assertNull(person.getUsername());
-
-        // Should throw AccessDeniedException if current user is not an admin or owner.
-        assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMemberAttributes("bogus-owner-admin", null));
-
-        // Should not return an empty person if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        person = memberAttributeService.getMemberAttributes(testUid, testUid);
-        assertNotNull(person.getName());
-        assertNotNull(person.getUhUuid());
-        assertNotNull(person.getUsername());
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-
-        // Should not return an empty person if current user is an admin but not an owner.
-        updateMemberService.addAdminMember(ADMIN, testUid);
-        person = memberAttributeService.getMemberAttributes(testUid, testUid);
-        assertNotNull(person.getName());
-        assertNotNull(person.getUhUuid());
-        assertNotNull(person.getUsername());
-        updateMemberService.removeAdminMember(ADMIN, testUid);
-
     }
 
     @Test
