@@ -227,19 +227,6 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get a member's attributes based off username or id number.
-     */
-    @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}")
-    @ResponseBody
-    public ResponseEntity<Person> memberAttributes(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                   @PathVariable String uhIdentifier) {
-        logger.info("Entered REST memberAttributes...");
-        return ResponseEntity
-                .ok()
-                .body(memberAttributeService.getMemberAttributes(currentUser, uhIdentifier));
-    }
-
-    /**
      * Get a list of members' attributes based off a list of uhIdentifiers.
      */
     @PostMapping(value = "/members")

@@ -371,21 +371,6 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void memberAttributesTest() throws Exception {
-        MvcResult validResult = mockMvc.perform(get(API_BASE + "/members/i0-uuid")
-                        .header(CURRENT_USER, "0o0-username"))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(validResult, notNullValue());
-
-        MvcResult invalidResult = mockMvc.perform(get(API_BASE + "/members/<h1>hello<h1>")
-                        .header(CURRENT_USER, "0o0-username"))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertThat(invalidResult, notNullValue());
-    }
-
-    @Test
     public void memberAttributeResultsTest() throws Exception {
         List<String> members = new ArrayList<>();
         members.add("testiwta");
