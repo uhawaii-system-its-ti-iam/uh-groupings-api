@@ -42,7 +42,7 @@ public class MemberAttributeServiceTest {
     }
 
     /**
-     * Helper - getMemberAttributesSubjectFound, getMemberAttributesSubjectNotFound, getMemberAttributesNotAdminNotOwner, getMemberAttributesAdminButNotOwner, getMemberAttributesOwnerButNotAdmin
+     * Helper - getMemberAttributeResultsSubjectFound, getMemberAttributeResultsSubjectNotFound, getMemberAttributeResultsNotAdminNotOwner, getMemberAttributeResultsAdminButNotOwner, getMemberAttributeResultsOwnerButNotAdmin
      */
     private WsHasMemberResults makeWsHasMemberResults(final String resultCode) {
         return new WsHasMemberResults() {

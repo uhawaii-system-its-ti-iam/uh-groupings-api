@@ -306,16 +306,6 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void memberAttributesTest() throws Exception {
-        String url = API_BASE_URL + "members/" + testUids.get(0);
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Person.class));
-    }
-
-    @Test
     public void memberAttributeResultsTest() throws Exception {
         String url = API_BASE_URL + "members";
         MvcResult mvcResult = mockMvc.perform(post(url)
