@@ -118,7 +118,7 @@ public class ErrorControllerAdviceTest {
 
         GroupingsServiceResultException gsr = new GroupingsServiceResultException();
         statusCode = errorControllerAdvice.handleGroupingsServiceResultException(gsr).getStatusCode().toString();
-        assertThat(statusCode, is("400 BAD_REQUEST"));
+        assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
         IllegalArgumentException iae = new IllegalArgumentException();
         statusCode = errorControllerAdvice.handleIllegalArgumentException(iae).getStatusCode().toString();

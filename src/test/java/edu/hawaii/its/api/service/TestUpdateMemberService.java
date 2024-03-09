@@ -58,7 +58,7 @@ public class TestUpdateMemberService {
     private MemberService memberService;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private UhIdentifierGenerator uhIdentifierGenerator;
@@ -72,9 +72,9 @@ public class TestUpdateMemberService {
         testUids = testGroupingMembers.getUids();
         testUhUuids = testGroupingMembers.getUhUuids();
 
-        grouperApiService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
-        grouperApiService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
-        grouperApiService.removeMembers(ADMIN, GROUPING_EXCLUDE, testUids);
+        grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
+        grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
+        grouperService.removeMembers(ADMIN, GROUPING_EXCLUDE, testUids);
     }
 
     @Test
@@ -443,11 +443,11 @@ public class TestUpdateMemberService {
     }
 
     private void addGroupMember(String groupPath, String uhIdentifier) {
-        grouperApiService.addMember(ADMIN, groupPath, uhIdentifier);
+        grouperService.addMember(ADMIN, groupPath, uhIdentifier);
     }
 
     private void removeGroupMember(String groupPath, String uhIdentifier) {
-        grouperApiService.removeMember(ADMIN, groupPath, uhIdentifier);
+        grouperService.removeMember(ADMIN, groupPath, uhIdentifier);
     }
 
 }

@@ -20,10 +20,10 @@ public class AnnouncementsService {
     private String ANNOUNCEMENTS_ATTR_DEF;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     public Announcements getAnnouncements() {
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+        FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
                 ANNOUNCEMENTS_ATTR_DEF,
                 ANNOUNCEMENTS_ATTR_NAME);
         return new Announcements(findAttributesResults);

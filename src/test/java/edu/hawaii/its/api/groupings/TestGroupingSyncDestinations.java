@@ -1,29 +1,27 @@
 package edu.hawaii.its.api.groupings;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.service.GrouperService;
+import edu.hawaii.its.api.wrapper.AttributesResult;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.service.GrouperApiService;
-import edu.hawaii.its.api.wrapper.AttributesResult;
-import edu.hawaii.its.api.wrapper.FindAttributesResults;
-import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("integrationTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -37,14 +35,14 @@ public class TestGroupingSyncDestinations {
     private String GROUPING;
 
     @Autowired
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Test
     public void constructor() {
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+        FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
                 SYNC_DESTINATIONS_CHECKBOXES,
                 SYNC_DESTINATIONS_LOCATION);
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(
+        GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 GROUPING);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
@@ -57,10 +55,10 @@ public class TestGroupingSyncDestinations {
 
     @Test
     public void success() {
-        FindAttributesResults findAttributesResults = grouperApiService.findAttributesResults(
+        FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
                 SYNC_DESTINATIONS_CHECKBOXES,
                 SYNC_DESTINATIONS_LOCATION);
-        GroupAttributeResults groupAttributeResults = grouperApiService.groupAttributeResults(
+        GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 GROUPING);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(

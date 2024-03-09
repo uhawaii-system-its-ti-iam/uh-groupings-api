@@ -28,7 +28,7 @@ public class JsonUtil {
         try {
             result = new ObjectMapper().readValue(json, type);
         } catch (Exception e) {
-            logger.error("Error: " + e);
+            logger.error("Error: " + type +"; " + e);
         }
         return result;
     }

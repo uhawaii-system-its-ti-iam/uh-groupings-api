@@ -39,7 +39,7 @@ public class MemberServiceTest {
     private String groupingPath = "grouping-path";
 
     @SpyBean
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     @Autowired
     private MemberService memberService;
@@ -57,7 +57,7 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(GROUPING_ADMINS, TEST_USERNAMES.get(0));
 
         assertTrue(memberService.isAdmin(TEST_USERNAMES.get(0)));
@@ -69,9 +69,9 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.OWNERS.value(), TEST_USERNAMES.get(0));
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(OWNERS_GROUP, TEST_USERNAMES.get(0));
 
         assertTrue(memberService.isOwner(groupingPath, TEST_USERNAMES.get(0)));
@@ -84,7 +84,7 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.INCLUDE.value(), TEST_USERNAMES.get(0));
 
         assertTrue(memberService.isInclude(groupingPath, TEST_USERNAMES.get(0)));
@@ -96,7 +96,7 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.EXCLUDE.value(), TEST_USERNAMES.get(0));
 
         assertTrue(memberService.isExclude(groupingPath, TEST_USERNAMES.get(0)));
@@ -108,7 +108,7 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath, TEST_USERNAMES.get(0));
 
         assertTrue(memberService.isMember(groupingPath, TEST_USERNAMES.get(0)));
@@ -120,7 +120,7 @@ public class MemberServiceTest {
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperApiService)
+        doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath, TEST_USERNAMES.get(0));
 
         assertFalse(memberService.isMember(groupingPath, TEST_USERNAMES.get(0)));

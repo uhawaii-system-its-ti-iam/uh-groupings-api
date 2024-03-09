@@ -31,7 +31,7 @@ class GroupingAssignmentServiceTest {
     private GroupingAssignmentService groupingAssignmentService;
 
     @MockBean
-    private GrouperApiService grouperApiService;
+    private GrouperService grouperService;
 
     private PropertyLocator propertyLocator;
     @BeforeAll
@@ -42,7 +42,7 @@ class GroupingAssignmentServiceTest {
     @Test
     public void construction() {
         assertNotNull(groupingAssignmentService);
-        assertNotNull(grouperApiService);
+        assertNotNull(grouperService);
     }
 
     //TODO: finish unit test in GROUPINGS-1540
