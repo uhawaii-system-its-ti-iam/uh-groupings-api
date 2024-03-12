@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @Service("memberAttributeService")

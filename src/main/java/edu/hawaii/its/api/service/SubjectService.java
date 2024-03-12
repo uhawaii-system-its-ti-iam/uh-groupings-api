@@ -23,6 +23,9 @@ public class SubjectService {
     @Autowired
     private GrouperService grouperService;
 
+    @Autowired
+    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
+
     public Person getPerson(String uhIdentifier) {
         Subject subject = getSubject(uhIdentifier);
         if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
@@ -33,6 +36,9 @@ public class SubjectService {
     }
 
     public boolean isValidIdentifier(String uhIdentifier) {
+        if (grouperService instanceof OotbGrouperApiService) {
+            return ootbGroupingPropertiesService.isValidOotbUhIdentifier(uhIdentifier);
+        }
         return isValidSubject(getSubject(uhIdentifier));
     }
 
@@ -65,10 +71,9 @@ public class SubjectService {
 
     private Subject getSubject(String uhIdentifier) {
         SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
-        if (subjectsResults == null) {
-            return new Subject();
-        }
+
         List<Subject> subjects = subjectsResults.getSubjects();
+
         if (subjects.size() >= 1) {
             return subjects.get(0);
         }
