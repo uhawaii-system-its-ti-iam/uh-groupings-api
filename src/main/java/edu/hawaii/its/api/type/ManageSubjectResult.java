@@ -1,6 +1,6 @@
 package edu.hawaii.its.api.type;
 
-public class ManagePersonResult {
+public class ManageSubjectResult {
     private String path;
     private String name;
     private boolean inInclude = false;

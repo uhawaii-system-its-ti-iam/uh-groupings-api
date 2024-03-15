@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.ManagePersonResult;
+import edu.hawaii.its.api.type.ManageSubjectResult;
 import edu.hawaii.its.api.type.MembershipResult;
 import edu.hawaii.its.api.wrapper.Group;
 
@@ -96,31 +96,31 @@ public class MembershipService {
     /**
      * Get a list of all groupings pertaining to uid (nonfiltered).
      */
-    public ManagePersonResults managePersonResults(String currentUser, String uid) {
-        logger.info(String.format("managePersonResults; currentUser: %s; uid: %s;", currentUser, uid));
+    public ManageSubjectResults manageSubjectResults(String currentUser, String uid) {
+        logger.info(String.format("manageSubjectResults; currentUser: %s; uid: %s;", currentUser, uid));
         if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
         }
-        ManagePersonResults managePersonResults = new ManagePersonResults();
+        ManageSubjectResults manageSubjectResults = new ManageSubjectResults();
         String uhUuid = subjectService.getValidUhUuid(uid);
         if (uhUuid.equals("")) {
-            return managePersonResults;
+            return manageSubjectResults;
         }
         List<String> groupPaths;
         try {
             groupPaths = groupingsService.allGroupPaths(uid);
         } catch (GcWebServiceError e) {
             logger.warn("membershipResults;" + e);
-            return managePersonResults;
+            return manageSubjectResults;
         }
 
         return createMembershipList(groupPaths);
     }
 
     /**
-     * Helper - membershipResults, managePersonResults
+     * Helper - membershipResults, manageSubjectResults
      */
-    private ManagePersonResults createMembershipList(List<String> groupPaths) {
+    private ManageSubjectResults createMembershipList(List<String> groupPaths) {
         Map<String, List<String>> pathMap = new HashMap<>();
 
         for (String pathToCheck : groupPaths) {
@@ -138,24 +138,24 @@ public class MembershipService {
 
         List<Group> groupingMemberships = groupPathService.getValidGroupings(new ArrayList<>(pathMap.keySet()));
 
-        List<ManagePersonResult> results = new ArrayList<>();
+        List<ManageSubjectResult> results = new ArrayList<>();
 
         for (Group group : groupingMemberships) {
             String groupingPath = group.getGroupPath();
             List<String> paths = pathMap.get(groupingPath);
-            ManagePersonResult managePersonResult = subgroups(paths);
-            managePersonResult.setPath(groupingPath);
-            managePersonResult.setName(nameGroupingPath(group.getGroupPath()));
-            results.add(managePersonResult);
+            ManageSubjectResult manageSubjectResult = subgroups(paths);
+            manageSubjectResult.setPath(groupingPath);
+            manageSubjectResult.setName(nameGroupingPath(group.getGroupPath()));
+            results.add(manageSubjectResult);
         }
-        return new ManagePersonResults(results);
+        return new ManageSubjectResults(results);
     }
 
     /**
-     * Helper - membershipResults, managePersonResults
+     * Helper - membershipResults, manageSubjectResults
      */
-    private ManagePersonResult subgroups(List<String> paths) {
-        ManagePersonResult membership = new ManagePersonResult();
+    private ManageSubjectResult subgroups(List<String> paths) {
+        ManageSubjectResult membership = new ManageSubjectResult();
         for (String path : paths) {
             if (path.endsWith(GroupType.BASIS.value())) {
                 membership.setInBasisAndInclude(true);

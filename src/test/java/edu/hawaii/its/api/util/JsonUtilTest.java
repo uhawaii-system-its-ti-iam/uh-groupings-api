@@ -14,18 +14,22 @@ import java.lang.reflect.Modifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.wrapper.Subject;
 
-import edu.hawaii.its.api.type.Person;
-
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 public class JsonUtilTest {
 
-    private static Person person0;
+    private static PropertyLocator propertyLocator;
+    private static Subject subject0;
     private final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
     @BeforeAll
     public static void beforeAll() {
-        person0 = new Person("name", "uhUuid", "username", "firstName", "lastName");
+        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
+        String json = propertyLocator.find("ws.subject.success.uid");
+        WsSubject wsSubject = JsonUtil.asObject(json, WsSubject.class);
+        subject0 = new Subject(wsSubject);
     }
 
     @BeforeEach
@@ -36,31 +40,28 @@ public class JsonUtilTest {
 
     @Test
     public void asJsonAsObject() {
-        String personJson = JsonUtil.asJson(person0);
-
-        Person person1 = JsonUtil.asObject(personJson, Person.class);
-
-        assertEquals(person0.getName(), person1.getName());
-        assertEquals(person0.getUhUuid(), person1.getUhUuid());
-        assertEquals(person0.getUsername(), person1.getUsername());
-        assertEquals(person0.getFirstName(), person1.getFirstName());
-        assertEquals(person0.getLastName(), person1.getLastName());
-        assertEquals(person0.getAttributes(), person1.getAttributes());
-        assertEquals(person0.getClass(), person1.getClass());
+        String subjectJson = JsonUtil.asJson(subject0);
+        Subject subject1 = JsonUtil.asObject(subjectJson, Subject.class);
+        assertEquals(subject0.getName(), subject1.getName());
+        assertEquals(subject0.getUhUuid(), subject1.getUhUuid());
+        assertEquals(subject0.getUid(), subject1.getUid());
+        assertEquals(subject0.getFirstName(), subject1.getFirstName());
+        assertEquals(subject0.getLastName(), subject1.getLastName());
+        assertEquals(subject0.getClass(), subject1.getClass());
         assertDoesNotThrow(() -> JsonUtil.asJson(mock(Object.class)));
         assertDoesNotThrow(() -> JsonUtil.asObject("", Object.class));
     }
 
     @Test
     public void prettyPrint() {
-        JsonUtil.prettyPrint(person0);
+        JsonUtil.prettyPrint(subject0);
         assertTrue(outStream.toString().contains("name"));
         assertDoesNotThrow(() -> JsonUtil.prettyPrint(mock(Object.class)));
     }
 
     @Test
     public void printJson() {
-        JsonUtil.printJson(person0);
+        JsonUtil.printJson(subject0);
         assertFalse(errStream.toString().trim().isEmpty());
         assertDoesNotThrow(() -> JsonUtil.printJson(mock(Object.class)));
     }

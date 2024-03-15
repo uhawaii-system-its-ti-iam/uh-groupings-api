@@ -47,7 +47,7 @@ import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberService;
@@ -56,7 +56,6 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.util.JsonUtil;
 
 @ActiveProfiles("integrationTest")
@@ -370,13 +369,13 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void managePersonResultsTest() throws Exception {
+    public void manageSubjectResultsTest() throws Exception {
         String url = API_BASE_URL + "members/" + testUids.get(0) + "/groupings";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ManagePersonResults.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), ManageSubjectResults.class));
     }
 
     @Test

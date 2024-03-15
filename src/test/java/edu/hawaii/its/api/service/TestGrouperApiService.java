@@ -203,7 +203,7 @@ public class TestGrouperApiService {
         HashSet<String> testUidsSet = new HashSet<>(testUids);
         HashSet<String> testUhUuidsSet = new HashSet<>(testUhUuids);
 
-        // Usernames
+        // Uids
         SubjectsResults subjectsResults = grouperService.getSubjects(testUids);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
@@ -232,11 +232,11 @@ public class TestGrouperApiService {
             assertTrue(testUhUuidsSet.contains(subject.getUhUuid()));
         }
 
-        // Numbers and Usernames
-        List<String> numbersAndUsernames = new ArrayList<>();
-        numbersAndUsernames.add(testUhUuids.get(0));
-        numbersAndUsernames.add(testUids.get(1));
-        subjectsResults = grouperService.getSubjects(numbersAndUsernames);
+        // Numbers and Uids
+        List<String> numbersAndUids = new ArrayList<>();
+        numbersAndUids.add(testUhUuids.get(0));
+        numbersAndUids.add(testUids.get(1));
+        subjectsResults = grouperService.getSubjects(numbersAndUids);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
         subjects = subjectsResults.getSubjects();
@@ -251,8 +251,8 @@ public class TestGrouperApiService {
         }
 
         // With invalid identifier
-        numbersAndUsernames.add("invalid-identifier");
-        subjectsResults = grouperService.getSubjects(numbersAndUsernames);
+        numbersAndUids.add("invalid-identifier");
+        subjectsResults = grouperService.getSubjects(numbersAndUids);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
         subjects = subjectsResults.getSubjects();
@@ -396,7 +396,7 @@ public class TestGrouperApiService {
 
     @Test
     public void addMemberTest() {
-        // With uh usernames.
+        // With uh uids.
         AddMemberResult addMemberResult = grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUids.get(0)));
@@ -423,18 +423,18 @@ public class TestGrouperApiService {
 
     @Test
     public void addRemoveMembers() {
-        // With usernames.
+        // With uids.
         AddMembersResults addMembersResults = grouperService.addMembers(ADMIN, GROUPING_INCLUDE, testUids);
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
-        for (String username : testUids) {
-            assertTrue(memberService.isMember(GROUPING_INCLUDE, username));
+        for (String uid : testUids) {
+            assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
         }
         RemoveMembersResults removeMembersResults = grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
         assertNotNull(removeMembersResults);
         assertEquals("SUCCESS", removeMembersResults.getResultCode());
-        for (String username : testUids) {
-            assertFalse(memberService.isMember(GROUPING_INCLUDE, username));
+        for (String uid : testUids) {
+            assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
         }
 
         // With numbers.
@@ -465,7 +465,7 @@ public class TestGrouperApiService {
 
     @Test
     public void removeMember() {
-        // With uh usernames.
+        // With uh uids.
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
         RemoveMemberResult removeMemberResult =

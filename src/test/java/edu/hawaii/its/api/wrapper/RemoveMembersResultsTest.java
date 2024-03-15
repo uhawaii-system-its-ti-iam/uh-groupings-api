@@ -52,7 +52,7 @@ public class RemoveMembersResultsTest {
         assertEquals(5, removeMembersResults.getResults().size());
     }
 
-    public List<String> getTestUsernames() {
+    public List<String> getTestUids() {
         String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
         return new ArrayList<>(Arrays.asList(array));
     }

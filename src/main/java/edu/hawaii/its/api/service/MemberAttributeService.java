@@ -84,7 +84,7 @@ public class MemberAttributeService {
     }
 
     /**
-     * Get a list of GroupPaths the user owns, by username or uhUuid.
+     * Get a list of GroupPaths the user owns, by uid or uhUuid.
      */
     public GroupingPaths getOwnedGroupings(String currentUser, String uhIdentifier) {
         logger.info(String.format("getOwnedGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));
@@ -100,7 +100,7 @@ public class MemberAttributeService {
     }
 
     /**
-     * Get the number of groupings a user owns, by username or uhUuid.
+     * Get the number of groupings a user owns, by uid or uhUuid.
      */
     public Integer numberOfGroupings(String currentUser, String uhIdentifier) {
         logger.debug(String.format("numberOfGroupings; currentUser: %s; uhIdentifier: %s;", currentUser, uhIdentifier));

@@ -9,19 +9,19 @@ public final class OptRequest {
     private final Boolean optValue;
     private final String optId;
     private final PrivilegeType privilegeType;
-    private final String username;
+    private final String uid;
 
     private OptRequest(OptType optType,
             GroupType groupType,
             Boolean optValue,
             String groupNameRoot,
-            String username,
+            String uid,
             PrivilegeType privilegeType) {
         this.optId = optType.value();
         this.groupType = groupType;
         this.optValue = optValue;
         this.groupNameRoot = groupNameRoot;
-        this.username = username;
+        this.uid = uid;
         this.privilegeType = privilegeType;
     }
 
@@ -45,13 +45,13 @@ public final class OptRequest {
         return privilegeType;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUid() {
+        return uid;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(optId, optValue, groupNameRoot, privilegeType, username);
+        return Objects.hash(optId, optValue, groupNameRoot, privilegeType, uid);
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class OptRequest {
                 && Objects.equals(optValue, other.optValue)
                 && Objects.equals(groupNameRoot, other.groupNameRoot)
                 && Objects.equals(privilegeType, other.privilegeType)
-                && Objects.equals(username, other.username);
+                && Objects.equals(uid, other.uid);
     }
 
     public static class Builder {
@@ -77,7 +77,7 @@ public final class OptRequest {
         private OptType optType;
         private Boolean optValue;
         private PrivilegeType privilegeType;
-        private String username;
+        private String uid;
 
         public Builder withOptType(OptType optType) {
             this.optType = optType;
@@ -99,8 +99,8 @@ public final class OptRequest {
             return this;
         }
 
-        public Builder withUsername(String username) {
-            this.username = username;
+        public Builder withUid(String uid) {
+            this.uid = uid;
             return this;
         }
 
@@ -108,7 +108,7 @@ public final class OptRequest {
             Objects.requireNonNull(optType, "optType cannot be null.");
             Objects.requireNonNull(optValue, "optValue cannot be null.");
             Objects.requireNonNull(groupNameRoot, "groupNameRoot cannot be null.");
-            Objects.requireNonNull(username, "username cannot be null.");
+            Objects.requireNonNull(uid, "uid cannot be null.");
             Objects.requireNonNull(privilegeType, "privilege cannot be null.");
 
             if (privilegeType.inclusionType() == optType.inclusionType()) {
@@ -118,7 +118,7 @@ public final class OptRequest {
                 groupType = GroupType.EXCLUDE;
             }
 
-            return new OptRequest(optType, groupType, optValue, groupNameRoot, username, privilegeType);
+            return new OptRequest(optType, groupType, optValue, groupNameRoot, uid, privilegeType);
         }
     }
 }
