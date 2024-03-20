@@ -38,6 +38,7 @@ import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.groupings.ManagePersonResults;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -50,10 +51,8 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 
@@ -293,8 +292,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<List<Membership>> managePersonResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                                @PathVariable String uhIdentifier) {
+    public ResponseEntity<ManagePersonResults> managePersonResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                   @PathVariable String uhIdentifier) {
         logger.info("Entered REST managePersonResults...");
         return ResponseEntity
                 .ok()
