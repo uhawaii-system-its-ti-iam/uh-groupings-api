@@ -8,20 +8,15 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.type.MembershipResult;
 
 public class MembershipResultsTest {
 
     @Test
     public void testMembershipResultsConstructor() {
-        List<Membership> memberships = new ArrayList<>();
-        Group group = new Group("tmp:testiwta:testiwta-aux");
-        Person person = new Person("testiwta-name", "testiwta-uuid", "testiwta-username");
-        group.addMember(person);
-        Membership membership = new Membership(person, group);
-        memberships.add(membership);
+        List<MembershipResult> memberships = new ArrayList<>();
+        MembershipResult membershipResult = new MembershipResult();
+        memberships.add(membershipResult);
 
         MembershipResults membershipResults = new MembershipResults(memberships);
         assertNotNull(membershipResults);
