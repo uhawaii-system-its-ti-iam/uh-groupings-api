@@ -6,6 +6,8 @@ import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
+import edu.hawaii.its.api.wrapper.RemoveMemberResult;
+import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +16,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +44,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testGetGroupsResults() {
+    public void testGetGroupsResults() {
         // Arrange
         String uhIdentifier = "25555555";
         GetGroupsResults expectedResults = new GetGroupsResults();
@@ -59,7 +58,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testGetMembersResult() {
+    public void testGetMembersResult() {
         // Setup
         String currentUser = "testiwta";
         List<String> groupPath = new ArrayList<>(Arrays.asList("group-0-1", "group-0-2", "group-0-3"));
@@ -79,7 +78,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testFindGroupsResults() {
+    public void testFindGroupsResults() {
         // Arrange
         String groupPath = "group-0-1";
         FindGroupsResults expectedResults = new FindGroupsResults();
@@ -92,7 +91,7 @@ public class OotbGrouperApiServiceTest {
         assertEquals(expectedResults, actualResults);
     }
     @Test
-    void testGroupSaveResults() {
+    public void testGroupSaveResults() {
         // Arrange
         String groupingPath = "group-0-1";
         String description = "Groupings group";
@@ -108,7 +107,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testAssignAttributesResults() {
+    public void testAssignAttributesResults() {
         // Setup
         String currentUser = "testiwta";
         String assignType = "group";
@@ -128,18 +127,78 @@ public class OotbGrouperApiServiceTest {
 
     // Test for validating UH identifier
     @Test
-    void testGetSubjects() {
-        // Setup
-        String uhIdentifier = "25555555";
-        SubjectsResults expectedResults = new SubjectsResults();
-        when(ootbGroupingPropertiesService.getSubjectsResults()).thenReturn(expectedResults);
+    public void testGetSubjectsSingle() {
+        // Set up
+        String uhIdentifier = "uhId1";
+        SubjectsResults mockSubjectsResults = mock(SubjectsResults.class);
+
+        when(ootbGroupingPropertiesService.getSubjectsResults()).thenReturn(mockSubjectsResults);
 
         // Execution
-        SubjectsResults actualResults = grouperService.getSubjects(uhIdentifier);
+        SubjectsResults results = grouperService.getSubjects(uhIdentifier);
 
-        // Verification
-        assertEquals(expectedResults, actualResults);
-        verify(ootbGroupingPropertiesService).getSubjectsResults();
+        // Verifications
+        assertNotNull(results);
+        verify(mockSubjectsResults).getSubjectsAfterAssignSubject(uhIdentifier);
+
+    }
+    @Test
+    public void testGetSubjectsMultiple() {
+        // Set up
+        List<String> uhIdentifiers = Arrays.asList("uhId1", "uhId2");
+        SubjectsResults mockSubjectsResults = mock(SubjectsResults.class);
+        when(ootbGroupingPropertiesService.getSubjectsResults()).thenReturn(mockSubjectsResults);
+
+        // Execution
+        SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
+
+        // Verifications
+        assertNotNull(results);
+        verify(mockSubjectsResults).getSubjectsAfterAssignSubjects(uhIdentifiers);
+
+    }
+
+    @Test
+    public void testRemoveMember() {
+        // Set up
+        String currentUser = "user1";
+        String groupPath = "group-path-0";
+        String uhIdentifier = "uhId1";
+        RemoveMemberResult mockRemoveMemberResult = new RemoveMemberResult(); // Assume this is a valid class
+        GetMembersResults mockMembers = mock(GetMembersResults.class);
+
+        RemoveMembersResults mockRemoveMembersResults = mock(RemoveMembersResults.class);
+        when(mockRemoveMembersResults.getResults()).thenReturn(Collections.singletonList(mockRemoveMemberResult));
+        when(ootbGroupingPropertiesService.getRemoveMembersResults()).thenReturn(mockRemoveMembersResults);
+        when(ootbGroupingPropertiesService.getMembersResults()).thenReturn(mockMembers);
+
+        // Execution
+        RemoveMemberResult result = grouperService.removeMember(currentUser, groupPath, uhIdentifier);
+
+        // Verifications
+        assertNotNull(result);
+        verify(mockMembers).removeMember(groupPath, uhIdentifier);
+
+    }
+
+    @Test
+    public void testRemoveMembers() {
+        // Set up
+        String currentUser = "user1";
+        String groupPath = "groupPath2";
+        List<String> uhIdentifiers = Arrays.asList("uhId1", "uhId2");
+        RemoveMembersResults mockRemoveMembersResults = new RemoveMembersResults(); // Assume this is a valid class
+        GetMembersResults mockMembers = mock(GetMembersResults.class);
+
+        when(ootbGroupingPropertiesService.getRemoveMembersResults()).thenReturn(mockRemoveMembersResults);
+        when(ootbGroupingPropertiesService.getMembersResults()).thenReturn(mockMembers);
+
+        // Execution
+        RemoveMembersResults results = grouperService.removeMembers(currentUser, groupPath, uhIdentifiers);
+
+        // Verifications
+        assertNotNull(results);
+        verify(mockMembers).removeMembers(groupPath, uhIdentifiers);
     }
 
 }
