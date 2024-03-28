@@ -49,6 +49,7 @@ import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.groupings.ManagePersonResults;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -61,7 +62,6 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.Membership;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.Person;
@@ -446,8 +446,8 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void managePersonResultsTest() throws Exception {
-        List<Membership> results = new ArrayList<>();
-        given(membershipService.managePersonResults(ADMIN, "testiwta")).willReturn(results);
+        ManagePersonResults managePersonResults = new ManagePersonResults();
+        given(membershipService.managePersonResults(ADMIN, "testiwta")).willReturn(managePersonResults);
 
         mockMvc.perform(get(API_BASE + "/members/testiwta/groupings")
                         .header(CURRENT_USER, ADMIN))

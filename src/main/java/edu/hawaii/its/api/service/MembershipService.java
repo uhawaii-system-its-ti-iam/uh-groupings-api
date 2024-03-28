@@ -23,8 +23,10 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.groupings.ManagePersonResults;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.Membership;
+import edu.hawaii.its.api.type.ManagePersonResult;
+import edu.hawaii.its.api.type.MembershipResult;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -36,7 +38,7 @@ public class MembershipService {
 
     public static final Log logger = LogFactory.getLog(MembershipService.class);
 
-    @Value("{groupings.api.curated}")
+    @Value("${groupings.api.curated}")
     private String CURATED;
 
     @Autowired
@@ -95,26 +97,26 @@ public class MembershipService {
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
         List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
 
-        List<Membership> memberships = createMemberships(membershipGroupings, optOutList);
+        List<MembershipResult> memberships = createMemberships(membershipGroupings, optOutList);
         return new MembershipResults(memberships);
     }
 
-    private List<Membership> createMemberships(List<Group> membershipGroupings, List<String> optOutList) {
-        List<Membership> memberships = new ArrayList<>();
+    private List<MembershipResult> createMemberships(List<Group> membershipGroupings, List<String> optOutList) {
+        List<MembershipResult> memberships = new ArrayList<>();
         for (Group grouping : membershipGroupings) {
             GroupAttributeResults groupAttributeResults =
                     grouperApiService.groupAttributeResult(grouping.getGroupPath());
-            Membership membership = new Membership();
-            membership.setDescription(grouping.getDescription());
-            membership.setPath(grouping.getGroupPath());
-            membership.setName(nameGroupingPath(grouping.getGroupPath()));
+            MembershipResult membershipResult = new MembershipResult();
+            membershipResult.setDescription(grouping.getDescription());
+            membershipResult.setPath(grouping.getGroupPath());
+            membershipResult.setName(nameGroupingPath(grouping.getGroupPath()));
             for (int i = 0; i < groupAttributeResults.getGroupAttributes().size(); i++) {
                 if (groupAttributeResults.getGroupAttributes().get(i).getAttributeName().endsWith("curated")) {
-                    membership.setName(grouping.getGroupPath());
+                    membershipResult.setName(grouping.getGroupPath());
                 }
             }
-            membership.setOptOutEnabled(optOutList.contains(grouping.getGroupPath()));
-            memberships.add(membership);
+            membershipResult.setOptOutEnabled(optOutList.contains(grouping.getGroupPath()));
+            memberships.add(membershipResult);
         }
         return memberships;
     }
@@ -122,34 +124,31 @@ public class MembershipService {
     /**
      * Get a list of all groupings pertaining to uid (nonfiltered).
      */
-    public List<Membership> managePersonResults(String currentUser, String uid) {
+    public ManagePersonResults managePersonResults(String currentUser, String uid) {
         logger.info(String.format("managePersonResults; currentUser: %s; uid: %s;", currentUser, uid));
         if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
         }
-        List<Membership> memberships = new ArrayList<>();
+        ManagePersonResults managePersonResults = new ManagePersonResults();
         String uhUuid = subjectService.getValidUhUuid(uid);
         if (uhUuid.equals("")) {
-            return memberships;
+            return managePersonResults;
         }
         List<String> groupPaths;
-        List<String> optOutList;
         try {
             groupPaths = groupingsService.allGroupPaths(uid);
-            optOutList = groupingsService.optOutEnabledGroupingPaths();
         } catch (GcWebServiceError e) {
             logger.warn("membershipResults;" + e);
-            return memberships;
+            return managePersonResults;
         }
 
-        return createMembershipList(groupPaths, optOutList, memberships);
+        return createMembershipList(groupPaths);
     }
 
     /**
      * Helper - membershipResults, managePersonResults
      */
-    private List<Membership> createMembershipList(List<String> groupPaths, List<String> optOutList,
-            List<Membership> memberships) {
+    private ManagePersonResults createMembershipList(List<String> groupPaths) {
         Map<String, List<String>> pathMap = new HashMap<>();
 
         for (String pathToCheck : groupPaths) {
@@ -167,27 +166,27 @@ public class MembershipService {
 
         List<Group> groupingMemberships = groupPathService.getValidGroupings(new ArrayList<>(pathMap.keySet()));
 
+        List<ManagePersonResult> results = new ArrayList<>();
+
         for (Group group : groupingMemberships) {
             String groupingPath = group.getGroupPath();
             List<String> paths = pathMap.get(groupingPath);
-            Membership membership = subgroups(paths);
-            membership.setPath(groupingPath);
-            membership.setOptOutEnabled(optOutList.contains(groupingPath));
-            membership.setName(nameGroupingPath(groupingPath));
-            membership.setDescription(group.getDescription());
-            memberships.add(membership);
+            ManagePersonResult managePersonResult = subgroups(paths);
+            managePersonResult.setPath(groupingPath);
+            managePersonResult.setName(nameGroupingPath(group.getGroupPath()));
+            results.add(managePersonResult);
         }
-        return memberships;
+        return new ManagePersonResults(results);
     }
 
     /**
      * Helper - membershipResults, managePersonResults
      */
-    private Membership subgroups(List<String> paths) {
-        Membership membership = new Membership();
+    private ManagePersonResult subgroups(List<String> paths) {
+        ManagePersonResult membership = new ManagePersonResult();
         for (String path : paths) {
             if (path.endsWith(GroupType.BASIS.value())) {
-                membership.setInBasis(true);
+                membership.setInBasisAndInclude(true);
             }
             if (path.endsWith(GroupType.INCLUDE.value())) {
                 membership.setInInclude(true);

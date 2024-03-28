@@ -1,22 +1,21 @@
 package edu.hawaii.its.api.groupings;
 
+import edu.hawaii.its.api.type.ManagePersonResult;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.hawaii.its.api.type.MembershipResult;
-
-public class MembershipResults implements MemberResults<MembershipResult> {
+public class ManagePersonResults implements MemberResults<ManagePersonResult> {
     private String resultCode;
-    private List<MembershipResult> results;
+    private List<ManagePersonResult> results;
 
-    public MembershipResults() {
+    public ManagePersonResults() {
         setResults(new ArrayList<>());
         setResultCode("FAILURE");
     }
 
-    public MembershipResults(List<MembershipResult> results) {
+    public ManagePersonResults(List<ManagePersonResult> results) {
         setResults(results);
-        setResultCode(resultCode);
     }
 
     public String getResultCode() {
@@ -24,7 +23,7 @@ public class MembershipResults implements MemberResults<MembershipResult> {
     }
 
     @Override
-    public List<MembershipResult> getResults() {
+    public List<ManagePersonResult> getResults() {
         return results;
     }
 
@@ -32,7 +31,7 @@ public class MembershipResults implements MemberResults<MembershipResult> {
         this.resultCode = resultCode;
     }
 
-    private void setResults(List<MembershipResult> results) {
+    private void setResults(List<ManagePersonResult> results) {
         this.results = results;
         setResultCode("SUCCESS");
     }

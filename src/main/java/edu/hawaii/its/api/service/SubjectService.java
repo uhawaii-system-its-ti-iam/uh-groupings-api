@@ -69,9 +69,10 @@ public class SubjectService {
 
     private Subject getSubject(String uhIdentifier) {
         SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
-
+        if (subjectsResults == null) {
+            return new Subject();
+        }
         List<Subject> subjects = subjectsResults.getSubjects();
-
         if (subjects.size() >= 1) {
             return subjects.get(0);
         }

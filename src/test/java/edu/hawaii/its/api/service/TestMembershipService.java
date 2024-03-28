@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.type.ManagePersonResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.type.Membership;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -125,27 +124,27 @@ public class TestMembershipService {
 
     @Test
     public void managePersonResultsTest() {
-        List<Membership> memberships;
+        ManagePersonResults managePersonResults;
 
         // Should not be a member.
-        memberships = membershipService.managePersonResults(ADMIN, testUids.get(0));
-        assertTrue(memberships.stream()
-                .noneMatch(membership -> membership.getPath().equals(GROUPING) && !membership.isInBasis()));
+        managePersonResults = membershipService.managePersonResults(ADMIN, testUids.get(0));
+        assertTrue(managePersonResults.getResults().stream()
+                .noneMatch(membership -> membership.getPath().equals(GROUPING) && !membership.isInBasisAndInclude()));
 
         // Should be a member after added.
         grouperService.addMember(ADMIN, GROUPING_OWNERS, testUids.get(0));
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         grouperService.addMember(ADMIN, GROUPING_EXCLUDE, testUids.get(0));
         grouperService.addMember(ADMIN, GROUPING_BASIS, testUids.get(0));
-        memberships = membershipService.managePersonResults(ADMIN, testUids.get(0));
-        Membership membership = memberships.stream()
+        managePersonResults = membershipService.managePersonResults(ADMIN, testUids.get(0));
+        ManagePersonResult managePersonResult = managePersonResults.getResults().stream()
                 .filter(m -> m.getPath().equals(GROUPING)).findAny().orElse(null);
-        assertNotNull(membership);
-        assertEquals(GROUPING, membership.getPath());
-        assertTrue(membership.isInExclude());
-        assertTrue(membership.isInBasis());
-        assertTrue(membership.isInInclude());
-        assertTrue(membership.isInOwner());
+        assertNotNull(managePersonResult);
+        assertEquals(GROUPING, managePersonResult.getPath());
+        assertTrue(managePersonResult.isInExclude());
+        assertTrue(managePersonResult.isInBasisAndInclude());
+        assertTrue(managePersonResult.isInInclude());
+        assertTrue(managePersonResult.isInOwner());
 
         // Clean up.
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUids.get(0));
@@ -195,8 +194,8 @@ public class TestMembershipService {
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should return and empty list if uid passed is bogus.
-        memberships = membershipService.managePersonResults(ADMIN, "bogus-user");
-        assertTrue(memberships.isEmpty());
+        managePersonResults = membershipService.managePersonResults(ADMIN, "bogus-user");
+        assertTrue(managePersonResults.getResults().isEmpty());
     }
 
     @Test
@@ -220,30 +219,6 @@ public class TestMembershipService {
         assertEquals(membershipService.numberOfMemberships(ADMIN, testUidList.get(0)), results);
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
         updateMemberService.removeExcludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
-    }
-
-    /**
-     * Helper - getMembershipResultsTest()
-     * Create a sublist which contains all memberships whose path contains the currentUsers uh username (ADMIN) and who is not in basis.
-     */
-    private List<Membership> getMembershipsForCurrentUser(List<Membership> memberships) {
-        return memberships
-                .stream().filter(membership -> membership.getPath().equals(GROUPING))
-                .collect(Collectors.toList())
-                .stream().filter(membership -> !membership.isInBasis()).collect(Collectors.toList());
-    }
-
-    /**
-     * Helper - updateLastModifiedTimestampTest
-     * Get a random LocalDateTime between start and end.
-     */
-    private static LocalDateTime getRandomLocalDateTimeBetween(LocalDateTime start, LocalDateTime end) {
-        return LocalDateTime.of(
-                getRandomNumberBetween(start.getYear(), end.getYear()),
-                getRandomNumberBetween(start.getMonthValue(), end.getMonthValue()),
-                getRandomNumberBetween(start.getDayOfMonth(), end.getDayOfMonth()),
-                getRandomNumberBetween(start.getHour(), end.getHour()),
-                getRandomNumberBetween(start.getMinute(), end.getMinute()));
     }
 
     /**

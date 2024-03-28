@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -27,8 +26,8 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MemberResult;
-import edu.hawaii.its.api.type.Membership;
-import edu.hawaii.its.api.type.Person;
+import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -181,11 +180,11 @@ public class TestMemberAttributeService {
         // Groupings owned by current admin should complement
         // the list of memberships that the current admin is in.
         GroupingPaths groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
-        List<Membership> results = membershipService.managePersonResults(ADMIN, ADMIN);
+        ManagePersonResults managePersonResults = membershipService.managePersonResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.getGroupingPaths().forEach(groupingPath -> {
             assertTrue(
-                    results.stream()
+                    managePersonResults.getResults().stream()
                             .anyMatch(membership -> membership
                                     .getPath().equals(groupingPath.getPath())));
         });
