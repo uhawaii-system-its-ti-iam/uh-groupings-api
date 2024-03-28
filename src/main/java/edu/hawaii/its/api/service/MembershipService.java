@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
@@ -26,6 +28,8 @@ import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.ManagePersonResult;
 import edu.hawaii.its.api.type.MembershipResult;
 import edu.hawaii.its.api.wrapper.Group;
+import edu.hawaii.its.api.wrapper.GroupAttribute;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -34,11 +38,17 @@ public class MembershipService {
 
     public static final Log logger = LogFactory.getLog(MembershipService.class);
 
+    @Value("${groupings.api.curated}")
+    private String CURATED;
+
     @Autowired
     private SubjectService subjectService;
 
     @Autowired
     private GroupingsService groupingsService;
+
+    @Autowired
+    private GrouperApiService grouperApiService;
 
     @Autowired
     private GroupPathService groupPathService;
@@ -71,6 +81,17 @@ public class MembershipService {
         // The disjoint of basis plus include and exclude: (Basis + Include) - Exclude
         List<String> groupingMembershipPaths = disjoint(parentGroupingPaths(basisIncludeExcludePaths),
                 parentGroupingPaths(excludePaths));
+        // A list of all group paths, in which the uhIdentifier is listed (including curated groupings), so we can find the intersection with curated groupings
+        List<String> allGroupPaths = groupingsService.allGroupPaths(uid);
+        // The list of all curated groupings
+        List<String> curatedGroupings =
+                grouperApiService.groupAttributeResults(CURATED)
+                        .getGroupAttributes().stream().map(
+                                GroupAttribute::getGroupPath)
+                        .collect(Collectors.toList());
+        // Intersect the two lists and add to our original list of groupingMembershipPaths
+        allGroupPaths.retainAll(curatedGroupings);
+        groupingMembershipPaths.addAll(allGroupPaths);
         // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
         List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
@@ -83,10 +104,17 @@ public class MembershipService {
     private List<MembershipResult> createMemberships(List<Group> membershipGroupings, List<String> optOutList) {
         List<MembershipResult> memberships = new ArrayList<>();
         for (Group grouping : membershipGroupings) {
+            GroupAttributeResults groupAttributeResults =
+                    grouperApiService.groupAttributeResult(grouping.getGroupPath());
             MembershipResult membershipResult = new MembershipResult();
             membershipResult.setDescription(grouping.getDescription());
             membershipResult.setPath(grouping.getGroupPath());
             membershipResult.setName(nameGroupingPath(grouping.getGroupPath()));
+            for (int i = 0; i < groupAttributeResults.getGroupAttributes().size(); i++) {
+                if (groupAttributeResults.getGroupAttributes().get(i).getAttributeName().endsWith("curated")) {
+                    membershipResult.setName(grouping.getGroupPath());
+                }
+            }
             membershipResult.setOptOutEnabled(optOutList.contains(grouping.getGroupPath()));
             memberships.add(membershipResult);
         }
