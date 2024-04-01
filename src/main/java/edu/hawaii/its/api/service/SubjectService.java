@@ -5,8 +5,6 @@ package edu.hawaii.its.api.service;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,8 +22,6 @@ public class SubjectService {
 
     @Autowired
     private GrouperService grouperService;
-
-    private static final Log logger = LogFactory.getLog(SubjectService.class);
 
     public Person getPerson(String uhIdentifier) {
         Subject subject = getSubject(uhIdentifier);

@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
@@ -19,6 +20,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesRe
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class OotbGrouperApiService implements GrouperService {
 
@@ -75,6 +77,9 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public SubjectsResults getSubjects(String uhIdentifier) {
         SubjectsResults subjectsResults = ootbGroupingPropertiesService.getSubjectsResults();
+
+        subjectsResults.getSubjectsAfterAssignSubject(uhIdentifier);
+
         return subjectsResults;
     }
 
@@ -83,6 +88,9 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
         SubjectsResults subjectsResults = ootbGroupingPropertiesService.getSubjectsResults();
+
+        subjectsResults.getSubjectsAfterAssignSubjects(uhIdentifiers);
+
         return subjectsResults;
     }
 
@@ -164,7 +172,8 @@ public class OotbGrouperApiService implements GrouperService {
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
-        return ootbGroupingPropertiesService.getMembersResults().getMembersResults().get(0);
+        GetMembersResults getMembersResults = ootbGroupingPropertiesService.getMembersResults();
+        return getMembersResults.getMembersByGroupPath(groupPath);
     }
 
     /**
@@ -212,6 +221,11 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
         RemoveMemberResult removeMemberResult = ootbGroupingPropertiesService.getRemoveMembersResults().getResults().get(0);
+        GetMembersResults members = ootbGroupingPropertiesService.getMembersResults();
+
+        members.removeMember(groupPath, uhIdentifier);
+        removeMemberResult.updateRemoveResults(groupPath, uhIdentifier);
+
         return removeMemberResult;
     }
 
@@ -220,6 +234,9 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         RemoveMembersResults removeMembersResults = ootbGroupingPropertiesService.getRemoveMembersResults();
+        GetMembersResults members = ootbGroupingPropertiesService.getMembersResults();
+
+        members.removeMembers(groupPath, uhIdentifiers);
         return removeMembersResults;
     }
 
