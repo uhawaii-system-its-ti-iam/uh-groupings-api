@@ -2,7 +2,6 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import edu.hawaii.its.api.type.GroupType;
 
@@ -63,5 +62,10 @@ public class GetMembersResult extends Results {
             subjects.add(new Subject(wsSubject));
         }
         return subjects;
+    }
+
+    @JsonIgnore
+    public WsGetMembersResult getWsGetMembersResult() {
+        return this.wsGetMembersResult;
     }
 }

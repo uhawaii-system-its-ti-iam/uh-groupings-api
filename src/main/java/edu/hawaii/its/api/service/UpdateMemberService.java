@@ -294,7 +294,9 @@ public class UpdateMemberService {
     private GroupingReplaceGroupMembersResult resetGroup(String groupPath) {
         AddMembersResults addMembersResults = grouperService.resetGroupMembers(groupPath);
         GroupingReplaceGroupMembersResult result = new GroupingReplaceGroupMembersResult(addMembersResults);
-        timestampService.update(result);
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(result);
+        }
         return result;
     }
 
@@ -333,8 +335,10 @@ public class UpdateMemberService {
         RemoveMemberResult removeMemberResult = grouperService.removeMember(currentUser, removeGroupPath, uhIdentifier);
         AddMemberResult addMemberResult = grouperService.addMember(currentUser, addGroupPath, uhIdentifier);
         GroupingMoveMemberResult result = new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
-        timestampService.update(result.getAddResult());
-        timestampService.update(result.getRemoveResult());
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(result.getAddResult());
+            timestampService.update(result.getRemoveResult());
+        }
         return result;
     }
 
@@ -360,7 +364,9 @@ public class UpdateMemberService {
         AddMemberResult addMemberResult =
                 grouperService.addMember(currentUser, GROUPING_ADMINS, uhIdentifier);
         GroupingAddResult result = new GroupingAddResult(addMemberResult);
-        timestampService.update(result);
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(result);
+        }
         return result;
     }
 
@@ -368,7 +374,9 @@ public class UpdateMemberService {
         RemoveMemberResult removeMemberResult =
                 grouperService.removeMember(currentUser, GROUPING_ADMINS, uhIdentifier);
         GroupingRemoveResult result = new GroupingRemoveResult(removeMemberResult);
-        timestampService.update(result);
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(result);
+        }
         return result;
     }
 
@@ -376,7 +384,9 @@ public class UpdateMemberService {
         AddMembersResults addMembersResults =
                 grouperService.addMembers(currentUser, groupingPath + GroupType.OWNERS.value(), uhIdentifiers);
         GroupingAddResults results = new GroupingAddResults(addMembersResults);
-        timestampService.update(results);
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(results);
+        }
         return results;
     }
 
@@ -384,7 +394,9 @@ public class UpdateMemberService {
         AddMemberResult addMemberResult =
                 grouperService.addMember(currentUser, groupingPath + GroupType.OWNERS.value(), uhIdentifier);
         GroupingAddResult result = new GroupingAddResult(addMemberResult);
-        timestampService.update(result);
+        if(grouperService instanceof GrouperApiService) {
+            timestampService.update(result);
+        }
         return result;
     }
 

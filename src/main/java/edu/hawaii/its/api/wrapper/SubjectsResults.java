@@ -3,7 +3,6 @@ package edu.hawaii.its.api.wrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClientExt.com.fasterxml.jackson.annotation.JsonIgnore;
@@ -51,26 +50,8 @@ public class SubjectsResults extends Results {
         return failure;
     }
 
-    public void getSubjectsAfterAssignSubject(String uhIdentifier){
-        WsSubject newSubject = new WsSubject();
-        newSubject.setIdentifierLookup(uhIdentifier);
-        newSubject.setId(uhIdentifier);
-        newSubject.setResultCode("SUCCESS");
-        WsSubject[] updatedSubjects = new WsSubject[]{newSubject};
-        this.wsGetSubjectsResults.setWsSubjects(updatedSubjects);
-    }
-
-    public void getSubjectsAfterAssignSubjects(List<String> uhIdentifiers){
-        WsGetSubjectsResults wsGetSubjectsResults = this.wsGetSubjectsResults;
-        WsSubject[] updatedWsSubjects = uhIdentifiers.stream()
-                .map(uhIdentifier -> {
-                    WsSubject wsSubject = new WsSubject();
-                    wsSubject.setIdentifierLookup(uhIdentifier);
-                    wsSubject.setId(uhIdentifier);
-                    wsSubject.setResultCode("SUCCESS");
-                    return wsSubject;
-                })
-                .toArray(WsSubject[]::new);
-        wsGetSubjectsResults.setWsSubjects(updatedWsSubjects);
+    @JsonIgnore
+    public WsGetSubjectsResults getWsGetSubjectsResults() {
+        return this.wsGetSubjectsResults;
     }
 }
