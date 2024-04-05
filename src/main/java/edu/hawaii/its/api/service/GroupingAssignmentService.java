@@ -10,19 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
@@ -31,14 +30,11 @@ import edu.hawaii.its.api.wrapper.Subject;
 @Service("groupingAssignmentService")
 public class GroupingAssignmentService {
 
+    public static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
-
     @Value("${groupings.api.stale_subject_id}")
     private String STALE_SUBJECT_ID;
-
-    public static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
-
     @Autowired
     private MemberService memberService;
 

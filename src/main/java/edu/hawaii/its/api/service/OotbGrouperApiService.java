@@ -1,6 +1,11 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.util.JsonUtil;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
@@ -16,14 +21,12 @@ import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.function.Consumer;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 
 public class OotbGrouperApiService implements GrouperService {
 
+    public static final Log log = LogFactory.getLog(OotbGrouperApiService.class);
     @Autowired
     OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
@@ -76,22 +79,18 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if a UH identifier is valid.
      */
     public SubjectsResults getSubjects(String uhIdentifier) {
-        SubjectsResults subjectsResults = ootbGroupingPropertiesService.getSubjectsResults();
+        ootbGroupingPropertiesService.updateSubjectsByUhIdentifier(uhIdentifier);
 
-        subjectsResults.getSubjectsAfterAssignSubject(uhIdentifier);
-
-        return subjectsResults;
+        return ootbGroupingPropertiesService.getSubjectsResults();
     }
 
     /**
      * Check if multiple UH identifiers are valid.
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = ootbGroupingPropertiesService.getSubjectsResults();
+        ootbGroupingPropertiesService.updateSubjectsByUhIdentifiers(uhIdentifiers);
 
-        subjectsResults.getSubjectsAfterAssignSubjects(uhIdentifiers);
-
-        return subjectsResults;
+        return ootbGroupingPropertiesService.getSubjectsResults();
     }
 
     /**
@@ -172,8 +171,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
-        GetMembersResults getMembersResults = ootbGroupingPropertiesService.getMembersResults();
-        return getMembersResults.getMembersByGroupPath(groupPath);
+        return ootbGroupingPropertiesService.getMembersByGroupPath(groupPath);
     }
 
     /**
@@ -198,7 +196,7 @@ public class OotbGrouperApiService implements GrouperService {
      * implement the "act-as" requirements."
      */
     public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
-                                                       String searchScope) {
+            String searchScope) {
         return new FindAttributesResults(new WsFindAttributeDefNamesResults());
     }
 
@@ -206,6 +204,8 @@ public class OotbGrouperApiService implements GrouperService {
      * Add a UH identifier to group listing.
      */
     public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
+        ootbGroupingPropertiesService.addMember(groupPath, uhIdentifier);
+
         return ootbGroupingPropertiesService.getAddMembersResults().getResults().get(0);
     }
 
@@ -213,6 +213,8 @@ public class OotbGrouperApiService implements GrouperService {
      * Add multiple UH identifiers to a group listing.
      */
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+        ootbGroupingPropertiesService.addMembers(groupPath, uhIdentifiers);
+
         return ootbGroupingPropertiesService.getAddMembersResults();
     }
 
@@ -220,24 +222,18 @@ public class OotbGrouperApiService implements GrouperService {
      * Remove a UH identifier from a group listing.
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
-        RemoveMemberResult removeMemberResult = ootbGroupingPropertiesService.getRemoveMembersResults().getResults().get(0);
-        GetMembersResults members = ootbGroupingPropertiesService.getMembersResults();
+        ootbGroupingPropertiesService.removeMember(groupPath, uhIdentifier);
 
-        members.removeMember(groupPath, uhIdentifier);
-        removeMemberResult.updateRemoveResults(groupPath, uhIdentifier);
-
-        return removeMemberResult;
+        return ootbGroupingPropertiesService.getRemoveMembersResults().getResults().get(0);
     }
 
     /**
      * Remove multiple UH identifiers from a group listing.
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        RemoveMembersResults removeMembersResults = ootbGroupingPropertiesService.getRemoveMembersResults();
-        GetMembersResults members = ootbGroupingPropertiesService.getMembersResults();
+        ootbGroupingPropertiesService.removeMembers(groupPath, uhIdentifiers);
 
-        members.removeMembers(groupPath, uhIdentifiers);
-        return removeMembersResults;
+        return ootbGroupingPropertiesService.getRemoveMembersResults();
     }
 
     /**
@@ -251,16 +247,18 @@ public class OotbGrouperApiService implements GrouperService {
      * Add or remove an attribute from a group. This is used to update a groupings
      * preferences.
      */
-    public AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath,
-                                                           String attributeName) {
+    public AssignAttributesResults assignAttributesResults(String currentUser, String assignType,
+            String assignOperation, String groupPath,
+            String attributeName) {
         return ootbGroupingPropertiesService.getAssignAttributesResults();
     }
 
     /**
      * Change a group attribute's privilege to true or false.
      */
-    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath, String privilegeName,
-                                                                       String uhIdentifier, boolean isAllowed) {
+    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath,
+            String privilegeName,
+            String uhIdentifier, boolean isAllowed) {
         return new AssignGrouperPrivilegesResult();
     }
 
@@ -268,7 +266,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Get a list of members for each groupPath.
      */
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
-                                               Integer pageSize, String sortString, Boolean isAscending) {
+            Integer pageSize, String sortString, Boolean isAscending) {
         GetMembersResults getMembersResults = ootbGroupingPropertiesService.getMembersResults();
         return getMembersResults;
     }
