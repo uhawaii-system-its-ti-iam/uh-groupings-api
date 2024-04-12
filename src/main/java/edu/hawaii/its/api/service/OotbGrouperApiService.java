@@ -58,46 +58,39 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if a group exists.
      */
     public FindGroupsResults findGroupsResults(String groupPath) {
-        FindGroupsResults findGroupsResults = ootbGroupingPropertiesService.getFindGroupsResults();
-        return findGroupsResults;
+        return ootbGroupingPropertiesService.getFindGroups(groupPath);
     }
 
     public FindGroupsResults findGroupsResults(String currentUser, String groupPath) {
-        FindGroupsResults findGroupsResults = ootbGroupingPropertiesService.getFindGroupsResults();
-        return findGroupsResults;
+        return ootbGroupingPropertiesService.getFindGroups(groupPath);
     }
 
     /**
      * Check if multiple groups exist.
      */
     public FindGroupsResults findGroupsResults(List<String> groupPaths) {
-        FindGroupsResults findGroupsResults = ootbGroupingPropertiesService.getFindGroupsResults();
-        return findGroupsResults;
+        return ootbGroupingPropertiesService.getFindGroups(groupPaths);
     }
 
     /**
      * Check if a UH identifier is valid.
      */
     public SubjectsResults getSubjects(String uhIdentifier) {
-        ootbGroupingPropertiesService.updateSubjectsByUhIdentifier(uhIdentifier);
-
-        return ootbGroupingPropertiesService.getSubjectsResults();
+        return ootbGroupingPropertiesService.getSubject(uhIdentifier);
     }
 
     /**
      * Check if multiple UH identifiers are valid.
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
-        ootbGroupingPropertiesService.updateSubjectsByUhIdentifiers(uhIdentifiers);
-
-        return ootbGroupingPropertiesService.getSubjectsResults();
+        return ootbGroupingPropertiesService.getSubjects(uhIdentifiers);
     }
 
     /**
      * Get all the groups with the specified attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute) {
-        return ootbGroupingPropertiesService.getGroupAttributeResults();
+        return ootbGroupingPropertiesService.getGroupAttributeResultsByAttribute(attribute);
     }
 
     /**
@@ -118,7 +111,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if multiple groups contain an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, List<String> groupPaths) {
-        return ootbGroupingPropertiesService.getGroupAttributeResults();
+        return ootbGroupingPropertiesService.getGroupAttributeResultsByAttributeAndGroupPathList(attribute, groupPaths);
     }
 
     /**
@@ -154,8 +147,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Get all groups that a UH identifier is listed in.
      */
     public GetGroupsResults getGroupsResults(String uhIdentifier) {
-        GetGroupsResults getGroupsResults = ootbGroupingPropertiesService.getGroupsResults();
-        return getGroupsResults;
+        return ootbGroupingPropertiesService.getGroups(uhIdentifier);
     }
 
     /**
@@ -204,36 +196,28 @@ public class OotbGrouperApiService implements GrouperService {
      * Add a UH identifier to group listing.
      */
     public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
-        ootbGroupingPropertiesService.addMember(groupPath, uhIdentifier);
-
-        return ootbGroupingPropertiesService.getAddMembersResults().getResults().get(0);
+        return ootbGroupingPropertiesService.addMember(currentUser, groupPath, uhIdentifier);
     }
 
     /**
      * Add multiple UH identifiers to a group listing.
      */
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        ootbGroupingPropertiesService.addMembers(groupPath, uhIdentifiers);
-
-        return ootbGroupingPropertiesService.getAddMembersResults();
+        return ootbGroupingPropertiesService.addMembers(currentUser, groupPath, uhIdentifiers);
     }
 
     /**
      * Remove a UH identifier from a group listing.
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
-        ootbGroupingPropertiesService.removeMember(groupPath, uhIdentifier);
-
-        return ootbGroupingPropertiesService.getRemoveMembersResults().getResults().get(0);
+        return ootbGroupingPropertiesService.removeMember(currentUser, groupPath, uhIdentifier);
     }
 
     /**
      * Remove multiple UH identifiers from a group listing.
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        ootbGroupingPropertiesService.removeMembers(groupPath, uhIdentifiers);
-
-        return ootbGroupingPropertiesService.getRemoveMembersResults();
+        return ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, uhIdentifiers);
     }
 
     /**

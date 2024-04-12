@@ -7,8 +7,10 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+import edu.internet2.middleware.grouperClientExt.com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class GetGroupsResults extends Results {
+
     private final WsGetGroupsResults wsGetGroupsResults;
 
     public GetGroupsResults(WsGetGroupsResults wsGetGroupsResults) {
@@ -57,4 +59,8 @@ public class GetGroupsResults extends Results {
 
     }
 
+    @JsonIgnore
+    public WsGetGroupsResults getWsGetGroupsResults() {
+        return wsGetGroupsResults;
+    }
 }
