@@ -467,6 +467,16 @@ public class OotbGroupingPropertiesService {
         return getSubjectsResults();
     }
 
+    public GetMembersResults getOwnedGroupings(List<String> groupPaths) {
+        WsGetMembersResult[] originalResults = getMembersResults().getWsGetMembersResults().getResults();
+        WsGetMembersResult[] filteredResults = Arrays.stream(originalResults)
+                .filter(result -> result.getWsGroup() != null && groupPaths.contains(result.getWsGroup().getName()))
+                .toArray(WsGetMembersResult[]::new);
+        WsGetMembersResults newWsGetMembersResults = new WsGetMembersResults();
+        newWsGetMembersResults.setResults(filteredResults);
+        return new GetMembersResults(newWsGetMembersResults);
+    }
+
     public GroupAttributeResults getGroupAttributeResultsByAttribute(String attribute) {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
                 getGroupAttributeResults().getWsGetAttributeAssignmentsResults();
@@ -643,7 +653,7 @@ public class OotbGroupingPropertiesService {
                             || uhIdentifier.equals(result.getWsSubject().getId()))
                     .forEach(result -> {
                         WsGroup[] filteredGroups = Arrays.stream(result.getWsGroups())
-                                .filter(group -> !groupPath.equals(group.getName()))
+                                .filter(group -> group != null && !groupPath.equals(group.getName()))
                                 .toArray(WsGroup[]::new);
                         result.setWsGroups(filteredGroups);
                     });
@@ -681,7 +691,7 @@ public class OotbGroupingPropertiesService {
                             || uhIdentifier.contains(result.getWsSubject().getId()))
                     .forEach(result -> {
                         WsGroup[] filteredGroups = Arrays.stream(result.getWsGroups())
-                                .filter(group -> !groupPath.equals(group.getName()))
+                                .filter(group -> group != null && !groupPath.equals(group.getName()))
                                 .toArray(WsGroup[]::new);
                         result.setWsGroups(filteredGroups);
                     });
