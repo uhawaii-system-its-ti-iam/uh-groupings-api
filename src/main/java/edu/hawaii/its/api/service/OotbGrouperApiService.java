@@ -251,7 +251,6 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
-        GetMembersResults getMembersResults = ootbGroupingPropertiesService.getMembersResults();
-        return getMembersResults;
+        return ootbGroupingPropertiesService.getOwnedGroupings(groupPaths);
     }
 }
