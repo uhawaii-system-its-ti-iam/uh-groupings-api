@@ -61,7 +61,7 @@ public class OotbGrouperApiServiceTest {
     public void testGetMembersResult() {
         // Setup
         String currentUser = "testiwta";
-        List<String> groupPath = new ArrayList<>(Arrays.asList("group-0-1", "group-0-2", "group-0-3"));
+        List<String> groupPaths = new ArrayList<>(Arrays.asList("group-0-1", "group-0-2", "group-0-3"));
         Integer pageNumber = 1;
         Integer pageSize = 700;
         String sortString = "name";
@@ -71,7 +71,7 @@ public class OotbGrouperApiServiceTest {
 
         // Execution
         GetMembersResults actual =
-                grouperService.getMembersResults(currentUser, groupPath, pageNumber, pageSize, sortString, isAscending);
+                grouperService.getMembersResults(groupPaths);
 
         // Verification
         assertEquals(expected, actual);
