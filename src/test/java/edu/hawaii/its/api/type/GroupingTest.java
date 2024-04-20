@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.wrapper.Subject;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingTest {
@@ -42,7 +43,8 @@ public class GroupingTest {
         grouping.setIsEmpty();
         assertTrue(grouping.isEmpty());
         Group group = new Group();
-        group.addMember(new Person("A", "B", "C"));
+        Subject subject = new Subject("uid","name", "uhUuid");
+        group.addMember(subject);
         grouping.setBasis(group);
         grouping.setIsEmpty();
         assertFalse(grouping.isEmpty());
@@ -102,11 +104,11 @@ public class GroupingTest {
         Grouping grouping = new Grouping(groupingPath);
         assertTrue(grouping.getBasis().isEmpty());
         Group group = new Group();
-        Person person = new Person("A", "B", "C");
-        group.addMember(person);
+        Subject subject = new Subject("uid", "name", "uhUuid");
+        group.addMember(subject);
         grouping.setBasis(group);
         assertFalse(grouping.getBasis().isEmpty());
-        assertTrue(grouping.getBasis().getMembers().contains(person));
+        assertTrue(grouping.getBasis().getMembers().contains(subject));
         grouping.setBasis(null);
         assertNotNull(grouping.getBasis());
         assertTrue(grouping.getBasis().isEmpty());
@@ -117,11 +119,11 @@ public class GroupingTest {
         Grouping grouping = new Grouping(groupingPath);
         assertTrue(grouping.getInclude().isEmpty());
         Group group = new Group();
-        Person person = new Person("A", "B", "C");
-        group.addMember(person);
+        Subject subject = new Subject("uid", "name", "uhUuid");
+        group.addMember(subject);
         grouping.setInclude(group);
         assertFalse(grouping.getInclude().isEmpty());
-        assertTrue(grouping.getInclude().getMembers().contains(person));
+        assertTrue(grouping.getInclude().getMembers().contains(subject));
         grouping.setInclude(null);
         assertNotNull(grouping.getInclude());
         assertTrue(grouping.getInclude().isEmpty());
@@ -132,11 +134,11 @@ public class GroupingTest {
         Grouping grouping = new Grouping(groupingPath);
         assertTrue(grouping.getExclude().isEmpty());
         Group group = new Group();
-        Person person = new Person("A", "B", "C");
-        group.addMember(person);
+        Subject subject = new Subject("uid", "name", "uhUuid");
+        group.addMember(subject);
         grouping.setExclude(group);
         assertFalse(grouping.getExclude().isEmpty());
-        assertTrue(grouping.getExclude().getMembers().contains(person));
+        assertTrue(grouping.getExclude().getMembers().contains(subject));
         grouping.setExclude(null);
         assertNotNull(grouping.getExclude());
         assertTrue(grouping.getExclude().isEmpty());
@@ -147,11 +149,11 @@ public class GroupingTest {
         Grouping grouping = new Grouping(groupingPath);
         assertTrue(grouping.getComposite().isEmpty());
         Group group = new Group();
-        Person person = new Person("A", "B", "C");
-        group.addMember(person);
+        Subject subject = new Subject("uid", "name", "uhUuid");
+        group.addMember(subject);
         grouping.setComposite(group);
         assertFalse(grouping.getComposite().isEmpty());
-        assertTrue(grouping.getComposite().getMembers().contains(person));
+        assertTrue(grouping.getComposite().getMembers().contains(subject));
         grouping.setComposite(null);
         assertNotNull(grouping.getComposite());
         assertTrue(grouping.getComposite().isEmpty());
@@ -162,11 +164,11 @@ public class GroupingTest {
         Grouping grouping = new Grouping(groupingPath);
         assertTrue(grouping.getOwners().isEmpty());
         Group group = new Group();
-        Person person = new Person("A", "B", "C");
-        group.addMember(person);
+        Subject subject = new Subject("uid", "name", "uhUuid");
+        group.addMember(subject);
         grouping.setOwners(group);
         assertFalse(grouping.getOwners().isEmpty());
-        assertTrue(grouping.getOwners().getMembers().contains(person));
+        assertTrue(grouping.getOwners().getMembers().contains(subject));
         grouping.setOwners(null);
         assertNotNull(grouping.getOwners());
         assertTrue(grouping.getOwners().isEmpty());

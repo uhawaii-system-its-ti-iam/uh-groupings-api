@@ -54,13 +54,13 @@ public class RemoveMemberResultTest {
         assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
         assertEquals("group-path", removeMemberResult.getGroupPath());
         assertEquals(getTestNumbers().get(0), removeMemberResult.getUhUuid());
-        assertEquals(getTestUsernames().get(0), removeMemberResult.getUid());
+        assertEquals(getTestUids().get(0), removeMemberResult.getUid());
         assertEquals(getTestNames().get(0), removeMemberResult.getName());
         assertNotNull(removeMemberResult.getSubject());
     }
 
 
-    public List<String> getTestUsernames() {
+    public List<String> getTestUids() {
         String[] array = { "testiwta", "testiwtb", "testiwtc", "testiwtd", "testiwte" };
         return new ArrayList<>(Arrays.asList(array));
     }

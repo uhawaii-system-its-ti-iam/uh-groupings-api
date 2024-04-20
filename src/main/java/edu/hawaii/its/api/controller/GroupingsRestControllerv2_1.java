@@ -38,7 +38,7 @@ import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -292,12 +292,12 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/groupings")
     @ResponseBody
-    public ResponseEntity<ManagePersonResults> managePersonResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                                   @PathVariable String uhIdentifier) {
-        logger.info("Entered REST managePersonResults...");
+    public ResponseEntity<ManageSubjectResults> manageSubjectResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String uhIdentifier) {
+        logger.info("Entered REST manageSubjectResults...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.managePersonResults(currentUser, uhIdentifier));
+                .body(membershipService.manageSubjectResults(currentUser, uhIdentifier));
     }
 
     /**
@@ -416,7 +416,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings by username or UH id number.
+     * Get an owner's owned groupings by uid or uhUuid.
      */
     @GetMapping("/owners/{uhIdentifier:[\\w-:.]+}/groupings")
     public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
@@ -544,7 +544,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST togglePreference");
 
         OptRequest optInRequest = new OptRequest.Builder()
-                .withUsername(currentUser)
+                .withUid(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(preferenceId)
@@ -552,7 +552,7 @@ public class GroupingsRestControllerv2_1 {
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
-                .withUsername(currentUser)
+                .withUid(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(preferenceId)

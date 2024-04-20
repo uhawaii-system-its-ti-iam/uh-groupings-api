@@ -62,24 +62,24 @@ public class GroupingAttributeService {
      */
     public List<GroupingsServiceResult> changeOptStatus(OptRequest optInRequest, OptRequest optOutRequest) {
 
-        checkPrivileges(optInRequest.getGroupNameRoot(), optInRequest.getUsername());
+        checkPrivileges(optInRequest.getGroupNameRoot(), optInRequest.getUid());
 
         List<GroupingsServiceResult> results = new ArrayList<>();
 
         results.add(assignGrouperPrivilege(
-                optInRequest.getUsername(),
+                optInRequest.getUid(),
                 optInRequest.getPrivilegeType().value(),
                 optInRequest.getGroupName(),
                 optInRequest.getOptValue()));
 
         results.add(assignGrouperPrivilege(
-                optOutRequest.getUsername(),
+                optOutRequest.getUid(),
                 optOutRequest.getPrivilegeType().value(),
                 optOutRequest.getGroupName(),
                 optOutRequest.getOptValue()));
 
         results.add(changeGroupAttributeStatus(optInRequest.getGroupNameRoot(),
-                optInRequest.getUsername(),
+                optInRequest.getUid(),
                 optInRequest.getOptId(),
                 optInRequest.getOptValue()));
 
@@ -158,13 +158,13 @@ public class GroupingAttributeService {
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
-    public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUsername,
+    public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUid,
             String description) {
-        logger.info(String.format("updateDescription; groupPath: %s; ownerUsername: %s; description: %s;",
-                groupPath, ownerUsername, description));
+        logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s; description: %s;",
+                groupPath, ownerUid, description));
 
-        if (!memberService.isOwner(groupPath, ownerUsername) && !memberService.isAdmin(
-                ownerUsername)) {
+        if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isAdmin(
+                ownerUid)) {
             throw new AccessDeniedException();
         }
         return groupingsService.updateGroupingDescription(groupPath, description);

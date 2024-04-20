@@ -112,7 +112,7 @@ public class TestGroupingAttributeService {
     public void changeOptInStatusTest() {
         // Should throw an exception if current user is not an owner or and admin.
         OptRequest optInRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.IN)
@@ -120,7 +120,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.IN)
@@ -153,14 +153,14 @@ public class TestGroupingAttributeService {
         // Should throw an exception if an invalid path is passed.
         assertThrows(NullPointerException.class, () -> groupingAttributeService.changeOptStatus(
                 new OptRequest.Builder()
-                        .withUsername(testUid)
+                        .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
                         .withPrivilegeType(PrivilegeType.IN)
                         .withOptType(OptType.IN)
                         .withOptValue(false)
                         .build(),
                 new OptRequest.Builder()
-                        .withUsername(testUid)
+                        .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
                         .withPrivilegeType(PrivilegeType.OUT)
                         .withOptType(OptType.IN)
@@ -171,7 +171,7 @@ public class TestGroupingAttributeService {
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.IN)
@@ -179,7 +179,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.IN)
@@ -191,12 +191,12 @@ public class TestGroupingAttributeService {
         GroupingsServiceResult optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optInResult.getPerson());
+        assertNull(optInResult.getSubject());
         assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.IN)
@@ -204,7 +204,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.IN)
@@ -215,7 +215,7 @@ public class TestGroupingAttributeService {
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optInResult.getPerson());
+        assertNull(optInResult.getSubject());
         assertEquals(SUCCESS_ALLOWED, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
@@ -223,12 +223,12 @@ public class TestGroupingAttributeService {
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optInResult.getPerson());
+        assertNull(optInResult.getSubject());
         assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optInResult.getResultCode());
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.IN)
@@ -236,7 +236,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.IN)
@@ -247,7 +247,7 @@ public class TestGroupingAttributeService {
         optInResult = groupingsServiceResults.get(0);
         assertNotNull(optInResult);
         assertTrue(optInResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optInResult.getPerson());
+        assertNull(optInResult.getSubject());
         assertEquals(SUCCESS_NOT_ALLOWED, optInResult.getResultCode());
     }
 
@@ -255,7 +255,7 @@ public class TestGroupingAttributeService {
     public void changeOptOutStatusTest() {
         // Should throw an exception if current user is not an owner or and admin.
         OptRequest optInRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
@@ -263,7 +263,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
@@ -288,7 +288,7 @@ public class TestGroupingAttributeService {
 
         // Should not throw an exception if current user is an admin but not an owner.
         optInRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
@@ -296,7 +296,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(testUid)
+                .withUid(testUid)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
@@ -313,14 +313,14 @@ public class TestGroupingAttributeService {
         // Should throw an exception if an invalid path is passed.
         assertThrows(NullPointerException.class, () -> groupingAttributeService.changeOptStatus(
                 new OptRequest.Builder()
-                        .withUsername(testUid)
+                        .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
                         .withPrivilegeType(PrivilegeType.IN)
                         .withOptType(OptType.OUT)
                         .withOptValue(false)
                         .build(),
                 new OptRequest.Builder()
-                        .withUsername(testUid)
+                        .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
                         .withPrivilegeType(PrivilegeType.OUT)
                         .withOptType(OptType.OUT)
@@ -332,7 +332,7 @@ public class TestGroupingAttributeService {
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED_DIDNT_EXIST if false was set to false.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
@@ -340,7 +340,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
@@ -352,12 +352,12 @@ public class TestGroupingAttributeService {
         GroupingsServiceResult optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optOutResult.getPerson());
+        assertNull(optOutResult.getSubject());
         assertEquals(SUCCESS_NOT_ALLOWED_DIDNT_EXIST, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED if false was set to true.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
@@ -365,7 +365,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
@@ -376,7 +376,7 @@ public class TestGroupingAttributeService {
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optOutResult.getPerson());
+        assertNull(optOutResult.getSubject());
         assertEquals(SUCCESS_ALLOWED, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_ALLOWED_ALREADY_EXISTED if true was set to true.
@@ -384,12 +384,12 @@ public class TestGroupingAttributeService {
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optOutResult.getPerson());
+        assertNull(optOutResult.getSubject());
         assertEquals(SUCCESS_ALLOWED_ALREADY_EXISTED, optOutResult.getResultCode());
 
         // Should return resultCode: SUCCESS_NOT_ALLOWED if true was set to false.
         optInRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
@@ -397,7 +397,7 @@ public class TestGroupingAttributeService {
                 .build();
 
         optOutRequest = new OptRequest.Builder()
-                .withUsername(ADMIN)
+                .withUid(ADMIN)
                 .withGroupNameRoot(GROUPING)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
@@ -408,7 +408,7 @@ public class TestGroupingAttributeService {
         optOutResult = groupingsServiceResults.get(1);
         assertNotNull(optOutResult);
         assertTrue(optOutResult.getAction().contains(GROUPING_INCLUDE));
-        assertNull(optOutResult.getPerson());
+        assertNull(optOutResult.getSubject());
         assertEquals(SUCCESS_NOT_ALLOWED, optOutResult.getResultCode());
     }
 

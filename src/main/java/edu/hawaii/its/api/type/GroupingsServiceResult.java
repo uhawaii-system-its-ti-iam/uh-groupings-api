@@ -1,9 +1,11 @@
 package edu.hawaii.its.api.type;
 
+import edu.hawaii.its.api.wrapper.Subject;
+
 public class GroupingsServiceResult {
     private String action = "null";
     private String resultCode = "null";
-    private Person person = null;
+    private Subject subject = null;
 
     // Constructor
     public GroupingsServiceResult() {
@@ -16,10 +18,10 @@ public class GroupingsServiceResult {
     }
 
     // Constructor
-    public GroupingsServiceResult(String resultCode, String action, Person person) {
+    public GroupingsServiceResult(String resultCode, String action, Subject subject) {
         this.resultCode = resultCode;
         this.action = action;
-        this.person = person;
+        this.subject = subject;
     }
 
     public String getResultCode() {
@@ -38,16 +40,16 @@ public class GroupingsServiceResult {
         this.action = action;
     }
 
-    public Person getPerson() {
-        return person;
+    public Subject getSubject() {
+        return subject;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setSubject(Subject subject) {
+        this.subject = subject;
     }
 
     @Override public String toString() {
         return "GroupingsServiceResult{" + "action='" + action + '\'' + ", resultCode='" + resultCode + '\''
-                + ", person=" + person + '}';
+                + ", subject=" + subject + '}';
     }
 }

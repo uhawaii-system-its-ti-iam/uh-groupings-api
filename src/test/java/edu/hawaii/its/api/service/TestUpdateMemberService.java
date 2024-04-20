@@ -86,7 +86,7 @@ public class TestUpdateMemberService {
         updateMemberService.removeAdminMember(ADMIN, testUhUuids.get(0));
         assertFalse(memberService.isAdmin(testUhUuids.get(0)));
 
-        // With uh username.
+        // With uh uid.
         assertFalse(memberService.isAdmin(testUids.get(0)));
         updateMemberService.addAdminMember(ADMIN, testUids.get(0));
         assertTrue(memberService.isAdmin(testUids.get(0)));

@@ -22,7 +22,6 @@ import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
@@ -69,10 +68,10 @@ public class GroupingAssignmentService {
     /**
      * Returns a group from grouper or the database.
      */
-    public Map<String, Group> getMembers(String ownerUsername, List<String> groupPaths) {
+    public Map<String, Group> getMembers(String ownerUid, List<String> groupPaths) {
         GetMembersResults getMembersResults =
                 grouperService.getMembersResults(
-                        ownerUsername,
+                        ownerUid,
                         groupPaths,
                         null,
                         null,
@@ -136,13 +135,12 @@ public class GroupingAssignmentService {
                 if (!subject.hasUHAttributes()) {
                     continue;
                 }
-                Person person = new Person(subject);
                 if (group.getPath().endsWith(GroupType.BASIS.value()) && subject.getSourceId() != null
                         && subject.getSourceId()
                         .equals(STALE_SUBJECT_ID)) {
-                    person.setUsername("User Not Available.");
+                    subject.setUid("User Not Available.");
                 }
-                group.addMember(new Person(subject));
+                group.addMember(subject);
             }
             groupMembers.put(group.getPath(), group);
         }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.wrapper.Subject;
 
 public class EmptyGroupTest extends Group {
 
@@ -16,6 +17,7 @@ public class EmptyGroupTest extends Group {
 
     @Test
     public void test() {
-        assertThrows(UnsupportedOperationException.class, () -> emptygroup.addMember(new Person()));
+        assertThrows(UnsupportedOperationException.class, () -> emptygroup.addMember(new Subject()));
     }
+
 }

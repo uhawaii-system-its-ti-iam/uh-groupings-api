@@ -31,7 +31,7 @@ public class TestSubjectService {
     private List<String> TEST_UH_NUMBERS;
 
     @Value("${groupings.api.test.dept-uh-usernames}")
-    private List<String> TEST_DEPT_UH_USERNAMES;
+    private List<String> TEST_DEPT_UH_UIDS;
 
     @Test
     public void constructor() {
@@ -40,14 +40,13 @@ public class TestSubjectService {
 
     @Test
     public void isValidIdentifier() {
-        for (String username : TEST_UH_USERNAMES) {
-            assertTrue(subjectService.isValidIdentifier(username));
+        for (String uid : TEST_UH_USERNAMES) {
+            assertTrue(subjectService.isValidIdentifier(uid));
         }
         for (String number : TEST_UH_NUMBERS) {
             assertTrue(subjectService.isValidIdentifier(number));
         }
-        assertFalse(subjectService.isValidIdentifier(TEST_DEPT_UH_USERNAMES.get(0))); // testiwt1 is invalid
-        assertTrue(subjectService.isValidIdentifier(TEST_DEPT_UH_USERNAMES.get(1))); // testiwt2 is valid
+        assertTrue(subjectService.isValidIdentifier(TEST_DEPT_UH_UIDS.get(1))); // testiwt2 is valid
         assertFalse(subjectService.isValidIdentifier("invalid-identifier"));
     }
 
@@ -67,9 +66,9 @@ public class TestSubjectService {
 
     @Test
     public void getValidUhUuid() {
-        String username = TEST_UH_USERNAMES.get(0);
+        String uid = TEST_UH_USERNAMES.get(0);
         String number = TEST_UH_NUMBERS.get(0);
-        assertEquals(number, subjectService.getValidUhUuid(username));
+        assertEquals(number, subjectService.getValidUhUuid(uid));
         assertEquals(number, subjectService.getValidUhUuid(number));
 
         assertEquals("", subjectService.getValidUhUuid("invalid-identifier"));

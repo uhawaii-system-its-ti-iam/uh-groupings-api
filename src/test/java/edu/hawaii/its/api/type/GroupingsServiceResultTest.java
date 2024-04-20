@@ -5,20 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.wrapper.Subject;
 
 public class GroupingsServiceResultTest {
     private GroupingsServiceResult groupingsServiceResult;
     private final String action = "action";
     private final String resultCode = "resultCode";
-    private Person person = null;
+    private Subject subject = null;
 
     @BeforeEach
     public void setUp() {
         groupingsServiceResult = new GroupingsServiceResult();
-        person = new Person("name", "uhUuid", "uid");
+        subject = new Subject("uid", "name", "uhUuid");
         groupingsServiceResult.setAction(action);
         groupingsServiceResult.setResultCode(resultCode);
-        groupingsServiceResult.setPerson(person);
+        groupingsServiceResult.setSubject(subject);
     }
 
     @Test
@@ -27,7 +28,7 @@ public class GroupingsServiceResultTest {
         assertNotNull(gsr);
         gsr = new GroupingsServiceResult(resultCode, action);
         assertNotNull(gsr);
-        gsr = new GroupingsServiceResult(resultCode, action, person);
+        gsr = new GroupingsServiceResult(resultCode, action, subject);
         assertNotNull(gsr);
     }
 
@@ -36,13 +37,13 @@ public class GroupingsServiceResultTest {
 
         assertEquals(action, groupingsServiceResult.getAction());
         assertEquals(resultCode, groupingsServiceResult.getResultCode());
-        assertEquals(person, groupingsServiceResult.getPerson());
+        assertEquals(subject, groupingsServiceResult.getSubject());
     }
 
     @Test
     public void toStringTest() {
         String expected = "GroupingsServiceResult{" + "action='" + action + '\'' + ", resultCode='" + resultCode + '\''
-                + ", person=" + person + '}';
+                + ", subject=" + subject + '}';
         assertEquals(expected, groupingsServiceResult.toString());
     }
 }
