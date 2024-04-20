@@ -1,8 +1,5 @@
-
-
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.type.Person;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +22,6 @@ public class SubjectService {
 
     @Autowired
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
-
-    public Person getPerson(String uhIdentifier) {
-        Subject subject = getSubject(uhIdentifier);
-        if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
-            return new Person();
-        }
-        return new Person(subject.getName(), subject.getUhUuid(), subject.getUid(), subject.getFirstName(),
-                subject.getLastName());
-    }
 
     public boolean isValidIdentifier(String uhIdentifier) {
         if (grouperService instanceof OotbGrouperApiService) {
@@ -74,6 +62,9 @@ public class SubjectService {
 
         List<Subject> subjects = subjectsResults.getSubjects();
 
+        if (subjectsResults.getResultCode().equals("SUBJECT_NOT_FOUND")) {
+            return new Subject();
+        }
         if (subjects.size() >= 1) {
             return subjects.get(0);
         }

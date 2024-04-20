@@ -86,7 +86,7 @@ public class ErrorControllerAdviceTest {
 
     private static final String API_BASE = "/api/groupings/v2.1";
     private static final String GROUPING = "grouping";
-    private static final String USERNAME = "user";
+    private static final String UID = "user";
     private static final String ADMIN = "admin";
 
     @BeforeEach

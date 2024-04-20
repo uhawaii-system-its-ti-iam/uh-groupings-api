@@ -112,7 +112,7 @@ public class TestGrouperApiServiceTutorial {
 
     @Test
     public void addMemberTest() {
-        // With uh usernames.
+        // With uh uids.
         AddMemberResult addMemberResult = grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         assertNotNull(addMemberResult);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, testUids.get(0)));
@@ -139,7 +139,7 @@ public class TestGrouperApiServiceTutorial {
 
     @Test
     public void removeMemberTest() {
-        // With uh usernames.
+        // With uh uids.
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(1));
         RemoveMemberResult removeMemberResult =
@@ -238,7 +238,7 @@ public class TestGrouperApiServiceTutorial {
         assertEquals(memberResultsNonMember.get(0).getUhUuid(), testUhUuids.get(1));
         assertEquals(memberResultsNonMember.get(0).getResultCode(), "IS_NOT_MEMBER");
 
-        // Using uh usernames (one that is a member)
+        // Using uh uids (one that is a member)
         grouperService.addMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         hasMemberResultsIsMember =
                 grouperService.hasMemberResults(GROUPING_INCLUDE, testUids.get(0));
@@ -248,7 +248,7 @@ public class TestGrouperApiServiceTutorial {
         assertEquals(memberResultsIsMember.size(), 1);
         assertEquals(memberResultsIsMember.get(0).getUid(), testUids.get(0));
         assertEquals(memberResultsIsMember.get(0).getResultCode(), "IS_MEMBER");
-        // Using uh usernames (one that is not a member)
+        // Using uh uids (one that is not a member)
         hasMemberResultsNonMember =
                 grouperService.hasMemberResults(GROUPING_INCLUDE, testUids.get(1));
         assertNotNull(hasMemberResultsNonMember);
@@ -295,15 +295,15 @@ public class TestGrouperApiServiceTutorial {
 
     @Test
     public void groupsResultsTest() {
-        GetGroupsResults getGroupsResultsUserNames = grouperService.getGroupsResults(testUids.get(0));
+        GetGroupsResults getGroupsResultsUids = grouperService.getGroupsResults(testUids.get(0));
         GetGroupsResults getGroupsResultsNumbers = grouperService.getGroupsResults(testUhUuids.get(0));
         assertNotNull(getGroupsResultsNumbers);
         assertFalse(getGroupsResultsNumbers.getGroups().isEmpty());
         assertEquals(testUhUuids.get(0), getGroupsResultsNumbers.getSubject().getUhUuid());
 
-        assertNotNull(getGroupsResultsUserNames);
-        assertFalse(getGroupsResultsUserNames.getGroups().isEmpty());
-        assertEquals(testUids.get(0), getGroupsResultsUserNames.getSubject().getUid());
+        assertNotNull(getGroupsResultsUids);
+        assertFalse(getGroupsResultsUids.getGroups().isEmpty());
+        assertEquals(testUids.get(0), getGroupsResultsUids.getSubject().getUid());
 
     }
 

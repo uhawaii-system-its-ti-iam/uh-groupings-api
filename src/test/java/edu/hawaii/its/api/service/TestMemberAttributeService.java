@@ -26,7 +26,7 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MemberResult;
-import edu.hawaii.its.api.groupings.ManagePersonResults;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 
 @ActiveProfiles("integrationTest")
@@ -180,11 +180,11 @@ public class TestMemberAttributeService {
         // Groupings owned by current admin should complement
         // the list of memberships that the current admin is in.
         GroupingPaths groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
-        ManagePersonResults managePersonResults = membershipService.managePersonResults(ADMIN, ADMIN);
+        ManageSubjectResults manageSubjectResults = membershipService.manageSubjectResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.getGroupingPaths().forEach(groupingPath -> {
             assertTrue(
-                    managePersonResults.getResults().stream()
+                    manageSubjectResults.getResults().stream()
                             .anyMatch(membership -> membership
                                     .getPath().equals(groupingPath.getPath())));
         });

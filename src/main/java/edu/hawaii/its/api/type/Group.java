@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import edu.hawaii.its.api.wrapper.Subject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Group implements Comparable<Group> {
+public class Group {
 
-    private List<Person> members = new ArrayList<>();
+    private List<Subject> members = new ArrayList<>();
     private String path = "";
 
     // Constructor.
@@ -18,7 +19,7 @@ public class Group implements Comparable<Group> {
     }
 
     // Constructor.
-    public Group(List<Person> members) {
+    public Group(List<Subject> members) {
         setMembers(members);
     }
 
@@ -28,7 +29,7 @@ public class Group implements Comparable<Group> {
     }
 
     // Constructor.
-    public Group(String path, List<Person> members) {
+    public Group(String path, List<Subject> members) {
         this(members);
         setPath(path);
     }
@@ -41,36 +42,36 @@ public class Group implements Comparable<Group> {
         return path;
     }
 
-    public List<Person> getMembers() {
+    public List<Subject> getMembers() {
         return members;
     }
 
-    public void setMembers(List<Person> members) {
+    public void setMembers(List<Subject> members) {
         this.members = members != null ? members : new ArrayList<>();
     }
 
-    public void addMember(Person person) {
-        members.add(person);
+    public void addMember(Subject subject) {
+        members.add(subject);
     }
 
     public List<String> getNames() {
         return members
                 .parallelStream()
-                .map(Person::getName)
+                .map(Subject::getName)
                 .collect(Collectors.toList());
     }
 
     public List<String> getUhUuids() {
         return members
                 .parallelStream()
-                .map(Person::getUhUuid)
+                .map(Subject::getUhUuid)
                 .collect(Collectors.toList());
     }
 
-    public List<String> getUsernames() {
+    public List<String> getUids() {
         return members
                 .parallelStream()
-                .map(Person::getUsername)
+                .map(Subject::getUid)
                 .collect(Collectors.toList());
     }
 
@@ -103,30 +104,6 @@ public class Group implements Comparable<Group> {
         } else if (!path.equals(other.path))
             return false;
         return true;
-    }
-
-    @Override
-    public int compareTo(Group group) {
-        int pathComp = getPath().compareTo(group.getPath());
-        if (pathComp != 0) {
-            return pathComp;
-        }
-        int size0 = getMembers().size();
-        int size1 = group.getMembers().size();
-        if (size0 != size1) {
-            return Integer.compare(size0, size1);
-        }
-
-        for (int i = 0; i < size0; i++) {
-            Person p0 = getMembers().get(i);
-            Person p1 = group.getMembers().get(i);
-            int personComp = p0.compareTo(p1);
-            if (personComp != 0) {
-                return personComp;
-            }
-        }
-
-        return 0;
     }
 
     @Override

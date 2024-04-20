@@ -10,7 +10,7 @@ import java.util.Map;
 public class UhCasAttributes implements UhAttributes {
 
     private Map<String, List<String>> uhAttributeMap = new HashMap<>();
-    private final String username; // CAS login username.
+    private final String uid; // CAS login uid.
     private final Map<?, ?> map; // Original CAS results.
 
     public UhCasAttributes() {
@@ -21,8 +21,8 @@ public class UhCasAttributes implements UhAttributes {
         this("", map);
     }
 
-    public UhCasAttributes(String username, Map<?, ?> map) {
-        this.username = username != null ? username : "";
+    public UhCasAttributes(String uid, Map<?, ?> map) {
+        this.uid = uid != null ? uid : "";
         this.map = map;
         if (map != null) {
             for (Object key : map.keySet()) {
@@ -52,35 +52,9 @@ public class UhCasAttributes implements UhAttributes {
         return getValue("cn");
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     @Override
     public String getUid() {
-        List<String> values = uhAttributeMap.get("uid");
-        if (values != null) {
-            // Check expected case first.
-            if (values.size() == 1) {
-                return values.get(0); // We are done.
-            }
-
-            if (values.size() > 1) {
-                // More than one uid in the results.
-                // Try to match up with the username.
-                for (String s : values) {
-                    if (s.equals(getUsername())) {
-                        return s;
-                    }
-                }
-
-                // Couldn't match up username with uid,
-                // so just return first value.
-                return values.get(0); // We are done.
-            }
-        }
-
-        return ""; // Didn't find anything.
+        return getValue("uid");
     }
 
     @Override
@@ -124,7 +98,7 @@ public class UhCasAttributes implements UhAttributes {
 
     @Override
     public String toString() {
-        return "UhCasAttributes [username=" + username
+        return "UhCasAttributes [uid=" + uid
                 + ", uhAttributeMap=" + uhAttributeMap
                 + ", map=" + map + "]";
     }

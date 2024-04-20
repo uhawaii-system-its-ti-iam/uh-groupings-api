@@ -8,11 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import edu.hawaii.its.api.wrapper.Subject;
+
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class GroupTest {
@@ -45,11 +46,19 @@ public class GroupTest {
         assertThat(group.getPath(), equalTo("path"));
 
         assertThat(group.getMembers().size(), equalTo(0));
-        group.addMember(new Person("a"));
+
+        Subject subject0 = new Subject();
+        subject0.setName("a");
+        Subject subject1 = new Subject();
+        subject1.setName("b");
+        Subject subject2 = new Subject();
+        subject2.setName("c");
+
+        group.addMember(subject0);
         assertThat(group.getMembers().size(), equalTo(1));
-        group.addMember(new Person("b"));
+        group.addMember(subject1);
         assertThat(group.getMembers().size(), equalTo(2));
-        group.addMember(new Person("c"));
+        group.addMember(subject2);
         assertThat(group.getMembers().size(), equalTo(3));
 
         group.setMembers(null);
@@ -58,6 +67,23 @@ public class GroupTest {
 
     @Test
     public void equals() {
+        Subject subject0 = new Subject();
+        subject0.setName("Madonna");
+        Subject subject1 = new Subject();
+        subject1.setName("Prince");
+        Subject subject2 = new Subject();
+        subject2.setName("Archibald Cox");
+        Subject subject3 = new Subject();
+        subject3.setName("Leon Jaworski");
+        Subject subject4 = new Subject();
+        subject4.setName("Archibald Cox");
+        Subject subject5 = new Subject();
+        subject5.setName("Leon Jaworski");
+        Subject subject6 = new Subject();
+        subject6.setName("Tricky Dick");
+        Subject subject7 = new Subject();
+        subject7.setName("Richard Nixon");
+
         Group g0 = new Group();
         assertThat(g0, equalTo(g0));
         assertTrue(g0.equals(g0));
@@ -68,24 +94,24 @@ public class GroupTest {
         assertThat(g0, equalTo(g1));
         assertThat(g1, equalTo(g0));
 
-        g0.addMember(new Person());
+        g0.addMember(new Subject());
         assertThat(g0, not(equalTo(g1)));
-        g1.addMember(new Person());
+        g1.addMember(new Subject());
         assertThat(g0, equalTo(g1));
 
-        g0.addMember(new Person("Madonna"));
+        g0.addMember(subject0);
         assertThat(g0, not(equalTo(g1)));
-        g1.addMember(new Person("Madonna"));
+        g1.addMember(subject0);
         assertThat(g0, equalTo(g1));
 
-        g0.addMember(new Person("Prince"));
+        g0.addMember(subject1);
         assertThat(g0, not(equalTo(g1)));
-        g0.addMember(new Person("Prince"));
+        g0.addMember(subject1);
         assertThat(g0, not(equalTo(g1)));
 
-        g1.addMember(new Person("Prince"));
+        g1.addMember(subject1);
         assertThat(g0, not(equalTo(g1)));
-        g1.addMember(new Person("Prince"));
+        g1.addMember(subject1);
         assertThat(g0, equalTo(g1));
 
         g0.setPath("path");
@@ -111,17 +137,17 @@ public class GroupTest {
         assertThat(g0.getMembers().size(), equalTo(4));
         assertThat(g1.getMembers().size(), equalTo(4));
 
-        g0.addMember(new Person("Archibald Cox"));
+        g0.addMember(subject2);
         assertThat(g0, not(equalTo(g1)));
-        g0.addMember(new Person("Leon Jaworski"));
+        g0.addMember(subject3);
         assertThat(g0, not(equalTo(g1)));
-        g1.addMember(new Person("Archibald Cox"));
+        g1.addMember(subject4);
         assertThat(g0, not(equalTo(g1)));
-        g1.addMember(new Person("Leon Jaworski"));
+        g1.addMember(subject5);
         assertThat(g0, equalTo(g1));
 
-        g0.addMember(new Person("Tricky Dick"));
-        g1.addMember(new Person("Richard Nixon"));
+        g0.addMember(subject6);
+        g1.addMember(subject7);
         assertThat(g0, not(equalTo(g1)));
 
         g0 = new Group();
@@ -177,100 +203,21 @@ public class GroupTest {
     }
 
     @Test
-    public void compareTo() {
-        Group g0 = new Group();
-        Group g1 = new Group();
-        assertThat(g0.compareTo(g1), equalTo(0));
-
-        g0 = new Group("a");
-        assertThat(g0.compareTo(g1), equalTo(1));
-        assertThat(g1.compareTo(g0), equalTo(-1));
-
-        g1 = new Group("b");
-        assertThat(g0.compareTo(g1), equalTo(-1));
-        assertThat(g1.compareTo(g0), equalTo(1));
-
-        List<Group> groups = new ArrayList<>();
-        g0 = new Group("d");
-        groups.add(g0);
-        g1 = new Group("c");
-        groups.add(g1);
-        Group g2 = new Group("b");
-        groups.add(g2);
-        Group g3 = new Group("a");
-        groups.add(g3);
-
-        assertThat(groups.get(0).getPath(), equalTo("d"));
-        assertThat(groups.get(1).getPath(), equalTo("c"));
-        assertThat(groups.get(2).getPath(), equalTo("b"));
-        assertThat(groups.get(3).getPath(), equalTo("a"));
-
-        Collections.sort(groups);
-
-        assertThat(groups.get(0).getPath(), equalTo("a"));
-        assertThat(groups.get(1).getPath(), equalTo("b"));
-        assertThat(groups.get(2).getPath(), equalTo("c"));
-        assertThat(groups.get(3).getPath(), equalTo("d"));
-
-        groups = new ArrayList<>();
-        List<Person> list0 = new ArrayList<>();
-        list0.add(new Person("a"));
-        list0.add(new Person("b"));
-        list0.add(new Person("c"));
-        list0.add(new Person("d"));
-        g0 = new Group("A", list0);
-        groups.add(g0);
-        g1 = new Group("A", list0.subList(1, 4));
-        groups.add(g1);
-        g2 = new Group("A", list0.subList(2, 4));
-        groups.add(g2);
-        g3 = new Group("A", list0.subList(3, 4));
-        groups.add(g3);
-
-        assertThat(groups.get(0).getMembers().size(), equalTo(4));
-        assertThat(groups.get(1).getMembers().size(), equalTo(3));
-        assertThat(groups.get(2).getMembers().size(), equalTo(2));
-        assertThat(groups.get(3).getMembers().size(), equalTo(1));
-
-        Collections.sort(groups);
-
-        assertThat(groups.get(0).getMembers().size(), equalTo(1));
-        assertThat(groups.get(1).getMembers().size(), equalTo(2));
-        assertThat(groups.get(2).getMembers().size(), equalTo(3));
-        assertThat(groups.get(3).getMembers().size(), equalTo(4));
-
-        List<Person> list1 = new ArrayList<>();
-        list1.add(new Person("a"));
-        list1.add(new Person("b"));
-        list1.add(new Person("c"));
-        list1.add(new Person("d"));
-
-        g0 = new Group("a", list0);
-        g1 = new Group("a", list1);
-        assertThat(g0.compareTo(g1), equalTo(0));
-        assertTrue(g0.equals(g1));
-        assertTrue(g1.equals(g0));
-
-        g1.getMembers().get(3).setName("e");
-        assertThat(g0.compareTo(g1), equalTo(-1));
-        assertThat(g1.compareTo(g0), equalTo(01));
-    }
-
-    @Test
     public void testToString() {
         assertThat(group.toString(), equalTo("Group [path=, members=[]]"));
 
         group = new Group("eno");
         assertThat(group.toString(), equalTo("Group [path=eno, members=[]]"));
 
-        group = new Group("fripp", new ArrayList<Person>());
+        group = new Group("fripp", new ArrayList<Subject>());
         assertThat(group.toString(), equalTo("Group [path=fripp, members=[]]"));
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(new Person("A", "B", "C"));
-        group = new Group("manzanera", persons);
+        List<Subject> subjects = new ArrayList<>();
+        Subject subject = new Subject("C", "A", "B");
+        subjects.add(subject);
+        group = new Group("manzanera", subjects);
         String expected = "Group [path=manzanera, "
-                + "members=[Person [name=A, uhUuid=B, username=C]]]";
+                + "members=[Subject [name=A, uhUuid=B, uid=C]]]";
         assertThat(group.toString(), equalTo(expected));
     }
 
@@ -278,7 +225,8 @@ public class GroupTest {
     public void isEmptyTest() {
         group = new Group();
         assertTrue(group.isEmpty());
-        group.addMember(new Person("A", "B", "C"));
+        Subject subject = new Subject("C", "A", "B");
+        group.addMember(subject);
         assertFalse(group.isEmpty());
     }
 
