@@ -324,7 +324,6 @@ public class OotbGroupingPropertiesService {
             result.setWsGroups(
                     groupList.toArray(new WsGroup[0]));
         });
-
     }
 
     private void optOut(String groupPath) {
@@ -401,38 +400,32 @@ public class OotbGroupingPropertiesService {
         subjectsResults.getWsGetSubjectsResults().setWsSubjects(filteredWsSubjects);
     }
 
-    public FindGroupsResults getFindGroups(String path) {
-        WsGroup[] currentGroups = getFindGroupsResults().getWsFindGroupsResults().getGroupResults();
+    public void ootbResetGroup(String groupPath) {
+        WsGetMembersResult[] updatedWsGetMembersResults = Arrays.stream(wsGetMembersResultsList())
+                .map(wsGetMembersResult -> {
+                    if (wsGetMembersResult.getWsGroup() != null && groupPath.equals(wsGetMembersResult.getWsGroup().getName())) {
+                        WsGetMembersResult filteredResult = new WsGetMembersResult();
+                        filteredResult.setWsGroup(wsGetMembersResult.getWsGroup());
+                        filteredResult.setResultMetadata(wsGetMembersResult.getResultMetadata());
+                        WsSubject[] resetSubjects = new WsSubject[]{};
+                        filteredResult.setWsSubjects(resetSubjects);
 
-        String groupPath = PathFilter.parentGroupingPath(path);
+                        /* Updating managePersonResults with uhIdentifiers to be reset*/
+                        String[] uhIdentifiers = Arrays.stream(wsGetMembersResult.getWsSubjects())
+                                .map(WsSubject::getId)
+                                .toArray(String[]::new);
+                        updateGetGroupsResults(List.of(uhIdentifiers), groupPath, "remove");
 
-        List<WsGroup> filteredGroups = Arrays.stream(currentGroups)
-                .filter(group -> groupPath.equals(group.getName()))
-                .toList();
-        if (filteredGroups.isEmpty()) {
-            return new FindGroupsResults();
-        }
-        WsFindGroupsResults newWsFindGroupsResults = new WsFindGroupsResults();
-        newWsFindGroupsResults.setGroupResults(filteredGroups.toArray(new WsGroup[0]));
-
-        return new FindGroupsResults(newWsFindGroupsResults);
+                        return filteredResult;
+                    } else {
+                        return wsGetMembersResult;
+                    }
+                })
+                .toArray(WsGetMembersResult[]::new);
+        getMembersResults.getWsGetMembersResults().setResults(updatedWsGetMembersResults);
     }
 
-    public FindGroupsResults getFindGroups(List<String> groupPaths) {
-        WsGroup[] currentGroups = getFindGroupsResults().getWsFindGroupsResults().getGroupResults();
 
-        List<WsGroup> filteredGroups = Arrays.stream(currentGroups)
-                .filter(group -> groupPaths.contains(group.getName()))
-                .toList();
-
-        if (filteredGroups.isEmpty()) {
-            return new FindGroupsResults();
-        }
-
-        WsFindGroupsResults newWsFindGroupsResults = new WsFindGroupsResults();
-        newWsFindGroupsResults.setGroupResults(filteredGroups.toArray(new WsGroup[0]));
-        return new FindGroupsResults(newWsFindGroupsResults);
-    }
 
 
     /* Query Function */
@@ -465,6 +458,11 @@ public class OotbGroupingPropertiesService {
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
         updateSubjectsByUhIdentifiers(uhIdentifiers);
         return getSubjectsResults();
+    }
+
+    public AddMembersResults resetGroup(String groupPath) {
+        ootbResetGroup(groupPath);
+        return getAddMembersResults();
     }
 
     public GetMembersResults getOwnedGroupings(List<String> groupPaths) {
@@ -545,6 +543,39 @@ public class OotbGroupingPropertiesService {
         WsGetGroupsResults wsGetGroupsResults1 = new WsGetGroupsResults();
         wsGetGroupsResults1.setResults(finalResults);
         return new GetGroupsResults(wsGetGroupsResults1);
+    }
+
+    public FindGroupsResults getFindGroups(String path) {
+        WsGroup[] currentGroups = getFindGroupsResults().getWsFindGroupsResults().getGroupResults();
+
+        String groupPath = PathFilter.parentGroupingPath(path);
+
+        List<WsGroup> filteredGroups = Arrays.stream(currentGroups)
+                .filter(group -> groupPath.equals(group.getName()))
+                .toList();
+        if (filteredGroups.isEmpty()) {
+            return new FindGroupsResults();
+        }
+        WsFindGroupsResults newWsFindGroupsResults = new WsFindGroupsResults();
+        newWsFindGroupsResults.setGroupResults(filteredGroups.toArray(new WsGroup[0]));
+
+        return new FindGroupsResults(newWsFindGroupsResults);
+    }
+
+    public FindGroupsResults getFindGroups(List<String> groupPaths) {
+        WsGroup[] currentGroups = getFindGroupsResults().getWsFindGroupsResults().getGroupResults();
+
+        List<WsGroup> filteredGroups = Arrays.stream(currentGroups)
+                .filter(group -> groupPaths.contains(group.getName()))
+                .toList();
+
+        if (filteredGroups.isEmpty()) {
+            return new FindGroupsResults();
+        }
+
+        WsFindGroupsResults newWsFindGroupsResults = new WsFindGroupsResults();
+        newWsFindGroupsResults.setGroupResults(filteredGroups.toArray(new WsGroup[0]));
+        return new FindGroupsResults(newWsFindGroupsResults);
     }
 
 

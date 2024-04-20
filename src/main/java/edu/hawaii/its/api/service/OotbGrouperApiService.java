@@ -224,7 +224,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Remove all listed members from a group.
      */
     public AddMembersResults resetGroupMembers(String groupPath) {
-        return ootbGroupingPropertiesService.getAddMembersResults();
+        return ootbGroupingPropertiesService.resetGroup(groupPath);
     }
 
     /**
