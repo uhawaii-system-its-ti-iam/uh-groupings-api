@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -227,5 +228,23 @@ public class OotbGrouperApiServiceTest {
         verify(ootbGroupingPropertiesService).removeMembers(currentUser, groupPath, uhIdentifiers);
         assertEquals(expected, result, "The returned RemoveMembersResults should match the expected results.");
     }
+
+    @Test
+    public void testResetGroup() {
+        // Set up
+        String groupPath = "groupPath-0-1";
+        AddMembersResults mockAddMembersResults = new AddMembersResults(); // Assume this is a valid class
+
+        when(ootbGroupingPropertiesService.getAddMembersResults()).thenReturn(mockAddMembersResults);
+        when(ootbGroupingPropertiesService.resetGroup(groupPath)).thenReturn(mockAddMembersResults);
+
+        // Execution
+        AddMembersResults results = grouperService.resetGroupMembers(groupPath);
+
+        // Verifications
+        assertNotNull(results);
+        verify(ootbGroupingPropertiesService).resetGroup(groupPath);
+    }
+
 
 }
