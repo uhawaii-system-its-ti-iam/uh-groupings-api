@@ -47,9 +47,9 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -57,11 +57,14 @@ import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OotbActiveProfile;
+import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
@@ -113,6 +116,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockBean
     private MemberService memberService;
+
+    @MockBean
+    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @Autowired
     private WebApplicationContext context;
@@ -915,6 +921,33 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
         verify(asyncJobsManager, times(1)).getJobResult(CURRENT_USER, jobId);
+    }
+
+    @Test
+    public void updateActiveDefaultUserTest() throws Exception {
+        List<String> paths =
+                Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER", "ROLE_OOTB");
+        OotbActiveProfile activeProfile = new OotbActiveProfile.Builder()
+            .uid("admin0123")
+            .uhUuid("33333333")
+            .name("ADMIN")
+            .givenName("AdminUser")
+            .authorities(paths)
+            .build();
+
+        given(ootbGroupingPropertiesService.updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser"))
+                .willReturn(new OotbActiveProfileResult(activeProfile));
+
+        MvcResult result = mockMvc.perform(
+                        post(API_BASE + "/activeProfile/ootb?uid=admin0123&uhUuid=33333333&name=ADMIN&givenName=AdminUser")
+                                .header(CURRENT_USER, CURRENT_USER)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        verify(ootbGroupingPropertiesService, times(1))
+                .updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser");
     }
 
     @Test

@@ -36,9 +36,9 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -47,10 +47,12 @@ import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PreferenceStatus;
@@ -91,6 +93,9 @@ public class GroupingsRestControllerv2_1 {
 
     @Autowired
     private AnnouncementsService announcementsService;
+
+    @Autowired
+    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     final private static String CURRENT_USER_KEY = "current_user";
 
@@ -661,5 +666,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(announcementsService.getAnnouncements());
+    }
+
+    /**
+     * Update Ootb active user profile.
+     */
+    @PostMapping(value = "/activeProfile/ootb")
+    public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserProfile(@RequestBody List<String> authorities,
+                                                                               @RequestParam(required = true) String uid,
+                                                                               @RequestParam(required = true) String uhUuid,
+                                                                               @RequestParam(required = true) String name,
+                                                                               @RequestParam(required = true) String givenName) {
+        logger.debug("Entered REST updateActiveUserProfile...");
+        return ResponseEntity
+                .ok()
+                .body(ootbGroupingPropertiesService.updateActiveUserProfile(authorities, uid, uhUuid, name, givenName));
     }
 }

@@ -132,7 +132,7 @@ public class OotbGrouperApiServiceTest {
 
     // Test for validating UH identifier
     @Test
-    void testGetSubjectsSingle() {
+    public void testGetSubjectsSingle() {
         // Setup
         String uhIdentifier = "12345";
         SubjectsResults expectedResults = new SubjectsResults(); // Properly initialized or mocked
@@ -147,7 +147,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testGetSubjectsMultiple() {
+    public void testGetSubjectsMultiple() {
         // Setup
         List<String> uhIdentifiers = List.of("12345", "67890");
         SubjectsResults expectedResults = new SubjectsResults(); // Mock or use a real instance
@@ -196,7 +196,7 @@ public class OotbGrouperApiServiceTest {
     }
 
     @Test
-    void testRemoveMember() {
+    public void testRemoveMember() {
         // Setup
         String currentUser = "testUser";
         String groupPath = "testGroup";
