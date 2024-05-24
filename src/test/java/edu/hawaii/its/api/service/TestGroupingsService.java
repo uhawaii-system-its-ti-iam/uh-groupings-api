@@ -43,8 +43,8 @@ public class TestGroupingsService extends ServiceTest {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_UH_NUMBERS;
+    @Value("${groupings.api.test.uh-uuids}")
+    private List<String> TEST_UH_UUIDS;
 
     @Autowired
     private GroupingsService groupingsService;
@@ -53,7 +53,7 @@ public class TestGroupingsService extends ServiceTest {
 
     @BeforeEach
     public void init() {
-        UH_UUID = TEST_UH_NUMBERS.get(0);
+        UH_UUID = TEST_UH_UUIDS.get(0);
     }
 
     @Test
