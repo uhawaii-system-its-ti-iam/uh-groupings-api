@@ -232,11 +232,10 @@ public class TestGrouperApiService {
             assertTrue(testUhUuidsSet.contains(subject.getUhUuid()));
         }
 
-        // Numbers and Uids
-        List<String> numbersAndUids = new ArrayList<>();
-        numbersAndUids.add(testUhUuids.get(0));
-        numbersAndUids.add(testUids.get(1));
-        subjectsResults = grouperService.getSubjects(numbersAndUids);
+        List<String> uhUuidsAndUids = new ArrayList<>();
+        uhUuidsAndUids.add(testUhUuids.get(0));
+        uhUuidsAndUids.add(testUids.get(1));
+        subjectsResults = grouperService.getSubjects(uhUuidsAndUids);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
         subjects = subjectsResults.getSubjects();
@@ -251,8 +250,8 @@ public class TestGrouperApiService {
         }
 
         // With invalid identifier
-        numbersAndUids.add("invalid-identifier");
-        subjectsResults = grouperService.getSubjects(numbersAndUids);
+        uhUuidsAndUids.add("invalid-identifier");
+        subjectsResults = grouperService.getSubjects(uhUuidsAndUids);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
         subjects = subjectsResults.getSubjects();

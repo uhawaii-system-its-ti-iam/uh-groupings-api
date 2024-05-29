@@ -23,11 +23,11 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class SubjectTest {
 
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_USERNAMES;
+    @Value("${groupings.api.test.uids}")
+    private List<String> TEST_UIDS;
 
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_NUMBERS;
+    @Value("${groupings.api.test.uh-uuids}")
+    private List<String> TEST_UH_UUIDS;
 
     @Value("${groupings.api.test.uh-names}")
     private List<String> TEST_NAMES;
@@ -60,8 +60,8 @@ public class SubjectTest {
 
     @Test
     public void accessors() {
-        String uid = TEST_USERNAMES.get(0);
-        String number = TEST_NUMBERS.get(0);
+        String uid = TEST_UIDS.get(0);
+        String uhuuid = TEST_UH_UUIDS.get(0);
         String name = TEST_NAMES.get(0);
         String firstName = TEST_FIRSTNAMES.get(0);
         String lastName = TEST_LASTNAMES.get(0);
@@ -72,7 +72,7 @@ public class SubjectTest {
         assertNotNull(subject);
         assertEquals(SUCCESS, subject.getResultCode());
         assertEquals(uid, subject.getUid());
-        assertEquals(number, subject.getUhUuid());
+        assertEquals(uhuuid, subject.getUhUuid());
         assertEquals(name, subject.getName());
         assertEquals(firstName, subject.getFirstName());
         assertEquals(lastName, subject.getLastName());
@@ -84,7 +84,7 @@ public class SubjectTest {
         assertNotNull(subject);
         assertEquals(SUCCESS, subject.getResultCode());
         assertEquals(uid, subject.getUid());
-        assertEquals(number, subject.getUhUuid());
+        assertEquals(uhuuid, subject.getUhUuid());
         assertEquals(name, subject.getName());
         assertEquals(firstName, subject.getFirstName());
         assertEquals(lastName, subject.getLastName());

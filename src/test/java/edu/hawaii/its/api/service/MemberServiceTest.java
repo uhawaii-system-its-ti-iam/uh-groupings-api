@@ -27,8 +27,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberServiceTest {
 
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_USERNAMES;
+    @Value("${groupings.api.test.uids}")
+    private List<String> TEST_UIDS;
     
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -58,9 +58,9 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(GROUPING_ADMINS, TEST_USERNAMES.get(0));
+                .hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
-        assertTrue(memberService.isAdmin(TEST_USERNAMES.get(0)));
+        assertTrue(memberService.isAdmin(TEST_UIDS.get(0)));
     }
 
     @Test
@@ -70,12 +70,12 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupingPath + GroupType.OWNERS.value(), TEST_USERNAMES.get(0));
+                .hasMemberResults(groupingPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(OWNERS_GROUP, TEST_USERNAMES.get(0));
+                .hasMemberResults(OWNERS_GROUP, TEST_UIDS.get(0));
 
-        assertTrue(memberService.isOwner(groupingPath, TEST_USERNAMES.get(0)));
-        assertTrue(memberService.isOwner(TEST_USERNAMES.get(0)));
+        assertTrue(memberService.isOwner(groupingPath, TEST_UIDS.get(0)));
+        assertTrue(memberService.isOwner(TEST_UIDS.get(0)));
     }
 
     @Test
@@ -85,9 +85,9 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupingPath + GroupType.INCLUDE.value(), TEST_USERNAMES.get(0));
+                .hasMemberResults(groupingPath + GroupType.INCLUDE.value(), TEST_UIDS.get(0));
 
-        assertTrue(memberService.isInclude(groupingPath, TEST_USERNAMES.get(0)));
+        assertTrue(memberService.isInclude(groupingPath, TEST_UIDS.get(0)));
     }
 
     @Test
@@ -97,9 +97,9 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupingPath + GroupType.EXCLUDE.value(), TEST_USERNAMES.get(0));
+                .hasMemberResults(groupingPath + GroupType.EXCLUDE.value(), TEST_UIDS.get(0));
 
-        assertTrue(memberService.isExclude(groupingPath, TEST_USERNAMES.get(0)));
+        assertTrue(memberService.isExclude(groupingPath, TEST_UIDS.get(0)));
     }
 
     @Test
@@ -109,9 +109,9 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupingPath, TEST_USERNAMES.get(0));
+                .hasMemberResults(groupingPath, TEST_UIDS.get(0));
 
-        assertTrue(memberService.isMember(groupingPath, TEST_USERNAMES.get(0)));
+        assertTrue(memberService.isMember(groupingPath, TEST_UIDS.get(0)));
     }
 
     @Test
@@ -121,9 +121,9 @@ public class MemberServiceTest {
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupingPath, TEST_USERNAMES.get(0));
+                .hasMemberResults(groupingPath, TEST_UIDS.get(0));
 
-        assertFalse(memberService.isMember(groupingPath, TEST_USERNAMES.get(0)));
+        assertFalse(memberService.isMember(groupingPath, TEST_UIDS.get(0)));
     }
 
 }
