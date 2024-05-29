@@ -24,13 +24,13 @@ public class TestSubjectService {
     @Autowired
     private SubjectService subjectService;
 
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_UH_USERNAMES;
+    @Value("${groupings.api.test.uids}")
+    private List<String> TEST_UIDS;
 
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_UH_NUMBERS;
+    @Value("${groupings.api.test.uh-uuids}")
+    private List<String> TEST_UH_UUIDS;
 
-    @Value("${groupings.api.test.dept-uh-usernames}")
+    @Value("${groupings.api.test.dept-uids}")
     private List<String> TEST_DEPT_UH_UIDS;
 
     @Test
@@ -40,11 +40,11 @@ public class TestSubjectService {
 
     @Test
     public void isValidIdentifier() {
-        for (String uid : TEST_UH_USERNAMES) {
+        for (String uid : TEST_UIDS) {
             assertTrue(subjectService.isValidIdentifier(uid));
         }
-        for (String number : TEST_UH_NUMBERS) {
-            assertTrue(subjectService.isValidIdentifier(number));
+        for (String uhuuid : TEST_UH_UUIDS) {
+            assertTrue(subjectService.isValidIdentifier(uhuuid));
         }
         assertTrue(subjectService.isValidIdentifier(TEST_DEPT_UH_UIDS.get(1))); // testiwt2 is valid
         assertFalse(subjectService.isValidIdentifier("invalid-identifier"));
@@ -52,24 +52,24 @@ public class TestSubjectService {
 
     @Test
     public void getValidUhUuids() {
-        assertEquals(TEST_UH_NUMBERS, subjectService.getValidUhUuids(TEST_UH_NUMBERS));
-        assertEquals(TEST_UH_NUMBERS, subjectService.getValidUhUuids(TEST_UH_USERNAMES));
+        assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(TEST_UH_UUIDS));
+        assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(TEST_UIDS));
 
-        List<String> hasInvalidIdentifiers = new ArrayList<>(TEST_UH_USERNAMES);
+        List<String> hasInvalidIdentifiers = new ArrayList<>(TEST_UIDS);
         hasInvalidIdentifiers.add("invalid-identifier");
-        assertEquals(TEST_UH_NUMBERS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
+        assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
 
-        hasInvalidIdentifiers = new ArrayList<>(TEST_UH_NUMBERS);
+        hasInvalidIdentifiers = new ArrayList<>(TEST_UH_UUIDS);
         hasInvalidIdentifiers.add("invalid-identifier");
-        assertEquals(TEST_UH_NUMBERS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
+        assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
     }
 
     @Test
     public void getValidUhUuid() {
-        String uid = TEST_UH_USERNAMES.get(0);
-        String number = TEST_UH_NUMBERS.get(0);
-        assertEquals(number, subjectService.getValidUhUuid(uid));
-        assertEquals(number, subjectService.getValidUhUuid(number));
+        String uid = TEST_UIDS.get(0);
+        String uhuuid = TEST_UH_UUIDS.get(0);
+        assertEquals(uhuuid, subjectService.getValidUhUuid(uid));
+        assertEquals(uhuuid, subjectService.getValidUhUuid(uhuuid));
 
         assertEquals("", subjectService.getValidUhUuid("invalid-identifier"));
     }

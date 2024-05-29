@@ -27,11 +27,11 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingRemoveResultTest {
 
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_USERNAMES;
+    @Value("${groupings.api.test.uids}")
+    private List<String> TEST_UIDS;
 
-    @Value("${groupings.api.test.uh-numbers}")
-    private List<String> TEST_NUMBERS;
+    @Value("${groupings.api.test.uh-uuids}")
+    private List<String> TEST_UH_UUIDS;
 
     @Value("${groupings.api.test.uh-names}")
     private List<String> TEST_NAMES;
@@ -59,8 +59,8 @@ public class GroupingRemoveResultTest {
 
         assertNotNull(groupingRemoveResult);
         assertEquals("SUCCESS_WASNT_IMMEDIATE", groupingRemoveResult.getResultCode());
-        assertEquals(TEST_USERNAMES.get(0), groupingRemoveResult.getUid());
-        assertEquals(TEST_NUMBERS.get(0), groupingRemoveResult.getUhUuid());
+        assertEquals(TEST_UIDS.get(0), groupingRemoveResult.getUid());
+        assertEquals(TEST_UH_UUIDS.get(0), groupingRemoveResult.getUhUuid());
         assertEquals(TEST_NAMES.get(0), groupingRemoveResult.getName());
     }
 

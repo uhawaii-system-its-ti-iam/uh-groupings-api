@@ -53,7 +53,7 @@ public class RemoveMemberResultTest {
         RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResult, "group-path");
         assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMemberResult.getResultCode());
         assertEquals("group-path", removeMemberResult.getGroupPath());
-        assertEquals(getTestNumbers().get(0), removeMemberResult.getUhUuid());
+        assertEquals(getTestUhUuids().get(0), removeMemberResult.getUhUuid());
         assertEquals(getTestUids().get(0), removeMemberResult.getUid());
         assertEquals(getTestNames().get(0), removeMemberResult.getName());
         assertNotNull(removeMemberResult.getSubject());
@@ -65,7 +65,7 @@ public class RemoveMemberResultTest {
         return new ArrayList<>(Arrays.asList(array));
     }
 
-    public List<String> getTestNumbers() {
+    public List<String> getTestUhUuids() {
         String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
         return new ArrayList<>(Arrays.asList(array));
     }

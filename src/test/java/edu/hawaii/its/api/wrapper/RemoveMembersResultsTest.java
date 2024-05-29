@@ -57,7 +57,7 @@ public class RemoveMembersResultsTest {
         return new ArrayList<>(Arrays.asList(array));
     }
 
-    public List<String> getTestNumbers() {
+    public List<String> getTestUhUuids() {
         String[] array = { "99997010", "99997027", "99997033", "99997043", "99997056" };
         return new ArrayList<>(Arrays.asList(array));
     }

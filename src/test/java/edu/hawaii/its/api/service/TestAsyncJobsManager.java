@@ -29,8 +29,8 @@ public class TestAsyncJobsManager {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
-    @Value("${groupings.api.test.uh-usernames}")
-    private List<String> TEST_UH_USERNAMES;
+    @Value("${groupings.api.test.uids}")
+    private List<String> TEST_UIDS;
 
     @Autowired
     private AsyncJobsManager asyncJobsManager;
@@ -72,7 +72,7 @@ public class TestAsyncJobsManager {
 
     @Test
     public void completedAsyncJobTest() {
-        String testUid = TEST_UH_USERNAMES.get(0);
+        String testUid = TEST_UIDS.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         CompletableFuture<String> completableFuture = CompletableFuture.completedFuture("SUCCESS");
         Integer jobId = asyncJobsManager.putJob(completableFuture);
