@@ -99,14 +99,14 @@ public class OotbGrouperApiServiceTest {
         String groupingPath = "group-0-1";
         String description = "Groupings group";
         GroupSaveResults expected = new GroupSaveResults();
-        when(ootbGroupingPropertiesService.getGroupSaveResults()).thenReturn(expected);
+        when(ootbGroupingPropertiesService.updateDescription(groupingPath, description)).thenReturn(expected);
 
         // Act
         GroupSaveResults result = grouperService.groupSaveResults(groupingPath, description);
 
         // Assert
         assertEquals(expected, result);
-        verify(ootbGroupingPropertiesService).getGroupSaveResults();
+        verify(ootbGroupingPropertiesService).updateDescription(groupingPath, description);
     }
 
     @Test
