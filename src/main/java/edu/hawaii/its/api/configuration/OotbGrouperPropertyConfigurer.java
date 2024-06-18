@@ -1,8 +1,15 @@
 package edu.hawaii.its.api.configuration;
 
-import edu.hawaii.its.api.service.OotbGrouperApiService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ActiveProfiles;
+
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GrouperService;
+import edu.hawaii.its.api.service.OotbGrouperApiService;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -16,6 +23,7 @@ import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
@@ -27,18 +35,15 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ActiveProfiles("ootb")
 class OotbGrouperPropertyConfigurer {
 
     private PropertyLocator propertyLocator = new PropertyLocator("src/main/resources", "data.harness.properties");
 
     public static final Log log = LogFactory.getLog(OotbGrouperPropertyConfigurer.class);
+
     /*
     Data Harness Configuration
      */
@@ -147,3 +152,5 @@ class OotbGrouperPropertyConfigurer {
     }
 
 }
+
+

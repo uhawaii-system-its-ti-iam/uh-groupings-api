@@ -27,6 +27,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesRe
 public class OotbGrouperApiService implements GrouperService {
 
     public static final Log log = LogFactory.getLog(OotbGrouperApiService.class);
+
     @Autowired
     OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
@@ -34,7 +35,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if a UH identifier is listed in a group.
      */
     public HasMembersResults hasMemberResults(String groupPath, String uhIdentifier) {
-        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResultsBean();
+        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResults();
         return hasMembersResults;
     }
 
@@ -42,7 +43,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if multiple UH identifiers are listed in a group.
      */
     public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
-        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResultsBean();
+        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResults();
         return hasMembersResults;
     }
 
