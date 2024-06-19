@@ -829,5 +829,21 @@ public class OotbGroupingPropertiesService {
                 .toArray(WsGetMembersResult[]::new);
         getMembersResults.getWsGetMembersResults().setResults(updatedWsGetMembersResults);
     }
+
+    public GroupSaveResults updateDescription(String groupPath, String description) {
+        WsFindGroupsResults wsFindGroupsResults = getFindGroupsResults().getWsFindGroupsResults();
+        WsGroup[] groups = wsFindGroupsResults.getGroupResults();
+
+        if (groups.length == 0) {
+            return new GroupSaveResults();
+        }
+
+        Arrays.stream(groups)
+                .filter(group -> group.getName() != null && group.getName().equals(groupPath))
+                .findFirst()
+                .ifPresent(group -> group.setDescription(description));
+
+        return getGroupSaveResults();
+    }
 }
 
