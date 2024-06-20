@@ -51,8 +51,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Update a groups description.
      */
     public GroupSaveResults groupSaveResults(String groupingPath, String description) {
-        GroupSaveResults groupSaveResults = ootbGroupingPropertiesService.getGroupSaveResults();
-        return groupSaveResults;
+        return ootbGroupingPropertiesService.updateDescription(groupingPath, description);
     }
 
     /**
