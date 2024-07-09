@@ -10,7 +10,6 @@ import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 @Service("ownerService")
 public class GroupingOwnerService {
 
-    public static final Log log = LogFactory.getLog(GroupingOwnerService.class);
+    private static final Log log = LogFactory.getLog(GroupingOwnerService.class);
 
     @Value("${grouper.api.sync.destinations.location}")
     private String SYNC_DESTINATIONS_LOCATION;
@@ -31,7 +30,11 @@ public class GroupingOwnerService {
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
 
-    @Autowired private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public GroupingOwnerService(GrouperService grouperService) {
+        this.grouperService = grouperService;
+    }
 
     /**
      * Get all members listed in the groups in groupsPath. This should be used iteratively from the UI to get all

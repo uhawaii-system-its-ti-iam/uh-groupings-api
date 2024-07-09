@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -32,25 +31,32 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
  */
 @Service("updateMemberService")
 public class UpdateMemberService {
-    public static final Log log = LogFactory.getLog(UpdateMemberService.class);
+    private static final Log log = LogFactory.getLog(UpdateMemberService.class);
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
-    @Autowired
-    private UpdateTimestampService timestampService;
+    private final UpdateTimestampService timestampService;
 
-    @Autowired
-    private SubjectService subjectService;
+    private final SubjectService subjectService;
 
-    @Autowired
-    private GroupPathService groupPathService;
+    private final GroupPathService groupPathService;
 
-    @Autowired
-    private MemberService memberService;
+    private final MemberService memberService;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public UpdateMemberService(UpdateTimestampService timestampService,
+            SubjectService subjectService,
+            GroupPathService groupPathService,
+            MemberService memberService,
+            GrouperService grouperService) {
+        this.timestampService = timestampService;
+        this.subjectService = subjectService;
+        this.groupPathService = groupPathService;
+        this.memberService = memberService;
+        this.grouperService = grouperService;
+    }
 
     public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("addAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));

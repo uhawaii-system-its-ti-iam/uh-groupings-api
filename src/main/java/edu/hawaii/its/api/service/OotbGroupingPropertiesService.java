@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -55,7 +54,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 @Service
 public class OotbGroupingPropertiesService {
 
-    public static final Log logger = LogFactory.getLog(OotbGroupingPropertiesService.class);
+    private static final Log logger = LogFactory.getLog(OotbGroupingPropertiesService.class);
 
     @Value("${groupings.api.ootb.groupings_users}")
     private String GROUPING_OOTBS;
@@ -63,45 +62,57 @@ public class OotbGroupingPropertiesService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
-    @Autowired
     @Qualifier("HasMembersResultsOOTBBean")
-    private HasMembersResults hasMembersResults;
+    private final HasMembersResults hasMembersResults;
 
-    @Autowired
     @Qualifier("FindGroupsResultsOOTBBean")
-    private FindGroupsResults findGroupsResults;
+    private final FindGroupsResults findGroupsResults;
 
-    @Autowired
     @Qualifier("GetSubjectsResultsOOTBBean")
-    private SubjectsResults subjectsResults;
+    private final SubjectsResults subjectsResults;
 
-    @Autowired
     @Qualifier("GroupSaveResultsOOTBBean")
-    private GroupSaveResults groupSaveResults;
+    private final GroupSaveResults groupSaveResults;
 
-    @Autowired
     @Qualifier("AssignAttributesOOTBBean")
-    private AssignAttributesResults assignAttributesResults;
+    private final AssignAttributesResults assignAttributesResults;
 
-    @Autowired
     @Qualifier("GetMembersResultsOOTBBean")
-    private GetMembersResults getMembersResults;
+    private final GetMembersResults getMembersResults;
 
-    @Autowired
     @Qualifier("AddMemberResultsOOTBBean")
-    private AddMembersResults addMembersResults;
+    private final AddMembersResults addMembersResults;
 
-    @Autowired
     @Qualifier("RemoveMembersResultsOOTBBean")
-    private RemoveMembersResults removeMembersResults;
+    private final RemoveMembersResults removeMembersResults;
 
-    @Autowired
     @Qualifier("AttributeAssignmentResultsOOTBBean")
-    private GroupAttributeResults groupAttributeResults;
+    private final GroupAttributeResults groupAttributeResults;
 
-    @Autowired
     @Qualifier("GetGroupsResultsOOTBBean")
-    private GetGroupsResults getGroupsResults;
+    private final GetGroupsResults getGroupsResults;
+
+    public OotbGroupingPropertiesService(HasMembersResults hasMembersResults,
+            FindGroupsResults findGroupsResults,
+            SubjectsResults subjectsResults,
+            GroupSaveResults groupSaveResults,
+            AssignAttributesResults assignAttributesResults,
+            GetMembersResults getMembersResults,
+            AddMembersResults addMembersResults,
+            RemoveMembersResults removeMembersResults,
+            GroupAttributeResults groupAttributeResults,
+            GetGroupsResults getGroupsResults) {
+        this.hasMembersResults = hasMembersResults;
+        this.findGroupsResults = findGroupsResults;
+        this.subjectsResults = subjectsResults;
+        this.groupSaveResults = groupSaveResults;
+        this.assignAttributesResults = assignAttributesResults;
+        this.getMembersResults = getMembersResults;
+        this.addMembersResults = addMembersResults;
+        this.removeMembersResults = removeMembersResults;
+        this.groupAttributeResults = groupAttributeResults;
+        this.getGroupsResults = getGroupsResults;
+    }
 
     public HasMembersResults getHasMembersResults() {
         return this.hasMembersResults;

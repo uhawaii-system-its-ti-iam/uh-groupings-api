@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,22 +23,28 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 @Service("memberAttributeService")
 public class MemberAttributeService {
 
-    public static final Log logger = LogFactory.getLog(MemberAttributeService.class);
+    private static final Log logger = LogFactory.getLog(MemberAttributeService.class);
 
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
 
-    @Autowired
-    private SubjectService subjectService;
+    private final SubjectService subjectService;
 
-    @Autowired
-    private MemberService memberService;
+    private final MemberService memberService;
 
-    @Autowired
-    private GroupingsService groupingsService;
+    private final GroupingsService groupingsService;
+
+    public MemberAttributeService(GrouperService grouperService,
+            SubjectService subjectService,
+            MemberService memberService,
+            GroupingsService groupingsService) {
+        this.grouperService = grouperService;
+        this.subjectService = subjectService;
+        this.memberService = memberService;
+        this.groupingsService = groupingsService;
+    }
 
     /**
      * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid

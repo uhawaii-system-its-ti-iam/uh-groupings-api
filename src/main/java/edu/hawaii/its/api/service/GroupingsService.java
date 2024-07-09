@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import static edu.hawaii.its.api.service.PathFilter.logger;
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +27,14 @@ public class GroupingsService {
     @Value("${groupings.api.trio}")
     private String TRIO;
 
-    @Autowired
-    private GroupPathService groupPathService;
+    private final GroupPathService groupPathService;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public GroupingsService(GroupPathService groupPathService, GrouperService grouperService) {
+        this.groupPathService = groupPathService;
+        this.grouperService = grouperService;
+    }
 
     /**
      * A list of grouping paths for all groupings.

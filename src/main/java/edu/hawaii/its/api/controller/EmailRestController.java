@@ -2,7 +2,6 @@ package edu.hawaii.its.api.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +21,13 @@ public class EmailRestController {
 
     private static final Log logger = LogFactory.getLog(EmailRestController.class);
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     final private static String CURRENT_USER_KEY = "current_user";
+
+    public EmailRestController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping(value = "/send/feedback")
     @ResponseBody

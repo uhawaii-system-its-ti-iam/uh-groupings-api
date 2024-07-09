@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
@@ -32,19 +31,25 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 @Service("membershipService")
 public class MembershipService {
 
-    public static final Log logger = LogFactory.getLog(MembershipService.class);
+    private static final Log logger = LogFactory.getLog(MembershipService.class);
 
-    @Autowired
-    private SubjectService subjectService;
+    private final SubjectService subjectService;
 
-    @Autowired
-    private GroupingsService groupingsService;
+    private final GroupingsService groupingsService;
 
-    @Autowired
-    private GroupPathService groupPathService;
+    private final GroupPathService groupPathService;
 
-    @Autowired
-    private MemberService memberService;
+    private final MemberService memberService;
+
+    public MembershipService(SubjectService subjectService,
+            GroupingsService groupingsService,
+            GroupPathService groupPathService,
+            MemberService memberService) {
+        this.subjectService = subjectService;
+        this.groupingsService = groupingsService;
+        this.groupPathService = groupPathService;
+        this.memberService = memberService;
+    }
 
     /**
      * Get a list of memberships pertaining to uid. A list of memberships is made up from the groups listings of
