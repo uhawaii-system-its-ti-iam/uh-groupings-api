@@ -6,7 +6,6 @@ import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -67,37 +66,49 @@ public class GroupingsRestControllerv2_1 {
     @Value("${app.groupings.controller.uuid}")
     private String uuid;
 
-    @Autowired
-    private AsyncJobsManager asyncJobsManager;
+    private final AsyncJobsManager asyncJobsManager;
 
-    @Autowired
-    private GroupingAttributeService groupingAttributeService;
+    private final GroupingAttributeService groupingAttributeService;
 
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
+    private final GroupingAssignmentService groupingAssignmentService;
 
-    @Autowired
-    private MemberAttributeService memberAttributeService;
+    private final MemberAttributeService memberAttributeService;
 
-    @Autowired
-    private MembershipService membershipService;
+    private final MembershipService membershipService;
 
-    @Autowired
-    private UpdateMemberService updateMemberService;
+    private final UpdateMemberService updateMemberService;
 
-    @Autowired
-    private MemberService memberService;
+    private final MemberService memberService;
 
-    @Autowired
-    private GroupingOwnerService groupingOwnerService;
+    private final GroupingOwnerService groupingOwnerService;
 
-    @Autowired
-    private AnnouncementsService announcementsService;
+    private final AnnouncementsService announcementsService;
 
-    @Autowired
-    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
+    private final OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     final private static String CURRENT_USER_KEY = "current_user";
+
+    public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
+            GroupingAttributeService groupingAttributeService,
+            GroupingAssignmentService groupingAssignmentService,
+            MemberAttributeService memberAttributeService,
+            MembershipService membershipService,
+            UpdateMemberService updateMemberService,
+            MemberService memberService,
+            GroupingOwnerService groupingOwnerService,
+            AnnouncementsService announcementsService,
+            OotbGroupingPropertiesService ootbGroupingPropertiesService) {
+        this.asyncJobsManager = asyncJobsManager;
+        this.groupingAttributeService = groupingAttributeService;
+        this.groupingAssignmentService = groupingAssignmentService;
+        this.memberAttributeService = memberAttributeService;
+        this.membershipService = membershipService;
+        this.updateMemberService = updateMemberService;
+        this.memberService = memberService;
+        this.groupingOwnerService = groupingOwnerService;
+        this.announcementsService = announcementsService;
+        this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
+    }
 
     @PostConstruct
     public void init() {

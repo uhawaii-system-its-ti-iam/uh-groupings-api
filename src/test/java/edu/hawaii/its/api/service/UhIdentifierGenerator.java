@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,11 @@ public class UhIdentifierGenerator {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Autowired
-    private GroupingOwnerService groupingOwnerService;
+    private final GroupingOwnerService groupingOwnerService;
+
+    public UhIdentifierGenerator(GroupingOwnerService groupingOwnerService) {
+        this.groupingOwnerService = groupingOwnerService;
+    }
 
     public GroupingMember getRandomMember() {
         List<GroupingMember> members = getGroupingMembers();

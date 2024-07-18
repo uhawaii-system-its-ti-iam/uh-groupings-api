@@ -4,7 +4,6 @@ import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.type.ApiValidationError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +17,6 @@ import edu.hawaii.its.api.exception.ExceptionForTesting;
 public class ForTestingRestController {
 
     private static final Log logger = LogFactory.getLog(ForTestingRestController.class);
-
-    @Autowired
-    OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @GetMapping(value = "/exception")
     @ResponseBody

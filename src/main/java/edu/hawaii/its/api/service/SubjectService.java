@@ -2,7 +2,6 @@ package edu.hawaii.its.api.service;
 
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,14 @@ public class SubjectService {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
 
-    @Autowired
-    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
+    private final OotbGroupingPropertiesService ootbGroupingPropertiesService;
+
+    public SubjectService(GrouperService grouperService, OotbGroupingPropertiesService ootbGroupingPropertiesService) {
+        this.grouperService = grouperService;
+        this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
+    }
 
     public boolean isValidIdentifier(String uhIdentifier) {
         if (grouperService instanceof OotbGrouperApiService) {

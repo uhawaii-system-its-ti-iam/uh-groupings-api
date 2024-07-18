@@ -10,7 +10,6 @@ import jakarta.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -34,8 +33,11 @@ public class ErrorControllerAdvice {
 
     private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
+
+    public ErrorControllerAdvice(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());

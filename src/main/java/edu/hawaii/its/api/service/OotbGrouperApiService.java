@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -28,9 +27,11 @@ public class OotbGrouperApiService implements GrouperService {
 
     public static final Log log = LogFactory.getLog(OotbGrouperApiService.class);
 
-    @Autowired
-    OotbGroupingPropertiesService ootbGroupingPropertiesService;
+    private final OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
+    public OotbGrouperApiService(OotbGroupingPropertiesService ootbGroupingPropertiesService) {
+        this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
+    }
     /**
      * Check if a UH identifier is listed in a group.
      */

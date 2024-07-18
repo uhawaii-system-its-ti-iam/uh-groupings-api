@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -16,8 +15,11 @@ import edu.hawaii.its.api.wrapper.Group;
 @Service
 public class GroupPathService {
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public GroupPathService(GrouperService grouperService) {
+            this.grouperService = grouperService;
+    }
 
     /**
      * Throw an exception if path is invalid.

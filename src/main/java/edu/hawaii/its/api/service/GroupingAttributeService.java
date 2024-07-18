@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,22 +39,25 @@ public class GroupingAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    public static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
+    private static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
 
-    @Autowired
-    private GroupingAssignmentService groupingAssignmentService;
+    private final MemberService memberService;
 
-    @Autowired
-    private MemberService memberService;
+    private final GroupingsService groupingsService;
 
-    @Autowired
-    private GroupingsService groupingsService;
+    private final UpdateTimestampService timestampService;
 
-    @Autowired
-    private UpdateTimestampService timestampService;
+    public GroupingAttributeService(GrouperService grouperService,
+            MemberService memberService,
+            GroupingsService groupingsService,
+            UpdateTimestampService timestampService) {
+        this.grouperService = grouperService;
+        this.memberService = memberService;
+        this.groupingsService = groupingsService;
+        this.timestampService = timestampService;
+    }
 
     /**
      * Turn the ability for users to opt-in/opt-out to a grouping on or off.
