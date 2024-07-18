@@ -2,7 +2,6 @@ package edu.hawaii.its.api.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +10,7 @@ import edu.hawaii.its.api.wrapper.FindAttributesResults;
 
 @Service
 public class AnnouncementsService {
-    public static final Log log = LogFactory.getLog(AnnouncementsService.class);
+    private static final Log log = LogFactory.getLog(AnnouncementsService.class);
 
     @Value("${groupings.api.announcements}")
     private String ANNOUNCEMENTS_ATTR_NAME;
@@ -19,8 +18,11 @@ public class AnnouncementsService {
     @Value("${groupings.api.propertystring}")
     private String ANNOUNCEMENTS_ATTR_DEF;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public AnnouncementsService(GrouperService grouperService) {
+        this.grouperService = grouperService;
+    }
 
     public Announcements getAnnouncements() {
         FindAttributesResults findAttributesResults = grouperService.findAttributesResults(

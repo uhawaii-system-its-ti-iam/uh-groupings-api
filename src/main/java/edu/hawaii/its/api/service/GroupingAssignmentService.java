@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,19 +28,25 @@ import edu.hawaii.its.api.wrapper.Subject;
 @Service("groupingAssignmentService")
 public class GroupingAssignmentService {
 
-    public static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
+    private static final Log logger = LogFactory.getLog(GroupingAssignmentService.class);
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
     @Value("${groupings.api.stale_subject_id}")
     private String STALE_SUBJECT_ID;
-    @Autowired
-    private MemberService memberService;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final MemberService memberService;
 
-    @Autowired
-    private GroupingsService groupingsService;
+    private final GrouperService grouperService;
+
+    private final GroupingsService groupingsService;
+
+    public GroupingAssignmentService(MemberService memberService,
+            GrouperService grouperService,
+            GroupingsService groupingsService) {
+        this.memberService = memberService;
+        this.grouperService = grouperService;
+        this.groupingsService = groupingsService;
+    }
 
     /**
      * A list of grouping paths for all groupings, restricted to admins' use only.

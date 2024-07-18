@@ -2,10 +2,6 @@ package edu.hawaii.its.api.service;
 
 import java.util.List;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +18,11 @@ public class MemberService {
     @Value("${groupings.api.grouping_owners}")
     private String OWNERS_GROUP;
 
-    @Autowired
-    private GrouperService grouperService;
+    private final GrouperService grouperService;
+
+    public MemberService(GrouperService grouperService) {
+        this.grouperService = grouperService;
+    }
 
     public boolean isAdmin(String uhIdentifier) {
         return isMember(GROUPING_ADMINS, uhIdentifier);

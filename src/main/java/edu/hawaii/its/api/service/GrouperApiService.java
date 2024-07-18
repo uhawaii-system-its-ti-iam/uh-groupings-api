@@ -3,7 +3,6 @@ package edu.hawaii.its.api.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -34,8 +33,11 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 public class GrouperApiService implements GrouperService {
 
-    @Autowired
-    private ExecutorService exec;
+    private final ExecutorService exec;
+
+    public GrouperApiService(ExecutorService exec) {
+        this.exec = exec;
+    }
 
     /**
      * Check if a UH identifier is listed in a group.

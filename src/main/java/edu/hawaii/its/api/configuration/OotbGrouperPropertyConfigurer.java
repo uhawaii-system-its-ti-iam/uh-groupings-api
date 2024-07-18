@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.service.ExecutorService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GrouperService;
 import edu.hawaii.its.api.service.OotbGrouperApiService;
+import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -111,6 +113,7 @@ class OotbGrouperPropertyConfigurer {
         RemoveMembersResults removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         return removeMembersResults;
     }
+
     @Bean(name = "AttributeAssignmentResultsOOTBBean")
     public GroupAttributeResults grouperGroupAttributeResultsOOTB() {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
@@ -118,6 +121,7 @@ class OotbGrouperPropertyConfigurer {
         GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
         return groupAttributeResults;
     }
+
     @Bean(name = "AssignGrouperPrivilegesResultOOTBBean")
     public AssignGrouperPrivilegesResult grouperAssignGrouperPrivilegesResultOOTB() {
         String json = propertyLocator.find("ws.assign.grouper.privileges.results.success");
@@ -125,6 +129,7 @@ class OotbGrouperPropertyConfigurer {
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult = new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
         return assignGrouperPrivilegesResult;
     }
+
     @Bean(name = "GetGroupsResultsOOTBBean")
     public GetGroupsResults grouperGetGroupsResultsOOTB() {
         String json = propertyLocator.find("ws.get.groups.results.success");
@@ -139,18 +144,15 @@ class OotbGrouperPropertyConfigurer {
 
     @Bean(name = "grouperService")
     @ConditionalOnProperty(name = "grouping.api.server.type", havingValue = "OOTB")
-    public GrouperService grouperApiOOTBService() {
+    public GrouperService grouperApiOOTBService(OotbGroupingPropertiesService ootbGroupingPropertiesService) {
         log.debug("OOTB Grouper Api Service Started");
-        return new OotbGrouperApiService();
+        return new OotbGrouperApiService(ootbGroupingPropertiesService);
     }
 
     @Bean(name = "grouperService")
     @ConditionalOnProperty(name = "grouping.api.server.type", havingValue = "GROUPER", matchIfMissing = true)
-    public GrouperService grouperApiService() {
+    public GrouperService grouperApiService(ExecutorService executorService) {
         log.debug("REAL Grouper Api Service Started");
-        return new GrouperApiService();
+        return new GrouperApiService(executorService);
     }
-
 }
-
-

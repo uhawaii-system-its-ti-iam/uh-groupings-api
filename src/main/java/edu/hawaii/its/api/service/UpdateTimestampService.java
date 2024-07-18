@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.groupings.GroupingResult;
@@ -22,13 +21,16 @@ import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
  */
 @Service("timestampService")
 public class UpdateTimestampService {
-    public static final Log logger = LogFactory.getLog(MembershipService.class);
+    private static final Log logger = LogFactory.getLog(MembershipService.class);
 
-    @Autowired
-    public GroupPathService groupPathService;
+    private final GroupPathService groupPathService;
 
-    @Autowired
-    public RetryExecutorService retryExec;
+    private final RetryExecutorService retryExec;
+
+    public UpdateTimestampService(GroupPathService groupPathService, RetryExecutorService retryExec) {
+        this.groupPathService = groupPathService;
+        this.retryExec = retryExec;
+    }
 
     public GroupingTimestampResults update(GroupingResult groupingResult) {
         if (groupingResult.getResultCode().equals("SUCCESS")) {
