@@ -51,6 +51,7 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
@@ -682,15 +683,12 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update Ootb active user profile.
      */
-    @PostMapping(value = "/activeProfile/ootb")
-    public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserProfile(@RequestBody List<String> authorities,
-                                                                               @RequestParam(required = true) String uid,
-                                                                               @RequestParam(required = true) String uhUuid,
-                                                                               @RequestParam(required = true) String name,
-                                                                               @RequestParam(required = true) String givenName) {
-        logger.debug("Entered REST updateActiveUserProfile...");
+     @PostMapping(value = "/activeProfile/ootb")
+     public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserGroupings(@RequestBody OotbActiveProfile ootbActiveProfile) {
+        logger.debug("Entered REST updateOotbActiveUserGroupings...");
         return ResponseEntity
                 .ok()
-                .body(ootbGroupingPropertiesService.updateActiveUserProfile(authorities, uid, uhUuid, name, givenName));
-    }
+                .body(ootbGroupingPropertiesService.updateActiveUserProfile(ootbActiveProfile));
+     }
+
 }
