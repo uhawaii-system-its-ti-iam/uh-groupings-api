@@ -38,6 +38,9 @@ public class TestGroupingAttributeService {
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
+    @Value("${groupings.api.test.grouping_many_basis}")
+    private String GROUPING_BASIS;
+
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 
@@ -58,6 +61,8 @@ public class TestGroupingAttributeService {
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
+
+    private static final String INVALID_GROUPING_PATH = "invalid:grouping:path";
 
     @Autowired
     private GrouperService grouperService;
@@ -106,6 +111,16 @@ public class TestGroupingAttributeService {
                 attributeMap.get(OptType.IN.value()));
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
                 attributeMap.get(OptType.OUT.value()));
+    }
+
+    @Test
+    public void isGroupingPath() {
+        assertTrue(groupingAttributeService.isGroupingPath(GROUPING));
+        assertFalse(groupingAttributeService.isGroupingPath(GROUPING_BASIS));
+        assertFalse(groupingAttributeService.isGroupingPath(GROUPING_OWNERS));
+        assertFalse(groupingAttributeService.isGroupingPath(GROUPING_INCLUDE));
+        assertFalse(groupingAttributeService.isGroupingPath(GROUPING_EXCLUDE));
+        assertFalse(groupingAttributeService.isGroupingPath(INVALID_GROUPING_PATH));
     }
 
     @Test
