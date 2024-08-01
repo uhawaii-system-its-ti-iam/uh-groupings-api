@@ -156,7 +156,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void allGroupingsTest() throws Exception {
-        String url = API_BASE_URL + "all-groupings";
+        String url = API_BASE_URL + "groupings";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -167,7 +167,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     void groupingAdmins() throws Exception {
-        String url = API_BASE_URL + "grouping-admins";
+        String url = API_BASE_URL + "groupings/admins";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -659,7 +659,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void hasAdminPrivsTest() throws Exception {
-        String url = API_BASE_URL + "owners";
+        String url = API_BASE_URL + "members/is-admin";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -669,7 +669,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void hasOwnerPrivsTest() throws Exception {
-        String url = API_BASE_URL + "admins";
+        String url = API_BASE_URL + "owners";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
