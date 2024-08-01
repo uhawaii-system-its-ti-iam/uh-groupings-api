@@ -130,7 +130,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of all admins.
      */
-    @GetMapping(value = "/grouping-admins")
+    @GetMapping(value = "/groupings/admins")
     @ResponseBody
     public ResponseEntity<GroupingGroupMembers> groupingAdmins(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST groupingAdmins...");
@@ -142,7 +142,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of all groupings.
      */
-    @GetMapping(value = "/all-groupings")
+    @GetMapping(value = "/groupings")
     @ResponseBody
     public ResponseEntity<GroupingPaths> allGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST allGroupings...");
@@ -595,7 +595,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * True if currentUser is an admin.
      */
-    @GetMapping(value = "/admins")
+    @GetMapping(value = "/members/is-admin")
     @ResponseBody
     public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST hasAdminPrivs...");
