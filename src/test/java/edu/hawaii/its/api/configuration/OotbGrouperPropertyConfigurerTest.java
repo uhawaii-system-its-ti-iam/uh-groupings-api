@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
+import edu.hawaii.its.api.service.GrouperService;
+import edu.hawaii.its.api.service.OotbGrouperApiService;
 import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
@@ -23,7 +28,7 @@ import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-@SpringBootTest(classes = {SpringBootWebApplication.class})
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 @ActiveProfiles("ootb")
 @TestPropertySource(locations = "classpath:ootb.grouper.test.properties")
 public class OotbGrouperPropertyConfigurerTest {
@@ -33,6 +38,11 @@ public class OotbGrouperPropertyConfigurerTest {
 
     @MockBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
+
+    @DynamicPropertySource
+    static void grouperProperties(DynamicPropertyRegistry registry) {
+        registry.add("grouping.api.server.type", () -> "OOTB");
+    }
 
     @Test
     public void testHasMembersResultsOOTBBean() {
@@ -111,7 +121,8 @@ public class OotbGrouperPropertyConfigurerTest {
 
     @Test
     public void testAssignGrouperPrivilegesResultOOTBBean() {
-        AssignGrouperPrivilegesResult bean = context.getBean("AssignGrouperPrivilegesResultOOTBBean", AssignGrouperPrivilegesResult.class);
+        AssignGrouperPrivilegesResult bean =
+                context.getBean("AssignGrouperPrivilegesResultOOTBBean", AssignGrouperPrivilegesResult.class);
         assertNotNull(bean);
         assertNotNull(bean.getGroup());
         assertNotNull(bean.getResultCode());
@@ -119,6 +130,7 @@ public class OotbGrouperPropertyConfigurerTest {
         assertNotNull(bean.getSubject());
         assertNotNull(bean.isAllowed());
     }
+
     @Test
     public void testGetGroupsResultsOOTBBean() {
         GetGroupsResults bean = context.getBean("GetGroupsResultsOOTBBean", GetGroupsResults.class);
@@ -128,4 +140,10 @@ public class OotbGrouperPropertyConfigurerTest {
         assertNotNull(bean.getSubject());
     }
 
+    @Test
+    public void testGrouperApiOOTBService() {
+        GrouperService service = context.getBean("grouperService", GrouperService.class);
+        assertNotNull(service);
+        assertTrue(service instanceof OotbGrouperApiService);
+    }
 }

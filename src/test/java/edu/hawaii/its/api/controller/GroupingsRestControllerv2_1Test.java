@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -925,30 +927,44 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void updateActiveDefaultUserTest() throws Exception {
-        List<String> paths =
-                Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER", "ROLE_OOTB");
-        OotbActiveProfile activeProfile = new OotbActiveProfile.Builder()
-            .uid("admin0123")
-            .uhUuid("33333333")
-            .name("ADMIN")
-            .givenName("AdminUser")
-            .authorities(paths)
-            .build();
+        List<String> paths = Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER");
 
-        given(ootbGroupingPropertiesService.updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser"))
-                .willReturn(new OotbActiveProfileResult(activeProfile));
+        OotbActiveProfile activeProfile = new OotbActiveProfile();
+        activeProfile.setUid("admin0123");
+        activeProfile.setUhUuid("33333333");
+        activeProfile.setAuthorities(paths);
+        activeProfile.setAttributes(new HashMap<>());
+        activeProfile.setGroupings(new ArrayList<>());
+
+        OotbActiveProfileResult expectedResult = new OotbActiveProfileResult(activeProfile);
+
+        given(ootbGroupingPropertiesService.updateActiveUserProfile(argThat(profile ->
+                profile.getUid().equals(activeProfile.getUid()) &&
+                profile.getUhUuid().equals(activeProfile.getUhUuid()) &&
+                profile.getAuthorities().equals(activeProfile.getAuthorities()) &&
+                profile.getAttributes().equals(activeProfile.getAttributes()) &&
+                profile.getGroupings().equals(activeProfile.getGroupings())
+        ))).willReturn(expectedResult);
 
         MvcResult result = mockMvc.perform(
-                        post(API_BASE + "/activeProfile/ootb?uid=admin0123&uhUuid=33333333&name=ADMIN&givenName=AdminUser")
+                        post(API_BASE + "/activeProfile/ootb")
                                 .header(CURRENT_USER, CURRENT_USER)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(JsonUtil.asJson(paths)))
+                                .content(JsonUtil.asJson(activeProfile)))
                 .andExpect(status().isOk())
                 .andReturn();
+
         assertNotNull(result);
         verify(ootbGroupingPropertiesService, times(1))
-                .updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser");
+                .updateActiveUserProfile(argThat(profile ->
+                    profile.getUid().equals(activeProfile.getUid()) &&
+                    profile.getUhUuid().equals(activeProfile.getUhUuid()) &&
+                    profile.getAuthorities().equals(activeProfile.getAuthorities()) &&
+                    profile.getAttributes().equals(activeProfile.getAttributes()) &&
+                    profile.getGroupings().equals(activeProfile.getGroupings())
+                ));
     }
+
 
     @Test
     public void regexTest() throws Exception {
