@@ -75,16 +75,6 @@ public class TestGroupPathService {
     }
 
     @Test
-    public void isGroupingPath() {
-        assertTrue(groupPathService.isGroupingPath(GROUPING));
-        assertFalse(groupPathService.isGroupingPath(GROUPING_BASIS));
-        assertFalse(groupPathService.isGroupingPath(GROUPING_OWNERS));
-        assertFalse(groupPathService.isGroupingPath(GROUPING_INCLUDE));
-        assertFalse(groupPathService.isGroupingPath(GROUPING_EXCLUDE));
-        assertFalse(groupPathService.isGroupingPath(INVALID_GROUPING_PATH));
-    }
-
-    @Test
     public void isGroupPath() {
         assertFalse(groupPathService.isGroupPath(GROUPING));
         assertTrue(groupPathService.isGroupPath(GROUPING_BASIS));
