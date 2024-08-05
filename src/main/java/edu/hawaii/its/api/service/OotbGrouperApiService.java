@@ -213,6 +213,13 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
+     * Add multiple path owners to a group owner listing.
+     */
+    public AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners) {
+        return ootbGroupingPropertiesService.addMembers(currentUser, groupPath, groupPathOwners);
+    }
+
+    /**
      * Remove a UH identifier from a group listing.
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
@@ -224,6 +231,15 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, uhIdentifiers);
+    }
+
+    /**
+     * Remove multiple path owners from a group owner listing.
+     */
+
+    public RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath,
+            List<String> groupPathOwners) {
+        return ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, groupPathOwners);
     }
 
     /**

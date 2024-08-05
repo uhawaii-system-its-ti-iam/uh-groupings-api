@@ -563,6 +563,11 @@ public class TestGroupingsRestControllerv2_1 {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
+//    @Test
+//    public void addPathOwnersTest() throws Exception {
+//
+//    }
+
     @Test
     public void removeOwnersTest() throws Exception {
         updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
@@ -575,6 +580,11 @@ public class TestGroupingsRestControllerv2_1 {
                 GroupingRemoveResults.class));
         testUids.forEach(testUid -> assertFalse(memberService.isOwner(GROUPING, testUid)));
     }
+
+//    @Test
+//    public void removePathOwnersTest() throws Exception {
+//
+//    }
 
     @Test
     public void updateDescriptionTest() throws Exception {
