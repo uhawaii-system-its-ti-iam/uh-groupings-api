@@ -271,7 +271,7 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.setGroupingPaths(paths);
         given(groupingAssignmentService.allGroupingPaths("bobo")).willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/all-groupings")
+        mockMvc.perform(get(API_BASE + "/groupings")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("groupingPaths[0].name").value("grouping0"))
@@ -287,7 +287,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void groupingAdminsTest() throws Exception {
         given(groupingAssignmentService.groupingAdmins("bobo")).willReturn(new GroupingGroupMembers());
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping-admins")
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/admins")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
@@ -808,7 +808,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/admins")
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-admin")
                         .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
