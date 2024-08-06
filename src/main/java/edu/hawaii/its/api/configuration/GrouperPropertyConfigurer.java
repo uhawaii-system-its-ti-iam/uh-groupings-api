@@ -11,8 +11,12 @@ import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 @Configuration
 public class GrouperPropertyConfigurer {
 
+    private final Environment env;
+
     @Autowired
-    private Environment env;
+    public GrouperPropertyConfigurer(Environment env) {
+        this.env = env;
+    }
 
     @PostConstruct
     public void init() {
@@ -24,12 +28,24 @@ public class GrouperPropertyConfigurer {
     }
 
     private void setOverride(GrouperClientConfig config, String key) {
-        if (isOverride(key)) {
+        String envKey = convertToEnvKey(key);
+
+        // Check for the environment variable first. If using the project's
+        // Docker container, GROUPERCLIENT_WEBSERVICE_PASSWORD may be set.
+        String envValue = System.getenv(envKey);
+        if (envValue != null) {
+            config.propertiesOverrideMap().put(key, envValue);
+        } else if (isOverride(key)) {
             config.propertiesOverrideMap().put(key, env.getProperty(key));
         }
     }
 
-    // Checks to see if override exists
+    // Helper method to convert property key to environment variable name.
+    private String convertToEnvKey(String key) {
+        return key.replace('.', '_').toUpperCase();
+    }
+
+    // Check to see an override exists.
     private boolean isOverride(String key) {
         return env.containsProperty(key);
     }
