@@ -458,6 +458,20 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping to add new path owners.
+     */
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
+    public ResponseEntity<GroupingAddResults> addGroupPathOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                        @PathVariable String path,
+                                                        @PathVariable List<String> pathOwners) {
+        logger.info("Entered REST addOwner...");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.addGroupPathOwnership(currentUser, path, pathOwners));
+    }
+
+
+    /**
      * Delete a grouping owner.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
@@ -468,6 +482,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.removeOwnerships(currentUser, path, uhIdentifier));
+    }
+
+
+    /**
+     * Delete grouping group path owners.
+     */
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
+    public ResponseEntity<GroupingRemoveResults> removeGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                              @PathVariable String path,
+                                                              @PathVariable List<String> pathOwners) {
+        logger.info("Entered REST removeGroupPathOwners");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.removeGroupPathOwnerships(currentUser, path, pathOwners));
     }
 
     /**

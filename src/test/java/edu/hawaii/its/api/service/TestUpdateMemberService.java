@@ -442,6 +442,16 @@ public class TestUpdateMemberService {
 
     }
 
+//    @Test
+//    public void addRemovePathOwnershipsTest(){
+//        // Todo integration test for updating grouping owners with path owners
+//    }
+
+//    @Test
+//    public void checkAllMembersAfterAddRemovePathOwnershipsTest(){
+//        // Todo integration test for checking the changes of members' group after adding and removing path owners
+//    }
+
     private void addGroupMember(String groupPath, String uhIdentifier) {
         grouperService.addMember(ADMIN, groupPath, uhIdentifier);
     }
