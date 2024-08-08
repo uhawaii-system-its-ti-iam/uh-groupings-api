@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import java.util.List;
+
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
@@ -15,8 +17,6 @@ import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
-
-import java.util.List;
 
 public interface GrouperService {
     HasMembersResults hasMemberResults(String groupPath, String uhIdentifier);
@@ -69,9 +69,13 @@ public interface GrouperService {
 
     AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers);
 
+    AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners);
+
     RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier);
 
     RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers);
+
+    RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners);
 
     AddMembersResults resetGroupMembers(String groupPath);
 
