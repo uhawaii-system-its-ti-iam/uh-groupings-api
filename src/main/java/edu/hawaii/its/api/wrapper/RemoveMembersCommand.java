@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
@@ -45,6 +46,23 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
         gcDeleteMember.addSubjectIdentifier(uid);
         return this;
     }
+
+    public RemoveMembersCommand addGroupPathOwner(String groupPath) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        // we can check added member is a path owners when sourceId is g:gsa. That means it's a group
+        wsSubjectLookup.setSubjectSourceId("g:gsa");
+        wsSubjectLookup.setSubjectIdentifier(groupPath);
+        gcDeleteMember.addSubjectLookup(wsSubjectLookup);
+        return this;
+    }
+
+    public RemoveMembersCommand addGroupPathOwners(List<String> groupPaths) {
+        for(String groupPath: groupPaths){
+            addGroupPathOwner(groupPath);
+        }
+        return this;
+    }
+
 
     public RemoveMembersCommand assignGroupPath(String groupPath) {
         gcDeleteMember.assignGroupName(groupPath);

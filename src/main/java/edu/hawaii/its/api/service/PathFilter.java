@@ -87,4 +87,12 @@ public class PathFilter {
         }
         return parentPath.substring(parentPath.lastIndexOf(":") + 1, parentPath.length());
     }
+
+    public static String extractExtension(String groupPath) {
+        int colonIndex = groupPath.indexOf(":");
+        if (colonIndex != -1) {
+            return groupPath.substring(colonIndex + 1);
+        }
+        return "";
+    }
 }

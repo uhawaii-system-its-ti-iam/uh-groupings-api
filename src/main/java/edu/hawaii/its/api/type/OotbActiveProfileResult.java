@@ -11,7 +11,7 @@ public class OotbActiveProfileResult {
 
     public OotbActiveProfileResult() {
         setResultCode("FAILURE");
-        setResult(new OotbActiveProfile.Builder().build());
+        setResult(null);
     }
 
     public String getResultCode() {
