@@ -16,7 +16,7 @@ import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
-import edu.hawaii.its.api.wrapper.GroupAttribute;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 @Service
 public class GroupingAttributeService {
@@ -39,6 +39,9 @@ public class GroupingAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
+    @Value("${groupings.api.trio}")
+    private String TRIO;
+
     private static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
     private final GrouperService grouperService;
@@ -57,6 +60,13 @@ public class GroupingAttributeService {
         this.memberService = memberService;
         this.groupingsService = groupingsService;
         this.timestampService = timestampService;
+    }
+
+    /**
+    * Checks if a group at path has TRIO attribute.
+    */
+    public boolean isGroupingPath(String path) {
+        return isGroupAttribute(path, TRIO);
     }
 
     /**
@@ -124,10 +134,11 @@ public class GroupingAttributeService {
 
     // Check if attribute is on.
     public boolean isGroupAttribute(String groupPath, String attributeName) {
-        List<GroupAttribute> groupAttributes = grouperService
-                .groupAttributeResults(attributeName, groupPath)
-                .getGroupAttributes();
-        return groupAttributes.stream()
+        GroupAttributeResults groupAttributes = grouperService.groupAttributeResults(attributeName, groupPath);
+        if (groupAttributes == null) {
+            return false;
+        }
+        return groupAttributes.getGroupAttributes().stream()
                 .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
     }
 

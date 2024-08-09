@@ -155,6 +155,17 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void groupingPathIsValidTest() throws Exception {
+        String url = API_BASE_URL + "grouping/" + GROUPING + "/is-valid";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertTrue(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
+                Boolean.class));
+    }
+
+    @Test
     public void allGroupingsTest() throws Exception {
         String url = API_BASE_URL + "groupings";
         MvcResult mvcResult = mockMvc.perform(get(url)

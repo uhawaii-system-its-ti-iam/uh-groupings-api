@@ -128,7 +128,7 @@ public class GroupingsRestControllerv2_1Test {
     private MockMvc mockMvc;
 
     private static final String API_BASE = "/api/groupings/v2.1";
-    private static final String GROUPING = "grouping";
+    private static final String GROUPING = "path:to:grouping";
     private static final String UID = "user";
     private static final String ADMIN = "admin";
     private PropertyLocator propertyLocator;
@@ -260,6 +260,16 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString(), is("University of Hawaii Groupings"));
+    }
+
+    @Test
+    public void groupingPathIsValidTest() throws Exception {
+        given(groupingAttributeService.isGroupingPath(GROUPING)).willReturn(true);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/grouping/" + GROUPING +"/is-valid"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString(), is("true"));
+        verify(groupingAttributeService, times(1)).isGroupingPath(GROUPING);
     }
 
     @Test

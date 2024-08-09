@@ -35,11 +35,6 @@ public class GroupPathService {
         return group.isValidPath();
     }
 
-    public boolean isGroupingPath(String path) {
-        Group group = getGroup(path);
-        return isGroupingPath(group);
-    }
-
     public boolean isGroupPath(String path) {
         Group group = getGroup(path);
         return isGroupPath(group);
