@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -460,6 +461,26 @@ public class TestGrouperApiService {
         assertNull(addMembersResults); // Todo exception handler
         removeMembersResults = grouperService.removeMembers(ADMIN, "invalid-path", testUids);
         assertNull(removeMembersResults); // Todo exception handler
+    }
+
+    @Test
+    public void addRemovePathOwners() {
+        // With Group Path.
+        AddMembersResults addMembersResults = grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
+        assertNotNull(addMembersResults);
+        assertEquals("SUCCESS", addMembersResults.getResultCode());
+
+        RemoveMembersResults removeMembersResults = grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
+        assertNotNull(removeMembersResults);
+        assertEquals("SUCCESS", removeMembersResults.getResultCode());
+
+        // Add and Remove duplicated group path owners
+        addMembersResults = grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
+        assertNotNull(addMembersResults);
+        assertEquals("SUCCESS_ALREADY_EXISTED", addMembersResults.getResults().get(addMembersResults.getResults().size()-1).getResultCode());
+        removeMembersResults = grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
+        assertNotNull(removeMembersResults);
+        assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMembersResults.getResults().get(removeMembersResults.getResults().size()-1).getResultCode());
     }
 
     @Test

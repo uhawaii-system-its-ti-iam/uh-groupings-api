@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 /**
  * A wrapper for GcAddMember. When a UH identifier and group path are passed, AddMembersCommand on execute adds, to
@@ -58,6 +59,22 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
 
     private AddMembersCommand addUid(String uid) {
         gcAddMember.addSubjectIdentifier(uid);
+        return this;
+    }
+
+    public AddMembersCommand addGroupPathOwner(String groupPath) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        // we can check added member is path owner when sourceId is g:gsa. That means it's a group
+        wsSubjectLookup.setSubjectSourceId("g:gsa");
+        wsSubjectLookup.setSubjectIdentifier(groupPath);
+        gcAddMember.addSubjectLookup(wsSubjectLookup);
+        return this;
+    }
+
+    public AddMembersCommand addGroupPathOwners(List<String> groupPaths) {
+        for(String groupPath: groupPaths){
+            addGroupPathOwner(groupPath);
+        }
         return this;
     }
 

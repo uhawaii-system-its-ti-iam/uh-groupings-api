@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -269,7 +271,7 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.setGroupingPaths(paths);
         given(groupingAssignmentService.allGroupingPaths("bobo")).willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/all-groupings")
+        mockMvc.perform(get(API_BASE + "/groupings")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("groupingPaths[0].name").value("grouping0"))
@@ -285,7 +287,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void groupingAdminsTest() throws Exception {
         given(groupingAssignmentService.groupingAdmins("bobo")).willReturn(new GroupingGroupMembers());
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping-admins")
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/admins")
                         .header(CURRENT_USER, "bobo"))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
@@ -678,6 +680,27 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void addGroupPathOwnersTest() throws Exception {
+        List<String> pathOwnersToAdd = new ArrayList<>();
+        GroupingAddResults groupingAddResults = new GroupingAddResults();
+        pathOwnersToAdd.add("tmp:tst04name:groupPath04");
+        pathOwnersToAdd.add("tmp:tst05name:groupPath05");
+        pathOwnersToAdd.add("tmp:tst06name:groupPath06");
+
+        given(updateMemberService.addGroupPathOwnership(UID, "grouping", pathOwnersToAdd))
+                .willReturn(groupingAddResults);
+
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/path-owner/" + String.join(",", pathOwnersToAdd))
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result, notNullValue());
+        verify(updateMemberService, times(1))
+                .addGroupPathOwnership(UID, "grouping", pathOwnersToAdd);
+    }
+
+    @Test
     public void removeOwnersTest() throws Exception {
         List<String> ownersToRemove = new ArrayList<>();
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
@@ -696,6 +719,27 @@ public class GroupingsRestControllerv2_1Test {
         assertNotNull(result);
         verify(updateMemberService, times(1))
                 .removeOwnerships(UID, "grouping", ownersToRemove);
+    }
+
+    @Test
+    public void removeGroupPathOwnersTest() throws Exception {
+        List<String> pathOwnersToAdd = new ArrayList<>();
+        GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
+        pathOwnersToAdd.add("tmp:tst04name:groupPath04");
+        pathOwnersToAdd.add("tmp:tst05name:groupPath05");
+        pathOwnersToAdd.add("tmp:tst06name:groupPath06");
+
+        given(updateMemberService.removeOwnerships(UID, "grouping", pathOwnersToAdd))
+                .willReturn(groupingRemoveResults);
+
+        MvcResult result =
+                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/path-owner/" + String.join(",", pathOwnersToAdd))
+                                .header(CURRENT_USER, UID))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertNotNull(result);
+        verify(updateMemberService, times(1))
+                .removeGroupPathOwnerships(UID, "grouping", pathOwnersToAdd);
     }
 
     @Test
@@ -806,7 +850,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/admins")
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-admin")
                         .header(CURRENT_USER, CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -925,30 +969,44 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void updateActiveDefaultUserTest() throws Exception {
-        List<String> paths =
-                Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER", "ROLE_OOTB");
-        OotbActiveProfile activeProfile = new OotbActiveProfile.Builder()
-            .uid("admin0123")
-            .uhUuid("33333333")
-            .name("ADMIN")
-            .givenName("AdminUser")
-            .authorities(paths)
-            .build();
+        List<String> paths = Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER");
 
-        given(ootbGroupingPropertiesService.updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser"))
-                .willReturn(new OotbActiveProfileResult(activeProfile));
+        OotbActiveProfile activeProfile = new OotbActiveProfile();
+        activeProfile.setUid("admin0123");
+        activeProfile.setUhUuid("33333333");
+        activeProfile.setAuthorities(paths);
+        activeProfile.setAttributes(new HashMap<>());
+        activeProfile.setGroupings(new ArrayList<>());
+
+        OotbActiveProfileResult expectedResult = new OotbActiveProfileResult(activeProfile);
+
+        given(ootbGroupingPropertiesService.updateActiveUserProfile(argThat(profile ->
+                profile.getUid().equals(activeProfile.getUid()) &&
+                profile.getUhUuid().equals(activeProfile.getUhUuid()) &&
+                profile.getAuthorities().equals(activeProfile.getAuthorities()) &&
+                profile.getAttributes().equals(activeProfile.getAttributes()) &&
+                profile.getGroupings().equals(activeProfile.getGroupings())
+        ))).willReturn(expectedResult);
 
         MvcResult result = mockMvc.perform(
-                        post(API_BASE + "/activeProfile/ootb?uid=admin0123&uhUuid=33333333&name=ADMIN&givenName=AdminUser")
+                        post(API_BASE + "/activeProfile/ootb")
                                 .header(CURRENT_USER, CURRENT_USER)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(JsonUtil.asJson(paths)))
+                                .content(JsonUtil.asJson(activeProfile)))
                 .andExpect(status().isOk())
                 .andReturn();
+
         assertNotNull(result);
         verify(ootbGroupingPropertiesService, times(1))
-                .updateActiveUserProfile(paths, "admin0123", "33333333", "ADMIN", "AdminUser");
+                .updateActiveUserProfile(argThat(profile ->
+                    profile.getUid().equals(activeProfile.getUid()) &&
+                    profile.getUhUuid().equals(activeProfile.getUhUuid()) &&
+                    profile.getAuthorities().equals(activeProfile.getAuthorities()) &&
+                    profile.getAttributes().equals(activeProfile.getAttributes()) &&
+                    profile.getGroupings().equals(activeProfile.getGroupings())
+                ));
     }
+
 
     @Test
     public void regexTest() throws Exception {

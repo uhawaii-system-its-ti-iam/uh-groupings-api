@@ -1,6 +1,5 @@
 package edu.hawaii.its.api.service;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,15 +32,14 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public class OotbGrouperApiServiceTest {
 
     @Autowired
-    GrouperService grouperService;
+    OotbGrouperApiService ootbGrouperService;
 
     @MockBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @Test
     public void isGrouperApiOOTBService() {
-        assertThat(grouperService, notNullValue());
-        assertThat(grouperService instanceof OotbGrouperApiService, equalTo(true));
+        assertThat(ootbGrouperService, notNullValue());
     }
 
     @Test
@@ -52,7 +50,7 @@ public class OotbGrouperApiServiceTest {
         when(ootbGroupingPropertiesService.getGroups(uhIdentifier)).thenReturn(expectedResults);
 
         // Act
-        GetGroupsResults actualResults = grouperService.getGroupsResults(uhIdentifier);
+        GetGroupsResults actualResults = ootbGrouperService.getGroupsResults(uhIdentifier);
 
         // Assert
         assertEquals(expectedResults, actualResults);
@@ -72,7 +70,7 @@ public class OotbGrouperApiServiceTest {
 
         // Execution
         GetMembersResults actual =
-                grouperService.getMembersResults(groupPaths);
+                ootbGrouperService.getMembersResults(groupPaths);
 
         // Verification
         assertEquals(expected, actual);
@@ -87,7 +85,7 @@ public class OotbGrouperApiServiceTest {
         when(ootbGroupingPropertiesService.getFindGroups(groupPath)).thenReturn(expectedResults);
 
         // Act
-        FindGroupsResults actualResults = grouperService.findGroupsResults(groupPath);
+        FindGroupsResults actualResults = ootbGrouperService.findGroupsResults(groupPath);
 
         // Assert
         assertEquals(expectedResults, actualResults);
@@ -102,7 +100,7 @@ public class OotbGrouperApiServiceTest {
         when(ootbGroupingPropertiesService.updateDescription(groupingPath, description)).thenReturn(expected);
 
         // Act
-        GroupSaveResults result = grouperService.groupSaveResults(groupingPath, description);
+        GroupSaveResults result = ootbGrouperService.groupSaveResults(groupingPath, description);
 
         // Assert
         assertEquals(expected, result);
@@ -114,20 +112,21 @@ public class OotbGrouperApiServiceTest {
         // Setup
         String currentUser = "testiwta";
         String assignType = "group";
-        String assignOperation = "opt-in";
+        String assignOperation = "assign_attr";
         String groupPath = "group-0-1";
-        String attributeName = "attribute1";
+        String attributeName = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
         AssignAttributesResults expected = new AssignAttributesResults();
-        when(ootbGroupingPropertiesService.getAssignAttributesResults()).thenReturn(expected);
+        when(ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName,
+                assignOperation)).thenReturn(expected);
 
         // Execution
         AssignAttributesResults actual =
-                grouperService.assignAttributesResults(currentUser, assignType, assignOperation, groupPath,
+                ootbGrouperService.assignAttributesResults(currentUser, assignType, assignOperation, groupPath,
                         attributeName);
 
         // Verification
         assertEquals(expected, actual);
-        verify(ootbGroupingPropertiesService).getAssignAttributesResults();
+        verify(ootbGroupingPropertiesService).manageAttributeAssignment(groupPath, attributeName, assignOperation);
     }
 
     // Test for validating UH identifier
@@ -135,11 +134,11 @@ public class OotbGrouperApiServiceTest {
     public void testGetSubjectsSingle() {
         // Setup
         String uhIdentifier = "12345";
-        SubjectsResults expectedResults = new SubjectsResults(); // Properly initialized or mocked
+        SubjectsResults expectedResults = new SubjectsResults();
         when(ootbGroupingPropertiesService.getSubject(uhIdentifier)).thenReturn(expectedResults);
 
         // Execution
-        SubjectsResults result = grouperService.getSubjects(uhIdentifier);
+        SubjectsResults result = ootbGrouperService.getSubjects(uhIdentifier);
 
         // Verification
         verify(ootbGroupingPropertiesService).getSubject(uhIdentifier);
@@ -150,11 +149,11 @@ public class OotbGrouperApiServiceTest {
     public void testGetSubjectsMultiple() {
         // Setup
         List<String> uhIdentifiers = List.of("12345", "67890");
-        SubjectsResults expectedResults = new SubjectsResults(); // Mock or use a real instance
+        SubjectsResults expectedResults = new SubjectsResults();
         when(ootbGroupingPropertiesService.getSubjects(uhIdentifiers)).thenReturn(expectedResults);
 
         // Execution
-        SubjectsResults result = grouperService.getSubjects(uhIdentifiers);
+        SubjectsResults result = ootbGrouperService.getSubjects(uhIdentifiers);
 
         // Verification
         verify(ootbGroupingPropertiesService).getSubjects(uhIdentifiers);
@@ -167,11 +166,11 @@ public class OotbGrouperApiServiceTest {
         String currentUser = "testUser";
         String groupPath = "testGroup";
         String uhIdentifier = "12345";
-        AddMemberResult expected = new AddMemberResult(); // Assume this is properly initialized
+        AddMemberResult expected = new AddMemberResult();
         when(ootbGroupingPropertiesService.addMember(currentUser, groupPath, uhIdentifier)).thenReturn(expected);
 
         // Execution
-        AddMemberResult result = grouperService.addMember(currentUser, groupPath, uhIdentifier);
+        AddMemberResult result = ootbGrouperService.addMember(currentUser, groupPath, uhIdentifier);
 
         // Verification
         verify(ootbGroupingPropertiesService).addMember(currentUser, groupPath, uhIdentifier);
@@ -184,11 +183,11 @@ public class OotbGrouperApiServiceTest {
         String currentUser = "testUser";
         String groupPath = "testGroup";
         List<String> uhIdentifiers = List.of("12345", "67890");
-        AddMembersResults expected = new AddMembersResults(); // Assume this is properly initialized
+        AddMembersResults expected = new AddMembersResults();
         when(ootbGroupingPropertiesService.addMembers(currentUser, groupPath, uhIdentifiers)).thenReturn(expected);
 
         // Execution
-        AddMembersResults result = grouperService.addMembers(currentUser, groupPath, uhIdentifiers);
+        AddMembersResults result = ootbGrouperService.addMembers(currentUser, groupPath, uhIdentifiers);
 
         // Verification
         verify(ootbGroupingPropertiesService).addMembers(currentUser, groupPath, uhIdentifiers);
@@ -201,11 +200,11 @@ public class OotbGrouperApiServiceTest {
         String currentUser = "testUser";
         String groupPath = "testGroup";
         String uhIdentifier = "12345";
-        RemoveMemberResult expected = new RemoveMemberResult(); // Assume properly initialized
+        RemoveMemberResult expected = new RemoveMemberResult();
         when(ootbGroupingPropertiesService.removeMember(currentUser, groupPath, uhIdentifier)).thenReturn(expected);
 
         // Execution
-        RemoveMemberResult result = grouperService.removeMember(currentUser, groupPath, uhIdentifier);
+        RemoveMemberResult result = ootbGrouperService.removeMember(currentUser, groupPath, uhIdentifier);
 
         // Verification
         verify(ootbGroupingPropertiesService).removeMember(currentUser, groupPath, uhIdentifier);
@@ -218,11 +217,11 @@ public class OotbGrouperApiServiceTest {
         String currentUser = "testUser";
         String groupPath = "testGroup";
         List<String> uhIdentifiers = List.of("12345", "67890");
-        RemoveMembersResults expected = new RemoveMembersResults(); // Assume properly initialized
+        RemoveMembersResults expected = new RemoveMembersResults();
         when(ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, uhIdentifiers)).thenReturn(expected);
 
         // Execution
-        RemoveMembersResults result = grouperService.removeMembers(currentUser, groupPath, uhIdentifiers);
+        RemoveMembersResults result = ootbGrouperService.removeMembers(currentUser, groupPath, uhIdentifiers);
 
         // Verification
         verify(ootbGroupingPropertiesService).removeMembers(currentUser, groupPath, uhIdentifiers);
@@ -233,18 +232,17 @@ public class OotbGrouperApiServiceTest {
     public void testResetGroup() {
         // Set up
         String groupPath = "groupPath-0-1";
-        AddMembersResults mockAddMembersResults = new AddMembersResults(); // Assume this is a valid class
+        AddMembersResults mockAddMembersResults = new AddMembersResults();
 
         when(ootbGroupingPropertiesService.getAddMembersResults()).thenReturn(mockAddMembersResults);
         when(ootbGroupingPropertiesService.resetGroup(groupPath)).thenReturn(mockAddMembersResults);
 
         // Execution
-        AddMembersResults results = grouperService.resetGroupMembers(groupPath);
+        AddMembersResults results = ootbGrouperService.resetGroupMembers(groupPath);
 
         // Verifications
         assertNotNull(results);
         verify(ootbGroupingPropertiesService).resetGroup(groupPath);
     }
-
 
 }

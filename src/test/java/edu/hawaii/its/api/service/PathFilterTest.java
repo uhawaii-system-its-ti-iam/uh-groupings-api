@@ -169,10 +169,23 @@ public class PathFilterTest {
         assertEquals("", nameGroupingPath(""));
     }
 
+    @Test
+    public void testExtractExtension() {
+        assertEquals("include", PathFilter.extractExtension("bogus:include"));
+        assertEquals("exclude", PathFilter.extractExtension("bogus:exclude"));
+        assertEquals("owners", PathFilter.extractExtension("bogus:owners"));
+        assertEquals("basis", PathFilter.extractExtension("bogus:basis"));
+        assertEquals("grouping-path", PathFilter.extractExtension("bogus:grouping-path"));
+        assertEquals("", PathFilter.extractExtension("bogus"));
+        assertEquals("", PathFilter.extractExtension(""));
+    }
+
     /**
      * General filter to filter paths with the predicates in the PathFilter class.
      */
     private static List<String> filterPaths(List<String> groupPaths, Predicate<String> predicate) {
         return groupPaths.stream().filter(predicate).collect(Collectors.toList());
     }
+
+
 }

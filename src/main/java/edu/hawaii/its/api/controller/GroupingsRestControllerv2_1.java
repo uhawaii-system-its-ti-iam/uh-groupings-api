@@ -51,6 +51,7 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
+import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
@@ -130,7 +131,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of all admins.
      */
-    @GetMapping(value = "/grouping-admins")
+    @GetMapping(value = "/groupings/admins")
     @ResponseBody
     public ResponseEntity<GroupingGroupMembers> groupingAdmins(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST groupingAdmins...");
@@ -142,7 +143,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a list of all groupings.
      */
-    @GetMapping(value = "/all-groupings")
+    @GetMapping(value = "/groupings")
     @ResponseBody
     public ResponseEntity<GroupingPaths> allGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST allGroupings...");
@@ -457,6 +458,20 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Update grouping to add new path owners.
+     */
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
+    public ResponseEntity<GroupingAddResults> addGroupPathOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                        @PathVariable String path,
+                                                        @PathVariable List<String> pathOwners) {
+        logger.info("Entered REST addOwner...");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.addGroupPathOwnership(currentUser, path, pathOwners));
+    }
+
+
+    /**
      * Delete a grouping owner.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
@@ -467,6 +482,20 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.removeOwnerships(currentUser, path, uhIdentifier));
+    }
+
+
+    /**
+     * Delete grouping group path owners.
+     */
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
+    public ResponseEntity<GroupingRemoveResults> removeGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                              @PathVariable String path,
+                                                              @PathVariable List<String> pathOwners) {
+        logger.info("Entered REST removeGroupPathOwners");
+        return ResponseEntity
+                .ok()
+                .body(updateMemberService.removeGroupPathOwnerships(currentUser, path, pathOwners));
     }
 
     /**
@@ -595,7 +624,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * True if currentUser is an admin.
      */
-    @GetMapping(value = "/admins")
+    @GetMapping(value = "/members/is-admin")
     @ResponseBody
     public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST hasAdminPrivs...");
@@ -682,15 +711,12 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update Ootb active user profile.
      */
-    @PostMapping(value = "/activeProfile/ootb")
-    public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserProfile(@RequestBody List<String> authorities,
-                                                                               @RequestParam(required = true) String uid,
-                                                                               @RequestParam(required = true) String uhUuid,
-                                                                               @RequestParam(required = true) String name,
-                                                                               @RequestParam(required = true) String givenName) {
-        logger.debug("Entered REST updateActiveUserProfile...");
+     @PostMapping(value = "/activeProfile/ootb")
+     public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserGroupings(@RequestBody OotbActiveProfile ootbActiveProfile) {
+        logger.debug("Entered REST updateOotbActiveUserGroupings...");
         return ResponseEntity
                 .ok()
-                .body(ootbGroupingPropertiesService.updateActiveUserProfile(authorities, uid, uhUuid, name, givenName));
-    }
+                .body(ootbGroupingPropertiesService.updateActiveUserProfile(ootbActiveProfile));
+     }
+
 }

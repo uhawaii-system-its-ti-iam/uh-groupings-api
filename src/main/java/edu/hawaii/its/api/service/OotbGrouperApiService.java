@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +22,9 @@ import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 
 public class OotbGrouperApiService implements GrouperService {
 
@@ -32,6 +35,7 @@ public class OotbGrouperApiService implements GrouperService {
     public OotbGrouperApiService(OotbGroupingPropertiesService ootbGroupingPropertiesService) {
         this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
     }
+
     /**
      * Check if a UH identifier is listed in a group.
      */
@@ -105,7 +109,8 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if a group contains an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, String groupPath) {
-        return ootbGroupingPropertiesService.getGroupAttributeResults();
+        return ootbGroupingPropertiesService.getGroupAttributeResultsByAttributeAndGroupPathList(attribute,
+                Collections.singletonList(groupPath));
     }
 
     /**
@@ -141,7 +146,7 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     public GroupAttributeResults groupAttributeResult(String currentUser, String groupPath) {
-        return ootbGroupingPropertiesService.getGroupAttributeResults();
+        return ootbGroupingPropertiesService.getGroupAttributeResults(currentUser, groupPath);
     }
 
     /**
@@ -208,6 +213,13 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
+     * Add multiple path owners to a group owner listing.
+     */
+    public AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners) {
+        return ootbGroupingPropertiesService.addMembers(currentUser, groupPath, groupPathOwners);
+    }
+
+    /**
      * Remove a UH identifier from a group listing.
      */
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
@@ -219,6 +231,15 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, uhIdentifiers);
+    }
+
+    /**
+     * Remove multiple path owners from a group owner listing.
+     */
+
+    public RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath,
+            List<String> groupPathOwners) {
+        return ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, groupPathOwners);
     }
 
     /**
@@ -235,7 +256,7 @@ public class OotbGrouperApiService implements GrouperService {
     public AssignAttributesResults assignAttributesResults(String currentUser, String assignType,
             String assignOperation, String groupPath,
             String attributeName) {
-        return ootbGroupingPropertiesService.getAssignAttributesResults();
+        return ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName, assignOperation);
     }
 
     /**
@@ -244,7 +265,14 @@ public class OotbGrouperApiService implements GrouperService {
     public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath,
             String privilegeName,
             String uhIdentifier, boolean isAllowed) {
-        return new AssignGrouperPrivilegesResult();
+
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult =
+                new WsAssignGrouperPrivilegesLiteResult();
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("SUCCESS");
+        wsAssignGrouperPrivilegesLiteResult.setResultMetadata(resultMetadata);
+
+        return new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
     }
 
     /**
