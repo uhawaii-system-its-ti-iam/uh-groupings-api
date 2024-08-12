@@ -1,77 +1,48 @@
 package edu.hawaii.its.api.type;
 
 import java.util.List;
+import java.util.Map;
 
 public class OotbActiveProfile {
+    private String uid;
+    private String uhUuid;
+    private List<String> authorities;
+    private Map<String, String> attributes;
+    private List<OotbGrouping> ootbGroupings;
 
-    private final String uid;
-    private final String uhUuid;
-    private final String name;
-    private final String givenName;
-    private final List<String> authorities;
+    public List<OotbGrouping> getGroupings() { return ootbGroupings; }
 
-    OotbActiveProfile(Builder builder) {
-        this.uid = builder.uid;
-        this.uhUuid = builder.uhUuid;
-        this.name = builder.name;
-        this.givenName = builder.givenName;
-        this.authorities = builder.authorities;
-    }
+    public void setGroupings(List<OotbGrouping> ootbGroupings) { this.ootbGroupings = ootbGroupings; }
 
     public String getUid() {
         return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getUhUuid() {
         return uhUuid;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getGivenName() {
-        return givenName;
+    public void setUhUuid(String uhUuid) {
+        this.uhUuid = uhUuid;
     }
 
     public List<String> getAuthorities() {
         return authorities;
     }
 
-    public static class Builder {
-        private String uid;
-        private String uhUuid;
-        private String name;
-        private String givenName;
-        private List<String> authorities;
+    public void setAuthorities(List<String> authorities) {
+        this.authorities = authorities;
+    }
 
-        public Builder uid(String uid) {
-            this.uid = uid;
-            return this;
-        }
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
 
-        public Builder uhUuid(String uhUuid) {
-            this.uhUuid = uhUuid;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder givenName(String givenName) {
-            this.givenName = givenName;
-            return this;
-        }
-
-        public Builder authorities(List<String> authorities) {
-            this.authorities = authorities;
-            return this;
-        }
-
-        public OotbActiveProfile build() {
-            return new OotbActiveProfile(this);
-        }
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 }
