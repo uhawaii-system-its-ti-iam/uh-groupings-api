@@ -30,6 +30,13 @@ public class GroupingMoveMemberResult implements GroupingResult {
         setResultCode();
     }
 
+    public GroupingMoveMemberResult(String groupPath, String resultCode) {
+        addResult = new GroupingAddResult();
+        removeResult = new GroupingRemoveResult();
+        setGroupPath(groupPath);
+        this.resultCode = resultCode;
+    }
+
     @Override
     public String getResultCode() {
         return resultCode;
