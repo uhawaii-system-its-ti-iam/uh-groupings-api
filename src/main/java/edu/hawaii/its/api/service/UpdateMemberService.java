@@ -230,6 +230,10 @@ public class UpdateMemberService {
         log.info(String.format("optIn; currentUser: %s; groupingPath: %s; uhIdentifier %s;",
                 currentUser, groupingPath, uhIdentifier));
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
+        // To prevent a race condition and avoid calling the grouper API to update the status of someone who is already opted in
+        if(memberService.isInclude(groupingPath, uhIdentifier)) {
+            return new GroupingMoveMemberResult(groupingPath, "SUCCESS");
+        }
         return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(),
                 groupingPath + GroupType.EXCLUDE.value(), uhIdentifier);
     }
@@ -238,6 +242,10 @@ public class UpdateMemberService {
         log.info(String.format("optOut; currentUser: %s; groupingPath: %s; uhIdentifier %s;",
                 currentUser, groupingPath, uhIdentifier));
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
+        // To prevent a race condition and avoid calling the grouper API to update the status of someone who is already opted out
+        if(memberService.isExclude(groupingPath, uhIdentifier)) {
+            return new GroupingMoveMemberResult(groupingPath, "SUCCESS");
+        }
         return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(),
                 groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
     }
