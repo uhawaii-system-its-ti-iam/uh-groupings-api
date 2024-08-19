@@ -111,7 +111,8 @@ public class UpdateMemberServiceTest {
 
         json = propertyLocator.find("ws.delete.member.results.success");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
+        RemoveMemberResult removeMemberResult =
+                new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
         assertNotNull(removeMemberResult);
         doReturn(removeMemberResult).when(grouperService)
                 .removeMember(TEST_UIDS.get(1), GROUPING_ADMINS, TEST_UIDS.get(0));
@@ -158,7 +159,6 @@ public class UpdateMemberServiceTest {
 
         assertNotNull(updateMemberService.addOwnerships(TEST_UIDS.get(0), groupPath, TEST_UIDS));
     }
-
 
     @Test
     public void addOwnershipTest() {
@@ -248,7 +248,8 @@ public class UpdateMemberServiceTest {
 
         json = propertyLocator.find("ws.delete.member.results.failure");
         WsDeleteMemberResults wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
-        RemoveMemberResult removeMemberResult = new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
+        RemoveMemberResult removeMemberResult =
+                new RemoveMemberResult(wsDeleteMemberResults.getResults()[0], groupPath);
         String validIdentifier = subjectService.getValidUhUuid(TEST_UIDS.get(1));
         doReturn(removeMemberResult).when(grouperService)
                 .removeMember(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifier);
@@ -443,12 +444,14 @@ public class UpdateMemberServiceTest {
 
     @Test
     public void optInTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
+        String json = propertyLocator.find("ws.has.member.results.is.members.uid");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.INCLUDE.value(), TEST_UIDS.get(1));
         doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
         json = propertyLocator.find("ws.delete.member.results.failure");
@@ -473,12 +476,14 @@ public class UpdateMemberServiceTest {
 
     @Test
     public void optOutTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
+        String json = propertyLocator.find("ws.has.member.results.is.members.uid");
         WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
         HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.EXCLUDE.value(), TEST_UIDS.get(1));
         doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
         json = propertyLocator.find("ws.delete.member.results.failure");

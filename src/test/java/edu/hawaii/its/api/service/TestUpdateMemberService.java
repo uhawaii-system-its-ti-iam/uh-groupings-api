@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,9 +21,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.CommandException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
+import edu.hawaii.its.api.type.OptType;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -58,6 +62,9 @@ public class TestUpdateMemberService {
     private MemberService memberService;
 
     @Autowired
+    private GroupingAttributeService groupingAttributeService;
+
+    @Autowired
     private GrouperService grouperService;
 
     @Autowired
@@ -65,12 +72,19 @@ public class TestUpdateMemberService {
 
     private List<String> testUids;
     private List<String> testUhUuids;
+    private Map<String, Boolean> attributeMap = new HashMap<>();
 
     @BeforeAll
     public void init() {
         GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(5);
         testUids = testGroupingMembers.getUids();
         testUhUuids = testGroupingMembers.getUhUuids();
+
+        // Initial setting for testing opt-in opt-out related functions in update member service
+        attributeMap.put(OptType.IN.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
+        attributeMap.put(OptType.OUT.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
+        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), false);
 
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
         grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
@@ -332,8 +346,10 @@ public class TestUpdateMemberService {
         updateMemberService.addIncludeMembers(ADMIN, GROUPING, includes);
         updateMemberService.addExcludeMembers(ADMIN, GROUPING, excludes);
 
-        GroupingReplaceGroupMembersResult resultInclude = updateMemberService.resetIncludeGroupAsync(ADMIN, GROUPING).join();
-        GroupingReplaceGroupMembersResult resultExclude = updateMemberService.resetExcludeGroupAsync(ADMIN, GROUPING).join();
+        GroupingReplaceGroupMembersResult resultInclude =
+                updateMemberService.resetIncludeGroupAsync(ADMIN, GROUPING).join();
+        GroupingReplaceGroupMembersResult resultExclude =
+                updateMemberService.resetExcludeGroupAsync(ADMIN, GROUPING).join();
 
         assertEquals(SUCCESS, resultInclude.getResultCode());
         assertEquals(SUCCESS, resultExclude.getResultCode());
@@ -451,6 +467,37 @@ public class TestUpdateMemberService {
 //    public void checkAllMembersAfterAddRemovePathOwnershipsTest(){
 //        // Todo integration test for checking the changes of members' group after adding and removing path owners
 //    }
+
+    @Test
+    public void validateOptInActionForAlreadyOptedUser() {
+        String testUid = testUhUuids.get(0);
+        updateMemberService.addAdminMember(ADMIN, testUid);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+
+        try {
+            updateMemberService.optIn(ADMIN, GROUPING, testUid);
+            updateMemberService.optIn(ADMIN, GROUPING, testUid);
+        } catch (Exception e) {
+            fail("should not throw an exception if user does self opt in when user already opted in");
+        }
+
+        updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
+    }
+
+    @Test
+    public void validateOptOutActionForAlreadyOptedUser() {
+        String testUid = testUhUuids.get(0);
+        updateMemberService.addAdminMember(ADMIN, testUid);
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+        try {
+            updateMemberService.optOut(ADMIN, GROUPING, testUid);
+            updateMemberService.optOut(ADMIN, GROUPING, testUid);
+        } catch (CommandException e) {
+            fail("should not throw an exception if user does self opt out when user already opted out");
+        }
+
+        updateMemberService.removeExcludeMember(ADMIN, GROUPING, testUid);
+    }
 
     private void addGroupMember(String groupPath, String uhIdentifier) {
         grouperService.addMember(ADMIN, groupPath, uhIdentifier);
