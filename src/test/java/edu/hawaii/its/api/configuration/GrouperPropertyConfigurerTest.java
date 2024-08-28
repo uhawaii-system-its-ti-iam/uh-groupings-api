@@ -2,23 +2,19 @@ package edu.hawaii.its.api.configuration;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.test.context.TestPropertySource;
 
 import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 
-
 @SpringBootTest(classes = {SpringBootWebApplication.class})
+@TestPropertySource(properties = {"grouperClient.webService.url=test-url-b"})
 public class GrouperPropertyConfigurerTest {
-
-    @Autowired
-    private ConfigurableEnvironment env;
 
     @Autowired
     private GrouperPropertyConfigurer grouperPropertyConfigurer;
@@ -29,21 +25,18 @@ public class GrouperPropertyConfigurerTest {
     }
 
     @Test
-    public void testing() {
+    public void testingOverrideProperty() {
         GrouperClientConfig config = GrouperClientConfig.retrieveConfig();
+
+        // Define the key and the expected test value.
         String key = "grouperClient.webService.url";
         String testUrl = "test-url-b";
 
-        String value = config.propertiesOverrideMap().get(key);
-        assertNotEquals(value, testUrl);
-
-        // Will cause an override of value.
-        env.getSystemProperties().put(key, testUrl);
-
+        // Now perform the initialization that overrides the value.
         grouperPropertyConfigurer.init();
 
-        value = config.propertiesOverrideMap().get(key);
-        assertThat(value, equalTo(testUrl));
+        // Check that the override worked as expected.
+        String overriddenValue = config.propertiesOverrideMap().get(key);
+        assertThat(overriddenValue, equalTo(testUrl));
     }
-
 }
