@@ -40,16 +40,14 @@ public class OotbGrouperApiService implements GrouperService {
      * Check if a UH identifier is listed in a group.
      */
     public HasMembersResults hasMemberResults(String groupPath, String uhIdentifier) {
-        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResults();
-        return hasMembersResults;
+        return ootbGroupingPropertiesService.getHasMembers(groupPath, uhIdentifier);
     }
 
     /**
      * Check if multiple UH identifiers are listed in a group.
      */
     public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
-        HasMembersResults hasMembersResults = ootbGroupingPropertiesService.getHasMembersResults();
-        return hasMembersResults;
+        return ootbGroupingPropertiesService.getHasMembersResults();
     }
 
     /**
@@ -186,7 +184,7 @@ public class OotbGrouperApiService implements GrouperService {
      * containing a matching sync-dest attribute type string.
      */
     public FindAttributesResults findAttributesResults(String attributeTypeName, String searchScope) {
-        return new FindAttributesResults(new WsFindAttributeDefNamesResults());
+        return ootbGroupingPropertiesService.getFindAttributesResults();
     }
 
     /**
@@ -256,7 +254,7 @@ public class OotbGrouperApiService implements GrouperService {
     public AssignAttributesResults assignAttributesResults(String currentUser, String assignType,
             String assignOperation, String groupPath,
             String attributeName) {
-        return ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName, assignOperation);
+        return ootbGroupingPropertiesService.manageAttributeAssignment(currentUser, groupPath, attributeName, assignOperation);
     }
 
     /**

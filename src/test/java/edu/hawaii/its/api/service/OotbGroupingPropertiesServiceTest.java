@@ -179,23 +179,25 @@ class OotbGroupingPropertiesServiceTest {
 
     @Test
     public void testManageAttributeAssignmentAssign() {
+        String currentUser = "CURRENT_USER";
         String groupPath = "testGroup";
         String attributeName = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
         String assignOperation = "assign_attr";
 
         AssignAttributesResults result =
-                ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName, assignOperation);
+                ootbGroupingPropertiesService.manageAttributeAssignment(currentUser, groupPath, attributeName, assignOperation);
         assertNotNull(result);
     }
 
     @Test
     public void testManageAttributeAssignmentRemove() {
+        String currentUser = "CURRENT_USER";
         String groupPath = "testGroup";
         String attributeName = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
         String assignOperation = "remove_attr";
 
         AssignAttributesResults result =
-                ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName, assignOperation);
+                ootbGroupingPropertiesService.manageAttributeAssignment(currentUser, groupPath, attributeName, assignOperation);
         assertNotNull(result);
     }
 

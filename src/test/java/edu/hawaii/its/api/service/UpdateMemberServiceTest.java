@@ -22,6 +22,7 @@ import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -31,6 +32,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 
@@ -471,6 +473,16 @@ public class UpdateMemberServiceTest {
         doReturn(addMemberResult).when(grouperService)
                 .addMember(TEST_UIDS.get(0), groupPath + GroupType.INCLUDE.value(), TEST_UIDS.get(1));
 
+        json = propertyLocator.find("ws.get.attribute.assignment.results.success");
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        assertNotNull(groupAttributeResults);
+        doReturn(groupAttributeResults).when(grouperService)
+                        .groupAttributeResult(TEST_UIDS.get(1), groupPath);
+
+
+
         assertNotNull(updateMemberService.optIn(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
     }
 
@@ -504,6 +516,16 @@ public class UpdateMemberServiceTest {
         assertNotNull(addMemberResult);
         doReturn(addMemberResult).when(grouperService)
                 .addMember(TEST_UIDS.get(0), groupPath + GroupType.EXCLUDE.value(), TEST_UIDS.get(1));
+
+        json = propertyLocator.find("ws.get.attribute.assignment.results.success");
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        assertNotNull(groupAttributeResults);
+        doReturn(groupAttributeResults).when(grouperService)
+                        .groupAttributeResult(TEST_UIDS.get(1), groupPath);
+
+
 
         assertNotNull(updateMemberService.optOut(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
     }
