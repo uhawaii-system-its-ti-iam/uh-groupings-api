@@ -484,6 +484,8 @@ public class UpdateMemberServiceTest {
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupPath + GroupType.EXCLUDE.value(), TEST_UIDS.get(1));
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.INCLUDE.value(), TEST_UIDS.get(1));
         doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
         json = propertyLocator.find("ws.delete.member.results.failure");
