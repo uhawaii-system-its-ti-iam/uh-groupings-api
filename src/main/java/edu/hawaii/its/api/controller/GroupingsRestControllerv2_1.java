@@ -129,6 +129,17 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Check if a grouping path is valid.
+     */
+    @GetMapping(value = "/grouping/{path:[\\w-:.]+}/is-valid")
+    @ResponseBody
+    public ResponseEntity<Boolean> groupingPathIsValid(@PathVariable String path) {
+        return ResponseEntity
+                .ok()
+                .body(groupingAttributeService.isGroupingPath(path));
+    }
+
+    /**
      * Get a list of all admins.
      */
     @GetMapping(value = "/groupings/admins")
