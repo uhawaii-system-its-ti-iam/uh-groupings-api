@@ -7,6 +7,18 @@ public class MembershipResult {
     private String description;
     private boolean isOptOutEnabled = false;
 
+    public MembershipResult() {
+        path = null;
+        name = null;
+        description = null;
+    }
+
+    public MembershipResult(String groupingPath, String groupingName, String groupingDescription) {
+        path = groupingPath;
+        name = groupingName;
+        description = groupingDescription;
+    }
+
     public String getPath() {
         return path;
     }
