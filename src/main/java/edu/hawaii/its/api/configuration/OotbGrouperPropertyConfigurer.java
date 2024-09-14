@@ -117,7 +117,8 @@ class OotbGrouperPropertyConfigurer {
     @Bean(name = "AttributeAssignmentResultsOOTBBean")
     public GroupAttributeResults grouperGroupAttributeResultsOOTB() {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.success");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
+        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
+                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
         GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
         return groupAttributeResults;
     }
@@ -125,8 +126,10 @@ class OotbGrouperPropertyConfigurer {
     @Bean(name = "AssignGrouperPrivilegesResultOOTBBean")
     public AssignGrouperPrivilegesResult grouperAssignGrouperPrivilegesResultOOTB() {
         String json = propertyLocator.find("ws.assign.grouper.privileges.results.success");
-        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult = JsonUtil.asObject(json, WsAssignGrouperPrivilegesLiteResult.class);
-        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult = new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
+        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult =
+                JsonUtil.asObject(json, WsAssignGrouperPrivilegesLiteResult.class);
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
         return assignGrouperPrivilegesResult;
     }
 
@@ -147,12 +150,5 @@ class OotbGrouperPropertyConfigurer {
     public GrouperService grouperApiOOTBService(OotbGroupingPropertiesService ootbGroupingPropertiesService) {
         log.debug("OOTB Grouper Api Service Started");
         return new OotbGrouperApiService(ootbGroupingPropertiesService);
-    }
-
-    @Bean(name = "grouperService")
-    @ConditionalOnProperty(name = "grouping.api.server.type", havingValue = "GROUPER", matchIfMissing = true)
-    public GrouperService grouperApiService(ExecutorService executorService) {
-        log.debug("REAL Grouper Api Service Started");
-        return new GrouperApiService(executorService);
     }
 }

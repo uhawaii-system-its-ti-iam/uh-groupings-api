@@ -3,19 +3,27 @@ package edu.hawaii.its.api.configuration;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import edu.hawaii.its.api.service.GrouperApiService;
+import edu.hawaii.its.api.service.GrouperService;
 
 import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @TestPropertySource(properties = {"grouperClient.webService.url=test-url-b"})
 public class GrouperPropertyConfigurerTest {
+
+    @Autowired
+    private ApplicationContext context;
 
     @Autowired
     private GrouperPropertyConfigurer grouperPropertyConfigurer;
@@ -61,5 +69,12 @@ public class GrouperPropertyConfigurerTest {
         // Verify that the value has been overridden correctly
         String overriddenValue = config.propertiesOverrideMap().get("grouperClient.webService.url");
         assertThat(overriddenValue, equalTo("test-url-b2"));
+    }
+
+    @Test
+    public void testGrouperApiService() {
+        GrouperService service = context.getBean("grouperService", GrouperService.class);
+        assertNotNull(service);
+        assertTrue(service instanceof GrouperApiService);
     }
 }
