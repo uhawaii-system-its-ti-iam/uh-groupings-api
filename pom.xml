@@ -67,7 +67,7 @@
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
             <artifactId>grouperClient</artifactId>
-            <version>4.9.0</version>
+            <version>5.12.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
