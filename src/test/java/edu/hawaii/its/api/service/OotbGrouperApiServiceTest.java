@@ -116,7 +116,7 @@ public class OotbGrouperApiServiceTest {
         String groupPath = "group-0-1";
         String attributeName = "uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in";
         AssignAttributesResults expected = new AssignAttributesResults();
-        when(ootbGroupingPropertiesService.manageAttributeAssignment(groupPath, attributeName,
+        when(ootbGroupingPropertiesService.manageAttributeAssignment(currentUser, groupPath, attributeName,
                 assignOperation)).thenReturn(expected);
 
         // Execution
@@ -126,7 +126,7 @@ public class OotbGrouperApiServiceTest {
 
         // Verification
         assertEquals(expected, actual);
-        verify(ootbGroupingPropertiesService).manageAttributeAssignment(groupPath, attributeName, assignOperation);
+        verify(ootbGroupingPropertiesService).manageAttributeAssignment(currentUser, groupPath, attributeName, assignOperation);
     }
 
     // Test for validating UH identifier
