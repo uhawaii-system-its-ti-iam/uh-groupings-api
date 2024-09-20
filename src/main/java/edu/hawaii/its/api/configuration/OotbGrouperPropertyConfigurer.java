@@ -17,6 +17,7 @@ import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
+import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
@@ -30,6 +31,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -139,6 +141,14 @@ class OotbGrouperPropertyConfigurer {
         WsGetGroupsResults wsgetGroupsResults = JsonUtil.asObject(json, WsGetGroupsResults.class);
         GetGroupsResults getGroupsResults = new GetGroupsResults(wsgetGroupsResults);
         return getGroupsResults;
+    }
+
+    @Bean(name = "FindAttributesResultsOOTBBean")
+    public FindAttributesResults grouperFindAttributesResultsOOTB() {
+        String json = propertyLocator.find("ws.attribute.def.name.results.success");
+        WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults = JsonUtil.asObject(json, WsFindAttributeDefNamesResults.class);
+        FindAttributesResults findAttributesResults = new FindAttributesResults(wsFindAttributeDefNamesResults);
+        return findAttributesResults;
     }
 
     /*

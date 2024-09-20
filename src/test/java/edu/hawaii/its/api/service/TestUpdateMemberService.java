@@ -26,7 +26,6 @@ import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.OptType;
-
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @ActiveProfiles("integrationTest")
