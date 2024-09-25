@@ -63,6 +63,14 @@ public class TestGroupingsService extends ServiceTest {
     }
 
     @Test
+    public void curatedGroupings() {
+        List<String> result = groupingsService.curatedGroupings();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertFalse(containsDuplicates(result));
+    }
+
+    @Test
     public void optOutEnabledGroupingPaths() {
         List<String> result = groupingsService.optOutEnabledGroupingPaths();
         assertNotNull(result);

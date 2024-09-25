@@ -11,15 +11,30 @@ import org.junit.jupiter.api.Test;
 
 public class MembershipResultTest {
     private MembershipResult membershipResultEmptyOnConstruction;
+    private MembershipResult membershipResultHydratedOnConstruction;
 
     @BeforeEach
     public void setUp() {
         membershipResultEmptyOnConstruction = new MembershipResult();
+        membershipResultHydratedOnConstruction = new MembershipResult("path", "name", "description");
     }
 
     @Test
     public void construction() {
         assertNotNull(membershipResultEmptyOnConstruction);
+        assertNull(membershipResultEmptyOnConstruction.getName());
+        assertNull(membershipResultEmptyOnConstruction.getPath());
+        assertNull(membershipResultEmptyOnConstruction.getDescription());
+        assertNotNull(membershipResultHydratedOnConstruction);
+        String name = "name";
+        String path = "path";
+        String description = "description";
+        assertNotNull(membershipResultHydratedOnConstruction.getName());
+        assertEquals(name, membershipResultHydratedOnConstruction.getName());
+        assertNotNull(membershipResultHydratedOnConstruction.getPath());
+        assertEquals(path, membershipResultHydratedOnConstruction.getPath());
+        assertNotNull(membershipResultHydratedOnConstruction.getDescription());
+        assertEquals(description, membershipResultHydratedOnConstruction.getDescription());
     }
 
     @Test
