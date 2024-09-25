@@ -27,6 +27,9 @@ public class GroupingsService {
     @Value("${groupings.api.trio}")
     private String TRIO;
 
+    @Value("${groupings.api.curated}")
+    private String CURATED;
+
     private final GroupPathService groupPathService;
 
     private final GrouperService grouperService;
@@ -43,12 +46,17 @@ public class GroupingsService {
         return allGroupingPaths(TRIO);
     }
 
+    public List<String> curatedGroupings() {
+        return allGroupingPaths(CURATED);
+    }
+
     public List<GroupingPath> allGroupingPaths() {
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(TRIO);
         return groupAttributeResults.getGroups().stream()
                 .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription())).collect(
                         Collectors.toList());
     }
+
     public GroupAttributeResults allGroupAttributeResults() {
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(TRIO);
         return groupAttributeResults;
