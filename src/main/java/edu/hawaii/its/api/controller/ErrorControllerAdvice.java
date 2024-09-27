@@ -3,9 +3,6 @@ package edu.hawaii.its.api.controller;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import edu.hawaii.its.api.exception.CommandException;
-import edu.hawaii.its.api.exception.GroupingsHTTPException;
-import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import jakarta.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
@@ -19,8 +16,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.CommandException;
 import edu.hawaii.its.api.exception.ExceptionForTesting;
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.GroupingsHTTPException;
+import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.ApiError;
@@ -201,22 +200,6 @@ public class ErrorControllerAdvice {
                 .timestamp(LocalDateTime.now());
 
         errorBuilder.addAllSubErrors(ghe.getSubErrors());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-    @ExceptionHandler(GroupingsServiceResultException.class)
-    public ResponseEntity<ApiError> handleGroupingsServiceResultException(
-            GroupingsServiceResultException gsre) {
-        emailService.sendWithStack(gsre, "Groupings ServiceResult Exception");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message("Groupings ServiceResult Exception")
-                .debugMessage("Groupings Service resulted in FAILURE.")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(gsre.getSubErrors());
 
         ApiError apiError = errorBuilder.build();
 
