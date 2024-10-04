@@ -647,7 +647,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of groupings that the current user owns
      */
-    @GetMapping(value = "/owners/{uhIdentifier:[\\w-:.]+}/groupings/count")
+    @GetMapping(value = "/owners/{uhIdentifier:[\\w-:.]+}/groupings/groupingCount")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String uhIdentifier) {
@@ -660,7 +660,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of memberships the current user has
      */
-    @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}/memberships/count")
+    @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}/memberships/membershipCount")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                           @PathVariable String uhIdentifier) {

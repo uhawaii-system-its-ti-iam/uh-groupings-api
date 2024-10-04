@@ -882,7 +882,7 @@ public class GroupingsRestControllerv2_1Test {
         }
         given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
+        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/groupingCount")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
@@ -934,7 +934,7 @@ public class GroupingsRestControllerv2_1Test {
         given(membershipService.numberOfMemberships(ADMIN, uid))
                 .willReturn(369);
 
-        mockMvc.perform(get(API_BASE + "/members/" + uid + "/memberships/count")
+        mockMvc.perform(get(API_BASE + "/members/" + uid + "/memberships/membershipCount")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));

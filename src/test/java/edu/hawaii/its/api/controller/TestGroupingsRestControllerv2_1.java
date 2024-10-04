@@ -700,7 +700,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfGroupingsTest() throws Exception {
-        String url = API_BASE_URL + "owners/" + testUids.get(0) + "/groupings/count";
+        String url = API_BASE_URL + "owners/" + testUids.get(0) + "/groupings/groupingCount";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
@@ -710,7 +710,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
-        String url = API_BASE_URL + "/members/" + testUids.get(0) + "/memberships/count";
+        String url = API_BASE_URL + "/members/" + testUids.get(0) + "/memberships/membershipCount";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
