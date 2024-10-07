@@ -1,12 +1,13 @@
 package edu.hawaii.its.api.service;
 
-import edu.hawaii.its.api.wrapper.Subject;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 /**
  * SubjectService provides a set of functions for checking the validity of UH identifiers.
@@ -18,17 +19,12 @@ public class SubjectService {
 
     private final GrouperService grouperService;
 
-    private final OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
-    public SubjectService(GrouperService grouperService, OotbGroupingPropertiesService ootbGroupingPropertiesService) {
+    public SubjectService(GrouperService grouperService) {
         this.grouperService = grouperService;
-        this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
     }
 
     public boolean isValidIdentifier(String uhIdentifier) {
-        if (grouperService instanceof OotbGrouperApiService) {
-            return ootbGroupingPropertiesService.isValidOotbUhIdentifier(uhIdentifier);
-        }
         return isValidSubject(getSubject(uhIdentifier));
     }
 

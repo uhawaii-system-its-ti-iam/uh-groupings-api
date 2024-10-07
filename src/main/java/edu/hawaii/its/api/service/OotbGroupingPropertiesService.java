@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.type.OotbActiveProfile;
@@ -54,6 +55,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @Service
+@Profile("ootb")
 public class OotbGroupingPropertiesService {
 
     private static final Log logger = LogFactory.getLog(OotbGroupingPropertiesService.class);

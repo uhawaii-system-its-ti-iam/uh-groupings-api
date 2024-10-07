@@ -5,10 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Profile;
 
-import edu.hawaii.its.api.service.ExecutorService;
-import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GrouperService;
 import edu.hawaii.its.api.service.OotbGrouperApiService;
 import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
@@ -41,12 +39,11 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 
 @Configuration
-@ActiveProfiles("ootb")
+@Profile("ootb")
 class OotbGrouperPropertyConfigurer {
 
-    private PropertyLocator propertyLocator = new PropertyLocator("src/main/resources", "data.harness.properties");
-
     public static final Log log = LogFactory.getLog(OotbGrouperPropertyConfigurer.class);
+    private PropertyLocator propertyLocator = new PropertyLocator("src/main/resources", "data.harness.properties");
 
     /*
     Data Harness Configuration
@@ -146,7 +143,8 @@ class OotbGrouperPropertyConfigurer {
     @Bean(name = "FindAttributesResultsOOTBBean")
     public FindAttributesResults grouperFindAttributesResultsOOTB() {
         String json = propertyLocator.find("ws.attribute.def.name.results.success");
-        WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults = JsonUtil.asObject(json, WsFindAttributeDefNamesResults.class);
+        WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults =
+                JsonUtil.asObject(json, WsFindAttributeDefNamesResults.class);
         FindAttributesResults findAttributesResults = new FindAttributesResults(wsFindAttributeDefNamesResults);
         return findAttributesResults;
     }
