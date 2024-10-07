@@ -46,13 +46,10 @@ import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OotbActiveProfile;
-import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PreferenceStatus;
@@ -85,8 +82,6 @@ public class GroupingsRestControllerv2_1 {
 
     private final AnnouncementsService announcementsService;
 
-    private final OotbGroupingPropertiesService ootbGroupingPropertiesService;
-
     final private static String CURRENT_USER_KEY = "current_user";
 
     public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
@@ -97,8 +92,7 @@ public class GroupingsRestControllerv2_1 {
             UpdateMemberService updateMemberService,
             MemberService memberService,
             GroupingOwnerService groupingOwnerService,
-            AnnouncementsService announcementsService,
-            OotbGroupingPropertiesService ootbGroupingPropertiesService) {
+            AnnouncementsService announcementsService) {
         this.asyncJobsManager = asyncJobsManager;
         this.groupingAttributeService = groupingAttributeService;
         this.groupingAssignmentService = groupingAssignmentService;
@@ -108,7 +102,6 @@ public class GroupingsRestControllerv2_1 {
         this.memberService = memberService;
         this.groupingOwnerService = groupingOwnerService;
         this.announcementsService = announcementsService;
-        this.ootbGroupingPropertiesService = ootbGroupingPropertiesService;
     }
 
     @PostConstruct
@@ -718,16 +711,5 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-
-    /**
-     * Update Ootb active user profile.
-     */
-     @PostMapping(value = "/activeProfile/ootb")
-     public ResponseEntity<OotbActiveProfileResult> updateOotbActiveUserGroupings(@RequestBody OotbActiveProfile ootbActiveProfile) {
-        logger.debug("Entered REST updateOotbActiveUserGroupings...");
-        return ResponseEntity
-                .ok()
-                .body(ootbGroupingPropertiesService.updateActiveUserProfile(ootbActiveProfile));
-     }
 
 }

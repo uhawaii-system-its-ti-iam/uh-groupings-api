@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -30,6 +31,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
+@ActiveProfiles("ootb")
 class OotbGroupingPropertiesServiceTest {
 
     @Autowired
