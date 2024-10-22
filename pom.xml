@@ -85,6 +85,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Spring Vault -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-vault-config</artifactId>
+            <version>4.1.3</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
