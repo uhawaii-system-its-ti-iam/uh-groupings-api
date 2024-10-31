@@ -3,7 +3,6 @@ package edu.hawaii.its.api.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
@@ -50,6 +49,8 @@ import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.groupings.GroupingUpdatedAttributeResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -62,10 +63,6 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.PrivilegeType;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -210,44 +207,6 @@ public class GroupingsRestControllerv2_1Test {
         grouping.setOwners(owners);
 
         return grouping;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrListIn() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is opted-in"));
-        return gsrList;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrListIn2() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is not opted-in"));
-        return gsrList;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrListOut() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is opted-out"));
-        return gsrList;
-    }
-
-    //Test data (2.1 API).
-    private List<GroupingsServiceResult> gsrListOut2() {
-        List<GroupingsServiceResult> gsrList = new ArrayList<>();
-        gsrList.add(new GroupingsServiceResult(SUCCESS, "member is not opted-out"));
-        return gsrList;
-    }
-
-    //Test data (2.1 API).
-    private GroupingsServiceResult gsrListserv() {
-        return new GroupingsServiceResult(SUCCESS, "listserv status changed");
-    }
-
-    //Test data (2.1 API).
-    private GroupingsServiceResult gsrReleasedGrouping() {
-        return new GroupingsServiceResult(SUCCESS, "ldap status changed");
     }
 
     @Test
@@ -766,79 +725,47 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void enablePreferenceSyncDestTest() throws Exception {
+    public void updateSyncDestTest() throws Exception {
 
-        OptRequest optInRequest = new OptRequest.Builder()
-                .withOptType(OptType.IN)
-                .withUid(UID)
-                .withGroupNameRoot("grouping")
-                .withPrivilegeType(PrivilegeType.IN)
-                .withOptValue(true)
-                .build();
+        given(groupingAttributeService.updateGroupingSyncDest(GROUPING, UID, LISTSERV, true))
+                .willReturn(new GroupingUpdateSyncDestResult(new GroupingUpdatedAttributeResult()));
 
-        OptRequest optOutRequest = new OptRequest.Builder()
-                .withOptType(OptType.IN)
-                .withUid(UID)
-                .withGroupNameRoot("grouping")
-                .withPrivilegeType(PrivilegeType.OUT)
-                .withOptValue(true)
-                .build();
-
-        given(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListIn());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OptType.IN.value() + "/enable")
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/sync-destination/" + LISTSERV + "/true")
                         .header(CURRENT_USER, UID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is opted-in"));
-        verify(groupingAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
-
-        optInRequest = new OptRequest.Builder()
-                .withOptType(OptType.OUT)
-                .withUid(UID)
-                .withGroupNameRoot("grouping")
-                .withPrivilegeType(PrivilegeType.IN)
-                .withOptValue(false)
-                .build();
-
-        optOutRequest = new OptRequest.Builder()
-                .withOptType(OptType.OUT)
-                .withUid(UID)
-                .withGroupNameRoot("grouping")
-                .withPrivilegeType(PrivilegeType.OUT)
-                .withOptValue(false)
-                .build();
-
-        given(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest)).willReturn(gsrListOut());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/preference/" + OptType.OUT.value() + "/disable")
-                        .header(CURRENT_USER, UID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$[0].action").value("member is opted-out"));
-        verify(groupingAttributeService, times(1)).changeOptStatus(optInRequest, optOutRequest);
-
-        given(groupingAttributeService.changeGroupAttributeStatus("grouping", UID, LISTSERV, true))
-                .willReturn(gsrListserv());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/sync-destination/" + LISTSERV + "/enable")
-                        .header(CURRENT_USER, UID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("listserv status changed"));
+                .andExpect(status().isOk());
 
         verify(groupingAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", UID, LISTSERV, true);
+                .updateGroupingSyncDest(GROUPING, UID, LISTSERV, true);
 
-        given(groupingAttributeService.changeGroupAttributeStatus("grouping", UID, RELEASED_GROUPING, true))
-                .willReturn(gsrReleasedGrouping());
-        mockMvc.perform(put(API_BASE + "/groupings/grouping/sync-destination/" + RELEASED_GROUPING + "/enable")
+        given(groupingAttributeService.updateGroupingSyncDest(GROUPING, UID, LISTSERV, false))
+                .willReturn(new GroupingUpdateSyncDestResult(new GroupingUpdatedAttributeResult()));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/sync-destination/" + LISTSERV + "/false")
                         .header(CURRENT_USER, UID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(SUCCESS))
-                .andExpect(jsonPath("$.action").value("ldap status changed"));
+                .andExpect(status().isOk());
 
         verify(groupingAttributeService, times(1))
-                .changeGroupAttributeStatus("grouping", UID, RELEASED_GROUPING, true);
+                .updateGroupingSyncDest(GROUPING, UID, LISTSERV, false);
+
+        given(groupingAttributeService.updateGroupingSyncDest(GROUPING, UID, RELEASED_GROUPING, true))
+                .willReturn(new GroupingUpdateSyncDestResult(new GroupingUpdatedAttributeResult()));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/sync-destination/" + RELEASED_GROUPING + "/true")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateGroupingSyncDest(GROUPING, UID, RELEASED_GROUPING, true);
+
+        given(groupingAttributeService.updateGroupingSyncDest(GROUPING, UID, RELEASED_GROUPING, false))
+                .willReturn(new GroupingUpdateSyncDestResult(new GroupingUpdatedAttributeResult()));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/sync-destination/" + RELEASED_GROUPING + "/false")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateGroupingSyncDest(GROUPING, UID, RELEASED_GROUPING, false);
     }
 
     @Test

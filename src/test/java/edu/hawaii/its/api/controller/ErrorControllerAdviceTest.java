@@ -11,16 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.MemberService;
-import edu.hawaii.its.api.service.AsyncJobsManager;
-import edu.hawaii.its.api.service.GroupingAttributeService;
-import edu.hawaii.its.api.service.GroupingAssignmentService;
-import edu.hawaii.its.api.service.MemberAttributeService;
-import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.service.GroupingOwnerService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +20,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.context.WebApplicationContext;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.GroupingsServiceResultException;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.service.AsyncJobsManager;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
+import edu.hawaii.its.api.service.GroupingAttributeService;
+import edu.hawaii.its.api.service.GroupingOwnerService;
+import edu.hawaii.its.api.service.MemberAttributeService;
+import edu.hawaii.its.api.service.MemberService;
+import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.UpdateMemberService;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ErrorControllerAdviceTest {
@@ -115,10 +113,6 @@ public class ErrorControllerAdviceTest {
         GcWebServiceError gwse = new GcWebServiceError("FAIL");
         statusCode = errorControllerAdvice.handleGcWebServiceError(gwse).getStatusCode().toString();
         assertThat(statusCode, is("404 NOT_FOUND"));
-
-        GroupingsServiceResultException gsr = new GroupingsServiceResultException();
-        statusCode = errorControllerAdvice.handleGroupingsServiceResultException(gsr).getStatusCode().toString();
-        assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
         IllegalArgumentException iae = new IllegalArgumentException();
         statusCode = errorControllerAdvice.handleIllegalArgumentException(iae).getStatusCode().toString();

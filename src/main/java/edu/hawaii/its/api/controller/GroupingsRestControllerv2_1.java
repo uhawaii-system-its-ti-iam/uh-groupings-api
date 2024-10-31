@@ -35,6 +35,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
@@ -49,10 +51,8 @@ import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.PreferenceStatus;
 import edu.hawaii.its.api.type.PrivilegeType;
 
 @RestController
@@ -556,48 +556,37 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference.
+     * Update grouping to enable/disable a sync destination.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/enable")
-    public ResponseEntity<GroupingsServiceResult> enableSyncDest(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/{status}")
+    public ResponseEntity<GroupingUpdateSyncDestResult> updateSyncDest(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable String id) {
+            @PathVariable String id,
+            @PathVariable boolean status) {
+        logger.info("Entered REST updateSyncDest");
         return ResponseEntity
                 .ok()
-                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, true));
+                .body(groupingAttributeService.updateGroupingSyncDest(path, currentUser, id, status));
     }
 
     /**
-     * Update grouping to disable given preference.
+     * Update grouping to enable/disable an opt attribute.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/disable")
-    public ResponseEntity<GroupingsServiceResult> disableSyncDest(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable String id) {
-        return ResponseEntity
-                .ok()
-                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
-    }
-
-    /**
-     * Update grouping to toggle given preference.
-     */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
-    public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/opt-attribute/{id:[\\w-:.]+}/{status}")
+    public ResponseEntity<GroupingUpdateOptAttributeResult> updateOptAttribute(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable("id") OptType preferenceId,
-            @PathVariable("type") PreferenceStatus preferenceStatus) {
-        logger.info("Entered REST togglePreference");
+            @PathVariable boolean status) {
+        logger.info("Entered REST updateOptAttribute");
 
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUid(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceStatus.toggle())
+                .withOptValue(status)
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
@@ -605,12 +594,12 @@ public class GroupingsRestControllerv2_1 {
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceStatus.toggle())
+                .withOptValue(status)
                 .build();
 
         return ResponseEntity
                 .ok()
-                .body(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest));
+                .body(groupingAttributeService.updateOptAttribute(optInRequest, optOutRequest));
     }
 
     /**

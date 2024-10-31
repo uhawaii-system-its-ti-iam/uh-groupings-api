@@ -10,7 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new StringToOptTypeConverter());
-        registry.addConverter(new StringToPreferenceStatusConverter());
         registry.addConverter(new StringToFeedbackConverter());
     }
 }
