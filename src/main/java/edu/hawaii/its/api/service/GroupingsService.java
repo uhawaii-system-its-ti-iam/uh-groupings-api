@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import static edu.hawaii.its.api.service.PathFilter.logger;
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -176,5 +178,14 @@ public class GroupingsService {
     public List<String> allGroupPaths(String uhIdentifier) {
         List<Group> groups = grouperService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
+    }
+
+    /**
+     * Get the number of grouping members
+     */
+    public Integer numberOfGroupingMembers(String currentUser, String path) {
+        logger.debug(String.format("numberOfGroupingMembers; currentUser: %s; path: %s;", currentUser, path));
+        GetMembersResult getMembersResult = grouperService.getMembersResult(currentUser, path);
+        return getMembersResult.getSubjects().size();
     }
 }

@@ -55,6 +55,7 @@ import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingOwnerService;
+import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
@@ -108,6 +109,9 @@ public class GroupingsRestControllerv2_1Test {
     private UpdateMemberService updateMemberService;
     @MockBean
     private GroupingOwnerService groupingOwnerService;
+
+    @MockBean
+    private GroupingsService groupingsService;
 
     @MockBean
     private MemberService memberService;
@@ -864,6 +868,21 @@ public class GroupingsRestControllerv2_1Test {
 
         verify(membershipService, times(1))
                 .numberOfMemberships(ADMIN, uid);
+    }
+
+    @Test
+    public void getNumberOfGroupingMembersTest() throws Exception {
+        String path = "grouping-path";
+        given(groupingsService.numberOfGroupingMembers(ADMIN, path))
+                .willReturn(100);
+
+        mockMvc.perform(get(API_BASE + "/groupings/" + path + "/count")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andExpect(content().string("100"));
+
+        verify(groupingsService, times(1))
+                .numberOfGroupingMembers(ADMIN, path);
     }
 
     @Test
