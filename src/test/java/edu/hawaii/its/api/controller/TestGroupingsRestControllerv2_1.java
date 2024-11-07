@@ -679,6 +679,17 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void getNumberOfGroupingMembersTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/count";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+
+    }
+
+    @Test
     public void isSoleOwnerTest() throws Exception {
         String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/" + CURRENT_USER;
         MvcResult mvcResult = mockMvc.perform(get(url)
