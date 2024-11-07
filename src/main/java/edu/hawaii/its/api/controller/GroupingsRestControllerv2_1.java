@@ -45,6 +45,7 @@ import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingOwnerService;
+import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
@@ -82,6 +83,8 @@ public class GroupingsRestControllerv2_1 {
 
     private final AnnouncementsService announcementsService;
 
+    private final GroupingsService groupingsService;
+
     final private static String CURRENT_USER_KEY = "current_user";
 
     public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
@@ -92,7 +95,8 @@ public class GroupingsRestControllerv2_1 {
             UpdateMemberService updateMemberService,
             MemberService memberService,
             GroupingOwnerService groupingOwnerService,
-            AnnouncementsService announcementsService) {
+            AnnouncementsService announcementsService,
+            GroupingsService groupingsService) {
         this.asyncJobsManager = asyncJobsManager;
         this.groupingAttributeService = groupingAttributeService;
         this.groupingAssignmentService = groupingAssignmentService;
@@ -102,6 +106,7 @@ public class GroupingsRestControllerv2_1 {
         this.memberService = memberService;
         this.groupingOwnerService = groupingOwnerService;
         this.announcementsService = announcementsService;
+        this.groupingsService = groupingsService;
     }
 
     @PostConstruct
@@ -653,6 +658,19 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get number of grouping members
+     */
+    @GetMapping(value = "/groupings/{path}/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                              @PathVariable String path) {
+        logger.info("Enter REST getNumberOfGroupingMembers...");
+        return ResponseEntity
+                .ok()
+                .body(groupingsService.numberOfGroupingMembers(currentUser, path));
+    }
+
+    /**
      * Check if the user is a sole owner of a grouping
      */
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
@@ -700,5 +718,5 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-
+    
 }
