@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import java.util.List;
 
+import edu.hawaii.its.api.type.*;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -47,13 +48,6 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
-import edu.hawaii.its.api.type.Announcements;
-import edu.hawaii.its.api.type.AsyncJobResult;
-import edu.hawaii.its.api.type.GroupingsServiceResult;
-import edu.hawaii.its.api.type.OptRequest;
-import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.type.PreferenceStatus;
-import edu.hawaii.its.api.type.PrivilegeType;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -279,20 +273,20 @@ public class GroupingsRestControllerv2_1 {
      * Currently, the UI is not using this function to hydrate grouping members, this implementation of getMembers is
      * much faster than the current getMembers in use and should be used in the future ether when GROUPINGS-304 is
      * completed on the UI or when the UI is migrated to the react framework.
-     */
+ */
     @PostMapping(value = "/groupings/group")
     @ResponseBody
-    public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingGroupsMembers> getGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                                @RequestBody List<String> groupPaths,
                                                                @RequestParam(required = true) Integer page,
                                                                @RequestParam(required = true) Integer size,
-                                                               @RequestParam(required = true) String sortString,
+                                                               @RequestParam(required = true) SortBy sortBy,
                                                                @RequestParam(required = true) Boolean isAscending) {
         logger.info("Entered REST getGrouping...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending));
+                        .paginatedGrouping(currentUser, groupPaths, page, size, sortBy.sortString(), isAscending));
     }
 
     /**
