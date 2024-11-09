@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.CommandException;
-import edu.hawaii.its.api.exception.ExceptionForTesting;
 import edu.hawaii.its.api.exception.GroupingsHTTPException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
@@ -143,22 +142,7 @@ public class ErrorControllerAdvice {
 
         return buildResponseEntity(apiError);
     }
-    @ExceptionHandler(ExceptionForTesting.class)
-    protected ResponseEntity<ApiError> handleExceptionForTesting(ExceptionForTesting ex) {
-        emailService.sendWithStack(ex, "Exception For Testing Exception");
 
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message("Validation failed")
-                .debugMessage("Check your service at endpoint /exception")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(ex.getSubErrors());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
     @ExceptionHandler(UhMemberNotFoundException.class)
     protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException ex) {
         emailService.sendWithStack(ex, "Uh Member Not Found Exception");
