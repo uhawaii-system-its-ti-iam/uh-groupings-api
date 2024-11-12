@@ -26,8 +26,6 @@ import edu.hawaii.its.api.type.ManageSubjectResult;
 import edu.hawaii.its.api.type.MembershipResult;
 import edu.hawaii.its.api.wrapper.Group;
 
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
-
 @Service("membershipService")
 public class MembershipService {
 
@@ -125,7 +123,7 @@ public class MembershipService {
         List<String> groupPaths;
         try {
             groupPaths = groupingsService.allGroupPaths(uid);
-        } catch (GcWebServiceError e) {
+        } catch (Exception e) {
             logger.warn("membershipResults;" + e);
             return manageSubjectResults;
         }
