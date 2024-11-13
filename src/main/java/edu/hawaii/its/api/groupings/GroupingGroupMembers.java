@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.Subject;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 /**
  * When getMembers is called, GroupingGroupMembers holds the information about UH affiliates that are listed in a
@@ -20,6 +21,12 @@ public class GroupingGroupMembers implements GroupingResult {
         setResultCode(getMembersResult.getResultCode());
         setGroupPath(getMembersResult.getGroup().getGroupPath());
         setMembers(getMembersResult.getSubjects());
+    }
+
+    public GroupingGroupMembers(SubjectsResults subjectsResults) {
+        setResultCode(subjectsResults.getResultCode());
+        setGroupPath(subjectsResults.getGroup().getGroupPath());
+        setMembers(subjectsResults.getSubjects());
     }
 
     public GroupingGroupMembers() {

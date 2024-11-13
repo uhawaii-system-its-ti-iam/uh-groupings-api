@@ -963,6 +963,19 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void searchGroupingMembersTest() throws Exception {
+        String path = "path:to:grouping";
+        String search = "UID";
+        given(groupingOwnerService.groupMembersBySearchString(path, search)).willReturn(new GroupingGroupMembers());
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/search/" + search)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingOwnerService, times(1)).groupMembersBySearchString(path, search);
+    }
+
+
+    @Test
     public void getAsyncJobResultTest() throws Exception {
         CompletableFuture<?> completableFuture = new CompletableFuture<>();
         Integer jobId = completableFuture.hashCode();
