@@ -673,14 +673,14 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Check if the user is a sole owner of a grouping
      */
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
+    @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/{uhIdentifier}/count")
     @ResponseBody
-    public ResponseEntity<Boolean> isSoleOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                               @PathVariable String path, @PathVariable String uhIdentifier) {
-        logger.info("Entered REST getGroupingOwners...");
+    public ResponseEntity<Integer> getNumberOfOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                     @PathVariable String path, @PathVariable String uhIdentifier) {
+        logger.info("Entered REST getNumberOfOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.isSoleOwner(currentUser, path, uhIdentifier));
+                .body(groupingAssignmentService.numberOfOwners(currentUser, path, uhIdentifier));
     }
 
     /**

@@ -16,9 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
+import edu.hawaii.its.api.type.ApiError;
+import edu.hawaii.its.api.type.ApiValidationError;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -120,14 +123,14 @@ public class GroupingAssignmentService {
                 grouperService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
     }
 
-    public Boolean isSoleOwner(String currentUser, String groupPath, String uidToCheck) {
+    public Integer numberOfOwners(String currentUser, String groupPath, String uhIdentifier) {
         logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s",
-                currentUser, groupPath, uidToCheck));
-        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
-        if (owners.size() >= 2) {
-            return false;
+                currentUser, groupPath, uhIdentifier))  ;
+        if (!memberService.isOwner(uhIdentifier)) {
+            throw new AccessDeniedException();
         }
-        return owners.stream().anyMatch(owner -> owner.getUid().contains(uidToCheck));
+        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
+        return owners.size();
     }
 
     public Map<String, Group> makeGroups(GetMembersResults getMembersResults) {
