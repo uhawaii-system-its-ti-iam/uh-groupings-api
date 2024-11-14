@@ -35,6 +35,8 @@ public interface GrouperService {
 
     SubjectsResults getSubjects(List<String> uhIdentifiers);
 
+    SubjectsResults getSubjects(String groupingPath, String SearchString);
+
     GroupAttributeResults groupAttributeResults(String attribute);
 
     GroupAttributeResults groupAttributeResults(List<String> attributes);
