@@ -1,6 +1,15 @@
 package edu.hawaii.its.api.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import edu.hawaii.its.api.groupings.GroupingDescription;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
@@ -8,13 +17,6 @@ import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * GroupingOwnerService contains all the necessary functions to hydrate a selected grouping.
@@ -58,6 +60,10 @@ public class GroupingOwnerService {
             groupingGroupsMembers.setPaginationCompleteTrue();
         }
         return groupingGroupsMembers;
+    }
+
+    public GroupingGroupMembers groupMembersBySearchString(String groupingsPath, String searchString){
+        return new GroupingGroupMembers(grouperService.getSubjects(groupingsPath, searchString));
     }
 
     /**

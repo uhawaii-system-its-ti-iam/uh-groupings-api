@@ -11,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
 public class GroupingGroupMembersTest {
 
@@ -24,7 +26,7 @@ public class GroupingGroupMembersTest {
     }
 
     @Test
-    public void test() {
+    public void testConstructorWithGetMembersResults() {
         String json = propertyLocator.find("ws.get.members.results.success");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
@@ -36,5 +38,18 @@ public class GroupingGroupMembersTest {
         List<GroupingGroupMember> results = groupingGroupMembers.getMembers();
         assertNotNull(results);
         assertEquals(2, results.size());
+    }
+
+    @Test
+    public void testConstructorWithSubjectsResults() {
+        String json = propertyLocator.find("ws.get.subjects.results.success");
+        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
+        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
+        assertNotNull(groupingGroupMembers);
+        assertEquals("SUCCESS", groupingGroupMembers.getResultCode());
+        List<GroupingGroupMember> results = groupingGroupMembers.getMembers();
+        assertNotNull(results);
+        assertEquals(4, results.size());
     }
 }

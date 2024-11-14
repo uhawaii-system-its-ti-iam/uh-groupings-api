@@ -547,6 +547,19 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a list of members for a selected grouping path with search string.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/search/{search}")
+    public ResponseEntity<GroupingGroupMembers> searchGroupingMembers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path, @PathVariable String search) {
+        logger.info("Entered REST searchGroupingMembers");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.groupMembersBySearchString(path, search));
+    }
+
+    /**
      * Update grouping description.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/description")

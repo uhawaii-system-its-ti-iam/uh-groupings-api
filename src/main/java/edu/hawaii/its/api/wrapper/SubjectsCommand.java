@@ -44,4 +44,14 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
         gcGetSubjects.addSubjectAttributeName(attribute);
         return this;
     }
+
+    public SubjectsCommand assignGroupingPath(String groupingPath) {
+        this.gcGetSubjects.assignGroupLookup(groupLookup(groupingPath));
+        return this;
+    }
+
+    public SubjectsCommand assignSearchString(String searchString) {
+        this.gcGetSubjects.assignSearchString(searchString);
+        return this;
+    }
 }

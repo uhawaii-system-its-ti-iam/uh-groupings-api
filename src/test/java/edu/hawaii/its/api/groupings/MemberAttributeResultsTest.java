@@ -1,11 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
@@ -14,8 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
 public class MemberAttributeResultsTest {
 

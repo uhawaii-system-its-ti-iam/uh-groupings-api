@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingDescription;
+import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
@@ -58,6 +59,16 @@ public class TestGroupingOwnerService {
         assertNotNull(groupingGroupsMembers.getGroupingExclude());
         assertNotNull(groupingGroupsMembers.getGroupingOwners());
         assertNotNull(groupingGroupsMembers.getAllMembers());
+    }
+
+    @Test
+    public void groupMembersBySearch() {
+        GroupingGroupMembers groupingGroupMembers = ownerService.groupMembersBySearchString(GROUPING, ADMIN);
+        assertNotNull(groupingGroupMembers);
+        assertEquals(SUCCESS, groupingGroupMembers.getResultCode());
+        assertNotNull(groupingGroupMembers.getMembers());
+        assertEquals(1, groupingGroupMembers.getMembers().size());
+        assertNotNull(groupingGroupMembers.getGroupPath());
     }
 
     @Test
