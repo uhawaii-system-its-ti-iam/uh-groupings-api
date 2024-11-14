@@ -886,15 +886,15 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void isSoleOwnerTest() throws Exception {
+    public void getNumberOfOwnersTest() throws Exception {
         String uid = "uid";
         String path = "grouping-path";
-        given(groupingAssignmentService.isSoleOwner(ADMIN, path, uid)).willReturn(true);
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/owners/" + uid)
+        given(groupingAssignmentService.numberOfOwners(ADMIN, path, uid)).willReturn(1);
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/" + uid + "/count")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).isSoleOwner(ADMIN, path, uid);
+        verify(groupingAssignmentService, times(1)).numberOfOwners(ADMIN, path, uid);
     }
 
     @Test
