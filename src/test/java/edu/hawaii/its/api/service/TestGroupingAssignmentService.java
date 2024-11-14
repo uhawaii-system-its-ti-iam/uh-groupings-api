@@ -210,10 +210,10 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void isSoleOwner() {
+    public void numberOfOwners() {
         updateMemberService.addOwnership(ADMIN, GROUPING, ADMIN);
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        assertFalse(groupingAssignmentService.isSoleOwner(ADMIN, GROUPING, ADMIN));
+        assertEquals(2, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
     }
 

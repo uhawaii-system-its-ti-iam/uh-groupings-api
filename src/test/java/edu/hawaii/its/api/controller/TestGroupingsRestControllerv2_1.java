@@ -690,13 +690,12 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
-    public void isSoleOwnerTest() throws Exception {
-        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/" + CURRENT_USER;
+    public void getNumberOfOwnersTest() throws Exception {
+        String url = API_BASE_URL + "/members/" + GROUPING + "/owners/" + CURRENT_USER + "/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
-
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
     }
 
     @Test
