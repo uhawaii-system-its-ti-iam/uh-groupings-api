@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,15 @@ public class TestUpdateMemberService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    //    @Value("${user.name}.api.test.grouping_many")
+    //    private String testGroup;
+
+    @Value("${groupings.api.test.grouping_store_empty_owners}")
+    private String GROUPING_STORE_EMPTY_OWNERS;
+
+    @Value("$groupings.api.test.grouping_single")
+    private String GROUPING_SINGLE;
+
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
@@ -72,6 +82,7 @@ public class TestUpdateMemberService {
     private List<String> testUids;
     private List<String> testUhUuids;
     private Map<String, Boolean> attributeMap = new HashMap<>();
+    private List<String> pathList = new ArrayList<>();
 
     @BeforeAll
     public void init() {
@@ -457,10 +468,90 @@ public class TestUpdateMemberService {
 
     }
 
-//    @Test
-//    public void addRemovePathOwnershipsTest(){
-//        // Todo integration test for updating grouping owners with path owners
-//    }
+    @Test
+    public void addRemovePathOwnershipsTest(){
+        // Todo integration test for updating grouping owners with path owners
+
+        //pathList.add(GROUPING_STORE_EMPTY_OWNERS);
+        //        pathList.add(GROUPING_SINGLE);
+                pathList.add("tmp:rainem:rainem-single");
+        //try using this path just by itself to see if it works or smthing I have no idea
+        List <String> uniqueUsers = new ArrayList<>();
+        //make sure there will be no duplicates
+        for(String uid: testUids){
+            if(!(memberService.isMember(GROUPING_OWNERS,uid))){
+                uniqueUsers.add(uid);
+            }
+        }
+        //give ownership to the testuids
+        updateMemberService.addOwnerships(ADMIN, pathList.get(0), uniqueUsers);
+        //add path to another path giving it ownership
+        updateMemberService.addGroupPathOwnership(ADMIN,GROUPING, pathList);
+        //check if the uids now have ownership
+        for(String uid: uniqueUsers){
+            assertTrue(memberService.isOwner(GROUPING_OWNERS,uid));
+        }
+        //remove the path from the other path
+        updateMemberService.removeGroupPathOwnerships(ADMIN,GROUPING, pathList);
+        //check if it was removed
+        for (String uid: uniqueUsers){
+            assertFalse(memberService.isOwner(GROUPING_OWNERS, uid));
+        }
+        updateMemberService.removeOwnerships(ADMIN, pathList.get(0), uniqueUsers);
+
+        //check to see if it will allow to remove all owners
+        /*
+        get all members from a certain path
+        count them all and put them in a list
+        iterate through the list and remove them all from the path
+        check if it succesfully removes them all
+        re add them again
+         */
+       // OotbGroupingPropertiesService ootbGroupingPropertiesService = new OotbGroupingPropertiesService();
+        //OotbGrouperApiService ootbGrouperApiService = new OotbGrouperApiService();
+        //ootbGrouperApiService.getMembersResult();
+        //maybe try using the getMemberbyGroupPath in Grouping Properties service or getMemberResults in GrouperApiService
+
+        //ask for a different path into
+        //would populating a path with users then adding that path as a group owner then test to see if the ids are now owners to see if the path was added.
+
+        //check to see if members are already in first and if they are remove them then add the path
+        //
+
+        /*
+        populate a group with users
+        add that path as a groupOwner using addGroupPathOwnership method
+        check if the users are now owners using isMember method
+        remove path as GroupOwner using removeGroupPathOwnership method
+        check if the users are now not a member
+         */
+        //user isOwner instead of isMember
+
+        /*
+        if(!memberService.isMember(GROUPING_OWNERS, pathList.get(0))) {
+            updateMemberService.addGroupPathOwnership(ADMIN, GROUPING, pathList);
+            assertTrue(memberService.isMember(GROUPING_OWNERS, pathList.get(0)));
+            updateMemberService.addGroupPathOwnership(ADMIN, GROUPING, pathList);
+            assertFalse(memberService.isMember(GROUPING_OWNERS, pathList.get(0)));
+        }
+        else {
+            updateMemberService.addGroupPathOwnership(ADMIN, GROUPING, pathList);
+            assertFalse(memberService.isMember(GROUPING_OWNERS, pathList.get(0)));
+            updateMemberService.addGroupPathOwnership(ADMIN, GROUPING, pathList);
+            assertTrue(memberService.isMember(GROUPING_OWNERS, pathList.get(0)));
+        }
+        */
+
+
+        //asks if isGroupPathOwner similar to that of isMember
+        //look at GroupingRestController to see if there is a isPath method usable for the test
+        //check if user an owner, if not add as owner, then check if they have been added, if they are an owner test deleting them as from being an owner.
+        //use api call to get list of owners
+        //also add test to see to make sure that if there is only one owner then they cannot be deleted
+        //write algorithm for this first to better understand
+        //maybe apply testuid to a path then add the path then check if the uid are owners
+
+    }
 
 //    @Test
 //    public void checkAllMembersAfterAddRemovePathOwnershipsTest(){
