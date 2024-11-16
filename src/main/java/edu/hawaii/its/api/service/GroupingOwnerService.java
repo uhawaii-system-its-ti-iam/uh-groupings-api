@@ -72,6 +72,22 @@ public class GroupingOwnerService {
     }
 
     /**
+     * Get all members listed in the groups in groupsPath.
+     */
+    public GroupingGroupsMembers getGroupingMembers(String currentUser, List<String> groupPaths, String sortString, Boolean isAscending) {
+        log.debug(String.format(
+                "getGroupingMembers; currentUser: %s; groupPaths: %s; sortString: %s; isAscending: %b;",
+                currentUser, groupPaths, sortString, isAscending));
+        GetMembersResults getMembersResults = grouperService.getMembersResults(
+                currentUser,
+                groupPaths,
+                sortString,
+                isAscending);
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        return groupingGroupsMembers;
+    }
+
+    /**
      * Get the opt attributes of a selected grouping.
      */
     public GroupingOptAttributes groupingOptAttributes(String currentUser, String groupingPath) {

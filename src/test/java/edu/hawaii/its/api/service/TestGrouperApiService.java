@@ -371,6 +371,16 @@ public class TestGrouperApiService {
         assertEquals("SUCCESS", getMembersResults.getResultCode());
         assertEquals(GROUPING_LARGE_BASIS, getMembersResults.getMembersResults().get(0).getGroup().getGroupPath());
         assertFalse(getMembersResults.getMembersResults().get(0).getSubjects().isEmpty());
+
+        getMembersResults = grouperService.getMembersResults(
+                ADMIN,
+                Arrays.asList(GROUPING_LARGE_BASIS),
+                "name",
+                true);
+        assertNotNull(getMembersResults);
+        assertEquals("SUCCESS", getMembersResults.getResultCode());
+        assertEquals(GROUPING_LARGE_BASIS, getMembersResults.getMembersResults().get(0).getGroup().getGroupPath());
+        assertFalse(getMembersResults.getMembersResults().get(0).getSubjects().isEmpty());
     }
 
     @Test

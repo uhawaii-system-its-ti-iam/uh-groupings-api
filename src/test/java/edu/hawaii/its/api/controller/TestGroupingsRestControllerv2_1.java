@@ -369,6 +369,21 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void allGroupingMembersTest() throws Exception {
+        String url = API_BASE_URL + "groupings/all-grouping-members?sortString=name&isAscending=true";
+        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(
+                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+    }
+
+    @Test
     public void membershipResultsTest() throws Exception {
         String url = API_BASE_URL + "members/" + ADMIN + "/memberships";
         MvcResult mvcResult = mockMvc.perform(get(url)

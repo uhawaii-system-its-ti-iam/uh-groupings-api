@@ -62,6 +62,22 @@ public class TestGroupingOwnerService {
     }
 
     @Test
+    public void getGroupingMembers() {
+        GroupingGroupsMembers groupingGroupsMembers = ownerService.getGroupingMembers(
+                ADMIN,
+                groupPathService.getGroupPaths(GROUPING),
+                "name",
+                true);
+        assertNotNull(groupingGroupsMembers);
+        assertEquals(SUCCESS, groupingGroupsMembers.getResultCode());
+        assertNotNull(groupingGroupsMembers.getGroupingBasis());
+        assertNotNull(groupingGroupsMembers.getGroupingInclude());
+        assertNotNull(groupingGroupsMembers.getGroupingExclude());
+        assertNotNull(groupingGroupsMembers.getGroupingOwners());
+        assertNotNull(groupingGroupsMembers.getAllMembers());
+    }
+
+    @Test
     public void groupMembersBySearch() {
         GroupingGroupMembers groupingGroupMembers = ownerService.groupMembersBySearchString(GROUPING, ADMIN);
         assertNotNull(groupingGroupMembers);

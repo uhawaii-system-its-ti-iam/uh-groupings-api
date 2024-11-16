@@ -428,6 +428,30 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void allGroupingMembersTest() throws Exception {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        assertNotNull(groupingGroupsMembers);
+        List<String> paths =
+                Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
+        given(groupingOwnerService.getGroupingMembers(CURRENT_USER, paths, "name", true))
+                .willReturn(groupingGroupsMembers);
+        MvcResult result = mockMvc.perform(
+                        post(API_BASE + "/groupings/all-grouping-members?sortString=name&isAscending=true")
+                                .header(CURRENT_USER, CURRENT_USER)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
+        verify(groupingOwnerService, times(1))
+                .getGroupingMembers(CURRENT_USER, paths,  "name", true);
+    }
+
+    @Test
     public void membershipResultsTest() throws Exception {
         MembershipResults memberships = new MembershipResults();
         given(membershipService.membershipResults(ADMIN, "testiwta")).willReturn(memberships);

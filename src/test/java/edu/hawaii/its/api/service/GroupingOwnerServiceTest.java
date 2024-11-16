@@ -89,6 +89,24 @@ public class GroupingOwnerServiceTest {
     }
 
     @Test
+    public void getGroupingMembersTest() {
+        GetMembersResults getMembersResults = groupingsTestConfiguration.getMembersResultsSuccessTestData();
+        assertNotNull(getMembersResults);
+
+        List<String> groupPaths = Collections.singletonList(groupingPath);
+        String sortString = "name";
+        Boolean isAscending = true;
+
+        doReturn(getMembersResults).when(grouperService)
+                .getMembersResults(TEST_UIDS.get(0), groupPaths, sortString, isAscending);
+
+        GroupingGroupsMembers result = groupingOwnerService.getGroupingMembers(
+                TEST_UIDS.get(0), groupPaths, sortString, isAscending);
+
+        assertNotNull(result);
+    }
+
+    @Test
     public void groupMembersBySearchStringTest() {
         SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         assertNotNull(subjectsResults);

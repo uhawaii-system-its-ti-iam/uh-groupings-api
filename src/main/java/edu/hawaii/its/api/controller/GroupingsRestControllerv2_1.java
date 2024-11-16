@@ -301,6 +301,22 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a list of grouping members.
+     */
+    @PostMapping(value = "/groupings/all-grouping-members")
+    @ResponseBody
+    public ResponseEntity<GroupingGroupsMembers> allGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                    @RequestBody List<String> groupPaths,
+                                                                    @RequestParam(required = true) String sortString,
+                                                                    @RequestParam(required = true) Boolean isAscending) {
+        logger.info("Entered REST allGroupingMembers...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService
+                        .getGroupingMembers(currentUser, groupPaths, sortString, isAscending));
+    }
+
+    /**
      * Get a List of memberships as which uhIdentifier has.
      */
     @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/memberships")
@@ -731,5 +747,4 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-    
 }

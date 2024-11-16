@@ -284,4 +284,11 @@ public class OotbGrouperApiService implements GrouperService {
             Integer pageSize, String sortString, Boolean isAscending) {
         return ootbGroupingPropertiesService.getOwnedGroupings(groupPaths);
     }
+
+    /**
+     * Get a list of members for each groupPath without pageNumber and pageSize parameters.
+     */
+    public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, String sortString, Boolean isAscending) {
+        return ootbGroupingPropertiesService.getOwnedGroupings(groupPaths);
+    }
 }

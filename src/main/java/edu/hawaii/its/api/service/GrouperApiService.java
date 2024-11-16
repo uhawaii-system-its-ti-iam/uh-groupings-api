@@ -376,4 +376,15 @@ public class GrouperApiService implements GrouperService {
                 .setAscending(isAscending)
                 .sortBy(sortString));
     }
+
+    /**
+     * Get a list of members for each groupPath without pageNumber and pageSize parameters.
+     */
+    public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, String sortString, Boolean isAscending) {
+        return exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPaths(groupPaths)
+                .setAscending(isAscending)
+                .sortBy(sortString));
+    }
 }
