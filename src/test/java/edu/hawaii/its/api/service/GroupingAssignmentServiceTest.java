@@ -5,20 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.Group;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -33,11 +29,8 @@ class GroupingAssignmentServiceTest {
     @MockBean
     private GrouperService grouperService;
 
-    private PropertyLocator propertyLocator;
-    @BeforeAll
-    public void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
@@ -48,10 +41,7 @@ class GroupingAssignmentServiceTest {
     //TODO: finish unit test in GROUPINGS-1540
     @Test
     public void makeGroupsTest() {
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-
+        GetMembersResults getMembersResults = groupingsTestConfiguration.getMembersResultsSuccessTestData();
         Map<String, Group> groups = groupingAssignmentService.makeGroups(getMembersResults);
         assertFalse(groups.isEmpty());
         Group resultGroup = groups.get(GROUPING_0_PATH);
