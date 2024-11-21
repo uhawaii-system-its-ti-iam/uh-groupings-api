@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,13 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -29,7 +25,7 @@ public class MemberServiceTest {
 
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
-    
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -44,18 +40,12 @@ public class MemberServiceTest {
     @Autowired
     private MemberService memberService;
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void isAdminTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
@@ -65,9 +55,7 @@ public class MemberServiceTest {
 
     @Test
     public void isOwnerTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
@@ -80,9 +68,7 @@ public class MemberServiceTest {
 
     @Test
     public void isIncludeTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.INCLUDE.value(), TEST_UIDS.get(0));
@@ -92,9 +78,7 @@ public class MemberServiceTest {
 
     @Test
     public void isExcludeTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath + GroupType.EXCLUDE.value(), TEST_UIDS.get(0));
@@ -104,9 +88,7 @@ public class MemberServiceTest {
 
     @Test
     public void isMemberTest() {
-        String json = propertyLocator.find("ws.has.member.results.is.members.uhuuid");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath, TEST_UIDS.get(0));
@@ -116,9 +98,7 @@ public class MemberServiceTest {
 
     @Test
     public void isMemberNullTest() {
-        String json = propertyLocator.find("ws.has.member.results.null.group");
-        WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-        HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsNullGroupTestData();
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupingPath, TEST_UIDS.get(0));
