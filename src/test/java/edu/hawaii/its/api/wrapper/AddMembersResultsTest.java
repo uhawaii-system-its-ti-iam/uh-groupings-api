@@ -5,17 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -30,18 +27,12 @@ public class AddMembersResultsTest {
     @Value("${groupings.api.test.uh-names}")
     private List<String> TEST_NAMES;
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
-        String json = propertyLocator.find("ws.add.member.results.success");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
+        AddMembersResults addMembersResults = groupingsTestConfiguration.addMemberResultsSuccessTestData();
         assertNotNull(addMembersResults);
         assertNotNull(new AddMembersResults(null));
         assertNotNull(new AddMembersResults());
@@ -49,9 +40,7 @@ public class AddMembersResultsTest {
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.add.member.results.success");
-        WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
-        AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
+        AddMembersResults addMembersResults = groupingsTestConfiguration.addMemberResultsSuccessTestData();
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
         assertEquals("group-path", addMembersResults.getGroupPath());

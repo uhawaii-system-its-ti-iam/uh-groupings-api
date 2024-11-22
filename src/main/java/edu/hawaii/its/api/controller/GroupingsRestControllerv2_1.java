@@ -36,6 +36,8 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
@@ -44,10 +46,16 @@ import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingOwnerService;
+import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
+import edu.hawaii.its.api.type.Announcements;
+import edu.hawaii.its.api.type.AsyncJobResult;
+import edu.hawaii.its.api.type.OptRequest;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.PrivilegeType;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -76,6 +84,8 @@ public class GroupingsRestControllerv2_1 {
 
     private final AnnouncementsService announcementsService;
 
+    private final GroupingsService groupingsService;
+
     final private static String CURRENT_USER_KEY = "current_user";
 
     public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
@@ -86,7 +96,8 @@ public class GroupingsRestControllerv2_1 {
             UpdateMemberService updateMemberService,
             MemberService memberService,
             GroupingOwnerService groupingOwnerService,
-            AnnouncementsService announcementsService) {
+            AnnouncementsService announcementsService,
+            GroupingsService groupingsService) {
         this.asyncJobsManager = asyncJobsManager;
         this.groupingAttributeService = groupingAttributeService;
         this.groupingAssignmentService = groupingAssignmentService;
@@ -96,6 +107,7 @@ public class GroupingsRestControllerv2_1 {
         this.memberService = memberService;
         this.groupingOwnerService = groupingOwnerService;
         this.announcementsService = announcementsService;
+        this.groupingsService = groupingsService;
     }
 
     @PostConstruct
@@ -273,7 +285,7 @@ public class GroupingsRestControllerv2_1 {
      * Currently, the UI is not using this function to hydrate grouping members, this implementation of getMembers is
      * much faster than the current getMembers in use and should be used in the future ether when GROUPINGS-304 is
      * completed on the UI or when the UI is migrated to the react framework.
- */
+     */
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> getGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
@@ -536,6 +548,19 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get a list of members for a selected grouping path with search string.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/search/{search}")
+    public ResponseEntity<GroupingGroupMembers> searchGroupingMembers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path, @PathVariable String search) {
+        logger.info("Entered REST searchGroupingMembers");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.groupMembersBySearchString(path, search));
+    }
+
+    /**
      * Update grouping description.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/description")
@@ -550,48 +575,37 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to enable given preference.
+     * Update grouping to enable/disable a sync destination.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/enable")
-    public ResponseEntity<GroupingsServiceResult> enableSyncDest(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/{status}")
+    public ResponseEntity<GroupingUpdateSyncDestResult> updateSyncDest(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
-            @PathVariable String id) {
+            @PathVariable String id,
+            @PathVariable boolean status) {
+        logger.info("Entered REST updateSyncDest");
         return ResponseEntity
                 .ok()
-                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, true));
+                .body(groupingAttributeService.updateGroupingSyncDest(path, currentUser, id, status));
     }
 
     /**
-     * Update grouping to disable given preference.
+     * Update grouping to enable/disable an opt attribute.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/disable")
-    public ResponseEntity<GroupingsServiceResult> disableSyncDest(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path,
-            @PathVariable String id) {
-        return ResponseEntity
-                .ok()
-                .body(groupingAttributeService.changeGroupAttributeStatus(path, currentUser, id, false));
-    }
-
-    /**
-     * Update grouping to toggle given preference.
-     */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/preference/{id:[\\w-:.]+}/{type:[\\w-:.]+}")
-    public ResponseEntity<List<GroupingsServiceResult>> togglePreference(
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/opt-attribute/{id:[\\w-:.]+}/{status}")
+    public ResponseEntity<GroupingUpdateOptAttributeResult> updateOptAttribute(
             @RequestHeader(CURRENT_USER_KEY) String currentUser,
             @PathVariable String path,
             @PathVariable("id") OptType preferenceId,
-            @PathVariable("type") PreferenceStatus preferenceStatus) {
-        logger.info("Entered REST togglePreference");
+            @PathVariable boolean status) {
+        logger.info("Entered REST updateOptAttribute");
 
         OptRequest optInRequest = new OptRequest.Builder()
                 .withUid(currentUser)
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceStatus.toggle())
+                .withOptValue(status)
                 .build();
 
         OptRequest optOutRequest = new OptRequest.Builder()
@@ -599,12 +613,12 @@ public class GroupingsRestControllerv2_1 {
                 .withGroupNameRoot(path)
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(preferenceId)
-                .withOptValue(preferenceStatus.toggle())
+                .withOptValue(status)
                 .build();
 
         return ResponseEntity
                 .ok()
-                .body(groupingAttributeService.changeOptStatus(optInRequest, optOutRequest));
+                .body(groupingAttributeService.updateOptAttribute(optInRequest, optOutRequest));
     }
 
     /**
@@ -658,16 +672,29 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Check if the user is a sole owner of a grouping
+     * Get number of grouping members
      */
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
+    @GetMapping(value = "/groupings/{path}/count")
     @ResponseBody
-    public ResponseEntity<Boolean> isSoleOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                               @PathVariable String path, @PathVariable String uhIdentifier) {
-        logger.info("Entered REST getGroupingOwners...");
+    public ResponseEntity<Integer> getNumberOfGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                              @PathVariable String path) {
+        logger.info("Enter REST getNumberOfGroupingMembers...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.isSoleOwner(currentUser, path, uhIdentifier));
+                .body(groupingsService.numberOfGroupingMembers(currentUser, path));
+    }
+
+    /**
+     * Check if the user is a sole owner of a grouping
+     */
+    @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/{uhIdentifier}/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                     @PathVariable String path, @PathVariable String uhIdentifier) {
+        logger.info("Entered REST getNumberOfOwners...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.numberOfOwners(currentUser, path, uhIdentifier));
     }
 
     /**

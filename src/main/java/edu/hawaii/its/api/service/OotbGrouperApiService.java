@@ -89,6 +89,10 @@ public class OotbGrouperApiService implements GrouperService {
         return ootbGroupingPropertiesService.getSubjects(uhIdentifiers);
     }
 
+    public SubjectsResults getSubjects(String groupingPath, String SearchString){
+        return ootbGroupingPropertiesService.getSubject(groupingPath);
+    }
+
     /**
      * Get all the groups with the specified attribute.
      */
