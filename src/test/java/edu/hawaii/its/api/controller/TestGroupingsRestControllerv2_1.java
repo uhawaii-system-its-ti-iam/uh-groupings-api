@@ -354,8 +354,23 @@ public class TestGroupingsRestControllerv2_1 {
                 AsyncJobResult.class));
     }
 
+//    @Test
+//    public void ownedGroupingTest() throws Exception {
+//        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
+//        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+//        MvcResult mvcResult = mockMvc.perform(post(url)
+//                        .header(CURRENT_USER, ADMIN)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(JsonUtil.asJson(paths)))
+//                .andExpect(status().isOk())
+//                .andReturn();
+//        assertNotNull(mvcResult);
+//        assertNotNull(
+//                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+//    }
+
     @Test
-    public void ownedGroupingTest() throws Exception {
+    public void getGroupingsMembersByNameTest() throws Exception {
         String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
         List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -418,6 +433,39 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(mvcResult);
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingMembers.class));
     }
+
+    @Test
+    public void getGroupingsMembersByUidTest() throws Exception {
+        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
+        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(
+                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+    }
+
+    @Test
+    public void getGroupingsMembersByUhuuidTest() throws Exception {
+        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
+        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(
+                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+    }
+
+
+
 
     @Test
     public void membershipResultsTest() throws Exception {
