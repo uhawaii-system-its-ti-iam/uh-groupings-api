@@ -28,6 +28,9 @@ public class GroupAttributeResults extends Results {
 
     @Override
     public String getResultCode() {
+        if (getGroupAttributes().isEmpty()) {
+            return "FAILURE";
+        }
         return this.wsGetAttributeAssignmentsResults.getResultMetadata().getResultCode();
     }
 
