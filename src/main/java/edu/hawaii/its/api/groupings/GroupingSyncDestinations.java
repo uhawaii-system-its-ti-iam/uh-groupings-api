@@ -20,13 +20,12 @@ public class GroupingSyncDestinations {
     private List<GroupAttribute> groupAttributes;
     private String groupingExtension;
 
-    public GroupingSyncDestinations(FindAttributesResults findAttributesResults,
-            GroupAttributeResults groupAttributeResults) {
+    public GroupingSyncDestinations(
+            GroupAttributeResults groupAttributeResults, List<GroupingSyncDestination> groupingSyncDestinationList) {
         setGroupingExtension(groupAttributeResults.getGroups());
         setGroupAttributes(groupAttributeResults.getGroupAttributes());
-        setSyncDestination(findAttributesResults.getResults());
-        setResultCode(findAttributesResults.getResultCode());
-
+        setSyncDestination(groupingSyncDestinationList);
+        setResultCode(groupAttributeResults.getResultCode());
     }
 
     public GroupingSyncDestinations() {
@@ -48,19 +47,8 @@ public class GroupingSyncDestinations {
         this.resultCode = resultCode;
     }
 
-    private void setSyncDestination(List<AttributesResult> attributesResults) {
-        this.syncDestinations = new ArrayList<>();
-        for (AttributesResult attributesResult : attributesResults) {
-            GroupingSyncDestination groupingSyncDestination =
-                    JsonUtil.asObject(attributesResult.getDescription(), GroupingSyncDestination.class);
-            groupingSyncDestination.setName(attributesResult.getName());
-            groupingSyncDestination.setDescription(groupingSyncDestination.getDescription()
-                    .replaceFirst("\\$\\{srhfgs}", this.groupingExtension));
-            groupingSyncDestination.setSynced(this.groupAttributes.stream()
-                    .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributesResult.getName())));
-            this.syncDestinations.add(groupingSyncDestination);
-        }
-        this.syncDestinations.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
+    private void setSyncDestination(List<GroupingSyncDestination> syncDestinations) {
+        this.syncDestinations = syncDestinations;
     }
 
     private void setGroupAttributes(List<GroupAttribute> groupAttributes) {
