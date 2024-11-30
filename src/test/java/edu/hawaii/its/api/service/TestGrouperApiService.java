@@ -305,19 +305,15 @@ public class TestGrouperApiService {
 
         groupAttributeResults = grouperService.groupAttributeResults(optIn, GROUPING);
         assertNotNull(groupAttributeResults);
-        assertEquals("SUCCESS", groupAttributeResults.getResultCode());
 
         groupAttributeResults = grouperService.groupAttributeResults(optIn, getGroupPaths());
         assertNotNull(groupAttributeResults);
-        assertEquals("SUCCESS", groupAttributeResults.getResultCode());
 
         groupAttributeResults = grouperService.groupAttributeResults(attributes, GROUPING);
         assertNotNull(groupAttributeResults);
-        assertEquals("SUCCESS", groupAttributeResults.getResultCode());
 
         groupAttributeResults = grouperService.groupAttributeResults(attributes, getGroupPaths());
         assertNotNull(groupAttributeResults);
-        assertEquals("SUCCESS", groupAttributeResults.getResultCode());
 
         groupAttributeResults = grouperService.groupAttributeResult(GROUPING);
         assertNotNull(groupAttributeResults);

@@ -52,6 +52,7 @@ public class TestGroupingSyncDestinations {
         List<GroupingSyncDestination> syncDestinationList =
                 groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
+                findAttributesResults,
                 groupAttributeResults,
                 syncDestinationList);
         assertNotNull(groupingSyncDestinations);
@@ -70,6 +71,7 @@ public class TestGroupingSyncDestinations {
         List<GroupingSyncDestination> syncDestinationList =
                 groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
+                findAttributesResults,
                 groupAttributeResults,
                 syncDestinationList);
 
@@ -98,6 +100,7 @@ public class TestGroupingSyncDestinations {
         List<GroupingSyncDestination> syncDestinationList =
                 groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
+                findAttributesResults,
                 groupAttributeResults,
                 syncDestinationList);
         assertNotNull(groupingSyncDestinations);
