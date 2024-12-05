@@ -8,12 +8,16 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.GroupingTest;
+import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -37,9 +41,21 @@ class OotbGroupingPropertiesServiceTest {
     @Autowired
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
+
+    @Mock
+    private List<OotbActiveProfile> ootbActiveProfiles;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        ootbActiveProfiles = groupingsTestConfiguration.ootbActiveProfilesTestData();
+    }
+
+    @Test
+    public void testOotbActiveProfiles() {
+        assertNotNull(ootbActiveProfiles);
     }
 
     @Test
