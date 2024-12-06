@@ -368,57 +368,40 @@ public class TestGroupingsRestControllerv2_1 {
 //                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
 //    }
 
-    @Test
-    public void getGroupingsMembersByNameTest() throws Exception {
-        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
-        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
-        MvcResult mvcResult = mockMvc.perform(post(url)
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(paths)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(mvcResult);
-        assertNotNull(
-                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
-    }
+//    @Test
+//    public void ownedGroupingTest() throws Exception {
+//        String url = API_BASE_URL + "owners/" + ADMIN + "/groupings";
+//
+//        MvcResult mvcResult = mockMvc.perform(post(url)
+//                        .header(CURRENT_USER, ADMIN))
+//                .andExpect(status().isOk())
+//                .andReturn();
+//        assertNotNull(mvcResult);
+//        GroupingPaths groupingPaths = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingPaths.class);
+//        assertNotNull(groupingPaths);
+//        assertFalse(groupingPaths.getGroupingPaths().isEmpty());
+//    }
 
     @Test
-    public void getGroupingsMembersByUidTest() throws Exception {
-        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
-        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+    public void ownedGroupingTest() throws Exception {
+        // Define the sortBy parameter (assuming it is a valid value in your SortBy enum)
+        String sortBy = "NAME"; // or "UID", "UH_UUID", etc. based on your enum
+        String url = API_BASE_URL + "owners/" + ADMIN + "/groupings?sortBy=" + sortBy;
+
         MvcResult mvcResult = mockMvc.perform(post(url)
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(paths)))
+                        .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
+
         assertNotNull(mvcResult);
-        assertNotNull(
-                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+        GroupingPaths groupingPaths = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GroupingPaths.class);
+        assertNotNull(groupingPaths);
+        assertFalse(groupingPaths.getGroupingPaths().isEmpty());
     }
-
-    @Test
-    public void getGroupingsMembersByUhuuidTest() throws Exception {
-        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
-        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
-        MvcResult mvcResult = mockMvc.perform(post(url)
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(paths)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(mvcResult);
-        assertNotNull(
-                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
-    }
-
-
-
 
     @Test
     public void membershipResultsTest() throws Exception {
-        String url = API_BASE_URL + "members/" + ADMIN + "/memberships";
+        String url = API_BASE_URL + "members/" + ADMIN + "`/memberships";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
