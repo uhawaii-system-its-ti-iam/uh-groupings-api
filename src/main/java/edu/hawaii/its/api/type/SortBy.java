@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum SortBy {
 
     NAME("name", "name"),
-    UID("uid", "sort_string0"),
+    UID("uid", "search_string0"),
     UH_UUID("uhUuid", "subjectId");
 
 //    IN("uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in", InclusionType.IN),
