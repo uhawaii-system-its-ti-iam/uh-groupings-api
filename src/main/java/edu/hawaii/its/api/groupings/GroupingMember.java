@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
+import edu.hawaii.its.api.wrapper.Subject;
+
 /**
  * GroupingMember is used to hydrate the allMembers section of a grouping.
  */
@@ -17,6 +19,15 @@ public class GroupingMember {
         this.lastName = groupingGroupMember.getLastName();
         this.uhUuid = groupingGroupMember.getUhUuid();
         this.uid = groupingGroupMember.getUid();
+        this.whereListed = whereListed;
+    }
+
+    public GroupingMember(Subject subject, String whereListed) {
+        this.name = subject.getName();
+        this.firstName = subject.getFirstName();
+        this.lastName = subject.getLastName();
+        this.uhUuid = subject.getUhUuid();
+        this.uid = subject.getUid();
         this.whereListed = whereListed;
     }
 

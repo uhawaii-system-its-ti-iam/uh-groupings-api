@@ -10,18 +10,25 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMember;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 
 /**
  * GroupingOwnerService contains all the necessary functions to hydrate a selected grouping.
@@ -39,8 +46,11 @@ public class GroupingOwnerService {
 
     private final GrouperService grouperService;
 
-    public GroupingOwnerService(GrouperService grouperService) {
+    private final MemberService memberService;
+
+    public GroupingOwnerService(GrouperService grouperService, MemberService memberService) {
         this.grouperService = grouperService;
+        this.memberService = memberService;
     }
 
     /**
@@ -67,8 +77,66 @@ public class GroupingOwnerService {
         return groupingGroupsMembers;
     }
 
-    public GroupingGroupMembers groupMembersBySearchString(String groupingsPath, String searchString) {
-        return new GroupingGroupMembers(grouperService.getSubjects(groupingsPath, searchString));
+    public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        log.debug(String.format(
+                "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
+                currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
+        GetMembersResult getMembersResult = grouperService.getMembersResult(
+                currentUser,
+                groupingPath,
+                pageNumber,
+                pageSize,
+                sortString,
+                isAscending);
+        return new GroupingGroupMembers(getMembersResult);
+    }
+
+    public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResultsBasis = grouperService.hasMembersResults(currentUser,
+                groupingPath + GroupType.BASIS.value(), uhIdentifiers);
+        HasMembersResults hasMembersResultsInclude = grouperService.hasMembersResults(currentUser,
+                groupingPath + GroupType.INCLUDE.value(), uhIdentifiers);
+
+        List<GroupingMember> groupingMembers =  new ArrayList<>();
+        for (int i = 0; i < hasMembersResultsBasis.getResults().size(); i++) {
+            HasMemberResult hasMemberResultBasis = hasMembersResultsBasis.getResults().get(i);
+            HasMemberResult hasMemberResultInclude = hasMembersResultsInclude.getResults().get(i);
+
+            String whereListed = hasMemberResultBasis.getResultCode().equals("IS_MEMBER")
+                    ? (hasMemberResultInclude.getResultCode().equals("IS_MEMBER") ? "Basis & Include" : "Basis")
+                    : "Include";
+
+            groupingMembers.add(new GroupingMember(hasMemberResultBasis.getSubject(), whereListed));
+        }
+
+        return new GroupingMembers(groupingMembers);
+    }
+
+    public GroupingMembers getGroupingMembersIsBasis(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResults = grouperService.hasMembersResults(currentUser,
+                groupingPath + GroupType.BASIS.value(), uhIdentifiers);
+
+        List<GroupingMember> groupingMembers =  new ArrayList<>();
+        for (HasMemberResult hasMemberResult : hasMembersResults.getResults()) {
+            GroupingMember groupingMember = new GroupingMember(hasMemberResult.getSubject(),
+                    hasMemberResult.getResultCode().equals("IS_MEMBER") ? "Basis" : "");
+            groupingMembers.add(groupingMember);
+        }
+
+        return new GroupingMembers(groupingMembers);
+    }
+
+    /**
+     * Get grouping members of a selected grouping path by search string.
+     */
+    public GroupingGroupMembers groupingMembersBySearchString(String currentUser, String groupingPath, String searchString) {
+        log.debug(String.format("groupingMembersBySearchString; currentUser: %s; groupingPath: %s; searchString: %s;",
+                currentUser, groupingPath, searchString));
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+        return new GroupingGroupMembers(grouperService.getSubjects(groupingPath, searchString));
     }
 
     /**

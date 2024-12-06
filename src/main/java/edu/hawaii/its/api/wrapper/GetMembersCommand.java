@@ -47,7 +47,7 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
         return this;
     }
 
-    public GetMembersCommand setAscending(boolean isAscending) {
+    public GetMembersCommand setAscending(Boolean isAscending) {
         gcGetMembers.assignAscending(isAscending);
         return this;
     }

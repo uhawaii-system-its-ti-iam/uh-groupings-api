@@ -56,6 +56,18 @@ public class GroupingMemberTest {
         assertEquals(TEST_UIDS.get(0), groupingMember.getUid());
         assertEquals(TEST_UH_UUIDS.get(0), groupingMember.getUhUuid());
         assertEquals(TEST_NAMES.get(0), groupingMember.getName());
+        assertEquals(TEST_NAMES.get(0).split(" ")[0], groupingMember.getFirstName());
+        assertEquals(TEST_NAMES.get(0).split(" ")[1], groupingMember.getLastName());
+        assertEquals("Include", groupingMember.getWhereListed());
+
+        groupingMember = new GroupingMember(subject, "Include");
+        assertNotNull(groupingMember);
+
+        assertEquals(TEST_UIDS.get(0), groupingMember.getUid());
+        assertEquals(TEST_UH_UUIDS.get(0), groupingMember.getUhUuid());
+        assertEquals(TEST_NAMES.get(0), groupingMember.getName());
+        assertEquals(TEST_NAMES.get(0).split(" ")[0], groupingMember.getFirstName());
+        assertEquals(TEST_NAMES.get(0).split(" ")[1], groupingMember.getLastName());
         assertEquals("Include", groupingMember.getWhereListed());
 
         groupingMember = new GroupingMember();

@@ -53,4 +53,9 @@ public class HasMembersCommand extends GrouperCommand implements Command<HasMemb
         gcHasMember.addSubjectIdentifier(uid);
         return this;
     }
+
+    public HasMembersCommand owner(String uhIdentifier) {
+        this.gcHasMember.assignActAsSubject(subjectLookup(uhIdentifier));
+        return this;
+    }
 }

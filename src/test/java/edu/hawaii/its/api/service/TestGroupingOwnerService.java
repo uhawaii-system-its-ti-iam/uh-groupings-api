@@ -1,8 +1,10 @@
 package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
@@ -42,6 +45,12 @@ public class TestGroupingOwnerService {
     @Autowired
     private GroupPathService groupPathService;
 
+    @Autowired
+    private UpdateMemberService updateMemberService;
+
+    @Autowired
+    private UhIdentifierGenerator uhIdentifierGenerator;
+
     @Test
     public void paginatedGrouping() {
         GroupingGroupsMembers groupingGroupsMembers = ownerService.paginatedGrouping(
@@ -62,13 +71,30 @@ public class TestGroupingOwnerService {
     }
 
     @Test
-    public void groupMembersBySearch() {
-        GroupingGroupMembers groupingGroupMembers = ownerService.groupMembersBySearchString(GROUPING, ADMIN);
+    public void groupingMembersBySearch() {
+        String uhIdentifier = uhIdentifierGenerator.getRandomMember().getUhUuid();
+
+        updateMemberService.removeOwnership(ADMIN, GROUPING, uhIdentifier);
+        assertThrows(AccessDeniedException.class,
+                () -> ownerService.groupingMembersBySearchString(uhIdentifier, GROUPING, uhIdentifier));
+
+        updateMemberService.addIncludeMember(ADMIN, GROUPING, uhIdentifier);
+        updateMemberService.addOwnership(ADMIN, GROUPING, uhIdentifier);
+
+        GroupingGroupMembers groupingGroupMembers = ownerService.groupingMembersBySearchString(uhIdentifier, GROUPING, uhIdentifier);
         assertNotNull(groupingGroupMembers);
-        assertEquals(SUCCESS, groupingGroupMembers.getResultCode());
         assertNotNull(groupingGroupMembers.getMembers());
-        assertEquals(1, groupingGroupMembers.getMembers().size());
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
         assertNotNull(groupingGroupMembers.getGroupPath());
+
+        groupingGroupMembers = ownerService.groupingMembersBySearchString(ADMIN, GROUPING, uhIdentifier);
+        assertNotNull(groupingGroupMembers);
+        assertNotNull(groupingGroupMembers.getMembers());
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
+        assertNotNull(groupingGroupMembers.getGroupPath());
+
+        updateMemberService.removeIncludeMember(ADMIN, GROUPING, uhIdentifier);
+        updateMemberService.removeOwnership(ADMIN, GROUPING, uhIdentifier);
     }
 
     @Test

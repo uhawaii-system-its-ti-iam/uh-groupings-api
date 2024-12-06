@@ -38,6 +38,7 @@ import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingPaths;
@@ -45,10 +46,10 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.ManageSubjectResults;
-import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberService;
@@ -364,8 +365,58 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(mvcResult);
-        assertNotNull(
-                objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+    }
+
+    @Test
+    public void getGroupingMembersTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "?page=1&size=20&sortString=name&isAscending=true";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupMembers.class));
+    }
+
+    @Test
+    public void searchGroupingMembersTest() throws Exception {
+        String search = "search";
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/search/" + search;
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupMembers.class));
+    }
+
+    @Test
+    public void getGroupingMembersWhereListedTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/where-listed";
+        List<String> members = Arrays.asList("testiwta", "testiwtb");
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingMembers.class));
+    }
+
+    @Test
+    public void getGroupingMembersIsBasisTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/is-basis";
+        List<String> members = Arrays.asList("testiwta", "testiwtb");
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingMembers.class));
     }
 
     @Test
@@ -691,7 +742,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfOwnersTest() throws Exception {
-        String url = API_BASE_URL + "/members/" + GROUPING + "/owners/" + CURRENT_USER + "/count";
+        String url = API_BASE_URL + "/members/" + GROUPING + "/owners/" + ADMIN + "/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
