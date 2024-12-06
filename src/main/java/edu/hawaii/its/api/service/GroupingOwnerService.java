@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,10 +14,13 @@ import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 /**
@@ -56,13 +61,13 @@ public class GroupingOwnerService {
                 isAscending);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
         groupingGroupsMembers.setPageNumber(pageNumber);
-        if(grouperService instanceof OotbGrouperApiService && pageNumber > 1){
+        if (grouperService instanceof OotbGrouperApiService && pageNumber > 1) {
             groupingGroupsMembers.setPaginationCompleteTrue();
         }
         return groupingGroupsMembers;
     }
 
-    public GroupingGroupMembers groupMembersBySearchString(String groupingsPath, String searchString){
+    public GroupingGroupMembers groupMembersBySearchString(String groupingsPath, String searchString) {
         return new GroupingGroupMembers(grouperService.getSubjects(groupingsPath, searchString));
     }
 
@@ -70,7 +75,8 @@ public class GroupingOwnerService {
      * Get the opt attributes of a selected grouping.
      */
     public GroupingOptAttributes groupingOptAttributes(String currentUser, String groupingPath) {
-        log.debug(String.format("groupingOptAttributes; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        log.debug(
+                String.format("groupingOptAttributes; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingOptAttributes(grouperService.groupAttributeResult(currentUser, groupingPath));
     }
 
@@ -92,10 +98,39 @@ public class GroupingOwnerService {
                 currentUser,
                 SYNC_DESTINATIONS_CHECKBOXES,
                 SYNC_DESTINATIONS_LOCATION);
+
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
                 currentUser,
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 groupingPath);
-        return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults);
+
+        List<GroupingSyncDestination> syncDestinationList =
+                createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
+
+        return new GroupingSyncDestinations(groupAttributeResults, syncDestinationList);
+    }
+
+    /**
+     * Create a list of groupingSyncDestination with findAttributesResults and groupAttributeResults
+     */
+    public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults findAttributesResults,
+            GroupAttributeResults groupAttributeResults) {
+        List<AttributesResult> attributesResults = findAttributesResults.getResults();
+        List<GroupingSyncDestination> syncDestinationList = new ArrayList<>();
+        for (AttributesResult attributesResult : attributesResults) {
+            GroupingSyncDestination groupingSyncDestination =
+                    JsonUtil.asObject(attributesResult.getDescription(), GroupingSyncDestination.class);
+            groupingSyncDestination.setName(attributesResult.getName());
+            groupingSyncDestination.setDescription(groupingSyncDestination.getDescription()
+                    .replaceFirst("\\$\\{srhfgs}", groupAttributeResults.getGroups().stream()
+                            .findFirst()
+                            .map(Group::getExtension)
+                            .orElse("")));
+            groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
+                    .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributesResult.getName())));
+            syncDestinationList.add(groupingSyncDestination);
+        }
+        syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
+        return syncDestinationList;
     }
 }

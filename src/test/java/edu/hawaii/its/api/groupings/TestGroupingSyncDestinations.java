@@ -2,6 +2,7 @@ package edu.hawaii.its.api.groupings;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.service.GrouperService;
+import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -37,6 +38,9 @@ public class TestGroupingSyncDestinations {
     @Autowired
     private GrouperService grouperService;
 
+    @Autowired
+    private GroupingOwnerService groupingOwnerService;
+
     @Test
     public void constructor() {
         FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
@@ -45,9 +49,11 @@ public class TestGroupingSyncDestinations {
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 GROUPING);
+        List<GroupingSyncDestination> syncDestinationList =
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
-                findAttributesResults,
-                groupAttributeResults);
+                groupAttributeResults,
+                syncDestinationList);
         assertNotNull(groupingSyncDestinations);
         groupingSyncDestinations = new GroupingSyncDestinations();
         assertNotNull(groupingSyncDestinations);
@@ -61,9 +67,11 @@ public class TestGroupingSyncDestinations {
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
                 findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
                 GROUPING);
+        List<GroupingSyncDestination> syncDestinationList =
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
         GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
-                findAttributesResults,
-                groupAttributeResults);
+                groupAttributeResults,
+                syncDestinationList);
 
         assertNotNull(groupingSyncDestinations);
         assertEquals("SUCCESS", groupingSyncDestinations.getResultCode());
@@ -85,9 +93,13 @@ public class TestGroupingSyncDestinations {
 
     @Test
     public void failure() {
-        GroupingSyncDestinations groupingSyncDestinations =
-                new GroupingSyncDestinations(new FindAttributesResults(new WsFindAttributeDefNamesResults()),
-                        new GroupAttributeResults(new WsGetAttributeAssignmentsResults()));
+        FindAttributesResults findAttributesResults = new FindAttributesResults(new WsFindAttributeDefNamesResults());
+        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(new WsGetAttributeAssignmentsResults());
+        List<GroupingSyncDestination> syncDestinationList =
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
+        GroupingSyncDestinations groupingSyncDestinations = new GroupingSyncDestinations(
+                groupAttributeResults,
+                syncDestinationList);
         assertNotNull(groupingSyncDestinations);
         assertEquals("FAILURE", groupingSyncDestinations.getResultCode());
         assertTrue(groupingSyncDestinations.getSyncDestinations().isEmpty());

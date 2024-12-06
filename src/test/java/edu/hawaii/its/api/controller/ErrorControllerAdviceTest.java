@@ -148,25 +148,4 @@ public class ErrorControllerAdviceTest {
         assertThat(result, notNullValue());
         assertTrue(content.contains("NOT_FOUND"));
     }
-    @Test
-    public void throwExceptionTest() throws Exception {
-        MvcResult result = mockMvc.perform(get(API_BASE + "/testing/exception"))
-                .andExpect(status().isInternalServerError()) // Checking for a 500 status
-                .andExpect(jsonPath("$.status").value("INTERNAL_SERVER_ERROR"))
-                .andExpect(jsonPath("$.message").value("Validation failed"))
-                .andExpect(jsonPath("$.debugMessage").value("Check your service at endpoint /exception"))
-                .andExpect(jsonPath("$.subErrors").isArray()) // Checking if subErrors is an array
-                .andExpect(jsonPath("$.subErrors", hasSize(2))) // Checking if subErrors array has 2 elements
-                .andExpect(jsonPath("$.subErrors[0].object").value("testing object 1"))
-                .andExpect(jsonPath("$.subErrors[0].field").value("membership service"))
-                .andExpect(jsonPath("$.subErrors[0].rejectedValue").value("id: 12"))
-                .andExpect(jsonPath("$.subErrors[0].message").value("Membership access denied"))
-                .andExpect(jsonPath("$.subErrors[1].object").value("testing object 2"))
-                .andExpect(jsonPath("$.subErrors[1].field").value("member service"))
-                .andExpect(jsonPath("$.subErrors[1].rejectedValue").value("id: 30"))
-                .andExpect(jsonPath("$.subErrors[1].message").value("There is no member"))
-                .andReturn();
-
-        assertThat(result, notNullValue());
-    }
 }

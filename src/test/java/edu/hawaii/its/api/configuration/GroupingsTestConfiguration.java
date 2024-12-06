@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 
+import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
@@ -304,6 +305,10 @@ public class GroupingsTestConfiguration {
         WsGetMembersResults wsGetMembersResults =
                 getWsResultTestData("ws.get.members.results.success.multiple.groups", WsGetMembersResults.class);
         return new GetMembersResults(wsGetMembersResults);
+    }
+
+    public GroupingSyncDestination attributeDescriptionTestData() {
+        return getWsResultTestData("ws.attribute.description", GroupingSyncDestination.class);
     }
 
     public FindAttributesResults attributeDefNameResultsSuccessTestData() {
