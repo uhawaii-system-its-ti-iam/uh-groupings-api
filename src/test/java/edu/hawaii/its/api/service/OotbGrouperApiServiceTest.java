@@ -72,7 +72,7 @@ public class OotbGrouperApiServiceTest {
 
         // Execution
         GetMembersResults actual =
-                grouperService.getMembersResults(groupPaths);
+                grouperService.getMembersResults(currentUser, groupPaths);
 
         // Verification
         assertEquals(expected, actual);

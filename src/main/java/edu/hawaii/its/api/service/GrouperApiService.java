@@ -234,8 +234,9 @@ public class GrouperApiService implements GrouperService {
     /**
      * Get all members listed in each group.
      */
-    public GetMembersResults getMembersResults(List<String> groupPaths) {
+    public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths) {
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
                 .addGroupPaths(groupPaths));
         return getMembersResults;
     }
@@ -361,6 +362,25 @@ public class GrouperApiService implements GrouperService {
                 .setPrivilege(privilegeName)
                 .setSubjectLookup(uhIdentifier)
                 .setIsAllowed(isAllowed));
+    }
+
+    /**
+     * Get all members listed in a group.
+     */
+    public GetMembersResult getMembersResult(String currentUser, String groupPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .setPageNumber(pageNumber)
+                .setPageSize(pageSize)
+                .setAscending(isAscending)
+                .sortBy(sortString));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
     }
 
     /**

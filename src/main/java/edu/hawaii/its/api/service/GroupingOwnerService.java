@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,15 +14,21 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMember;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 
 /**
  * GroupingOwnerService contains all the necessary functions to hydrate a selected grouping.
@@ -66,6 +73,49 @@ public class GroupingOwnerService {
         }
         return groupingGroupsMembers;
     }
+
+    public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        log.debug(String.format(
+                "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
+                currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
+        GetMembersResult getMembersResult = grouperService.getMembersResult(
+                currentUser,
+                groupingPath,
+                pageNumber,
+                pageSize,
+                sortString,
+                isAscending);
+        return new GroupingGroupMembers(getMembersResult);
+    }
+
+    public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResultsBasis
+                = grouperService.hasMembersResults(groupingPath + GroupType.BASIS.value(), uhIdentifiers);
+        HasMembersResults hasMembersResultsInclude
+                = grouperService.hasMembersResults(groupingPath + GroupType.INCLUDE.value(), uhIdentifiers);
+
+        List<GroupingMember> groupingMembers =  new ArrayList<>();
+        IntStream.range(0, hasMembersResultsBasis.getResults().size()).forEach(i -> {
+            HasMemberResult hasMemberResultBasis = hasMembersResultsBasis.getResults().get(i);
+            HasMemberResult hasMemberResultInclude = hasMembersResultsInclude.getResults().get(i);
+
+            String whereListed;
+            if (hasMemberResultBasis.getResultCode().equals("IS_MEMBER")
+                    && hasMemberResultInclude.getResultCode().equals("IS_MEMBER")) {
+                whereListed = GroupType.BASIS.value() + "&" + GroupType.INCLUDE.value();
+            } else {
+                whereListed = hasMemberResultBasis.getResultCode().equals("IS_MEMBER")
+                        ? GroupType.BASIS.value()
+                        : GroupType.INCLUDE.value();
+            }
+            GroupingMember groupingMember = new GroupingMember(hasMemberResultBasis.getSubject(), whereListed);
+            groupingMembers.add(groupingMember);
+        });
+
+        return new GroupingMembers(groupingMembers);
+    }
+
 
     public GroupingGroupMembers groupMembersBySearchString(String groupingsPath, String searchString) {
         return new GroupingGroupMembers(grouperService.getSubjects(groupingsPath, searchString));

@@ -347,17 +347,17 @@ public class TestGrouperApiService {
 
     @Test
     public void getMembersResults() {
-        GetMembersResults getMembersResults = grouperService.getMembersResults(getGroupPaths());
+        GetMembersResults getMembersResults = grouperService.getMembersResults(ADMIN, getGroupPaths());
         assertNotNull(getMembersResults);
         assertEquals("SUCCESS", getMembersResults.getResultCode());
 
         List<String> containsInvalidPath = getGroupPaths();
         containsInvalidPath.add("invalid-path");
-        getMembersResults = grouperService.getMembersResults(getGroupPaths());
+        getMembersResults = grouperService.getMembersResults(ADMIN, getGroupPaths());
         assertNotNull(getMembersResults);
         assertEquals("SUCCESS", getMembersResults.getResultCode());
 
-        getMembersResults = grouperService.getMembersResults(Arrays.asList("invalid-path"));
+        getMembersResults = grouperService.getMembersResults(ADMIN, Arrays.asList("invalid-path"));
         assertNull(getMembersResults); // Todo exception handler.
 
         getMembersResults = grouperService.getMembersResults(
