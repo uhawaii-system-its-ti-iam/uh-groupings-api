@@ -1,8 +1,13 @@
 package edu.hawaii.its.api.util;
 
+import java.nio.file.Files;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtil {
@@ -28,7 +33,7 @@ public class JsonUtil {
         try {
             result = new ObjectMapper().readValue(json, type);
         } catch (Exception e) {
-            logger.error("Error: " + type +"; " + e);
+            logger.error("Error: " + type + "; " + e);
         }
         return result;
     }
@@ -42,6 +47,31 @@ public class JsonUtil {
             logger.error("Error: " + e);
         }
         return result;
+    }
+
+    private static String readJsonFileToString(String filePath) {
+        String result = null;
+        try {
+            if (!filePath.endsWith(".json")) {
+                throw new IllegalArgumentException("The provided file is not a JSON file: " + filePath);
+            }
+            Resource resource = new ClassPathResource(filePath);
+            result = Files.readString(resource.getFile().toPath());
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid file error: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error: " + e);
+        }
+        return result;
+    }
+
+    public static <T> List<T> asListFromFile(final String filePath, Class<T> type) {
+        return JsonUtil.asList(readJsonFileToString(filePath), type);
+    }
+
+    public static <T> T asObjectFromFile(final String filePath, Class<T> type) {
+        return JsonUtil.asObject(readJsonFileToString(filePath), type);
     }
 
     public static void printJson(Object obj) {
