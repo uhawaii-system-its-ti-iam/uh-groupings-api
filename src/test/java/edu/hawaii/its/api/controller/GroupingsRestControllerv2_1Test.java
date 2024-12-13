@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -90,33 +90,33 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @MockBean
+    @MockitoBean
     private AsyncJobsManager asyncJobsManager;
 
-    @MockBean
+    @MockitoBean
     private GroupingAttributeService groupingAttributeService;
 
-    @MockBean
+    @MockitoBean
     private GroupingAssignmentService groupingAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private MemberAttributeService memberAttributeService;
 
-    @MockBean
+    @MockitoBean
     private MembershipService membershipService;
 
-    @MockBean
+    @MockitoBean
     private UpdateMemberService updateMemberService;
-    @MockBean
+    @MockitoBean
     private GroupingOwnerService groupingOwnerService;
 
-    @MockBean
+    @MockitoBean
     private GroupingsService groupingsService;
 
-    @MockBean
+    @MockitoBean
     private MemberService memberService;
 
-    @MockBean
+    @MockitoBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @Autowired

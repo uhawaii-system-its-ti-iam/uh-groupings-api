@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
@@ -39,13 +39,13 @@ public class EmailServiceTest {
 
     private static Feedback feedback;
 
-    @SpyBean
+    @MockitoSpyBean
     private EmailService emailService;
 
-    @SpyBean
+    @MockitoSpyBean
     private JavaMailSender javaMailSender;
 
-    @MockBean
+    @MockitoBean
     private SubjectService subjectService;
 
     @Value("${app.environment}")
