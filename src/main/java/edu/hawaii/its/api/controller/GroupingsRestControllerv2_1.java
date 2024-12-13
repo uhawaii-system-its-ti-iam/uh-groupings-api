@@ -26,6 +26,7 @@ import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
@@ -280,24 +281,80 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get all the members of an owned grouping through paginated calls. This should be done through the UI using await.
-     * Currently, the UI is not using this function to hydrate grouping members, this implementation of getMembers is
-     * much faster than the current getMembers in use and should be used in the future ether when GROUPINGS-304 is
-     * completed on the UI or when the UI is migrated to the react framework.
+     * Get all the members of an owned grouping through paginated calls.
      */
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                                @RequestBody List<String> groupPaths,
-                                                               @RequestParam(required = true) Integer page,
-                                                               @RequestParam(required = true) Integer size,
-                                                               @RequestParam(required = true) String sortString,
-                                                               @RequestParam(required = true) Boolean isAscending) {
-        logger.info("Entered REST getGrouping...");
+                                                               @RequestParam Integer page,
+                                                               @RequestParam Integer size,
+                                                               @RequestParam String sortString,
+                                                               @RequestParam Boolean isAscending) {
+        logger.info("Entered REST ownedGrouping...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
                         .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending));
+    }
+
+    /**
+     * Get paginated members by a grouping path.
+     */
+    @GetMapping(value = "/groupings/{groupingPath}")
+    @ResponseBody
+    public ResponseEntity<GroupingGroupMembers> getGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                   @PathVariable String groupingPath,
+                                                                   @RequestParam(required = false) Integer page,
+                                                                   @RequestParam(required = false) Integer size,
+                                                                   @RequestParam String sortString,
+                                                                   @RequestParam Boolean isAscending) {
+        logger.info("Entered REST getGroupingMembers...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService
+                        .getGroupingMembers(currentUser, groupingPath, page, size, sortString, isAscending));
+    }
+
+    /**
+     * Get grouping members of a selected grouping path by search string.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/search/{search}")
+    public ResponseEntity<GroupingGroupMembers> searchGroupingMembers(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path, @PathVariable String search) {
+        logger.info("Entered REST searchGroupingMembers");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.groupingMembersBySearchString(currentUser, path, search));
+    }
+
+    /**
+     * Get where listed information for members of a grouping path.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/where-listed")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getGroupingMembersWhereListed(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                         @PathVariable String groupingPath,
+                                                                         @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getGroupingMembersWhereListed...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getGroupingMembersWhereListed(currentUser, groupingPath, uhIdentifiers));
+    }
+
+    /**
+     * Get is basis information for members of a grouping path.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/is-basis")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getGroupingMembersIsBasis(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                                     @PathVariable String groupingPath,
+                                                                     @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getGroupingMembersIsBasis...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getGroupingMembersIsBasis(currentUser, groupingPath, uhIdentifiers));
     }
 
     /**
@@ -544,19 +601,6 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.groupingsDescription(currentUser, path));
-    }
-
-    /**
-     * Get a list of members for a selected grouping path with search string.
-     */
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/search/{search}")
-    public ResponseEntity<GroupingGroupMembers> searchGroupingMembers(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path, @PathVariable String search) {
-        logger.info("Entered REST searchGroupingMembers");
-        return ResponseEntity
-                .ok()
-                .body(groupingOwnerService.groupMembersBySearchString(path, search));
     }
 
     /**

@@ -33,6 +33,8 @@ public class HasMemberResultTest {
         assertNotNull(wsHasMemberResult);
         HasMemberResult hasMemberResult = new HasMemberResult(wsHasMemberResult);
         assertEquals("", hasMemberResult.getName());
+        assertEquals("", hasMemberResult.getFirstName());
+        assertEquals("", hasMemberResult.getLastName());
         assertEquals("", hasMemberResult.getUid());
         assertEquals("", hasMemberResult.getUhUuid());
         assertEquals("", hasMemberResult.getResultCode());

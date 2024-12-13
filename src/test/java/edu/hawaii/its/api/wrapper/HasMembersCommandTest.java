@@ -18,6 +18,7 @@ public class HasMembersCommandTest {
     @Test
     public void builders() {
         HasMembersCommand hasMembersCommand = new HasMembersCommand();
+        assertNotNull(hasMembersCommand.owner(""));
         assertNotNull(hasMembersCommand.assignGroupPath(""));
         assertNotNull(hasMembersCommand.addUhIdentifier(""));
         assertNotNull(hasMembersCommand.addUhIdentifier("11111111"));
