@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -22,25 +24,33 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
+import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
+import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingOwnerServiceTest {
+
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
@@ -55,6 +65,9 @@ public class GroupingOwnerServiceTest {
 
     @SpyBean
     private GrouperService grouperService;
+
+    @SpyBean
+    private MemberService memberService;
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
@@ -89,15 +102,111 @@ public class GroupingOwnerServiceTest {
     }
 
     @Test
-    public void groupMembersBySearchStringTest() {
+    public void getGroupingMembersTest() {
+        GetMembersResult getMembersResult = groupingsTestConfiguration.getMembersResultsSuccessTestData()
+                .getMembersResults().get(0);
+
+        Integer pageNumber = 1;
+        Integer pageSize = 10;
+        String sortString = "name";
+        Boolean isAscending = true;
+
+        doReturn(getMembersResult).when(grouperService)
+                .getMembersResult(TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending);
+
+        GroupingGroupMembers result = groupingOwnerService.getGroupingMembers(
+                TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending);
+
+        assertNotNull(result);
+        assertFalse(result.getMembers().isEmpty());
+    }
+
+    @Test
+    public void getGroupingMembersWhereListedTest() {
+        HasMembersResults basis = groupingsTestConfiguration.hasMemberResultsIsMembersBasisTestData();
+        HasMembersResults include = groupingsTestConfiguration.hasMemberResultsIsMembersUidTestData();
+        HasMembersResults notMembersBasis = groupingsTestConfiguration.hasMemberResultsIsNotMembersBasisTestData();
+        HasMembersResults notMembersInclude = groupingsTestConfiguration.hasMemberResultsIsNotMembersUidTestData();
+
+        doReturn(basis).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+        doReturn(include).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+
+        GroupingMembers groupingMembers = groupingOwnerService.getGroupingMembersWhereListed(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("Basis & Include")));
+
+        doReturn(basis).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+        doReturn(notMembersInclude).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+
+        groupingMembers = groupingOwnerService.getGroupingMembersWhereListed(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("Basis")));
+
+        doReturn(notMembersBasis).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+        doReturn(include).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+
+        groupingMembers = groupingOwnerService.getGroupingMembersWhereListed(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("Include")));
+
+        doReturn(notMembersBasis).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+        doReturn(notMembersInclude).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+
+        groupingMembers = groupingOwnerService.getGroupingMembersWhereListed(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("")));
+    }
+
+    @Test
+    public void getGroupingMembersIsBasisTest() {
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersBasisTestData();
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+
+        GroupingMembers groupingMembers = groupingOwnerService.getGroupingMembersIsBasis(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("Basis")));
+
+        hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsNotMembersUidTestData();
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMembersResults(ADMIN, groupingPath + GroupType.BASIS.value(), TEST_UIDS);
+
+        groupingMembers = groupingOwnerService.getGroupingMembersIsBasis(ADMIN, groupingPath, TEST_UIDS);
+        assertNotNull(groupingMembers);
+        assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("")));
+    }
+
+    @Test
+    public void groupingMembersBySearchStringTest() {
         SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         assertNotNull(subjectsResults);
 
         String searchString = "testiwta";
+        doReturn(true).when(memberService).isAdmin(ADMIN);
         doReturn(subjectsResults).when(grouperService).getSubjects(groupingPath, searchString);
 
-        GroupingGroupMembers result = groupingOwnerService.groupMembersBySearchString(groupingPath, searchString);
-        assertNotNull(result);
+        GroupingGroupMembers members = groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString);
+        assertNotNull(members);
+
+        doReturn(false).when(memberService).isAdmin(ADMIN);
+        doReturn(true).when(memberService).isOwner(ADMIN);
+
+        members = groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString);
+        assertNotNull(members);
+
+        doReturn(false).when(memberService).isAdmin(ADMIN);
+        doReturn(false).when(memberService).isOwner(ADMIN);
+
+        assertThrows(AccessDeniedException.class,
+                () -> groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString));
     }
 
     @Test

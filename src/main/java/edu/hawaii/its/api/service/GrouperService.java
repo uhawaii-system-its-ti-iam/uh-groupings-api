@@ -21,7 +21,7 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public interface GrouperService {
     HasMembersResults hasMemberResults(String groupPath, String uhIdentifier);
 
-    HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers);
+    HasMembersResults hasMembersResults(String currentUser, String groupPath, List<String> uhIdentifiers);
 
     GroupSaveResults groupSaveResults(String groupingPath, String description);
 
@@ -84,6 +84,8 @@ public interface GrouperService {
     AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath, String attributeName);
 
     AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath, String privilegeName, String uhIdentifier, boolean isAllowed);
+
+    GetMembersResult getMembersResult(String currentUser, String groupingPath, Integer pageNumber, Integer pageSize, String sortString, Boolean isAscending);
 
     GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber, Integer pageSize, String sortString, Boolean isAscending);
 }
