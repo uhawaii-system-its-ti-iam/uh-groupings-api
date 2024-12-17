@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -25,7 +25,7 @@ public class AsyncJobsManagerTest {
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
 
-    @MockBean
+    @MockitoBean
     private MemberService memberService;
 
     @Autowired

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -69,7 +69,7 @@ public class TestGroupingAssignmentService {
     @Autowired
     private GrouperService grouperService;
 
-    @SpyBean
+    @MockitoSpyBean
     private GroupingsService groupingsService;
 
     @Autowired
