@@ -51,7 +51,7 @@ public class SubjectsResults extends Results {
                 continue;
             }
             Subject subject = new Subject(wsSubject);
-            if (!subject.hasUHAttributes()) {
+            if (subject.getResultCode().equals("SUCCESS") && !subject.hasUHAttributes()) {
                 continue;
             }
             subjects.add(new Subject(wsSubject));

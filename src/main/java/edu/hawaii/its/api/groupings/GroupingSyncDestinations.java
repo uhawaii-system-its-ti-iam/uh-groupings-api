@@ -20,12 +20,12 @@ public class GroupingSyncDestinations {
     private List<GroupAttribute> groupAttributes;
     private String groupingExtension;
 
-    public GroupingSyncDestinations(
+    public GroupingSyncDestinations(FindAttributesResults findAttributesResults,
             GroupAttributeResults groupAttributeResults, List<GroupingSyncDestination> groupingSyncDestinationList) {
         setGroupingExtension(groupAttributeResults.getGroups());
         setGroupAttributes(groupAttributeResults.getGroupAttributes());
         setSyncDestination(groupingSyncDestinationList);
-        setResultCode(groupAttributeResults.getResultCode());
+        setResultCode(findAttributesResults.getResultCode());
     }
 
     public GroupingSyncDestinations() {

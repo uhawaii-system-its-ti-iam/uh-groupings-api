@@ -211,10 +211,11 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void numberOfOwners() {
-        updateMemberService.addOwnership(ADMIN, GROUPING, ADMIN);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        int initialOwners = groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN);
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        assertEquals(2, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
+        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
     }
-
 }
