@@ -306,7 +306,7 @@ public class GroupingsRestControllerv2_1 {
                                                                    @PathVariable String groupingPath,
                                                                    @RequestParam(required = false) Integer page,
                                                                    @RequestParam(required = false) Integer size,
-                                                                   @RequestParam String sortString,
+                                                                   @RequestParam(required = true) SortBy sortBy,
                                                                    @RequestParam Boolean isAscending) {
         logger.info("Entered REST getGroupingMembers...");
         return ResponseEntity
