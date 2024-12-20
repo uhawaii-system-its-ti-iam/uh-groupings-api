@@ -153,7 +153,7 @@ public class GroupingOwnerService {
         List<GroupingSyncDestination> syncDestinationList =
                 createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
 
-        return new GroupingSyncDestinations(groupAttributeResults, syncDestinationList);
+        return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults, syncDestinationList);
     }
 
     /**
