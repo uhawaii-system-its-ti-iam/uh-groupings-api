@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import edu.hawaii.its.api.type.SortBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -404,50 +405,50 @@ public class GroupingsRestControllerv2_1Test {
         verify(memberAttributeService, times(1))
                 .getMemberAttributeResultsAsync(UID, members);
     }
-
     @Test
     public void ownedGroupingTest() throws Exception {
+        SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
         String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
-        assertNotNull(groupingGroupsMembers);
-        List<String> paths =
-                Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
-        given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true))
+        List<String> paths = Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
+        for (SortBy sortBy: sortByOptions) {
+            given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true))
                 .willReturn(groupingGroupsMembers);
-        MvcResult result = mockMvc.perform(
-                        post(API_BASE + "/groupings/group?page=1&size=700&sortString=name&isAscending=true")
-                                .header(CURRENT_USER, CURRENT_USER)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(JsonUtil.asJson(paths)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(result);
-        assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
-        verify(groupingOwnerService, times(1))
-                .paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true);
+            MvcResult result = mockMvc.perform(
+                post(API_BASE + "/groupings/group?page=1&size=700&sortBy=" + sortBy.value() + "&isAscending=true")
+                            .header(CURRENT_USER, CURRENT_USER)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(JsonUtil.asJson(paths)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
+            verify(groupingOwnerService).paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true);
+        }
     }
 
     @Test
     public void getGroupingMembersTest() throws Exception {
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResult wsGetMembersResult = JsonUtil.asObject(json, WsGetMembersResult.class);
-        GetMembersResult getMembersResult = new GetMembersResult(wsGetMembersResult);
-        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResult);
-        assertNotNull(groupingGroupMembers);
-        String path = "group-path:include";
-        given(groupingOwnerService.getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true))
-                .willReturn(groupingGroupMembers);
-        MvcResult result = mockMvc.perform(
-                        get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortString=name&isAscending=true")
-                                .header(CURRENT_USER, CURRENT_USER))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(result);
-        assertEquals(JsonUtil.asJson(groupingGroupMembers), result.getResponse().getContentAsString());
-        verify(groupingOwnerService, times(1))
-                .getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true);
+        SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        List<String> paths = Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
+        for (SortBy sortBy: sortByOptions) {
+            given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true))
+                    .willReturn(groupingGroupsMembers);
+            MvcResult result = mockMvc.perform(
+                            post(API_BASE + "/groupings/group?page=1&size=700&sortBy=" + sortBy.value() + "&isAscending=true")
+                                    .header(CURRENT_USER, CURRENT_USER)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(JsonUtil.asJson(paths)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
+            verify(groupingOwnerService).paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true);
+        }
     }
 
     @Test

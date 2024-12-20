@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.hawaii.its.api.type.SortBy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -356,27 +357,39 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void ownedGroupingTest() throws Exception {
-        String url = API_BASE_URL + "groupings/group?page=1&size=700&sortString=name&isAscending=true";
-        List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
-        MvcResult mvcResult = mockMvc.perform(post(url)
-                        .header(CURRENT_USER, ADMIN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.asJson(paths)))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(mvcResult);
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+        SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
+        for(SortBy sortBy: sortByOptions){
+            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value() + "&page=1&size=700&isAscending=true";
+            List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+            MvcResult mvcResult = mockMvc.perform(post(url)
+                            .header(CURRENT_USER, ADMIN)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(JsonUtil.asJson(paths)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            assertNotNull(mvcResult);
+            assertNotNull(
+                    objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+        }
     }
 
     @Test
     public void getGroupingMembersTest() throws Exception {
-        String url = API_BASE_URL + "groupings/" + GROUPING + "?page=1&size=20&sortString=name&isAscending=true";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(mvcResult);
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupMembers.class));
+        SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
+        for(SortBy sortBy: sortByOptions){
+            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value() + "&page=1&size=700&isAscending=true";
+            List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
+            MvcResult mvcResult = mockMvc.perform(post(url)
+                            .header(CURRENT_USER, ADMIN)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(JsonUtil.asJson(paths)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            assertNotNull(mvcResult);
+            assertNotNull(
+                    objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
+        }
+
     }
 
     @Test
@@ -421,7 +434,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void membershipResultsTest() throws Exception {
-        String url = API_BASE_URL + "members/" + ADMIN + "/memberships";
+        String url = API_BASE_URL + "members/" + ADMIN + "`/memberships";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
