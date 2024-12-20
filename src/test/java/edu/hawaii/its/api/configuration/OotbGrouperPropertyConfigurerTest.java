@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -36,7 +36,7 @@ public class OotbGrouperPropertyConfigurerTest {
     @Autowired
     private ApplicationContext context;
 
-    @MockBean
+    @MockitoBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @DynamicPropertySource

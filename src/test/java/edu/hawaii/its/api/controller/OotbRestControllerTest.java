@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,7 +44,7 @@ public class OotbRestControllerTest {
     private String CURRENT_USER;
     @Value("${groupings.api.success}")
     private String SUCCESS;
-    @MockBean
+    @MockitoBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
     @Autowired
     private WebApplicationContext context;

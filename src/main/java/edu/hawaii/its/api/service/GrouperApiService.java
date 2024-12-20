@@ -52,8 +52,9 @@ public class GrouperApiService implements GrouperService {
     /**
      * Check if multiple UH identifiers are listed in a group.
      */
-    public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
+    public HasMembersResults hasMembersResults(String currentUser, String groupPath, List<String> uhIdentifiers) {
         HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
+                .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
         return hasMembersResults;
@@ -361,6 +362,25 @@ public class GrouperApiService implements GrouperService {
                 .setPrivilege(privilegeName)
                 .setSubjectLookup(uhIdentifier)
                 .setIsAllowed(isAllowed));
+    }
+
+    /**
+     * Get all members listed in a group.
+     */
+    public GetMembersResult getMembersResult(String currentUser, String groupPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .setPageNumber(pageNumber)
+                .setPageSize(pageSize)
+                .setAscending(isAscending)
+                .sortBy(sortString));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
     }
 
     /**

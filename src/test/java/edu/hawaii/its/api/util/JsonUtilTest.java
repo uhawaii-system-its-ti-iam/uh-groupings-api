@@ -3,20 +3,28 @@ package edu.hawaii.its.api.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+
 public class JsonUtilTest {
 
     private static PropertyLocator propertyLocator;
@@ -86,4 +94,36 @@ public class JsonUtilTest {
         constructor.newInstance();
     }
 
+    @Test
+    public void asObjectFromFile() {
+        TestUser user = JsonUtil.asObjectFromFile("test.json", TestUser.class);
+        assertNotNull(user);
+        assertTrue(user.getTest().equals("value"));
+        assertEquals(123, user.getNumber());
+
+        assertNull(JsonUtil.asObjectFromFile("non-existent.json", TestUser.class));
+    }
+
+    @Test
+    public void asListFromFile() {
+        List<OotbActiveProfile> users =
+                JsonUtil.asListFromFile("ootb.active.user.profiles.json", OotbActiveProfile.class);
+        assertNotNull(users);
+
+        assertNull(JsonUtil.asListFromFile("non-existent.json", TestUser.class));
+    }
+
+    // Test class matching test.json structure
+    private static class TestUser {
+        private String test;
+        private int number;
+
+        public String getTest() {
+            return test;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+    }
 }

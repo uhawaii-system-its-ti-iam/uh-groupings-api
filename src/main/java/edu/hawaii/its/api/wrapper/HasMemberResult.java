@@ -34,6 +34,14 @@ public class HasMemberResult {
         return getSubject().getName();
     }
 
+    public String getFirstName() {
+        return getSubject().getFirstName();
+    }
+
+    public String getLastName() {
+        return getSubject().getLastName();
+    }
+
     public String getUid() {
         return getSubject().getUid();
     }

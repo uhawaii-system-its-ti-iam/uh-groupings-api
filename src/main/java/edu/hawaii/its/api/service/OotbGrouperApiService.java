@@ -46,7 +46,7 @@ public class OotbGrouperApiService implements GrouperService {
     /**
      * Check if multiple UH identifiers are listed in a group.
      */
-    public HasMembersResults hasMembersResults(String groupPath, List<String> uhIdentifiers) {
+    public HasMembersResults hasMembersResults(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return ootbGroupingPropertiesService.getHasMembersResults();
     }
 
@@ -275,6 +275,14 @@ public class OotbGrouperApiService implements GrouperService {
         wsAssignGrouperPrivilegesLiteResult.setResultMetadata(resultMetadata);
 
         return new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
+    }
+
+    /**
+     * Get all members listed in a group.
+     */
+    public GetMembersResult getMembersResult(String currentUser, String groupingPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending) {
+        return ootbGroupingPropertiesService.getMembersByGroupPath(groupingPath);
     }
 
     /**

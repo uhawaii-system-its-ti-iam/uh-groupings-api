@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -47,11 +47,11 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
+import edu.hawaii.its.api.groupings.GroupingUpdatedAttributeResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
-import edu.hawaii.its.api.groupings.GroupingUpdatedAttributeResult;
-import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -68,12 +68,14 @@ import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -91,33 +93,33 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.success}")
     private String SUCCESS;
 
-    @MockBean
+    @MockitoBean
     private AsyncJobsManager asyncJobsManager;
 
-    @MockBean
+    @MockitoBean
     private GroupingAttributeService groupingAttributeService;
 
-    @MockBean
+    @MockitoBean
     private GroupingAssignmentService groupingAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private MemberAttributeService memberAttributeService;
 
-    @MockBean
+    @MockitoBean
     private MembershipService membershipService;
 
-    @MockBean
+    @MockitoBean
     private UpdateMemberService updateMemberService;
-    @MockBean
+    @MockitoBean
     private GroupingOwnerService groupingOwnerService;
 
-    @MockBean
+    @MockitoBean
     private GroupingsService groupingsService;
 
-    @MockBean
+    @MockitoBean
     private MemberService memberService;
 
-    @MockBean
+    @MockitoBean
     private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @Autowired
@@ -403,31 +405,6 @@ public class GroupingsRestControllerv2_1Test {
         verify(memberAttributeService, times(1))
                 .getMemberAttributeResultsAsync(UID, members);
     }
-
-//    @Test
-//    public void ownedGroupingTest() throws Exception {
-//        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
-//        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-//        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-//        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
-//        assertNotNull(groupingGroupsMembers);
-//        List<String> paths =
-//                Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
-//        given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true))
-//                .willReturn(groupingGroupsMembers);
-//        MvcResult result = mockMvc.perform(
-//                        post(API_BASE + "/groupings/group?page=1&size=700&sortString=name&isAscending=true")
-//                                .header(CURRENT_USER, CURRENT_USER)
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                                .content(JsonUtil.asJson(paths)))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//        assertNotNull(result);
-//        assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
-//        verify(groupingOwnerService, times(1))
-//                .paginatedGrouping(CURRENT_USER, paths, 1, 700, "name", true);
-//    }
-
     @Test
     public void ownedGroupingTest() throws Exception {
         SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
@@ -455,6 +432,66 @@ public class GroupingsRestControllerv2_1Test {
             assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
             verify(groupingOwnerService).paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true);
         }
+    }
+
+    @Test
+    public void getGroupingMembersTest() throws Exception {
+        String json = propertyLocator.find("ws.get.members.results.success");
+        WsGetMembersResult wsGetMembersResult = JsonUtil.asObject(json, WsGetMembersResult.class);
+        GetMembersResult getMembersResult = new GetMembersResult(wsGetMembersResult);
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResult);
+        assertNotNull(groupingGroupMembers);
+        String path = "group-path:include";
+        given(groupingOwnerService.getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true))
+                .willReturn(groupingGroupMembers);
+        MvcResult result = mockMvc.perform(
+                        get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortString=name&isAscending=true")
+                                .header(CURRENT_USER, CURRENT_USER))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        assertEquals(JsonUtil.asJson(groupingGroupMembers), result.getResponse().getContentAsString());
+        verify(groupingOwnerService, times(1))
+                .getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true);
+    }
+
+    @Test
+    public void searchGroupingMembersTest() throws Exception {
+        String path = "path:to:grouping";
+        String search = "UID";
+        given(memberService.isAdmin(ADMIN)).willReturn(true);
+        given(groupingOwnerService.groupingMembersBySearchString(ADMIN, path, search)).willReturn(new GroupingGroupMembers());
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/search/" + search)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingOwnerService, times(1)).groupingMembersBySearchString(ADMIN, path, search);
+    }
+
+    @Test
+    public void getGroupingMembersWhereListedTest() throws Exception {
+        String path = "path:to:grouping";
+        List<String> members = Arrays.asList("testiwta", "testiwtb");
+        MvcResult mvcResult = mockMvc.perform(post(API_BASE + "/groupings/" + path + "/where-listed")
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingOwnerService, times(1)).getGroupingMembersWhereListed(ADMIN, path, members);
+    }
+
+    @Test
+    public void getGroupingMembersIsBasisTest() throws Exception {
+        String path = "path:to:grouping";
+        List<String> members = Arrays.asList("testiwta", "testiwtb");
+        MvcResult mvcResult = mockMvc.perform(post(API_BASE + "/groupings/" + path + "/is-basis")
+                        .header(CURRENT_USER, ADMIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(members)))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingOwnerService, times(1)).getGroupingMembersIsBasis(ADMIN, path, members);
     }
 
     @Test
@@ -937,19 +974,6 @@ public class GroupingsRestControllerv2_1Test {
         assertNotNull(mvcResult);
         verify(groupingAssignmentService, times(1)).groupingOwners(ADMIN, path);
     }
-
-    @Test
-    public void searchGroupingMembersTest() throws Exception {
-        String path = "path:to:grouping";
-        String search = "UID";
-        given(groupingOwnerService.groupMembersBySearchString(path, search)).willReturn(new GroupingGroupMembers());
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/search/" + search)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk()).andReturn();
-        assertNotNull(mvcResult);
-        verify(groupingOwnerService, times(1)).groupMembersBySearchString(path, search);
-    }
-
 
     @Test
     public void getAsyncJobResultTest() throws Exception {

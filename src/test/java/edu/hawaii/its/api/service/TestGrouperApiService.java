@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -119,13 +120,24 @@ public class TestGrouperApiService {
     }
 
     @Test
-    public void hasMemberResult() {
+    public void hasMemberResults() {
         HasMembersResults hasMembersResults = grouperService.hasMemberResults(GROUPING_INCLUDE, ADMIN);
         assertNotNull(hasMembersResults);
         assertEquals("SUCCESS", hasMembersResults.getResultCode());
         List<HasMemberResult> memberResults = hasMembersResults.getResults();
         assertEquals(1, memberResults.size());
         assertEquals(ADMIN, memberResults.get(0).getUid());
+    }
+
+    @Test
+    public void hasMembersResults() {
+        HasMembersResults hasMembersResults = grouperService.hasMembersResults(ADMIN, GROUPING_INCLUDE, testUids);
+        assertNotNull(hasMembersResults);
+        assertEquals("SUCCESS", hasMembersResults.getResultCode());
+        List<HasMemberResult> memberResults = hasMembersResults.getResults();
+        assertEquals(testUids.size(), memberResults.size());
+        assertTrue(IntStream.range(0, testUids.size())
+                .allMatch(i -> testUids.get(i).equals(memberResults.get(i).getUid())));
     }
 
     @Test
@@ -343,6 +355,18 @@ public class TestGrouperApiService {
         assertNotNull(getMembersResult);
         assertEquals("SUCCESS", getMembersResult.getResultCode());
         // Todo exception handler for invalid paths.
+
+        getMembersResult = grouperService.getMembersResult(
+                ADMIN,
+                GROUPING_LARGE_BASIS,
+                1,
+                20,
+                "name",
+                true);
+        assertNotNull(getMembersResult);
+        assertEquals("SUCCESS", getMembersResult.getResultCode());
+        assertEquals(GROUPING_LARGE_BASIS, getMembersResult.getGroup().getGroupPath());
+        assertFalse(getMembersResult.getSubjects().isEmpty());
     }
 
     @Test

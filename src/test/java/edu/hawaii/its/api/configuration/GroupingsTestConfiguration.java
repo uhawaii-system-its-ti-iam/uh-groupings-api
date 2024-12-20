@@ -1,17 +1,19 @@
 package edu.hawaii.its.api.configuration;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
+import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributeResult;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
-import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -23,22 +25,25 @@ import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
+import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
+import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @TestConfiguration
 public class GroupingsTestConfiguration {
@@ -52,6 +57,10 @@ public class GroupingsTestConfiguration {
         return JsonUtil.asObject(json, type);
     }
 
+    public List<OotbActiveProfile> ootbActiveProfilesTestData() {
+        return JsonUtil.asListFromFile("ootb.active.user.profiles.json", OotbActiveProfile.class);
+    }
+
     public HasMembersResults hasMemberResultsIsMembersUidTestData() {
         return new HasMembersResults(
                 getWsResultTestData("ws.has.member.results.is.members.uid", WsHasMemberResults.class));
@@ -60,6 +69,21 @@ public class GroupingsTestConfiguration {
     public HasMembersResults hasMemberResultsIsMembersUhuuidTestData() {
         return new HasMembersResults(
                 getWsResultTestData("ws.has.member.results.is.members.uhuuid", WsHasMemberResults.class));
+    }
+
+    public HasMembersResults hasMemberResultsIsNotMembersUidTestData() {
+        return new HasMembersResults(
+                getWsResultTestData("ws.has.member.results.is.not.members.uid", WsHasMemberResults.class));
+    }
+
+    public HasMembersResults hasMemberResultsIsMembersBasisTestData() {
+        return new HasMembersResults(
+                getWsResultTestData("ws.has.member.results.is.members.basis", WsHasMemberResults.class));
+    }
+
+    public HasMembersResults hasMemberResultsIsNotMembersBasisTestData() {
+        return new HasMembersResults(
+                getWsResultTestData("ws.has.member.results.is.not.members.basis", WsHasMemberResults.class));
     }
 
     public HasMembersResults hasMemberResultsIsMembersFailureTestData() {
@@ -163,6 +187,10 @@ public class GroupingsTestConfiguration {
 
     public FindGroupsResults findGroupsResultsFailureTestData() {
         return new FindGroupsResults(getWsResultTestData("find.groups.results.failure", WsFindGroupsResults.class));
+    }
+
+    public Subject subjectSuccessUidTestData() {
+        return new Subject(getWsResultTestData("ws.subject.success.uid", WsSubject.class));
     }
 
     public GroupSaveResults groupSaveResultsDescriptionUpdatedTestData() {
