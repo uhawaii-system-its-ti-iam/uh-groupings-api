@@ -1,5 +1,8 @@
 package edu.hawaii.its.api.groupings;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +20,8 @@ public class GroupingMembers {
         this.members = new ArrayList<>();
     }
 
-    public GroupingMembers(List<GroupingMember> members) {
+    @JsonCreator
+    public GroupingMembers(@JsonProperty("members") List<GroupingMember> members) {
         this.members = members;
     }
 
