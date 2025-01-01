@@ -25,6 +25,7 @@ import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupOwners;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
@@ -517,7 +518,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<GroupingAddResults> addOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
                                                         @PathVariable List<String> uhIdentifier) {
-        logger.info("Entered REST addOwner...");
+        logger.info("Entered REST addOwners...");
         return ResponseEntity
                 .ok()
                 .body(updateMemberService.addOwnerships(currentUser, path, uhIdentifier));
@@ -527,13 +528,13 @@ public class GroupingsRestControllerv2_1 {
      * Update grouping to add new path owners.
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
-    public ResponseEntity<GroupingAddResults> addGroupPathOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    public ResponseEntity<GroupingAddResults> addGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
                                                         @PathVariable List<String> pathOwners) {
-        logger.info("Entered REST addOwner...");
+        logger.info("Entered REST addGroupPathOwners...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addGroupPathOwnership(currentUser, path, pathOwners));
+                .body(updateMemberService.addGroupPathOwnerships(currentUser, path, pathOwners));
     }
 
 
@@ -744,7 +745,7 @@ public class GroupingsRestControllerv2_1 {
      * A list of all owners listed in grouping.
      */
     @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")
-    public ResponseEntity<GroupingGroupMembers> groupingOwners(@RequestHeader(CURRENT_USER_KEY) String
+    public ResponseEntity<GroupingGroupOwners> groupingOwners(@RequestHeader(CURRENT_USER_KEY) String
                                                                        currentUser,
                                                                @PathVariable String path) {
         logger.info("Entered REST groupingOwners...");

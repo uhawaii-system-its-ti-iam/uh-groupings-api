@@ -290,6 +290,11 @@ public class TestGrouperApiService {
     }
 
     @Test
+    public void getImmediateMembers() {
+        // Implement test
+    }
+
+    @Test
     public void groupAttributeResults() {
         String optIn = OptType.IN.value();
         String optOut = OptType.OUT.value();

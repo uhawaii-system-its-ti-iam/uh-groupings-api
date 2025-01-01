@@ -16,12 +16,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
-import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupOwners;
 import edu.hawaii.its.api.groupings.GroupingPaths;
-import edu.hawaii.its.api.type.ApiError;
-import edu.hawaii.its.api.type.ApiValidationError;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -117,10 +114,10 @@ public class GroupingAssignmentService {
         return new GroupingPaths(groupingsService.getGroupingPaths(optInPaths));
     }
 
-    public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
+    public GroupingGroupOwners groupingOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
-        return new GroupingGroupMembers(
-                grouperService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
+        return new GroupingGroupOwners(
+                grouperService.getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()));
     }
 
     public Integer numberOfOwners(String currentUser, String groupPath, String uhIdentifier) {
@@ -129,8 +126,8 @@ public class GroupingAssignmentService {
         if (!memberService.isOwner(uhIdentifier)) {
             throw new AccessDeniedException();
         }
-        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
-        return owners.size();
+        GroupingGroupMembers owners = groupingOwners(currentUser, groupPath).getImmediateOwners();
+        return owners.getMembers().size();
     }
 
     public Map<String, Group> makeGroups(GetMembersResults getMembersResults) {

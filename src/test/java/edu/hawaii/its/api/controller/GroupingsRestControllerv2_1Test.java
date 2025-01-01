@@ -38,6 +38,7 @@ import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
+import edu.hawaii.its.api.groupings.GroupingGroupOwners;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
@@ -718,7 +719,7 @@ public class GroupingsRestControllerv2_1Test {
         pathOwnersToAdd.add("tmp:tst05name:groupPath05");
         pathOwnersToAdd.add("tmp:tst06name:groupPath06");
 
-        given(updateMemberService.addGroupPathOwnership(UID, "grouping", pathOwnersToAdd))
+        given(updateMemberService.addGroupPathOwnerships(UID, "grouping", pathOwnersToAdd))
                 .willReturn(groupingAddResults);
 
         MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/path-owner/" + String.join(",", pathOwnersToAdd))
@@ -728,7 +729,7 @@ public class GroupingsRestControllerv2_1Test {
 
         assertThat(result, notNullValue());
         verify(updateMemberService, times(1))
-                .addGroupPathOwnership(UID, "grouping", pathOwnersToAdd);
+                .addGroupPathOwnerships(UID, "grouping", pathOwnersToAdd);
     }
 
     @Test
@@ -962,7 +963,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void groupingOwnersTest() throws Exception {
         String path = "grouping-path";
-        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingGroupMembers());
+        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingGroupOwners());
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + path + "/owners")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
