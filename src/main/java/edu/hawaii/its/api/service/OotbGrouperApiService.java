@@ -94,6 +94,13 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
+     * Not implemented yet
+     */
+    public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
+        return new GetMembersResult();
+    }
+
+    /**
      * Get all the groups with the specified attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute) {

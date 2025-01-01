@@ -34,6 +34,8 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
+import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
+
 public class GrouperApiService implements GrouperService {
 
     private final ExecutorService exec;
@@ -125,6 +127,21 @@ public class GrouperApiService implements GrouperService {
                 .assignGroupingPath(groupingPath)
                 .assignSearchString(searchString));
         return subjectsResults;
+    }
+
+    /**
+     * Get all immediate members of a grouping path (members with the immediate filter)
+     */
+    public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .assignMemberFilter(WsMemberFilter.Immediate));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
     }
 
     /**
