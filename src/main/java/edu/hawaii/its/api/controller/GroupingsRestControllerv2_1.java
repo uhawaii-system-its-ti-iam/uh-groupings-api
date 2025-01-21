@@ -312,7 +312,7 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .getGroupingMembers(currentUser, groupingPath, page, size, sortString, isAscending));
+                        .getGroupingMembers(currentUser, groupingPath, page, size, sortBy.sortString(), isAscending));
     }
 
     /**
@@ -774,5 +774,5 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-    
+
 }
