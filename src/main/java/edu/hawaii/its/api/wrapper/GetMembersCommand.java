@@ -3,6 +3,7 @@ package edu.hawaii.its.api.wrapper;
 import java.util.List;
 
 import edu.internet2.middleware.grouperClient.api.GcGetMembers;
+import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 /**
@@ -64,6 +65,13 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
 
     public GetMembersCommand addSubjectAttribute(String subjectAttribute) {
         gcGetMembers.addSubjectAttributeName(subjectAttribute);
+        return this;
+    }
+
+    public GetMembersCommand assignMemberFilter(String filter) {
+        WsMemberFilter memberFilter =
+                filter.equalsIgnoreCase("All") ? WsMemberFilter.All : WsMemberFilter.Immediate;
+        gcGetMembers.assignMemberFilter(memberFilter);
         return this;
     }
 }

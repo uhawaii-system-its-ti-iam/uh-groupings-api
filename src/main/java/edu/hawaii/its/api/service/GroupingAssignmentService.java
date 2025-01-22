@@ -117,19 +117,27 @@ public class GroupingAssignmentService {
         return new GroupingPaths(groupingsService.getGroupingPaths(optInPaths));
     }
 
-    public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+    /**
+     * Get owners of a grouping.
+     * @param filter All - direct and indirect; Immediate - direct owners only
+     */
+    public GroupingGroupMembers groupingOwners(String currentUser, String groupingPath, String filter) {
+        logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s; filter: %s;", currentUser, groupingPath, filter));
         return new GroupingGroupMembers(
-                grouperService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value()));
+                grouperService.getMembersResult(currentUser, groupingPath + GroupType.OWNERS.value(), filter));
     }
 
-    public Integer numberOfOwners(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s",
-                currentUser, groupPath, uhIdentifier))  ;
-        if (!memberService.isOwner(uhIdentifier)) {
+    /**
+     * Get number of owners in a grouping.
+     * @param filter All - direct and indirect; Immediate - direct owners only
+     */
+    public Integer numberOfOwners(String currentUser, String groupPath, String filter) {
+        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s;",
+                currentUser, groupPath))  ;
+        if (!memberService.isOwner(currentUser, groupPath)) {
             throw new AccessDeniedException();
         }
-        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath).getMembers();
+        List<GroupingGroupMember> owners = groupingOwners(currentUser, groupPath, filter).getMembers();
         return owners.size();
     }
 

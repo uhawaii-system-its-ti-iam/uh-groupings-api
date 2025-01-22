@@ -1,16 +1,16 @@
 package edu.hawaii.its.api.service;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import edu.hawaii.its.api.exception.*;
+import edu.hawaii.its.api.wrapper.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
@@ -19,10 +19,6 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.GroupType;
-import edu.hawaii.its.api.wrapper.AddMemberResult;
-import edu.hawaii.its.api.wrapper.AddMembersResults;
-import edu.hawaii.its.api.wrapper.RemoveMemberResult;
-import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -35,6 +31,9 @@ public class UpdateMemberService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    @Value("${groupings.max.owner.count}")
+    private Integer MAX_OWNERS;
+
     private final UpdateTimestampService timestampService;
 
     private final SubjectService subjectService;
@@ -45,16 +44,23 @@ public class UpdateMemberService {
 
     private final GrouperService grouperService;
 
+    private final GroupingOwnerService groupingOwnerService;
+
+    private final GroupingAssignmentService groupingAssignmentService;
+
     public UpdateMemberService(UpdateTimestampService timestampService,
             SubjectService subjectService,
             GroupPathService groupPathService,
             MemberService memberService,
-            GrouperService grouperService) {
+            GrouperService grouperService, GroupingOwnerService groupingOwnerService,
+                               GroupingAssignmentService groupingAssignmentService) {
         this.timestampService = timestampService;
         this.subjectService = subjectService;
         this.groupPathService = groupPathService;
         this.memberService = memberService;
         this.grouperService = grouperService;
+        this.groupingOwnerService = groupingOwnerService;
+        this.groupingAssignmentService = groupingAssignmentService;
     }
 
     public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
@@ -77,12 +83,20 @@ public class UpdateMemberService {
         return removeAdmin(currentUser, uhIdentifier);
     }
 
-    public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+    public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers, boolean exceedLimit) {
         groupPathService.checkPath(groupingPath);
         log.info(String.format("addOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
                 currentUser, groupingPath, uhIdentifiers));
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
+        // Skip number of owners check if allowed to exceed limit.
+        if (exceedLimit)
+            return addOwners(currentUser, groupingPath, validIdentifiers);
+        // Check that owner group wouldn't exceed configured limit after adding new owners.
+        Integer ownerCount = groupingAssignmentService.numberOfOwners(currentUser, groupingPath, "All");
+        if (ownerCount + validIdentifiers.size() > MAX_OWNERS) {
+            throw new LimitExceedException("Exceed limit of allowed owners for a grouping.");
+        }
         return addOwners(currentUser, groupingPath, validIdentifiers);
     }
 
@@ -94,9 +108,18 @@ public class UpdateMemberService {
     }
 
     public GroupingAddResults addGroupPathOwnership(String currentUser, String groupingPath,
-            List<String> groupPathOwners) {
+            List<String> groupPathOwners, Boolean exceedLimit) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
+        if (exceedLimit)
+            addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
+        Integer ownerCount = groupingAssignmentService.numberOfOwners(currentUser, groupingPath, "All");
+        for (String path: groupPathOwners) {
+            ownerCount += groupingAssignmentService.numberOfOwners(currentUser, path, "All");
+        }
+        if (ownerCount > MAX_OWNERS) {
+            throw new LimitExceedException("Exceed limit of allowed owners for a grouping.");
+        }
         return addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
     }
 

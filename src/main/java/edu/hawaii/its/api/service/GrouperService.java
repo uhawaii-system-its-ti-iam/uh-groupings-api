@@ -61,6 +61,8 @@ public interface GrouperService {
 
     GetMembersResult getMembersResult(String currentUser, String groupPath);
 
+    GetMembersResult getMembersResult(String currentUser, String groupPath, String filter);
+
     GetMembersResults getMembersResults(List<String> groupPaths);
 
     FindAttributesResults findAttributesResults(String attributeTypeName, String searchScope);

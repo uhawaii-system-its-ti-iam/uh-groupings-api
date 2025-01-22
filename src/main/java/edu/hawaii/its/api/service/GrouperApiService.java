@@ -233,6 +233,22 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
+     * Get all members listed in a group with a filter option:
+     * "All" - direct and indirect member; "Immediate" - direct members.
+     */
+    public GetMembersResult getMembersResult(String currentUser, String groupPath, String filter) {
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .assignMemberFilter(filter));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
+    }
+
+    /**
      * Get all members listed in each group.
      */
     public GetMembersResults getMembersResults(List<String> groupPaths) {

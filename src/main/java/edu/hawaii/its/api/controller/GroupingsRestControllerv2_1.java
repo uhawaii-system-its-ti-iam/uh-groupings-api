@@ -290,12 +290,13 @@ public class GroupingsRestControllerv2_1 {
                                                                @RequestParam Integer page,
                                                                @RequestParam Integer size,
                                                                @RequestParam String sortString,
-                                                               @RequestParam Boolean isAscending) {
+                                                               @RequestParam Boolean isAscending,
+                                                               @RequestParam String filter) {
         logger.info("Entered REST ownedGrouping...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending));
+                        .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending, filter));
     }
 
     /**
@@ -513,27 +514,29 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to add a new owner.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}/{exceedLimit}")
     public ResponseEntity<GroupingAddResults> addOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
-                                                        @PathVariable List<String> uhIdentifier) {
+                                                        @PathVariable List<String> uhIdentifier,
+                                                        @PathVariable Boolean exceedLimit) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addOwnerships(currentUser, path, uhIdentifier));
+                .body(updateMemberService.addOwnerships(currentUser, path, uhIdentifier, exceedLimit));
     }
 
     /**
      * Update grouping to add new path owners.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}/{exceedLimit}")
     public ResponseEntity<GroupingAddResults> addGroupPathOwner(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
-                                                        @PathVariable List<String> pathOwners) {
+                                                        @PathVariable List<String> pathOwners,
+                                                        @PathVariable Boolean exceedLimit) {
         logger.info("Entered REST addOwner...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addGroupPathOwnership(currentUser, path, pathOwners));
+                .body(updateMemberService.addGroupPathOwnership(currentUser, path, pathOwners, exceedLimit));
     }
 
 
@@ -737,7 +740,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.numberOfOwners(currentUser, path, uhIdentifier));
+                .body(groupingAssignmentService.numberOfOwners(currentUser, path, "Immediate"));
     }
 
     /**
@@ -750,7 +753,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST groupingOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingOwners(currentUser, path));
+                .body(groupingAssignmentService.groupingOwners(currentUser, path, "Immediate"));
     }
 
     /**
