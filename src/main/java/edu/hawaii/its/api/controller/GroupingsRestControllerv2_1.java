@@ -305,25 +305,13 @@ public class GroupingsRestControllerv2_1 {
                                                                    @RequestParam(required = false) Integer page,
                                                                    @RequestParam(required = false) Integer size,
                                                                    @RequestParam(required = true) SortBy sortBy,
-                                                                   @RequestParam Boolean isAscending) {
+                                                                   @RequestParam Boolean isAscending,
+                                                                   @RequestParam(required = false) String searchString) {
         logger.info("Entered REST getGroupingMembers...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .getGroupingMembers(currentUser, groupingPath, page, size, sortBy.sortString(), isAscending));
-    }
-
-    /**
-     * Get grouping members of a selected grouping path by search string.
-     */
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/search/{search}")
-    public ResponseEntity<GroupingGroupMembers> searchGroupingMembers(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @PathVariable String path, @PathVariable String search) {
-        logger.info("Entered REST searchGroupingMembers");
-        return ResponseEntity
-                .ok()
-                .body(groupingOwnerService.groupingMembersBySearchString(currentUser, path, search));
+                        .getGroupingMembers(currentUser, groupingPath, page, size, sortBy.sortString(), isAscending, searchString));
     }
 
     /**
@@ -721,7 +709,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Enter REST getNumberOfGroupingMembers...");
         return ResponseEntity
                 .ok()
-                .body(groupingsService.numberOfGroupingMembers(currentUser, path));
+                .body(groupingOwnerService.numberOfGroupingMembers(currentUser, path));
     }
 
     /**

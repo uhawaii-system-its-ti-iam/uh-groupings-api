@@ -3,14 +3,12 @@ package edu.hawaii.its.api.type;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum SortBy {
-
     NAME("name", "name"),
     UID("uid", "search_string0"),
     UH_UUID("uhUuid", "subjectId");
 
     private final String value;
     private final String sortString;
-
 
     SortBy(String value, String sortString) {
         this.value = value;
@@ -20,7 +18,6 @@ public enum SortBy {
 
     @JsonValue
     public String value() {
-
         return value;
     }
 
