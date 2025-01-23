@@ -480,14 +480,16 @@ public class TestUpdateMemberService {
             fail("should not throw an exception if user does self opt in when user already opted in");
         }
 
-         try {
+        try {
             updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
             updateMemberService.optIn(ADMIN, GROUPING, testUid);
             assertTrue(memberService.isMember(GROUPING_INCLUDE, testUid));
         } catch (CommandException e) {
             fail("Should not throw an exception because opt in operation can be executed after removing include member");
         }
-         updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
+        updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
+        updateMemberService.removeAdminMember(ADMIN, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
     @Test
@@ -511,6 +513,9 @@ public class TestUpdateMemberService {
         } catch (CommandException e) {
             fail("Should not throw an exception because opt out operation is not executed after removing include member");
         }
+
+        updateMemberService.removeAdminMember(ADMIN, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
     private void addGroupMember(String groupPath, String uhIdentifier) {
