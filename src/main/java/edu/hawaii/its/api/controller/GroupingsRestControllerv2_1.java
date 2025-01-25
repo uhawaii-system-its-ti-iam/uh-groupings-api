@@ -774,5 +774,5 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-    
+
 }
