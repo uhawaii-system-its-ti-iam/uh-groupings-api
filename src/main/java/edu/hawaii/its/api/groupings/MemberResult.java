@@ -6,6 +6,8 @@ public abstract class MemberResult {
     private String name;
     private String firstName;
     private String lastName;
+    private boolean isGroupingOwner;
+    private String ownerPath;
 
     public String getUid() {
         return uid;

@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import static com.jayway.jsonpath.internal.function.ParamType.JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +46,8 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
+import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
+
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -52,6 +55,12 @@ public class TestGrouperApiService {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
+
+    @Value("${groupings.api.test.grouping_single}")
+    private String GROUPING_SINGLE;
+
+    @Value("${groupings.api.test.grouping_single_owners}")
+    private String GROUPING_SINGLE_OWNERS;
 
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
@@ -291,7 +300,10 @@ public class TestGrouperApiService {
 
     @Test
     public void getImmediateMembers() {
-        // Implement test
+        grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        GetMembersResult immediateMembers = grouperService.getImmediateMembers(ADMIN, GROUPING);
+        assertNotNull(immediateMembers);
+        assertEquals("SUCCESS", immediateMembers.getResultCode());
     }
 
     @Test

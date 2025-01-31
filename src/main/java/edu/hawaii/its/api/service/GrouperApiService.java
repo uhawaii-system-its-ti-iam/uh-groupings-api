@@ -125,6 +125,9 @@ public class GrouperApiService implements GrouperService {
         return subjectsResults;
     }
 
+    /**
+     * Get all immediate members of a grouping path (members with the immediate filter)
+     */
     public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .owner(currentUser)
