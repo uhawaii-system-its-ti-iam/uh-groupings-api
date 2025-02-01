@@ -56,6 +56,7 @@ import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.SortBy;
 
 @RestController
 @RequestMapping("/api/groupings/v2.1")
@@ -279,23 +280,19 @@ public class GroupingsRestControllerv2_1 {
                 .accepted()
                 .body(asyncJobsManager.putJob(memberAttributeService.getMemberAttributeResultsAsync(currentUser, uhIdentifiers)));
     }
-
-    /**
-     * Get all the members of an owned grouping through paginated calls.
-     */
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                                @RequestBody List<String> groupPaths,
                                                                @RequestParam Integer page,
                                                                @RequestParam Integer size,
-                                                               @RequestParam String sortString,
+                                                               @RequestParam SortBy sortBy,
                                                                @RequestParam Boolean isAscending) {
         logger.info("Entered REST ownedGrouping...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .paginatedGrouping(currentUser, groupPaths, page, size, sortString, isAscending));
+                        .paginatedGrouping(currentUser, groupPaths, page, size, sortBy.sortString(), isAscending));
     }
 
     /**
@@ -307,13 +304,13 @@ public class GroupingsRestControllerv2_1 {
                                                                    @PathVariable String groupingPath,
                                                                    @RequestParam(required = false) Integer page,
                                                                    @RequestParam(required = false) Integer size,
-                                                                   @RequestParam String sortString,
+                                                                   @RequestParam(required = true) SortBy sortBy,
                                                                    @RequestParam Boolean isAscending) {
         logger.info("Entered REST getGroupingMembers...");
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .getGroupingMembers(currentUser, groupingPath, page, size, sortString, isAscending));
+                        .getGroupingMembers(currentUser, groupingPath, page, size, sortBy.sortString(), isAscending));
     }
 
     /**
