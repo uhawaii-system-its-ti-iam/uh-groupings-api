@@ -17,7 +17,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -49,9 +48,6 @@ public class TestGroupingsService extends ServiceTest {
 
     @Autowired
     private GroupingsService groupingsService;
-
-    @MockitoSpyBean
-    private GrouperService grouperService;
 
     private static String UH_UUID;
 
@@ -151,23 +147,6 @@ public class TestGroupingsService extends ServiceTest {
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getCurrentDescription());
         assertEquals(description, result.getUpdatedDescription());
-    }
-
-    @Test
-    public void getNumberOfGroupingMembersTest() {
-        int initialCount = groupingsService.numberOfGroupingMembers(ADMIN, GROUPING_INCLUDE);
-
-        grouperService.addMember(ADMIN, GROUPING_INCLUDE, TEST_UH_UUIDS.get(1));
-        int countAfterAddition = groupingsService.numberOfGroupingMembers(ADMIN, GROUPING_INCLUDE);
-        assertEquals(initialCount + 1, countAfterAddition);
-
-        grouperService.removeMember(ADMIN, GROUPING_INCLUDE, TEST_UH_UUIDS.get(1));
-        int countAfterRemoval = groupingsService.numberOfGroupingMembers(ADMIN, GROUPING_INCLUDE);
-        assertEquals(initialCount, countAfterRemoval);
-
-        grouperService.resetGroupMembers(GROUPING_INCLUDE);
-        int emptyCount = groupingsService.numberOfGroupingMembers(ADMIN, GROUPING_INCLUDE);
-        assertEquals(0, emptyCount);
     }
 
 }

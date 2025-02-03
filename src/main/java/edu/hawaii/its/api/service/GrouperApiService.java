@@ -3,6 +3,9 @@ package edu.hawaii.its.api.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -116,10 +119,11 @@ public class GrouperApiService implements GrouperService {
     /**
      * Get a list of members for a specific grouping path with search string
      */
-    public SubjectsResults getSubjects(String groupingPath, String SearchString) {
+    @Cacheable("search")
+    public SubjectsResults getSubjects(String groupingPath, String searchString) {
         SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .assignGroupingPath(groupingPath)
-                .assignSearchString(SearchString));
+                .assignSearchString(searchString));
         return subjectsResults;
     }
 
@@ -267,6 +271,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Add a UH identifier to group listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
@@ -277,6 +282,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Add multiple UH identifiers to a group listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
@@ -287,6 +293,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Add multiple path owners to a group owner listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners) {
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
@@ -297,6 +304,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Remove a UH identifier from a group listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
         return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
@@ -307,6 +315,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Remove multiple UH identifiers from a group listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
         return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
@@ -317,6 +326,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Remove multiple path owners from a group owner listing.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath,
             List<String> groupPathOwners) {
         return exec.execute(new RemoveMembersCommand()
@@ -328,6 +338,7 @@ public class GrouperApiService implements GrouperService {
     /**
      * Remove all listed members from a group.
      */
+    @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults resetGroupMembers(String groupPath) {
         return exec.execute(new AddMembersCommand()
                 .assignGroupPath(groupPath)

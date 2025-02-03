@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -63,10 +63,10 @@ public class GroupingOwnerServiceTest {
 
     private String groupingPath = "tmp:grouping:path";
 
-    @SpyBean
+    @MockitoSpyBean
     private GrouperService grouperService;
 
-    @SpyBean
+    @MockitoSpyBean
     private MemberService memberService;
 
     @Autowired
@@ -78,6 +78,18 @@ public class GroupingOwnerServiceTest {
     @Test
     public void construction() {
         assertNotNull(groupingOwnerService);
+    }
+
+    @Test
+    public void numberOfGroupingMembersTest() {
+        GetMembersResult getMembersResult = groupingsTestConfiguration.getMembersResultsSuccessTestData()
+                .getMembersResults().get(0);
+
+        doReturn(getMembersResult).when(grouperService).getMembersResult(TEST_UIDS.get(0), groupingPath);
+
+        Integer numberOfGroupingMembers = groupingOwnerService.numberOfGroupingMembers(TEST_UIDS.get(0), groupingPath);
+        assertNotNull(numberOfGroupingMembers);
+        assertEquals(getMembersResult.getSubjects().size(), numberOfGroupingMembers);
     }
 
     @Test
@@ -114,11 +126,47 @@ public class GroupingOwnerServiceTest {
         doReturn(getMembersResult).when(grouperService)
                 .getMembersResult(TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending);
 
-        GroupingGroupMembers result = groupingOwnerService.getGroupingMembers(
+        GroupingGroupMembers groupingGroupMembers = groupingOwnerService.getGroupingMembers(
                 TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending);
 
-        assertNotNull(result);
-        assertFalse(result.getMembers().isEmpty());
+        assertNotNull(groupingGroupMembers);
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
+
+        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();;
+
+        String searchString = "test";
+
+        doReturn(true).when(memberService).isAdmin(TEST_UIDS.get(0));
+
+        groupingGroupMembers = groupingOwnerService.getGroupingMembers(
+                TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, null);
+
+        assertNotNull(groupingGroupMembers);
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
+
+        doReturn(subjectsResults).when(grouperService).getSubjects(groupingPath, searchString);
+
+        groupingGroupMembers = groupingOwnerService.getGroupingMembers(
+                TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, searchString);
+
+        assertNotNull(groupingGroupMembers);
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
+
+        doReturn(false).when(memberService).isAdmin(TEST_UIDS.get(0));
+        doReturn(true).when(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
+
+        groupingGroupMembers = groupingOwnerService.getGroupingMembers(
+                TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, searchString);
+
+        assertNotNull(groupingGroupMembers);
+        assertFalse(groupingGroupMembers.getMembers().isEmpty());
+
+        doReturn(false).when(memberService).isAdmin(TEST_UIDS.get(0));
+        doReturn(false).when(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
+
+        assertThrows(AccessDeniedException.class,
+                () -> groupingOwnerService.getGroupingMembers(
+                        TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
     }
 
     @Test
@@ -182,31 +230,6 @@ public class GroupingOwnerServiceTest {
         groupingMembers = groupingOwnerService.getGroupingMembersIsBasis(ADMIN, groupingPath, TEST_UIDS);
         assertNotNull(groupingMembers);
         assertTrue(groupingMembers.getMembers().stream().allMatch(member -> member.getWhereListed().equals("")));
-    }
-
-    @Test
-    public void groupingMembersBySearchStringTest() {
-        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
-        assertNotNull(subjectsResults);
-
-        String searchString = "testiwta";
-        doReturn(true).when(memberService).isAdmin(ADMIN);
-        doReturn(subjectsResults).when(grouperService).getSubjects(groupingPath, searchString);
-
-        GroupingGroupMembers members = groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString);
-        assertNotNull(members);
-
-        doReturn(false).when(memberService).isAdmin(ADMIN);
-        doReturn(true).when(memberService).isOwner(ADMIN);
-
-        members = groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString);
-        assertNotNull(members);
-
-        doReturn(false).when(memberService).isAdmin(ADMIN);
-        doReturn(false).when(memberService).isOwner(ADMIN);
-
-        assertThrows(AccessDeniedException.class,
-                () -> groupingOwnerService.groupingMembersBySearchString(ADMIN, groupingPath, searchString));
     }
 
     @Test

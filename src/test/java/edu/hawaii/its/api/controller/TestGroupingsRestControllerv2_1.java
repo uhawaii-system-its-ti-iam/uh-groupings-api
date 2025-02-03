@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.hawaii.its.api.type.SortBy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -58,6 +57,7 @@ import edu.hawaii.its.api.service.UhIdentifierGenerator;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
 
 @ActiveProfiles("integrationTest")
@@ -377,7 +377,8 @@ public class TestGroupingsRestControllerv2_1 {
     public void getGroupingMembersTest() throws Exception {
         SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
         for(SortBy sortBy: sortByOptions){
-            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value() + "&page=1&size=700&isAscending=true";
+            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value()
+                    + "&page=1&size=700&isAscending=true&searchString=test";
             List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
             MvcResult mvcResult = mockMvc.perform(post(url)
                             .header(CURRENT_USER, ADMIN)
@@ -390,18 +391,6 @@ public class TestGroupingsRestControllerv2_1 {
                     objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
         }
 
-    }
-
-    @Test
-    public void searchGroupingMembersTest() throws Exception {
-        String search = "search";
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/search/" + search;
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(mvcResult);
-        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupMembers.class));
     }
 
     @Test
