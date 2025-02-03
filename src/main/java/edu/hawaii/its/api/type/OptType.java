@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum OptType {
 
     IN("uh-settings:attributes:for-groups:uh-grouping:anyone-can:opt-in", InclusionType.IN),
@@ -13,6 +15,7 @@ public enum OptType {
         this.inclusionType = inclusionType;
     }
 
+    @JsonValue
     public String value() {
         return value;
     }

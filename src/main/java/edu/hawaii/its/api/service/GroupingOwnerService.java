@@ -20,6 +20,7 @@ import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.Strings;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -27,6 +28,7 @@ import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
+import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 /**
  * GroupingOwnerService contains all the necessary functions to hydrate a selected grouping.
@@ -49,6 +51,15 @@ public class GroupingOwnerService {
     public GroupingOwnerService(GrouperService grouperService, MemberService memberService) {
         this.grouperService = grouperService;
         this.memberService = memberService;
+    }
+
+    /**
+     * Get the number of grouping members
+     */
+    public Integer numberOfGroupingMembers(String currentUser, String groupingPath) {
+        log.debug(String.format("numberOfGroupingMembers; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        GetMembersResult getMembersResult = grouperService.getMembersResult(currentUser, groupingPath);
+        return getMembersResult.getSubjects().size();
     }
 
     /**
@@ -77,9 +88,6 @@ public class GroupingOwnerService {
 
     public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
-        log.debug(String.format(
-                "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
-                currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
         GetMembersResult getMembersResult = grouperService.getMembersResult(
                 currentUser,
                 groupingPath,
@@ -88,6 +96,25 @@ public class GroupingOwnerService {
                 sortString,
                 isAscending);
         return new GroupingGroupMembers(getMembersResult);
+    }
+
+    public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
+            Integer pageSize, String sortString, Boolean isAscending, String searchString) {
+        log.debug(String.format(
+            "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b; searchString: %s;",
+            currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
+
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupingPath, currentUser)) {
+            throw new AccessDeniedException();
+        }
+
+        if (Strings.isEmpty(searchString)) {
+            return getGroupingMembers(currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending);
+        }
+
+        SubjectsResults subjectsResults = grouperService.getSubjects(groupingPath, searchString);
+
+        return new GroupingGroupMembers(subjectsResults).sort(sortString, isAscending).paginate(pageNumber, pageSize);
     }
 
     public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath, List<String> uhIdentifiers) {
@@ -103,18 +130,6 @@ public class GroupingOwnerService {
         HasMembersResults hasMembersResults = grouperService.hasMembersResults(currentUser,
                 groupingPath + GroupType.BASIS.value(), uhIdentifiers);
         return new GroupingMembers(hasMembersResults);
-    }
-
-    /**
-     * Get grouping members of a selected grouping path by search string.
-     */
-    public GroupingGroupMembers groupingMembersBySearchString(String currentUser, String groupingPath, String searchString) {
-        log.debug(String.format("groupingMembersBySearchString; currentUser: %s; groupingPath: %s; searchString: %s;",
-                currentUser, groupingPath, searchString));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
-            throw new AccessDeniedException();
-        }
-        return new GroupingGroupMembers(grouperService.getSubjects(groupingPath, searchString));
     }
 
     /**

@@ -414,7 +414,7 @@ public class GroupingsRestControllerv2_1Test {
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
         List<String> paths = Arrays.asList("group-path:basis", "group-path:include", "group-path:exclude", "group-path:owners");
-        for (SortBy sortBy: sortByOptions) {
+        for (SortBy sortBy : sortByOptions) {
             given(groupingOwnerService.paginatedGrouping(CURRENT_USER, paths, 1, 700, sortBy.sortString(), true))
                 .willReturn(groupingGroupsMembers);
             MvcResult result = mockMvc.perform(
@@ -431,36 +431,28 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getGroupingMembersTest() throws Exception {
+        SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
         String json = propertyLocator.find("ws.get.members.results.success");
         WsGetMembersResult wsGetMembersResult = JsonUtil.asObject(json, WsGetMembersResult.class);
         GetMembersResult getMembersResult = new GetMembersResult(wsGetMembersResult);
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResult);
         assertNotNull(groupingGroupMembers);
         String path = "group-path:include";
-        given(groupingOwnerService.getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true))
-                .willReturn(groupingGroupMembers);
-        MvcResult result = mockMvc.perform(
-                        get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortBy=name&isAscending=true")
-                                .header(CURRENT_USER, CURRENT_USER))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertNotNull(result);
-        assertEquals(JsonUtil.asJson(groupingGroupMembers), result.getResponse().getContentAsString());
-        verify(groupingOwnerService, times(1))
-                .getGroupingMembers(CURRENT_USER, path, 1, 700, "name", true);
-    }
+        for (SortBy sortBy : sortByOptions) {
+            given(groupingOwnerService.getGroupingMembers(CURRENT_USER, path, 1, 700,
+                    sortBy.sortString(), true, "test")).willReturn(groupingGroupMembers);
+            MvcResult result = mockMvc.perform(
+                            get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortBy=" + sortBy.value()
+                                    + "&isAscending=true&searchString=test")
+                                    .header(CURRENT_USER, CURRENT_USER))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            assertNotNull(result);
+            assertEquals(JsonUtil.asJson(groupingGroupMembers), result.getResponse().getContentAsString());
+            verify(groupingOwnerService, times(1)).getGroupingMembers(CURRENT_USER, path,
+                    1, 700, sortBy.sortString(), true, "test");
+        }
 
-    @Test
-    public void searchGroupingMembersTest() throws Exception {
-        String path = "path:to:grouping";
-        String search = "UID";
-        given(memberService.isAdmin(ADMIN)).willReturn(true);
-        given(groupingOwnerService.groupingMembersBySearchString(ADMIN, path, search)).willReturn(new GroupingGroupMembers());
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/search/" + search)
-                        .header(CURRENT_USER, ADMIN))
-                .andExpect(status().isOk()).andReturn();
-        assertNotNull(mvcResult);
-        verify(groupingOwnerService, times(1)).groupingMembersBySearchString(ADMIN, path, search);
     }
 
     @Test
@@ -935,7 +927,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void getNumberOfGroupingMembersTest() throws Exception {
         String path = "grouping-path";
-        given(groupingsService.numberOfGroupingMembers(ADMIN, path))
+        given(groupingOwnerService.numberOfGroupingMembers(ADMIN, path))
                 .willReturn(100);
 
         mockMvc.perform(get(API_BASE + "/groupings/" + path + "/count")
@@ -943,7 +935,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(status().isOk())
                 .andExpect(content().string("100"));
 
-        verify(groupingsService, times(1))
+        verify(groupingOwnerService, times(1))
                 .numberOfGroupingMembers(ADMIN, path);
     }
 
