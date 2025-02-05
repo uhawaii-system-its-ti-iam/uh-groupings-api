@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.CommandException;
@@ -41,8 +42,9 @@ public class ErrorControllerAdvice {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
-        emailService.sendWithStack(ade, "Access Denied Exception");
+    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ade, "Access Denied Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access Denied Exception")
@@ -54,8 +56,9 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae) {
-        emailService.sendWithStack(iae, "Illegal Argument Exception");
+    public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(iae, "Illegal Argument Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("Illegal Argument Exception")
@@ -68,8 +71,9 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(GcWebServiceError.class)
-    public ResponseEntity<ApiError> handleGcWebServiceError(GcWebServiceError gce) {
-        emailService.sendWithStack(gce, "Gc Web Service Error");
+    public ResponseEntity<ApiError> handleGcWebServiceError(GcWebServiceError gce, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(gce, "Gc Web Service Error", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -84,8 +88,10 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpRequestMethodNotSupportedException(
-        HttpRequestMethodNotSupportedException hrmnse) {
-        emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception");
+        HttpRequestMethodNotSupportedException hrmnse, WebRequest request) {
+
+        String path = request.getDescription(false);
+        emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .message("Http Request Method Not Supported Exception")
@@ -98,8 +104,9 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({Exception.class, RuntimeException.class})
-    public ResponseEntity<ApiError> handleException(Exception exception) {
-        emailService.sendWithStack(exception, "Runtime Exception");
+    public ResponseEntity<ApiError> handleException(Exception exception, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(exception, "Runtime Exception", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -113,8 +120,9 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({MessagingException.class, IOException.class})
-    public ResponseEntity<ApiError> handleMessagingException(Exception e) {
-        emailService.sendWithStack(e, "Messaging Exception");
+    public ResponseEntity<ApiError> handleMessagingException(Exception e, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(e, "Messaging Exception", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -129,8 +137,10 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ApiError> handleUnsupportedOperationException(
-        UnsupportedOperationException ex) {
-        emailService.sendWithStack(ex, "Unsupported Operation Exception");
+        UnsupportedOperationException ex, WebRequest request) {
+        
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ex, "Unsupported Operation Exception", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_IMPLEMENTED)
@@ -144,8 +154,9 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(UhMemberNotFoundException.class)
-    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException ex) {
-        emailService.sendWithStack(ex, "Uh Member Not Found Exception");
+    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException ex, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ex, "Uh Member Not Found Exception", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -160,8 +171,9 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(CommandException.class)
-    public ResponseEntity<ApiError> handleCommandException(CommandException ce) {
-        emailService.sendWithStack(ce, "Command Exception");
+    public ResponseEntity<ApiError> handleCommandException(CommandException ce, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ce, "Command Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .message("Command Exception")
@@ -175,8 +187,9 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(GroupingsHTTPException.class)
-    public ResponseEntity<ApiError> handleGroupingsHTTPException(GroupingsHTTPException ghe) {
-        emailService.sendWithStack(ghe, "Groupings HTTP Exception");
+    public ResponseEntity<ApiError> handleGroupingsHTTPException(GroupingsHTTPException ghe, WebRequest request) {
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ghe, "Groupings HTTP Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Groupings HTTP Exception")
@@ -192,8 +205,10 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(InvalidGroupPathException.class)
     public ResponseEntity<ApiError> handleInvalidGroupPathException(
-            InvalidGroupPathException ex) {
-        emailService.sendWithStack(ex, "Invalid Group Path Exception");
+            InvalidGroupPathException ex, WebRequest request) {
+        
+        String path = request.getDescription(false);
+        emailService.sendWithStack(ex, "Invalid Group Path Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")
