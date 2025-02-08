@@ -1,16 +1,18 @@
 package edu.hawaii.its.api.exception;
 
 import edu.hawaii.its.api.type.ApiSubError;
+import org.springframework.http.*;
+import org.springframework.web.server.*;
 
 import java.util.List;
 import java.util.ArrayList;
 
-public class LimitExceedException extends RuntimeException {
+public class OwnerLimitExceededException extends ResponseStatusException {
 
     private List<ApiSubError> subErrors;
 
-    public LimitExceedException(String message) {
-        super(message);
+    public OwnerLimitExceededException(String message) {
+        super(HttpStatus.CONFLICT, message);
         this.subErrors = new ArrayList<>();
     }
 
@@ -18,7 +20,7 @@ public class LimitExceedException extends RuntimeException {
         return subErrors;
     }
 
-    public LimitExceedException addSubError(ApiSubError subError) {
+    public OwnerLimitExceededException addSubError(ApiSubError subError) {
         this.subErrors.add(subError);
         return this;
     }

@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.controller.*;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import org.apache.commons.logging.*;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * When getMembers is called, GroupingGroupsMembers holds the information about UH affiliates that are listed in a grouping.
  */
 public class GroupingGroupsMembers implements GroupingResult {
+
     private String resultCode;
     private String groupPath;
     private List<GroupingGroupMembers> groupsMembersList;
@@ -22,8 +26,9 @@ public class GroupingGroupsMembers implements GroupingResult {
     private boolean paginationComplete;
     private GroupingMembers allMembers;
     private Integer pageNumber;
+    private Integer ownerLimit;
 
-    public GroupingGroupsMembers(GetMembersResults getMembersResults) {
+    public GroupingGroupsMembers(GetMembersResults getMembersResults, Integer ownerLimit) {
         setGroupPath("");
         setResultCode(getMembersResults.getResultCode());
         setGroupsMembersList(getMembersResults);
@@ -34,9 +39,10 @@ public class GroupingGroupsMembers implements GroupingResult {
         setOwners(hasMembers(GroupType.OWNERS.value()));
         setPageNumber(0);
         setPaginationComplete();
+        this.ownerLimit = ownerLimit;
     }
 
-    public GroupingGroupsMembers() {
+    public GroupingGroupsMembers(Integer ownerLimit) {
         setGroupPath("");
         setResultCode("");
         this.groupsMembersList = new ArrayList<>();
@@ -47,6 +53,7 @@ public class GroupingGroupsMembers implements GroupingResult {
         setOwners(false);
         setPageNumber(0);
         setPaginationComplete();
+        this.ownerLimit = ownerLimit;
     }
 
     @Override public String getResultCode() {
@@ -171,6 +178,14 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     public GroupingGroupMembers getGroupingOwners() {
         return getMembersOf(GroupType.OWNERS.value());
+    }
+
+    public Integer getAllOwners() {
+        return getGroupingOwners().getMembers().size();
+    }
+
+    public Integer getOwnerLimit() {
+        return this.ownerLimit;
     }
 
     private boolean hasMembers(String groupExtension) {

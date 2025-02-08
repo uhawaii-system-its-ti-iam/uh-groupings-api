@@ -83,42 +83,46 @@ public class UpdateMemberService {
         return removeAdmin(currentUser, uhIdentifier);
     }
 
-    public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers, boolean exceedLimit) {
-        groupPathService.checkPath(groupingPath);
-        log.info(String.format("addOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
-                currentUser, groupingPath, uhIdentifiers));
-        checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
-        // Skip number of owners check if allowed to exceed limit.
-        if (exceedLimit)
-            return addOwners(currentUser, groupingPath, validIdentifiers);
-        // Check that owner group wouldn't exceed configured limit after adding new owners.
-        Integer ownerCount = groupingAssignmentService.numberOfOwners(currentUser, groupingPath, "All");
-        if (ownerCount + validIdentifiers.size() > MAX_OWNERS) {
-            throw new LimitExceedException("Exceed limit of allowed owners for a grouping.");
-        }
-        return addOwners(currentUser, groupingPath, validIdentifiers);
+    public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers, Boolean ignoreLimit) {
+//        groupPathService.checkPath(groupingPath);
+        log.info(String.format("addOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s; ignoreLimit: %s",
+                currentUser, groupingPath, uhIdentifiers, ignoreLimit));
+//        checkIfOwnerOrAdminUser(currentUser, groupingPath);
+//        List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
+//        // Skip number of owners check if allowed to exceed limit.
+//        if (ignoreLimit)
+//            return addOwners(currentUser, groupingPath, validIdentifiers);
+//        // Check that owner group wouldn't exceed configured limit after adding new owners.
+//        Integer ownerCount = groupingAssignmentService.numberOfOwners(currentUser, groupingPath, "All");
+//        if (ownerCount + validIdentifiers.size() > MAX_OWNERS) {
+//            throw new OwnerLimitExceededException("Exceed limit of allowed owners for a grouping.");
+//        }
+//        return addOwners(currentUser, groupingPath, validIdentifiers);
+        throw new OwnerLimitExceededException("Exceed limit of allowed owners for a grouping.");
     }
 
     public GroupingAddResult addOwnership(String currentUser, String groupingPath, String uhIdentifier) {
+/*
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
         return addOwner(currentUser, groupingPath, validIdentifier);
+*/
+        throw new OwnerLimitExceededException("Exceed limit of allowed owners for a grouping.");
     }
 
     public GroupingAddResults addGroupPathOwnership(String currentUser, String groupingPath,
-            List<String> groupPathOwners, Boolean exceedLimit) {
+            List<String> groupPathOwners, boolean exceedLimit) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         if (exceedLimit)
-            addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
+            return addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
         Integer ownerCount = groupingAssignmentService.numberOfOwners(currentUser, groupingPath, "All");
         for (String path: groupPathOwners) {
             ownerCount += groupingAssignmentService.numberOfOwners(currentUser, path, "All");
         }
         if (ownerCount > MAX_OWNERS) {
-            throw new LimitExceedException("Exceed limit of allowed owners for a grouping.");
+            throw new OwnerLimitExceededException("Exceed limit of allowed owners for a grouping.");
         }
         return addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
     }

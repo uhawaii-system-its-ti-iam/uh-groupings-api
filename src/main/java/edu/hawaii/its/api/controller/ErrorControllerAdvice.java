@@ -203,13 +203,14 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(LimitExceedException.class)
-    public ResponseEntity<ApiError> handleLimitExceedException(
-            LimitExceedException ex) {
+    @ExceptionHandler(OwnerLimitExceededException.class)
+    public ResponseEntity<ApiError> handleOwnerLimitExceededException(
+            OwnerLimitExceededException ex) {
+        logger.info("Owner Limit Exceeded Exception is handled by the Exception Handler!");
         emailService.sendWithStack(ex, "Limit Exceed Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("Limit Exceed Exception")
+                .status(HttpStatus.NOT_FOUND)
+                .message("MAX_OWNER_LIMIT_ERROR")
                 .debugMessage("Your action exceeds maximum number of allowed owners")
                 .timestamp(LocalDateTime.now());
 

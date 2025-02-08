@@ -42,6 +42,9 @@ public class GroupingOwnerService {
     @Value("uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes")
     private String SYNC_DESTINATIONS_CHECKBOXES;
 
+    @Value("${groupings.max.owner.count}")
+    private Integer MAX_OWNERS;
+
     private final GrouperService grouperService;
 
     private final MemberService memberService;
@@ -67,7 +70,7 @@ public class GroupingOwnerService {
                 pageSize,
                 sortString,
                 isAscending);
-        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults, MAX_OWNERS);
         groupingGroupsMembers.setPageNumber(pageNumber);
         if (grouperService instanceof OotbGrouperApiService && pageNumber > 1) {
             groupingGroupsMembers.setPaginationCompleteTrue();
@@ -76,7 +79,7 @@ public class GroupingOwnerService {
     }
 
     public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
-            Integer pageSize, String sortString, Boolean isAscending) {
+            Integer pageSize, String sortString, Boolean isAscending, String filter) {
         log.debug(String.format(
                 "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
                 currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
@@ -86,7 +89,8 @@ public class GroupingOwnerService {
                 pageNumber,
                 pageSize,
                 sortString,
-                isAscending);
+                isAscending,
+                filter);
         return new GroupingGroupMembers(getMembersResult);
     }
 

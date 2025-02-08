@@ -175,6 +175,13 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
+     * Get all members listed in a group.
+     */
+    public GetMembersResult getMembersResult(String currentUser, String groupPath, String filter) {
+        return ootbGroupingPropertiesService.getMembersByGroupPath(groupPath);
+    }
+
+    /**
      * Get all members listed in each group.
      */
     public GetMembersResults getMembersResults(List<String> groupPaths) {
@@ -281,7 +288,7 @@ public class OotbGrouperApiService implements GrouperService {
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupingPath, Integer pageNumber,
-            Integer pageSize, String sortString, Boolean isAscending) {
+            Integer pageSize, String sortString, Boolean isAscending, String filter) {
         return ootbGroupingPropertiesService.getMembersByGroupPath(groupingPath);
     }
 
