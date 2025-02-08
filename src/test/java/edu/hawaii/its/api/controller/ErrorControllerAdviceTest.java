@@ -16,11 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
@@ -98,32 +101,33 @@ public class ErrorControllerAdviceTest {
      */
     @Test
     public void ErrorControllerTest() {
+        WebRequest webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
         AccessDeniedException ade = new AccessDeniedException();
-        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
+        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("403 FORBIDDEN"));
 
         Exception e = new Exception("FAIL");
-        statusCode = errorControllerAdvice.handleException(e).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleException(e, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
-        statusCode = errorControllerAdvice.handleMessagingException(e).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleMessagingException(e, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
         GcWebServiceError gwse = new GcWebServiceError("FAIL");
-        statusCode = errorControllerAdvice.handleGcWebServiceError(gwse).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleGcWebServiceError(gwse, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("404 NOT_FOUND"));
 
         IllegalArgumentException iae = new IllegalArgumentException();
-        statusCode = errorControllerAdvice.handleIllegalArgumentException(iae).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleIllegalArgumentException(iae, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("404 NOT_FOUND"));
 
         HttpRequestMethodNotSupportedException hrmnse = new HttpRequestMethodNotSupportedException("FAIL");
-        statusCode = errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("405 METHOD_NOT_ALLOWED"));
 
         UnsupportedOperationException uoe = new UnsupportedOperationException();
-        statusCode = errorControllerAdvice.handleUnsupportedOperationException(uoe).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleUnsupportedOperationException(uoe,webRequest).getStatusCode().toString();
         assertThat(statusCode, is("501 NOT_IMPLEMENTED"));
     }
 

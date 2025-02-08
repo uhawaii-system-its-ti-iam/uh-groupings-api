@@ -163,7 +163,7 @@ public class EmailService {
         String header =  "(" + environment + ") UH Groupings API Error Response";
         text += "Cause of Response: The API threw an exception that has triggered the ErrorControllerAdvice. \n\n";
         text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
-        text += "Host Name: " + hostname + ".\n";
+        text += "Host Name: " + hostname + "\n";
         text += "Endpoint Path: " + path + "\n";
         if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
             text += "Recipient overridden to: " + recipient + "\n";
@@ -172,8 +172,11 @@ public class EmailService {
         text += "API Stack Trace: \n\n" + exceptionAsString;
         msg.setText(text);
         msg.setSubject(header);
+        logger.info(text);
         try {
+            
             javaMailSender.send(msg);
+            
         } catch (MailException ex) {
             logger.error("Error", ex);
         }
