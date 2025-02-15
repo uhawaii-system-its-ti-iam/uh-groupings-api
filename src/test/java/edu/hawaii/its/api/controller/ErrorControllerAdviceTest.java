@@ -27,6 +27,9 @@ import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.CommandException;
+import edu.hawaii.its.api.exception.GroupingsHTTPException;
+import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.exception.UhMemberNotFoundException;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
@@ -129,6 +132,19 @@ public class ErrorControllerAdviceTest {
         UnsupportedOperationException uoe = new UnsupportedOperationException();
         statusCode = errorControllerAdvice.handleUnsupportedOperationException(uoe,webRequest).getStatusCode().toString();
         assertThat(statusCode, is("501 NOT_IMPLEMENTED"));
+        
+        CommandException ce = new CommandException();
+        statusCode = errorControllerAdvice.handleCommandException(ce, webRequest).getStatusCode().toString();
+        assertThat(statusCode, is("406 NOT_ACCEPTABLE"));
+        
+        GroupingsHTTPException ghe = new GroupingsHTTPException();
+        statusCode = errorControllerAdvice.handleGroupingsHTTPException(ghe, webRequest).getStatusCode().toString();
+        assertThat(statusCode, is("403 FORBIDDEN"));
+        
+        InvalidGroupPathException igpe = new InvalidGroupPathException("Invalid Group Path Exception");
+        statusCode = errorControllerAdvice.handleInvalidGroupPathException(igpe, webRequest).getStatusCode().toString();
+        assertThat(statusCode, is("400 BAD_REQUEST"));
+        
     }
 
     @Test
