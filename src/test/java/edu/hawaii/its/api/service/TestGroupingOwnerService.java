@@ -99,6 +99,8 @@ public class TestGroupingOwnerService {
 
     @Test
     public void getGroupingMembers() {
+        grouperService.addMember(ADMIN, GROUPING_INCLUDE, TEST_UH_UUIDS.get(1));
+
         GroupingGroupMembers groupingGroupMembers = ownerService.getGroupingMembers(
                 ADMIN,
                 GROUPING,
@@ -136,6 +138,8 @@ public class TestGroupingOwnerService {
         assertEquals(SUCCESS, groupingGroupMembers.getResultCode());
         assertEquals(GROUPING, groupingGroupMembers.getGroupPath());
         assertNotNull(groupingGroupMembers.getMembers());
+
+        grouperService.removeMember(ADMIN, GROUPING_INCLUDE, TEST_UH_UUIDS.get(1));
     }
 
     @Test
