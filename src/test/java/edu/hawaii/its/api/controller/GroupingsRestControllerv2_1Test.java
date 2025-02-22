@@ -829,8 +829,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasOwnerPrivsTest() throws Exception {
         given(memberService.isOwner(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/owners")
-                        .header(CURRENT_USER, CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-owner"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
@@ -841,8 +840,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-admin")
-                        .header(CURRENT_USER, CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-admin"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
