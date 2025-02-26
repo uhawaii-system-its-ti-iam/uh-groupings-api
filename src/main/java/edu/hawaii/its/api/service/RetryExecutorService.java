@@ -20,7 +20,7 @@ public class RetryExecutorService {
         for (int i = 0; i <= MAX_RETRIES; i++) {
             try {
                 T result = command.execute();
-                if (result.getResultCode().equals("SUCCESS")) {
+                if (result.getResultCode().startsWith("SUCCESS")) {
                     logger.debug(text + "execution success");
                     return result;
                 }

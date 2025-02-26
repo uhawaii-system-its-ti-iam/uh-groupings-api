@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import edu.hawaii.its.api.service.ExecutorService;
+import edu.hawaii.its.api.service.RetryExecutorService;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GrouperService;
 
@@ -46,8 +47,8 @@ public class GrouperPropertyConfigurer {
 
     @Bean(name = "grouperService")
     @ConditionalOnProperty(name = "grouping.api.server.type", havingValue = "GROUPER", matchIfMissing = true)
-    public GrouperService grouperApiService(ExecutorService executorService) {
+    public GrouperService grouperApiService(ExecutorService executorService, RetryExecutorService retryExecutorService) {
         log.debug("REAL Grouper Api Service Started");
-        return new GrouperApiService(executorService);
+        return new GrouperApiService(executorService, retryExecutorService);
     }
 }

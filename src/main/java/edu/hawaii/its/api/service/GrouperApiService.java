@@ -37,9 +37,11 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public class GrouperApiService implements GrouperService {
 
     private final ExecutorService exec;
+    private final RetryExecutorService retryExec;
 
-    public GrouperApiService(ExecutorService exec) {
+    public GrouperApiService(ExecutorService exec, RetryExecutorService retryExec) {
         this.exec = exec;
+        this.retryExec = retryExec;
     }
 
     /**
@@ -353,7 +355,7 @@ public class GrouperApiService implements GrouperService {
     public AssignAttributesResults assignAttributesResults(String currentUser, String assignType,
             String assignOperation, String groupPath,
             String attributeName) {
-        return exec.execute(new AssignAttributesCommand()
+        return retryExec.execute(new AssignAttributesCommand()
                 .owner(currentUser)
                 .setAssignType(assignType)
                 .setAssignOperation(assignOperation)
@@ -367,7 +369,7 @@ public class GrouperApiService implements GrouperService {
     public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath,
             String privilegeName,
             String uhIdentifier, boolean isAllowed) {
-        return exec.execute(new AssignGrouperPrivilegesCommand()
+        return retryExec.execute(new AssignGrouperPrivilegesCommand()
                 .owner(currentUser)
                 .setGroupPath(groupPath)
                 .setPrivilege(privilegeName)
