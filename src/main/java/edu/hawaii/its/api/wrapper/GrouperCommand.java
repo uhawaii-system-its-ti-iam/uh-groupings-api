@@ -5,7 +5,20 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-public abstract class GrouperCommand<T> {
+public abstract class GrouperCommand<T extends GrouperCommand<T>> {
+
+    private boolean retry = false;
+
+    public boolean isRetry(){
+        return this.retry;
+    }
+
+    public T setRetry() {
+        this.retry = true;
+        return self();
+    }
+
+    protected abstract T self();
 
     protected WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();

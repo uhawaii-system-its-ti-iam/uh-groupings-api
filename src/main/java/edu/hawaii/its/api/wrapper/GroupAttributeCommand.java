@@ -10,7 +10,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
  * fetches (from grouper) results containing all the groups baring the attribute. Specifying a groupPath(s) with the attribute passed
  * will fetch attribute results pertaining only to that group(s).
  */
-public class GroupAttributeCommand extends GrouperCommand implements Command<GroupAttributeResults> {
+public class GroupAttributeCommand extends GrouperCommand<GroupAttributeCommand> implements Command<GroupAttributeResults> {
     protected final GcGetAttributeAssignments gcGetAttributeAssignments;
 
     public GroupAttributeCommand() {
@@ -23,6 +23,11 @@ public class GroupAttributeCommand extends GrouperCommand implements Command<Gro
     public GroupAttributeResults execute() {
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults = gcGetAttributeAssignments.execute();
         return new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+    }
+
+    @Override
+    protected GroupAttributeCommand self() {
+        return this;
     }
 
     public GroupAttributeCommand addAttribute(String attribute) {

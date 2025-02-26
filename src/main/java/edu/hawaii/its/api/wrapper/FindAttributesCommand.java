@@ -9,7 +9,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesRe
  * "uh-settings:attributes:for-groups:uh-grouping:destinations:checkboxes" will data pertaining to all grouping sync
  * destinations.
  */
-public class FindAttributesCommand extends GrouperCommand implements Command<FindAttributesResults> {
+public class FindAttributesCommand extends GrouperCommand<FindAttributesCommand> implements Command<FindAttributesResults> {
     private final GcFindAttributeDefNames gcFindAttributeDefNames;
 
     public FindAttributesCommand() {
@@ -21,6 +21,11 @@ public class FindAttributesCommand extends GrouperCommand implements Command<Fin
     public FindAttributesResults execute() {
         WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults = this.gcFindAttributeDefNames.execute();
         return new FindAttributesResults(wsFindAttributeDefNamesResults);
+    }
+
+    @Override
+    protected FindAttributesCommand self() {
+        return this;
     }
 
     public FindAttributesCommand assignSearchScope(String scope) {

@@ -7,7 +7,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivileges
  * A wrapper for GcAssignGrouperPrivilegesLite. Upon passing a privilege name and group path,
  * AssignGrouperPrivilegesCommand on execute sets a groups privilege to is allowed or not.
  */
-public class AssignGrouperPrivilegesCommand extends GrouperCommand implements Command<AssignGrouperPrivilegesResult> {
+public class AssignGrouperPrivilegesCommand extends GrouperCommand<AssignGrouperPrivilegesCommand> implements Command<AssignGrouperPrivilegesResult> {
 
     private final GcAssignGrouperPrivilegesLite gcAssignGrouperPrivilegesLite;
 
@@ -22,6 +22,11 @@ public class AssignGrouperPrivilegesCommand extends GrouperCommand implements Co
         WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult =
                 gcAssignGrouperPrivilegesLite.execute();
         return new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
+    }
+
+    @Override
+    protected AssignGrouperPrivilegesCommand self() {
+        return this;
     }
 
     public AssignGrouperPrivilegesCommand setGroupPath(String groupPath) {

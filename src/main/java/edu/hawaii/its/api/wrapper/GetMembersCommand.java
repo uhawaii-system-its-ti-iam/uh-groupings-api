@@ -10,7 +10,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
  * A wrapper for GcGetMembers. When groupPath(s) are passed, GetMembersCommand on execute fetches, from grouper, results
  * containing all the members of that group at groupPath.
  */
-public class GetMembersCommand extends GrouperCommand implements Command<GetMembersResults> {
+public class GetMembersCommand extends GrouperCommand<GetMembersCommand> implements Command<GetMembersResults> {
 
     private final GcGetMembers gcGetMembers;
 
@@ -24,6 +24,11 @@ public class GetMembersCommand extends GrouperCommand implements Command<GetMemb
     public GetMembersResults execute() {
         WsGetMembersResults wsGetMembersResults = gcGetMembers.execute();
         return new GetMembersResults(wsGetMembersResults);
+    }
+
+    @Override
+    protected GetMembersCommand self() {
+        return this;
     }
 
     public GetMembersCommand addGroupPaths(List<String> groupPaths) {

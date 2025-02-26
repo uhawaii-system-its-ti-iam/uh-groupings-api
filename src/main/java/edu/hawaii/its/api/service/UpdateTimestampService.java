@@ -25,11 +25,11 @@ public class UpdateTimestampService {
 
     private final GroupPathService groupPathService;
 
-    private final RetryExecutorService retryExec;
+    private final ExecutorService exec;
 
-    public UpdateTimestampService(GroupPathService groupPathService, RetryExecutorService retryExec) {
+    public UpdateTimestampService(GroupPathService groupPathService, ExecutorService exec) {
         this.groupPathService = groupPathService;
-        this.retryExec = retryExec;
+        this.exec = exec;
     }
 
     public GroupingTimestampResults update(GroupingResult groupingResult) {
@@ -41,8 +41,9 @@ public class UpdateTimestampService {
     }
 
     private GroupingTimestampResults updateLastModifiedTimestamp(List<String> groupPaths) {
-        UpdatedTimestampResults updatedTimestampResults = retryExec.execute(new UpdateTimestampCommand()
-                .addGroupPaths(groupPaths));
+        UpdatedTimestampResults updatedTimestampResults = exec.execute(new UpdateTimestampCommand()
+                .addGroupPaths(groupPaths)
+                .setRetry());
         GroupingTimestampResults groupingsTimestampResults = new GroupingTimestampResults(updatedTimestampResults);
         logger.debug("GroupingsTimestampResult; + " + JsonUtil.asJson(groupingsTimestampResults));
         return groupingsTimestampResults;
