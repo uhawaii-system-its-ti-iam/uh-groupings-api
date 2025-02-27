@@ -15,26 +15,34 @@ public class ExecutorService {
     private static final int MAX_RETRIES = 2;
     private static final int DELAY = 1000;
 
+    public <T extends Results> T execute(Command<T> command) {
+        return this.execute(false, command);
+    }
+
     public <T extends Results> T execute(boolean retry, Command<T> command) {
+
         String text = "execute; " + command.getClass().getSimpleName() + ": ";
+        T result = null;
+
         for (int i = 0; i <= MAX_RETRIES; i++) {
             try {
-                T result = command.execute();
+                result = command.execute();
                 if (result.getResultCode().startsWith("SUCCESS")) {
                     logger.debug(text + "execution success");
                     return result;
                 }
-                if (!retry || i == MAX_RETRIES)
-                    return result;
             } catch (Exception e) {
                 logger.error(text + e);
+                result = null;
             }
-            if (!retry)
-                return null;
+
+            if (!retry || i == MAX_RETRIES)
+                break;
+
             logger.debug(text + "Execution failed, retrying in " + DELAY * i + " ms");
             delay(i);
         }
-        return null;
+        return result;
     }
 
     protected void delay(int i) {

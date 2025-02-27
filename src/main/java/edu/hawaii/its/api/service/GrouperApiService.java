@@ -37,9 +37,7 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public class GrouperApiService implements GrouperService {
 
     private final ExecutorService exec;
-    
     private final boolean RETRY = true;
-    private final boolean NO_RETRY = false;
 
     public GrouperApiService(ExecutorService exec) {
         this.exec = exec;
@@ -49,7 +47,7 @@ public class GrouperApiService implements GrouperService {
      * Check if a UH identifier is listed in a group.
      */
     public HasMembersResults hasMemberResults(String groupPath, String uhIdentifier) {
-        HasMembersResults hasMembersResults = exec.execute(NO_RETRY, new HasMembersCommand()
+        HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier));
         return hasMembersResults;
@@ -59,7 +57,7 @@ public class GrouperApiService implements GrouperService {
      * Check if multiple UH identifiers are listed in a group.
      */
     public HasMembersResults hasMembersResults(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        HasMembersResults hasMembersResults = exec.execute(NO_RETRY, new HasMembersCommand()
+        HasMembersResults hasMembersResults = exec.execute(new HasMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
@@ -70,7 +68,7 @@ public class GrouperApiService implements GrouperService {
      * Update a groups description.
      */
     public GroupSaveResults groupSaveResults(String groupingPath, String description) {
-        GroupSaveResults groupSaveResults = exec.execute(NO_RETRY, new GroupSaveCommand()
+        GroupSaveResults groupSaveResults = exec.execute(new GroupSaveCommand()
                 .setGroupingPath(groupingPath)
                 .setDescription(description));
         return groupSaveResults;
@@ -80,13 +78,13 @@ public class GrouperApiService implements GrouperService {
      * Check if a group exists.
      */
     public FindGroupsResults findGroupsResults(String groupPath) {
-        FindGroupsResults findGroupsResults = exec.execute(NO_RETRY, new FindGroupsCommand()
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .addPath(groupPath));
         return findGroupsResults;
     }
 
     public FindGroupsResults findGroupsResults(String currentUser, String groupPath) {
-        FindGroupsResults findGroupsResults = exec.execute(NO_RETRY ,new FindGroupsCommand()
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .owner(currentUser)
                 .addPath(groupPath));
         return findGroupsResults;
@@ -96,7 +94,7 @@ public class GrouperApiService implements GrouperService {
      * Check if multiple groups exist.
      */
     public FindGroupsResults findGroupsResults(List<String> groupPaths) {
-        FindGroupsResults findGroupsResults = exec.execute(NO_RETRY, new FindGroupsCommand()
+        FindGroupsResults findGroupsResults = exec.execute(new FindGroupsCommand()
                 .addPaths(groupPaths));
         return findGroupsResults;
     }
@@ -105,7 +103,7 @@ public class GrouperApiService implements GrouperService {
      * Check if a UH identifier is valid.
      */
     public SubjectsResults getSubjects(String uhIdentifier) {
-        SubjectsResults subjectsResults = exec.execute(NO_RETRY, new SubjectsCommand()
+        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .addSubject(uhIdentifier));
         return subjectsResults;
     }
@@ -114,7 +112,7 @@ public class GrouperApiService implements GrouperService {
      * Check if multiple UH identifiers are valid.
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = exec.execute(NO_RETRY, new SubjectsCommand()
+        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .addSubjects(uhIdentifiers));
         return subjectsResults;
     }
@@ -124,7 +122,7 @@ public class GrouperApiService implements GrouperService {
      */
     @Cacheable("search")
     public SubjectsResults getSubjects(String groupingPath, String searchString) {
-        SubjectsResults subjectsResults = exec.execute(NO_RETRY, new SubjectsCommand()
+        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
                 .assignGroupingPath(groupingPath)
                 .assignSearchString(searchString));
         return subjectsResults;
@@ -134,7 +132,7 @@ public class GrouperApiService implements GrouperService {
      * Get all the groups with the specified attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute));
     }
 
@@ -142,7 +140,7 @@ public class GrouperApiService implements GrouperService {
      * Get all the groups with the specified attributes.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes));
     }
 
@@ -150,7 +148,7 @@ public class GrouperApiService implements GrouperService {
      * Check if a group contains an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, String groupPath) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute)
                 .addGroup(groupPath));
     }
@@ -159,7 +157,7 @@ public class GrouperApiService implements GrouperService {
      * Check if multiple groups contain an attribute.
      */
     public GroupAttributeResults groupAttributeResults(String attribute, List<String> groupPaths) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttribute(attribute)
                 .addGroups(groupPaths));
     }
@@ -168,13 +166,13 @@ public class GrouperApiService implements GrouperService {
      * Check if a group contains multiple attributes.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, String groupPath) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes)
                 .addGroup(groupPath));
     }
 
     public GroupAttributeResults groupAttributeResults(String currentUser, List<String> attributes, String groupPath) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .owner(currentUser)
                 .addAttributes(attributes)
                 .addGroup(groupPath));
@@ -184,7 +182,7 @@ public class GrouperApiService implements GrouperService {
      * Check if multiple groups contain attributes from the list specified.
      */
     public GroupAttributeResults groupAttributeResults(List<String> attributes, List<String> groupPaths) {
-        return exec.execute(NO_RETRY, new GroupAttributeCommand()
+        return exec.execute(new GroupAttributeCommand()
                 .addAttributes(attributes)
                 .addGroups(groupPaths));
     }
@@ -195,21 +193,21 @@ public class GrouperApiService implements GrouperService {
     public GroupAttributeResults groupAttributeResult(String groupPath) {
         GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
                 .addGroup(groupPath);
-        return exec.execute(NO_RETRY, groupAttributeCommand);
+        return exec.execute(groupAttributeCommand);
     }
 
     public GroupAttributeResults groupAttributeResult(String currentUser, String groupPath) {
         GroupAttributeCommand groupAttributeCommand = new GroupAttributeCommand()
                 .owner(currentUser)
                 .addGroup(groupPath);
-        return exec.execute(NO_RETRY, groupAttributeCommand);
+        return exec.execute(groupAttributeCommand);
     }
 
     /**
      * Get all groups that a UH identifier is listed in.
      */
     public GetGroupsResults getGroupsResults(String uhIdentifier) {
-        return exec.execute(NO_RETRY, new GetGroupsCommand()
+        return exec.execute(new GetGroupsCommand()
                 .addUhIdentifier(uhIdentifier)
                 .query(""));
     }
@@ -220,7 +218,7 @@ public class GrouperApiService implements GrouperService {
      * "tmp" that "some-identifier" is listed in.
      */
     public GetGroupsResults getGroupsResults(String uhIdentifier, String query) {
-        return exec.execute(NO_RETRY, new GetGroupsCommand()
+        return exec.execute(new GetGroupsCommand()
                 .addUhIdentifier(uhIdentifier)
                 .query(query));
     }
@@ -229,7 +227,7 @@ public class GrouperApiService implements GrouperService {
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
-        GetMembersResults getMembersResults = exec.execute(NO_RETRY, new GetMembersCommand()
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .owner(currentUser)
                 .addGroupPath(groupPath));
         List<GetMembersResult> result = getMembersResults.getMembersResults();
@@ -243,7 +241,7 @@ public class GrouperApiService implements GrouperService {
      * Get all members listed in each group.
      */
     public GetMembersResults getMembersResults(List<String> groupPaths) {
-        GetMembersResults getMembersResults = exec.execute(NO_RETRY, new GetMembersCommand()
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .addGroupPaths(groupPaths));
         return getMembersResults;
     }
@@ -254,7 +252,7 @@ public class GrouperApiService implements GrouperService {
      * containing a matching sync-dest attribute type string.
      */
     public FindAttributesResults findAttributesResults(String attributeTypeName, String searchScope) {
-        return exec.execute(NO_RETRY, new FindAttributesCommand()
+        return exec.execute(new FindAttributesCommand()
                 .assignAttributeName(attributeTypeName)
                 .assignSearchScope(searchScope));
     }
@@ -265,7 +263,7 @@ public class GrouperApiService implements GrouperService {
      */
     public FindAttributesResults findAttributesResults(String currentUser, String attributeTypeName,
             String searchScope) {
-        return exec.execute(NO_RETRY, new FindAttributesCommand()
+        return exec.execute(new FindAttributesCommand()
                 .owner(currentUser)
                 .assignAttributeName(attributeTypeName)
                 .assignSearchScope(searchScope));
@@ -276,7 +274,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public AddMemberResult addMember(String currentUser, String groupPath, String uhIdentifier) {
-        return exec.execute(NO_RETRY, new AddMembersCommand()
+        return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
@@ -287,7 +285,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        return exec.execute(NO_RETRY, new AddMembersCommand()
+        return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
@@ -298,7 +296,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners) {
-        return exec.execute(NO_RETRY, new AddMembersCommand()
+        return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addGroupPathOwners(groupPathOwners));
@@ -309,7 +307,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier) {
-        return exec.execute(NO_RETRY, new RemoveMembersCommand()
+        return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifier(uhIdentifier)).getResults().get(0);
@@ -320,7 +318,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
-        return exec.execute(NO_RETRY, new RemoveMembersCommand()
+        return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(uhIdentifiers));
@@ -332,7 +330,7 @@ public class GrouperApiService implements GrouperService {
     @CacheEvict(value="search", key="#groupPath")
     public RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath,
             List<String> groupPathOwners) {
-        return exec.execute(NO_RETRY, new RemoveMembersCommand()
+        return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
                 .addGroupPathOwners(groupPathOwners));
@@ -343,7 +341,7 @@ public class GrouperApiService implements GrouperService {
      */
     @CacheEvict(value="search", key="#groupPath")
     public AddMembersResults resetGroupMembers(String groupPath) {
-        return exec.execute(NO_RETRY, new AddMembersCommand()
+        return exec.execute(new AddMembersCommand()
                 .assignGroupPath(groupPath)
                 .addUhIdentifiers(new ArrayList<>())
                 .replaceGroupMembers(true));
@@ -383,7 +381,7 @@ public class GrouperApiService implements GrouperService {
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
-        GetMembersResults getMembersResults = exec.execute(NO_RETRY, new GetMembersCommand()
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .owner(currentUser)
                 .addGroupPath(groupPath)
                 .setPageNumber(pageNumber)
@@ -402,7 +400,7 @@ public class GrouperApiService implements GrouperService {
      */
     public GetMembersResults getMembersResults(String currentUser, List<String> groupPaths, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
-        return exec.execute(NO_RETRY, new GetMembersCommand()
+        return exec.execute(new GetMembersCommand()
                 .owner(currentUser)
                 .addGroupPaths(groupPaths)
                 .setPageNumber(pageNumber)

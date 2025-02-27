@@ -20,19 +20,18 @@ import edu.hawaii.its.api.wrapper.MockResults;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ExecutorServiceTest {
 
-    private final boolean RETRY = true;
-    private final boolean NO_RETRY = false;
-
     @Mock
     private Command<MockResults> mockCommand;
 
     @Autowired
     private ExecutorService exec;
-    
+
+    private final boolean RETRY = true;
+
     @Test
     public void successfulExecution() {
         doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
-        assertSuccessfulExecution(NO_RETRY, mockCommand);
+        assertSuccessfulExecution(mockCommand);
 
         doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
         assertSuccessfulExecution(RETRY, mockCommand);
@@ -69,10 +68,10 @@ public class ExecutorServiceTest {
     @Test
     public void unsuccessfulExecution() {
         doThrow(RuntimeException.class).when(mockCommand).execute();
-        assertUnsuccessfulExecution(NO_RETRY, mockCommand);
+        assertUnsuccessfulExecution(mockCommand);
 
         doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        assertUnsuccessfulExecution(NO_RETRY, mockCommand);
+        assertUnsuccessfulExecution(mockCommand);
 
         doThrow(RuntimeException.class).when(mockCommand).execute();
         doThrow(RuntimeException.class).when(mockCommand).execute();
@@ -113,10 +112,21 @@ public class ExecutorServiceTest {
         assertNotNull(thread);
     }
 
+    private void assertSuccessfulExecution(Command<MockResults> command) {
+        MockResults result = exec.execute(command);
+        assertNotNull(result);
+        assertEquals(result.getResultCode(), "SUCCESS");
+    }
+
     private void assertSuccessfulExecution(boolean retry, Command<MockResults> command) {
         MockResults result = exec.execute(retry, command);
         assertNotNull(result);
         assertEquals(result.getResultCode(), "SUCCESS");
+    }
+
+    private void assertUnsuccessfulExecution(Command<MockResults> command) {
+        MockResults result = exec.execute(command);
+        assertTrue(result == null || !result.getResultCode().equals("SUCCESS"));
     }
 
     private void assertUnsuccessfulExecution(boolean retry, Command<MockResults> command) {
