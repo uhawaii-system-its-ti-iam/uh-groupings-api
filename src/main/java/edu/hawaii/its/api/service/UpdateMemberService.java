@@ -93,7 +93,7 @@ public class UpdateMemberService {
         return addOwner(currentUser, groupingPath, validIdentifier);
     }
 
-    public GroupingAddResults addGroupPathOwnership(String currentUser, String groupingPath,
+    public GroupingAddResults addGroupPathOwnerships(String currentUser, String groupingPath,
             List<String> groupPathOwners) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
