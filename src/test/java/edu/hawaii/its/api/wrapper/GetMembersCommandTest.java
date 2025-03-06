@@ -27,5 +27,6 @@ public class GetMembersCommandTest {
         assertNotNull(getMembersCommand.sortBy(""));
         assertNotNull(getMembersCommand.owner(""));
         assertNotNull(getMembersCommand.addSubjectAttribute(""));
+        assertNotNull(getMembersCommand.assignMemberFilter(MemberFilter.ALL));
     }
 }

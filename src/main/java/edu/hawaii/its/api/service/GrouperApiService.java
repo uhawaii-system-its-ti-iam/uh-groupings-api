@@ -28,6 +28,7 @@ import edu.hawaii.its.api.wrapper.GroupSaveCommand;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
 import edu.hawaii.its.api.wrapper.HasMembersCommand;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
+import edu.hawaii.its.api.wrapper.MemberFilter;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -125,6 +126,22 @@ public class GrouperApiService implements GrouperService {
                 .assignGroupingPath(groupingPath)
                 .assignSearchString(searchString));
         return subjectsResults;
+    }
+
+    /**
+     * Get all immediate members of a grouping path (members with the immediate filter)
+     */
+    public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
+        MemberFilter memberFilter = MemberFilter.IMMEDIATE;
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .assignMemberFilter(memberFilter));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
     }
 
     /**
