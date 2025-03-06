@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import static com.jayway.jsonpath.internal.function.ParamType.JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +46,8 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
+import edu.internet2.middleware.grouperClient.ws.WsMemberFilter;
+
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -52,6 +55,12 @@ public class TestGrouperApiService {
 
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
+
+    @Value("${groupings.api.test.grouping_single}")
+    private String GROUPING_SINGLE;
+
+    @Value("${groupings.api.test.grouping_single_owners}")
+    private String GROUPING_SINGLE_OWNERS;
 
     @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
@@ -287,6 +296,18 @@ public class TestGrouperApiService {
         assertNotNull(subjects);
         assertEquals(1, subjects.size());
         assertEquals("SUBJECT_NOT_FOUND", subjects.get(0).getResultCode());
+    }
+
+    @Test
+    public void getImmediateMembers() {
+        grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        GetMembersResult immediateMembers = grouperService.getImmediateMembers(ADMIN, GROUPING_OWNERS);
+        assertNotNull(immediateMembers);
+        assertEquals("SUCCESS", immediateMembers.getResultCode());
+        SubjectsResults subjectsResults = grouperService.getSubjects(GROUPING_OWNERS, GROUPING_SINGLE);
+        assertNotNull(subjectsResults);
+        assertEquals("SUCCESS", subjectsResults.getResultCode());
+        grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
     }
 
     @Test
