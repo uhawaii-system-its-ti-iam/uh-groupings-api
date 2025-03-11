@@ -29,15 +29,15 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class ErrorControllerAdvice {
-
+    
     private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
-
+    
     private final EmailService emailService;
-
+    
     public ErrorControllerAdvice(EmailService emailService) {
         this.emailService = emailService;
     }
-
+    
     private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
@@ -50,9 +50,9 @@ public class ErrorControllerAdvice {
                 .message("Access Denied Exception")
                 .debugMessage("The current user does not have permission to perform this action.")
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(IllegalArgumentException.class)
@@ -64,32 +64,31 @@ public class ErrorControllerAdvice {
                 .message("Illegal Argument Exception")
                 .debugMessage("Resource not available")
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler(GcWebServiceError.class)
     public ResponseEntity<ApiError> handleGcWebServiceError(GcWebServiceError gce, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(gce, "Gc Web Service Error", path);
-
+        
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("Gc Web Service Error")
                 .debugMessage(gce.getMessage())
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
-  }
-
+    }
+    
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpRequestMethodNotSupportedException(
-        HttpRequestMethodNotSupportedException hrmnse, WebRequest request) {
-
+            HttpRequestMethodNotSupportedException hrmnse, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
@@ -97,77 +96,76 @@ public class ErrorControllerAdvice {
                 .message("Http Request Method Not Supported Exception")
                 .debugMessage(hrmnse.getMessage())
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler({Exception.class, RuntimeException.class})
     public ResponseEntity<ApiError> handleException(Exception exception, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(exception, "Runtime Exception", path);
-
+        
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Runtime Exception")
                 .debugMessage(exception.getMessage())
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler({MessagingException.class, IOException.class})
     public ResponseEntity<ApiError> handleMessagingException(Exception e, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(e, "Messaging Exception", path);
-
+        
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Mail service exception")
                 .debugMessage(e.getMessage())
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ApiError> handleUnsupportedOperationException(
-        UnsupportedOperationException ex, WebRequest request) {
-        
+            UnsupportedOperationException ex, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(ex, "Unsupported Operation Exception", path);
-
+        
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_IMPLEMENTED)
                 .message("Unsupported Operation Exception")
                 .debugMessage(ex.getMessage())
                 .timestamp(LocalDateTime.now());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler(UhMemberNotFoundException.class)
     protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException ex, WebRequest request) {
         String path = request.getDescription(false);
         emailService.sendWithStack(ex, "Uh Member Not Found Exception", path);
-
+        
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
                 .debugMessage("This is not the validation error from frontend, check Sub Error to see the reason in the backend")
                 .timestamp(LocalDateTime.now());
-
+        
         errorBuilder.addAllSubErrors(ex.getSubErrors());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(CommandException.class)
@@ -179,11 +177,11 @@ public class ErrorControllerAdvice {
                 .message("Command Exception")
                 .debugMessage("There's an error from the command of grouper or grouping")
                 .timestamp(LocalDateTime.now());
-
+        
         errorBuilder.addAllSubErrors(ce.getSubErrors());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(GroupingsHTTPException.class)
@@ -195,18 +193,17 @@ public class ErrorControllerAdvice {
                 .message("Groupings HTTP Exception")
                 .debugMessage("The current user does not have permission to perform this action.")
                 .timestamp(LocalDateTime.now());
-
+        
         errorBuilder.addAllSubErrors(ghe.getSubErrors());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
-
+    
     @ExceptionHandler(InvalidGroupPathException.class)
     public ResponseEntity<ApiError> handleInvalidGroupPathException(
             InvalidGroupPathException ex, WebRequest request) {
-        
         String path = request.getDescription(false);
         emailService.sendWithStack(ex, "Invalid Group Path Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
@@ -214,11 +211,11 @@ public class ErrorControllerAdvice {
                 .message("Invalid Group Path Exception")
                 .debugMessage("The group path you are using is wrong")
                 .timestamp(LocalDateTime.now());
-
+        
         errorBuilder.addAllSubErrors(ex.getSubErrors());
-
+        
         ApiError apiError = errorBuilder.build();
-
+        
         return buildResponseEntity(apiError);
     }
 }
