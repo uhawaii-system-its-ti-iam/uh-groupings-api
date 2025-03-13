@@ -20,6 +20,7 @@ public class SubjectsCommandTest {
         assertNotNull(subjectsCommand.addSubject(""));
         assertNotNull(subjectsCommand.addSubject("11111111"));
         assertNotNull(subjectsCommand.addSubjectAttribute(""));
+        assertNotNull(subjectsCommand.assignSearchString(""));
         List<String> strings = new ArrayList<>();
         strings.add("");
         assertNotNull(subjectsCommand.addSubjects(strings));

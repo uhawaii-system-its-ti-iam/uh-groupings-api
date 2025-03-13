@@ -3,6 +3,8 @@ package edu.hawaii.its.api.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AttributesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
@@ -38,6 +40,7 @@ public class Announcements {
         this.resultCode = resultCode;
     }
 
+    @JsonProperty
     private void setAnnouncements(AttributesResult attributesResult) {
         this.announcements = JsonUtil.asList(attributesResult.getDescription(), Announcement.class);
     }

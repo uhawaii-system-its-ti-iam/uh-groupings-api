@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
@@ -49,6 +51,7 @@ public class GroupingOwnerMembers implements GroupingResult {
         this.groupPath = groupPath;
     }
 
+    @JsonProperty
     public void setImmediateOwners(GetMembersResult getMembersResult) {
         this.immediateOwners = new GroupingGroupMembers(getMembersResult);
     }
