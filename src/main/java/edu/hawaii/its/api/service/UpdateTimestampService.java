@@ -23,13 +23,16 @@ import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
 public class UpdateTimestampService {
     private static final Log logger = LogFactory.getLog(MembershipService.class);
 
+    private final boolean RETRY = true;
+    private final boolean NO_RETRY = true;
+
     private final GroupPathService groupPathService;
 
-    private final RetryExecutorService retryExec;
+    private final ExecutorService exec;
 
-    public UpdateTimestampService(GroupPathService groupPathService, RetryExecutorService retryExec) {
+    public UpdateTimestampService(GroupPathService groupPathService, ExecutorService exec) {
         this.groupPathService = groupPathService;
-        this.retryExec = retryExec;
+        this.exec = exec;
     }
 
     public GroupingTimestampResults update(GroupingResult groupingResult) {
@@ -41,7 +44,7 @@ public class UpdateTimestampService {
     }
 
     private GroupingTimestampResults updateLastModifiedTimestamp(List<String> groupPaths) {
-        UpdatedTimestampResults updatedTimestampResults = retryExec.execute(new UpdateTimestampCommand()
+        UpdatedTimestampResults updatedTimestampResults = exec.execute(RETRY, new UpdateTimestampCommand()
                 .addGroupPaths(groupPaths));
         GroupingTimestampResults groupingsTimestampResults = new GroupingTimestampResults(updatedTimestampResults);
         logger.debug("GroupingsTimestampResult; + " + JsonUtil.asJson(groupingsTimestampResults));

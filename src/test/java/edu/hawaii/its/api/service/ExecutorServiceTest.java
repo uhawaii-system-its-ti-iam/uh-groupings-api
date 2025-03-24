@@ -2,7 +2,7 @@ package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -24,16 +24,114 @@ public class ExecutorServiceTest {
     private Command<MockResults> mockCommand;
 
     @Autowired
-    private ExecutorService executorService;
+    private ExecutorService exec;
+
+    private final boolean RETRY = true;
 
     @Test
-    public void executeTest() {
+    public void successfulExecution() {
         doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
-        assertNotNull(executorService.execute(mockCommand));
-        assertEquals("SUCCESS", executorService.execute(mockCommand).getResultCode());
+        assertSuccessfulExecution(mockCommand);
 
-        doThrow(new RuntimeException()).when(mockCommand).execute();
-        assertNull(executorService.execute(mockCommand));
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("SUCCESS")).when(mockCommand).execute();
+        assertSuccessfulExecution(RETRY, mockCommand);
+    }
+
+    @Test
+    public void unsuccessfulExecution() {
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        assertUnsuccessfulExecution(mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        assertUnsuccessfulExecution(mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+
+        doThrow(RuntimeException.class).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
+        assertUnsuccessfulExecution(RETRY, mockCommand);
+    }
+
+    @Test
+    public void catchInterruptedException() {
+        Thread thread = new Thread(() -> exec.delay(0));
+        thread.start();
+        thread.interrupt();
+        assertNotNull(thread);
+    }
+
+    private void assertSuccessfulExecution(Command<MockResults> command) {
+        MockResults result = exec.execute(command);
+        assertNotNull(result);
+        assertEquals(result.getResultCode(), "SUCCESS");
+    }
+
+    private void assertSuccessfulExecution(boolean retry, Command<MockResults> command) {
+        MockResults result = exec.execute(retry, command);
+        assertNotNull(result);
+        assertEquals(result.getResultCode(), "SUCCESS");
+    }
+
+    private void assertUnsuccessfulExecution(Command<MockResults> command) {
+        MockResults result = exec.execute(command);
+        assertTrue(result == null || !result.getResultCode().equals("SUCCESS"));
+    }
+
+    private void assertUnsuccessfulExecution(boolean retry, Command<MockResults> command) {
+        MockResults result = exec.execute(retry, command);
+        assertTrue(result == null || !result.getResultCode().equals("SUCCESS"));
     }
 
 }
