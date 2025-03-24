@@ -1,12 +1,10 @@
 package edu.hawaii.its.api.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import jakarta.mail.MessagingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -14,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.CommandException;
@@ -28,9 +29,6 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class ErrorControllerAdvice {
-
-    private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
-
     private final EmailService emailService;
 
     public ErrorControllerAdvice(EmailService emailService) {
@@ -40,14 +38,18 @@ public class ErrorControllerAdvice {
     private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
         emailService.sendWithStack(ade, "Access Denied Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access Denied Exception")
-                .debugMessage("The current user does not have permission to perform this action.")
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(ade))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI()); // Get the URI of the current HTTP Request
 
         ApiError apiError = errorBuilder.build();
 
@@ -55,12 +57,15 @@ public class ErrorControllerAdvice {
     }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
         emailService.sendWithStack(iae, "Illegal Argument Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("Illegal Argument Exception")
-                .debugMessage("Resource not available")
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(iae))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -69,28 +74,33 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(GcWebServiceError.class)
     public ResponseEntity<ApiError> handleGcWebServiceError(GcWebServiceError gce) {
-        emailService.sendWithStack(gce, "Gc Web Service Error");
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+        emailService.sendWithStack(gce, "Gc Web Service Error");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("Gc Web Service Error")
-                .debugMessage(gce.getMessage())
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(gce))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
         return buildResponseEntity(apiError);
-  }
+    }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpRequestMethodNotSupportedException(
-        HttpRequestMethodNotSupportedException hrmnse) {
+            HttpRequestMethodNotSupportedException hrmnse) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
         emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .message("Http Request Method Not Supported Exception")
-                .debugMessage(hrmnse.getMessage())
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(hrmnse))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -98,14 +108,16 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({Exception.class, RuntimeException.class})
-    public ResponseEntity<ApiError> handleException(Exception exception) {
-        emailService.sendWithStack(exception, "Runtime Exception");
+    public ResponseEntity<ApiError> handleException(Exception e) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+        emailService.sendWithStack(e, "Runtime Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Runtime Exception")
-                .debugMessage(exception.getMessage())
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(e))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -113,14 +125,16 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({MessagingException.class, IOException.class})
-    public ResponseEntity<ApiError> handleMessagingException(Exception e) {
-        emailService.sendWithStack(e, "Messaging Exception");
+    public ResponseEntity<ApiError> handleMessagingException(Exception me) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+        emailService.sendWithStack(me, "Messaging Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Mail service exception")
-                .debugMessage(e.getMessage())
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(me))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -128,15 +142,16 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<ApiError> handleUnsupportedOperationException(
-        UnsupportedOperationException ex) {
-        emailService.sendWithStack(ex, "Unsupported Operation Exception");
+    public ResponseEntity<ApiError> handleUnsupportedOperationException(UnsupportedOperationException uoe) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+        emailService.sendWithStack(uoe, "Unsupported Operation Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_IMPLEMENTED)
                 .message("Unsupported Operation Exception")
-                .debugMessage(ex.getMessage())
-                .timestamp(LocalDateTime.now());
+                .stackTrace(ExceptionUtils.getStackTrace(uoe))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -144,46 +159,49 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(UhMemberNotFoundException.class)
-    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException ex) {
-        emailService.sendWithStack(ex, "Uh Member Not Found Exception");
+    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException mnfe) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+        emailService.sendWithStack(mnfe, "Uh Member Not Found Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
-                .debugMessage("This is not the validation error from frontend, check Sub Error to see the reason in the backend")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(ex.getSubErrors());
+                .stackTrace(ExceptionUtils.getStackTrace(mnfe))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(CommandException.class)
-    public ResponseEntity<ApiError> handleCommandException(CommandException ce) {
+    public ResponseEntity<ApiError> handleCommandException(CommandException ce, WebRequest request) {
+        String path = request.getDescription(false);
+
         emailService.sendWithStack(ce, "Command Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .message("Command Exception")
-                .debugMessage("There's an error from the command of grouper or grouping")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(ce.getSubErrors());
+                .stackTrace(ExceptionUtils.getStackTrace(ce))
+                .resultCode("FAILURE")
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
         return buildResponseEntity(apiError);
     }
+
     @ExceptionHandler(GroupingsHTTPException.class)
     public ResponseEntity<ApiError> handleGroupingsHTTPException(GroupingsHTTPException ghe) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
         emailService.sendWithStack(ghe, "Groupings HTTP Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Groupings HTTP Exception")
-                .debugMessage("The current user does not have permission to perform this action.")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(ghe.getSubErrors());
+                .stackTrace(ExceptionUtils.getStackTrace(ghe))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
@@ -191,16 +209,16 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(InvalidGroupPathException.class)
-    public ResponseEntity<ApiError> handleInvalidGroupPathException(
-            InvalidGroupPathException ex) {
-        emailService.sendWithStack(ex, "Invalid Group Path Exception");
+    public ResponseEntity<ApiError> handleInvalidGroupPathException(InvalidGroupPathException igpe) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        emailService.sendWithStack(igpe, "Invalid Group Path Exception");
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")
-                .debugMessage("The group path you are using is wrong")
-                .timestamp(LocalDateTime.now());
-
-        errorBuilder.addAllSubErrors(ex.getSubErrors());
+                .stackTrace(ExceptionUtils.getStackTrace(igpe))
+                .resultCode("FAILURE")
+                .path(attributes.getRequest().getRequestURI());
 
         ApiError apiError = errorBuilder.build();
 
