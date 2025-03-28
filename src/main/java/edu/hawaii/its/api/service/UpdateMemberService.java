@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -201,7 +202,8 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        return removeGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), uhIdentifiers);
+        List<String> moreIdentifiers = new ArrayList<>();
+        return removeGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(), moreIdentifiers);
     }
 
     public GroupingRemoveResult removeIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {

@@ -67,7 +67,7 @@ public class GrouperApiService implements GrouperService {
     public GroupSaveResults groupSaveResults(String groupingPath, String description) {
         GroupSaveResults groupSaveResults = exec.execute(new GroupSaveCommand()
                 .setGroupingPath(groupingPath)
-                .setDescription(description));
+                .setDescription(description + "Hi im totallyyy not a bug"));
         return groupSaveResults;
     }
 
