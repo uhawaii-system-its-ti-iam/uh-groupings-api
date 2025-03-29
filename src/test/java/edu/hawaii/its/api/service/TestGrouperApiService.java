@@ -1,11 +1,10 @@
 package edu.hawaii.its.api.service;
 
-import static com.jayway.jsonpath.internal.function.ParamType.JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -163,8 +163,7 @@ public class TestGrouperApiService {
         groupSaveResults = grouperService.groupSaveResults(GROUPING, description);
         assertEquals("SUCCESS_NO_CHANGES_NEEDED", groupSaveResults.getResultCode());
 
-        groupSaveResults = grouperService.groupSaveResults("invalid-path", description);
-        assertNull(groupSaveResults); // Todo exception handler.
+        assertThrows(GrouperException.class, () -> grouperService.groupSaveResults("invalid-path", description));
     }
 
     @Test
@@ -356,11 +355,8 @@ public class TestGrouperApiService {
         assertNotNull(groupAttributeResults);
         assertEquals("SUCCESS", groupAttributeResults.getResultCode());
 
-        groupAttributeResults = grouperService.groupAttributeResult("invalid-path");
-        assertNull(groupAttributeResults); // Todo exception handler.
-
-        groupAttributeResults = grouperService.groupAttributeResults("invalid-attribute");
-        assertNull(groupAttributeResults); // Todo exception handler.
+        assertThrows(GrouperException.class, () -> grouperService.groupAttributeResult("invalid-path"));
+        assertThrows(GrouperException.class, () -> grouperService.groupAttributeResults("invalid-attribute"));
 
     }
 
@@ -414,8 +410,8 @@ public class TestGrouperApiService {
         assertNotNull(getMembersResults);
         assertEquals("SUCCESS", getMembersResults.getResultCode());
 
-        getMembersResults = grouperService.getMembersResults(Arrays.asList("invalid-path"));
-        assertNull(getMembersResults); // Todo exception handler.
+        assertThrows(GrouperException.class,
+                () -> grouperService.getMembersResults(Arrays.asList("invalid-path")));
 
         getMembersResults = grouperService.getMembersResults(
                 ADMIN,
@@ -437,18 +433,15 @@ public class TestGrouperApiService {
         assertNotNull(findAttributesResults);
         assertEquals("SUCCESS", findAttributesResults.getResultCode());
 
-        findAttributesResults =
-                grouperService.findAttributesResults("invalid-attr-type-name", SYNC_DESTINATIONS_LOCATION);
-        assertNull(findAttributesResults); // Todo exception handler.
+        assertThrows(GrouperException.class, () ->
+                grouperService.findAttributesResults("invalid-attr-type-name", SYNC_DESTINATIONS_LOCATION));
 
         findAttributesResults =
                 grouperService.findAttributesResults(SYNC_DESTINATIONS_CHECKBOXES, "invalid-scope-loc");
         assertEquals("FAILURE", findAttributesResults.getResultCode());
 
-        findAttributesResults =
-                grouperService.findAttributesResults("invalid-attr-type-name", "invalid-scope-loc");
-        assertNull(findAttributesResults); // Todo exception handler.
-
+        assertThrows(GrouperException.class, () ->
+                grouperService.findAttributesResults("invalid-attr-type-name", "invalid-scope-loc"));
     }
 
     @Test
@@ -510,14 +503,14 @@ public class TestGrouperApiService {
         }
 
         // Invalid identifiers.
-        addMembersResults = grouperService.addMembers(ADMIN, GROUPING_INCLUDE, Arrays.asList("invalid-identifier"));
-        assertNull(addMembersResults); // Todo exception handler
-        removeMembersResults = grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, Arrays.asList("invalidIdentifier"));
-        /* assertNull(removeMembersResults); // Todo exception handler */
-        addMembersResults = grouperService.addMembers(ADMIN,"invalid-path", testUids);
-        assertNull(addMembersResults); // Todo exception handler
-        removeMembersResults = grouperService.removeMembers(ADMIN, "invalid-path", testUids);
-        assertNull(removeMembersResults); // Todo exception handler
+        assertThrows(GrouperException.class, () -> grouperService.addMembers(ADMIN, GROUPING_INCLUDE, List.of("invalid-identifier")));
+
+
+        RemoveMembersResults results = grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, List.of("invalid-identifier")); assertNotNull(results);
+        assertTrue(results.getResultCode().startsWith("SUCCESS"));
+
+        assertThrows(GrouperException.class, () -> grouperService.addMembers(ADMIN, "invalid-path", testUids));
+        assertThrows(GrouperException.class, () -> grouperService.removeMembers(ADMIN, "invalid-path", testUids));
     }
 
     @Test
@@ -576,8 +569,7 @@ public class TestGrouperApiService {
         assertTrue(grouperService.getMembersResult(ADMIN, GROUPING_INCLUDE).getSubjects().isEmpty());
         grouperService.addMembers(ADMIN, GROUPING_INCLUDE, uhUuids);
         grouperService.removeMembers(ADMIN, GROUPING_INCLUDE, testUids);
-        resetResults = grouperService.resetGroupMembers("invalid-path");
-        assertNull(resetResults); // Todo exception handler
+        assertThrows(GrouperException.class, () -> grouperService.resetGroupMembers("invalid-path"));
     }
 
     @Test
@@ -588,25 +580,18 @@ public class TestGrouperApiService {
         assertEquals("SUCCESS", assignAttributesResults.getResultCode());
         assertEquals(OptType.IN.value(), assignAttributesResults.getAttributesResults().get(0).getName());
 
-        assignAttributesResults =
-                grouperService.assignAttributesResults(ADMIN,"invalid_assign_type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
-                        OptType.IN.value());
-        assertNull(assignAttributesResults); // Todo exception handler
+        assertThrows(GrouperException.class, () -> grouperService.assignAttributesResults(
+                ADMIN, "invalid_assign_type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING, OptType.IN.value()));
 
-        assignAttributesResults =
-                grouperService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, "invalid-operation", GROUPING,
-                        OptType.IN.value());
-        assertNull(assignAttributesResults); // Todo exception handler
+        assertThrows(GrouperException.class, () -> grouperService.assignAttributesResults(
+                ADMIN, ASSIGN_TYPE_GROUP, "invalid-operation", GROUPING, OptType.IN.value()));
 
-        assignAttributesResults =
-                grouperService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, "invalid-path",
-                        OptType.IN.value());
-        assertNull(assignAttributesResults); // Todo exception handler
+        assertThrows(GrouperException.class, () -> grouperService.assignAttributesResults(
+                ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, "invalid-path", OptType.IN.value()));
 
-        assignAttributesResults =
-                grouperService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,
-                        "invalid-attribute");
-        assertNull(assignAttributesResults); // Todo exception handler
+
+        assertThrows(GrouperException.class, () -> grouperService.assignAttributesResults(
+                ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING, "invalid-attribute"));
     }
 
     @Test
