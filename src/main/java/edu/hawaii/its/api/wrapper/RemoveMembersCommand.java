@@ -2,6 +2,7 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.List;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
