@@ -25,7 +25,7 @@ public class ApiErrorTest {
         String resultCode = "Test result code error message";
         String path = "Test path error message";
 
-        errorBuilder
+        ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(status)
                 .message(message)
                 .stackTrace(stackTrace)

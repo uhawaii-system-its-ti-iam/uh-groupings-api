@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doReturn;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,11 +19,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -188,10 +195,30 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void noOptInGroupingsPathsTest() {
-        given(groupingsService.optInEnabledGroupingPaths()).willReturn(Collections.emptyList());
-        GroupingPaths optInGroupingsPaths =
-                groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
-        assertEquals(Collections.emptyList(), optInGroupingsPaths.getGroupingPaths());
+        // Mock groupPaths (which internally depends on allGroupPaths)
+        doReturn(Collections.emptyList())
+                .when(groupingsService)
+                .groupPaths(eq(testUid), ArgumentMatchers.<Predicate<String>>any());
+
+        // Mock optInEnabledGroupingPaths (used in business logic)
+        doReturn(Collections.emptyList())
+                .when(groupingsService)
+                .optInEnabledGroupingPaths();
+
+        // Mock getGroupingPaths (used for final return construction)
+        doReturn(Collections.emptyList())
+                .when(groupingsService)
+                .getGroupingPaths(anyList());
+
+        // Also mock allGroupPaths to prevent real GetGroupsCommand execution
+        doReturn(Collections.emptyList())
+                .when(groupingsService)
+                .allGroupPaths(eq(testUid));
+
+        GroupingPaths optInGroupingsPaths = groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
+
+        assertNotNull(optInGroupingsPaths);
+        assertTrue(optInGroupingsPaths.getGroupingPaths().isEmpty());
     }
 
     @Test
