@@ -1,16 +1,17 @@
 package edu.hawaii.its.api.service;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.wrapper.Command;
 import edu.hawaii.its.api.wrapper.MockCommand;
 import edu.hawaii.its.api.wrapper.MockResults;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,21 +59,20 @@ public class ExecutorServiceTest {
     @Test
     public void unsuccessfulExecutionWithRetry() {
         mockCommand.setRetry(true);
-
-        doThrow(new RuntimeException()).when(mockCommand).execute();
-        doThrow(new RuntimeException()).when(mockCommand).execute();
-        doThrow(new RuntimeException()).when(mockCommand).execute();
+        when(mockCommand.execute())
+                .thenThrow(new RuntimeException("first attempt failed"))
+                .thenReturn(new MockResults("FAILURE"))
+                .thenThrow(new RuntimeException("third attempt failed"));
         assertUnsuccessfulExecution(mockCommand);
-
-        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        assertUnsuccessfulExecution(mockCommand);
-
-        doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        doThrow(new RuntimeException()).when(mockCommand).execute();
-        doThrow(new RuntimeException()).when(mockCommand).execute();
-        assertUnsuccessfulExecution(mockCommand);
+        reset(mockCommand);
+        mockCommand.setRetry(true);
+        when(mockCommand.execute())
+                .thenReturn(new MockResults("FAILURE"))
+                .thenReturn(new MockResults("FAILURE"))
+                .thenReturn(new MockResults("FAILURE"));
+        MockResults result = exec.execute(mockCommand);
+        assertNotNull(result);
+        assertEquals("FAILURE", result.getResultCode());
     }
 
     @Test
@@ -83,7 +83,9 @@ public class ExecutorServiceTest {
         assertUnsuccessfulExecution(mockCommand);
 
         doReturn(new MockResults("FAILURE")).when(mockCommand).execute();
-        assertUnsuccessfulExecution(mockCommand);
+        MockResults result = exec.execute(mockCommand);
+        assertNotNull(result);
+        assertEquals("FAILURE", result.getResultCode());
     }
 
     @Test
@@ -101,8 +103,7 @@ public class ExecutorServiceTest {
     }
 
     private void assertUnsuccessfulExecution(Command<MockResults> command) {
-        MockResults result = exec.execute(command);
-        assertTrue(result == null || !result.getResultCode().equals("SUCCESS"));
+        assertThrows(GrouperException.class, () -> exec.execute(command));
     }
 
 }
