@@ -8,6 +8,8 @@ import edu.hawaii.its.api.wrapper.Results;
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.Log;
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.LogFactory;
 
+import edu.hawaii.its.api.exception.GrouperException;
+
 @Service
 public class ExecutorService {
     protected final Log logger = LogFactory.getLog(getClass());
@@ -20,7 +22,7 @@ public class ExecutorService {
             return result;
         } catch (Exception e) {
             logger.error(text + e);
+            throw new GrouperException("GrouperClient execution failed: " + command.getClass().getSimpleName(), e);
         }
-        return null;
     }
 }

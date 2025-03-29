@@ -12,6 +12,7 @@ public class ApiError {
     private final String message;
     private final String path;
     private final String stackTrace;
+    private final String debugMessage;
 
     private ApiError(Builder builder) {
         this.status = builder.status;
@@ -20,7 +21,7 @@ public class ApiError {
         this.message = builder.message;
         this.path = builder.path;
         this.stackTrace = builder.stackTrace;
-
+        this.debugMessage = builder.debugMessage;
     }
 
     public HttpStatus getStatus() {
@@ -46,6 +47,7 @@ public class ApiError {
     public String getStackTrace() {
         return stackTrace;
     }
+    public String getDebugMessage() { return debugMessage; }
 
     public static class Builder {
         private HttpStatus status;
@@ -53,6 +55,8 @@ public class ApiError {
         private String message;
         private String path;
         private String stackTrace;
+        private String debugMessage;
+        private LocalDateTime timestamp;
 
 
         public Builder status(HttpStatus status) {
@@ -80,11 +84,23 @@ public class ApiError {
             return this;
         }
 
+        public Builder debugMessage(String debugMessage) {
+            this.debugMessage = debugMessage;
+            return this;
+        }
+
+        public Builder timestamp(LocalDateTime timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+
         public ApiError build() {
             Objects.requireNonNull(this.status, "status cannot be null");
             Objects.requireNonNull(this.message, "message cannot be null");
             Objects.requireNonNull(this.path, "path cannot be null");
             Objects.requireNonNull(this.stackTrace, "stackTrace cannot be null");
+            Objects.requireNonNull(this.debugMessage, "debugMessage cannot be null");
 
             return new ApiError(this);
         }
