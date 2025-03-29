@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -145,11 +146,15 @@ public class GroupingsService {
     }
 
     public String getGroupingDescription(String path) {
-        Group group = grouperService.findGroupsResults(path).getGroup();
-        if (!groupPathService.isGroupingPath(group)) {
+        try {
+            Group group = grouperService.findGroupsResults(path).getGroup();
+            if (!groupPathService.isGroupingPath(group)) {
+                return "";
+            }
+            return group.getDescription();
+        } catch (GrouperException e) {
             return "";
         }
-        return group.getDescription();
     }
 
     /**

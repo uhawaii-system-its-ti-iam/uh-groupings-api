@@ -9,6 +9,8 @@ import edu.hawaii.its.api.wrapper.Results;
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.Log;
 import edu.internet2.middleware.grouperClientExt.org.apache.commons.logging.LogFactory;
 
+import edu.hawaii.its.api.exception.GrouperException;
+
 @Service
 public class ExecutorService {
     protected final Log logger = LogFactory.getLog(getClass());
@@ -35,15 +37,16 @@ public class ExecutorService {
                 }
             } catch (Exception e) {
                 logger.error(text + e);
-                result = null;
+                throw new GrouperException("GrouperClient execution failed: " + command.getClass().getSimpleName(), e);
             }
 
-            if (!retry || i == MAX_RETRIES)
+            if (!retry || i == MAX_RETRIES) {
                 break;
-
+            }
             logger.info(text + "Execution failed, retrying in " + DELAY * i + " ms");
             delay(i);
         }
+
         return result;
     }
 
