@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,7 @@ public class AssignGrouperPrivilegesCommandTest {
         assertNotNull(assignGrouperPrivilegesCommand.owner(""));
         assertNotNull(assignGrouperPrivilegesCommand.setIsAllowed(true));
         assertNotNull(assignGrouperPrivilegesCommand.setIsAllowed(false));
+        assertEquals(assignGrouperPrivilegesCommand.self(), assignGrouperPrivilegesCommand);
     }
 
 }

@@ -5,7 +5,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
-public abstract class GrouperCommand<T extends GrouperCommand<T>> {
+public abstract class GrouperCommand<T> {
 
     private boolean retry = false;
 
@@ -13,8 +13,8 @@ public abstract class GrouperCommand<T extends GrouperCommand<T>> {
         return this.retry;
     }
 
-    public T setRetry() {
-        this.retry = true;
+    public T setRetry(boolean retry) {
+        this.retry = retry;
         return self();
     }
 

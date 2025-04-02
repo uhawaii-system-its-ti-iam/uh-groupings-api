@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class HasMembersCommandTest {
         assertNotNull(hasMembersCommand.assignGroupPath(""));
         assertNotNull(hasMembersCommand.addUhIdentifier(""));
         assertNotNull(hasMembersCommand.addUhIdentifier("11111111"));
+        assertEquals(hasMembersCommand.self(), hasMembersCommand);
 
         List<String> strings = new ArrayList<>();
         strings.add("");
