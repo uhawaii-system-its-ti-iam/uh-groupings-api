@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.CommandException;
 import edu.hawaii.its.api.groupings.GroupingPrivilegeResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
@@ -118,7 +117,7 @@ public class GroupingAttributeService {
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
                 grouperService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
         if (assignGrouperPrivilegesResult.getResultCode().startsWith(FAILURE)) {
-            throw new CommandException(assignGrouperPrivilegesResult.getResultCode());
+            throw new AccessDeniedException(assignGrouperPrivilegesResult.getResultCode());
         }
         return new GroupingPrivilegeResult(assignGrouperPrivilegesResult);
     }

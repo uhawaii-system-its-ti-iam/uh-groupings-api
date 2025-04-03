@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -106,7 +106,7 @@ public class TestMembershipService {
             membershipService.membershipResults(testUids.get(0), ADMIN);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin and does not match uid.");
-        } catch (UhMemberNotFoundException e) {
+        } catch (UhIdentifierNotFoundException e) {
 
         }
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
@@ -115,7 +115,7 @@ public class TestMembershipService {
         try {
             membershipService.membershipResults(ADMIN, "bogus-user");
             fail("Should throw an exception if uid passed is bogus.");
-        } catch (UhMemberNotFoundException e) {
+        } catch (UhIdentifierNotFoundException e) {
             assertEquals("404 NOT_FOUND \"bogus-user\"", e.getMessage());
         }
 
