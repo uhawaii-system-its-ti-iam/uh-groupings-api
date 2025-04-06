@@ -663,6 +663,18 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * True if user is an owner of the grouping.
+     */
+    @GetMapping(value = "/members/{path:[\\w-:.]+}/{uhIdentifier}/is-owner")
+    @ResponseBody
+    public ResponseEntity<Boolean> hasGroupingOwnerPrivs(@PathVariable String path, @PathVariable String uhIdentifier) {
+        logger.info("Entered REST hasGroupingOwnerPrivs...");
+        return ResponseEntity
+                .ok()
+                .body(memberService.isOwner(path, uhIdentifier));
+    }
+
+    /**
      * True if currentUser is an admin.
      */
     @GetMapping(value = "/members/{uhIdentifier}/is-admin")
