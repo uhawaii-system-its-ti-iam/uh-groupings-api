@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,5 +16,10 @@ public class TestFindAttributesCommand {
     @Test
     public void execute() {
         assertThrows(RuntimeException.class, new FindAttributesCommand()::execute);
+    }
+    @Test
+    public void self() {
+        FindAttributesCommand findAttributesCommand = new FindAttributesCommand();
+        assertEquals(findAttributesCommand, findAttributesCommand.self());
     }
 }

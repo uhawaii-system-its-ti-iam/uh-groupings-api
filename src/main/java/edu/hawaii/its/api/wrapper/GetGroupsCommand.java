@@ -9,7 +9,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsStemLookup;
  * A wrapper for GcGetGroups. When the uhIdentifier of a UH affiliate is passed, GetGroupsCommand on execute
  * fetches(from grouper) results containing the groups that the affiliate is listed in.
  */
-public class GetGroupsCommand extends GrouperCommand implements Command<GetGroupsResults> {
+public class GetGroupsCommand extends GrouperCommand<GetGroupsCommand> implements Command<GetGroupsResults> {
     private final GcGetGroups gcGetGroups;
 
     public GetGroupsCommand() {
@@ -21,6 +21,11 @@ public class GetGroupsCommand extends GrouperCommand implements Command<GetGroup
     public GetGroupsResults execute() {
         WsGetGroupsResults wsGetGroupsResults = this.gcGetGroups.execute();
         return new GetGroupsResults(wsGetGroupsResults);
+    }
+
+    @Override
+    protected GetGroupsCommand self() {
+        return this;
     }
 
     public GetGroupsCommand addUhIdentifier(String uhIdentifier) {
