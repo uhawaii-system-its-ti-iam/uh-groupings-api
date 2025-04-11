@@ -533,9 +533,41 @@ public class TestGrouperApiService {
     }
 
     @Test
+    public void assignAttributesResultsWithRetry() {
+        AssignAttributesResults assignAttributesResults =
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING, OptType.IN.value(), true);
+        assertEquals("SUCCESS", assignAttributesResults.getResultCode());
+        assertEquals(OptType.IN.value(), assignAttributesResults.getAttributesResults().get(0).getName());
+
+        assignAttributesResults =
+                grouperApiService.assignAttributesResults(ADMIN,"invalid_assign_type", OPERATION_ASSIGN_ATTRIBUTE, GROUPING, OptType.IN.value(), true);
+        assertNull(assignAttributesResults); // Todo exception handler
+
+        assignAttributesResults =
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, "invalid-operation", GROUPING, OptType.IN.value(), true);
+        assertNull(assignAttributesResults); // Todo exception handler
+
+        assignAttributesResults =
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, "invalid-path", OptType.IN.value(), true);
+        assertNull(assignAttributesResults); // Todo exception handler
+
+        assignAttributesResults =
+                grouperApiService.assignAttributesResults(ADMIN, ASSIGN_TYPE_GROUP, OPERATION_ASSIGN_ATTRIBUTE, GROUPING,"invalid-attribute", true);
+        assertNull(assignAttributesResults); // Todo exception handler
+    }
+
+    @Test
     public void assignGrouperPrivilegesLiteResult() {
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
                 grouperApiService.assignGrouperPrivilegesResult(ADMIN, GROUPING, PrivilegeType.IN.value(), ADMIN, true);
+        assertNotNull(assignGrouperPrivilegesResult);
+
+    }
+
+    @Test
+    public void assignGrouperPrivilegesLiteResultWithRetry() {
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                grouperApiService.assignGrouperPrivilegesResult(ADMIN, GROUPING, PrivilegeType.IN.value(), ADMIN, true, true);
         assertNotNull(assignGrouperPrivilegesResult);
 
     }

@@ -9,7 +9,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
  * A wrapper for GcHasMember.  When a group path and UH identifier are passed, HasMembersCommand on execute fetches,
  * from grouper, results which confirm whether the UH identifier is listed with the group at group path.
  */
-public class HasMembersCommand extends GrouperCommand implements Command<HasMembersResults> {
+public class HasMembersCommand extends GrouperCommand<HasMembersCommand> implements Command<HasMembersResults> {
 
     private final GcHasMember gcHasMember;
 
@@ -23,6 +23,11 @@ public class HasMembersCommand extends GrouperCommand implements Command<HasMemb
     public HasMembersResults execute() {
         WsHasMemberResults wsHasMemberResults = gcHasMember.execute();
         return new HasMembersResults(wsHasMemberResults);
+    }
+
+    @Override
+    protected HasMembersCommand self() {
+        return this;
     }
 
     public HasMembersCommand assignGroupPath(String groupPath) {

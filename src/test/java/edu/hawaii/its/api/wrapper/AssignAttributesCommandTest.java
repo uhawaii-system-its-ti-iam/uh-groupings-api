@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,5 +23,6 @@ public class AssignAttributesCommandTest {
         assertNotNull(assignAttributesCommand.owner(""));
         assertNotNull(assignAttributesCommand.setValueOperation(""));
         assertNotNull(assignAttributesCommand.addValue(""));
+        assertEquals(assignAttributesCommand.self(), assignAttributesCommand);
     }
 }

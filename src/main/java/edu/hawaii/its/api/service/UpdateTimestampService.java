@@ -28,7 +28,8 @@ public class UpdateTimestampService {
     public GroupPathService groupPathService;
 
     @Autowired
-    public RetryExecutorService retryExec;
+    public ExecutorService exec;
+
 
     public GroupingTimestampResults update(GroupingResult groupingResult) {
         if (groupingResult.getResultCode().equals("SUCCESS")) {
@@ -39,8 +40,9 @@ public class UpdateTimestampService {
     }
 
     private GroupingTimestampResults updateLastModifiedTimestamp(List<String> groupPaths) {
-        UpdatedTimestampResults updatedTimestampResults = retryExec.execute(new UpdateTimestampCommand()
-                .addGroupPaths(groupPaths));
+        UpdatedTimestampResults updatedTimestampResults = exec.execute(new UpdateTimestampCommand()
+                .addGroupPaths(groupPaths)
+                .setRetry(true));
         GroupingTimestampResults groupingsTimestampResults = new GroupingTimestampResults(updatedTimestampResults);
         logger.debug("GroupingsTimestampResult; + " + JsonUtil.asJson(groupingsTimestampResults));
         return groupingsTimestampResults;
