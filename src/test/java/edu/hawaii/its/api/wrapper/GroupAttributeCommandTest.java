@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,5 +24,6 @@ public class GroupAttributeCommandTest {
         assertNotNull(groupAttributeCommand.addAttributes(strings));
         assertNotNull(groupAttributeCommand.addGroup(""));
         assertNotNull(groupAttributeCommand.addGroups(strings));
+        assertEquals(groupAttributeCommand.self(), groupAttributeCommand);
     }
 }

@@ -100,10 +100,9 @@ public class GroupingAttributeService {
         return updateAttribute(currentUser, attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingUpdatedAttributeResult updateAttribute(String currentUser, String attributeName, String assignOperation,
-            String groupingPath) {
+    public GroupingUpdatedAttributeResult updateAttribute(String currentUser, String attributeName, String assignOperation, String groupingPath) {
         AssignAttributesResults assignAttributesResults = grouperService.assignAttributesResults(
-                currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
+                currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName, true);
         GroupingUpdatedAttributeResult result = new GroupingUpdatedAttributeResult(assignAttributesResults);
         if(grouperService instanceof GrouperApiService) {
             timestampService.update(result);
@@ -116,7 +115,7 @@ public class GroupingAttributeService {
      */
     public GroupingPrivilegeResult assignGrouperPrivilege(String currentUser, String privilegeName, String groupName, boolean isSet) {
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                grouperService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
+                grouperService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet, true);
         if (assignGrouperPrivilegesResult.getResultCode().startsWith(FAILURE)) {
             throw new CommandException(assignGrouperPrivilegesResult.getResultCode());
         }

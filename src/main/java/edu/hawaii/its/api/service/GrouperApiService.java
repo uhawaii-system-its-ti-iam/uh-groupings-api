@@ -35,7 +35,7 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public class GrouperApiService implements GrouperService {
 
     private final ExecutorService exec;
-
+    
     public GrouperApiService(ExecutorService exec) {
         this.exec = exec;
     }
@@ -368,6 +368,23 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
+     * Add or remove an attribute from a group. This is used to update a groupings
+     * preferences.
+     * @param retry used to retry execution if it fails.
+     */
+    public AssignAttributesResults assignAttributesResults(String currentUser, String assignType,
+                                                           String assignOperation, String groupPath,
+                                                           String attributeName, boolean retry) {
+        return exec.execute(new AssignAttributesCommand()
+                .owner(currentUser)
+                .setAssignType(assignType)
+                .setAssignOperation(assignOperation)
+                .addGroupPath(groupPath)
+                .addAttribute(attributeName)
+                .setRetry(retry));
+    }
+
+    /**
      * Change a group attribute's privilege to true or false.
      */
     public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath,
@@ -379,6 +396,23 @@ public class GrouperApiService implements GrouperService {
                 .setPrivilege(privilegeName)
                 .setSubjectLookup(uhIdentifier)
                 .setIsAllowed(isAllowed));
+    }
+
+    /**
+     * Change a group attribute's privilege to true or false.
+     * @param retry used to retry execution if it fails.
+     */
+    public AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath,
+                                                                       String privilegeName,
+                                                                       String uhIdentifier, boolean isAllowed,
+                                                                       boolean retry) {
+        return exec.execute(new AssignGrouperPrivilegesCommand()
+                .owner(currentUser)
+                .setGroupPath(groupPath)
+                .setPrivilege(privilegeName)
+                .setSubjectLookup(uhIdentifier)
+                .setIsAllowed(isAllowed)
+                .setRetry(retry));
     }
 
     /**

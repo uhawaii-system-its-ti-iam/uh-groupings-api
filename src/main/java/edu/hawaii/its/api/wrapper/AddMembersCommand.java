@@ -13,7 +13,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
  * added using one call to grouper. Only one group can be added per query. Passing an invalid identifier, or path
  * will result, on execute, with in a RuntimeException.
  */
-public class AddMembersCommand extends GrouperCommand implements Command<AddMembersResults> {
+public class AddMembersCommand extends GrouperCommand<AddMembersCommand> implements Command<AddMembersResults> {
     protected final GcAddMember gcAddMember;
 
     public AddMembersCommand() {
@@ -22,9 +22,15 @@ public class AddMembersCommand extends GrouperCommand implements Command<AddMemb
         includeUhMemberDetails(true);
     }
 
+    @Override
     public AddMembersResults execute() {
         WsAddMemberResults wsAddMemberResults = gcAddMember.execute();
         return new AddMembersResults(wsAddMemberResults);
+    }
+
+    @Override
+    protected AddMembersCommand self() {
+        return this;
     }
 
     public GcAddMember getGcAddMember() {

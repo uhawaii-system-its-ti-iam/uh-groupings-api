@@ -2,6 +2,7 @@ package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,12 @@ public class TestUpdateTimestampCommand {
     @Test
     public void execute() {
         assertThrows(RuntimeException.class, new UpdateTimestampCommand()::execute);
+    }
+
+    @Test
+    public void self() {
+        UpdateTimestampCommand updateTimestampCommand = new UpdateTimestampCommand();
+        assertEquals(updateTimestampCommand, updateTimestampCommand.self());
     }
 
 }

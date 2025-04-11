@@ -13,7 +13,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
  * passing an invalid UH identifier on execute does not throw a RuntimeException, thus making GcGetSubjects a great
  * candidate for checking that validly of UH identifier before it used to query grouper for add and remove.
  */
-public class SubjectsCommand extends GrouperCommand implements Command<SubjectsResults> {
+public class SubjectsCommand extends GrouperCommand<SubjectsCommand> implements Command<SubjectsResults> {
     private final GcGetSubjects gcGetSubjects;
 
     public SubjectsCommand() {
@@ -22,9 +22,15 @@ public class SubjectsCommand extends GrouperCommand implements Command<SubjectsR
         this.gcGetSubjects.assignIncludeSubjectDetail(true);
     }
 
+    @Override
     public SubjectsResults execute() {
         WsGetSubjectsResults wsGetSubjectsResults = gcGetSubjects.execute();
         return new SubjectsResults(wsGetSubjectsResults);
+    }
+
+    @Override
+    protected SubjectsCommand self() {
+        return this;
     }
 
     public SubjectsCommand addSubject(String uhIdentifier) {

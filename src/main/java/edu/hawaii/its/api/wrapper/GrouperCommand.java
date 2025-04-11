@@ -7,6 +7,19 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public abstract class GrouperCommand<T> {
 
+    private boolean retry = false;
+
+    public boolean isRetry(){
+        return this.retry;
+    }
+
+    public T setRetry(boolean retry) {
+        this.retry = retry;
+        return self();
+    }
+
+    protected abstract T self();
+
     protected WsSubjectLookup subjectLookup(String uhIdentifier) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
 
