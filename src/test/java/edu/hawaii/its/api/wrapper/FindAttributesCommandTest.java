@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,5 +17,6 @@ public class FindAttributesCommandTest {
         FindAttributesCommand findAttributesCommand = new FindAttributesCommand();
         assertNotNull(findAttributesCommand.assignAttributeName(""));
         assertNotNull(findAttributesCommand.assignSearchScope(""));
+        assertEquals(findAttributesCommand.self(), findAttributesCommand);
     }
 }

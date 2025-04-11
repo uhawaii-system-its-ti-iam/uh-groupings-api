@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,5 +25,6 @@ public class SubjectsCommandTest {
         List<String> strings = new ArrayList<>();
         strings.add("");
         assertNotNull(subjectsCommand.addSubjects(strings));
+        assertEquals(subjectsCommand.self(), subjectsCommand);
     }
 }

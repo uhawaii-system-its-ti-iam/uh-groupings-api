@@ -8,7 +8,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroupToSave;
 /**
  * Wrapper for GcGroupSave.
  */
-public class GroupSaveCommand extends GrouperCommand implements Command<GroupSaveResults> {
+public class GroupSaveCommand extends GrouperCommand<GroupSaveCommand> implements Command<GroupSaveResults> {
 
     private final GcGroupSave gcGroupSave;
     private final WsGroupToSave wsGroupToSave;
@@ -24,6 +24,11 @@ public class GroupSaveCommand extends GrouperCommand implements Command<GroupSav
         gcGroupSave.addGroupToSave(wsGroupToSave);
         WsGroupSaveResults wsGroupSaveResults = gcGroupSave.execute();
         return new GroupSaveResults(wsGroupSaveResults);
+    }
+
+    @Override
+    protected GroupSaveCommand self() {
+        return this;
     }
 
     public GroupSaveCommand setGroupingPath(String groupingPath) {

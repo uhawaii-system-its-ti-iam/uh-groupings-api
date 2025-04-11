@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,5 +18,11 @@ public class TestHasMembersCommand {
     @Test
     public void execute() {
         assertThrows(RuntimeException.class, new HasMembersCommand()::execute);
+    }
+
+    @Test
+    public void self() {
+        HasMembersCommand hasMembersCommand = new HasMembersCommand();
+        assertEquals(hasMembersCommand, hasMembersCommand.self());
     }
 }
