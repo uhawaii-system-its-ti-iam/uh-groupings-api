@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
 import edu.hawaii.its.api.type.GroupType;
@@ -61,7 +61,7 @@ public class MembershipService {
         }
         String uhUuid = subjectService.getValidUhUuid(uid);
         if (uhUuid.equals("")) {
-            throw new UhMemberNotFoundException(uid);
+            throw new UhIdentifierNotFoundException(uid);
         }
         // Get all basis, include and exclude paths from grouper.
         List<String> basisIncludeExcludePaths =

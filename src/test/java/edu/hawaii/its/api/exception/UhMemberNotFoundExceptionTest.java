@@ -9,7 +9,7 @@ public class UhMemberNotFoundExceptionTest {
 
     @Test
     public void construction() {
-        UhMemberNotFoundException exception = new UhMemberNotFoundException("fail");
+        UhIdentifierNotFoundException exception = new UhIdentifierNotFoundException("fail");
         assertNotNull(exception);
         assertEquals("404 NOT_FOUND \"fail\"", exception.getMessage());
     }

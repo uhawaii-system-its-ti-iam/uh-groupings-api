@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
@@ -70,7 +70,7 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects("bogus-identifier");
 
-        assertThrows(UhMemberNotFoundException.class,
+        assertThrows(UhIdentifierNotFoundException.class,
                 () -> updateMemberService.addAdminMember(TEST_UIDS.get(1), "bogus-identifier"));
     }
 
@@ -95,7 +95,7 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects("bogus-identifier");
 
-        assertThrows(UhMemberNotFoundException.class,
+        assertThrows(UhIdentifierNotFoundException.class,
                 () -> updateMemberService.removeAdminMember(TEST_UIDS.get(1), "bogus-identifier"));
     }
 
