@@ -14,17 +14,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.CommandException;
-import edu.hawaii.its.api.exception.GroupingsHTTPException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.ApiError;
-
-import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -64,23 +59,6 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_FOUND)
                 .message("Illegal Argument Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(iae))
-                .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-
-    @ExceptionHandler(GcWebServiceError.class)
-    public ResponseEntity<ApiError> handleGcWebServiceError(GcWebServiceError gce) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(gce, "Gc Web Service Error");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.NOT_FOUND)
-                .message("Gc Web Service Error")
-                .stackTrace(ExceptionUtils.getStackTrace(gce))
                 .resultCode("FAILURE")
                 .path(attributes.getRequest().getRequestURI());
 
@@ -158,8 +136,8 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(UhMemberNotFoundException.class)
-    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhMemberNotFoundException mnfe) {
+    @ExceptionHandler(UhIdentifierNotFoundException.class)
+    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhIdentifierNotFoundException mnfe) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         emailService.sendWithStack(mnfe, "Uh Member Not Found Exception");
@@ -167,39 +145,6 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
                 .stackTrace(ExceptionUtils.getStackTrace(mnfe))
-                .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-    @ExceptionHandler(CommandException.class)
-    public ResponseEntity<ApiError> handleCommandException(CommandException ce, WebRequest request) {
-        String path = request.getDescription(false);
-
-        emailService.sendWithStack(ce, "Command Exception");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.NOT_ACCEPTABLE)
-                .message("Command Exception")
-                .stackTrace(ExceptionUtils.getStackTrace(ce))
-                .resultCode("FAILURE")
-                .path(path);
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-
-    @ExceptionHandler(GroupingsHTTPException.class)
-    public ResponseEntity<ApiError> handleGroupingsHTTPException(GroupingsHTTPException ghe) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(ghe, "Groupings HTTP Exception");
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("Groupings HTTP Exception")
-                .stackTrace(ExceptionUtils.getStackTrace(ghe))
                 .resultCode("FAILURE")
                 .path(attributes.getRequest().getRequestURI());
 
