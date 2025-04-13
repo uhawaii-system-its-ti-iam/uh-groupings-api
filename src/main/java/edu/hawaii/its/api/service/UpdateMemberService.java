@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
@@ -62,7 +62,7 @@ public class UpdateMemberService {
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
-            throw new UhMemberNotFoundException(validUhUuid);
+            throw new UhIdentifierNotFoundException(validUhUuid);
         }
         return addAdmin(currentUser, uhIdentifier);
     }
@@ -72,7 +72,7 @@ public class UpdateMemberService {
         checkIfAdminUser(currentUser);
         String validUhUuid = subjectService.getValidUhUuid(uhIdentifier);
         if (validUhUuid.equals("")) {
-            throw new UhMemberNotFoundException(validUhUuid);
+            throw new UhIdentifierNotFoundException(validUhUuid);
         }
         return removeAdmin(currentUser, uhIdentifier);
     }

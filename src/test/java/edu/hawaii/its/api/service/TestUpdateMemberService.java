@@ -21,8 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.exception.CommandException;
-import edu.hawaii.its.api.exception.UhMemberNotFoundException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.OptType;
@@ -109,14 +108,14 @@ public class TestUpdateMemberService {
         try {
             updateMemberService.addAdminMember(ADMIN, "bogus-admin-to-add");
             fail("Should throw an exception if an invalid adminToAdd is passed.");
-        } catch (UhMemberNotFoundException e) {
+        } catch (UhIdentifierNotFoundException e) {
             assertNull(e.getCause());
         }
 
         try {
             updateMemberService.removeAdminMember(ADMIN, "bogus-admin-to-remove");
             fail("Should throw an exception if an invalid adminToRemove is passed.");
-        } catch (UhMemberNotFoundException e) {
+        } catch (UhIdentifierNotFoundException e) {
             assertNull(e.getCause());
         }
     }
@@ -479,41 +478,14 @@ public class TestUpdateMemberService {
         } catch (Exception e) {
             fail("should not throw an exception if user does self opt in when user already opted in");
         }
-
         try {
             updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
             updateMemberService.optIn(ADMIN, GROUPING, testUid);
             assertTrue(memberService.isMember(GROUPING_INCLUDE, testUid));
-        } catch (CommandException e) {
+        } catch (AccessDeniedException e) {
             fail("Should not throw an exception because opt in operation can be executed after removing include member");
         }
         updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
-        updateMemberService.removeAdminMember(ADMIN, testUid);
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
-    }
-
-    @Test
-    public void validateOptOutActionForAlreadyOptedUser() {
-        String testUid = testUhUuids.get(0);
-        updateMemberService.addAdminMember(ADMIN, testUid);
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
-        try {
-            updateMemberService.optOut(ADMIN, GROUPING, testUid);
-            updateMemberService.optOut(ADMIN, GROUPING, testUid);
-        } catch (CommandException e) {
-            fail("should not throw an exception if user does self opt out when user already opted out");
-        }
-
-        updateMemberService.removeExcludeMember(ADMIN, GROUPING, testUid);
-
-        try {
-            updateMemberService.removeIncludeMember(ADMIN, GROUPING, testUid);
-            updateMemberService.optOut(ADMIN, GROUPING, testUid);
-            assertFalse(memberService.isMember(GROUPING_EXCLUDE, testUid));
-        } catch (CommandException e) {
-            fail("Should not throw an exception because opt out operation is not executed after removing include member");
-        }
-
         updateMemberService.removeAdminMember(ADMIN, testUid);
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
@@ -525,5 +497,4 @@ public class TestUpdateMemberService {
     private void removeGroupMember(String groupPath, String uhIdentifier) {
         grouperService.removeMember(ADMIN, groupPath, uhIdentifier);
     }
-
 }

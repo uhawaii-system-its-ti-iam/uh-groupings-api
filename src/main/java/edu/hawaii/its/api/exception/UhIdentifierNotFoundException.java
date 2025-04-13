@@ -7,10 +7,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UhMemberNotFoundException extends ResponseStatusException {
+public class UhIdentifierNotFoundException extends ResponseStatusException {
 
     private final List<ApiSubError> subErrors;
-    public UhMemberNotFoundException(String reason) {
+    public UhIdentifierNotFoundException(String reason) {
         super(HttpStatus.NOT_FOUND, reason);
         this.subErrors = new ArrayList<>();
     }
@@ -19,7 +19,7 @@ public class UhMemberNotFoundException extends ResponseStatusException {
         return subErrors;
     }
 
-    public UhMemberNotFoundException addSubError(ApiSubError subError) {
+    public UhIdentifierNotFoundException addSubError(ApiSubError subError) {
         this.subErrors.add(subError);
         return this;
     }
