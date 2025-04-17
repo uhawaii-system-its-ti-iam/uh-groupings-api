@@ -839,6 +839,18 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void hasGroupingOwnerPrivsTest() throws Exception {
+        String groupingPath = "grouping-path";
+        given(memberService.isOwner(groupingPath, CURRENT_USER)).willReturn(false);
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + groupingPath + "/" + CURRENT_USER + "/is-owner"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result);
+        verify(memberService, times(1))
+                .isOwner(groupingPath, CURRENT_USER);
+    }
+
+    @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-admin"))
