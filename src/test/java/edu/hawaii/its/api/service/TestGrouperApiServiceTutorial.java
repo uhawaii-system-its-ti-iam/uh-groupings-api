@@ -277,6 +277,19 @@ public class TestGrouperApiServiceTutorial {
     }
 
     @Test
+    public void assignGrouperPrivilegesLiteResultWithRetry() {
+        AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
+                grouperApiService.assignGrouperPrivilegesResult(ADMIN, GROUPING, PrivilegeType.IN.value(), ADMIN,true, true);
+        assertNotNull(assignGrouperPrivilegesResult);
+        Group group = assignGrouperPrivilegesResult.getGroup();
+        assertNotNull(group);
+        assertEquals(GROUPING, group.getGroupPath());
+        assertEquals(PrivilegeType.IN.value(), assignGrouperPrivilegesResult.getPrivilegeName());
+        assertEquals("access", assignGrouperPrivilegesResult.getPrivilegeType());
+        assertEquals(ADMIN, assignGrouperPrivilegesResult.getSubject().getUid());
+    }
+
+    @Test
     public void getMembersResults() {
         GetMembersResults getMembersResults = grouperApiService.getMembersResults(
                 ADMIN,

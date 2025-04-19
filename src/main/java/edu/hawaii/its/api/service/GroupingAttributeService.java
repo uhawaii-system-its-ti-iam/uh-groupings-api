@@ -137,10 +137,9 @@ public class GroupingAttributeService {
         return updateAttribute(currentUser, attributeName, OPERATION_REMOVE_ATTRIBUTE, groupingPath);
     }
 
-    public GroupingUpdatedAttributesResult updateAttribute(String currentUser, String attributeName, String assignOperation,
-            String groupingPath) {
+    public GroupingUpdatedAttributesResult updateAttribute(String currentUser, String attributeName, String assignOperation, String groupingPath) {
         AssignAttributesResults assignAttributesResults = grouperApiService.assignAttributesResults(
-                currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName);
+                currentUser, ASSIGN_TYPE_GROUP, assignOperation, groupingPath, attributeName, true);
 
         GroupingUpdatedAttributesResult result = new GroupingUpdatedAttributesResult(assignAttributesResults);
         timestampService.update(result);
@@ -153,8 +152,9 @@ public class GroupingAttributeService {
     public GroupingsServiceResult assignGrouperPrivilege(String currentUser, String privilegeName, String groupName, boolean isSet) {
         String action = "set " + privilegeName + " " + isSet + " for " + EVERY_ENTITY + " in " + groupName;
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                grouperApiService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet);
+                grouperApiService.assignGrouperPrivilegesResult(currentUser, groupName, privilegeName, EVERY_ENTITY, isSet, true);
         return makeGroupingsServiceResult(assignGrouperPrivilegesResult.getResultCode(), action);
+
     }
 
     // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.

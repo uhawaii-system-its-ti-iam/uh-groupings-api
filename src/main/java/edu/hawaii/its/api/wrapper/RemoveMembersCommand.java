@@ -5,7 +5,7 @@ import java.util.List;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
 
-public class RemoveMembersCommand extends GrouperCommand implements Command<RemoveMembersResults> {
+public class RemoveMembersCommand extends GrouperCommand<RemoveMembersCommand> implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
 
     public RemoveMembersCommand() {
@@ -14,9 +14,15 @@ public class RemoveMembersCommand extends GrouperCommand implements Command<Remo
         includeUhMemberDetails(true);
     }
 
+    @Override
     public RemoveMembersResults execute() {
         WsDeleteMemberResults wsDeleteMemberResults = gcDeleteMember.execute();
         return new RemoveMembersResults(wsDeleteMemberResults);
+    }
+
+    @Override
+    protected RemoveMembersCommand self() {
+        return this;
     }
 
     public RemoveMembersCommand addUhIdentifiers(List<String> uhIdentifiers) {

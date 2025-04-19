@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,5 +23,6 @@ public class FindGroupsCommandTest {
         assertNotNull(findGroupsCommand.addPath(""));
         assertNotNull(findGroupsCommand.addPaths(strings));
         assertNotNull(findGroupsCommand.addPaths(new ArrayList<>()));
+        assertEquals(findGroupsCommand.self(), findGroupsCommand);
     }
 }

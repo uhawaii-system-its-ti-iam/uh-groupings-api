@@ -10,7 +10,7 @@ import edu.internet2.middleware.grouperClient.api.GcAssignAttributes;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssignValue;
 
-public class UpdateTimestampCommand extends GrouperCommand implements Command<UpdatedTimestampResults> {
+public class UpdateTimestampCommand extends GrouperCommand<UpdateTimestampCommand> implements Command<UpdatedTimestampResults> {
 
     private static final String ASSIGN_TYPE_GROUP = "group";
     private static final String OPERATION_ASSIGN_ATTRIBUTE = "assign_attr";
@@ -47,6 +47,11 @@ public class UpdateTimestampCommand extends GrouperCommand implements Command<Up
     public UpdatedTimestampResults execute() {
         WsAssignAttributesResults wsAssignAttributesResults = this.gcAssignAttributes.execute();
         return new UpdatedTimestampResults(wsAssignAttributesResults);
+    }
+
+    @Override
+    protected UpdateTimestampCommand self() {
+        return this;
     }
 
     private static class DateTimeAttributeValue {

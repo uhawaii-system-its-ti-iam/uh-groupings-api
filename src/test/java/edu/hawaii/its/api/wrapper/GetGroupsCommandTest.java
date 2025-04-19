@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,5 +18,6 @@ public class GetGroupsCommandTest {
         assertNotNull(getGroupsCommand.addUhIdentifier(""));
         assertNotNull(getGroupsCommand.addUhIdentifier("11111111"));
         assertNotNull(getGroupsCommand.query(""));
+        assertEquals(getGroupsCommand.self(), getGroupsCommand);
     }
 }
