@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -33,12 +35,28 @@ public class ErrorControllerAdvice {
     private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
+    
+    public String extractEndpoint(WebRequest request) {
+        if (request == null) {
+            return null;
+        }
+        
+        if (request instanceof ServletWebRequest) {
+            return ((ServletWebRequest) request).getRequest().getRequestURI();
+        }
+        
+        String description = request.getDescription(false);
+        return (description != null && description.startsWith("uri="))
+                ? description.substring(4)
+                : null;
+    }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade) {
+    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ade, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(ade, "Access Denied Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(ade, "Access Denied Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access Denied Exception")
@@ -51,10 +69,11 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae) {
+    public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException iae, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(iae, "Illegal Argument Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(iae, "Illegal Argument Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("Illegal Argument Exception")
@@ -69,10 +88,11 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpRequestMethodNotSupportedException(
-            HttpRequestMethodNotSupportedException hrmnse) {
+            HttpRequestMethodNotSupportedException hrmnse, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(hrmnse, "Http Request Method Not Supported Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .message("Http Request Method Not Supported Exception")
@@ -86,10 +106,11 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({Exception.class, RuntimeException.class})
-    public ResponseEntity<ApiError> handleException(Exception e) {
+    public ResponseEntity<ApiError> handleException(Exception e, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(e, "Runtime Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(e, "Runtime Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Runtime Exception")
@@ -103,10 +124,11 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler({MessagingException.class, IOException.class})
-    public ResponseEntity<ApiError> handleMessagingException(Exception me) {
+    public ResponseEntity<ApiError> handleMessagingException(Exception me, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(me, "Messaging Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(me, "Messaging Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Mail service exception")
@@ -120,10 +142,12 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<ApiError> handleUnsupportedOperationException(UnsupportedOperationException uoe) {
+    public ResponseEntity<ApiError> handleUnsupportedOperationException(UnsupportedOperationException uoe,
+            WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(uoe, "Unsupported Operation Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(uoe, "Unsupported Operation Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_IMPLEMENTED)
                 .message("Unsupported Operation Exception")
@@ -137,10 +161,11 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(UhIdentifierNotFoundException.class)
-    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhIdentifierNotFoundException mnfe) {
+    protected ResponseEntity<ApiError> handleUhMemberNotFound(UhIdentifierNotFoundException mnfe, WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(mnfe, "Uh Member Not Found Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(mnfe, "Uh Member Not Found Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
@@ -154,10 +179,12 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(InvalidGroupPathException.class)
-    public ResponseEntity<ApiError> handleInvalidGroupPathException(InvalidGroupPathException igpe) {
+    public ResponseEntity<ApiError> handleInvalidGroupPathException(InvalidGroupPathException igpe,
+            WebRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        emailService.sendWithStack(igpe, "Invalid Group Path Exception");
+        String path = extractEndpoint(request);
+        
+        emailService.sendWithStack(igpe, "Invalid Group Path Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")

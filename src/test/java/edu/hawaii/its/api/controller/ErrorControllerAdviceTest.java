@@ -5,21 +5,27 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
@@ -96,31 +102,36 @@ public class ErrorControllerAdviceTest {
      */
     @Test
     public void testErrorController() {
+        WebRequest webRequest = new ServletWebRequest(new MockHttpServletRequest());
         AccessDeniedException ade = new AccessDeniedException();
-        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
+        String statusCode =
+                errorControllerAdvice.handleAccessDeniedException(ade, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("403 FORBIDDEN"));
 
         IllegalArgumentException iae = new IllegalArgumentException();
-        statusCode = errorControllerAdvice.handleIllegalArgumentException(iae).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleIllegalArgumentException(iae, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("404 NOT_FOUND"));
 
         HttpRequestMethodNotSupportedException hrmnse = new HttpRequestMethodNotSupportedException("FAIL");
-        statusCode = errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse).getStatusCode().toString();
+        statusCode =
+                errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse, webRequest).getStatusCode()
+                        .toString();
         assertThat(statusCode, is("405 METHOD_NOT_ALLOWED"));
 
         Exception e = new Exception("FAIL");
-        statusCode = errorControllerAdvice.handleException(e).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleException(e, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
-
-        statusCode = errorControllerAdvice.handleMessagingException(e).getStatusCode().toString();
+        
+        statusCode = errorControllerAdvice.handleMessagingException(e, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
         UnsupportedOperationException uoe = new UnsupportedOperationException();
-        statusCode = errorControllerAdvice.handleUnsupportedOperationException(uoe).getStatusCode().toString();
+        statusCode =
+                errorControllerAdvice.handleUnsupportedOperationException(uoe, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("501 NOT_IMPLEMENTED"));
 
         InvalidGroupPathException igpe = new InvalidGroupPathException("Invalid Group Path Exception");
-        statusCode = errorControllerAdvice.handleInvalidGroupPathException(igpe).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleInvalidGroupPathException(igpe, webRequest).getStatusCode().toString();
         assertThat(statusCode, is("400 BAD_REQUEST"));
     }
 
@@ -147,4 +158,26 @@ public class ErrorControllerAdviceTest {
         assertThat(result, notNullValue());
         assertTrue(content.contains("NOT_FOUND"));
     }
+    
+    @Test
+    public void testExtractEndpoint() {
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.setRequestURI("/api/test/endpoint");
+        ServletWebRequest servletWebRequest = new ServletWebRequest(mockRequest);
+        String endpoint = errorControllerAdvice.extractEndpoint(servletWebRequest);
+        assertThat(endpoint, is("/api/test/endpoint"));
+        
+        Assertions.assertNull(errorControllerAdvice.extractEndpoint(null));
+        
+        WebRequest webRequest = mock(WebRequest.class);
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/description");
+        assertThat(errorControllerAdvice.extractEndpoint(webRequest), is("/api/description"));
+        
+        when(webRequest.getDescription(false)).thenReturn("invalid_description");
+        Assertions.assertNull(errorControllerAdvice.extractEndpoint(webRequest));
+        
+        when(webRequest.getDescription(false)).thenReturn(null);
+        Assertions.assertNull(errorControllerAdvice.extractEndpoint(webRequest));
+    }
+    
 }
