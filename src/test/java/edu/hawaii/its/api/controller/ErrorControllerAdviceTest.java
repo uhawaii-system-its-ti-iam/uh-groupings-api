@@ -3,8 +3,11 @@ package edu.hawaii.its.api.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -150,5 +153,26 @@ public class ErrorControllerAdviceTest {
         String content = result.getResponse().getContentAsString();
         assertThat(result, notNullValue());
         assertTrue(content.contains("NOT_FOUND"));
+    }
+    
+    @Test
+    public void testExtractEndpoint() {
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.setRequestURI("/api/test/endpoint");
+        ServletWebRequest servletWebRequest = new ServletWebRequest(mockRequest);
+        String endpoint = errorControllerAdvice.extractEndpoint(servletWebRequest);
+        assertThat(endpoint, is("/api/test/endpoint"));
+        
+        assertNull(errorControllerAdvice.extractEndpoint(null));
+        
+        WebRequest webRequest = mock(WebRequest.class);
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/description");
+        assertThat(errorControllerAdvice.extractEndpoint(webRequest), is("/api/description"));
+        
+        when(webRequest.getDescription(false)).thenReturn("invalid_description");
+        assertNull(errorControllerAdvice.extractEndpoint(webRequest));
+        
+        when(webRequest.getDescription(false)).thenReturn(null);
+        assertNull(errorControllerAdvice.extractEndpoint(webRequest));
     }
 }
