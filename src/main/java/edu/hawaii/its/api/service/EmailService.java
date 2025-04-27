@@ -135,7 +135,7 @@ public class EmailService {
         return new EmailResult(msg);
     }
 
-    public void sendWithStack(Exception e, String exceptionType) {
+    public void sendWithStack(Exception e, String exceptionType, String path) {
         logger.info("Feedback Error email has been triggered.");
         if (!isEnabled) {
             logger.warn("Email service is not enabled. Set email.is.enabled property to true");
@@ -164,6 +164,7 @@ public class EmailService {
         text += "Cause of Response: The API threw an exception that has triggered the ErrorControllerAdvice. \n\n";
         text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
         text += "Host Name: " + hostname + ".\n";
+        text += "Endpoint Path: " + path + "\n";
         if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
