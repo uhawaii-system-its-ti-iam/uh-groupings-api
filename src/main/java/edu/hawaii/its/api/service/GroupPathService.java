@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -97,10 +98,6 @@ public class GroupPathService {
         return replaceGroup("owners", group);
     }
 
-    public List<String> getGroupPaths(List<Group> groups) {
-        return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
-    }
-
     public List<String> getGroupPaths(String groupingPath) {
         return Arrays.asList(
                 getBasisGroup(groupingPath),
@@ -110,7 +107,11 @@ public class GroupPathService {
     }
 
     private Group getGroup(String groupPath) {
-        return grouperService.findGroupsResults(groupPath).getGroup();
+        try {
+            return grouperService.findGroupsResults(groupPath).getGroup();
+        } catch (GrouperException ge) {
+            return new Group();
+        }
     }
 
     private String replaceGroup(String rep, Group group) {
