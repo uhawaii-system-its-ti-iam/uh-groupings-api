@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,14 +84,15 @@ public class GroupingAttributeService {
     }
     // Check if attribute is on.
     public boolean isGroupAttribute(String groupPath, String attributeName) {
-        GroupAttributeResults groupAttributes = grouperService.groupAttributeResults(attributeName, groupPath);
-        if (groupAttributes == null) {
+        try {
+            GroupAttributeResults groupAttributes = grouperService.groupAttributeResults(attributeName, groupPath);
+            return groupAttributes.getGroupAttributes().stream()
+                    .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
+        } catch (GrouperException e) {
+            logger.error("Failed to get group attribute results from GrouperClient for path: " + groupPath, e);
             return false;
         }
-        return groupAttributes.getGroupAttributes().stream()
-                .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributeName));
     }
-
     public GroupingUpdatedAttributeResult assignAttribute(String currentUser, String attributeName, String groupingPath) {
         return updateAttribute(currentUser, attributeName, OPERATION_ASSIGN_ATTRIBUTE, groupingPath);
     }
