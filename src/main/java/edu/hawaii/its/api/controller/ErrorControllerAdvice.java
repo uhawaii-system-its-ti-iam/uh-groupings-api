@@ -45,7 +45,7 @@ public class ErrorControllerAdvice {
                 .message("Access Denied Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(ade))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -62,7 +62,7 @@ public class ErrorControllerAdvice {
                 .message("Illegal Argument Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(iae))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -81,7 +81,7 @@ public class ErrorControllerAdvice {
                 .message("Http Request Method Not Supported Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(hrmnse))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -99,7 +99,7 @@ public class ErrorControllerAdvice {
                 .message("Runtime Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(e))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -117,7 +117,7 @@ public class ErrorControllerAdvice {
                 .message("Mail service exception")
                 .stackTrace(ExceptionUtils.getStackTrace(me))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -135,7 +135,7 @@ public class ErrorControllerAdvice {
                 .message("Unsupported Operation Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(uoe))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -153,7 +153,7 @@ public class ErrorControllerAdvice {
                 .message("UH Member found failed")
                 .stackTrace(ExceptionUtils.getStackTrace(mnfe))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
@@ -171,7 +171,7 @@ public class ErrorControllerAdvice {
                 .message("Invalid Group Path Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(igpe))
                 .resultCode("FAILURE")
-                .path(attributes.getRequest().getRequestURI());
+                .path(path);
 
         ApiError apiError = errorBuilder.build();
 
