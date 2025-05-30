@@ -16,14 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
@@ -54,6 +54,9 @@ public class EmailServiceTest {
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
 
+    @Value("${groupings.api.test.path:/api/groupings/v2.1}")
+    private String testPath;
+
     @TestConfiguration
     public static class EmailServiceTestConfiguration {
         @Bean
@@ -76,7 +79,9 @@ public class EmailServiceTest {
         emailService.setRecipient("address");
         emailService.setEnvironment(environment);
 
+
         wasSent = false;
+        
 
         feedback = new Feedback();
         feedback.setName("Testf-iwt-a TestIAM-staff");
@@ -84,6 +89,7 @@ public class EmailServiceTest {
         feedback.setType("problem");
         feedback.setMessage("Some problem happened.");
         feedback.setExceptionMessage("");
+
     }
 
     @Test
@@ -102,7 +108,7 @@ public class EmailServiceTest {
         assertFalse(wasSent);
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertFalse(wasSent);
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertFalse(wasSent);
     }
 
@@ -113,7 +119,7 @@ public class EmailServiceTest {
         assertFalse(messageSent.getText().contains("Recipient overridden"));
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertFalse(messageSent.getText().contains("Recipient overridden"));
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertFalse(messageSent.getText().contains("Recipient overridden"));
 
         emailService.setRecipient("override@email.com");
@@ -121,7 +127,7 @@ public class EmailServiceTest {
         assertTrue(messageSent.getText().contains("Recipient overridden"));
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertTrue(messageSent.getText().contains("Recipient overridden"));
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertTrue(messageSent.getText().contains("Recipient overridden"));
     }
 
@@ -160,7 +166,7 @@ public class EmailServiceTest {
         assertFalse(wasSent);
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertFalse(wasSent);
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertFalse(wasSent);
     }
 
@@ -172,7 +178,7 @@ public class EmailServiceTest {
         assertTrue(messageSent.getText().contains("Unknown Host"));
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertTrue(messageSent.getText().contains("Unknown Host"));
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertTrue(messageSent.getText().contains("Unknown Host"));
     }
 
@@ -180,7 +186,7 @@ public class EmailServiceTest {
     public void environmentInSubject() {
         String environment = emailService.getEnvironment();
         assertEquals("dev", environment);
-        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception");
+        emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertTrue(messageSent.getSubject().contains("(dev)"));
     }
 }
