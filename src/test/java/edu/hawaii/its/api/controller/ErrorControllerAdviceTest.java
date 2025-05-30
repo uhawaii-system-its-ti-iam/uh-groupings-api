@@ -105,13 +105,14 @@ public class ErrorControllerAdviceTest {
         assertThat(statusCode, is("404 NOT_FOUND"));
 
         HttpRequestMethodNotSupportedException hrmnse = new HttpRequestMethodNotSupportedException("FAIL");
-        statusCode = errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse).getStatusCode().toString();
+        statusCode =
+                errorControllerAdvice.handleHttpRequestMethodNotSupportedException(hrmnse).getStatusCode().toString();
         assertThat(statusCode, is("405 METHOD_NOT_ALLOWED"));
 
         Exception e = new Exception("FAIL");
         statusCode = errorControllerAdvice.handleException(e).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
-
+        
         statusCode = errorControllerAdvice.handleMessagingException(e).getStatusCode().toString();
         assertThat(statusCode, is("500 INTERNAL_SERVER_ERROR"));
 
