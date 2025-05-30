@@ -195,28 +195,55 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void groupingOwners() {
+    public void groupingImmediateOwners() {
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
-        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertFalse(GroupingOwnerMembers.getImmediateOwners().getMembers().stream()
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
 
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        GroupingOwnerMembers = groupingAssignmentService.groupingOwners(ADMIN, GROUPING);
+        GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertTrue(GroupingOwnerMembers.getImmediateOwners().getMembers().stream()
+        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
     }
 
     @Test
-    public void numberOfOwners() {
-        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
-        int initialOwners = groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN);
-        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
+    public void groupingAllOwners() {
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
-        assertEquals(initialOwners, groupingAssignmentService.numberOfOwners(ADMIN, GROUPING, ADMIN));
+        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        assertNotNull(GroupingOwnerMembers);
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
+
+        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        assertNotNull(GroupingOwnerMembers);
+        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+    }
+
+    // TODO: these needs to be enhanced by adding an actual grouping with fixed owners as path owners.
+    @Test
+    public void numberOfImmediateOwners() {
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
+        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+    }
+
+    @Test
+    public void numberOfAllOwners() {
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        int initialOwners = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
+        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
+        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
     }
 }

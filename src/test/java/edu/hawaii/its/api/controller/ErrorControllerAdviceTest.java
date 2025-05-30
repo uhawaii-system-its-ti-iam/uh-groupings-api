@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +97,12 @@ public class ErrorControllerAdviceTest {
      */
     @Test
     public void testErrorController() {
+        OwnerLimitExceededException olee = new OwnerLimitExceededException();
+        String statusCode = errorControllerAdvice.handleOwnerLimitExceededException(olee).getStatusCode().toString();
+        assertThat(statusCode, is("409 CONFLICT"));
+
         AccessDeniedException ade = new AccessDeniedException();
-        String statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleAccessDeniedException(ade).getStatusCode().toString();
         assertThat(statusCode, is("403 FORBIDDEN"));
 
         IllegalArgumentException iae = new IllegalArgumentException();

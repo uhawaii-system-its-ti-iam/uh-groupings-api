@@ -132,6 +132,7 @@ public class GroupingsRestControllerv2_1Test {
     private static final String GROUPING = "path:to:grouping";
     private static final String UID = "user";
     private static final String ADMIN = "admin";
+    private static final Integer OWNER_LIMIT = 100;
     private PropertyLocator propertyLocator;
 
     @BeforeEach
@@ -954,23 +955,23 @@ public class GroupingsRestControllerv2_1Test {
     public void getNumberOfOwnersTest() throws Exception {
         String uid = "uid";
         String path = "grouping-path";
-        given(groupingAssignmentService.numberOfOwners(ADMIN, path, uid)).willReturn(1);
+        given(groupingAssignmentService.numberOfImmediateOwners(ADMIN, path, uid)).willReturn(1);
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/" + uid + "/count")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).numberOfOwners(ADMIN, path, uid);
+        verify(groupingAssignmentService, times(1)).numberOfImmediateOwners(ADMIN, path, uid);
     }
 
     @Test
     public void groupingOwnersTest() throws Exception {
         String path = "grouping-path";
-        given(groupingAssignmentService.groupingOwners(ADMIN, path)).willReturn(new GroupingOwnerMembers());
+        given(groupingAssignmentService.groupingImmediateOwners(ADMIN, path)).willReturn(new GroupingOwnerMembers(OWNER_LIMIT));
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + path + "/owners")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).groupingOwners(ADMIN, path);
+        verify(groupingAssignmentService, times(1)).groupingImmediateOwners(ADMIN, path);
     }
 
     @Test

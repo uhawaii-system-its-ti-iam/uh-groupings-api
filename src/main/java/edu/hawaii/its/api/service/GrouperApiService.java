@@ -125,10 +125,26 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Get all immediate members of a grouping path (members with the immediate filter)
+     * Get all immediate members of a grouping path (members with the "IMMEDIATE" filter)
      */
     public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
         MemberFilter memberFilter = MemberFilter.IMMEDIATE;
+        GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
+                .owner(currentUser)
+                .addGroupPath(groupPath)
+                .assignMemberFilter(memberFilter));
+        List<GetMembersResult> result = getMembersResults.getMembersResults();
+        if (result.isEmpty()) {
+            return new GetMembersResult();
+        }
+        return result.get(0);
+    }
+
+    /**
+     * Get all members of a grouping (members with the "ALL" filter)
+     */
+    public GetMembersResult getAllMembers(String currentUser, String groupPath) {
+        MemberFilter memberFilter = MemberFilter.ALL;
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .owner(currentUser)
                 .addGroupPath(groupPath)

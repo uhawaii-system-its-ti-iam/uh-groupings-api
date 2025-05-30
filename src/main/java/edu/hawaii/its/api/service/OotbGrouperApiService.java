@@ -3,7 +3,6 @@ package edu.hawaii.its.api.service;
 import java.util.Collections;
 import java.util.List;
 
-import edu.hawaii.its.api.wrapper.AssignAttributesCommand;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -99,6 +98,13 @@ public class OotbGrouperApiService implements GrouperService {
      */
     public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
         return new GetMembersResult();
+    }
+
+    /**
+     * TODO: needs to be implemented if OOTB gets into production.
+     */
+    public GetMembersResult getAllMembers(String currentUser, String groupPath) {
+        return null;
     }
 
     /**
@@ -286,7 +292,7 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
-     * NEEDS TO BE IMPLEMENTED.
+     * TODO: NEEDS TO BE IMPLEMENTED if we decide to use OOTB.
      * Change a group attribute's privilege to true or false.
      * @param retry used to retry execution if it fails.
      */
@@ -298,7 +304,7 @@ public class OotbGrouperApiService implements GrouperService {
     }
 
     /**
-     * NEEDS TO BE IMPLEMENTED.
+     * TODO NEEDS TO BE IMPLEMENTED if we decide to use OOTB.
      * Add or remove an attribute from a group. This is used to update a groupings
      * preferences.
      * @param retry used to retry execution if it fails.

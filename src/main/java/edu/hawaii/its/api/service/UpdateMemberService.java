@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,9 @@ public class UpdateMemberService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    @Value("${groupings.max.owner.limit}")
+    private Integer OWNERS_LIMIT;
+
     private final UpdateTimestampService timestampService;
 
     private final SubjectService subjectService;
@@ -45,16 +49,23 @@ public class UpdateMemberService {
 
     private final GrouperService grouperService;
 
+    private final GroupingOwnerService groupingOwnerService;
+
+    private final GroupingAssignmentService groupingAssignmentService;
+
     public UpdateMemberService(UpdateTimestampService timestampService,
             SubjectService subjectService,
             GroupPathService groupPathService,
             MemberService memberService,
-            GrouperService grouperService) {
+            GrouperService grouperService, GroupingOwnerService groupingOwnerService,
+                               GroupingAssignmentService groupingAssignmentService) {
         this.timestampService = timestampService;
         this.subjectService = subjectService;
         this.groupPathService = groupPathService;
         this.memberService = memberService;
         this.grouperService = grouperService;
+        this.groupingOwnerService = groupingOwnerService;
+        this.groupingAssignmentService = groupingAssignmentService;
     }
 
     public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
@@ -78,11 +89,15 @@ public class UpdateMemberService {
     }
 
     public GroupingAddResults addOwnerships(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+        log.info(String.format("addOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;", currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(groupingPath);
-        log.info(String.format("addOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
-                currentUser, groupingPath, uhIdentifiers));
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
+
+        Integer ownerCount = groupingAssignmentService.numberOfAllOwners(currentUser, groupingPath);
+        if (ownerCount + validIdentifiers.size() > OWNERS_LIMIT) {
+            throw new OwnerLimitExceededException();
+        }
         return addOwners(currentUser, groupingPath, validIdentifiers);
     }
 
@@ -95,8 +110,18 @@ public class UpdateMemberService {
 
     public GroupingAddResults addGroupPathOwnerships(String currentUser, String groupingPath,
             List<String> groupPathOwners) {
+        // TODO: should we also check if groupPathOwners are valid paths?
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
+
+        // Check that owner limit will not be exceeded after addition.
+        Integer ownerCount = groupingAssignmentService.numberOfAllOwners(currentUser, groupingPath);
+        for (String path: groupPathOwners) {
+            ownerCount += groupingOwnerService.numberOfGroupingMembers(currentUser, path);
+        }
+        if (ownerCount > OWNERS_LIMIT) {
+            throw new OwnerLimitExceededException();
+        }
         return addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
     }
 
@@ -110,6 +135,7 @@ public class UpdateMemberService {
         return removeOwners(currentUser, groupingPath, validIdentifiers);
     }
 
+    // TODO: what is this for?
     public GroupingRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
