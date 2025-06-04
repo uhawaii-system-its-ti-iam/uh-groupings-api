@@ -52,7 +52,15 @@ public class GroupingMember {
         this.uid = "";
         this.whereListed = "";
     }
-
+    
+    public GroupingMember(HasMemberResult result) {
+        this.name = result.getName();
+        this.firstName = result.getFirstName();
+        this.lastName = result.getLastName();
+        this.uhUuid = result.getUhUuid();
+        this.uid = result.getUid();
+        this.whereListed = "";
+    }
     public String getName() {
         return name;
     }

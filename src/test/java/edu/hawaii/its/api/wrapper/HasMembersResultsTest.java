@@ -113,5 +113,71 @@ public class HasMembersResultsTest {
         assertEquals("FAILURE", hasMembersResults.getGroup().getResultCode());
         assertEquals("", hasMembersResults.getGroupPath());
     }
-
+	
+	@Test
+	public void getExistingMembersWithMembers() {
+		String json = propertyLocator.find("ws.has.member.results.is.members.uid");
+		WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
+		HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+		assertNotNull(hasMembersResults);
+		
+		List<HasMemberResult> existingMembers = hasMembersResults.getExistingMembers();
+		assertNotNull(existingMembers);
+		assertEquals(5, existingMembers.size());
+		
+		for (HasMemberResult result : existingMembers) {
+			assertEquals("IS_MEMBER", result.getResultCode());
+		}
+	}
+	
+	@Test
+	public void getExistingMembersWithNoMembers() {
+		String json = propertyLocator.find("ws.has.member.results.is.not.members.uid");
+		WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
+		HasMembersResults hasMembersResults = new HasMembersResults(wsHasMemberResults);
+		assertNotNull(hasMembersResults);
+		
+		List<HasMemberResult> existingMembers = hasMembersResults.getExistingMembers();
+		assertNotNull(existingMembers);
+		assertEquals(0, existingMembers.size());
+	}
+	
+	@Test
+	public void getExistingMembersWithMixedResults() {
+		String jsonMembers = propertyLocator.find("ws.has.member.results.is.members.uid");
+		String jsonNonMembers = propertyLocator.find("ws.has.member.results.is.not.members.uid");
+		
+		WsHasMemberResults wsMemberResults = JsonUtil.asObject(jsonMembers, WsHasMemberResults.class);
+		WsHasMemberResults wsNonMemberResults = JsonUtil.asObject(jsonNonMembers, WsHasMemberResults.class);
+		
+		WsHasMemberResults wsMixedResults = new WsHasMemberResults();
+		wsMixedResults.setResultMetadata(wsMemberResults.getResultMetadata());
+		wsMixedResults.setWsGroup(wsMemberResults.getWsGroup());
+		
+		int totalResults = 5;
+		edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult[] mixedResults =
+				new edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult[totalResults];
+		mixedResults[0] = wsMemberResults.getResults()[0];
+		mixedResults[1] = wsMemberResults.getResults()[1];
+		mixedResults[2] = wsNonMemberResults.getResults()[0];
+		mixedResults[3] = wsMemberResults.getResults()[2];
+		mixedResults[4] = wsNonMemberResults.getResults()[1];
+		
+		wsMixedResults.setResults(mixedResults);
+		
+		HasMembersResults hasMembersResults = new HasMembersResults(wsMixedResults);
+		assertNotNull(hasMembersResults);
+		
+		List<HasMemberResult> allResults = hasMembersResults.getResults();
+		assertEquals(5, allResults.size());
+		
+		List<HasMemberResult> existingMembers = hasMembersResults.getExistingMembers();
+		assertNotNull(existingMembers);
+		assertEquals(3, existingMembers.size());
+		
+		for (HasMemberResult result : existingMembers) {
+			assertEquals("IS_MEMBER", result.getResultCode());
+		}
+	}
+	
 }
