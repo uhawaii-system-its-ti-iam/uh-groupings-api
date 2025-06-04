@@ -318,4 +318,64 @@ public class GroupingOwnerServiceTest {
         assertEquals("test-attribute", destination.getName());
         assertEquals("Test description with test-group", destination.getDescription());
     }
+	
+	@Test
+	public void getMembersExistInIncludeTest() {
+		HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+		
+		GroupingMembers groupingMembers = groupingOwnerService.getMembersExistInInclude(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertFalse(groupingMembers.getMembers().isEmpty());
+		assertEquals(TEST_UIDS.size(), groupingMembers.getMembers().size());
+		
+		hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsNotMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.INCLUDE.value(), TEST_UIDS);
+		
+		groupingMembers = groupingOwnerService.getMembersExistInInclude(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertTrue(groupingMembers.getMembers().isEmpty());
+	}
+	
+	@Test
+	public void getMembersExistInExcludeTest() {
+		HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.EXCLUDE.value(), TEST_UIDS);
+		
+		GroupingMembers groupingMembers = groupingOwnerService.getMembersExistInExclude(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertFalse(groupingMembers.getMembers().isEmpty());
+		assertEquals(TEST_UIDS.size(), groupingMembers.getMembers().size());
+		
+		hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsNotMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.EXCLUDE.value(), TEST_UIDS);
+		
+		groupingMembers = groupingOwnerService.getMembersExistInExclude(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertTrue(groupingMembers.getMembers().isEmpty());
+	}
+	
+	@Test
+	public void getMembersExistInOwnersTest() {
+		HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.OWNERS.value(), TEST_UIDS);
+		
+		GroupingMembers groupingMembers = groupingOwnerService.getMembersExistInOwners(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertFalse(groupingMembers.getMembers().isEmpty());
+		assertEquals(TEST_UIDS.size(), groupingMembers.getMembers().size());
+		
+		hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsNotMembersUidTestData();
+		doReturn(hasMembersResults).when(grouperService)
+				.hasMembersResults(ADMIN, groupingPath + GroupType.OWNERS.value(), TEST_UIDS);
+		
+		groupingMembers = groupingOwnerService.getMembersExistInOwners(ADMIN, groupingPath, TEST_UIDS);
+		assertNotNull(groupingMembers);
+		assertTrue(groupingMembers.getMembers().isEmpty());
+	}
 }
