@@ -25,12 +25,12 @@ import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
@@ -341,6 +341,49 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getGroupingMembersIsBasis(currentUser, groupingPath, uhIdentifiers));
+    }
+    
+    /**
+     * Check if the user inputs for modifying exist in the include list of a grouping
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/include-members/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInInclude(
+            @RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInInclude...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInInclude(currentUser, groupingPath, uhIdentifiers));
+    }
+    
+    /**
+     * Check if the user inputs for modifying exist in the exclude list of a grouping.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/exclude-members/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInExclude(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInExclude...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInExclude(currentUser, groupingPath, uhIdentifiers));
+    }
+    
+    /**
+     * Check if the user inputs for modifying exist in the owners list of a grouping.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/owners/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInOwners...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInOwners(currentUser, groupingPath, uhIdentifiers));
     }
 
     /**

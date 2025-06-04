@@ -27,6 +27,7 @@ import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
@@ -134,7 +135,44 @@ public class GroupingOwnerService {
                 groupingPath + GroupType.BASIS.value(), uhIdentifiers);
         return new GroupingMembers(hasMembersResults);
     }
-
+    
+    public GroupingMembers getMembersExistInInclude(String currentUser, String groupingPath,
+            List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResults = grouperService.hasMembersResults(
+                currentUser,
+                groupingPath + GroupType.INCLUDE.value(),
+                uhIdentifiers);
+        
+        List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
+        
+        return GroupingMembers.fromFilteredResults(filteredList);
+        
+    }
+    
+    public GroupingMembers getMembersExistInExclude(String currentUser, String groupingPath,
+            List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResults = grouperService.hasMembersResults(
+                currentUser,
+                groupingPath + GroupType.EXCLUDE.value(),
+                uhIdentifiers);
+        
+        List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
+        
+        return GroupingMembers.fromFilteredResults(filteredList);
+    }
+    
+    public GroupingMembers getMembersExistInOwners(String currentUser, String groupingPath,
+            List<String> uhIdentifiers) {
+        HasMembersResults hasMembersResults = grouperService.hasMembersResults(
+                currentUser,
+                groupingPath + GroupType.OWNERS.value(),
+                uhIdentifiers);
+        
+        List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
+        
+        return GroupingMembers.fromFilteredResults(filteredList);
+    }
+    
     /**
      * Get the opt attributes of a selected grouping.
      */

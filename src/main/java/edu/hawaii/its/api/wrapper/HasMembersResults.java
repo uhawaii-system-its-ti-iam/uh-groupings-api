@@ -2,6 +2,7 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
@@ -31,11 +32,17 @@ public class HasMembersResults extends Results {
         }
         return hasMembersResults;
     }
-
+    
+    public List<HasMemberResult> getExistingMembers() {
+        return getResults().stream()
+                .filter(HasMemberResult::isMember)
+                .collect(Collectors.toList());
+    }
+    
     @Override public String getResultCode() {
         return wsHasMemberResults.getResultMetadata().getResultCode();
     }
-
+    
     public String getGroupPath() {
         return getGroup().getGroupPath();
     }
