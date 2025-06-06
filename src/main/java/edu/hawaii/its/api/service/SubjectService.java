@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -56,18 +57,19 @@ public class SubjectService {
     }
 
     private Subject getSubject(String uhIdentifier) {
-        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
-        if (subjectsResults == null) {
-            return new Subject();
-        }
-        List<Subject> subjects = subjectsResults.getSubjects();
+        try {
+            SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
+            List<Subject> subjects = subjectsResults.getSubjects();
 
-        if (subjectsResults.getResultCode().equals("SUBJECT_NOT_FOUND")) {
+            if (subjectsResults.getResultCode().equals("SUBJECT_NOT_FOUND")) {
+                return new Subject();
+            }
+            if (subjects.size() >= 1) {
+                return subjects.get(0);
+            }
+            return new Subject();
+        } catch (GrouperException e) {
             return new Subject();
         }
-        if (subjects.size() >= 1) {
-            return subjects.get(0);
-        }
-        return new Subject();
     }
 }
