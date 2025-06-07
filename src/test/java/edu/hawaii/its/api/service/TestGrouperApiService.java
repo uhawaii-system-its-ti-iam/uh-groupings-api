@@ -311,6 +311,18 @@ public class TestGrouperApiService {
     }
 
     @Test
+    public void getAllMembers() {
+        grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        GetMembersResult allMembers = grouperService.getAllMembers(ADMIN, GROUPING_OWNERS);
+        assertNotNull(allMembers);
+        assertEquals("SUCCESS", allMembers.getResultCode());
+        SubjectsResults subjectsResults = grouperService.getSubjects(GROUPING_OWNERS, GROUPING_SINGLE);
+        assertNotNull(subjectsResults);
+        assertEquals("SUCCESS", subjectsResults.getResultCode());
+        grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+    }
+
+    @Test
     public void groupAttributeResults() {
         String optIn = OptType.IN.value();
         String optOut = OptType.OUT.value();

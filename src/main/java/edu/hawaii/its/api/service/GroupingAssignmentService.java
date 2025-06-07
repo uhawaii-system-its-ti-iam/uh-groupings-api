@@ -33,6 +33,8 @@ public class GroupingAssignmentService {
     private String GROUPING_ADMINS;
     @Value("${groupings.api.stale_subject_id}")
     private String STALE_SUBJECT_ID;
+    @Value("${groupings.max.owner.limit}")
+    private Integer OWNERS_LIMIT;
 
     private final MemberService memberService;
 
@@ -114,20 +116,44 @@ public class GroupingAssignmentService {
         return new GroupingPaths(groupingsService.getGroupingPaths(optInPaths));
     }
 
-    public GroupingOwnerMembers groupingOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
-        return new GroupingOwnerMembers(
-                grouperService.getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()));
-    }
-
-    public Integer numberOfOwners(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s",
+    /**
+     * Get number of immediate owners in a grouping. Owners with "IMMEDIATE" filter.
+     */
+    public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
+        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
         if (!memberService.isOwner(uhIdentifier)) {
             throw new AccessDeniedException();
         }
-        GroupingGroupMembers owners = groupingOwners(currentUser, groupPath).getImmediateOwners();
+        GroupingGroupMembers owners = groupingImmediateOwners(currentUser, groupPath).getOwners();
+
         return owners.getMembers().size();
+    }
+
+    /**
+     * Get number of all owners in a grouping. Owners with "ALL" filter.
+     */
+    public Integer numberOfAllOwners(String currentUser, String groupPath) {
+        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s;",
+                currentUser, groupPath));
+        if (!memberService.isOwner(currentUser)) {
+            throw new AccessDeniedException();
+        }
+        GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();
+
+        return owners.getMembers().size();
+    }
+
+    public GroupingOwnerMembers groupingAllOwners(String currentUser, String groupingPath) {
+        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        return new GroupingOwnerMembers(
+                grouperService.getAllMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
+    }
+
+    public GroupingOwnerMembers groupingImmediateOwners(String currentUser, String groupingPath) {
+        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        return new GroupingOwnerMembers(
+                grouperService.getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
     }
 
     public Map<String, Group> makeGroups(GetMembersResults getMembersResults) {

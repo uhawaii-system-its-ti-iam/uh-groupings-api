@@ -735,11 +735,12 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST getNumberOfOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.numberOfOwners(currentUser, path, uhIdentifier));
+                .body(groupingAssignmentService.numberOfImmediateOwners(currentUser, path, uhIdentifier));
     }
 
     /**
-     * A list of all owners listed in grouping.
+     * A list of all immediate owners listed in a grouping.
+     * Owners with "IMMEDIATE" filter.
      */
     @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")
     public ResponseEntity<GroupingOwnerMembers> groupingOwners(@RequestHeader(CURRENT_USER_KEY) String
@@ -748,7 +749,7 @@ public class GroupingsRestControllerv2_1 {
         logger.info("Entered REST groupingOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingOwners(currentUser, path));
+                .body(groupingAssignmentService.groupingImmediateOwners(currentUser, path));
     }
 
     /**
@@ -773,5 +774,5 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(announcementsService.getAnnouncements());
     }
-    
+
 }
