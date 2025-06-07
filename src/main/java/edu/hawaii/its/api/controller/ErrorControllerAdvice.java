@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import java.io.IOException;
 
+import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import jakarta.mail.MessagingException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -170,6 +171,25 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(igpe))
+                .resultCode("FAILURE")
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(OwnerLimitExceededException.class)
+    public ResponseEntity<ApiError> handleOwnerLimitExceededException(OwnerLimitExceededException olee) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        String path = attributes.getRequest().getRequestURI();
+
+        emailService.sendWithStack(olee, "Owner Limit Exceeded Exception", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.CONFLICT)
+                .message("Owner Limit Exceeded Exception")
+                .stackTrace(ExceptionUtils.getStackTrace(olee))
                 .resultCode("FAILURE")
                 .path(path);
 

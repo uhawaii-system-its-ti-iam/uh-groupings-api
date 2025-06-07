@@ -12,25 +12,28 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 public class GroupingOwnerMembers implements GroupingResult {
     private String resultCode;
     private String groupPath;
+    private GroupingGroupMembers owners;
+    private Integer ownerLimit;
 
-    private GroupingGroupMembers immediateOwners;
-
-    public GroupingOwnerMembers(GetMembersResult getMembersResult) {
+    public GroupingOwnerMembers(GetMembersResult getMembersResult, Integer ownerLimit) {
         setResultCode(getMembersResult.getResultCode());
         setGroupPath(getMembersResult.getGroup().getGroupPath());
-        setImmediateOwners(getMembersResult);
+        setOwners(getMembersResult);
+        setOwnerLimit(ownerLimit);
     }
 
-    public GroupingOwnerMembers(SubjectsResults subjectsResults) {
+    public GroupingOwnerMembers(SubjectsResults subjectsResults, Integer ownerLimit) {
         setResultCode(subjectsResults.getResultCode());
         setGroupPath(subjectsResults.getGroup().getGroupPath());
-        setImmediateOwners(subjectsResults);
+        setOwners(subjectsResults);
+        setOwnerLimit(ownerLimit);
     }
 
-    public GroupingOwnerMembers() {
+    public GroupingOwnerMembers(Integer ownerLimit) {
         setResultCode("");
         setGroupPath("");
-        this.immediateOwners = new GroupingGroupMembers();
+        this.owners = new GroupingGroupMembers();
+        setOwnerLimit(ownerLimit);
     }
 
     @Override
@@ -52,15 +55,23 @@ public class GroupingOwnerMembers implements GroupingResult {
     }
 
     @JsonProperty
-    public void setImmediateOwners(GetMembersResult getMembersResult) {
-        this.immediateOwners = new GroupingGroupMembers(getMembersResult);
+    public void setOwners(GetMembersResult getMembersResult) {
+        this.owners = new GroupingGroupMembers(getMembersResult);
     }
 
-    public void setImmediateOwners(SubjectsResults subjectsResults) {
-        this.immediateOwners = new GroupingGroupMembers(subjectsResults);
+    public void setOwners(SubjectsResults subjectsResults) {
+        this.owners = new GroupingGroupMembers(subjectsResults);
     }
 
-    public GroupingGroupMembers getImmediateOwners() {
-        return this.immediateOwners;
+    public GroupingGroupMembers getOwners() {
+        return this.owners;
+    }
+
+    public Integer getOwnerLimit() {
+        return this.ownerLimit;
+    }
+
+    public void setOwnerLimit(Integer ownerLimit) {
+        this.ownerLimit = ownerLimit;
     }
 }

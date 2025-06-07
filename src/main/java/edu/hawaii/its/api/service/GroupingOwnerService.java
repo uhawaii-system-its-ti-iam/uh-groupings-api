@@ -88,6 +88,9 @@ public class GroupingOwnerService {
 
     public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending) {
+        log.debug(String.format(
+                "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
+                currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
         GetMembersResult getMembersResult = grouperService.getMembersResult(
                 currentUser,
                 groupingPath,

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.List;
 
+import edu.hawaii.its.api.wrapper.GetMembersResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,9 @@ public class UpdateMemberServiceTest {
     private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @MockitoSpyBean
+    private GroupingAssignmentService groupingAssignmentService;
+
+    @MockitoSpyBean
     private GrouperService grouperService;
 
     @Value("${groupings.api.grouping_admins}")
@@ -47,6 +51,9 @@ public class UpdateMemberServiceTest {
 
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
+
+    @Value("${groupings.max.owner.limit}")
+    private Integer OWNER_LIMIT;
 
     private String groupPath = "group-path";
 
@@ -121,8 +128,14 @@ public class UpdateMemberServiceTest {
         doReturn(addMembersResults).when(grouperService)
                 .addMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
+        // TODO: this should be done with data harness like it is above.
+        doReturn(OWNER_LIMIT / 2).when(groupingAssignmentService)
+                .numberOfAllOwners(TEST_UIDS.get(0), groupPath);
+
         assertNotNull(updateMemberService.addOwnerships(TEST_UIDS.get(0), groupPath, TEST_UIDS));
     }
+
+    // TODO: missing test for addGroupPathOwnerships()
 
     @Test
     public void addOwnershipTest() {
