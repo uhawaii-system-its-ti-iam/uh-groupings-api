@@ -2,7 +2,6 @@ package edu.hawaii.its.api.groupings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,14 @@ import org.junit.jupiter.api.Test;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
-import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 
 public class GroupingOwnerMembersTest {
+
+    private final Integer OWNER_LIMIT = 100;
 
     private PropertyLocator propertyLocator;
 
@@ -29,13 +29,14 @@ public class GroupingOwnerMembersTest {
     }
 
     @Test
-    public void testDefaultConstructor() {
-        GroupingOwnerMembers GroupingOwnerMembers = new GroupingOwnerMembers();
+    public void testConstructorWithOwnerLimit() {
+        GroupingOwnerMembers GroupingOwnerMembers = new GroupingOwnerMembers(OWNER_LIMIT);
         assertNotNull(GroupingOwnerMembers);
         assertEquals("", GroupingOwnerMembers.getResultCode());
         assertEquals("", GroupingOwnerMembers.getGroupPath());
-        assertEquals(new ArrayList<>(), GroupingOwnerMembers.getImmediateOwners().getMembers());
-        assertEquals(0, GroupingOwnerMembers.getImmediateOwners().getSize());
+        assertEquals(new ArrayList<>(), GroupingOwnerMembers.getOwners().getMembers());
+        assertEquals(0, GroupingOwnerMembers.getOwners().getSize());
+        assertEquals(OWNER_LIMIT, GroupingOwnerMembers.getOwnerLimit());
     }
 
     @Test
@@ -44,13 +45,14 @@ public class GroupingOwnerMembersTest {
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         GroupingOwnerMembers GroupingOwnerMembers = new GroupingOwnerMembers(getMembersResults.getMembersResults()
-                .get(2));
+                .get(2), OWNER_LIMIT);
         assertNotNull(GroupingOwnerMembers);
         assertEquals("grouping-path:owners", GroupingOwnerMembers.getGroupPath());
         assertEquals("SUCCESS", GroupingOwnerMembers.getResultCode());
-        List<GroupingGroupMember> results = GroupingOwnerMembers.getImmediateOwners().getMembers();
+        assertEquals(OWNER_LIMIT, GroupingOwnerMembers.getOwnerLimit());
+        List<GroupingGroupMember> results = GroupingOwnerMembers.getOwners().getMembers();
         assertNotNull(results);
-        assertEquals(GroupingOwnerMembers.getImmediateOwners().getSize(), results.size());
+        assertEquals(GroupingOwnerMembers.getOwners().getSize(), results.size());
     }
 
     @Test
@@ -58,11 +60,12 @@ public class GroupingOwnerMembersTest {
         String json = propertyLocator.find("ws.get.subjects.results.success");
         WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
-        GroupingOwnerMembers GroupingOwnerMembers = new GroupingOwnerMembers(subjectsResults);
+        GroupingOwnerMembers GroupingOwnerMembers = new GroupingOwnerMembers(subjectsResults, OWNER_LIMIT);
         assertNotNull(GroupingOwnerMembers);
         assertEquals("SUCCESS", GroupingOwnerMembers.getResultCode());
-        List<GroupingGroupMember> results = GroupingOwnerMembers.getImmediateOwners().getMembers();
+        assertEquals(OWNER_LIMIT, GroupingOwnerMembers.getOwnerLimit());
+        List<GroupingGroupMember> results = GroupingOwnerMembers.getOwners().getMembers();
         assertNotNull(results);
-        assertEquals(GroupingOwnerMembers.getImmediateOwners().getSize(), results.size());
+        assertEquals(GroupingOwnerMembers.getOwners().getSize(), results.size());
     }
 }

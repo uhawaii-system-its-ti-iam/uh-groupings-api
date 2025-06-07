@@ -354,7 +354,7 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(new ObjectMapper().readValue(mvcResult.getResponse().getContentAsByteArray(),
                 AsyncJobResult.class));
     }
-    
+
     @Test
     public void ownedGroupingTest() throws Exception {
         SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
@@ -627,7 +627,7 @@ public class TestGroupingsRestControllerv2_1 {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
-//    @Test
+//    TODO @Test
 //    public void addPathOwnersTest() throws Exception {
 //
 //    }
@@ -645,7 +645,7 @@ public class TestGroupingsRestControllerv2_1 {
         testUids.forEach(testUid -> assertFalse(memberService.isOwner(GROUPING, testUid)));
     }
 
-//    @Test
+    //    TODO @Test
 //    public void removePathOwnersTest() throws Exception {
 //
 //    }

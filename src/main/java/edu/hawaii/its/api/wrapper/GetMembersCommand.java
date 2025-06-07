@@ -16,7 +16,7 @@ public class GetMembersCommand extends GrouperCommand<GetMembersCommand> impleme
 
     public GetMembersCommand() {
         this.gcGetMembers = new GcGetMembers();
-        this.gcGetMembers.assignContentType("text/x-json"); // Remove after upgrading to Grouper 4
+        this.gcGetMembers.assignContentType("text/x-json"); // TODO: Remove after upgrading to Grouper 4
         this.gcGetMembers.assignIncludeSubjectDetail(true);
     }
 
