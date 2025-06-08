@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

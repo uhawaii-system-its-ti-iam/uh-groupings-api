@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,7 +167,7 @@ public class TestGroupingAttributeService {
         }
 
         // Should throw an exception if an invalid path is passed.
-        assertThrows(NullPointerException.class, () -> groupingAttributeService.updateOptAttribute(
+        assertThrows(GrouperException.class, () -> groupingAttributeService.updateOptAttribute(
                 new OptRequest.Builder()
                         .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
@@ -330,7 +331,7 @@ public class TestGroupingAttributeService {
         }
 
         // Should throw an exception if an invalid path is passed.
-        assertThrows(NullPointerException.class, () -> groupingAttributeService.updateOptAttribute(
+        assertThrows(GrouperException.class, () -> groupingAttributeService.updateOptAttribute(
                 new OptRequest.Builder()
                         .withUid(testUid)
                         .withGroupNameRoot("bogus-path")
@@ -463,7 +464,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Should throw an exception if an invalid path is passed.
-        assertThrows(NullPointerException.class,
+        assertThrows(GrouperException.class,
                 () -> groupingAttributeService.changeGroupAttributeStatus("bogus-path", ADMIN, null, false));
 
         // Should return success no matter what.
@@ -534,7 +535,7 @@ public class TestGroupingAttributeService {
         }
 
         // Should throw an exception if an invalid path is passed.
-        assertThrows(NullPointerException.class,
+        assertThrows(GrouperException.class,
                 () -> groupingAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION));
         updateMemberService.removeAdminMember(ADMIN, testUid);
 
