@@ -20,7 +20,6 @@ public class ApiError {
         this.message = builder.message;
         this.path = builder.path;
         this.stackTrace = builder.stackTrace;
-
     }
 
     public HttpStatus getStatus() {
@@ -54,7 +53,6 @@ public class ApiError {
         private String path;
         private String stackTrace;
 
-
         public Builder status(HttpStatus status) {
             this.status = status;
             return this;
@@ -80,12 +78,12 @@ public class ApiError {
             return this;
         }
 
+
         public ApiError build() {
             Objects.requireNonNull(this.status, "status cannot be null");
             Objects.requireNonNull(this.message, "message cannot be null");
             Objects.requireNonNull(this.path, "path cannot be null");
             Objects.requireNonNull(this.stackTrace, "stackTrace cannot be null");
-
             return new ApiError(this);
         }
     }

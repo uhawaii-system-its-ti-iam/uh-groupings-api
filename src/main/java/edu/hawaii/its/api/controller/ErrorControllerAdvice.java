@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.ApiError;
 
@@ -190,6 +191,24 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.CONFLICT)
                 .message("Owner Limit Exceeded Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(olee))
+                .resultCode("FAILURE")
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+    @ExceptionHandler(GrouperException.class)
+    public ResponseEntity<ApiError> handleGrouperException(GrouperException ex) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes.getRequest().getRequestURI();
+
+        emailService.sendWithStack(ex, "Grouper Exception", path);
+
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.BAD_GATEWAY)
+                .message("An error occurred upstream from GrouperClient")
+                .stackTrace(ExceptionUtils.getStackTrace(ex))
                 .resultCode("FAILURE")
                 .path(path);
 
