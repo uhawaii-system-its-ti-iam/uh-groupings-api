@@ -669,9 +669,9 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.addGroupingPath(new GroupingPath(path, description));
 
-        given(memberAttributeService.getOwnedGroupings(admin, uid))
+        given(memberAttributeService.getOwnedGroupings(admin))
                 .willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+        mockMvc.perform(get(API_BASE + "/owners/groupings")
                         .header(CURRENT_USER, admin)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.groupingPaths[0].path").value(path))
@@ -679,7 +679,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.groupingPaths[0].description").value("description"));
 
         verify(memberAttributeService, times(1))
-                .getOwnedGroupings(admin, uid);
+                .getOwnedGroupings(admin);
     }
 
     @Test
@@ -831,30 +831,35 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasOwnerPrivsTest() throws Exception {
         given(memberService.isOwner(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-owner"))
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-owner")
+                        .header("current_user", CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
-        verify(memberService, times(1))
-                .isOwner(CURRENT_USER);
+        verify(memberService, times(1)).isOwner(CURRENT_USER);
     }
 
     @Test
     public void hasGroupingOwnerPrivsTest() throws Exception {
         String groupingPath = "grouping-path";
+
         given(memberService.isOwner(groupingPath, CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + groupingPath + "/" + CURRENT_USER + "/is-owner"))
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + groupingPath + "/is-owner")
+                        .header("current_user", CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
+
         assertNotNull(result);
-        verify(memberService, times(1))
-                .isOwner(groupingPath, CURRENT_USER);
+        verify(memberService, times(1)).isOwner(groupingPath, CURRENT_USER);
     }
 
     @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-admin"))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-admin")
+                .header("current_user", CURRENT_USER))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
@@ -873,13 +878,13 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 10; i++) {
             groupingPathList.add(new GroupingPath(path));
         }
-        given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
+        given(memberAttributeService.numberOfGroupings(owner)).willReturn(10);
 
         mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
-                .numberOfGroupings(owner, uid);
+                .numberOfGroupings(owner);
     }
 
     @Test

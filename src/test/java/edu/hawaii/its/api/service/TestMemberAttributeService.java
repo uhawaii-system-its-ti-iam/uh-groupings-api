@@ -179,7 +179,7 @@ public class TestMemberAttributeService {
     public void getOwnedGroupingsTest() {
         // Groupings owned by current admin should complement
         // the list of memberships that the current admin is in.
-        GroupingPaths groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, ADMIN);
+        GroupingPaths groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN);
         ManageSubjectResults manageSubjectResults = membershipService.manageSubjectResults(ADMIN, ADMIN);
         assertNotNull(groupingsOwned);
         groupingsOwned.getGroupingPaths().forEach(groupingPath -> {
@@ -193,13 +193,13 @@ public class TestMemberAttributeService {
         List<String> testList = new ArrayList<>();
         String testUid = testUids.get(0);
         testList.add(testUid);
-        groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, testUid);
+        groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN);
         assertFalse(
                 groupingsOwned.getGroupingPaths().stream()
                         .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
 
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN, testUid);
+        groupingsOwned = memberAttributeService.getOwnedGroupings(ADMIN);
         assertTrue(
                 groupingsOwned.getGroupingPaths().stream()
                         .anyMatch(groupingPath -> groupingPath.getPath().equals(GROUPING)));
@@ -212,19 +212,19 @@ public class TestMemberAttributeService {
         String testUid = testUids.get(0);
         List<String> testList = new ArrayList<>();
         testList.add(testUid);
-        Integer numberOfGroupings = memberAttributeService.numberOfGroupings(ADMIN, testUid);
+        Integer numberOfGroupings = memberAttributeService.numberOfGroupings(ADMIN);
         assertNotNull(numberOfGroupings);
 
         // Should equal the size of the list returned from getOwnedGroupings().
-        assertEquals(memberAttributeService.getOwnedGroupings(ADMIN, testUid).getGroupingPaths().size(), numberOfGroupings);
+        assertEquals(memberAttributeService.getOwnedGroupings(ADMIN).getGroupingPaths().size(), numberOfGroupings);
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
 
         // Should increase by one if user is added as owner to a grouping.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        assertEquals(numberOfGroupings + 1, memberAttributeService.numberOfGroupings(ADMIN, testUid));
+        assertEquals(numberOfGroupings + 1, memberAttributeService.numberOfGroupings(ADMIN));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
 
         // Should decrease by one if user is added as owner to a grouping.
-        assertEquals(numberOfGroupings, memberAttributeService.numberOfGroupings(ADMIN, testUid));
+        assertEquals(numberOfGroupings, memberAttributeService.numberOfGroupings(ADMIN));
     }
 }

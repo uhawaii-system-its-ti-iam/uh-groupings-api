@@ -487,13 +487,12 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get an owner's owned groupings by uid or uhUuid.
      */
-    @GetMapping("/owners/{uhIdentifier:[\\w-:.]+}/groupings")
-    public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                             @PathVariable String uhIdentifier) {
+    @GetMapping("/owners/groupings")
+    public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getOwnedGroupings(currentUser, uhIdentifier));
+                .body(memberAttributeService.getOwnedGroupings(currentUser));
     }
 
     /**
@@ -653,50 +652,51 @@ public class GroupingsRestControllerv2_1 {
     /**
      * True if currentUser is an owner.
      */
-    @GetMapping(value = "/members/{uhIdentifier}/is-owner")
+    @GetMapping("/members/is-owner")
     @ResponseBody
-    public ResponseEntity<Boolean> hasOwnerPrivs(@PathVariable String uhIdentifier) {
+    public ResponseEntity<Boolean> hasOwnerPrivs(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST hasOwnerPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberService.isOwner(uhIdentifier));
+                .body(memberService.isOwner(currentUser));
     }
 
     /**
-     * True if user is an owner of the grouping.
+     * True if currentUser is an owner of the grouping.
      */
-    @GetMapping(value = "/members/{path:[\\w-:.]+}/{uhIdentifier}/is-owner")
+    @GetMapping(value = "/members/{path:[\\w-:.]+}/is-owner")
     @ResponseBody
-    public ResponseEntity<Boolean> hasGroupingOwnerPrivs(@PathVariable String path, @PathVariable String uhIdentifier) {
+    public ResponseEntity<Boolean> hasGroupingOwnerPrivs(
+            @PathVariable String path,
+            @RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST hasGroupingOwnerPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberService.isOwner(path, uhIdentifier));
+                .body(memberService.isOwner(path, currentUser));
     }
 
     /**
      * True if currentUser is an admin.
      */
-    @GetMapping(value = "/members/{uhIdentifier}/is-admin")
+    @GetMapping(value = "/members/is-admin")
     @ResponseBody
-    public ResponseEntity<Boolean> hasAdminPrivs(@PathVariable String uhIdentifier) {
+    public ResponseEntity<Boolean> hasAdminPrivs(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST hasAdminPrivs...");
         return ResponseEntity
                 .ok()
-                .body(memberService.isAdmin(uhIdentifier));
+                .body(memberService.isAdmin(currentUser));
     }
 
     /**
      * Get the number of groupings that the current user owns
      */
-    @GetMapping(value = "/owners/{uhIdentifier:[\\w-:.]+}/groupings/count")
+    @GetMapping(value = "/owners/groupings/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                        @PathVariable String uhIdentifier) {
+    public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.numberOfGroupings(currentUser, uhIdentifier));
+                .body(memberAttributeService.numberOfGroupings(currentUser));
     }
 
     /**
