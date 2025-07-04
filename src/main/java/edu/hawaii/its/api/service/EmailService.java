@@ -38,6 +38,10 @@ public class EmailService {
 
     private final SubjectService subjectService;
 
+    private static final String HOST = "Unknown Host";
+
+    private static final String DEV_HELP_LIST_ADDRESS = "its-iam-web-app-dev-help-l@lists.hawaii.edu";
+
     public EmailService(JavaMailSender javaMailSender, SubjectService subjectService) {
         this.javaMailSender = javaMailSender;
         this.subjectService = subjectService;
@@ -55,7 +59,7 @@ public class EmailService {
             return new EmailResult();
         }
 
-        String hostname = "Unknown Host";
+        String hostname = HOST;
 
         try {
             InetAddress ip = this.getLocalHost();
@@ -70,7 +74,7 @@ public class EmailService {
         String text = "";
         String header = "UH Groupings service feedback [" + feedback.getType() + "]";
         text += "Host Name: " + hostname + ".\n";
-        if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
+        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
@@ -104,7 +108,7 @@ public class EmailService {
             return new EmailResult();
         }
 
-        String hostname = "Unknown Host";
+        String hostname = HOST;
 
         try {
             InetAddress ip = this.getLocalHost();
@@ -120,7 +124,7 @@ public class EmailService {
         String header =  "(" + environment + ") UH Groupings UI Error Response";
         text += "Cause of Response: The UI threw an exception while making a request to the API. \n\n";
         text += "Host Name: " + hostname + ".\n";
-        if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
+        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
@@ -143,7 +147,7 @@ public class EmailService {
         }
 
         InetAddress ip;
-        String hostname = "Unknown Host";
+        String hostname = HOST;
 
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
@@ -165,7 +169,7 @@ public class EmailService {
         text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
         text += "Host Name: " + hostname + ".\n";
         text += "Endpoint Path: " + path + "\n";
-        if (!recipient.equals("its-iam-web-app-dev-help-l@lists.hawaii.edu")) {
+        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
