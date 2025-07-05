@@ -15,7 +15,7 @@ public class GroupingPath {
     public GroupingPath(String path) {
         this.path = path;
         setName();
-        this.description = "No description given for this Grouping.";
+        this.description = NO_DESCRIPTION_TEXT;
     }
 
     public GroupingPath(String path, String description) {
