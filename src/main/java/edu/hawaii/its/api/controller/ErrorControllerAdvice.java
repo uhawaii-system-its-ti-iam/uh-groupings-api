@@ -154,7 +154,7 @@ public class ErrorControllerAdvice {
         emailService.sendWithStack(mnfe, "Uh Member Not Found Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.NOT_FOUND)
-                .message("UH Member found RESULT_CODE_FAILUREed")
+                .message("UH Member found failed")
                 .stackTrace(ExceptionUtils.getStackTrace(mnfe))
                 .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
