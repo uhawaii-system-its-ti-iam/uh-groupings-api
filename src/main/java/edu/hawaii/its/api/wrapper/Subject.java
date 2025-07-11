@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
@@ -130,6 +131,11 @@ public class Subject extends Results {
         return getName().equals(other.getName()) &&
                 getUid().equals(other.getUid()) &&
                 getUhUuid().equals(other.getUhUuid());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getUid(), getUhUuid());
     }
 
     @Override

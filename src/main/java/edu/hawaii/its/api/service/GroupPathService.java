@@ -22,7 +22,7 @@ public class GroupPathService {
     private static final String EXCLUDE = "exclude";
     private static final String INCLUDE = "include";
     private static final String OWNERS = "owners";
-    private static final String RESULT = "SUCCESS";
+    private static final String RESULT_CODE_SUCCESS = "SUCCESS";
 
     public GroupPathService(GrouperService grouperService) {
             this.grouperService = grouperService;
@@ -130,14 +130,14 @@ public class GroupPathService {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals(RESULT) && isGroupExtension(extension));
+        return (result.equals(RESULT_CODE_SUCCESS) && isGroupExtension(extension));
     }
 
     private boolean isGroupPath(Group group, String expectedExtension) {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals(RESULT) && isGroupExtension(extension) && isGroupExtension(expectedExtension)
+        return (result.equals(RESULT_CODE_SUCCESS) && isGroupExtension(extension) && isGroupExtension(expectedExtension)
                 && expectedExtension.equals(extension));
     }
 
@@ -145,7 +145,7 @@ public class GroupPathService {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals(RESULT) && !isGroupExtension(extension));
+        return (result.equals(RESULT_CODE_SUCCESS) && !isGroupExtension(extension));
     }
 
     private boolean isGroupExtension(String extension) {
