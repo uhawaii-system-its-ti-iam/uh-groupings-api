@@ -134,8 +134,8 @@ public class GroupingsService {
     /**
      * A list of group paths, filtered by the predicate, in which the uhIdentifier is listed.
      */
-    public List<String> groupPaths(String currentUser, Predicate<String> predicate) {
-        return allGroupPaths(currentUser).stream().filter(predicate).collect(Collectors.toList());
+    public List<String> groupPaths(String uhIdentifier, Predicate<String> predicate) {
+        return allGroupPaths(uhIdentifier).stream().filter(predicate).collect(Collectors.toList());
     }
 
     /**
@@ -172,10 +172,10 @@ public class GroupingsService {
     }
 
     /**
-     * A list of all group paths, in which the currentUser is listed..
+     * A list of all group paths, in which the uhIdentifier is listed..
      */
-    public List<String> allGroupPaths(String currentUser) {
-        List<Group> groups = grouperService.getGroupsResults(currentUser).getGroups();
+    public List<String> allGroupPaths(String uhIdentifier) {
+        List<Group> groups = grouperService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
     }
 }

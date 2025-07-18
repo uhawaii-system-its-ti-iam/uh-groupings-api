@@ -232,11 +232,11 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Get all groups that a currentUser is listed in.
+     * Get all groups that a uhIdentifier is listed in.
      */
-    public GetGroupsResults getGroupsResults(String currentUser) {
+    public GetGroupsResults getGroupsResults(String uhIdentifier) {
         return exec.execute(new GetGroupsCommand()
-                .addUhIdentifier(currentUser)
+                .addUhIdentifier(uhIdentifier)
                 .query(""));
     }
 

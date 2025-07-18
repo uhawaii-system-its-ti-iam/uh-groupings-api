@@ -692,9 +692,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void hasAdminPrivsTest() throws Exception {
-        String url = API_BASE_URL + "members/is-admin";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
+        String url = API_BASE_URL + "members/" + ADMIN + "/is-admin";
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
@@ -702,9 +701,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void hasOwnerPrivsTest() throws Exception {
-        String url = API_BASE_URL + "members/is-owner";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
+        String url = API_BASE_URL + "members/" + ADMIN + "/is-owner";
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));
@@ -712,9 +710,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void hasGroupingOwnerPrivsTest() throws Exception {
-        String url = API_BASE_URL + "members/" + GROUPING + "/is-owner";
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
+        String url = API_BASE_URL + "members/" + GROUPING + "/" + ADMIN + "/is-owner";
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Boolean.class));

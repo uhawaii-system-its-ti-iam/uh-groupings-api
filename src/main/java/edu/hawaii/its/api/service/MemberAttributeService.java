@@ -107,13 +107,13 @@ public class MemberAttributeService {
     /**
      * Get the number of groupings a user owns, by uid or uhUuid.
      */
-    public Integer numberOfGroupings(String currentUser) {
-        logger.debug(String.format("numberOfGroupings; currentUser: %s;", currentUser));
-        return groupingsService.groupPaths(currentUser, pathHasOwner()).size();
+    public Integer numberOfGroupings(String uhIdentifier) {
+        logger.debug(String.format("numberOfGroupings; uhIdentifier: %s;", uhIdentifier));
+        return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
     }
 
-    public Integer numberOfGroupings(String currentUser, String groupPath) {
-        logger.debug(String.format("numberOfGroupings; currentUser: %s;", currentUser));
-        return groupingsService.groupPaths(currentUser, pathHasOwner()).size();
+    public Integer numberOfGroupings(String uhIdentifier, String groupPath) {
+        logger.debug(String.format("numberOfGroupings; uhIdentifier: %s;", uhIdentifier));
+        return groupingsService.groupPaths(uhIdentifier, pathHasOwner()).size();
     }
 }

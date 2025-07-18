@@ -831,35 +831,30 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void hasOwnerPrivsTest() throws Exception {
         given(memberService.isOwner(CURRENT_USER)).willReturn(false);
-
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-owner")
-                        .header("current_user", CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-owner"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
-        verify(memberService, times(1)).isOwner(CURRENT_USER);
+        verify(memberService, times(1))
+                .isOwner(CURRENT_USER);
     }
 
     @Test
     public void hasGroupingOwnerPrivsTest() throws Exception {
         String groupingPath = "grouping-path";
-
         given(memberService.isOwner(groupingPath, CURRENT_USER)).willReturn(false);
-
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + groupingPath + "/is-owner")
-                        .header("current_user", CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + groupingPath + "/" + CURRENT_USER + "/is-owner"))
                 .andExpect(status().isOk())
                 .andReturn();
-
         assertNotNull(result);
-        verify(memberService, times(1)).isOwner(groupingPath, CURRENT_USER);
+        verify(memberService, times(1))
+                .isOwner(groupingPath, CURRENT_USER);
     }
 
     @Test
     public void hasAdminPrivsTest() throws Exception {
         given(memberService.isAdmin(CURRENT_USER)).willReturn(false);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/is-admin")
-                .header("current_user", CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-admin"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
@@ -880,7 +875,7 @@ public class GroupingsRestControllerv2_1Test {
         }
         given(memberAttributeService.numberOfGroupings(owner)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
+        mockMvc.perform(get(API_BASE + "/owners/groupings/count")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
