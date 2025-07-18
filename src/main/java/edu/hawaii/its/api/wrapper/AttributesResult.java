@@ -24,6 +24,9 @@ public class AttributesResult {
 
     public String getDescription() {
         String description = this.wsAttributeDefName.getDescription();
+        if (description != null && description.contains("Google-Group")) {
+            description = description.replace("Google-Group", "Google Group");
+        }
         return description != null ? description : "";
     }
 

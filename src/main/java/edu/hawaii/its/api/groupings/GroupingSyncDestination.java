@@ -24,6 +24,9 @@ public class GroupingSyncDestination {
     }
 
     public String getTooltip() {
+        if (tooltip != null && tooltip.contains("GOOGLE-GROUP")) {
+            return tooltip.replace("GOOGLE-GROUP", "Google Group");
+        }
         return tooltip;
     }
 
