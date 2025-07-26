@@ -90,6 +90,44 @@ public class MembershipService {
         return new MembershipResults(memberships);
     }
 
+    /**
+     * Get a list of memberships pertaining to the currentUser. A list of memberships is made up from the groups listings of
+     * (basis + include) - exclude.
+     */
+    public MembershipResults membershipResults(String currentUser) {
+        logger.info(String.format("membershipResults; currentUser: %s;", currentUser));
+
+        String uhUuid = subjectService.getValidUhUuid(currentUser);
+        if (uhUuid.equals("")) {
+            throw new UhIdentifierNotFoundException(currentUser);
+        }
+        // Get all basis, include and exclude paths from grouper.
+        List<String> basisIncludeExcludePaths =
+                groupingsService.groupPaths(currentUser, pathHasBasis().or(pathHasInclude().or(pathHasExclude())));
+        // Get all basis and include paths to check the opt-out attribute.
+        List<String> basisAndInclude =
+                groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasBasis().or(pathHasInclude()));
+        // Get all exclude paths for the disjoint.
+        List<String> excludePaths = groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasExclude());
+        // The disjoint of basis plus include and exclude: (Basis + Include) - Exclude
+        List<String> groupingMembershipPaths = disjoint(parentGroupingPaths(basisIncludeExcludePaths),
+                parentGroupingPaths(excludePaths));
+        // A list of all group paths, in which the uhIdentifier is listed (including curated groupings), so we can find the intersection with curated groupings
+        List<String> trioAndCuratedGroupingsPaths = groupingsService.allGroupPaths(currentUser);
+        // The list of all curated groupings
+        List<String> curatedGroupingsPaths = groupingsService.curatedGroupings();
+        // Intersect the two lists so groupAndCuratedGroupingsPaths is all curated paths the uhIdentifier is listed
+        curatedGroupingsPaths.retainAll(trioAndCuratedGroupingsPaths);
+        // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
+        List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
+        // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
+        List<String> optOutList = groupingsService.optOutEnabledGroupingPaths(parentGroupingPaths(basisAndInclude));
+
+        List<MembershipResult> memberships =
+                createMemberships(membershipGroupings, optOutList, curatedGroupingsPaths);
+        return new MembershipResults(memberships);
+    }
+
     private List<MembershipResult> createMemberships(List<Group> membershipGroupings, List<String> optOutList,
             List<String> curatedGroupingsPaths) {
         List<MembershipResult> memberships = new ArrayList<>();
@@ -190,8 +228,8 @@ public class MembershipService {
     /**
      * Get the number of memberships.
      */
-    public Integer numberOfMemberships(String currentUser, String uid) {
-        logger.debug(String.format("numberOfMemberships; currentUser: %s; uid: %s;", currentUser, uid));
-        return membershipResults(currentUser, uid).getResults().size();
+    public Integer numberOfMemberships(String currentUser) {
+        logger.debug(String.format("numberOfMemberships; currentUser: %s;", currentUser));
+        return membershipResults(currentUser).getResults().size();
     }
 }

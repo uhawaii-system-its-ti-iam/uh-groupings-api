@@ -700,14 +700,13 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of memberships the current user has
      */
-    @GetMapping(value = "/members/{uhIdentifier:[\\w-:.<>]+}/memberships/count")
+    @GetMapping(value = "/members/memberships/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                          @PathVariable String uhIdentifier) {
+    public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST getNumberOfMemberships...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.numberOfMemberships(currentUser, uhIdentifier));
+                .body(membershipService.numberOfMemberships(currentUser));
     }
 
     /**
