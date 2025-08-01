@@ -669,9 +669,9 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.addGroupingPath(new GroupingPath(path, description));
 
-        given(memberAttributeService.getOwnedGroupings(admin, uid))
+        given(memberAttributeService.getOwnedGroupings(admin))
                 .willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+        mockMvc.perform(get(API_BASE + "/owners/groupings")
                         .header(CURRENT_USER, admin)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.groupingPaths[0].path").value(path))
@@ -679,7 +679,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.groupingPaths[0].description").value("description"));
 
         verify(memberAttributeService, times(1))
-                .getOwnedGroupings(admin, uid);
+                .getOwnedGroupings(admin);
     }
 
     @Test
@@ -705,24 +705,24 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void addGroupPathOwnersTest() throws Exception {
-        List<String> pathOwnersToAdd = new ArrayList<>();
+    public void addOwnerGroupingsTest() throws Exception {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
         GroupingAddResults groupingAddResults = new GroupingAddResults();
-        pathOwnersToAdd.add("tmp:tst04name:groupPath04");
-        pathOwnersToAdd.add("tmp:tst05name:groupPath05");
-        pathOwnersToAdd.add("tmp:tst06name:groupPath06");
+        ownerGroupingsToAdd.add("tmp:tst04name:groupPath04");
+        ownerGroupingsToAdd.add("tmp:tst05name:groupPath05");
+        ownerGroupingsToAdd.add("tmp:tst06name:groupPath06");
 
-        given(updateMemberService.addGroupPathOwnerships(UID, "grouping", pathOwnersToAdd))
+        given(updateMemberService.addOwnerGroupingOwnerships(UID, "grouping", ownerGroupingsToAdd))
                 .willReturn(groupingAddResults);
 
-        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/path-owner/" + String.join(",", pathOwnersToAdd))
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/owner-grouping/" + String.join(",", ownerGroupingsToAdd))
                         .header(CURRENT_USER, UID))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThat(result, notNullValue());
         verify(updateMemberService, times(1))
-                .addGroupPathOwnerships(UID, "grouping", pathOwnersToAdd);
+                .addOwnerGroupingOwnerships(UID, "grouping", ownerGroupingsToAdd);
     }
 
     @Test
@@ -747,24 +747,24 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
-    public void removeGroupPathOwnersTest() throws Exception {
-        List<String> pathOwnersToAdd = new ArrayList<>();
+    public void removeOwnerGroupingsTest() throws Exception {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
-        pathOwnersToAdd.add("tmp:tst04name:groupPath04");
-        pathOwnersToAdd.add("tmp:tst05name:groupPath05");
-        pathOwnersToAdd.add("tmp:tst06name:groupPath06");
+        ownerGroupingsToAdd.add("tmp:tst04name:groupPath04");
+        ownerGroupingsToAdd.add("tmp:tst05name:groupPath05");
+        ownerGroupingsToAdd.add("tmp:tst06name:groupPath06");
 
-        given(updateMemberService.removeOwnerships(UID, "grouping", pathOwnersToAdd))
+        given(updateMemberService.removeOwnerships(UID, "grouping", ownerGroupingsToAdd))
                 .willReturn(groupingRemoveResults);
 
         MvcResult result =
-                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/path-owner/" + String.join(",", pathOwnersToAdd))
+                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/owner-grouping/" + String.join(",", ownerGroupingsToAdd))
                                 .header(CURRENT_USER, UID))
                         .andExpect(status().isOk())
                         .andReturn();
         assertNotNull(result);
         verify(updateMemberService, times(1))
-                .removeGroupPathOwnerships(UID, "grouping", pathOwnersToAdd);
+                .removeOwnerGroupingOwnerships(UID, "grouping", ownerGroupingsToAdd);
     }
 
     @Test
@@ -873,13 +873,13 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 10; i++) {
             groupingPathList.add(new GroupingPath(path));
         }
-        given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
+        given(memberAttributeService.numberOfGroupings(owner)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
+        mockMvc.perform(get(API_BASE + "/owners/groupings/count")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
-                .numberOfGroupings(owner, uid);
+                .numberOfGroupings(owner);
     }
 
     @Test

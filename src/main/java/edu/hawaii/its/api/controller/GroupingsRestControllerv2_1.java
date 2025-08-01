@@ -485,15 +485,14 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings by uid or uhUuid.
+     * Get a current user's owned groupings
      */
-    @GetMapping("/owners/{uhIdentifier:[\\w-:.]+}/groupings")
-    public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                             @PathVariable String uhIdentifier) {
+    @GetMapping("/owners/groupings")
+    public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST ownerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.getOwnedGroupings(currentUser, uhIdentifier));
+                .body(memberAttributeService.getOwnedGroupings(currentUser));
     }
 
     /**
@@ -510,16 +509,16 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add new path owners.
+     * Update grouping to add new owner-groupings.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
-    public ResponseEntity<GroupingAddResults> addGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-grouping/{ownerGroupings}")
+    public ResponseEntity<GroupingAddResults> addOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
-                                                        @PathVariable List<String> pathOwners) {
-        logger.info("Entered REST addGroupPathOwners...");
+                                                        @PathVariable List<String> ownerGroupings) {
+        logger.info("Entered REST addOwnerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addGroupPathOwnerships(currentUser, path, pathOwners));
+                .body(updateMemberService.addOwnerGroupingOwnerships(currentUser, path, ownerGroupings));
     }
 
 
@@ -538,16 +537,16 @@ public class GroupingsRestControllerv2_1 {
 
 
     /**
-     * Delete grouping group path owners.
+     * Delete grouping owner-groupings.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
-    public ResponseEntity<GroupingRemoveResults> removeGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-grouping/{ownerGroupings}")
+    public ResponseEntity<GroupingRemoveResults> removeOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String path,
-                                                              @PathVariable List<String> pathOwners) {
-        logger.info("Entered REST removeGroupPathOwners");
+                                                              @PathVariable List<String> ownerGroupings) {
+        logger.info("Entered REST removeOwnerGroupings");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.removeGroupPathOwnerships(currentUser, path, pathOwners));
+                .body(updateMemberService.removeOwnerGroupingOwnerships(currentUser, path, ownerGroupings));
     }
 
     /**
@@ -689,14 +688,13 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get the number of groupings that the current user owns
      */
-    @GetMapping(value = "/owners/{uhIdentifier:[\\w-:.]+}/groupings/count")
+    @GetMapping(value = "/owners/groupings/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                        @PathVariable String uhIdentifier) {
+    public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.numberOfGroupings(currentUser, uhIdentifier));
+                .body(memberAttributeService.numberOfGroupings(currentUser));
     }
 
     /**
