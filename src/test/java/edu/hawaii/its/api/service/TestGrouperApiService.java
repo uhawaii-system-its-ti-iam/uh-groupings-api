@@ -299,26 +299,26 @@ public class TestGrouperApiService {
 
     @Test
     public void getImmediateMembers() {
-        grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        grouperService.addOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
         GetMembersResult immediateMembers = grouperService.getImmediateMembers(ADMIN, GROUPING_OWNERS);
         assertNotNull(immediateMembers);
         assertEquals("SUCCESS", immediateMembers.getResultCode());
         SubjectsResults subjectsResults = grouperService.getSubjects(GROUPING_OWNERS, GROUPING_SINGLE);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
-        grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        grouperService.removeOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
     }
 
     @Test
     public void getAllMembers() {
-        grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        grouperService.addOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
         GetMembersResult allMembers = grouperService.getAllMembers(ADMIN, GROUPING_OWNERS);
         assertNotNull(allMembers);
         assertEquals("SUCCESS", allMembers.getResultCode());
         SubjectsResults subjectsResults = grouperService.getSubjects(GROUPING_OWNERS, GROUPING_SINGLE);
         assertNotNull(subjectsResults);
         assertEquals("SUCCESS", subjectsResults.getResultCode());
-        grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
+        grouperService.removeOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING_SINGLE));
     }
 
     @Test
@@ -516,19 +516,19 @@ public class TestGrouperApiService {
     @Test
     public void addRemovePathOwners() {
         // With Group Path.
-        AddMembersResults addMembersResults = grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
+        AddMembersResults addMembersResults = grouperService.addOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS", addMembersResults.getResultCode());
 
-        RemoveMembersResults removeMembersResults = grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
+        RemoveMembersResults removeMembersResults = grouperService.removeOwnerGroupings(ADMIN, GROUPING_OWNERS, Collections.singletonList(GROUPING));
         assertNotNull(removeMembersResults);
         assertEquals("SUCCESS", removeMembersResults.getResultCode());
 
-        // Add and Remove duplicated group path owners
-        addMembersResults = grouperService.addGroupPathOwners(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
+        // Add and Remove duplicated owner-groupings
+        addMembersResults = grouperService.addOwnerGroupings(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
         assertNotNull(addMembersResults);
         assertEquals("SUCCESS_ALREADY_EXISTED", addMembersResults.getResults().get(addMembersResults.getResults().size()-1).getResultCode());
-        removeMembersResults = grouperService.removeGroupPathOwners(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
+        removeMembersResults = grouperService.removeOwnerGroupings(ADMIN, GROUPING_OWNERS, Arrays.asList(GROUPING, GROUPING));
         assertNotNull(removeMembersResults);
         assertEquals("SUCCESS_WASNT_IMMEDIATE", removeMembersResults.getResults().get(removeMembersResults.getResults().size()-1).getResultCode());
     }

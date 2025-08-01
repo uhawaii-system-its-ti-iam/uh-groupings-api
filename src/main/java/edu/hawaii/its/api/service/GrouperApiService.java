@@ -318,13 +318,13 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Add multiple path owners to a group owner listing.
+     * Add multiple owner-groupings to a group owner listing.
      */
-    public AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners) {
+    public AddMembersResults addOwnerGroupings(String currentUser, String groupPath, List<String> ownerGroupings) {
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addGroupPathOwners(groupPathOwners));
+                .addOwnerGroupings(ownerGroupings));
     }
 
     /**
@@ -348,14 +348,14 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Remove multiple path owners from a group owner listing.
+     * Remove multiple owner-groupings from a group owner listing.
      */
-    public RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath,
-            List<String> groupPathOwners) {
+    public RemoveMembersResults removeOwnerGroupings(String currentUser, String groupPath,
+            List<String> ownerGroupings) {
         return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addGroupPathOwners(groupPathOwners));
+                .addOwnerGroupings(ownerGroupings));
     }
 
     /**

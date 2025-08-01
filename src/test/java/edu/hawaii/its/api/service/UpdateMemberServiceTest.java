@@ -135,7 +135,7 @@ public class UpdateMemberServiceTest {
         assertNotNull(updateMemberService.addOwnerships(TEST_UIDS.get(0), groupPath, TEST_UIDS));
     }
 
-    // TODO: missing test for addGroupPathOwnerships()
+    // TODO: missing test for addOwnerGroupingOwnerships()
 
     @Test
     public void addOwnershipTest() {
