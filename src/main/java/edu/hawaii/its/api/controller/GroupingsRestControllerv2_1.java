@@ -485,7 +485,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get an owner's owned groupings by uid or uhUuid.
+     * Get a current user's owned groupings
      */
     @GetMapping("/owners/groupings")
     public ResponseEntity<GroupingPaths> ownerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
