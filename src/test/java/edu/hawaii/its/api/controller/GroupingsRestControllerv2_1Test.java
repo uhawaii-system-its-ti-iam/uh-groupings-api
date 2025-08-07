@@ -669,9 +669,9 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.addGroupingPath(new GroupingPath(path, description));
 
-        given(memberAttributeService.getOwnedGroupings(admin, uid))
+        given(memberAttributeService.getOwnedGroupings(admin))
                 .willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/owners/grouping/groupings")
+        mockMvc.perform(get(API_BASE + "/owners/groupings")
                         .header(CURRENT_USER, admin)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.groupingPaths[0].path").value(path))
@@ -679,7 +679,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.groupingPaths[0].description").value("description"));
 
         verify(memberAttributeService, times(1))
-                .getOwnedGroupings(admin, uid);
+                .getOwnedGroupings(admin);
     }
 
     @Test
@@ -873,13 +873,13 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 10; i++) {
             groupingPathList.add(new GroupingPath(path));
         }
-        given(memberAttributeService.numberOfGroupings(owner, uid)).willReturn(10);
+        given(memberAttributeService.numberOfGroupings(owner)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/" + uid + "/groupings/count")
+        mockMvc.perform(get(API_BASE + "/owners/groupings/count")
                         .header(CURRENT_USER, owner))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
-                .numberOfGroupings(owner, uid);
+                .numberOfGroupings(owner);
     }
 
     @Test
