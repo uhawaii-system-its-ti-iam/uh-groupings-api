@@ -232,7 +232,7 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Get all groups that a UH identifier is listed in.
+     * Get all groups that a uhIdentifier is listed in.
      */
     public GetGroupsResults getGroupsResults(String uhIdentifier) {
         return exec.execute(new GetGroupsCommand()
