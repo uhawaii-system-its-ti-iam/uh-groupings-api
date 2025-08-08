@@ -923,17 +923,17 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
-        String uid = "uid";
-        given(membershipService.numberOfMemberships(ADMIN, uid))
+        String currentUser = "uid";
+        given(membershipService.numberOfMemberships(currentUser))
                 .willReturn(369);
 
-        mockMvc.perform(get(API_BASE + "/members/" + uid + "/memberships/count")
-                        .header(CURRENT_USER, ADMIN))
+        mockMvc.perform(get(API_BASE + "/members/memberships/count")
+                        .header(CURRENT_USER, currentUser))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
 
         verify(membershipService, times(1))
-                .numberOfMemberships(ADMIN, uid);
+                .numberOfMemberships(currentUser);
     }
 
     @Test

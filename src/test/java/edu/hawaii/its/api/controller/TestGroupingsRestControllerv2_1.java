@@ -729,9 +729,9 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
-        String url = API_BASE_URL + "/members/" + testUids.get(0) + "/memberships/count";
+        String url = API_BASE_URL + "/members/memberships/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
-                        .header(CURRENT_USER, ADMIN))
+                        .header(CURRENT_USER, testUids.get(0)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
