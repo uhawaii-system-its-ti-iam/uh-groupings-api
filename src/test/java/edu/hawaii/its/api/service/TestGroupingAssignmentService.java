@@ -62,11 +62,17 @@ public class TestGroupingAssignmentService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    @Value("${groupings.api.test.owner_grouping}")
+    private String OWNER_GROUPING;
+
     @Autowired
     private GroupingAttributeService groupingAttributeService;
 
     @Autowired
     private GroupingAssignmentService groupingAssignmentService;
+
+    @Autowired
+    private GroupingOwnerService groupingOwnerService;
 
     @Autowired
     private GrouperService grouperService;
@@ -197,6 +203,7 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void groupingImmediateOwners() {
+        //Person
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
@@ -209,10 +216,24 @@ public class TestGroupingAssignmentService {
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+
+        //Owner-Grouping
+        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
+        assertNotNull(ownersWithGroup);
+        assertTrue(ownersWithGroup.getOwners().getMembers().stream()
+                        .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
+
+        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
+        assertNotNull(ownersWithGroup);
+        assertFalse(ownersWithGroup.getOwners().getMembers().stream()
+                .anyMatch(member -> OWNER_GROUPING.equals(member.getName())));
     }
 
     @Test
     public void groupingAllOwners() {
+        // Person
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
@@ -225,16 +246,37 @@ public class TestGroupingAssignmentService {
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+
+        //Owner-Grouping
+        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        GroupingOwnerMembers afterRemove = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        assertNotNull(afterRemove);
+        assertFalse(afterRemove.getOwners().getMembers().stream()
+                .anyMatch(member -> OWNER_GROUPING.equals(member.getUid())));
+
+        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        assertNotNull(ownersWithGroup);
+        assertTrue(ownersWithGroup.getOwners().getMembers().stream()
+                .anyMatch(member -> OWNER_GROUPING.equals(member.getName())));
+        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+
     }
 
-    // TODO: these needs to be enhanced by adding an actual grouping with fixed owners as path owners.
     @Test
     public void numberOfImmediateOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
+        //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+
+        //Owner-Grouping
+        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
     }
 
@@ -242,9 +284,20 @@ public class TestGroupingAssignmentService {
     public void numberOfAllOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         int initialOwners = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
+        int basisMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":basis");
+        int includeMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":include");
+        //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         assertEquals(initialOwners + 1, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
         assertEquals(initialOwners, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
+
+        //Owner-Grouping
+        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
+        assertEquals(initialOwners + basisMembers + includeMembers + 1, afterAdd);
+        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        int afterRemove = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
+        assertEquals(initialOwners, afterRemove);
     }
 }
