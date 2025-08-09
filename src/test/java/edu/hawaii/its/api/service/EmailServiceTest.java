@@ -11,7 +11,6 @@ import static org.mockito.Mockito.doThrow;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
