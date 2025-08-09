@@ -14,6 +14,7 @@ public class GroupingMember {
     private final String firstName;
     private final String lastName;
     private String whereListed;
+    private static final String MEMBER = "IS_MEMBER";
 
     public GroupingMember(GroupingGroupMember groupingGroupMember, String whereListed) {
         this.name = groupingGroupMember.getName();
@@ -77,15 +78,15 @@ public class GroupingMember {
     }
 
     private void setWhereListed(HasMemberResult hasMemberResult, String groupingExtension) {
-        this.whereListed = hasMemberResult.getResultCode().equals("IS_MEMBER")
+        this.whereListed = hasMemberResult.getResultCode().equals(MEMBER)
                 ? StringUtils.capitalize(groupingExtension)
                 : "";
     }
 
     private void setWhereListed(HasMemberResult hasMemberResult1, String groupingExtension1,
             HasMemberResult hasMemberResult2, String groupingExtension2) {
-        boolean isGroupingExtension1 = hasMemberResult1.getResultCode().equals("IS_MEMBER");
-        boolean isGroupingExtension2 = hasMemberResult2.getResultCode().equals("IS_MEMBER");
+        boolean isGroupingExtension1 = hasMemberResult1.getResultCode().equals(MEMBER);
+        boolean isGroupingExtension2 = hasMemberResult2.getResultCode().equals(MEMBER);
 
         if (!isGroupingExtension1 && !isGroupingExtension2) {
             this.whereListed = "";
