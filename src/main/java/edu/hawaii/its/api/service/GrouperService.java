@@ -75,13 +75,13 @@ public interface GrouperService {
 
     AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers);
 
-    AddMembersResults addGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners);
+    AddMembersResults addOwnerGroupings(String currentUser, String groupPath, List<String> ownerGroupings);
 
     RemoveMemberResult removeMember(String currentUser, String groupPath, String uhIdentifier);
 
     RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers);
 
-    RemoveMembersResults removeGroupPathOwners(String currentUser, String groupPath, List<String> groupPathOwners);
+    RemoveMembersResults removeOwnerGroupings(String currentUser, String groupPath, List<String> ownerGroupings);
 
     AddMembersResults resetGroupMembers(String groupPath);
 
