@@ -108,21 +108,21 @@ public class UpdateMemberService {
         return addOwner(currentUser, groupingPath, validIdentifier);
     }
 
-    public GroupingAddResults addGroupPathOwnerships(String currentUser, String groupingPath,
-            List<String> groupPathOwners) {
-        // TODO: should we also check if groupPathOwners are valid paths?
+    public GroupingAddResults addOwnerGroupingOwnerships(String currentUser, String groupingPath,
+            List<String> ownerGroupings) {
+        // TODO: should we also check if OwnerGroupings are valid paths?
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
 
         // Check that owner limit will not be exceeded after addition.
         Integer ownerCount = groupingAssignmentService.numberOfAllOwners(currentUser, groupingPath);
-        for (String path: groupPathOwners) {
+        for (String path: ownerGroupings) {
             ownerCount += groupingOwnerService.numberOfGroupingMembers(currentUser, path);
         }
         if (ownerCount > OWNERS_LIMIT) {
             throw new OwnerLimitExceededException();
         }
-        return addGroupPathOwners(currentUser, groupingPath, groupPathOwners);
+        return addOwnerGroupings(currentUser, groupingPath, ownerGroupings);
     }
 
     public GroupingRemoveResults removeOwnerships(String currentUser, String groupingPath,
@@ -146,13 +146,13 @@ public class UpdateMemberService {
         return removeOwner(currentUser, groupingPath, validIdentifier);
     }
 
-    public GroupingRemoveResults removeGroupPathOwnerships(String currentUser, String groupingPath,
-            List<String> groupPathOwners) {
+    public GroupingRemoveResults removeOwnerGroupingOwnerships(String currentUser, String groupingPath,
+            List<String> ownerGroupings) {
         log.info(String.format("removeGroupPathOwnerships; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
-                currentUser, groupingPath, groupPathOwners));
+                currentUser, groupingPath, ownerGroupings));
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        return removeGroupPathOwners(currentUser, groupingPath, groupPathOwners);
+        return removeOwnerGroupings(currentUser, groupingPath, ownerGroupings);
     }
 
     public GroupingMoveMembersResult addIncludeMembers(String currentUser, String groupingPath,
@@ -456,11 +456,11 @@ public class UpdateMemberService {
         return result;
     }
 
-    private GroupingAddResults addGroupPathOwners(String currentUser, String groupingPath,
-            List<String> groupPathOwners) {
+    private GroupingAddResults addOwnerGroupings(String currentUser, String groupingPath,
+            List<String> ownerGroupings) {
         AddMembersResults addMembersResults =
-                grouperService.addGroupPathOwners(currentUser, groupingPath + GroupType.OWNERS.value(),
-                        groupPathOwners);
+                grouperService.addOwnerGroupings(currentUser, groupingPath + GroupType.OWNERS.value(),
+                        ownerGroupings);
         GroupingAddResults results = new GroupingAddResults(addMembersResults);
         if (grouperService instanceof GrouperApiService) {
             timestampService.update(results);
@@ -488,11 +488,11 @@ public class UpdateMemberService {
         return result;
     }
 
-    private GroupingRemoveResults removeGroupPathOwners(String currentUser, String groupingPath,
-            List<String> groupPathOwners) {
+    private GroupingRemoveResults removeOwnerGroupings(String currentUser, String groupingPath,
+            List<String> ownerGroupings) {
         RemoveMembersResults removeMembersResults =
-                grouperService.removeGroupPathOwners(currentUser, groupingPath + GroupType.OWNERS.value(),
-                        groupPathOwners);
+                grouperService.removeOwnerGroupings(currentUser, groupingPath + GroupType.OWNERS.value(),
+                        ownerGroupings);
         GroupingRemoveResults results = new GroupingRemoveResults(removeMembersResults);
         if (grouperService instanceof GrouperApiService) {
             timestampService.update(results);
