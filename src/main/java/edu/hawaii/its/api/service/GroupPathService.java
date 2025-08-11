@@ -18,6 +18,12 @@ public class GroupPathService {
 
     private final GrouperService grouperService;
 
+    private static final String BASIS = "basis";
+    private static final String EXCLUDE = "exclude";
+    private static final String INCLUDE = "include";
+    private static final String OWNERS = "owners";
+    private static final String RESULT_CODE_SUCCESS = "SUCCESS";
+
     public GroupPathService(GrouperService grouperService) {
             this.grouperService = grouperService;
     }
@@ -48,22 +54,22 @@ public class GroupPathService {
 
     public boolean isBasisGroupPath(String path) {
         Group group = getGroup(path);
-        return isGroupPath(group, "basis");
+        return isGroupPath(group, BASIS);
     }
 
     public boolean isIncludeGroupPath(String path) {
         Group group = getGroup(path);
-        return isGroupPath(group, "include");
+        return isGroupPath(group, INCLUDE);
     }
 
     public boolean isExcludeGroupPath(String path) {
         Group group = getGroup(path);
-        return isGroupPath(group, "exclude");
+        return isGroupPath(group, EXCLUDE);
     }
 
     public boolean isOwnersGroupPath(String path) {
         Group group = getGroup(path);
-        return isGroupPath(group, "owners");
+        return isGroupPath(group, OWNERS);
     }
 
     public String getGroupingPath(String groupPath) {
@@ -80,22 +86,22 @@ public class GroupPathService {
 
     public String getIncludeGroup(String path) {
         Group group = getGroup(path);
-        return replaceGroup("include", group);
+        return replaceGroup(INCLUDE, group);
     }
 
     public String getExcludeGroup(String path) {
         Group group = getGroup(path);
-        return replaceGroup("exclude", group);
+        return replaceGroup(EXCLUDE, group);
     }
 
     public String getBasisGroup(String path) {
         Group group = getGroup(path);
-        return replaceGroup("basis", group);
+        return replaceGroup(BASIS, group);
     }
 
     public String getOwnersGroup(String path) {
         Group group = getGroup(path);
-        return replaceGroup("owners", group);
+        return replaceGroup(OWNERS, group);
     }
 
     public List<String> getGroupPaths(String groupingPath) {
@@ -124,14 +130,14 @@ public class GroupPathService {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals("SUCCESS") && isGroupExtension(extension));
+        return (result.equals(RESULT_CODE_SUCCESS) && isGroupExtension(extension));
     }
 
     private boolean isGroupPath(Group group, String expectedExtension) {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals("SUCCESS") && isGroupExtension(extension) && isGroupExtension(expectedExtension)
+        return (result.equals(RESULT_CODE_SUCCESS) && isGroupExtension(extension) && isGroupExtension(expectedExtension)
                 && expectedExtension.equals(extension));
     }
 
@@ -139,7 +145,7 @@ public class GroupPathService {
         String extension = group.getExtension();
         String result = group.getResultCode();
 
-        return (result.equals("SUCCESS") && !isGroupExtension(extension));
+        return (result.equals(RESULT_CODE_SUCCESS) && !isGroupExtension(extension));
     }
 
     private boolean isGroupExtension(String extension) {
@@ -148,18 +154,18 @@ public class GroupPathService {
     }
 
     private boolean isOwnerExtension(String extension) {
-        return extension.equals("owners");
+        return extension.equals(OWNERS);
     }
 
     private boolean isIncludeExtension(String extension) {
-        return extension.equals("include");
+        return extension.equals(INCLUDE);
     }
 
     private boolean isExcludeExtension(String extension) {
-        return extension.equals("exclude");
+        return extension.equals(EXCLUDE);
     }
 
     private boolean isBasisExtension(String extension) {
-        return extension.equals("basis");
+        return extension.equals(BASIS);
     }
 }
