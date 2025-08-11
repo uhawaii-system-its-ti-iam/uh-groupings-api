@@ -28,6 +28,8 @@ import edu.hawaii.its.api.type.ApiError;
 public class ErrorControllerAdvice {
     private final EmailService emailService;
 
+    private static final String RESULT_CODE_FAILURE = "FAILURE";
+
     public ErrorControllerAdvice(EmailService emailService) {
         this.emailService = emailService;
     }
@@ -46,7 +48,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access Denied Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(ade))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -63,7 +65,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_FOUND)
                 .message("Illegal Argument Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(iae))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -82,7 +84,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .message("Http Request Method Not Supported Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(hrmnse))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -100,7 +102,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Runtime Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(e))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -118,7 +120,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Mail service exception")
                 .stackTrace(ExceptionUtils.getStackTrace(me))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -136,7 +138,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_IMPLEMENTED)
                 .message("Unsupported Operation Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(uoe))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -154,7 +156,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.NOT_FOUND)
                 .message("UH Member found failed")
                 .stackTrace(ExceptionUtils.getStackTrace(mnfe))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -172,7 +174,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(igpe))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -191,7 +193,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.CONFLICT)
                 .message("Owner Limit Exceeded Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(olee))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
@@ -209,7 +211,7 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.BAD_GATEWAY)
                 .message("An error occurred upstream from GrouperClient")
                 .stackTrace(ExceptionUtils.getStackTrace(ex))
-                .resultCode("FAILURE")
+                .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();
