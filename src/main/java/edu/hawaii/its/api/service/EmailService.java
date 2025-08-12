@@ -38,6 +38,8 @@ public class EmailService {
 
     private final SubjectService subjectService;
 
+    private static final String HOST = "Unknown Host";
+
     private static final String DEV_HELP_LIST_ADDRESS = "its-iam-web-app-dev-help-l@lists.hawaii.edu";
 
     public EmailService(JavaMailSender javaMailSender, SubjectService subjectService) {
@@ -57,7 +59,7 @@ public class EmailService {
             return new EmailResult();
         }
 
-        String hostname = "Unknown Host";
+        String hostname = HOST;
 
         try {
             InetAddress ip = this.getLocalHost();
@@ -106,7 +108,8 @@ public class EmailService {
             return new EmailResult();
         }
 
-        String hostname = "Unknown Host";
+        String hostname = HOST;
+
         try {
             InetAddress ip = this.getLocalHost();
             hostname = ip.getHostName();
@@ -144,7 +147,7 @@ public class EmailService {
         }
 
         InetAddress ip;
-        String hostname = "Unknown Host";
+        String hostname = HOST;
 
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
