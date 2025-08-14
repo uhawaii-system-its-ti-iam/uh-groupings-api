@@ -2,13 +2,12 @@ package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.Collections;
 import java.util.List;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;
-import edu.hawaii.its.api.wrapper.GetMembersResults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,16 +47,21 @@ public class UpdateMemberServiceTest {
     @MockitoSpyBean
     private GrouperService grouperService;
 
+    @MockitoSpyBean
+    private GroupingOwnerService groupingOwnerService;
+
+    @MockitoSpyBean
+    private UpdateTimestampService updateTimestampService;
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
 
-    @Value("${groupings.max.owner.limit}")
-    private Integer OWNER_LIMIT;
+    private final String groupPath = "group-path";
 
-    private String groupPath = "group-path";
+    private final String ownerGrouping = "owner-grouping";
 
     @Test
     public void addAdminTest() {
@@ -124,20 +128,76 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
 
+        doReturn(1).when(groupingAssignmentService).numberOfAllOwners(TEST_UIDS.get(0), groupPath);
+
         AddMembersResults addMembersResults = groupingsTestConfiguration.addMemberResultsFailureTestData();
         assertNotNull(addMembersResults);
         List<String> validIdentifiers = subjectService.getValidUhUuids(TEST_UIDS);
         doReturn(addMembersResults).when(grouperService)
                 .addMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
-        // TODO: this should be done with data harness like it is above.
-        doReturn(OWNER_LIMIT / 2).when(groupingAssignmentService)
-                .numberOfAllOwners(TEST_UIDS.get(0), groupPath);
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath, TEST_UIDS.get(0));
+        GetMembersResult getMembersResult = groupingsTestConfiguration.getMembersResultsSuccessTestData().getMembersResults().get(0);
+        doReturn(getMembersResult).when(grouperService)
+                .getAllMembers(TEST_UIDS.get(0), groupPath);
+
+        doReturn(null).when(updateTimestampService).update(any());
 
         assertNotNull(updateMemberService.addOwnerships(TEST_UIDS.get(0), groupPath, TEST_UIDS));
     }
 
-    // TODO: missing test for addOwnerGroupingOwnerships()
+    @Test
+    public void addOwnerGroupingOwnerships() {
+        FindGroupsResults findGroupsResults = groupingsTestConfiguration.findGroupsResultsDescriptionTestData();
+        assertNotNull(findGroupsResults);
+        doReturn(findGroupsResults).when(grouperService).findGroupsResults(groupPath);
+
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
+        assertNotNull(hasMembersResults);
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
+        doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
+
+        doReturn(1).when(groupingAssignmentService).numberOfAllOwners(TEST_UIDS.get(0), groupPath);
+        doReturn(1).when(groupingOwnerService).numberOfGroupingMembers(TEST_UIDS.get(0), ownerGrouping);
+
+        GetMembersResult getMembersResult = groupingsTestConfiguration.getMembersResultsSuccessTestData().getMembersResults().get(0);
+        assertNotNull(getMembersResult);
+        doReturn(getMembersResult).when(grouperService)
+                .getAllMembers(TEST_UIDS.get(0), groupPath);
+
+        AddMembersResults addMembersResults = groupingsTestConfiguration.addMemberResultsSuccessTestData();
+        assertNotNull(addMembersResults);
+        doReturn(addMembersResults).when(grouperService)
+                .addOwnerGroupings(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), List.of(ownerGrouping));
+
+        doReturn(null).when(updateTimestampService).update(any());
+
+        assertNotNull(updateMemberService.addOwnerGroupingOwnerships(TEST_UIDS.get(0), groupPath, List.of(ownerGrouping)));
+    }
+
+    @Test
+    public void removeOwnerGroupingOwnerships() {
+        FindGroupsResults findGroupsResults = groupingsTestConfiguration.findGroupsResultsDescriptionTestData();
+        assertNotNull(findGroupsResults);
+        doReturn(findGroupsResults).when(grouperService).findGroupsResults(groupPath);
+
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
+        assertNotNull(hasMembersResults);
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
+        doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
+
+        RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsSuccessTestData();
+        assertNotNull(removeMembersResults);
+        doReturn(removeMembersResults).when(grouperService)
+                .removeOwnerGroupings(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), List.of(ownerGrouping));
+
+        doReturn(null).when(updateTimestampService).update(any());
+
+        assertNotNull(updateMemberService.removeOwnerGroupingOwnerships(TEST_UIDS.get(0), groupPath, List.of(ownerGrouping)));
+    }
 
     @Test
     public void addOwnershipTest() {
