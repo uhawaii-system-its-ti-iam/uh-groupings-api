@@ -737,6 +737,21 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
+     * Get number of all owners (direct + indirect) in a grouping.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfAllOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+            @PathVariable String path) {
+
+        logger.info("Entered REST getNumberOfAllOwners...");
+
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.numberOfAllOwners(currentUser, path));
+    }
+
+    /**
      * A list of all immediate owners listed in a grouping.
      * Owners with "IMMEDIATE" filter.
      */
