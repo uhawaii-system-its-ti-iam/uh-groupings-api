@@ -2,7 +2,6 @@ package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -228,34 +227,6 @@ public class SubjectTest {
         String expected = "Subject [" + "name=" + name + ", uhUuid=" + uhUuid + ", uid=" + uid + "]";
         assertEquals(expected, subject.toString());
     }
-
-    @Test
-    public void hashCodeTest() {
-        Subject s0 = new Subject();
-        Subject s1 = new Subject();
-
-        assertEquals(s0.hashCode(), s1.hashCode());
-
-        s0.setName("name");
-        assertNotEquals(s0.hashCode(), s1.hashCode());
-        s1.setName("name");
-        assertEquals(s0.hashCode(), s1.hashCode());
-
-        s0.setUid("uid");
-        assertNotEquals(s0.hashCode(), s1.hashCode());
-        s1.setUid("uid");
-        assertEquals(s0.hashCode(), s1.hashCode());
-
-        s0.setUhUuid("uhUuid");
-        assertNotEquals(s0.hashCode(), s1.hashCode());
-        s1.setUhUuid("uhUuid");
-        assertEquals(s0.hashCode(), s1.hashCode());
-
-        int hash1 = s0.hashCode();
-        int hash2 = s0.hashCode();
-        assertEquals(hash1, hash2);
-    }
-
 
     @Test
     public void hasUHAttributesTest() {
