@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
@@ -135,6 +136,11 @@ public class Subject extends Results {
     @Override
     public String toString() {
         return "Subject [name=" + getName() + ", uhUuid=" + getUhUuid() + ", uid=" + getUid() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getUid(), getUhUuid());
     }
 
     /**
