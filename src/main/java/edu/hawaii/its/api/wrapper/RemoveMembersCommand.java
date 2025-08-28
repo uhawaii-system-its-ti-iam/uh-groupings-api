@@ -54,7 +54,7 @@ public class RemoveMembersCommand extends GrouperCommand<RemoveMembersCommand> i
         return this;
     }
 
-    public RemoveMembersCommand addGroupPathOwner(String groupPath) {
+    public RemoveMembersCommand addOwnerGrouping(String groupPath) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
         // we can check added member is a path owners when sourceId is g:gsa. That means it's a group
         wsSubjectLookup.setSubjectSourceId("g:gsa");
@@ -63,9 +63,9 @@ public class RemoveMembersCommand extends GrouperCommand<RemoveMembersCommand> i
         return this;
     }
 
-    public RemoveMembersCommand addGroupPathOwners(List<String> groupPaths) {
+    public RemoveMembersCommand addOwnerGroupings(List<String> groupPaths) {
         for(String groupPath: groupPaths){
-            addGroupPathOwner(groupPath);
+            addOwnerGrouping(groupPath);
         }
         return this;
     }
