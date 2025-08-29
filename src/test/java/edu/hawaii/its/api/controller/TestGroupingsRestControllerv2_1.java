@@ -423,7 +423,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     public void membershipResultsTest() throws Exception {
-        String url = API_BASE_URL + "members/" + ADMIN + "/memberships";
+        String url = API_BASE_URL + "members/memberships";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
