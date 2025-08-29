@@ -346,14 +346,13 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get a List of memberships as which uhIdentifier has.
      */
-    @GetMapping(value = "/members/{uhIdentifier:[\\w-:.]+}/memberships")
+    @GetMapping(value = "/members/memberships")
     @ResponseBody
-    public ResponseEntity<MembershipResults> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                              @PathVariable String uhIdentifier) {
+    public ResponseEntity<MembershipResults> membershipResults(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         logger.info("Entered REST membershipResults...");
         return ResponseEntity
                 .ok()
-                .body(membershipService.membershipResults(currentUser, uhIdentifier));
+                .body(membershipService.membershipResults(currentUser));
     }
 
     /**

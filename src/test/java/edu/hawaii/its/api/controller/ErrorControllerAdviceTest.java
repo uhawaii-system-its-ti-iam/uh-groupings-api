@@ -135,16 +135,16 @@ public class ErrorControllerAdviceTest {
         String uhIdentifier = "1234";
 
         // When current_user and uhIdentifier are the same, but uhIdentifier is not valid
-        given(membershipService.membershipResults(uhIdentifier, uhIdentifier)).willThrow(UhIdentifierNotFoundException.class);
+        given(membershipService.membershipResults(uhIdentifier)).willThrow(UhIdentifierNotFoundException.class);
 
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/{uhIdentifier}/memberships", uhIdentifier)
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships", uhIdentifier)
                         .header(CURRENT_USER, uhIdentifier))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.resultCode").value("FAILURE"))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.message").value("UH Member found failed"))
-                .andExpect(jsonPath("$.path").value("/api/groupings/v2.1/members/1234/memberships"))
+                .andExpect(jsonPath("$.path").value("/api/groupings/v2.1/members/memberships"))
                 .andExpect(jsonPath("$.stackTrace").exists())
 
                 .andReturn();

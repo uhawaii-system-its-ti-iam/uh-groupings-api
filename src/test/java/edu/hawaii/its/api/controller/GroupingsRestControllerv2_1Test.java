@@ -486,14 +486,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void membershipResultsTest() throws Exception {
         MembershipResults memberships = new MembershipResults();
-        given(membershipService.membershipResults(ADMIN, "testiwta")).willReturn(memberships);
+        given(membershipService.membershipResults("testiwta")).willReturn(memberships);
 
-        mockMvc.perform(get(API_BASE + "/members/testiwta/memberships")
-                        .header(CURRENT_USER, ADMIN))
+        mockMvc.perform(get(API_BASE + "/members/memberships")
+                        .header(CURRENT_USER, "testiwta"))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .membershipResults(ADMIN, "testiwta");
+                .membershipResults("testiwta");
     }
 
     @Test
