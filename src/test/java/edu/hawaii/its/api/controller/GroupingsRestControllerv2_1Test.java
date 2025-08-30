@@ -486,14 +486,14 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void membershipResultsTest() throws Exception {
         MembershipResults memberships = new MembershipResults();
-        given(membershipService.membershipResults(ADMIN, "testiwta")).willReturn(memberships);
+        given(membershipService.membershipResults("testiwta")).willReturn(memberships);
 
-        mockMvc.perform(get(API_BASE + "/members/testiwta/memberships")
-                        .header(CURRENT_USER, ADMIN))
+        mockMvc.perform(get(API_BASE + "/members/memberships")
+                        .header(CURRENT_USER, "testiwta"))
                 .andExpect(status().isOk());
 
         verify(membershipService, times(1))
-                .membershipResults(ADMIN, "testiwta");
+                .membershipResults("testiwta");
     }
 
     @Test
@@ -923,17 +923,17 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getNumberOfMembershipsTest() throws Exception {
-        String uid = "uid";
-        given(membershipService.numberOfMemberships(ADMIN, uid))
+        String currentUser = "uid";
+        given(membershipService.numberOfMemberships(currentUser))
                 .willReturn(369);
 
-        mockMvc.perform(get(API_BASE + "/members/" + uid + "/memberships/count")
-                        .header(CURRENT_USER, ADMIN))
+        mockMvc.perform(get(API_BASE + "/members/memberships/count")
+                        .header(CURRENT_USER, currentUser))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
 
         verify(membershipService, times(1))
-                .numberOfMemberships(ADMIN, uid);
+                .numberOfMemberships(currentUser);
     }
 
     @Test

@@ -50,22 +50,19 @@ public class MembershipService {
     }
 
     /**
-     * Get a list of memberships pertaining to uid. A list of memberships is made up from the groups listings of
+     * Get a list of memberships pertaining to the currentUser. A list of memberships is made up from the groups listings of
      * (basis + include) - exclude.
      */
-    public MembershipResults membershipResults(String currentUser, String uid) {
-        logger.info(String.format("membershipResults; currentUser: %s; uid: %s;", currentUser, uid));
+    public MembershipResults membershipResults(String currentUser) {
+        logger.info(String.format("membershipResults; currentUser: %s;", currentUser));
 
-        if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
-            throw new AccessDeniedException();
-        }
-        String uhUuid = subjectService.getValidUhUuid(uid);
+        String uhUuid = subjectService.getValidUhUuid(currentUser);
         if (uhUuid.equals("")) {
-            throw new UhIdentifierNotFoundException(uid);
+            throw new UhIdentifierNotFoundException(currentUser);
         }
         // Get all basis, include and exclude paths from grouper.
         List<String> basisIncludeExcludePaths =
-                groupingsService.groupPaths(uid, pathHasBasis().or(pathHasInclude().or(pathHasExclude())));
+                groupingsService.groupPaths(currentUser, pathHasBasis().or(pathHasInclude().or(pathHasExclude())));
         // Get all basis and include paths to check the opt-out attribute.
         List<String> basisAndInclude =
                 groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasBasis().or(pathHasInclude()));
@@ -75,7 +72,7 @@ public class MembershipService {
         List<String> groupingMembershipPaths = disjoint(parentGroupingPaths(basisIncludeExcludePaths),
                 parentGroupingPaths(excludePaths));
         // A list of all group paths, in which the uhIdentifier is listed (including curated groupings), so we can find the intersection with curated groupings
-        List<String> trioAndCuratedGroupingsPaths = groupingsService.allGroupPaths(uid);
+        List<String> trioAndCuratedGroupingsPaths = groupingsService.allGroupPaths(currentUser);
         // The list of all curated groupings
         List<String> curatedGroupingsPaths = groupingsService.curatedGroupings();
         // Intersect the two lists so groupAndCuratedGroupingsPaths is all curated paths the uhIdentifier is listed
@@ -190,8 +187,8 @@ public class MembershipService {
     /**
      * Get the number of memberships.
      */
-    public Integer numberOfMemberships(String currentUser, String uid) {
-        logger.debug(String.format("numberOfMemberships; currentUser: %s; uid: %s;", currentUser, uid));
-        return membershipResults(currentUser, uid).getResults().size();
+    public Integer numberOfMemberships(String currentUser) {
+        logger.debug(String.format("numberOfMemberships; currentUser: %s;", currentUser));
+        return membershipResults(currentUser).getResults().size();
     }
 }
