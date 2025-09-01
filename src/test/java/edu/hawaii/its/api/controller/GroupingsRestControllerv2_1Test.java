@@ -715,7 +715,7 @@ public class GroupingsRestControllerv2_1Test {
         given(updateMemberService.addOwnerGroupingOwnerships(UID, "grouping", ownerGroupingsToAdd))
                 .willReturn(groupingAddResults);
 
-        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/owner-grouping/" + String.join(",", ownerGroupingsToAdd))
+        MvcResult result = mockMvc.perform(put(API_BASE + "/groupings/grouping/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd))
                         .header(CURRENT_USER, UID))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -758,7 +758,7 @@ public class GroupingsRestControllerv2_1Test {
                 .willReturn(groupingRemoveResults);
 
         MvcResult result =
-                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/owner-grouping/" + String.join(",", ownerGroupingsToAdd))
+                mockMvc.perform(delete(API_BASE + "/groupings/grouping/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd))
                                 .header(CURRENT_USER, UID))
                         .andExpect(status().isOk())
                         .andReturn();

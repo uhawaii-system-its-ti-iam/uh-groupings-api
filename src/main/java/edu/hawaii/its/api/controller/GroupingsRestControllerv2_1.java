@@ -511,7 +511,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Update grouping to add new owner-groupings.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-grouping/{ownerGroupings}")
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
     public ResponseEntity<GroupingAddResults> addOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
                                                         @PathVariable List<String> ownerGroupings) {
@@ -539,7 +539,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Delete grouping owner-groupings.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-grouping/{ownerGroupings}")
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
     public ResponseEntity<GroupingRemoveResults> removeOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String path,
                                                               @PathVariable List<String> ownerGroupings) {
