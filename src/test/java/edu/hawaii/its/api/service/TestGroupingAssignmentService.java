@@ -218,13 +218,13 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
 
         //Owner-Grouping
-        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertTrue(ownersWithGroup.getOwners().getMembers().stream()
                         .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
 
-        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertFalse(ownersWithGroup.getOwners().getMembers().stream()
@@ -248,18 +248,18 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
 
         //Owner-Grouping
-        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         GroupingOwnerMembers afterRemove = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(afterRemove);
         assertFalse(afterRemove.getOwners().getMembers().stream()
                 .anyMatch(member -> OWNER_GROUPING.equals(member.getUid())));
 
-        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertTrue(ownersWithGroup.getOwners().getMembers().stream()
                 .anyMatch(member -> OWNER_GROUPING.equals(member.getName())));
-        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
 
     }
 
@@ -274,9 +274,9 @@ public class TestGroupingAssignmentService {
         assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
 
         //Owner-Grouping
-        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
-        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
     }
 
@@ -293,10 +293,10 @@ public class TestGroupingAssignmentService {
         assertEquals(initialOwners, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
 
         //Owner-Grouping
-        updateMemberService.addGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners + basisMembers + includeMembers + 1, afterAdd);
-        updateMemberService.removeGroupPathOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int afterRemove = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners, afterRemove);
     }

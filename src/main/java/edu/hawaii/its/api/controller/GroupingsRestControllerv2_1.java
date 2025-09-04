@@ -509,16 +509,16 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Update grouping to add new path owners.
+     * Update grouping to add new owner-groupings.
      */
-    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
-    public ResponseEntity<GroupingAddResults> addGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
+    public ResponseEntity<GroupingAddResults> addOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                         @PathVariable String path,
-                                                        @PathVariable List<String> pathOwners) {
-        logger.info("Entered REST addGroupPathOwners...");
+                                                        @PathVariable List<String> ownerGroupings) {
+        logger.info("Entered REST addOwnerGroupings...");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.addGroupPathOwnerships(currentUser, path, pathOwners));
+                .body(updateMemberService.addOwnerGroupingOwnerships(currentUser, path, ownerGroupings));
     }
 
 
@@ -537,16 +537,16 @@ public class GroupingsRestControllerv2_1 {
 
 
     /**
-     * Delete grouping group path owners.
+     * Delete grouping owner-groupings.
      */
-    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/path-owner/{pathOwners}")
-    public ResponseEntity<GroupingRemoveResults> removeGroupPathOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+    @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
+    public ResponseEntity<GroupingRemoveResults> removeOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String path,
-                                                              @PathVariable List<String> pathOwners) {
-        logger.info("Entered REST removeGroupPathOwners");
+                                                              @PathVariable List<String> ownerGroupings) {
+        logger.info("Entered REST removeOwnerGroupings");
         return ResponseEntity
                 .ok()
-                .body(updateMemberService.removeGroupPathOwnerships(currentUser, path, pathOwners));
+                .body(updateMemberService.removeOwnerGroupingOwnerships(currentUser, path, ownerGroupings));
     }
 
     /**
