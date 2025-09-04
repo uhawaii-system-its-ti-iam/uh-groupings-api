@@ -137,7 +137,7 @@ public class ErrorControllerAdviceTest {
         // When current_user and uhIdentifier are the same, but uhIdentifier is not valid
         given(membershipService.membershipResults(uhIdentifier)).willThrow(UhIdentifierNotFoundException.class);
 
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships", uhIdentifier)
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships")
                         .header(CURRENT_USER, uhIdentifier))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("NOT_FOUND"))
