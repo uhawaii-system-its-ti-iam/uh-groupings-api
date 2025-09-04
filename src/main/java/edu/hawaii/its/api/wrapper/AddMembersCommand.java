@@ -68,18 +68,18 @@ public class AddMembersCommand extends GrouperCommand<AddMembersCommand> impleme
         return this;
     }
 
-    public AddMembersCommand addGroupPathOwner(String groupPath) {
+    public AddMembersCommand addOwnerGrouping(String groupPath) {
         WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        // we can check added member is path owner when sourceId is g:gsa. That means it's a group
+        // we can check added member is owner-groupings when sourceId is g:gsa. That means it's a group
         wsSubjectLookup.setSubjectSourceId("g:gsa");
         wsSubjectLookup.setSubjectIdentifier(groupPath);
         gcAddMember.addSubjectLookup(wsSubjectLookup);
         return this;
     }
 
-    public AddMembersCommand addGroupPathOwners(List<String> groupPaths) {
+    public AddMembersCommand addOwnerGroupings(List<String> groupPaths) {
         for(String groupPath: groupPaths){
-            addGroupPathOwner(groupPath);
+            addOwnerGrouping(groupPath);
         }
         return this;
     }
