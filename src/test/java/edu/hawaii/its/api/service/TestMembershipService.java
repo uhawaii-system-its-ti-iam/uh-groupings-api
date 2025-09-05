@@ -84,37 +84,19 @@ public class TestMembershipService {
     public void membershipResultsTest() {
         grouperService.removeMember(ADMIN, GROUPING_BASIS, testUids.get(0));
 
-        // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
-        try {
-            membershipService.membershipResults(testUids.get(0), testUids.get(1));
-            fail("Should throw an exception when a non-admin user attempts to fetch memberships of another member.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should throw an exception if bogus-admin is passed as owner.
-        try {
-            membershipService.membershipResults("bogus-admin", testUids.get(0));
-            fail("Should throw exception if bogus-admin is passed as owner.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should not throw an exception if current user is an admin and does not match uid.
+        // Should not throw an exception if user has a valid uid.
         grouperService.addMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
         try {
-            membershipService.membershipResults(testUids.get(0), ADMIN);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an admin and does not match uid.");
+            membershipService.membershipResults(testUids.get(0));
         } catch (UhIdentifierNotFoundException e) {
-
+            fail("Should not throw an exception if user passed is valid.");
         }
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should throw an exception if uid passed is bogus.
         try {
-            membershipService.membershipResults(ADMIN, "bogus-user");
-            fail("Should throw an exception if uid passed is bogus.");
+            membershipService.membershipResults("bogus-user");
+            fail("Should throw an exception if user passed is bogus.");
         } catch (UhIdentifierNotFoundException e) {
             assertEquals("404 NOT_FOUND \"bogus-user\"", e.getMessage());
         }
@@ -204,19 +186,19 @@ public class TestMembershipService {
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
         updateMemberService.removeExcludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
 
-        int results = membershipService.numberOfMemberships(ADMIN, testUidList.get(0));
+        int results = membershipService.numberOfMemberships(testUidList.get(0));
         updateMemberService.addIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
-        assertTrue(membershipService.numberOfMemberships(ADMIN, testUidList.get(0)) > results);
+        assertTrue(membershipService.numberOfMemberships(testUidList.get(0)) > results);
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
 
         // Should have groups for user in include, basis, and not exclude only.
         testUidList = Arrays.asList(testUids.get(0));
 
-        results = membershipService.numberOfMemberships(ADMIN, testUidList.get(0));
+        results = membershipService.numberOfMemberships(testUidList.get(0));
         updateMemberService.addIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
         updateMemberService.addExcludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
 
-        assertEquals(membershipService.numberOfMemberships(ADMIN, testUidList.get(0)), results);
+        assertEquals(membershipService.numberOfMemberships(testUidList.get(0)), results);
         updateMemberService.removeIncludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
         updateMemberService.removeExcludeMembers(ADMIN, EMPTY_GROUPING, testUidList);
     }
