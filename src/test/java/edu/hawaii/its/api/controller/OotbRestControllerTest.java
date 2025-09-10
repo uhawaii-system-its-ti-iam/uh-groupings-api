@@ -78,7 +78,6 @@ public class OotbRestControllerTest {
 
         MvcResult result = mockMvc.perform(
                         post(API_BASE + "/activeProfile/ootb")
-                                .header(CURRENT_USER, CURRENT_USER)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(JsonUtil.asJson(activeProfile)))
                 .andExpect(status().isOk())
