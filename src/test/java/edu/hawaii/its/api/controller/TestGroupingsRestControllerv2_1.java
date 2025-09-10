@@ -50,6 +50,7 @@ import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
 import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberService;
@@ -627,10 +628,21 @@ public class TestGroupingsRestControllerv2_1 {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
     }
 
-//    TODO @Test
-//    public void addPathOwnersTest() throws Exception {
-//
-//    }
+    @Test
+    public void addOwnerGroupingsTest() throws Exception {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
+        ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
+        ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+        MvcResult mvcResult = mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingAddResults.class));
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertTrue(memberService.isOwner(GROUPING, ownerGrouping)));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+    }
 
     @Test
     public void removeOwnersTest() throws Exception {
@@ -645,10 +657,22 @@ public class TestGroupingsRestControllerv2_1 {
         testUids.forEach(testUid -> assertFalse(memberService.isOwner(GROUPING, testUid)));
     }
 
-    //    TODO @Test
-//    public void removePathOwnersTest() throws Exception {
-//
-//    }
+    @Test
+    public void removeOwnerGroupingsTest() throws Exception {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
+        ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
+        ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+        MvcResult mvcResult = mockMvc.perform(delete(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
+                GroupingRemoveResults.class));
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertFalse(memberService.isOwner(GROUPING, ownerGrouping)));
+    }
+
     @Test
     public void updateDescriptionTest() throws Exception {
         String description = groupingsService.getGroupingDescription(GROUPING);
