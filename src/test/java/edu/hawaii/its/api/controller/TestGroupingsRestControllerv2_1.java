@@ -715,6 +715,32 @@ public class TestGroupingsRestControllerv2_1 {
     }
 
     @Test
+    public void updateOptAttributeTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/true";
+        MvcResult mvcResult = mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String result = mvcResult.getResponse().getContentAsString();
+        assertNotNull(result);
+
+        url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/false";
+        mvcResult = mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        result = mvcResult.getResponse().getContentAsString();
+        assertNotNull(result);
+
+        url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + "badOpt" + "/true";
+        mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
     public void hasAdminPrivsTest() throws Exception {
         String url = API_BASE_URL + "members/" + ADMIN + "/is-admin";
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -781,6 +807,18 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
     }
+
+
+    @Test
+    public void getNumberOfAllOwnersTest() throws Exception {
+        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/count";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+    }
+
+
 
     @Test
     public void groupingOwnersTest() throws Exception {
