@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -702,7 +703,9 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/members/memberships/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.info("Entered REST getNumberOfMemberships...");
+        logger.info("HERE: username: " + username);
         return ResponseEntity
                 .ok()
                 .body(membershipService.numberOfMemberships(currentUser));
