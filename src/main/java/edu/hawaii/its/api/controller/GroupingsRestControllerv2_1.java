@@ -711,7 +711,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get number of grouping members
      */
-    @GetMapping(value = "/groupings/{path}/count")
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String path) {
@@ -732,6 +732,21 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.numberOfImmediateOwners(currentUser, path, uhIdentifier));
+    }
+
+    /**
+     * Get number of all owners (direct + indirect) in a grouping.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfAllOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                        @PathVariable String path) {
+
+        logger.info("Entered REST getNumberOfAllOwners...");
+
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.numberOfAllOwners(currentUser, path));
     }
 
     /**

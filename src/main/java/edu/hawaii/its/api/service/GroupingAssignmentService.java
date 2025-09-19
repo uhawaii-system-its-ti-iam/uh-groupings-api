@@ -120,7 +120,7 @@ public class GroupingAssignmentService {
      * Get number of immediate owners in a grouping. Owners with "IMMEDIATE" filter.
      */
     public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s; uidToCheck: %s;",
+        logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
         if (!memberService.isOwner(uhIdentifier)) {
             throw new AccessDeniedException();
@@ -134,7 +134,7 @@ public class GroupingAssignmentService {
      * Get number of all owners in a grouping. Owners with "ALL" filter.
      */
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
-        logger.debug(String.format("isSoleOwner; currentUser: %s; groupPath: %s;",
+        logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
         if (!memberService.isOwner(currentUser)) {
             throw new AccessDeniedException();
@@ -145,7 +145,7 @@ public class GroupingAssignmentService {
     }
 
     public GroupingOwnerMembers groupingAllOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        logger.info(String.format("groupingAllOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingOwnerMembers(
                 grouperService.getAllMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
     }
