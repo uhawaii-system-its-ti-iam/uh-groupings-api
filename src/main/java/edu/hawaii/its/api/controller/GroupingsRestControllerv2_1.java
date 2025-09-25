@@ -690,11 +690,15 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/owners/groupings/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
+    public ResponseEntity<Integer> getNumberOfGroupings() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+        logger.info("HERE: " + username);
+        logger.info("Authorities: " + authorities);
         logger.info("Entered REST getNumberOfGroupings...");
         return ResponseEntity
                 .ok()
-                .body(memberAttributeService.numberOfGroupings(currentUser));
+                .body(memberAttributeService.numberOfGroupings(username));
     }
 
     /**
@@ -705,7 +709,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<Integer> getNumberOfMemberships(@RequestHeader(CURRENT_USER_KEY) String currentUser) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.info("Entered REST getNumberOfMemberships...");
-        logger.info("HERE: username: " + username);
+        logger.info("HERE: username: " + currentUser);
         return ResponseEntity
                 .ok()
                 .body(membershipService.numberOfMemberships(currentUser));
