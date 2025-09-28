@@ -6,6 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import static org.mockito.Mockito.*;
+
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -30,6 +38,7 @@ import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
+@TestPropertySource(properties = "groupings.max.owner.limit=100")
 public class TestUpdateMemberService {
 
     @Value("${groupings.api.test.grouping_many}")
@@ -67,6 +76,9 @@ public class TestUpdateMemberService {
 
     @Autowired
     private UhIdentifierGenerator uhIdentifierGenerator;
+
+    @MockitoSpyBean
+    private UpdateMemberService updateMemberServiceMock;
 
     private List<String> testUids;
     private List<String> testUhUuids;
@@ -283,6 +295,11 @@ public class TestUpdateMemberService {
         assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
         assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
 
+        //opt out same Uuid again, nothing should change
+        updateMemberService.optOut(ADMIN, GROUPING, num);
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
+
         updateMemberService.optIn(ADMIN, GROUPING, num);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, num));
         assertFalse(memberService.isMember(GROUPING_EXCLUDE, num));
@@ -373,8 +390,27 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    public void addOwnershipsOverLimitTest() {
+        Integer originalLimit = (Integer) ReflectionTestUtils.getField(updateMemberService, "OWNERS_LIMIT");
+        ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", 4);
+        try {
+            updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+            fail("Should throw an exception if adding owners would exceed the owner limit");
+        } catch (OwnerLimitExceededException e) {
+            assertNull(e.getCause());
+        } finally {
+            ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", originalLimit);
+        }
+    }
+
+    @Test
     public void addRemoveOwnershipTest() {
         String uid = testUids.get(0);
+
+        updateMemberService.removeOwnership(ADMIN, GROUPING, ADMIN);
+        assertFalse(memberService.isOwner(GROUPING, ADMIN));
+        assertTrue(memberService.isAdmin(ADMIN));
+
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
         assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
@@ -454,6 +490,27 @@ public class TestUpdateMemberService {
             fail("Should not throw an exception if currentUser is not admin but currentUser is self opting.");
         }
 
+    }
+
+    @Test
+    public void addRemoveOwnerGroupingsTest() {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
+        List<String> ownerGroupingsToAddExceed = new ArrayList<>();
+
+        ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
+        ownerGroupingsToAddExceed.add(String.format("tmp:%s:%s-many", ADMIN, ADMIN));
+
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        assertTrue(memberService.isMember(GROUPING_OWNERS, ownerGroupingsToAdd.get(0)));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        assertFalse(memberService.isMember(GROUPING_OWNERS, ownerGroupingsToAdd.get(0)));
+
+        try {
+            updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAddExceed);
+            fail("Should throw an exception if adding owner-groupings would exceed the owner limit");
+        } catch (OwnerLimitExceededException e) {
+            assertNull(e.getCause());
+        }
     }
 
 //    @Test
