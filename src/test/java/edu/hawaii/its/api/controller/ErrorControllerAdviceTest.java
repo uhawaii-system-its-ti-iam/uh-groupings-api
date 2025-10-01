@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,18 +43,6 @@ public class ErrorControllerAdviceTest {
     @Autowired
     private ErrorControllerAdvice errorControllerAdvice;
 
-    @Value("${groupings.api.listserv}")
-    private String LISTSERV;
-
-    @Value("${groupings.api.releasedgrouping}")
-    private String RELEASED_GROUPING;
-
-    @Value("${groupings.api.current_user}")
-    private String CURRENT_USER;
-
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-
     @MockitoBean
     private AsyncJobsManager asyncJobsManager;
 
@@ -84,7 +73,7 @@ public class ErrorControllerAdviceTest {
 
     private static final String API_BASE = "/api/groupings/v2.1";
     private static final String GROUPING = "grouping";
-    private static final String UID = "user";
+    private static final String TEST_USER = "test_user";
     private static final String ADMIN = "admin";
 
     @BeforeEach
@@ -136,14 +125,12 @@ public class ErrorControllerAdviceTest {
     }
 
     @Test
+    @WithMockUhOwner
     public void testMembershipResultsExceptionHandling() throws Exception {
-        String uhIdentifier = "1234";
-
         // When current_user and uhIdentifier are the same, but uhIdentifier is not valid
-        given(membershipService.membershipResults(uhIdentifier)).willThrow(UhIdentifierNotFoundException.class);
+        given(membershipService.membershipResults(TEST_USER)).willThrow(UhIdentifierNotFoundException.class);
 
-        MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships")
-                        .header(CURRENT_USER, uhIdentifier))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.resultCode").value("FAILURE"))
