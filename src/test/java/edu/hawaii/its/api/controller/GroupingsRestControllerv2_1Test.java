@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -95,8 +96,8 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
 
-    @Value("${groupings.api.current_user}")
-    private String CURRENT_USER;
+    @Value("${groupings.max.owner.limit}")
+    private Integer OWNER_LIMIT;
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
@@ -139,7 +140,6 @@ public class GroupingsRestControllerv2_1Test {
     private static final String GROUPING = "path:to:grouping";
     private static final String UID = "user";
     private static final String ADMIN = "admin";
-    private static final Integer OWNER_LIMIT = 100;
     private PropertyLocator propertyLocator;
 
     @BeforeEach
@@ -252,8 +252,7 @@ public class GroupingsRestControllerv2_1Test {
         GroupingPaths groupingPaths = new GroupingPaths();
         groupingPaths.setGroupingPaths(paths);
         given(groupingAssignmentService.allGroupingPaths("bobo")).willReturn(groupingPaths);
-        mockMvc.perform(get(API_BASE + "/groupings")
-                        .header(CURRENT_USER, "bobo"))
+        mockMvc.perform(get(API_BASE + "/groupings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("groupingPaths[0].name").value("grouping0"))
                 .andExpect(jsonPath("groupingPaths[1].name").value("grouping1"))
@@ -921,10 +920,9 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    @WithMockUser(username = UID, authorities={"ROLE_UH"})
     public void getNumberOfGroupingsTest() throws Exception {
-        final String uid = "grouping";
         final String owner = "bobo";
-
         String path = "grouping";
 
         List<GroupingPath> groupingPathList = new ArrayList<>();
@@ -933,32 +931,32 @@ public class GroupingsRestControllerv2_1Test {
         }
         given(memberAttributeService.numberOfGroupings(owner)).willReturn(10);
 
-        mockMvc.perform(get(API_BASE + "/owners/groupings/count")
-                        .header(CURRENT_USER, owner))
+        mockMvc.perform(get(API_BASE + "/owners/groupings/count"))
                 .andExpect(status().isOk());
         verify(memberAttributeService, times(1))
                 .numberOfGroupings(owner);
     }
 
     @Test
+    @WithMockUser(username = UID, authorities={"ROLE_UH", "ROLE_OWNER"})
     public void getGroupingDescriptionTest() throws Exception {
         String json = propertyLocator.find("find.groups.results.description");
         WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
         FindGroupsResults findGroupsResults = new FindGroupsResults(wsFindGroupsResults);
         GroupingDescription groupingDescription = new GroupingDescription(findGroupsResults.getGroup());
-        given(groupingOwnerService.groupingsDescription(CURRENT_USER, "grouping-path")).willReturn(
+        given(groupingOwnerService.groupingsDescription(UID, "grouping-path")).willReturn(
                 groupingDescription);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/grouping-path/description")
-                        .header(CURRENT_USER, CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/grouping-path/description"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
         assertEquals(JsonUtil.asJson(groupingDescription), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
-                .groupingsDescription(CURRENT_USER, "grouping-path");
+                .groupingsDescription(UID, "grouping-path");
     }
 
     @Test
+    @WithMockUser(username = UID, authorities={"ROLE_UH"})
     public void groupingOptAttributesTest() throws Exception {
         String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-on");
         WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
@@ -967,26 +965,25 @@ public class GroupingsRestControllerv2_1Test {
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertNotNull(groupingOptAttributes);
         String groupingPath = "grouping-path";
-        given(groupingOwnerService.groupingOptAttributes(CURRENT_USER, groupingPath))
+        given(groupingOwnerService.groupingOptAttributes(UID, groupingPath))
                 .willReturn(groupingOptAttributes);
-        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/" + groupingPath + "/opt-attributes")
-                        .header(CURRENT_USER, CURRENT_USER))
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/" + groupingPath + "/opt-attributes"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result);
         assertEquals(JsonUtil.asJson(groupingOptAttributes), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
-                .groupingOptAttributes(CURRENT_USER, groupingPath);
+                .groupingOptAttributes(UID, groupingPath);
     }
 
     @Test
+    @WithMockUser(username = ADMIN, authorities={"ROLE_UH", "ROLE_ADMIN"})
     public void getNumberOfMembershipsTest() throws Exception {
         String currentUser = "uid";
         given(membershipService.numberOfMemberships(currentUser))
                 .willReturn(369);
 
-        mockMvc.perform(get(API_BASE + "/members/memberships/count")
-                        .header(CURRENT_USER, currentUser))
+        mockMvc.perform(get(API_BASE + "/members/memberships/count"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
 
