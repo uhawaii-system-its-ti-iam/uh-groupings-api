@@ -98,6 +98,12 @@ public class GroupingsRestControllerv2_1Test {
     @Value("${groupings.max.owner.limit}")
     private Integer OWNER_LIMIT;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
+    @Value("${groupings.api.localhost.user}")
+    private String TEST_USER;
+
     @MockitoBean
     private AsyncJobsManager asyncJobsManager;
 
@@ -134,8 +140,6 @@ public class GroupingsRestControllerv2_1Test {
 
     private static final String API_BASE = "/api/groupings/v2.1";
     private static final String GROUPING = "path:to:grouping";
-    private static final String TEST_USER = "test_user";
-    private static final String ADMIN = "admin";
     private PropertyLocator propertyLocator;
 
     @BeforeEach

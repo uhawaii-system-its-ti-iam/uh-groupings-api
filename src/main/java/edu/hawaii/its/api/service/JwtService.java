@@ -5,9 +5,12 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -29,6 +32,24 @@ public class JwtService {
     public List<String> extractRoles(String token) {
         final Claims claims = extractAllClaims(token);
         return claims.get("roles", List.class);
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        // Short-lived token as it is for a single server-to-server hop.
+        long expirationTime = 1000 * 60 * 5; // 5 min
+
+        // Get user's role.
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("roles", roles)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSignInKey())
+                .compact();
     }
 
     private Date extractExpiration(String token) {
