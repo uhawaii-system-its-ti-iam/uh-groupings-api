@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @WithMockUser(
-        username = "admin",
+        username = "test_admin_user",
         authorities = {"ROLE_ADMINISTRATOR", "ROLE_UH"}
 )
 public @interface WithMockUhAdmin {}
