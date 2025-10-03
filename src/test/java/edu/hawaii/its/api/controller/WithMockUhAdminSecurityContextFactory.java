@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 public class WithMockUhAdminSecurityContextFactory implements WithSecurityContextFactory<WithMockUhAdmin> {
 
-    @Value("$groupings.api.test.admin_user")
+    @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
     @Override

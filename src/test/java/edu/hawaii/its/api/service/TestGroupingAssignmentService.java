@@ -41,19 +41,19 @@ import edu.hawaii.its.api.type.OptType;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestGroupingAssignmentService {
 
-    @Value("${groupings.api.test.grouping_many}")
+    @Value("${groupings.api.test.grouping_complex}")
     private String GROUPING;
 
-    @Value("${groupings.api.test.grouping_many_basis}")
+    @Value("${groupings.api.test.grouping_complex_basis}")
     private String GROUPING_BASIS;
 
-    @Value("${groupings.api.test.grouping_many_include}")
+    @Value("${groupings.api.test.grouping_complex_include}")
     private String GROUPING_INCLUDE;
 
-    @Value("${groupings.api.test.grouping_many_exclude}")
+    @Value("${groupings.api.test.grouping_complex_exclude}")
     private String GROUPING_EXCLUDE;
 
-    @Value("${groupings.api.test.grouping_many_owners}")
+    @Value("${groupings.api.test.grouping_complex_owners}")
     private String GROUPING_OWNERS;
 
     @Value("${groupings.api.test.admin_user}")
