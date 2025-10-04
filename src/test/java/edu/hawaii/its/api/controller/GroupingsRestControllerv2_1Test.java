@@ -1011,14 +1011,13 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getNumberOfOwnersTest() throws Exception {
-        String uid = "uid";
         String path = "grouping-path";
-        given(groupingAssignmentService.numberOfImmediateOwners(ADMIN, path, uid)).willReturn(1);
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/" + uid + "/count")
+        given(groupingAssignmentService.numberOfDirectOwners(ADMIN, path)).willReturn(1);
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/count")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).numberOfImmediateOwners(ADMIN, path, uid);
+        verify(groupingAssignmentService, times(1)).numberOfDirectOwners(ADMIN, path);
     }
 
     @Test

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,8 +98,12 @@ public class ErrorControllerAdviceTest {
      */
     @Test
     public void testErrorController() {
+        DirectOwnerRemovedException dore = new DirectOwnerRemovedException();
+        String statusCode = errorControllerAdvice.handleDirectOwnerRemovedException(dore).getStatusCode().toString();
+        assertThat(statusCode, is("422 UNPROCESSABLE_ENTITY"));
+
         OwnerLimitExceededException olee = new OwnerLimitExceededException();
-        String statusCode = errorControllerAdvice.handleOwnerLimitExceededException(olee).getStatusCode().toString();
+        statusCode = errorControllerAdvice.handleOwnerLimitExceededException(olee).getStatusCode().toString();
         assertThat(statusCode, is("409 CONFLICT"));
 
         AccessDeniedException ade = new AccessDeniedException();

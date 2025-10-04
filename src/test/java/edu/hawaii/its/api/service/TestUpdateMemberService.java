@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -377,10 +378,10 @@ public class TestUpdateMemberService {
         String uid = testUids.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
         assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(uid));
         assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.addAdminMember(ADMIN, uid);
-        updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(uid));
         updateMemberService.removeAdminMember(ADMIN, uid);
     }
 

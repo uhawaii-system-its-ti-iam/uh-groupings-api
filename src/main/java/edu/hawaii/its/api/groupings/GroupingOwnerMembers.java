@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.groupings;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;

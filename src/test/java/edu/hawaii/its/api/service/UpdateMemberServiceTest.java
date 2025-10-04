@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
+import java.util.Collections;
 import java.util.List;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.GetMembersResults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -172,11 +174,15 @@ public class UpdateMemberServiceTest {
         assertNotNull(hasMembersResults);
         doReturn(hasMembersResults).when(grouperService)
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
-        doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
+        doReturn(hasMembersResults)
+                .when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
         SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
+
+        doReturn(TEST_UIDS.size() + 1).when(groupingAssignmentService)
+                .numberOfDirectOwners(TEST_UIDS.get(0), groupPath);
 
         RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         assertNotNull(removeMembersResults);
@@ -185,31 +191,6 @@ public class UpdateMemberServiceTest {
                 .removeMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
         assertNotNull(updateMemberService.removeOwnerships(TEST_UIDS.get(0), groupPath, TEST_UIDS));
-    }
-
-    @Test
-    public void removeOwnershipTest() {
-        FindGroupsResults findGroupsResults = groupingsTestConfiguration.findGroupsResultsDescriptionTestData();
-        assertNotNull(findGroupsResults);
-        doReturn(findGroupsResults).when(grouperService).findGroupsResults(groupPath);
-
-        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
-        assertNotNull(hasMembersResults);
-        doReturn(hasMembersResults).when(grouperService)
-                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
-        doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
-
-        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
-        assertNotNull(subjectsResults);
-        doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS.get(1));
-
-        RemoveMemberResult removeMemberResult = groupingsTestConfiguration.deleteMemberResultFailureTestData();
-        assertNotNull(removeMemberResult);
-        String validIdentifier = subjectService.getValidUhUuid(TEST_UIDS.get(1));
-        doReturn(removeMemberResult).when(grouperService)
-                .removeMember(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifier);
-
-        assertNotNull(updateMemberService.removeOwnership(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
     }
 
     @Test

@@ -2,6 +2,7 @@ package edu.hawaii.its.api.controller;
 
 import java.io.IOException;
 
+import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import jakarta.mail.MessagingException;
 
@@ -200,6 +201,26 @@ public class ErrorControllerAdvice {
 
         return buildResponseEntity(apiError);
     }
+
+    @ExceptionHandler(DirectOwnerRemovedException.class)
+    public ResponseEntity<ApiError> handleDirectOwnerRemovedException(DirectOwnerRemovedException dore) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        String path = attributes.getRequest().getRequestURI();
+
+        emailService.sendWithStack(dore, "Direct Owner Removed Exception", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .message("Direct Owner Removed Exception")
+                .stackTrace(ExceptionUtils.getStackTrace(dore))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
     @ExceptionHandler(GrouperException.class)
     public ResponseEntity<ApiError> handleGrouperException(GrouperException ex) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

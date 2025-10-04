@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -118,6 +119,7 @@ public class GroupingAssignmentService {
 
     /**
      * Get number of immediate owners in a grouping. Owners with "IMMEDIATE" filter.
+     * It includes direct owners + owner-groupings.
      */
     public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
         logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
@@ -132,6 +134,7 @@ public class GroupingAssignmentService {
 
     /**
      * Get number of all owners in a grouping. Owners with "ALL" filter.
+     * It includes direct owners + owner-groupings + indirect owners.
      */
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
@@ -144,12 +147,38 @@ public class GroupingAssignmentService {
         return owners.getMembers().size();
     }
 
+    /**
+     * Get number of direct owners in a grouping.
+     */
+    public Integer numberOfDirectOwners(String currentUser, String groupingPath) {
+        logger.info(String.format("groupingDirectOwners; currentUser: %s; groupingPath: %s;",
+                currentUser, groupingPath));
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupingPath, currentUser)) {
+            throw new AccessDeniedException();
+        }
+        GroupingOwnerMembers immediateOwners = new GroupingOwnerMembers(grouperService
+                .getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
+
+        Integer directOwnerCount = 0;
+        for (GroupingGroupMember owner : immediateOwners.getOwners().getMembers()) {
+            if (!owner.getName().contains(":"))
+                directOwnerCount++;
+        }
+        return directOwnerCount;
+    }
+
+    /**
+     * All owners including direct, owner-groupings and indirect owners.
+     */
     public GroupingOwnerMembers groupingAllOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingAllOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingOwnerMembers(
                 grouperService.getAllMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
     }
 
+    /**
+     * Direct owners + owner-groupings.
+     */
     public GroupingOwnerMembers groupingImmediateOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
         return new GroupingOwnerMembers(
