@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -80,6 +82,6 @@ public class TestAsyncJobsManager {
         assertEquals(jobId, asyncJobResult.getId());
         assertEquals("COMPLETED", asyncJobResult.getStatus());
         assertEquals(completableFuture.join(), asyncJobResult.getResult());
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
     }
 }
