@@ -1002,11 +1002,11 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhAdmin
     public void getNumberOfOwnersTest() throws Exception {
-        given(groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, TEST_USER)).willReturn(1);
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + GROUPING + "/owners/" + TEST_USER + "/count"))
+        given(groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING)).willReturn(1);
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + GROUPING + "/owners/count"))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).numberOfImmediateOwners(ADMIN, GROUPING, TEST_USER);
+        verify(groupingAssignmentService, times(1)).numberOfDirectOwners(ADMIN, GROUPING);
     }
 
     @Test
