@@ -139,7 +139,7 @@ public class UpdateMemberService {
     public GroupingRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        if (!memberService.isOwner(groupingPath, currentUser) && memberService.isAdmin(currentUser)) {
+        if (!memberService.isOwner(groupingPath, currentUser)) {
             addOwnership(currentUser, groupingPath, currentUser);
         }
         String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
