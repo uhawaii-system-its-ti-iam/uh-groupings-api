@@ -721,8 +721,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfOwners(@PathVariable String path,
-                                                     @PathVariable String uhIdentifier) {
+    public ResponseEntity<Integer> getNumberOfOwners(@PathVariable String path) {
         logger.info("Entered REST getNumberOfOwners...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
