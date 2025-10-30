@@ -68,22 +68,16 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
-    @Value("${groupings.api.current_user}")
-    private String CURRENT_USER;
-
-    @Value("${groupings.api.test.grouping_single}")
-    private String GROUPING_SINGLE;
-
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
-    @Value("${groupings.api.test.grouping_single_include}")
+    @Value("${groupings.api.test.grouping_many_include}")
     private String GROUPING_INCLUDE;
 
-    @Value("${groupings.api.test.grouping_single_exclude}")
+    @Value("${groupings.api.test.grouping_many_exclude}")
     private String GROUPING_EXCLUDE;
 
-    @Value("${groupings.api.test.grouping_single_owners}")
+    @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
 
     @Value("Test Many Groups In Basis")
@@ -558,7 +552,6 @@ public class TestGroupingsRestControllerv2_1 {
     public void addExcludeMembersAsyncTest() throws Exception {
         String url = API_BASE_URL + "groupings/" + GROUPING + "/exclude-members/async";
         MvcResult mvcResult = mockMvc.perform(put(url)
-                        
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(testUids)))
                 .andExpect(status().isAccepted())
@@ -570,8 +563,7 @@ public class TestGroupingsRestControllerv2_1 {
         url = API_BASE_URL + "jobs/" + jobId;
         AsyncJobResult asyncJobResult;
         do {
-            mvcResult = mockMvc.perform(get(url)
-                            )
+            mvcResult = mockMvc.perform(get(url))
                     .andExpect(status().isOk())
                     .andReturn();
             asyncJobResult = JsonUtil.asObject(mvcResult.getResponse().getContentAsString(), AsyncJobResult.class);
@@ -645,19 +637,20 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhAdmin
     public void addOwnerGroupingsTest() throws Exception {
+        String groupingPath = String.format("tmp:%s:%s-single", ADMIN, ADMIN);
         List<String> ownerGroupingsToAdd = new ArrayList<>();
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
 
-        String url = API_BASE_URL + "groupings/" + GROUPING_SINGLE + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+        String url = API_BASE_URL + "groupings/" + groupingPath + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
         MvcResult mvcResult = mockMvc.perform(put(url)
                         )
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingAddResults.class));
-        ownerGroupingsToAdd.forEach(ownerGrouping -> assertTrue(memberService.isOwner(GROUPING_SINGLE, ownerGrouping)));
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING_SINGLE, ownerGroupingsToAdd);
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertTrue(memberService.isOwner(groupingPath, ownerGrouping)));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, groupingPath, ownerGroupingsToAdd);
     }
 
     @Test
@@ -677,18 +670,19 @@ public class TestGroupingsRestControllerv2_1 {
     @Test
     @WithMockUhAdmin
     public void removeOwnerGroupingsTest() throws Exception {
+        String groupingPath = String.format("tmp:%s:%s-single", ADMIN, ADMIN);
         List<String> ownerGroupingsToAdd = new ArrayList<>();
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
-        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING_SINGLE, ownerGroupingsToAdd);
-        String url = API_BASE_URL + "groupings/" + GROUPING_SINGLE + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, groupingPath, ownerGroupingsToAdd);
+        String url = API_BASE_URL + "groupings/" + groupingPath + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         )
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
-        ownerGroupingsToAdd.forEach(ownerGrouping -> assertFalse(memberService.isOwner(GROUPING_SINGLE, ownerGrouping)));
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertFalse(memberService.isOwner(groupingPath, ownerGrouping)));
     }
 
     @Test
