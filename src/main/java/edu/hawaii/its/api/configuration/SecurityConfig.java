@@ -33,33 +33,31 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v3/api-docs/**",
-                                "/swagger-ui/**"
+                                "/swagger-ui/**",
+                                "/api/groupings/v2.1/announcements/**"
                         ).permitAll()
-                        .requestMatchers("/api/groupings/v2.1/announcements/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /**
-     * This UserDetailsService is required by the AuthenticationProvider.
-     * Since our JWT filter handles everything, this service will not be called for JWT-authenticated requests.
-     * It's a placeholder to satisfy Spring Security's configuration requirements.
-     */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            throw new UsernameNotFoundException("User not found: " + username);
-        };
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+//    /**
+//     * This UserDetailsService is required by the AuthenticationProvider.
+//     * Since our JWT filter handles everything, this service will not be called for JWT-authenticated requests.
+//     * It's a placeholder to satisfy Spring Security's configuration requirements.
+//     */
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        return username -> {
+//            throw new UsernameNotFoundException("User not found: " + username);
+//        };
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 }

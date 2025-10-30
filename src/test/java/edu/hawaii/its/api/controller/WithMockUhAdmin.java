@@ -6,7 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Mocks a logged-in user with ADMIN privileges.
+ * Mocks an authorized user with ADMIN privileges.
+ * Used to populate security context authentication.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithMockUhAdminSecurityContextFactory.class)

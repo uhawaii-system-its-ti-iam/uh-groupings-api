@@ -6,7 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Mocks a logged-in user with standard OWNER privileges.
+ * Mocks an authorized user with standard OWNER privileges.
+ * Used to populate security context authentication.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithMockUhOwnerSecurityContextFactory.class)
