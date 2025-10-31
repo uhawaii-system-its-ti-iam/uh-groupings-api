@@ -43,21 +43,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    /**
-//     * This UserDetailsService is required by the AuthenticationProvider.
-//     * Since our JWT filter handles everything, this service will not be called for JWT-authenticated requests.
-//     * It's a placeholder to satisfy Spring Security's configuration requirements.
-//     */
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return username -> {
-//            throw new UsernameNotFoundException("User not found: " + username);
-//        };
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
 }
