@@ -16,8 +16,8 @@ public class OptRequestTest {
     @Test
     public void optTypeInIn() {
         OptRequest optRequest = new OptRequest.Builder()
-                .withUid("yoda")
-                .withGroupNameRoot("t:yoda:yoda-aux")
+                .withUid("testiwta")
+                .withGroupNameRoot("tmp:testiwta:testiwta-aux")
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.IN)
                 .withOptValue(false)
@@ -25,15 +25,15 @@ public class OptRequestTest {
 
         assertEquals(optRequest, optRequest);
         assertThat(optRequest.getOptId(), equalTo(OptType.IN.value()));
-        assertThat(optRequest.getGroupName(), equalTo("t:yoda:yoda-aux:include"));
-        assertThat(optRequest.getGroupNameRoot(), equalTo("t:yoda:yoda-aux"));
+        assertThat(optRequest.getGroupName(), equalTo("tmp:testiwta:testiwta-aux:include"));
+        assertThat(optRequest.getGroupNameRoot(), equalTo("tmp:testiwta:testiwta-aux"));
     }
 
     @Test
     public void optTypeInOut() {
         OptRequest optRequest = new OptRequest.Builder()
-                .withUid("yoda")
-                .withGroupNameRoot("t:yoda:yoda-aux")
+                .withUid("testiwta")
+                .withGroupNameRoot("tmp:testiwta:testiwta-aux")
                 .withPrivilegeType(PrivilegeType.IN)
                 .withOptType(OptType.OUT)
                 .withOptValue(false)
@@ -42,8 +42,8 @@ public class OptRequestTest {
         assertEquals(optRequest, optRequest);
         assertEquals(optRequest.getOptId(), OptType.OUT.value());
         assertThat(optRequest.getOptId(), equalTo(OptType.OUT.value()));
-        assertThat(optRequest.getGroupName(), equalTo("t:yoda:yoda-aux:exclude"));
-        assertThat(optRequest.getGroupNameRoot(), equalTo("t:yoda:yoda-aux"));
+        assertThat(optRequest.getGroupName(), equalTo("tmp:testiwta:testiwta-aux:exclude"));
+        assertThat(optRequest.getGroupNameRoot(), equalTo("tmp:testiwta:testiwta-aux"));
         assertThat(optRequest.getOptValue(), notNullValue());
         assertThat(optRequest.getPrivilegeType(), notNullValue());
         assertThat(optRequest.getUid(), notNullValue());
@@ -52,8 +52,8 @@ public class OptRequestTest {
     @Test
     public void optTypeOutIn() {
         OptRequest optRequest = new OptRequest.Builder()
-                .withUid("yoda")
-                .withGroupNameRoot("t:yoda:yoda-aux")
+                .withUid("testiwta")
+                .withGroupNameRoot("tmp:testiwta:testiwta-aux")
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.IN)
                 .withOptValue(false)
@@ -61,15 +61,15 @@ public class OptRequestTest {
 
         assertEquals(optRequest, optRequest);
         assertThat(optRequest.getOptId(), equalTo(OptType.IN.value()));
-        assertThat(optRequest.getGroupName(), equalTo("t:yoda:yoda-aux:exclude"));
-        assertThat(optRequest.getGroupNameRoot(), equalTo("t:yoda:yoda-aux"));
+        assertThat(optRequest.getGroupName(), equalTo("tmp:testiwta:testiwta-aux:exclude"));
+        assertThat(optRequest.getGroupNameRoot(), equalTo("tmp:testiwta:testiwta-aux"));
     }
 
     @Test
     public void optTypeOutOut() {
         OptRequest optRequest = new OptRequest.Builder()
-                .withUid("yoda")
-                .withGroupNameRoot("t:yoda:yoda-aux")
+                .withUid("testiwta")
+                .withGroupNameRoot("tmp:testiwta:testiwta-aux")
                 .withPrivilegeType(PrivilegeType.OUT)
                 .withOptType(OptType.OUT)
                 .withOptValue(false)
@@ -77,8 +77,8 @@ public class OptRequestTest {
 
         assertEquals(optRequest, optRequest);
         assertThat(optRequest.getOptId(), equalTo(OptType.OUT.value()));
-        assertThat(optRequest.getGroupName(), equalTo("t:yoda:yoda-aux:include"));
-        assertThat(optRequest.getGroupNameRoot(), equalTo("t:yoda:yoda-aux"));
+        assertThat(optRequest.getGroupName(), equalTo("tmp:testiwta:testiwta-aux:include"));
+        assertThat(optRequest.getGroupNameRoot(), equalTo("tmp:testiwta:testiwta-aux"));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class OptRequestTest {
                         .withOptType(OptType.OUT)
                         .withOptValue(Boolean.TRUE)
                         .withGroupNameRoot("some:root")
-                        .withUid("hansolo")
+                        .withUid("testiwta")
                         .build());
         expectedMessage = "privilege cannot be null.";
         actualMessage = exception.getMessage();
@@ -132,7 +132,7 @@ public class OptRequestTest {
                 .withOptType(OptType.OUT)
                 .withOptValue(Boolean.TRUE)
                 .withGroupNameRoot("some:root")
-                .withUid("hansolo")
+                .withUid("testiwta")
                 .withPrivilegeType(PrivilegeType.IN)
                 .build();
         assertThat(optRequest, notNullValue());
@@ -141,7 +141,7 @@ public class OptRequestTest {
                 .withOptType(OptType.OUT)
                 .withOptValue(Boolean.TRUE)
                 .withGroupNameRoot("some:root")
-                .withUid("hansolo")
+                .withUid("testiwta")
                 .withPrivilegeType(PrivilegeType.OUT)
                 .build();
         assertThat(optRequest, notNullValue());

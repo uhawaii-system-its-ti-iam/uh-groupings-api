@@ -30,7 +30,7 @@ public class MemberAttributeServiceTest {
 
     final String groupAdminPath = "uh-settings:groupingAdmins";
     final String groupOwnerPath = "uh-settings:groupingOwners";
-    final String uid = "uuu";
+    final String uid = "testiwta";
 
     @BeforeEach
     public void beforeEach() throws Exception {
