@@ -33,7 +33,7 @@ import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.util.JsonUtil;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@ActiveProfiles("ootb")
+@ActiveProfiles({"ootb", "localTest"})
 public class OotbRestControllerTest {
 
     private static final String API_BASE = "/api/groupings/v2.1";

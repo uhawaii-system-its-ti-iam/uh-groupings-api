@@ -29,7 +29,7 @@ import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@ActiveProfiles("ootb")
+@ActiveProfiles({"ootb", "localTest"})
 @TestPropertySource(locations = "classpath:ootb.grouper.test.properties")
 public class OotbGrouperPropertyConfigurerTest {
 
