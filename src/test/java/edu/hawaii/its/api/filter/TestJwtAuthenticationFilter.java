@@ -41,7 +41,7 @@ public class TestJwtAuthenticationFilter {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${jwt.secret-key}")
+    @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
     @Value("${groupings.api.test.admin_user}")

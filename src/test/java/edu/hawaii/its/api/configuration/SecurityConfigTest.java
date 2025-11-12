@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,6 +22,7 @@ import edu.hawaii.its.api.filter.JwtAuthenticationFilter;
 import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.type.Announcements;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 public class SecurityConfigTest {
 
@@ -84,14 +86,14 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void protectedEndpointRequiresAuthenticationTest() throws Exception {
+    public void protectedEndpointRequiresJwtAuthenticationTest() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships"))
                 .andReturn();
         assertEquals(403, mvcResult.getResponse().getStatus());
     }
 
     @Test
-    public void protectedEndpointWithMissingBearerTest() throws Exception {
+    public void protectedEndpointWithWrongJwtBearerTest() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships")
                         .header("Authorization", "InvalidFormat"))
                 .andReturn();

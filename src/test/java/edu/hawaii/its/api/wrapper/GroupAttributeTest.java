@@ -12,7 +12,9 @@ import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupAttributeTest {
     private PropertyLocator propertyLocator;

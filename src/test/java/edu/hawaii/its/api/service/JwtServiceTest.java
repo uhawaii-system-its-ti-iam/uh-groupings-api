@@ -29,7 +29,7 @@ public class JwtServiceTest {
     @Autowired
     JwtService jwtService;
 
-    @Value("${jwt.secret-key}")
+    @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
     @Value("${groupings.api.test.admin_user}")
