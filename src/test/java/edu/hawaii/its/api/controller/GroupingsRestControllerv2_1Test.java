@@ -923,7 +923,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     public void getNumberOfGroupingsTest() throws Exception {
         final String uid = "grouping";
-        final String owner = "testiwta";
+        final String owner = "bobo";
 
         String path = "grouping";
 
