@@ -134,12 +134,6 @@ public class UpdateMemberService {
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
 
-    // TODO: what is this for?
-    public GroupingRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
-        groupPathService.checkPath(groupingPath);
-        checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        if (!memberService.isOwner(groupingPath, currentUser)) {
-            addOwnership(currentUser, groupingPath, currentUser);
         // Make sure that there would be at least one direct owner remaining after the operation.
         Integer directOwners = groupingAssignmentService.numberOfDirectOwners(currentUser, groupingPath);
         if ((directOwners - validIdentifiers.size()) <= 0) {
