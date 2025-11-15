@@ -72,6 +72,9 @@ public class TestGroupingsRestControllerv2_1 {
     @Value("${groupings.api.current_user}")
     private String CURRENT_USER;
 
+    @Value("${groupings.api.test.grouping_single}")
+    private String GROUPING_SINGLE;
+
     @Value("${groupings.api.test.grouping_many}")
     private String GROUPING;
 
@@ -633,15 +636,16 @@ public class TestGroupingsRestControllerv2_1 {
         List<String> ownerGroupingsToAdd = new ArrayList<>();
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+
+        String url = API_BASE_URL + "groupings/" + GROUPING_SINGLE + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
         MvcResult mvcResult = mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingAddResults.class));
-        ownerGroupingsToAdd.forEach(ownerGrouping -> assertTrue(memberService.isOwner(GROUPING, ownerGrouping)));
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertTrue(memberService.isOwner(GROUPING_SINGLE, ownerGrouping)));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING_SINGLE, ownerGroupingsToAdd);
     }
 
     @Test
@@ -662,15 +666,15 @@ public class TestGroupingsRestControllerv2_1 {
         List<String> ownerGroupingsToAdd = new ArrayList<>();
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-aux", ADMIN, ADMIN));
         ownerGroupingsToAdd.add(String.format("tmp:%s:%s-complex", ADMIN, ADMIN));
-        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
-        String url = API_BASE_URL + "groupings/" + GROUPING + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING_SINGLE, ownerGroupingsToAdd);
+        String url = API_BASE_URL + "groupings/" + GROUPING_SINGLE + "/owners/owner-groupings/" + String.join(",", ownerGroupingsToAdd);
         MvcResult mvcResult = mockMvc.perform(delete(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(),
                 GroupingRemoveResults.class));
-        ownerGroupingsToAdd.forEach(ownerGrouping -> assertFalse(memberService.isOwner(GROUPING, ownerGrouping)));
+        ownerGroupingsToAdd.forEach(ownerGrouping -> assertFalse(memberService.isOwner(GROUPING_SINGLE, ownerGrouping)));
     }
 
     @Test
@@ -709,6 +713,32 @@ public class TestGroupingsRestControllerv2_1 {
         assertNotNull(result);
 
         url = API_BASE_URL + "groupings/" + GROUPING + "/sync-destination/" + "badSyncDest" + "/enable";
+        mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    public void updateOptAttributeTest() throws Exception {
+        String url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/true";
+        MvcResult mvcResult = mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String result = mvcResult.getResponse().getContentAsString();
+        assertNotNull(result);
+
+        url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/false";
+        mvcResult = mockMvc.perform(put(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        result = mvcResult.getResponse().getContentAsString();
+        assertNotNull(result);
+
+        url = API_BASE_URL + "groupings/" + GROUPING + "/opt-attribute/" + "badOpt" + "/true";
         mockMvc.perform(put(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().is5xxServerError());
@@ -770,12 +800,20 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
-
     }
 
     @Test
     public void getNumberOfOwnersTest() throws Exception {
-        String url = API_BASE_URL + "/members/" + GROUPING + "/owners/" + ADMIN + "/count";
+        String url = API_BASE_URL + "/members/" + GROUPING + "/owners/count";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+    }
+
+    @Test
+    public void getNumberOfAllOwnersTest() throws Exception {
+        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/count";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();

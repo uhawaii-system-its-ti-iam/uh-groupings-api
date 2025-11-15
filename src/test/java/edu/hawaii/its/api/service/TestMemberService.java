@@ -14,6 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
+import java.util.Collections;
+
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -45,7 +47,7 @@ public class TestMemberService {
 
     @Test
     public void isOwner() {
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUhUuid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUhUuid));
         assertFalse(memberService.isOwner(GROUPING, testUhUuid));
         updateMemberService.addOwnership(ADMIN, GROUPING, testUhUuid);
         assertTrue(memberService.isOwner(GROUPING, testUhUuid));

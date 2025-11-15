@@ -522,7 +522,7 @@ public class GroupingsRestControllerv2_1 {
 
 
     /**
-     * Delete a grouping owner.
+     * Delete a grouping owner(s).
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     public ResponseEntity<GroupingRemoveResults> removeOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
@@ -711,7 +711,7 @@ public class GroupingsRestControllerv2_1 {
     /**
      * Get number of grouping members
      */
-    @GetMapping(value = "/groupings/{path}/count")
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfGroupingMembers(@RequestHeader(CURRENT_USER_KEY) String currentUser,
                                                               @PathVariable String path) {
@@ -722,20 +722,36 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Check if the user is a sole owner of a grouping
+     * Used to check if the user is a sole owner of a grouping.
      */
-    @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/{uhIdentifier}/count")
+    @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/count")
     @ResponseBody
-    public ResponseEntity<Integer> getNumberOfOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                     @PathVariable String path, @PathVariable String uhIdentifier) {
-        logger.info("Entered REST getNumberOfOwners...");
+    public ResponseEntity<Integer> getNumberOfDirectOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                           @PathVariable String path) {
+        logger.info("Entered REST getNumberOfDirectOwners...");
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.numberOfImmediateOwners(currentUser, path, uhIdentifier));
+                .body(groupingAssignmentService.numberOfDirectOwners(currentUser, path));
     }
 
     /**
-     * A list of all immediate owners listed in a grouping.
+     * Get number of all owners (direct + indirect) in a grouping.
+     * Owners with "ALL" filter.
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getNumberOfAllOwners(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                        @PathVariable String path) {
+
+        logger.info("Entered REST getNumberOfAllOwners...");
+
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.numberOfAllOwners(currentUser, path));
+    }
+
+    /**
+     * A list of immediate owners listed in a grouping.
      * Owners with "IMMEDIATE" filter.
      */
     @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")

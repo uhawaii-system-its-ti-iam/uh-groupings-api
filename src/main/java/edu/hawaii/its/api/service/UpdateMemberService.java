@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -132,8 +133,6 @@ public class UpdateMemberService {
         groupPathService.checkPath(groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(uhIdentifiers);
-        return removeOwners(currentUser, groupingPath, validIdentifiers);
-    }
 
     // TODO: what is this for?
     public GroupingRemoveResult removeOwnership(String currentUser, String groupingPath, String uhIdentifier) {
@@ -141,9 +140,12 @@ public class UpdateMemberService {
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         if (!memberService.isOwner(groupingPath, currentUser)) {
             addOwnership(currentUser, groupingPath, currentUser);
+        // Make sure that there would be at least one direct owner remaining after the operation.
+        Integer directOwners = groupingAssignmentService.numberOfDirectOwners(currentUser, groupingPath);
+        if ((directOwners - validIdentifiers.size()) <= 0) {
+            throw new DirectOwnerRemovedException();
         }
-        String validIdentifier = subjectService.getValidUhUuid(uhIdentifier);
-        return removeOwner(currentUser, groupingPath, validIdentifier);
+        return removeOwners(currentUser, groupingPath, validIdentifiers);
     }
 
     public GroupingRemoveResults removeOwnerGroupingOwnerships(String currentUser, String groupingPath,

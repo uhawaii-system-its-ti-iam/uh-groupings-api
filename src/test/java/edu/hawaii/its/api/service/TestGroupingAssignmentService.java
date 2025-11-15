@@ -204,7 +204,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingImmediateOwners() {
         //Person
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
         assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
@@ -215,7 +215,7 @@ public class TestGroupingAssignmentService {
         assertNotNull(GroupingOwnerMembers);
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
@@ -234,7 +234,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingAllOwners() {
         // Person
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
         assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
@@ -245,7 +245,7 @@ public class TestGroupingAssignmentService {
         assertNotNull(GroupingOwnerMembers);
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
 
         //Owner-Grouping
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
@@ -270,7 +270,7 @@ public class TestGroupingAssignmentService {
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
 
         //Owner-Grouping
@@ -289,7 +289,7 @@ public class TestGroupingAssignmentService {
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         assertEquals(initialOwners + 1, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         assertEquals(initialOwners, groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING));
 
         //Owner-Grouping
@@ -299,5 +299,23 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int afterRemove = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners, afterRemove);
+    }
+
+    @Test
+    public void numberOfDirectOwners() {
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        int initialOwners = groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING);
+
+        //Person
+        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
+        assertEquals(initialOwners, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
+
+        //Owner-Grouping shouldn't affect the count of direct owners.
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        assertEquals(initialOwners, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        assertEquals(initialOwners, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
     }
 }

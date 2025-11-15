@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -413,10 +414,10 @@ public class TestUpdateMemberService {
 
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
         assertTrue(memberService.isMember(GROUPING_OWNERS, uid));
-        updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(uid));
         assertFalse(memberService.isMember(GROUPING_OWNERS, uid));
         updateMemberService.addAdminMember(ADMIN, uid);
-        updateMemberService.removeOwnership(ADMIN, GROUPING, uid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(uid));
         updateMemberService.removeAdminMember(ADMIN, uid);
     }
 

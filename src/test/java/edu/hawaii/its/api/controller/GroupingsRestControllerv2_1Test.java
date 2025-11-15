@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +53,8 @@ import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateSyncDestResult;
 import edu.hawaii.its.api.groupings.GroupingUpdatedAttributeResult;
+import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
+
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
@@ -66,6 +71,8 @@ import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
+import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
@@ -829,6 +836,57 @@ public class GroupingsRestControllerv2_1Test {
     }
 
     @Test
+    public void updateOptAttributeTest() throws Exception {
+        // case 1: id=IN, status=true
+        given(groupingAttributeService.updateOptAttribute(any(OptRequest.class), any(OptRequest.class)))
+                .willReturn(mock(GroupingUpdateOptAttributeResult.class));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/true")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateOptAttribute(any(OptRequest.class), any(OptRequest.class));
+
+        // case 2: id=IN, status=false
+        reset(groupingAttributeService);
+        given(groupingAttributeService.updateOptAttribute(any(OptRequest.class), any(OptRequest.class)))
+                .willReturn(mock(GroupingUpdateOptAttributeResult.class));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/opt-attribute/" + OptType.IN.value() + "/false")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateOptAttribute(any(OptRequest.class), any(OptRequest.class));
+
+        // case 3: id=OUT, status=true
+        reset(groupingAttributeService);
+        given(groupingAttributeService.updateOptAttribute(any(OptRequest.class), any(OptRequest.class)))
+                .willReturn(mock(GroupingUpdateOptAttributeResult.class));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/opt-attribute/" + OptType.OUT.value() + "/true")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateOptAttribute(any(OptRequest.class), any(OptRequest.class));
+
+        // case 4: id=OUT, status=false
+        reset(groupingAttributeService);
+        given(groupingAttributeService.updateOptAttribute(any(OptRequest.class), any(OptRequest.class)))
+                .willReturn(mock(GroupingUpdateOptAttributeResult.class));
+
+        mockMvc.perform(put(API_BASE + "/groupings/" + GROUPING + "/opt-attribute/" + OptType.OUT.value() + "/false")
+                        .header(CURRENT_USER, UID))
+                .andExpect(status().isOk());
+
+        verify(groupingAttributeService, times(1))
+                .updateOptAttribute(any(OptRequest.class), any(OptRequest.class));
+    }
+
+
+    @Test
     public void hasOwnerPrivsTest() throws Exception {
         given(memberService.isOwner(CURRENT_USER)).willReturn(false);
         MvcResult result = mockMvc.perform(get(API_BASE + "/members/" + CURRENT_USER + "/is-owner"))
@@ -953,14 +1011,27 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     public void getNumberOfOwnersTest() throws Exception {
-        String uid = "uid";
         String path = "grouping-path";
-        given(groupingAssignmentService.numberOfImmediateOwners(ADMIN, path, uid)).willReturn(1);
-        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/" + uid + "/count")
+        given(groupingAssignmentService.numberOfDirectOwners(ADMIN, path)).willReturn(1);
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/members/" + path + "/owners/count")
                         .header(CURRENT_USER, ADMIN))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(groupingAssignmentService, times(1)).numberOfImmediateOwners(ADMIN, path, uid);
+        verify(groupingAssignmentService, times(1)).numberOfDirectOwners(ADMIN, path);
+    }
+
+    @Test
+    public void getNumberOfAllOwnersTest() throws Exception {
+        String path = "grouping-path";
+        given(groupingAssignmentService.numberOfAllOwners(ADMIN, path)).willReturn(1);
+
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + path + "/owners/count")
+                        .header(CURRENT_USER, ADMIN))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertNotNull(mvcResult);
+        verify(groupingAssignmentService, times(1)).numberOfAllOwners(ADMIN, path);
     }
 
     @Test
