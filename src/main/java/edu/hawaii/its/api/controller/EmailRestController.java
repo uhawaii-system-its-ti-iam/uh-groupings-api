@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -23,18 +24,15 @@ public class EmailRestController {
 
     private final EmailService emailService;
 
-    final private static String CURRENT_USER_KEY = "current_user";
-
     public EmailRestController(EmailService emailService) {
         this.emailService = emailService;
     }
 
     @PostMapping(value = "/send/feedback")
     @ResponseBody
-    public ResponseEntity<EmailResult> sendFeedback(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody Feedback feedback) {
+    public ResponseEntity<EmailResult> sendFeedback(@RequestBody Feedback feedback) {
         logger.info("Entered REST sendFeedback...");
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(emailService.sendFeedback(currentUser, feedback));
@@ -42,10 +40,9 @@ public class EmailRestController {
 
     @PostMapping(value = "/send/stack-trace", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public ResponseEntity<EmailResult> sendStackTrace(
-            @RequestHeader(CURRENT_USER_KEY) String currentUser,
-            @RequestBody String stackTrace) {
+    public ResponseEntity<EmailResult> sendStackTrace(@RequestBody String stackTrace) {
         logger.info("Entered REST sendStackTrace...");
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(emailService.sendStackTrace(currentUser, stackTrace));

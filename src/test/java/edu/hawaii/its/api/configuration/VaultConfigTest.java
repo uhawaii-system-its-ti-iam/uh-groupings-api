@@ -16,7 +16,7 @@ import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 @TestPropertySource(properties = { "grouperClient.webService.password=grouperPassword" })
-@ActiveProfiles("dockerhost")
+@ActiveProfiles({"dockerhost", "localTest"})
 public class VaultConfigTest {
 
     @Autowired
