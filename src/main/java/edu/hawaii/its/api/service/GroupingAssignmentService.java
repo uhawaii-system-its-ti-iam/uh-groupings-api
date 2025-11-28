@@ -124,7 +124,7 @@ public class GroupingAssignmentService {
     public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
         logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
-        if (!memberService.isOwner(uhIdentifier)) {
+        if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingImmediateOwners(currentUser, groupPath).getOwners();
@@ -139,7 +139,7 @@ public class GroupingAssignmentService {
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
-        if (!memberService.isOwner(currentUser)) {
+        if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();

@@ -54,7 +54,7 @@ public class GroupingOwnerService {
     }
 
     /**
-     * Get the number of grouping members
+     * Get the number of grouping members: Basis + Include - Exclude.
      */
     public Integer numberOfGroupingMembers(String currentUser, String groupingPath) {
         log.debug(String.format("numberOfGroupingMembers; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
