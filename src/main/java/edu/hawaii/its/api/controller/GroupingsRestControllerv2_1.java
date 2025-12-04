@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 
@@ -740,6 +741,28 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.numberOfAllOwners(currentUser, path));
+    }
+
+    /**
+     * Get all duplicated owners in a grouping.
+     * (Either both a direct owner and indirect owner, or multiple indirect owners via different owner-groupings.)
+     */
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/compare")
+    public ResponseEntity<GroupingGroupMembers> compareOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                               @PathVariable String path) {
+        logger.info("Entered REST compareOwnerGroupings...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.compareOwnerGroupings(currentUser, path));
+    }
+
+    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/compare/paths")
+    public ResponseEntity<Map> getDuplicateOwnerPaths(@RequestHeader(CURRENT_USER_KEY) String currentUser,
+                                                               @PathVariable String path ) {
+        logger.info("Entered REST getDuplicateOwnerPaths...");
+        return ResponseEntity
+                .ok()
+                .body(groupingAssignmentService.getDuplicateOwnerPaths(currentUser, path));
     }
 
     /**
