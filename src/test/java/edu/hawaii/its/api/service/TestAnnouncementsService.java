@@ -11,23 +11,30 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Announcement;
 import edu.hawaii.its.api.type.Announcements;
 
-@ActiveProfiles("integrationTest")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = { SpringBootWebApplication.class })
-public class TestAnnouncementsService {
-    @Value("${groupings.api.success}")
-    private String SUCCESS;
-    @Autowired
-    private AnnouncementsService announcementsService;
+@ActiveProfiles("integrationTest") @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest(classes = { SpringBootWebApplication.class }) public class TestAnnouncementsService {
+    @Value("${groupings.api.success}") private String SUCCESS;
+    @Autowired private AnnouncementsService announcementsService;
 
-    @Test
-    public void getAnnouncementsTest() {
+    @Test public void getAnnouncementsTest() {
         Announcements announcements = announcementsService.getAnnouncements();
         assertNotNull(announcements);
         assertNotNull(announcements.getAnnouncements());
         assertEquals(SUCCESS, announcements.getResultCode());
+    }
+
+    @Test public void getAnnouncementsReturnsOnlyActiveTest() {
+        Announcements announcements = announcementsService.getAnnouncements();
+        assertNotNull(announcements);
+
+        // Verify all returned announcements have state 'Active'
+        for (Announcement announcement : announcements.getAnnouncements()) {
+            assertEquals(Announcement.State.Active, announcement.getState(),
+                    "All announcements should have state 'Active'");
+        }
     }
 
 }
