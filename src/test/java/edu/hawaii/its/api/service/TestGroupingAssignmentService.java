@@ -204,18 +204,18 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingImmediateOwners() {
         //Person
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
-        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
-        assertNotNull(GroupingOwnerMembers);
-        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
-                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
-
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
+        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
+
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
+
+        GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
+        assertNotNull(GroupingOwnerMembers);
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
@@ -234,18 +234,18 @@ public class TestGroupingAssignmentService {
     @Test
     public void groupingAllOwners() {
         // Person
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
-        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
-        assertNotNull(GroupingOwnerMembers);
-        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
-                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
-
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
         assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
+
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
+
+        GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
+        assertNotNull(GroupingOwnerMembers);
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
+                .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
 
         //Owner-Grouping
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));

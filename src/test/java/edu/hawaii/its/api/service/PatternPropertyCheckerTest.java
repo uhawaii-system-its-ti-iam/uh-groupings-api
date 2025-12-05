@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class PatternPropertyCheckerTest {
 

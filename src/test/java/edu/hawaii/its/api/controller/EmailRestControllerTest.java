@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,13 +28,11 @@ import edu.hawaii.its.api.type.EmailResult;
 import edu.hawaii.its.api.type.Feedback;
 import edu.hawaii.its.api.util.JsonUtil;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 class EmailRestControllerTest {
 
     private static final String BASE_URL = "/email";
-
-    @Value("${groupings.api.current_user}")
-    private String CURRENT_USER;
 
     @Autowired
     private WebApplicationContext context;
@@ -43,7 +42,8 @@ class EmailRestControllerTest {
 
     private MockMvc mockMvc;
 
-    private static final String ADMIN = "admin";
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
 
     @BeforeEach
     public void setUp() {
@@ -51,13 +51,13 @@ class EmailRestControllerTest {
     }
 
     @Test
+    @WithMockUhAdmin
     public void sendFeedbackTest() throws Exception {
         Feedback feedback = new Feedback();
         feedback.setExceptionMessage("exceptionMessage");
         given(emailService.sendFeedback(eq(ADMIN), refEq(feedback))).willReturn(new EmailResult());
 
         MvcResult mvcResult = mockMvc.perform(post(BASE_URL + "/send/feedback")
-                        .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(feedback)))
                 .andExpect(status().isOk()).andReturn();
@@ -67,12 +67,12 @@ class EmailRestControllerTest {
     }
 
     @Test
+    @WithMockUhAdmin
     public void sendStackTraceTest() throws Exception {
         String stackTrace = "stackTrace";
         given(emailService.sendStackTrace(ADMIN, stackTrace)).willReturn(new EmailResult());
 
         MvcResult mvcResult = mockMvc.perform(post(BASE_URL + "/send/stack-trace")
-                        .header(CURRENT_USER, ADMIN)
                         .contentType(MediaType.TEXT_PLAIN_VALUE)
                         .content(stackTrace))
                 .andExpect(status().isOk()).andReturn();
