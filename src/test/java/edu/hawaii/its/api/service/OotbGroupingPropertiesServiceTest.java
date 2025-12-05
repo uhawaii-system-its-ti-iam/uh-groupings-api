@@ -35,7 +35,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@ActiveProfiles("ootb")
+@ActiveProfiles({"ootb", "localTest"})
 class OotbGroupingPropertiesServiceTest {
 
     @Autowired

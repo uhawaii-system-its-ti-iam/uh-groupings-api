@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -18,6 +19,7 @@ import edu.hawaii.its.api.service.GrouperService;
 
 import edu.internet2.middleware.grouperClient.util.GrouperClientConfig;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = {SpringBootWebApplication.class})
 @TestPropertySource(properties = {"grouperClient.webService.url=test-url-b"})
 public class GrouperPropertyConfigurerTest {
