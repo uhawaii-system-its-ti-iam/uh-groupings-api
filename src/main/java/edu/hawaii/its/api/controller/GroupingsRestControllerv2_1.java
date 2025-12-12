@@ -695,7 +695,6 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<Integer> getNumberOfMemberships() {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.info("Entered REST getNumberOfMemberships...");
-        logger.info("HERE: username: " + currentUser);
         return ResponseEntity
                 .ok()
                 .body(membershipService.numberOfMemberships(currentUser));
