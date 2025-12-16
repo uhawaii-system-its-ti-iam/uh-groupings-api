@@ -9,11 +9,14 @@ import edu.hawaii.its.api.type.Announcement;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 
-@Service public class AnnouncementsService {
+@Service
+public class AnnouncementsService {
 
-    @Value("${groupings.api.announcements}") private String ANNOUNCEMENTS_ATTR_NAME;
+    @Value("${groupings.api.announcements}") 
+    private String ANNOUNCEMENTS_ATTR_NAME;
 
-    @Value("${groupings.api.propertystring}") private String ANNOUNCEMENTS_ATTR_DEF;
+    @Value("${groupings.api.propertystring}") 
+    private String ANNOUNCEMENTS_ATTR_DEF;
 
     private final GrouperService grouperService;
 

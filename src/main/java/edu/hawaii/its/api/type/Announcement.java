@@ -11,19 +11,27 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 public class Announcement {
     private String message = "";
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) private State state;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private State state;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss") private LocalDateTime start;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
+    private LocalDateTime start;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss") private LocalDateTime end;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
+    private LocalDateTime end;
 
     public enum State {
-        Active, Expired, Future
+        Active, 
+        Expired, 
+        Future
     }
 
-    @JsonCreator Announcement(@JsonProperty("message") String message, @JsonProperty("start") LocalDateTime start,
+    @JsonCreator
+    Announcement(@JsonProperty("message") String message, @JsonProperty("start") LocalDateTime start,
             @JsonProperty("end") LocalDateTime end) {
         this.message = message;
         this.start = start;
@@ -55,8 +63,12 @@ public class Announcement {
         return state;
     }
 
-    @Override public String toString() {
-        return "Announcement [" + "message='" + message + '\'' + ", start='" + start + '\'' + ", end='" + end + '\''
-                + "]";
+    @Override
+    public String toString() {
+        return "Announcement [" + 
+            "message='" + message + '\'' + 
+            ", start='" + start + '\'' + 
+            ", end='" + end + '\'' + 
+            "]";
     }
 }
