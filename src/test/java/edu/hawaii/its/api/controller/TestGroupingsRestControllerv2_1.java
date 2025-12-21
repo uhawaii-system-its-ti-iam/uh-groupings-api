@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -833,6 +835,18 @@ public class TestGroupingsRestControllerv2_1 {
                         )
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Integer.class));
+    }
+
+    @Test
+    @WithMockUhAdmin
+    public void compareOwnerGroupingsTest() throws Exception {
+        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/compare";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        )
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, List<String>>>() {}));
     }
 
     @Test

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
+import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
@@ -744,25 +745,17 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get all duplicated owners in a grouping.
+     * Returns all duplicated owners in a grouping with their sources of ownership.
      * (Either both a direct owner and indirect owner, or multiple indirect owners via different owner-groupings.)
      */
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/compare")
-    public ResponseEntity<GroupingGroupMembers> compareOwnerGroupings(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                               @PathVariable String path) {
+    public ResponseEntity<Map<String, List<String>>> compareOwnerGroupings(@PathVariable String path) {
         logger.info("Entered REST compareOwnerGroupings...");
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         return ResponseEntity
                 .ok()
                 .body(groupingAssignmentService.compareOwnerGroupings(currentUser, path));
-    }
-
-    @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/compare/paths")
-    public ResponseEntity<Map> getDuplicateOwnerPaths(@RequestHeader(CURRENT_USER_KEY) String currentUser,
-                                                               @PathVariable String path ) {
-        logger.info("Entered REST getDuplicateOwnerPaths...");
-        return ResponseEntity
-                .ok()
-                .body(groupingAssignmentService.getDuplicateOwnerPaths(currentUser, path));
     }
 
     /**
