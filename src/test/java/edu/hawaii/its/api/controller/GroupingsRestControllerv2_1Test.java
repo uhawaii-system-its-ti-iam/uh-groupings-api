@@ -1026,6 +1026,16 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhAdmin
+    public void compareOwnerGroupingsTest() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING + "/owners/compare"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(mvcResult);
+        verify(groupingAssignmentService, times(1)).compareOwnerGroupings(ADMIN, GROUPING);
+    }
+
+    @Test
+    @WithMockUhAdmin
     public void groupingOwnersTest() throws Exception {
         given(groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING)).willReturn(new GroupingOwnerMembers(OWNER_LIMIT));
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/grouping/" + GROUPING + "/owners"))
