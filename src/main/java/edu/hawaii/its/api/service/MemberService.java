@@ -19,17 +19,72 @@ public class MemberService {
     private String OWNERS_GROUP;
 
     private final GrouperService grouperService;
+    private final SecurityContextRoleService securityContextRoleService;
 
-    public MemberService(GrouperService grouperService) {
+    public MemberService(GrouperService grouperService, SecurityContextRoleService securityContextRoleService) {
         this.grouperService = grouperService;
+        this.securityContextRoleService = securityContextRoleService;
     }
 
+    /**
+     * Check if a user is an admin by querying Grouper.
+     * This method is used by role population endpoints (/is-admin) which need to query Grouper
+     * to populate JWT tokens during login.
+     * 
+     * For general authorization checks of the current user, use isCurrentUserAdmin() instead.
+     * 
+     * @param uhIdentifier the user identifier to check
+     * @return true if the user is an admin according to Grouper
+     */
     public boolean isAdmin(String uhIdentifier) {
         return isMember(GROUPING_ADMINS, uhIdentifier);
     }
 
+    /**
+     * Check if a user is an owner by querying Grouper.
+     * This method is used by role population endpoints (/is-owner) which need to query Grouper
+     * to populate JWT tokens during login.
+     * 
+     * For general authorization checks of the current user, use isCurrentUserOwner() instead.
+     * 
+     * @param uhIdentifier the user identifier to check
+     * @return true if the user is an owner according to Grouper
+     */
     public boolean isOwner(String uhIdentifier) {
         return isMember(OWNERS_GROUP, uhIdentifier);
+    }
+
+    /**
+     * Check if the current authenticated user has the ADMIN role from JWT token.
+     * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
+     * Use this for general authorization checks in service methods.
+     * 
+     * @return true if the current user has ROLE_ADMIN in their JWT token
+     */
+    public boolean isCurrentUserAdmin() {
+        return securityContextRoleService.isCurrentUserAdmin();
+    }
+
+    /**
+     * Check if the current authenticated user has the OWNER role from JWT token.
+     * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
+     * Use this for general authorization checks in service methods.
+     * 
+     * @return true if the current user has ROLE_OWNER in their JWT token
+     */
+    public boolean isCurrentUserOwner() {
+        return securityContextRoleService.isCurrentUserOwner();
+    }
+
+    /**
+     * Check if the current authenticated user has either ADMIN or OWNER role from JWT token.
+     * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
+     * Use this for general authorization checks in service methods.
+     * 
+     * @return true if the current user has ROLE_ADMIN or ROLE_OWNER in their JWT token
+     */
+    public boolean isCurrentUserAdminOrOwner() {
+        return securityContextRoleService.isCurrentUserAdminOrOwner();
     }
 
     public boolean isOwner(String groupingPath, String uhIdentifier) {

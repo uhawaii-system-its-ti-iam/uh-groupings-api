@@ -34,7 +34,8 @@ public class AsyncJobsManager {
     public AsyncJobResult getJobResult(String currentUser, Integer jobId) {
         logger.debug(String.format("getJobResult; currentUser: %s; jobId: %s;", currentUser, jobId));
 
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+        // Use JWT for general role checks instead of querying Grouper
+        if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
             throw new AccessDeniedException();
         }
 

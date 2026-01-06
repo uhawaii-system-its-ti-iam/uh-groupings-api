@@ -152,8 +152,9 @@ public class GroupingAttributeService {
         logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s;",
                 groupPath, ownerUid));
 
-        if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isAdmin(
-                ownerUid)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        // Note: ownerUid is the currentUser from the controller
+        if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
         try {
@@ -184,7 +185,9 @@ public class GroupingAttributeService {
      * Helper - changeOptStatus, changeGroupAttributeStatus
      */
     private void checkPrivileges(String groupingPath, String ownerIdentifier) {
-        if (!memberService.isOwner(groupingPath, ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
+        if (!memberService.isCurrentUserAdmin()
+                && !memberService.isOwner(groupingPath, ownerIdentifier)
+                && !memberService.isAdmin(ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }

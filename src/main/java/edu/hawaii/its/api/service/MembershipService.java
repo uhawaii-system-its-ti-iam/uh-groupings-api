@@ -109,7 +109,8 @@ public class MembershipService {
      */
     public ManageSubjectResults manageSubjectResults(String currentUser, String uid) {
         logger.info(String.format("manageSubjectResults; currentUser: %s; uid: %s;", currentUser, uid));
-        if (!memberService.isAdmin(currentUser) && !currentUser.equals(uid)) {
+        // Use JWT for general admin check instead of querying Grouper
+        if (!memberService.isCurrentUserAdmin() && !currentUser.equals(uid)) {
             throw new AccessDeniedException();
         }
         ManageSubjectResults manageSubjectResults = new ManageSubjectResults();

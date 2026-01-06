@@ -53,7 +53,8 @@ public class MemberAttributeService {
      */
     public MemberAttributeResults getMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
         logger.info(String.format("getMemberAttributeResults; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+        // Use JWT for general role checks instead of querying Grouper
+        if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
             throw new AccessDeniedException();
         }
         List<String> invalidUhIdentifiers = uhIdentifiers.parallelStream()
@@ -75,7 +76,8 @@ public class MemberAttributeService {
     public CompletableFuture<MemberAttributeResults> getMemberAttributeResultsAsync(String currentUser, List<String> uhIdentifiers) {
         logger.info(String.format("getMemberAttributeResultsAsync; currentUser: %s; uhIdentifiers: %s;", currentUser,
                 uhIdentifiers));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(currentUser)) {
+        // Use JWT for general role checks instead of querying Grouper
+        if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
             throw new AccessDeniedException();
         }
         List<String> invalid = uhIdentifiers.parallelStream()
