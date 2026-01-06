@@ -108,7 +108,8 @@ public class GroupingOwnerService {
             "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b; searchString: %s;",
             currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
 
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupingPath, currentUser)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException();
         }
 
