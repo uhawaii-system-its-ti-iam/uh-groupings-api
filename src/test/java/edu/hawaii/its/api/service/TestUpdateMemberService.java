@@ -408,7 +408,7 @@ public class TestUpdateMemberService {
 
         try {
             updateMemberService.removeOwnerships(ADMIN, GROUPING, uidsToRemove);
-            fail("Should throw an exception if the number of owners being removed "
+            fail("Should throw an exception if the number of valid owners being removed "
                     + "is greater than or equal to the number of direct owners");
         } catch (DirectOwnerRemovedException e) {
             assertNull(e.getCause());
