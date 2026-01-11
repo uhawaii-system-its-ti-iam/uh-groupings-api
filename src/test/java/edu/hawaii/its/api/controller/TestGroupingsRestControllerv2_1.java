@@ -846,7 +846,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(objectMapper.readValue(
                 mvcResult.getResponse().getContentAsString(),
-                new com.fasterxml.jackson.core.type.TypeReference<Map<String, List<String>>>() {}));
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Map<String, Object>>>() {}));
     }
 
     @Test
