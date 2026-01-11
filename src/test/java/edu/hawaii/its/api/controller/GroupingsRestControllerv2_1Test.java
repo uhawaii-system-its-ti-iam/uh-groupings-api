@@ -315,7 +315,7 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 3; i++) {
             paths.add(GROUPING + i);
         }
-        String userToRemove = "userToRemove";
+        String userToRemove = "testiwta";
         given(updateMemberService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(groupingRemoveResults);
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + String.join(",", paths) + "/" + userToRemove))
                 .andExpect(status().isOk())

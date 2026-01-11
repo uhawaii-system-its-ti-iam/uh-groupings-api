@@ -47,7 +47,7 @@ public class OotbGrouperApiServiceTest {
     @Test
     public void testGetGroupsResults() {
         // Arrange
-        String uhIdentifier = "88888887";
+        String uhIdentifier = "testiwta";
         GetGroupsResults expectedResults = new GetGroupsResults();
         when(ootbGroupingPropertiesService.getGroups(uhIdentifier)).thenReturn(expectedResults);
 

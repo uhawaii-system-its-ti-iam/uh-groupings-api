@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -248,11 +250,11 @@ public class OptRequestTest {
                 .withUid("uidX")
                 .build();
         assertThat(optRequestOne, not(equalTo(optRequestTwo)));
-        assertFalse(optRequestOne.equals(optRequestTwo));
+        assertNotEquals(optRequestOne, optRequestTwo);
         assertThat(optRequestOne.hashCode(), not(equalTo(optRequestTwo.hashCode())));
 
         // Misc odd ball falses.
-        assertFalse(optRequestOne == null);
-        assertFalse(optRequestOne.equals("no-way-jose"));
+        assertNotNull(optRequestOne);
+        assertNotEquals("unexpected-result", optRequestOne);
     }
 }
