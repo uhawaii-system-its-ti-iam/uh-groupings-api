@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -846,7 +844,7 @@ public class TestGroupingsRestControllerv2_1 {
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(objectMapper.readValue(
                 mvcResult.getResponse().getContentAsString(),
-                new com.fasterxml.jackson.core.type.TypeReference<Map<String, List<String>>>() {}));
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Map<String, Object>>>() {}));
     }
 
     @Test

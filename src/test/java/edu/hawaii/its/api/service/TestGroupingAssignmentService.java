@@ -11,7 +11,6 @@ import static org.mockito.BDDMockito.given;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
-import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
@@ -330,57 +328,30 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
 
-        String duplicateOwnerUhUuid = "";
-        String duplicateOwnerUid = "";
         GetMembersResult membersResult =
                 grouperService.getMembersResult(ADMIN, OWNER_GROUPING);
         List<Subject> subjects = membersResult.getSubjects();
+        String duplicateOwnerUhUuid = subjects.get(0).getUhUuid();
 
-        String uid = "";
-        for (Subject s : subjects) {
-            uid = s.getUid();
-            if (!uid.isEmpty()) {
-                duplicateOwnerUhUuid = s.getUhUuid();
-                duplicateOwnerUid = uid;
-                break;
-            }
-        }
-//
-//        GroupingGroupMember duplicateOwner = null;
-//        String duplicateOwnerUid = "";
-//        GetMembersResult membersResult =
-//                grouperService.getMembersResult(ADMIN, OWNER_GROUPING);
-//        GroupingGroupMembers GroupingMembers =
-//                new GroupingGroupMembers(membersResult);
-//
-//        String uid = "";
-//        for (GroupingGroupMember member: GroupingMembers.getMembers()) {
-//            uid = member.getUid();
-//            if (!uid.isEmpty()) {
-//                duplicateOwner = member;
-//                duplicateOwnerUid = uid;
-//                break;
-//            }
-//        }
-
-        //there must be at least one member in OWNER_GROUPING with an uid to run this test
+        //there must be at least one member in OWNER_GROUPING to run this test
         if (duplicateOwnerUhUuid.isEmpty()) {
             updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
             fail("No valid members found in OWNER_GROUPING; cannot run test.");
         }
-        grouperService.removeMember(ADMIN, GROUPING_OWNERS, uid);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
 
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialDuplicatesCount = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
 
         // Add the member as a direct owner to create the duplicate (member is already in OWNER_GROUPING).
-        grouperService.addMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUid);
+        grouperService.addMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
 
-        Map<String, List<String>> duplicates = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING);
-        grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUid);
+        Map<String, Map<String, List<String>>> duplicates =
+                groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        assertEquals(initialDuplicatesCount+1, duplicates.size());
+        assertEquals(initialDuplicatesCount + 1, duplicates.size());
         assertTrue(duplicates.containsKey(duplicateOwnerUhUuid));
-        assertTrue(duplicates.get(duplicateOwnerUhUuid).contains(OWNER_GROUPING));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).get("paths").contains(OWNER_GROUPING));
     }
 }
