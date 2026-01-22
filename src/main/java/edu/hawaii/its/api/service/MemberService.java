@@ -36,6 +36,10 @@ public class MemberService {
         return isMember(groupingPath + GroupType.OWNERS.value(), uhIdentifier);
     }
 
+    public boolean isBasis(String groupingPath, String uhIdentifier) {
+        return isMember(groupingPath + GroupType.BASIS.value(), uhIdentifier);
+    }
+
     public boolean isInclude(String groupingPath, String uhIdentifier) {
         return isMember(groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
     }
