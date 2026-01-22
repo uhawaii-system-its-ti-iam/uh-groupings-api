@@ -265,7 +265,7 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifier));
         checkIfSelfOptOrAdmin(currentUser, uhIdentifier);
         // To prevent a race condition and avoid calling the grouper API to update the status of someone who is already opted out
-        if(!memberService.isInclude(groupingPath, uhIdentifier)) {
+        if(!memberService.isInclude(groupingPath, uhIdentifier) && !memberService.isBasis(groupingPath, uhIdentifier)) {
             return new GroupingMoveMemberResult(groupingPath, "SUCCESS");
         }
         return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(),
