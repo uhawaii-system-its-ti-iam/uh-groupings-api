@@ -155,7 +155,7 @@ public class GroupingsRestControllerv2_1Test {
 
     // Test data.
     private Grouping grouping() {
-        Grouping grouping = new Grouping("test:ing:me:bob");
+        Grouping grouping = new Grouping("tmp:tst01name:groupPath01");
 
         Group basisGroup = new Group();
         Subject subjectBasis0 = new Subject("b0-uid", "b0-name","b0-uuid");
@@ -193,7 +193,7 @@ public class GroupingsRestControllerv2_1Test {
 
     // Test data.
     private Grouping groupingTwo() {
-        Grouping grouping = new Grouping("test:ing:me:kim");
+        Grouping grouping = new Grouping("tmp:tst02name:groupPath02");
 
         Group basisGroup = new Group();
         Subject subjectBasis0 = new Subject("b0-uid", "b0-name", "b0-uuid");
@@ -283,7 +283,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhAdmin
     public void addAdminTest() throws Exception {
-        String adminToAdd = "adminToAdd";
+        String adminToAdd = "testiwta";
         GroupingAddResult addMemberResult = new GroupingAddResult();
         given(updateMemberService.addAdminMember(ADMIN, adminToAdd)).willReturn(addMemberResult);
         mockMvc.perform(post(API_BASE + "/admins/" + adminToAdd))
@@ -295,7 +295,7 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhAdmin
     public void removeAdminTest() throws Exception {
-        String adminToRemove = "adminToRemove";
+        String adminToRemove = "testiwta";
         GroupingRemoveResult removeMemberResult = new GroupingRemoveResult();
         given(updateMemberService.removeAdminMember(ADMIN, adminToRemove))
                 .willReturn(removeMemberResult);
@@ -313,9 +313,9 @@ public class GroupingsRestControllerv2_1Test {
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         List<String> paths = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            paths.add("grouping" + i);
+            paths.add(GROUPING + i);
         }
-        String userToRemove = "userToRemove";
+        String userToRemove = "testiwta";
         given(updateMemberService.removeFromGroups(ADMIN, userToRemove, paths)).willReturn(groupingRemoveResults);
         MvcResult result = mockMvc.perform(delete(API_BASE + "/admins/" + String.join(",", paths) + "/" + userToRemove))
                 .andExpect(status().isOk())
@@ -537,7 +537,8 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhOwner
     public void optInTest() throws Exception {
         MvcResult includeResult =
-                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/include-members/o6-uid/self")
+                mockMvc.perform(put(API_BASE + "/groupings/tmp:tst02name:groupPath02/include-members/o6-uid/self")
+                                .header("current_user", "o6-uid")
                                 .header("accept", "application/json"))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -548,7 +549,7 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhOwner
     public void optOutTest() throws Exception {
         MvcResult excludeResult =
-                mockMvc.perform(put(API_BASE + "/groupings/test:ing:me:kim/exclude-members/o6-uid/self")
+                mockMvc.perform(put(API_BASE + "/groupings/tmp:tst02name:groupPath02/exclude-members/o6-uid/self")
                                 .header("accept", "application/json"))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -673,7 +674,6 @@ public class GroupingsRestControllerv2_1Test {
     @Test
     @WithMockUhAdmin
     public void ownerGroupingsTest() throws Exception {
-
         String path = "path:to:grouping";
         String description = "description";
 

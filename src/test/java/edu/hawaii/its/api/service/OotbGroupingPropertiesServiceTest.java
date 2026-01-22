@@ -120,25 +120,25 @@ class OotbGroupingPropertiesServiceTest {
 
     @Test
     public void testAddMembers() {
-        AddMembersResults result = ootbGroupingPropertiesService.addMembers("CURRENT_USER", "groupPath", Arrays.asList("uh1234", "admin1234"));
+        AddMembersResults result = ootbGroupingPropertiesService.addMembers("CURRENT_USER", "groupPath", Arrays.asList("testiwta", "testiwtb"));
         assertNotNull(result);
     }
 
     @Test
     public void testRemoveMembers() {
-        RemoveMembersResults result = ootbGroupingPropertiesService.removeMembers("CURRENT_USER", "groupPath", Arrays.asList("uh1234", "admin1234"));
+        RemoveMembersResults result = ootbGroupingPropertiesService.removeMembers("CURRENT_USER", "groupPath", Arrays.asList("testiwta", "testiwtb"));
         assertNotNull(result);
     }
 
     @Test
     public void testGetSubject() {
-        SubjectsResults result = ootbGroupingPropertiesService.getSubject("userId");
+        SubjectsResults result = ootbGroupingPropertiesService.getSubject("testiwta");
         assertNotNull(result);
     }
 
     @Test
     public void testGetSubjects() {
-        SubjectsResults result = ootbGroupingPropertiesService.getSubjects(Arrays.asList("user1", "user2"));
+        SubjectsResults result = ootbGroupingPropertiesService.getSubjects(Arrays.asList("testiwta", "testiwtb"));
         assertNotNull(result);
     }
 
@@ -179,7 +179,7 @@ class OotbGroupingPropertiesServiceTest {
 
     @Test
     public void testGetGroups() {
-        GetGroupsResults result = ootbGroupingPropertiesService.getGroups("userId");
+        GetGroupsResults result = ootbGroupingPropertiesService.getGroups("testiwta");
         assertNotNull(result);
     }
 
@@ -239,25 +239,25 @@ class OotbGroupingPropertiesServiceTest {
 
     @Test
     public void testGetWsOotbSubject() {
-        WsSubject subject = ootbGroupingPropertiesService.getWsOotbSubject("no identifier");
+        WsSubject subject = ootbGroupingPropertiesService.getWsOotbSubject("testiwta");
         Assertions.assertNull(subject);
     }
 
     @Test
     public void testGetWsOotbSubjects() {
-        List<WsSubject> subjects = ootbGroupingPropertiesService.getWsOotbSubjects(Arrays.asList("id1", "id2"));
+        List<WsSubject> subjects = ootbGroupingPropertiesService.getWsOotbSubjects(Arrays.asList("testiwta", "testiwtb"));
         assertNotNull(subjects);
     }
 
     @Test
     public void testIsValidOotbUhIdentifierSingle() {
-        Boolean isValid = ootbGroupingPropertiesService.isValidOotbUhIdentifier("someIdentifier");
+        Boolean isValid = ootbGroupingPropertiesService.isValidOotbUhIdentifier("testiwta");
         assertNotNull(isValid);
     }
 
     @Test
     public void testIsValidOotbUhIdentifierList() {
-        Boolean isValid = ootbGroupingPropertiesService.isValidOotbUhIdentifier(Arrays.asList("id1", "id2"));
+        Boolean isValid = ootbGroupingPropertiesService.isValidOotbUhIdentifier(Arrays.asList("testiwta", "testiwtb"));
         assertNotNull(isValid);
     }
 

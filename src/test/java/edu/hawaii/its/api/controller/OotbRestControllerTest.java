@@ -60,8 +60,8 @@ public class OotbRestControllerTest {
         List<String> paths = Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER");
 
         OotbActiveProfile activeProfile = new OotbActiveProfile();
-        activeProfile.setUid("admin0123");
-        activeProfile.setUhUuid("33333333");
+        activeProfile.setUid("testiwta");
+        activeProfile.setUhUuid("99997010");
         activeProfile.setAuthorities(paths);
         activeProfile.setAttributes(new HashMap<>());
         activeProfile.setGroupings(new ArrayList<>());

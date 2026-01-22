@@ -374,7 +374,7 @@ public class TestGrouperApiService {
         assertFalse(groups.isEmpty());
         assertTrue(groups.stream().allMatch(group -> group.getGroupPath().startsWith(validQuery)));
 
-        String invalidQuery = "there-is-no-way-any-grouping-path-contains-this-string";
+        String invalidQuery = "invalid-path-01";
         getGroupsResults = grouperService.getGroupsResults(ADMIN, invalidQuery);
     }
 

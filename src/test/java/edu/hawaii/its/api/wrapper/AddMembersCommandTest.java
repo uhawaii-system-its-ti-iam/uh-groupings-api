@@ -23,7 +23,7 @@ public class AddMembersCommandTest {
         assertNotNull(addMembersCommand.getGcAddMember());
         assertNotNull(addMembersCommand.addUhIdentifiers(strings));
         assertNotNull(addMembersCommand.addUhIdentifier(""));
-        assertNotNull(addMembersCommand.addUhIdentifier("11111111"));
+        assertNotNull(addMembersCommand.addUhIdentifier("testiwta"));
         assertNotNull(addMembersCommand.assignGroupPath(""));
         assertNotNull(addMembersCommand.addOwnerGrouping("test-group-path"));
         assertNotNull(addMembersCommand.addOwnerGroupings(strings));

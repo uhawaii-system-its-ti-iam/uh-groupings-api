@@ -16,7 +16,7 @@ public class GetGroupsCommandTest {
     public void builders() {
         GetGroupsCommand getGroupsCommand = new GetGroupsCommand();
         assertNotNull(getGroupsCommand.addUhIdentifier(""));
-        assertNotNull(getGroupsCommand.addUhIdentifier("11111111"));
+        assertNotNull(getGroupsCommand.addUhIdentifier("testiwta"));
         assertNotNull(getGroupsCommand.query(""));
         assertEquals(getGroupsCommand.self(), getGroupsCommand);
     }

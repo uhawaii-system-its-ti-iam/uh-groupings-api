@@ -47,7 +47,7 @@ public class OotbGrouperApiServiceTest {
     @Test
     public void testGetGroupsResults() {
         // Arrange
-        String uhIdentifier = "88888887";
+        String uhIdentifier = "testiwta";
         GetGroupsResults expectedResults = new GetGroupsResults();
         when(ootbGroupingPropertiesService.getGroups(uhIdentifier)).thenReturn(expectedResults);
 
@@ -135,7 +135,7 @@ public class OotbGrouperApiServiceTest {
     @Test
     public void testGetSubjectsSingle() {
         // Setup
-        String uhIdentifier = "12345";
+        String uhIdentifier = "testiwta";
         SubjectsResults expectedResults = new SubjectsResults();
         when(ootbGroupingPropertiesService.getSubject(uhIdentifier)).thenReturn(expectedResults);
 
@@ -150,7 +150,7 @@ public class OotbGrouperApiServiceTest {
     @Test
     public void testGetSubjectsMultiple() {
         // Setup
-        List<String> uhIdentifiers = List.of("12345", "67890");
+        List<String> uhIdentifiers = List.of("testiwta", "testiwtb");
         SubjectsResults expectedResults = new SubjectsResults();
         when(ootbGroupingPropertiesService.getSubjects(uhIdentifiers)).thenReturn(expectedResults);
 
@@ -167,7 +167,7 @@ public class OotbGrouperApiServiceTest {
         // Setup
         String currentUser = "testUser";
         String groupPath = "testGroup";
-        String uhIdentifier = "12345";
+        String uhIdentifier = "testiwta";
         AddMemberResult expected = new AddMemberResult();
         when(ootbGroupingPropertiesService.addMember(currentUser, groupPath, uhIdentifier)).thenReturn(expected);
 
@@ -184,7 +184,7 @@ public class OotbGrouperApiServiceTest {
         // Setup
         String currentUser = "testUser";
         String groupPath = "testGroup";
-        List<String> uhIdentifiers = List.of("12345", "67890");
+        List<String> uhIdentifiers = List.of("testiwta", "testiwtb");
         AddMembersResults expected = new AddMembersResults();
         when(ootbGroupingPropertiesService.addMembers(currentUser, groupPath, uhIdentifiers)).thenReturn(expected);
 
@@ -201,7 +201,7 @@ public class OotbGrouperApiServiceTest {
         // Setup
         String currentUser = "testUser";
         String groupPath = "testGroup";
-        String uhIdentifier = "12345";
+        String uhIdentifier = "testiwta";
         RemoveMemberResult expected = new RemoveMemberResult();
         when(ootbGroupingPropertiesService.removeMember(currentUser, groupPath, uhIdentifier)).thenReturn(expected);
 
@@ -218,7 +218,7 @@ public class OotbGrouperApiServiceTest {
         // Setup
         String currentUser = "testUser";
         String groupPath = "testGroup";
-        List<String> uhIdentifiers = List.of("12345", "67890");
+        List<String> uhIdentifiers = List.of("testiwta", "testiwtb");
         RemoveMembersResults expected = new RemoveMembersResults();
         when(ootbGroupingPropertiesService.removeMembers(currentUser, groupPath, uhIdentifiers)).thenReturn(expected);
 
