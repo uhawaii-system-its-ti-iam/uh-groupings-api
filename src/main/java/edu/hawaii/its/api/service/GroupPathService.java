@@ -2,9 +2,11 @@ package edu.hawaii.its.api.service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
-import edu.hawaii.its.api.exception.GrouperException;
+import edu.hawaii.its.api.exception.GroupPathNotFoundException;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -24,6 +26,14 @@ public class GroupPathService {
     private static final String OWNERS = "owners";
     private static final String RESULT_CODE_SUCCESS = "SUCCESS";
 
+    @Value("${groupings.api.validation.path.maxlength}")
+    private int MAX_PATH_LENGTH;
+
+    @Value("${groupings.api.validation.path.regex}")
+    private String PATH_REGEX;
+
+    private static Pattern GROUP_PATH_PATTERN;
+
     public GroupPathService(GrouperService grouperService) {
             this.grouperService = grouperService;
     }
@@ -32,9 +42,25 @@ public class GroupPathService {
      * Throw an exception if path is invalid.
      */
     public void checkPath(String path) {
-        if (!isValidPath(path)) {
+        if (!isWellFormedPath(path)) {
             throw new InvalidGroupPathException(path);
         }
+        if (!isValidPath(path)) {
+            throw new GroupPathNotFoundException(path);
+        }
+    }
+
+    private boolean isWellFormedPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return false;
+        }
+        if (path.length() > MAX_PATH_LENGTH) {
+            return false;
+        }
+        if (GROUP_PATH_PATTERN == null) {
+            GROUP_PATH_PATTERN = Pattern.compile(PATH_REGEX);
+        }
+        return GROUP_PATH_PATTERN.matcher(path).matches();
     }
 
     public boolean isValidPath(String path) {

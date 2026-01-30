@@ -25,11 +25,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.InvalidDescriptionException;
 import edu.hawaii.its.api.groupings.GroupingPrivilegeResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.util.JsonUtil;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -533,11 +535,50 @@ public class TestGroupingAttributeService {
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
+        //Should throw an exception if description is null.
+        try {
+            groupingAttributeService.updateDescription(GROUPING, ADMIN, null);
+            fail("Should throw an exception if description is null.");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //Should throw an exception if description is empty.
+        try {
+            groupingAttributeService.updateDescription(GROUPING, ADMIN, "");
+            fail("Should throw an exception if description is empty.");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //Should throw an exception if description exceeds the character limit.
+        try {
+            String longDescription = "a".repeat(1001);
+            groupingAttributeService.updateDescription(GROUPING, ADMIN, longDescription);
+            fail("Should throw an exception if description exceeds the character limit.");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //Should throw an exception if description contains invalid characters.
+        try {
+            groupingAttributeService.updateDescription(GROUPING, ADMIN, "@invalid-description");
+            fail("Should throw an exception if description contains invalid characters.");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //Should throw an exception if an invalid path is passed.
+        try {
+            groupingAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GrouperException e) {
+            JsonUtil.printJson(e);
+        }
 
         // Should throw an exception if an invalid path is passed.
-        assertThrows(GrouperException.class,
-                () -> groupingAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION));
-        updateMemberService.removeAdminMember(ADMIN, testUid);
+        try {
+            groupingAttributeService.updateDescription("bogus-path", ADMIN, DEFAULT_DESCRIPTION);
+            fail("Should throw an exception if an invalid path is passed.");
+        } catch (GrouperException e) {
+            JsonUtil.printJson(e);
+        }
 
         // Should be set back to original description.
         groupingAttributeService.updateDescription(GROUPING, ADMIN, descriptionOriginal);

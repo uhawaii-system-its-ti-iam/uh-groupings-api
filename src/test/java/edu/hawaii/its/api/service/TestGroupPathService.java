@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.GroupPathNotFoundException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
 import edu.hawaii.its.api.util.JsonUtil;
 
@@ -52,15 +53,46 @@ public class TestGroupPathService {
 
     @Test
     public void checkPath() {
+        //valid path
         try {
             groupPathService.checkPath(GROUPING);
-        } catch (InvalidGroupPathException e) {
+        } catch (InvalidGroupPathException | GroupPathNotFoundException e) {
             fail("Should not throw an exception if path is valid");
         }
+        //invalid path (null)
+        try {
+            groupPathService.checkPath(null);
+            fail("Should throw an exception if path is null");
+        } catch (InvalidGroupPathException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid path (empty)
+        try {
+            groupPathService.checkPath("");
+            fail("Should throw an exception if path is empty");
+        } catch (InvalidGroupPathException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid path (too long)
+        try {
+            String longPath = "a".repeat(260);
+            groupPathService.checkPath(longPath);
+            fail("Should throw an exception if path is too long");
+        } catch (InvalidGroupPathException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid path (bad characters)
+        try {
+            groupPathService.checkPath("@bad-path!");
+            fail("Should throw an exception if path contains invalid characters");
+        } catch (InvalidGroupPathException e) {
+            JsonUtil.printJson(e);
+        }
+        //path not found
         try {
             groupPathService.checkPath("bad-path");
-            fail("Should throw an exception if path is valid");
-        } catch (InvalidGroupPathException e) {
+            fail("Should throw an exception if path does not exist");
+        } catch (GroupPathNotFoundException e) {
             JsonUtil.printJson(e);
         }
     }

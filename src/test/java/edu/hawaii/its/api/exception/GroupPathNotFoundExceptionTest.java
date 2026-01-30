@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class InvalidGroupPathExceptionTest {
+public class GroupPathNotFoundExceptionTest {
 
     @Test
     public void construction() {
-        InvalidGroupPathException exception = new InvalidGroupPathException("fail");
+        GroupPathNotFoundException exception = new GroupPathNotFoundException("fail");
         assertNotNull(exception);
-        assertEquals("400 BAD_REQUEST \"fail\"", exception.getMessage());
+        assertEquals("404 NOT_FOUND \"fail\"", exception.getMessage());
     }
 
 }

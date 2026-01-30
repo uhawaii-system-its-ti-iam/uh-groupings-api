@@ -1,12 +1,16 @@
 package edu.hawaii.its.api.service;
 
+import java.util.regex.Pattern;
+
 import edu.hawaii.its.api.exception.GrouperException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.InvalidDescriptionException;
 import edu.hawaii.its.api.groupings.GroupingPrivilegeResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateOptAttributeResult;
@@ -43,6 +47,8 @@ public class GroupingAttributeService {
 
     private static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
+    private final PolicyFactory policy = Sanitizers.FORMATTING;;
+
     private final GrouperService grouperService;
 
     private final MemberService memberService;
@@ -50,6 +56,14 @@ public class GroupingAttributeService {
     private final GroupingsService groupingsService;
 
     private final UpdateTimestampService timestampService;
+
+    @Value("${groupings.api.validation.description.maxlength}")
+    private int DESCIPTION_MAX_LENGTH;
+
+    @Value("${groupings.api.validation.description.regex}")
+    private String DESCRIPTION_REGEX;
+
+    private static Pattern DESCRIPTION_PATTERN;
 
     public GroupingAttributeService(GrouperService grouperService,
             MemberService memberService,
@@ -123,7 +137,9 @@ public class GroupingAttributeService {
         return new GroupingPrivilegeResult(assignGrouperPrivilegesResult);
     }
 
-    // Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
+    /**
+     * Updates a Group's description, then passes the Group object to GrouperFactoryService to be saved in Grouper.
+     */
     public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUid,
             String description) {
         logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s; description: %s;",
@@ -133,7 +149,24 @@ public class GroupingAttributeService {
                 ownerUid)) {
             throw new AccessDeniedException();
         }
-        return groupingsService.updateGroupingDescription(groupPath, description);
+        String santized_description = validateAndSanitizeDescription(description);
+        return groupingsService.updateGroupingDescription(groupPath, santized_description);
+    }
+
+    public String validateAndSanitizeDescription(String description) {
+        if (description == null || description.isEmpty()) {
+            throw new InvalidDescriptionException("Description cannot be null or empty.");
+        }
+        if (description.length() > DESCIPTION_MAX_LENGTH) {
+            throw new InvalidDescriptionException("Description length is too long.");
+        }
+        if (DESCRIPTION_PATTERN == null) {
+            DESCRIPTION_PATTERN = Pattern.compile(DESCRIPTION_REGEX);
+        }
+        if (!DESCRIPTION_PATTERN.matcher(description).matches()) {
+            throw new InvalidDescriptionException("Description contains invalid characters.");
+        }
+        return policy.sanitize(description);
     }
 
     //TODO: Move both checkPrivileges helper methods to the Governor class once it's built

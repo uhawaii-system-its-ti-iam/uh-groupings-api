@@ -56,12 +56,20 @@ public class TestSubjectService {
         assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(TEST_UIDS));
 
         List<String> hasInvalidIdentifiers = new ArrayList<>(TEST_UIDS);
-        hasInvalidIdentifiers.add("invalid-identifier");
+        hasInvalidIdentifiers.add("non-existant-identifier");
         assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
 
         hasInvalidIdentifiers = new ArrayList<>(TEST_UH_UUIDS);
-        hasInvalidIdentifiers.add("invalid-identifier");
+        hasInvalidIdentifiers.add("non-existant-identifier");
         assertEquals(TEST_UH_UUIDS, subjectService.getValidUhUuids(hasInvalidIdentifiers));
+
+        List<String> invalidIdentifiers = List.of(
+                "",
+                "a".repeat(260),
+                "@invalid-identifier!"
+        );
+        assertEquals(new ArrayList<>(), subjectService.getValidUhUuids(invalidIdentifiers));
+
     }
 
     @Test
@@ -71,7 +79,18 @@ public class TestSubjectService {
         assertEquals(uhuuid, subjectService.getValidUhUuid(uid));
         assertEquals(uhuuid, subjectService.getValidUhUuid(uhuuid));
 
-        assertEquals("", subjectService.getValidUhUuid("invalid-identifier"));
+        //identifier not found
+        assertEquals("", subjectService.getValidUhUuid("non-existant-identifier"));
+        //invalid identifier(null)
+        assertEquals("", subjectService.getValidUhUuid(null));
+        //invalid identifier(empty)
+        assertEquals("", subjectService.getValidUhUuid(""));
+        String longIdentifier = "a".repeat(260);
+        //invalid identifier(too long)
+        assertEquals("", subjectService.getValidUhUuid(longIdentifier));
+        //invalid identifier(bad characters)
+        assertEquals("", subjectService.getValidUhUuid("@invalid-identifier!"));
+
     }
 
 }
