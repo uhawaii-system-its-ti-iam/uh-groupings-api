@@ -35,6 +35,8 @@ import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.Subject;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -102,6 +104,7 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+
     }
 
     @Test
@@ -294,8 +297,9 @@ public class TestGroupingAssignmentService {
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        int duplicateOwners = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
         int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
-        assertEquals(initialOwners + basisMembers + includeMembers + 1, afterAdd);
+        assertEquals(initialOwners + basisMembers + includeMembers + 1 - duplicateOwners, afterAdd);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int afterRemove = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners, afterRemove);
@@ -317,5 +321,37 @@ public class TestGroupingAssignmentService {
         assertEquals(initialOwners, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         assertEquals(initialOwners, groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING));
+    }
+
+    @Test
+    public void compareOwnerGroupingsTest() {
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+
+        GetMembersResult membersResult =
+                grouperService.getMembersResult(ADMIN, OWNER_GROUPING);
+        List<Subject> subjects = membersResult.getSubjects();
+        String duplicateOwnerUhUuid = subjects.get(0).getUhUuid();
+
+        //there must be at least one member in OWNER_GROUPING to run this test
+        if (duplicateOwnerUhUuid.isEmpty()) {
+            updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+            fail("No valid members found in OWNER_GROUPING; cannot run test.");
+        }
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
+
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        int initialDuplicatesCount = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
+
+        // Add the member as a direct owner to create the duplicate (member is already in OWNER_GROUPING).
+        grouperService.addMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
+
+        Map<String, Map<String, List<String>>> duplicates =
+                groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING);
+        grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        assertEquals(initialDuplicatesCount + 1, duplicates.size());
+        assertTrue(duplicates.containsKey(duplicateOwnerUhUuid));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).get("paths").contains(OWNER_GROUPING));
     }
 }

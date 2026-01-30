@@ -837,6 +837,18 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     @WithMockUhAdmin
+    public void compareOwnerGroupingsTest() throws Exception {
+        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/compare";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        )
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Map<String, Object>>>() {}));
+    }
+
+    @Test
+    @WithMockUhAdmin
     public void groupingOwnersTest() throws Exception {
         String url = API_BASE_URL + "/grouping/" + GROUPING + "/owners";
         MvcResult mvcResult = mockMvc.perform(get(url)
