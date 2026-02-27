@@ -300,7 +300,7 @@ public class TestGroupingAssignmentService {
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int duplicateOwners = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
         int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
-        assertEquals(initialOwners + basisMembers + includeMembers + 1 - duplicateOwners, afterAdd);
+        assertEquals(initialOwners + basisMembers + includeMembers - duplicateOwners, afterAdd);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int afterRemove = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners, afterRemove);

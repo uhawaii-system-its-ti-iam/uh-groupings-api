@@ -135,17 +135,23 @@ public class GroupingAssignmentService {
 
     /**
      * Get number of all owners in a grouping. Owners with "ALL" filter.
-     * It includes direct owners + owner-groupings + indirect owners.
+     * It includes direct owners + indirect owners.
+     * (Excludes owner-groupings)
      */
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
-        if (!memberService.isOwner(groupPath, currentUser)) {
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();
-
-        return owners.getMembers().size();
+        Integer allOwnersCount = 0;
+        for (GroupingGroupMember owner : owners.getMembers()) {
+            if (!owner.getName().contains(":")) {
+                allOwnersCount++;
+            }
+        }
+        return allOwnersCount;
     }
 
     /**
