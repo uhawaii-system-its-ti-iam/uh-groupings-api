@@ -13,6 +13,10 @@ public class HasMemberResult {
     public HasMemberResult() {
         this.wsHasMemberResult = new WsHasMemberResult();
     }
+    
+    public boolean isMember() {
+        return "IS_MEMBER".equalsIgnoreCase(getResultCode());
+    }
 
     public Subject getSubject() {
         if (wsHasMemberResult.getWsSubject() == null) {

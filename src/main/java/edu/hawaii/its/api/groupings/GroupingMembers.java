@@ -1,11 +1,11 @@
 package edu.hawaii.its.api.groupings;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
@@ -32,7 +32,14 @@ public class GroupingMembers {
     public GroupingMembers(HasMembersResults hasMembersResults1, HasMembersResults hasMembersResults2) {
         setMembers(hasMembersResults1, hasMembersResults2);
     }
-
+    
+    public static GroupingMembers fromFilteredResults(List<HasMemberResult> filteredResults) {
+        GroupingMembers groupingMembers = new GroupingMembers();
+        for (HasMemberResult result : filteredResults) {
+            groupingMembers.members.add(new GroupingMember(result));
+        }
+        return groupingMembers;
+    }
     public List<GroupingMember> getMembers() {
         return members;
     }
@@ -60,4 +67,5 @@ public class GroupingMembers {
                     hasMembersResults2.getResults().get(i), hasMembersResults2.getGroup().getExtension()));
         }
     }
+    
 }
