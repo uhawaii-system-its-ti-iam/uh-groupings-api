@@ -34,6 +34,7 @@ public class GroupingGroupsMembersTest {
         assertFalse(groupingGroupsMembers.isInclude());
         assertFalse(groupingGroupsMembers.isExclude());
         assertFalse(groupingGroupsMembers.isOwners());
+        assertFalse(groupingGroupsMembers.isComposite());
         assertEquals(Integer.valueOf(0), groupingGroupsMembers.getPageNumber());
         assertTrue(groupingGroupsMembers.isPaginationComplete());
     }
@@ -63,23 +64,27 @@ public class GroupingGroupsMembersTest {
         assertTrue(groupingGroupsMembers.isInclude());
         assertTrue(groupingGroupsMembers.isExclude());
         assertTrue(groupingGroupsMembers.isOwners());
+        assertTrue(groupingGroupsMembers.isComposite());
 
         GroupingGroupMembers basis = groupingGroupsMembers.getGroupingBasis();
         GroupingGroupMembers include = groupingGroupsMembers.getGroupingInclude();
         GroupingGroupMembers exclude = groupingGroupsMembers.getGroupingExclude();
         GroupingGroupMembers owners = groupingGroupsMembers.getGroupingOwners();
+        GroupingGroupMembers composite = groupingGroupsMembers.getGroupingComposite();
         GroupingMembers allMembers = groupingGroupsMembers.getAllMembers();
 
         assertNotNull(basis);
         assertNotNull(include);
         assertNotNull(exclude);
         assertNotNull(owners);
+        assertNotNull(composite);
         assertNotNull(allMembers);
 
         assertEquals("group-path:basis", basis.getGroupPath());
         assertEquals("group-path:include", include.getGroupPath());
         assertEquals("group-path:exclude", exclude.getGroupPath());
         assertEquals("group-path:owners", owners.getGroupPath());
+        assertEquals("group-path", composite.getGroupPath());
 
         List<GroupingGroupMember> basisMembers = basis.getMembers();
         List<GroupingGroupMember> includeMembers = include.getMembers();
@@ -154,6 +159,7 @@ public class GroupingGroupsMembersTest {
         assertFalse(groupingGroupsMembers.isInclude());
         assertFalse(groupingGroupsMembers.isExclude());
         assertFalse(groupingGroupsMembers.isOwners());
+        assertFalse(groupingGroupsMembers.isComposite());
 
         assertNotNull(groupingGroupsMembers.getGroupingBasis());
         assertNotNull(groupingGroupsMembers.getGroupingBasis().getMembers());

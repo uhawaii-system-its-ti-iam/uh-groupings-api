@@ -5,7 +5,8 @@ public enum GroupType {
     BASIS(":basis"),
     INCLUDE(":include"),
     EXCLUDE(":exclude"),
-    OWNERS(":owners");
+    OWNERS(":owners"),
+    COMPOSITE("");
 
     private final String value;
 

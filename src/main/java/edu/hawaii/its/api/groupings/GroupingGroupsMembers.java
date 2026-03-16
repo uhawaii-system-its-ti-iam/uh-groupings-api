@@ -2,7 +2,6 @@ package edu.hawaii.its.api.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -19,6 +18,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     private boolean isInclude;
     private boolean isExclude;
     private boolean isOwners;
+    private boolean isComposite;
     private boolean paginationComplete;
     private GroupingMembers allMembers;
     private Integer pageNumber;
@@ -32,6 +32,7 @@ public class GroupingGroupsMembers implements GroupingResult {
         setInclude(hasMembers(GroupType.INCLUDE.value()));
         setExclude(hasMembers(GroupType.EXCLUDE.value()));
         setOwners(hasMembers(GroupType.OWNERS.value()));
+        setComposite(hasMembers(GroupType.COMPOSITE.value()));
         setPageNumber(0);
         setPaginationComplete();
     }
@@ -45,6 +46,7 @@ public class GroupingGroupsMembers implements GroupingResult {
         setInclude(false);
         setExclude(false);
         setOwners(false);
+        setComposite(false);
         setPageNumber(0);
         setPaginationComplete();
     }
@@ -74,35 +76,33 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     private void setAllMembers() {
         this.allMembers = new GroupingMembers();
+        
+        // Get the composite group from Grouper - it already contains (basis + include) - exclude
+        GroupingGroupMembers composite = getGroupingComposite();
+        List<GroupingGroupMember> compositeMembers = composite.getMembers();
+        
+        // Get basis and include to determine "where listed" for each member
         List<GroupingGroupMember> basis = getGroupingBasis().getMembers();
         List<GroupingGroupMember> include = getGroupingInclude().getMembers();
-        List<GroupingGroupMember> exclude = getGroupingExclude().getMembers();
-
-        List<GroupingGroupMember> intersectionBasisInclude = basis.stream()
-                .distinct().filter(groupingsGroupMember -> include.stream()
-                        .anyMatch(includeMember -> includeMember.getUhUuid().equals(groupingsGroupMember.getUhUuid())))
-                .collect(Collectors.toList());
-
-        // Basis plus Include.
-        for (GroupingGroupMember groupingGroupMember : intersectionBasisInclude) {
-            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis & Include"));
-        }
-        for (GroupingGroupMember groupingGroupMember : basis) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis"));
+        
+        // Use the composite group members (which Grouper has already calculated correctly)
+        for (GroupingGroupMember member : compositeMembers) {
+            boolean inBasis = basis.stream()
+                    .anyMatch(b -> b.getUhUuid().equals(member.getUhUuid()));
+            boolean inInclude = include.stream()
+                    .anyMatch(i -> i.getUhUuid().equals(member.getUhUuid()));
+            
+            String whereListed;
+            if (inBasis && inInclude) {
+                whereListed = "Basis & Include";
+            } else if (inBasis) {
+                whereListed = "Basis";
+            } else {
+                whereListed = "Include";
             }
+            
+            this.allMembers.getMembers().add(new GroupingMember(member, whereListed));
         }
-        for (GroupingGroupMember groupingGroupMember : include) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
-            }
-        }
-
-        // Minus Exclude
-        this.allMembers.getMembers().removeIf(groupingMember -> exclude.stream()
-                .anyMatch(excludeMember -> excludeMember.getUhUuid().equals(groupingMember.getUhUuid())));
     }
 
     public GroupingMembers getAllMembers() {
@@ -130,7 +130,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     }
 
     public void setPaginationComplete() {
-        paginationComplete = !isBasis && !isInclude && !isExclude && !isOwners;
+        paginationComplete = !isBasis && !isInclude && !isExclude && !isOwners && !isComposite;
     }
 
     public void setBasis(boolean basis) {
@@ -147,6 +147,14 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     public void setOwners(boolean owners) {
         isOwners = owners;
+    }
+
+    public boolean isComposite() {
+        return isComposite;
+    }
+
+    public void setComposite(boolean composite) {
+        isComposite = composite;
     }
 
     public void setPageNumber(Integer pageNumber) {
@@ -173,9 +181,24 @@ public class GroupingGroupsMembers implements GroupingResult {
         return getMembersOf(GroupType.OWNERS.value());
     }
 
+    public GroupingGroupMembers getGroupingComposite() {
+        return getMembersOf(GroupType.COMPOSITE.value());
+    }
+
     private boolean hasMembers(String groupExtension) {
         for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
+            String path = groupingGroupMembers.getGroupPath();
+            boolean matches;
+            if (groupExtension.isEmpty()) {
+                // For composite group, find the path that doesn't end with any known suffix
+                matches = !path.endsWith(GroupType.BASIS.value()) &&
+                        !path.endsWith(GroupType.INCLUDE.value()) &&
+                        !path.endsWith(GroupType.EXCLUDE.value()) &&
+                        !path.endsWith(GroupType.OWNERS.value());
+            } else {
+                matches = path.endsWith(groupExtension);
+            }
+            if (matches) {
                 return !groupingGroupMembers.getMembers().isEmpty();
             }
         }
@@ -184,7 +207,16 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     private GroupingGroupMembers getMembersOf(String groupExtension) {
         for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
+            String path = groupingGroupMembers.getGroupPath();
+            if (groupExtension.isEmpty()) {
+                // For composite group, find the path that doesn't end with any known suffix
+                if (!path.endsWith(GroupType.BASIS.value()) &&
+                        !path.endsWith(GroupType.INCLUDE.value()) &&
+                        !path.endsWith(GroupType.EXCLUDE.value()) &&
+                        !path.endsWith(GroupType.OWNERS.value())) {
+                    return groupingGroupMembers;
+                }
+            } else if (path.endsWith(groupExtension)) {
                 return groupingGroupMembers;
             }
         }
