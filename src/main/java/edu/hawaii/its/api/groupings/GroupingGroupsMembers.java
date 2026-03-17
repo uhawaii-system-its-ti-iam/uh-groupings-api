@@ -72,8 +72,56 @@ public class GroupingGroupsMembers implements GroupingResult {
         }
     }
 
+    /**
+     * Set all members using Grouper's composite group directly.
+     * The composite group already calculates (basis + include) - exclude correctly.
+     * If the composite group is available, use it directly. Otherwise, fall back to manual calculation.
+     */
     private void setAllMembers() {
         this.allMembers = new GroupingMembers();
+        
+        // Try to use the composite grouping directly (Grouper already calculates (basis + include) - exclude)
+        GroupingGroupMembers compositeGrouping = getCompositeGrouping();
+        if (!compositeGrouping.getMembers().isEmpty()) {
+            // Use composite group members directly - this is the correct membership from Grouper
+            List<GroupingGroupMember> basis = getGroupingBasis().getMembers();
+            List<GroupingGroupMember> include = getGroupingInclude().getMembers();
+            
+            for (GroupingGroupMember member : compositeGrouping.getMembers()) {
+                String whereListed = determineWhereListed(member, basis, include);
+                this.allMembers.getMembers().add(new GroupingMember(member, whereListed));
+            }
+        } else {
+            // Fall back to manual calculation if composite group is not available
+            setAllMembersFallback();
+        }
+    }
+    
+    /**
+     * Determine where a member is listed (Basis, Include, or Basis & Include).
+     */
+    private String determineWhereListed(GroupingGroupMember member, 
+            List<GroupingGroupMember> basis, List<GroupingGroupMember> include) {
+        boolean inBasis = basis.stream()
+                .anyMatch(b -> b.getUhUuid().equals(member.getUhUuid()));
+        boolean inInclude = include.stream()
+                .anyMatch(i -> i.getUhUuid().equals(member.getUhUuid()));
+        
+        if (inBasis && inInclude) {
+            return "Basis & Include";
+        } else if (inBasis) {
+            return "Basis";
+        } else if (inInclude) {
+            return "Include";
+        }
+        return "Basis"; // Default to Basis if not found (shouldn't happen)
+    }
+    
+    /**
+     * Fallback method for calculating all members manually.
+     * Used when composite group is not available in the results.
+     */
+    private void setAllMembersFallback() {
         List<GroupingGroupMember> basis = getGroupingBasis().getMembers();
         List<GroupingGroupMember> include = getGroupingInclude().getMembers();
         List<GroupingGroupMember> exclude = getGroupingExclude().getMembers();
@@ -171,6 +219,25 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     public GroupingGroupMembers getGroupingOwners() {
         return getMembersOf(GroupType.OWNERS.value());
+    }
+
+    /**
+     * Get the composite grouping members (the grouping path without :basis, :include, :exclude, :owners suffix).
+     * This represents the actual membership as calculated by Grouper: (basis + include) - exclude.
+     */
+    public GroupingGroupMembers getCompositeGrouping() {
+        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
+            String path = groupingGroupMembers.getGroupPath();
+            // Composite grouping path doesn't end with any of the subgroup suffixes
+            if (!path.endsWith(GroupType.BASIS.value()) && 
+                !path.endsWith(GroupType.INCLUDE.value()) && 
+                !path.endsWith(GroupType.EXCLUDE.value()) && 
+                !path.endsWith(GroupType.OWNERS.value()) &&
+                !path.isEmpty()) {
+                return groupingGroupMembers;
+            }
+        }
+        return new GroupingGroupMembers();
     }
 
     private boolean hasMembers(String groupExtension) {
