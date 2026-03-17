@@ -2,16 +2,18 @@ package edu.hawaii.its.api.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 
-/**
- * When getMembers is called, GroupingGroupsMembers holds the information about UH affiliates that are listed in a grouping.
- */
 public class GroupingGroupsMembers implements GroupingResult {
+
     private String resultCode;
     private String groupPath;
     private List<GroupingGroupMembers> groupsMembersList;
@@ -40,7 +42,7 @@ public class GroupingGroupsMembers implements GroupingResult {
         setGroupPath("");
         setResultCode("");
         this.groupsMembersList = new ArrayList<>();
-        setAllMembers();
+        this.allMembers = new GroupingMembers();
         setBasis(false);
         setInclude(false);
         setExclude(false);
@@ -49,7 +51,8 @@ public class GroupingGroupsMembers implements GroupingResult {
         setPaginationComplete();
     }
 
-    @Override public String getResultCode() {
+    @Override
+    public String getResultCode() {
         return resultCode;
     }
 
@@ -57,7 +60,8 @@ public class GroupingGroupsMembers implements GroupingResult {
         this.resultCode = resultCode;
     }
 
-    @Override public String getGroupPath() {
+    @Override
+    public String getGroupPath() {
         return groupPath;
     }
 
@@ -67,42 +71,95 @@ public class GroupingGroupsMembers implements GroupingResult {
 
     private void setGroupsMembersList(GetMembersResults getMembersResults) {
         this.groupsMembersList = new ArrayList<>();
-        for (GetMembersResult getMembersResult : getMembersResults.getMembersResults()) {
-            groupsMembersList.add(new GroupingGroupMembers(getMembersResult));
+        for (GetMembersResult result : getMembersResults.getMembersResults()) {
+            groupsMembersList.add(new GroupingGroupMembers(result));
         }
     }
 
     private void setAllMembers() {
+
         this.allMembers = new GroupingMembers();
-        List<GroupingGroupMember> basis = getGroupingBasis().getMembers();
-        List<GroupingGroupMember> include = getGroupingInclude().getMembers();
-        List<GroupingGroupMember> exclude = getGroupingExclude().getMembers();
 
-        List<GroupingGroupMember> intersectionBasisInclude = basis.stream()
-                .distinct().filter(groupingsGroupMember -> include.stream()
-                        .anyMatch(includeMember -> includeMember.getUhUuid().equals(groupingsGroupMember.getUhUuid())))
-                .collect(Collectors.toList());
+        List<GroupingGroupMember> basis = safeList(getGroupingBasis().getMembers());
+        List<GroupingGroupMember> include = safeList(getGroupingInclude().getMembers());
+        List<GroupingGroupMember> exclude = safeList(getGroupingExclude().getMembers());
 
-        // Basis plus Include.
-        for (GroupingGroupMember groupingGroupMember : intersectionBasisInclude) {
-            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis & Include"));
-        }
-        for (GroupingGroupMember groupingGroupMember : basis) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis"));
+        Set<String> basisSet = toUuidSet(basis);
+        Set<String> includeSet = toUuidSet(include);
+        Set<String> excludeSet = toUuidSet(exclude);
+
+        GroupingGroupMembers compositeGrouping = getCompositeGrouping();
+        List<GroupingGroupMember> compositeMembers = safeList(compositeGrouping.getMembers());
+
+        if (!compositeMembers.isEmpty()) {
+
+            for (GroupingGroupMember member : compositeMembers) {
+                String where = determineWhereListed(member, basisSet, includeSet);
+                this.allMembers.getMembers().add(new GroupingMember(member, where));
             }
+
+        } else {
+            buildFallbackMembers(basis, include, excludeSet);
         }
-        for (GroupingGroupMember groupingGroupMember : include) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
-            }
+    }
+
+    private Set<String> toUuidSet(List<GroupingGroupMember> members) {
+        return members.stream()
+                .map(GroupingGroupMember::getUhUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private List<GroupingGroupMember> safeList(List<GroupingGroupMember> list) {
+        return list != null ? list : new ArrayList<>();
+    }
+
+    private String determineWhereListed(GroupingGroupMember member,
+                                        Set<String> basisSet,
+                                        Set<String> includeSet) {
+
+        String uuid = member.getUhUuid();
+
+        if (uuid == null) {
+            return "Unknown";
         }
 
-        // Minus Exclude
-        this.allMembers.getMembers().removeIf(groupingMember -> exclude.stream()
-                .anyMatch(excludeMember -> excludeMember.getUhUuid().equals(groupingMember.getUhUuid())));
+        boolean inBasis = basisSet.contains(uuid);
+        boolean inInclude = includeSet.contains(uuid);
+
+        if (inBasis && inInclude) return "Basis & Include";
+        if (inBasis) return "Basis";
+        if (inInclude) return "Include";
+
+        return "Unknown";
+    }
+
+    private void buildFallbackMembers(List<GroupingGroupMember> basis,
+                                      List<GroupingGroupMember> include,
+                                      Set<String> excludeSet) {
+
+        Map<String, GroupingMember> map = new LinkedHashMap<>();
+
+        for (GroupingGroupMember member : basis) {
+            String uuid = member.getUhUuid();
+            if (uuid == null || excludeSet.contains(uuid)) continue;
+
+            String where = include.stream()
+                    .anyMatch(m -> uuid.equals(m.getUhUuid()))
+                    ? "Basis & Include"
+                    : "Basis";
+
+            map.put(uuid, new GroupingMember(member, where));
+        }
+
+        for (GroupingGroupMember member : include) {
+            String uuid = member.getUhUuid();
+            if (uuid == null || excludeSet.contains(uuid)) continue;
+
+            map.putIfAbsent(uuid, new GroupingMember(member, "Include"));
+        }
+
+        this.allMembers.getMembers().addAll(map.values());
     }
 
     public GroupingMembers getAllMembers() {
@@ -173,19 +230,33 @@ public class GroupingGroupsMembers implements GroupingResult {
         return getMembersOf(GroupType.OWNERS.value());
     }
 
+    public GroupingGroupMembers getCompositeGrouping() {
+        for (GroupingGroupMembers g : this.groupsMembersList) {
+            String path = g.getGroupPath();
+            if (!path.endsWith(GroupType.BASIS.value()) &&
+                    !path.endsWith(GroupType.INCLUDE.value()) &&
+                    !path.endsWith(GroupType.EXCLUDE.value()) &&
+                    !path.endsWith(GroupType.OWNERS.value()) &&
+                    !path.isEmpty()) {
+                return g;
+            }
+        }
+        return new GroupingGroupMembers();
+    }
+
     private boolean hasMembers(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return !groupingGroupMembers.getMembers().isEmpty();
+        for (GroupingGroupMembers g : this.groupsMembersList) {
+            if (g.getGroupPath().endsWith(groupExtension)) {
+                return !safeList(g.getMembers()).isEmpty();
             }
         }
         return false;
     }
 
     private GroupingGroupMembers getMembersOf(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return groupingGroupMembers;
+        for (GroupingGroupMembers g : this.groupsMembersList) {
+            if (g.getGroupPath().endsWith(groupExtension)) {
+                return g;
             }
         }
         return new GroupingGroupMembers();
