@@ -1,20 +1,19 @@
 package edu.hawaii.its.api.groupings;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
-
+import edu.hawaii.its.api.wrapper.Subject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GroupingGroupsMembersTest {
     private PropertyLocator propertyLocator;
@@ -182,6 +181,213 @@ public class GroupingGroupsMembersTest {
         assertNotNull(groupingGroupsMembers.getAllMembers());
         assertNotNull(groupingGroupsMembers.getAllMembers().getMembers());
         assertTrue(groupingGroupsMembers.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void fallbackAllMembersCalculation() {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults ws = JsonUtil.asObject(json, WsGetMembersResults.class);
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
+        g.getCompositeGrouping().getMembers().clear();
+        g = new GroupingGroupsMembers(new GetMembersResults(ws));
+        assertNotNull(g.getAllMembers());
+        assertFalse(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void setPaginationCompleteTrueTest() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+        g.setPaginationCompleteTrue();
+        assertTrue(g.isPaginationComplete());
+    }
+
+    @Test
+    public void compositeGroupingEmptyPathBranch() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        GroupingGroupMembers result = g.getCompositeGrouping();
+
+        assertNotNull(result);
+        assertTrue(result.getMembers().isEmpty());
+    }
+
+    @Test
+    public void determineWhereListedAllBranches() {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults ws = JsonUtil.asObject(json, WsGetMembersResults.class);
+
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
+
+        List<GroupingMember> members = g.getAllMembers().getMembers();
+
+        assertTrue(members.stream().anyMatch(m -> m.getWhereListed().equals("Basis & Include")));
+        assertTrue(members.stream().anyMatch(m -> m.getWhereListed().equals("Basis")));
+        assertTrue(members.stream().anyMatch(m -> m.getWhereListed().equals("Include")));
+    }
+
+    @Test
+    public void setAllMembersFallbackActuallyUsed() {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults ws = JsonUtil.asObject(json, WsGetMembersResults.class);
+
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
+
+        GroupingGroupMembers composite = g.getCompositeGrouping();
+
+        assertTrue(composite.getMembers().isEmpty());
+        assertFalse(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void setAllMembersFallbackBranch() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        assertNotNull(g.getAllMembers());
+        assertTrue(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void forceCompositeBranchFullCoverage() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject subject = new Subject();
+        subject.setUhUuid("u1");
+
+        GroupingGroupMember m = new GroupingGroupMember(subject);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group-path");
+        composite.getMembers().add(m);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group-path:basis");
+        basis.getMembers().add(m);
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group-path:include");
+        include.getMembers().add(m);
+
+        List<GroupingGroupMembers> list = new ArrayList<>();
+        list.add(composite);
+        list.add(basis);
+        list.add(include);
+
+        Field f = GroupingGroupsMembers.class.getDeclaredField("groupsMembersList");
+        f.setAccessible(true);
+        f.set(g, list);
+
+        Method mtd = GroupingGroupsMembers.class.getDeclaredMethod("setAllMembers");
+        mtd.setAccessible(true);
+        mtd.invoke(g);
+
+        assertFalse(g.getAllMembers().getMembers().isEmpty());
+
+        assertTrue(g.getAllMembers().getMembers().stream()
+                .anyMatch(x -> x.getWhereListed().equals("Basis & Include")));
+    }
+
+    @Test
+    public void determineWhereListedDefaultBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject subject = new Subject("u1", "u1", "person");
+        GroupingGroupMember member = new GroupingGroupMember(subject);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group-path");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group-path:basis");
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group-path:include");
+
+        List<GroupingGroupMembers> list = new ArrayList<>();
+        list.add(composite);
+        list.add(basis);
+        list.add(include);
+
+        Field field = GroupingGroupsMembers.class.getDeclaredField("groupsMembersList");
+        field.setAccessible(true);
+        field.set(g, list);
+
+        Method method = GroupingGroupsMembers.class.getDeclaredMethod("setAllMembers");
+        method.setAccessible(true);
+        method.invoke(g);
+
+        assertTrue(g.getAllMembers().getMembers().stream()
+                .anyMatch(x -> x.getWhereListed().equals("Basis")));
+    }
+
+    @Test
+    public void determineWhereListedIncludeOnlyBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject subject = new Subject("u1", "u1", "person");
+        GroupingGroupMember member = new GroupingGroupMember(subject);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group-path");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group-path:basis");
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group-path:include");
+        include.getMembers().add(member);
+
+        List<GroupingGroupMembers> list = new ArrayList<>();
+        list.add(composite);
+        list.add(basis);
+        list.add(include);
+
+        Field field = GroupingGroupsMembers.class.getDeclaredField("groupsMembersList");
+        field.setAccessible(true);
+        field.set(g, list);
+
+        Method method = GroupingGroupsMembers.class.getDeclaredMethod("setAllMembers");
+        method.setAccessible(true);
+        method.invoke(g);
+
+        assertTrue(g.getAllMembers().getMembers().stream()
+                .anyMatch(x -> x.getWhereListed().equals("Include")));
+    }
+
+    @Test
+    public void determineWhereListedBasisOnlyBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject subject = new Subject("u1", "u1", "person");
+        GroupingGroupMember member = new GroupingGroupMember(subject);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group-path");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group-path:basis");
+        basis.getMembers().add(member);
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group-path:include");
+
+        List<GroupingGroupMembers> list = new ArrayList<>();
+        list.add(composite);
+        list.add(basis);
+        list.add(include);
+
+        Field field = GroupingGroupsMembers.class.getDeclaredField("groupsMembersList");
+        field.setAccessible(true);
+        field.set(g, list);
+
+        Method method = GroupingGroupsMembers.class.getDeclaredMethod("setAllMembers");
+        method.setAccessible(true);
+        method.invoke(g);
+
+        assertTrue(g.getAllMembers().getMembers().stream()
+                .anyMatch(x -> x.getWhereListed().equals("Basis")));
     }
 
 }
