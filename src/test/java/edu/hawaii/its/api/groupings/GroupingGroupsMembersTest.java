@@ -265,7 +265,7 @@ public class GroupingGroupsMembersTest {
     public void determineWhereListedUuidNullBranch() throws Exception {
         GroupingGroupsMembers g = new GroupingGroupsMembers();
 
-        GroupingGroupMember member = new GroupingGroupMember() {
+        GroupingGroupMember member = new GroupingGroupMember(new Subject()) {
             @Override
             public String getUhUuid() {
                 return null;
