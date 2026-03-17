@@ -389,5 +389,4 @@ public class GroupingGroupsMembersTest {
         assertTrue(g.getAllMembers().getMembers().stream()
                 .anyMatch(x -> x.getWhereListed().equals("Basis")));
     }
-
 }

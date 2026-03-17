@@ -4,11 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.Collections;
 import java.util.List;
 
-import edu.hawaii.its.api.wrapper.GetMembersResult;
-import edu.hawaii.its.api.wrapper.GetMembersResults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
