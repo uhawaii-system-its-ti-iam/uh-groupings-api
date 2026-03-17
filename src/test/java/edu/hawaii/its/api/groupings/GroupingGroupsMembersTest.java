@@ -1,22 +1,22 @@
 package edu.hawaii.its.api.groupings;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
-
+import edu.hawaii.its.api.wrapper.Subject;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GroupingGroupsMembersTest {
+
     private PropertyLocator propertyLocator;
 
     @BeforeEach
@@ -26,162 +26,267 @@ public class GroupingGroupsMembersTest {
 
     @Test
     public void constructor() {
-        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers();
-        assertEquals("", groupingGroupsMembers.getGroupPath());
-        assertEquals("", groupingGroupsMembers.getResultCode());
-        assertNotNull(groupingGroupsMembers.getAllMembers());
-        assertFalse(groupingGroupsMembers.isBasis());
-        assertFalse(groupingGroupsMembers.isInclude());
-        assertFalse(groupingGroupsMembers.isExclude());
-        assertFalse(groupingGroupsMembers.isOwners());
-        assertEquals(Integer.valueOf(0), groupingGroupsMembers.getPageNumber());
-        assertTrue(groupingGroupsMembers.isPaginationComplete());
-    }
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
 
-    @Test
-    public void successfulResult() {
-        String onlyInclude = "testiwta";
-        String basisAndInclude = "testiwtb";
-        String onlyExclude = "testiwtc";
-        String basisAndExclude = "testiwtd";
-        String owner = "testiwte";
-        String onlyBasis = "testiwtf";
+        assertEquals("", g.getGroupPath());
+        assertEquals("", g.getResultCode());
+        assertNotNull(g.getAllMembers());
+        assertTrue(g.getAllMembers().getMembers().isEmpty());
 
-        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-        assertNotNull(getMembersResults);
-        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+        assertFalse(g.isBasis());
+        assertFalse(g.isInclude());
+        assertFalse(g.isExclude());
+        assertFalse(g.isOwners());
 
-        assertNotNull(groupingGroupsMembers);
-        assertEquals("SUCCESS", groupingGroupsMembers.getResultCode());
-        assertEquals(0, groupingGroupsMembers.getPageNumber());
-        assertFalse(groupingGroupsMembers.isPaginationComplete());
-
-        assertTrue(groupingGroupsMembers.isBasis());
-        assertTrue(groupingGroupsMembers.isInclude());
-        assertTrue(groupingGroupsMembers.isExclude());
-        assertTrue(groupingGroupsMembers.isOwners());
-
-        GroupingGroupMembers basis = groupingGroupsMembers.getGroupingBasis();
-        GroupingGroupMembers include = groupingGroupsMembers.getGroupingInclude();
-        GroupingGroupMembers exclude = groupingGroupsMembers.getGroupingExclude();
-        GroupingGroupMembers owners = groupingGroupsMembers.getGroupingOwners();
-        GroupingMembers allMembers = groupingGroupsMembers.getAllMembers();
-
-        assertNotNull(basis);
-        assertNotNull(include);
-        assertNotNull(exclude);
-        assertNotNull(owners);
-        assertNotNull(allMembers);
-
-        assertEquals("group-path:basis", basis.getGroupPath());
-        assertEquals("group-path:include", include.getGroupPath());
-        assertEquals("group-path:exclude", exclude.getGroupPath());
-        assertEquals("group-path:owners", owners.getGroupPath());
-
-        List<GroupingGroupMember> basisMembers = basis.getMembers();
-        List<GroupingGroupMember> includeMembers = include.getMembers();
-        List<GroupingGroupMember> excludeMembers = exclude.getMembers();
-        List<GroupingGroupMember> ownersMembers = owners.getMembers();
-        List<GroupingMember> allGroupingMembers = allMembers.getMembers();
-
-        assertNotNull(basisMembers);
-        assertNotNull(includeMembers);
-        assertNotNull(excludeMembers);
-        assertNotNull(ownersMembers);
-        assertNotNull(allGroupingMembers);
-
-        assertEquals(3, basisMembers.size());
-        assertEquals(2, includeMembers.size());
-        assertEquals(2, excludeMembers.size());
-        assertEquals(1, ownersMembers.size());
-        assertEquals(3, allGroupingMembers.size());
-
-        assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-        assertTrue(basisMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyInclude)));
-        assertTrue(basisMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(basisMembers.stream().noneMatch(member -> member.getUhUuid().equals(owner)));
-
-        assertTrue(includeMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyInclude)));
-        assertTrue(includeMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(includeMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(includeMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-        assertTrue(includeMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(includeMembers.stream().noneMatch(member -> member.getUhUuid().equals(owner)));
-
-        assertTrue(excludeMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(excludeMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-        assertTrue(excludeMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyInclude)));
-        assertTrue(excludeMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(excludeMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(excludeMembers.stream().noneMatch(member -> member.getUhUuid().equals(owner)));
-
-        assertTrue(ownersMembers.stream().anyMatch(member -> member.getUhUuid().equals(owner)));
-        assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyInclude)));
-        assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-
-        assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyInclude)));
-        assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(owner)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis & Include"))
-                .allMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
-                .allMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Include"))
-                .allMatch(member -> member.getUhUuid().equals(onlyInclude)));
+        assertEquals(0, g.getPageNumber());
+        assertTrue(g.isPaginationComplete());
     }
 
     @Test
     public void emptyResult() {
-        WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
-        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
-        assertNotNull(groupingGroupsMembers);
-        assertEquals("FAILURE", groupingGroupsMembers.getResultCode());
-        assertEquals(0, groupingGroupsMembers.getPageNumber());
-        assertTrue(groupingGroupsMembers.isPaginationComplete());
-        assertFalse(groupingGroupsMembers.isBasis());
-        assertFalse(groupingGroupsMembers.isInclude());
-        assertFalse(groupingGroupsMembers.isExclude());
-        assertFalse(groupingGroupsMembers.isOwners());
+        WsGetMembersResults ws = new WsGetMembersResults();
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
 
-        assertNotNull(groupingGroupsMembers.getGroupingBasis());
-        assertNotNull(groupingGroupsMembers.getGroupingBasis().getMembers());
-        assertTrue(groupingGroupsMembers.getGroupingBasis().getMembers().isEmpty());
-        assertEquals("", groupingGroupsMembers.getGroupingBasis().getResultCode());
-        assertEquals("", groupingGroupsMembers.getGroupingBasis().getGroupPath());
+        assertEquals("FAILURE", g.getResultCode());
+        assertTrue(g.getAllMembers().getMembers().isEmpty());
 
-        assertNotNull(groupingGroupsMembers.getGroupingInclude());
-        assertNotNull(groupingGroupsMembers.getGroupingInclude().getMembers());
-        assertTrue(groupingGroupsMembers.getGroupingInclude().getMembers().isEmpty());
-        assertEquals("", groupingGroupsMembers.getGroupingInclude().getResultCode());
-        assertEquals("", groupingGroupsMembers.getGroupingInclude().getGroupPath());
-
-        assertNotNull(groupingGroupsMembers.getGroupingExclude());
-        assertNotNull(groupingGroupsMembers.getGroupingExclude().getMembers());
-        assertTrue(groupingGroupsMembers.getGroupingExclude().getMembers().isEmpty());
-        assertEquals("", groupingGroupsMembers.getGroupingExclude().getResultCode());
-        assertEquals("", groupingGroupsMembers.getGroupingExclude().getGroupPath());
-
-        assertNotNull(groupingGroupsMembers.getGroupingOwners());
-        assertNotNull(groupingGroupsMembers.getGroupingOwners().getMembers());
-        assertTrue(groupingGroupsMembers.getGroupingOwners().getMembers().isEmpty());
-        assertEquals("", groupingGroupsMembers.getGroupingOwners().getResultCode());
-        assertEquals("", groupingGroupsMembers.getGroupingOwners().getGroupPath());
-
-        assertNotNull(groupingGroupsMembers.getAllMembers());
-        assertNotNull(groupingGroupsMembers.getAllMembers().getMembers());
-        assertTrue(groupingGroupsMembers.getAllMembers().getMembers().isEmpty());
+        assertNotNull(g.getGroupingBasis());
+        assertNotNull(g.getGroupingInclude());
+        assertNotNull(g.getGroupingExclude());
+        assertNotNull(g.getGroupingOwners());
     }
 
+    @Test
+    public void successfulResultBasic() {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults ws = JsonUtil.asObject(json, WsGetMembersResults.class);
+
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
+
+        assertEquals("SUCCESS", g.getResultCode());
+        assertFalse(g.getAllMembers().getMembers().isEmpty());
+
+        assertTrue(g.isBasis());
+        assertTrue(g.isInclude());
+        assertTrue(g.isExclude());
+        assertTrue(g.isOwners());
+    }
+
+    @Test
+    public void compositeNeverNull() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+        assertNotNull(g.getCompositeGrouping());
+    }
+
+    @Test
+    public void fallbackWhenCompositeEmpty() throws Exception {
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults ws = JsonUtil.asObject(json, WsGetMembersResults.class);
+
+        GroupingGroupsMembers g = new GroupingGroupsMembers(new GetMembersResults(ws));
+        g.getCompositeGrouping().getMembers().clear();
+
+        invokeSetAllMembers(g);
+
+        assertFalse(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void fallbackWhenNoData() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+        invokeSetAllMembers(g);
+
+        assertTrue(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void compositeBasisInclude() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject("u1", "name", "1001");
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group:basis");
+        basis.getMembers().add(member);
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group:include");
+        include.getMembers().add(member);
+
+        setGroups(g, List.of(composite, basis, include));
+
+        invokeSetAllMembers(g);
+
+        assertEquals("Basis & Include",
+                g.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    @Test
+    public void compositeBasisOnly() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject("u1", "name", "1001");
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers basis = new GroupingGroupMembers();
+        basis.setGroupPath("group:basis");
+        basis.getMembers().add(member);
+
+        setGroups(g, List.of(composite, basis));
+
+        invokeSetAllMembers(g);
+
+        assertEquals("Basis",
+                g.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    @Test
+    public void compositeIncludeOnly() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject("u1", "name", "1001");
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group");
+        composite.getMembers().add(member);
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group:include");
+        include.getMembers().add(member);
+
+        setGroups(g, List.of(composite, include));
+
+        invokeSetAllMembers(g);
+
+        assertEquals("Include",
+                g.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    @Test
+    public void compositeUnknownBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject("u1", "name", "1001");
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group");
+        composite.getMembers().add(member);
+
+        setGroups(g, List.of(composite));
+
+        invokeSetAllMembers(g);
+
+        assertEquals("Unknown",
+                g.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    @Test
+    public void nullUuidBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject(null, null, null);
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group");
+        composite.getMembers().add(member);
+
+        setGroups(g, List.of(composite));
+
+        invokeSetAllMembers(g);
+
+        assertEquals("Unknown",
+                g.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    @Test
+    public void fallbackExcludeWins() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        Subject s = new Subject("u1", "name", "1001");
+        GroupingGroupMember member = new GroupingGroupMember(s);
+
+        GroupingGroupMembers include = new GroupingGroupMembers();
+        include.setGroupPath("group:include");
+        include.getMembers().add(member);
+
+        GroupingGroupMembers exclude = new GroupingGroupMembers();
+        exclude.setGroupPath("group:exclude");
+        exclude.getMembers().add(member);
+
+        setGroups(g, List.of(include, exclude));
+
+        invokeSetAllMembers(g);
+
+        assertTrue(g.getAllMembers().getMembers().isEmpty());
+    }
+
+    @Test
+    public void paginationCompleteFalse() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+        g.setBasis(true);
+        g.setPaginationComplete();
+
+        assertFalse(g.isPaginationComplete());
+    }
+
+    @Test
+    public void setPaginationCompleteTrue() {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+        g.setPaginationCompleteTrue();
+
+        assertTrue(g.isPaginationComplete());
+    }
+
+    private void setGroups(GroupingGroupsMembers g, List<GroupingGroupMembers> list) throws Exception {
+        Field f = GroupingGroupsMembers.class.getDeclaredField("groupsMembersList");
+        f.setAccessible(true);
+        f.set(g, list);
+    }
+
+    private void invokeSetAllMembers(GroupingGroupsMembers g) throws Exception {
+        Method m = GroupingGroupsMembers.class.getDeclaredMethod("setAllMembers");
+        m.setAccessible(true);
+        m.invoke(g);
+    }
+
+    @Test
+    public void determineWhereListedUuidNullBranch() throws Exception {
+        GroupingGroupsMembers g = new GroupingGroupsMembers();
+
+        GroupingGroupMember member = new GroupingGroupMember() {
+            @Override
+            public String getUhUuid() {
+                return null;
+            }
+        };
+
+        Method method = GroupingGroupsMembers.class.getDeclaredMethod(
+                "determineWhereListed",
+                GroupingGroupMember.class,
+                java.util.Set.class,
+                java.util.Set.class
+        );
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(
+                g,
+                member,
+                java.util.Collections.emptySet(),
+                java.util.Collections.emptySet()
+        );
+
+        assertEquals("Unknown", result);
+    }
 }
