@@ -33,7 +33,7 @@ import edu.hawaii.its.api.type.OotbActiveProfileResult;
 import edu.hawaii.its.api.util.JsonUtil;
 
 @SpringBootTest(classes = { SpringBootWebApplication.class })
-@ActiveProfiles("ootb")
+@ActiveProfiles({"ootb", "localTest"})
 public class OotbRestControllerTest {
 
     private static final String API_BASE = "/api/groupings/v2.1";
@@ -60,8 +60,8 @@ public class OotbRestControllerTest {
         List<String> paths = Arrays.asList("ROLE_ADMIN", "ROLE_UH", "ROLE_OWNER");
 
         OotbActiveProfile activeProfile = new OotbActiveProfile();
-        activeProfile.setUid("admin0123");
-        activeProfile.setUhUuid("33333333");
+        activeProfile.setUid("testiwta");
+        activeProfile.setUhUuid("99997010");
         activeProfile.setAuthorities(paths);
         activeProfile.setAttributes(new HashMap<>());
         activeProfile.setGroupings(new ArrayList<>());
@@ -78,7 +78,6 @@ public class OotbRestControllerTest {
 
         MvcResult result = mockMvc.perform(
                         post(API_BASE + "/activeProfile/ootb")
-                                .header(CURRENT_USER, CURRENT_USER)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(JsonUtil.asJson(activeProfile)))
                 .andExpect(status().isOk())

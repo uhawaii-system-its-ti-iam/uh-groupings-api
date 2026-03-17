@@ -68,21 +68,21 @@ public class GroupTest {
     @Test
     public void equals() {
         Subject subject0 = new Subject();
-        subject0.setName("Madonna");
+        subject0.setName("Testf-iwt-a TestIAM-staff");
         Subject subject1 = new Subject();
-        subject1.setName("Prince");
+        subject1.setName("Testf-iwt-b TestIAM-staff");
         Subject subject2 = new Subject();
-        subject2.setName("Archibald Cox");
+        subject2.setName("Testf-iwt-c TestIAM-staff");
         Subject subject3 = new Subject();
-        subject3.setName("Leon Jaworski");
+        subject3.setName("Testf-iwt-d TestIAM-faculty");
         Subject subject4 = new Subject();
-        subject4.setName("Archibald Cox");
+        subject4.setName("Testf-iwt-c TestIAM-staff");
         Subject subject5 = new Subject();
-        subject5.setName("Leon Jaworski");
+        subject5.setName("Testf-iwt-d TestIAM-faculty");
         Subject subject6 = new Subject();
-        subject6.setName("Tricky Dick");
+        subject6.setName("Testf-iwt-e TestIAM-student");
         Subject subject7 = new Subject();
-        subject7.setName("Richard Nixon");
+        subject7.setName("Testf-iwt-1 TestIAM-dept");
 
         Group g0 = new Group();
         assertThat(g0, equalTo(g0));

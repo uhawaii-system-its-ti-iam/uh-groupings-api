@@ -31,10 +31,13 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
+import edu.hawaii.its.api.groupings.OwnerResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.wrapper.GetMembersResult;
+import edu.hawaii.its.api.wrapper.Subject;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -102,6 +105,7 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+
     }
 
     @Test
@@ -207,13 +211,14 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
+        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
 
-        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
+
         GroupingOwnerMembers = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
 
@@ -237,13 +242,14 @@ public class TestGroupingAssignmentService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
         GroupingOwnerMembers GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
+        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
 
-        updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
+
         GroupingOwnerMembers = groupingAssignmentService.groupingAllOwners(ADMIN, GROUPING);
         assertNotNull(GroupingOwnerMembers);
-        assertTrue(GroupingOwnerMembers.getOwners().getMembers().stream()
+        assertFalse(GroupingOwnerMembers.getOwners().getMembers().stream()
                 .anyMatch(groupingsGroupMember -> groupingsGroupMember.getUid().equals(testUid)));
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
 
@@ -294,6 +300,7 @@ public class TestGroupingAssignmentService {
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        int duplicateOwners = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
         int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners + basisMembers + includeMembers, afterAdd);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));

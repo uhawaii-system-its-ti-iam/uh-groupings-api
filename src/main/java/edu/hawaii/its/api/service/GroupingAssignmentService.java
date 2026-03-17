@@ -20,6 +20,7 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
+import edu.hawaii.its.api.groupings.OwnerResult;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -124,7 +125,7 @@ public class GroupingAssignmentService {
     public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
         logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
-        if (!memberService.isOwner(uhIdentifier)) {
+        if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingImmediateOwners(currentUser, groupPath).getOwners();
@@ -144,6 +145,14 @@ public class GroupingAssignmentService {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();
+        Integer allOwnersCount = 0;
+        for (GroupingGroupMember owner : owners.getMembers()) {
+            if (!owner.getName().contains(":")) {
+                allOwnersCount++;
+            }
+        }
+        return allOwnersCount;
+    }
 
         Integer allOwnersCount = 0;
         for (GroupingGroupMember owner : owners.getMembers()) {

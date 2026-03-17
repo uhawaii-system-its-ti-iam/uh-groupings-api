@@ -131,7 +131,7 @@ public class TestGroupingsService extends ServiceTest {
     @Test
     public void updateGroupingDescription() {
         String updatedDescription = groupingsService.getGroupingDescription(GROUPING);
-        String description = "abcdefghifklmnopqrstuvwxyz!@##$%%45234543";
+        String description = "description";
         GroupingUpdateDescriptionResult result = groupingsService.updateGroupingDescription(GROUPING, description);
         assertEquals("SUCCESS_UPDATED", result.getResultCode());
         assertEquals(updatedDescription, result.getUpdatedDescription());

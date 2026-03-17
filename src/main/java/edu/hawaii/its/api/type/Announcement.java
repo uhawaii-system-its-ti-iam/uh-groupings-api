@@ -2,33 +2,37 @@ package edu.hawaii.its.api.type;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
-
 public class Announcement {
     private String message = "";
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private State state;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private LocalDateTime start;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonFormat(pattern = "yyyyMMdd'T'HHmmss")
     private LocalDateTime end;
 
     public enum State {
-        Active,
-        Expired,
+        Active, 
+        Expired, 
         Future
     }
 
-    Announcement(@JsonProperty("message") String message,
-                 @JsonProperty("start") LocalDateTime start,
-                 @JsonProperty("end") LocalDateTime end) {
+    @JsonCreator
+    Announcement(@JsonProperty("message") String message, @JsonProperty("start") LocalDateTime start,
+            @JsonProperty("end") LocalDateTime end) {
         this.message = message;
         this.start = start;
         this.end = end;
@@ -61,10 +65,10 @@ public class Announcement {
 
     @Override
     public String toString() {
-        return "Announcement [" +
-                "message='" + message + '\'' +
-                ", start='" + start + '\'' +
-                ", end='" + end + '\'' +
-                "]";
+        return "Announcement [" + 
+            "message='" + message + '\'' + 
+            ", start='" + start + '\'' + 
+            ", end='" + end + '\'' + 
+            "]";
     }
 }

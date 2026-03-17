@@ -22,7 +22,7 @@ public class HasMembersCommandTest {
         assertNotNull(hasMembersCommand.owner(""));
         assertNotNull(hasMembersCommand.assignGroupPath(""));
         assertNotNull(hasMembersCommand.addUhIdentifier(""));
-        assertNotNull(hasMembersCommand.addUhIdentifier("11111111"));
+        assertNotNull(hasMembersCommand.addUhIdentifier("testiwta"));
         assertEquals(hasMembersCommand.self(), hasMembersCommand);
 
         List<String> strings = new ArrayList<>();

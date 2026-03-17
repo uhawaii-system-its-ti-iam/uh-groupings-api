@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -15,6 +16,7 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 
+@ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class MemberAttributeServiceTest {
 
@@ -28,7 +30,7 @@ public class MemberAttributeServiceTest {
 
     final String groupAdminPath = "uh-settings:groupingAdmins";
     final String groupOwnerPath = "uh-settings:groupingOwners";
-    final String uid = "uuu";
+    final String uid = "testiwta";
 
     @BeforeEach
     public void beforeEach() throws Exception {

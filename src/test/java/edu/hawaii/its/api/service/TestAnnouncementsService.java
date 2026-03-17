@@ -11,14 +11,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.Announcement;
 import edu.hawaii.its.api.type.Announcements;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class TestAnnouncementsService {
-    @Value("${groupings.api.success}")
+
+    @Value("${groupings.api.success}") 
     private String SUCCESS;
+
     @Autowired
     private AnnouncementsService announcementsService;
 
@@ -28,6 +31,12 @@ public class TestAnnouncementsService {
         assertNotNull(announcements);
         assertNotNull(announcements.getAnnouncements());
         assertEquals(SUCCESS, announcements.getResultCode());
+
+        // Verify all returned announcements have state 'Active'
+        for (Announcement announcement : announcements.getAnnouncements()) {
+            assertEquals(Announcement.State.Active, announcement.getState(),
+                    "All announcements should have state 'Active'");
+        }
     }
 
 }

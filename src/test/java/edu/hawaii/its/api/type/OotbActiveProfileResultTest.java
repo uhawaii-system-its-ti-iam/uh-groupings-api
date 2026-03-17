@@ -15,8 +15,8 @@ public class OotbActiveProfileResultTest {
     @BeforeEach
     public void setUp() {
         ootbActiveProfile = new OotbActiveProfile();
-        ootbActiveProfile.setUid("admin0123");
-        ootbActiveProfile.setUhUuid("33333333");
+        ootbActiveProfile.setUid("testiwta");
+        ootbActiveProfile.setUhUuid("99997010");
     }
 
     @Test
@@ -25,8 +25,8 @@ public class OotbActiveProfileResultTest {
         assertNotNull(result);
         assertThat(result.getResultCode(), is("SUCCESS"));
         assertNotNull(result.getResult());
-        assertThat(result.getResult().getUid(), is("admin0123"));
-        assertThat(result.getResult().getUhUuid(), is("33333333"));
+        assertThat(result.getResult().getUid(), is("testiwta"));
+        assertThat(result.getResult().getUhUuid(), is("99997010"));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class OotbActiveProfileResultTest {
         assertNull(result.getResult());
         result.setResult(ootbActiveProfile);
         assertNotNull(result.getResult());
-        assertThat(result.getResult().getUid(), is("admin0123"));
-        assertThat(result.getResult().getUhUuid(), is("33333333"));
+        assertThat(result.getResult().getUid(), is("testiwta"));
+        assertThat(result.getResult().getUhUuid(), is("99997010"));
     }
 }

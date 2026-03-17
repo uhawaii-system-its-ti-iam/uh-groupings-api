@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,9 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
+import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -48,6 +52,9 @@ public class TestUpdateMemberService {
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
+    @Value("${groupings.api.test.owner_grouping}")
+    private String OWNER_GROUPING;
+
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
@@ -65,6 +72,9 @@ public class TestUpdateMemberService {
 
     @Autowired
     private GrouperService grouperService;
+
+    @Autowired
+    private GroupingAssignmentService groupingAssignmentService;
 
     @Autowired
     private UhIdentifierGenerator uhIdentifierGenerator;
@@ -284,6 +294,11 @@ public class TestUpdateMemberService {
         assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
         assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
 
+        //opt out same uhUuid again, nothing should change
+        updateMemberService.optOut(ADMIN, GROUPING, num);
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
+
         updateMemberService.optIn(ADMIN, GROUPING, num);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, num));
         assertFalse(memberService.isMember(GROUPING_EXCLUDE, num));
@@ -374,6 +389,33 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    public void addRemoveOwnershipsExceptionsTest() {
+        Integer originalLimit = (Integer) ReflectionTestUtils.getField(updateMemberService, "OWNERS_LIMIT");
+        ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", 4);
+        try {
+            updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
+            fail("Should throw an exception if adding owners would exceed the owner limit");
+        } catch (OwnerLimitExceededException e) {
+            assertNull(e.getCause());
+        } finally {
+            ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", originalLimit);
+        }
+
+        int directOwnersCount =
+                groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING);
+        GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(directOwnersCount);
+        List<String> uidsToRemove = testGroupingMembers.getUids();
+
+        try {
+            updateMemberService.removeOwnerships(ADMIN, GROUPING, uidsToRemove);
+            fail("Should throw an exception if the number of valid owners being removed "
+                    + "is greater than or equal to the number of direct owners");
+        } catch (DirectOwnerRemovedException e) {
+            assertNull(e.getCause());
+        }
+    }
+
+    @Test
     public void addRemoveOwnershipTest() {
         String uid = testUids.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
@@ -457,15 +499,30 @@ public class TestUpdateMemberService {
 
     }
 
-//    @Test
-//    public void addRemovePathOwnershipsTest(){
-//        // Todo integration test for updating grouping owners with path owners
-//    }
+    @Test
+    public void addRemoveOwnerGroupingsTest() {
+        List<String> ownerGroupingsToAdd = new ArrayList<>();
+        ownerGroupingsToAdd.add(OWNER_GROUPING);
+        List<String> ownerGroupingsExceedingLimit = new ArrayList<>();
+        ownerGroupingsExceedingLimit.add(GROUPING);
 
-//    @Test
-//    public void checkAllMembersAfterAddRemovePathOwnershipsTest(){
-//        // Todo integration test for checking the changes of members' group after adding and removing path owners
-//    }
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        assertTrue(memberService.isMember(GROUPING_OWNERS, OWNER_GROUPING));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsToAdd);
+        assertFalse(memberService.isMember(GROUPING_OWNERS, OWNER_GROUPING));
+
+        try {
+            updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, ownerGroupingsExceedingLimit);
+            fail("Should throw an exception if adding owner-groupings would exceed the owner limit");
+        } catch (OwnerLimitExceededException e) {
+            assertNull(e.getCause());
+        }
+    }
+
+    //    @Test
+    //    public void checkAllMembersAfterAddRemoveOwnerGroupingsTest(){
+    //        // Todo integration test for checking the changes of members' group after adding and removing path owners
+    //    }
 
     @Test
     public void validateOptInActionForAlreadyOptedUser() {

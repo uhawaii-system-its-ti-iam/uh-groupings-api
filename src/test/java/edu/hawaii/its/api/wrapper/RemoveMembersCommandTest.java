@@ -19,7 +19,7 @@ public class RemoveMembersCommandTest {
     public void builders() {
         RemoveMembersCommand removeMembersCommand = new RemoveMembersCommand();
         assertNotNull(removeMembersCommand.addUhIdentifier(""));
-        assertNotNull(removeMembersCommand.addUhIdentifier("11111111"));
+        assertNotNull(removeMembersCommand.addUhIdentifier("testiwta"));
         assertNotNull(removeMembersCommand.assignGroupPath(""));
         assertNotNull(removeMembersCommand.includeUhMemberDetails(true));
         assertNotNull(removeMembersCommand.owner(""));
