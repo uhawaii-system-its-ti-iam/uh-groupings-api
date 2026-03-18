@@ -264,13 +264,8 @@ public class GroupingGroupsMembersTest {
     @Test
     public void determineWhereListedUuidNullBranch() throws Exception {
         GroupingGroupsMembers g = new GroupingGroupsMembers();
-
-        GroupingGroupMember member = new GroupingGroupMember() {
-            @Override
-            public String getUhUuid() {
-                return null;
-            }
-        };
+        Subject s = new Subject(null, null, null);
+        GroupingGroupMember member = new GroupingGroupMember(s);
 
         Method method = GroupingGroupsMembers.class.getDeclaredMethod(
                 "determineWhereListed",
