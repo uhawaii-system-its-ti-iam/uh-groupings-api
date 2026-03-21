@@ -8,7 +8,12 @@ import static org.mockito.Mockito.doReturn;
 import java.util.List;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,6 +67,16 @@ public class UpdateMemberServiceTest {
     private final String groupPath = "group-path";
 
     private final String ownerGrouping = "owner-grouping";
+
+    @BeforeEach
+    public void setUpSecurityContext() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(
+                TEST_UIDS.get(0),
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+        SecurityContextHolder.setContext(context);
+    }
 
     @Test
     public void addAdminTest() {

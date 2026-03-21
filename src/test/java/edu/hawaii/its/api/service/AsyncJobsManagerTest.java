@@ -33,8 +33,8 @@ public class AsyncJobsManagerTest {
 
     @BeforeEach
     public void beforeEach() {
-        doReturn(true).when(memberService).isAdmin(CURRENT_USER);
-        doReturn(true).when(memberService).isOwner(CURRENT_USER);
+        doReturn(true).when(memberService).isCurrentUserAdmin();
+        doReturn(true).when(memberService).isCurrentUserOwner();
     }
 
     @Test
@@ -42,7 +42,7 @@ public class AsyncJobsManagerTest {
         AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, 0);
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
 
-        doReturn(false).when(memberService).isAdmin(CURRENT_USER);
+        doReturn(false).when(memberService).isCurrentUserAdmin();
         AsyncJobResult result = asyncJobsManager.getJobResult(CURRENT_USER, 0);
         assertEquals("NOT_FOUND", result.getStatus());
     }
@@ -64,8 +64,8 @@ public class AsyncJobsManagerTest {
 
     @Test
     public void getJobResultDeniedTest() {
-        doReturn(false).when(memberService).isAdmin(CURRENT_USER);
-        doReturn(false).when(memberService).isOwner(CURRENT_USER);
+        doReturn(false).when(memberService).isCurrentUserAdmin();
+        doReturn(false).when(memberService).isCurrentUserOwner();
         assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, 0));
     }
 
