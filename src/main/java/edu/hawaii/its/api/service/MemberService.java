@@ -76,17 +76,6 @@ public class MemberService {
         return securityContextRoleService.isCurrentUserOwner();
     }
 
-    /**
-     * Check if the current authenticated user has either ADMIN or OWNER role from JWT token.
-     * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
-     * Use this for general authorization checks in service methods.
-     * 
-     * @return true if the current user has ROLE_ADMIN or ROLE_OWNER in their JWT token
-     */
-    public boolean isCurrentUserAdminOrOwner() {
-        return securityContextRoleService.isCurrentUserAdminOrOwner();
-    }
-
     public boolean isOwner(String groupingPath, String uhIdentifier) {
         return isMember(groupingPath + GroupType.OWNERS.value(), uhIdentifier);
     }

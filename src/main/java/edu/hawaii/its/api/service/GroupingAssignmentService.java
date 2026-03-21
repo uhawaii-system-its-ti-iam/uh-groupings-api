@@ -145,9 +145,10 @@ public class GroupingAssignmentService {
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
+        // Use the JWT-backed admin check; fall back to a Grouper-backed grouping-specific
+        // ownership check.
         if (!memberService.isCurrentUserAdmin()
-                && !memberService.isOwner(groupPath, currentUser)
-                && !memberService.isAdmin(currentUser)) {
+                && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();
@@ -188,9 +189,10 @@ public class GroupingAssignmentService {
     public Map<String, OwnerResult> getDuplicateOwners(String currentUser, String groupPath) {
         logger.info(String.format("getDuplicateOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
+        // Use the JWT-backed admin check; fall back to a Grouper-backed grouping-specific
+        // ownership check.
         if (!memberService.isCurrentUserAdmin()
-                && !memberService.isOwner(groupPath, currentUser)
-                && !memberService.isAdmin(currentUser)) {
+                && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers immediateOwners = groupingImmediateOwners(currentUser, groupPath).getOwners();

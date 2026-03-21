@@ -47,16 +47,6 @@ public class SecurityContextRoleService {
         return auth.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals(ROLE_OWNER));
     }
-
-    /**
-     * Check if the current authenticated user has either ADMIN or OWNER role.
-     * This checks the JWT token roles stored in SecurityContext.
-     * 
-     * @return true if the current user has ROLE_ADMIN or ROLE_OWNER, false otherwise
-     */
-    public boolean isCurrentUserAdminOrOwner() {
-        return isCurrentUserAdmin() || isCurrentUserOwner();
-    }
 }
 
 
