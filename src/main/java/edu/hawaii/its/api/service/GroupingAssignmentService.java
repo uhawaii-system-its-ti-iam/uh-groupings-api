@@ -198,6 +198,8 @@ public class GroupingAssignmentService {
                 ownerGroupings.add(name);
                 continue;
             }
+            // For direct owners, we intentionally leave OwnerResult.paths empty (no initial path)
+            // to indicate a DIRECT ownership source; only owner-grouping sources add paths below.
             existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid()));
         }
 
@@ -216,8 +218,9 @@ public class GroupingAssignmentService {
                     duplicates.get(uhUuid).addPath(path);
                 } else {
                     // Place it in existing map if it's seen for the first time
-                    existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, owner.getName(), owner.getUid()));
-                    existingUhUuids.get(uhUuid).addPath(path);
+                    OwnerResult ownerResult = new OwnerResult(uhUuid, owner.getName(), owner.getUid());
+                    ownerResult.addPath(path);
+                    existingUhUuids.put(uhUuid, ownerResult);
                 }
             }
         }

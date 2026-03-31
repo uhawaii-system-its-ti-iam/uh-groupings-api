@@ -355,5 +355,9 @@ public class TestGroupingAssignmentService {
         assertTrue(duplicates.containsKey(duplicateOwnerUhUuid));
         assertEquals(duplicates.get(duplicateOwnerUhUuid).getUhUuid(), duplicateOwnerUhUuid);
         assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths().contains(OWNER_GROUPING));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths().contains(OWNER_GROUPING));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths()
+                .stream()
+                .noneMatch(path -> path.contains("DIRECT")));
     }
 }
