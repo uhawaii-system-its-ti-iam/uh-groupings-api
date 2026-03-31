@@ -198,7 +198,7 @@ public class GroupingAssignmentService {
                 ownerGroupings.add(name);
                 continue;
             }
-            existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid(), "DIRECT"));
+            existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid()));
         }
 
         // Iterate through each owner-grouping to find duplicate owners
@@ -216,7 +216,8 @@ public class GroupingAssignmentService {
                     duplicates.get(uhUuid).addPath(path);
                 } else {
                     // Place it in existing map if it's seen for the first time
-                    existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, owner.getName(), owner.getUid(), path));
+                    existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, owner.getName(), owner.getUid()));
+                    existingUhUuids.get(uhUuid).addPath(path);
                 }
             }
         }
