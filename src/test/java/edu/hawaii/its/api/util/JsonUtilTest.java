@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
@@ -106,11 +105,12 @@ public class JsonUtilTest {
 
     @Test
     public void asListFromFile() {
-        List<OotbActiveProfile> users =
-                JsonUtil.asListFromFile("ootb.active.user.profiles.json", OotbActiveProfile.class);
+        List<TestUser> users =
+                JsonUtil.asListFromFile("test-list.json", TestUser.class);
         assertNotNull(users);
-
-        assertNull(JsonUtil.asListFromFile("non-existent.json", TestUser.class));
+        assertNull(
+                JsonUtil.asListFromFile("non-existent.json", TestUser.class)
+        );
     }
 
     // Test class matching test.json structure
