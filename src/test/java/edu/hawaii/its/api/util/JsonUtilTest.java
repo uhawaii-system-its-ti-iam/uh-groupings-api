@@ -108,6 +108,10 @@ public class JsonUtilTest {
         List<TestUser> users =
                 JsonUtil.asListFromFile("test-list.json", TestUser.class);
         assertNotNull(users);
+        assertEquals(1, users.size());
+        assertEquals("value", users.get(0).getTest());
+        assertEquals(123, users.get(0).getNumber());
+
         assertNull(
                 JsonUtil.asListFromFile("non-existent.json", TestUser.class)
         );
