@@ -69,7 +69,6 @@ import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.OotbGroupingPropertiesService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -134,9 +133,6 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockitoBean
     private MemberService memberService;
-
-    @MockitoBean
-    private OotbGroupingPropertiesService ootbGroupingPropertiesService;
 
     @Autowired
     private WebApplicationContext context;

@@ -1,13 +1,10 @@
 package edu.hawaii.its.api.configuration;
 
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
-import edu.hawaii.its.api.type.OotbActiveProfile;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
@@ -55,10 +52,6 @@ public class GroupingsTestConfiguration {
     private <T> T getWsResultTestData(String propertyName, Class<T> type) {
         String json = propertyLocator.find(propertyName);
         return JsonUtil.asObject(json, type);
-    }
-
-    public List<OotbActiveProfile> ootbActiveProfilesTestData() {
-        return JsonUtil.asListFromFile("ootb.active.user.profiles.json", OotbActiveProfile.class);
     }
 
     public HasMembersResults hasMemberResultsIsMembersUidTestData() {
