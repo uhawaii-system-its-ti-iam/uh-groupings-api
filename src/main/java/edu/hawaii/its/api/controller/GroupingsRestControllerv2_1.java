@@ -334,7 +334,7 @@ public class GroupingsRestControllerv2_1 {
     }
     
     /**
-     * Check if the user inputs for modifying exist in the include list of a grouping
+     * Check which of the given uhIdentifiers are already members of a grouping's include group.
      */
     @PostMapping(value = "/groupings/{groupingPath}/include-members/in-list")
     @ResponseBody
@@ -349,7 +349,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Check if the user inputs for modifying exist in the exclude list of a grouping.
+     * Check which of the given uhIdentifiers are already members of a grouping's exclude group.
      */
     @PostMapping(value = "/groupings/{groupingPath}/exclude-members/in-list")
     @ResponseBody
@@ -363,7 +363,7 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Check if the user inputs for modifying exist in the owners list of a grouping.
+     * Check which of the given uhIdentifiers are already owners of a grouping.
      */
     @PostMapping(value = "/groupings/{groupingPath}/owners/in-list")
     @ResponseBody
