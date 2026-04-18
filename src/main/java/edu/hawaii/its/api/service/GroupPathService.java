@@ -42,7 +42,7 @@ public class GroupPathService {
     private static Pattern GROUP_PATH_PATTERN;
 
     public GroupPathService(GrouperService grouperService) {
-            this.grouperService = grouperService;
+        this.grouperService = grouperService;
     }
 
     @PostConstruct

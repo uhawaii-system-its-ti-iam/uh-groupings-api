@@ -47,7 +47,6 @@ public class TestMemberService {
 
     @Test
     public void isOwner() {
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUhUuid));
         assertFalse(memberService.isOwner(GROUPING, testUhUuid));
         updateMemberService.addOwnership(ADMIN, GROUPING, testUhUuid);
         assertTrue(memberService.isOwner(GROUPING, testUhUuid));

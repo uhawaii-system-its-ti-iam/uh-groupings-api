@@ -37,7 +37,7 @@ public class GroupingGroupMembers implements GroupingResult {
     public GroupingGroupMembers() {
         setResultCode("");
         setGroupPath("");
-        setMembers(new ArrayList<>());
+        this.members = new ArrayList<>();
         setSize(0);
     }
 
@@ -81,6 +81,12 @@ public class GroupingGroupMembers implements GroupingResult {
         for (Subject subject : subjects) {
             this.members.add(new GroupingGroupMember(subject));
         }
+        setSize(this.members.size());
+    }
+
+    public void setGroupingGroupMembers(List<GroupingGroupMember> members) {
+        this.members = new ArrayList<>(members);
+        setSize(this.members.size());
     }
 
     public GroupingGroupMembers sort(String sortString, boolean isAscending) {
