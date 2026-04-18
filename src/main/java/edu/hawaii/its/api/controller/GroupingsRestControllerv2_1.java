@@ -34,6 +34,7 @@ import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingPagedMembers;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
@@ -284,6 +285,73 @@ public class GroupingsRestControllerv2_1 {
                 .ok()
                 .body(groupingOwnerService
                         .paginatedGrouping(currentUser, groupPaths, page, size, sortBy.sortString(), isAscending));
+    }
+
+    /**
+     * Retrieve the complete membership of a grouping by aggregating all paginated results
+     * and computing the final member list using the composite group.
+     */
+    @PostMapping(value = "/groupings/all-members")
+    @ResponseBody
+    public ResponseEntity<GroupingPagedMembers> getAllMembers(@RequestBody List<String> groupPaths,
+                                                              @RequestParam Integer page,
+                                                              @RequestParam Integer size,
+                                                              @RequestParam SortBy sortBy,
+                                                              @RequestParam Boolean isAscending) {
+
+        logger.info("Entered REST getAllMembers...");
+
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getAllMembers(
+                        currentUser,
+                        groupPaths,
+                        page,
+                        size,
+                        sortBy.sortString(),
+                        isAscending
+                ));
+    }
+
+    @PostMapping(value = "/groupings/all-members/start")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> startAllMembersProgress(@RequestBody List<String> groupPaths,
+                                                                       @RequestParam Integer size,
+                                                                       @RequestParam SortBy sortBy,
+                                                                       @RequestParam Boolean isAscending) {
+
+        logger.info("Entered REST startAllMembersProgress...");
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity
+                .accepted()
+                .body(groupingOwnerService.startAllMembersProgress(
+                        currentUser,
+                        groupPaths,
+                        size,
+                        sortBy.sortString(),
+                        isAscending
+                ));
+    }
+
+    @GetMapping(value = "/groupings/all-members/progress/{requestId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getAllMembersProgress(@PathVariable String requestId) {
+        logger.info("Entered REST getAllMembersProgress...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getAllMembersProgress(requestId));
+    }
+
+    @GetMapping(value = "/groupings/all-members/result/{requestId}")
+    @ResponseBody
+    public ResponseEntity<GroupingPagedMembers> getAllMembersResult(@PathVariable String requestId) {
+        logger.info("Entered REST getAllMembersResult...");
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getAllMembersResult(requestId));
     }
 
     /**

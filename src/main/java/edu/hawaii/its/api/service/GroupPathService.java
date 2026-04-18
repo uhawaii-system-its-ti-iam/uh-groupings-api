@@ -25,7 +25,7 @@ public class GroupPathService {
     private static final String RESULT_CODE_SUCCESS = "SUCCESS";
 
     public GroupPathService(GrouperService grouperService) {
-            this.grouperService = grouperService;
+        this.grouperService = grouperService;
     }
 
     /**

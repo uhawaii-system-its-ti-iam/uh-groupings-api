@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,7 @@ import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
+import edu.hawaii.its.api.groupings.GroupingPagedMembers;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -437,6 +440,128 @@ public class GroupingsRestControllerv2_1Test {
             assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
             verify(groupingOwnerService).paginatedGrouping(TEST_USER, paths, 1, 700, sortBy.sortString(), true);
         }
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void getAllMembersTest() throws Exception {
+        List<String> paths = Arrays.asList(
+                GROUPING,
+                GROUPING + ":basis",
+                GROUPING + ":include",
+                GROUPING + ":exclude",
+                GROUPING + ":owners"
+        );
+
+        GroupingPagedMembers groupingPagedMembers = new GroupingPagedMembers();
+        groupingPagedMembers.setPageNumber(1);
+        groupingPagedMembers.setTotalCount(25);
+
+        given(groupingOwnerService.getAllMembers(TEST_USER, paths, 1, 700, SortBy.NAME.sortString(), true))
+                .willReturn(groupingPagedMembers);
+
+        MvcResult result = mockMvc.perform(post(API_BASE + "/groupings/all-members?page=1&size=700&sortBy="
+                        + SortBy.NAME.value() + "&isAscending=true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNumber").value(1))
+                .andExpect(jsonPath("$.totalCount").value(25))
+                .andReturn();
+
+        assertNotNull(result);
+        verify(groupingOwnerService, times(1))
+                .getAllMembers(TEST_USER, paths, 1, 700, SortBy.NAME.sortString(), true);
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void startAllMembersProgressTest() throws Exception {
+        List<String> paths = Arrays.asList(
+                GROUPING,
+                GROUPING + ":basis",
+                GROUPING + ":include",
+                GROUPING + ":exclude",
+                GROUPING + ":owners"
+        );
+
+        Map<String, Object> progress = new HashMap<>();
+        progress.put("requestId", "test-request-id");
+        progress.put("loadedCount", 10);
+        progress.put("complete", false);
+        progress.put("failed", false);
+        progress.put("message", "Loading.");
+
+        given(groupingOwnerService.startAllMembersProgress(TEST_USER, paths, 700, SortBy.NAME.sortString(), true))
+                .willReturn(progress);
+
+        MvcResult result = mockMvc.perform(post(API_BASE + "/groupings/all-members/start?size=700&sortBy="
+                        + SortBy.NAME.value() + "&isAscending=true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.requestId").value("test-request-id"))
+                .andExpect(jsonPath("$.loadedCount").value(10))
+                .andExpect(jsonPath("$.complete").value(false))
+                .andExpect(jsonPath("$.failed").value(false))
+                .andExpect(jsonPath("$.message").value("Loading."))
+                .andReturn();
+
+        assertNotNull(result);
+        verify(groupingOwnerService, times(1))
+                .startAllMembersProgress(TEST_USER, paths, 700, SortBy.NAME.sortString(), true);
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void getAllMembersProgressTest() throws Exception {
+        String requestId = "test-request-id";
+
+        Map<String, Object> progress = new HashMap<>();
+        progress.put("requestId", requestId);
+        progress.put("loadedCount", 20);
+        progress.put("complete", true);
+        progress.put("failed", false);
+        progress.put("message", "Complete.");
+
+        given(groupingOwnerService.getAllMembersProgress(requestId))
+                .willReturn(progress);
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/all-members/progress/" + requestId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestId").value(requestId))
+                .andExpect(jsonPath("$.loadedCount").value(20))
+                .andExpect(jsonPath("$.complete").value(true))
+                .andExpect(jsonPath("$.failed").value(false))
+                .andExpect(jsonPath("$.message").value("Complete."))
+                .andReturn();
+
+        assertNotNull(result);
+        verify(groupingOwnerService, times(1))
+                .getAllMembersProgress(requestId);
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void getAllMembersResultTest() throws Exception {
+        String requestId = "test-request-id";
+
+        GroupingPagedMembers groupingPagedMembers = new GroupingPagedMembers();
+        groupingPagedMembers.setPageNumber(2);
+        groupingPagedMembers.setTotalCount(40);
+
+        given(groupingOwnerService.getAllMembersResult(requestId))
+                .willReturn(groupingPagedMembers);
+
+        MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/all-members/result/" + requestId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNumber").value(2))
+                .andExpect(jsonPath("$.totalCount").value(40))
+                .andReturn();
+
+        assertNotNull(result);
+        verify(groupingOwnerService, times(1))
+                .getAllMembersResult(requestId);
     }
 
     @Test

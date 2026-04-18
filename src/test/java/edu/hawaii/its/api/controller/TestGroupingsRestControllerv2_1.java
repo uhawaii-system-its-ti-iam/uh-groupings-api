@@ -43,6 +43,7 @@ import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
+import edu.hawaii.its.api.groupings.GroupingPagedMembers;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
@@ -115,7 +116,6 @@ public class TestGroupingsRestControllerv2_1 {
         testUids.forEach(testUid -> updateMemberService.removeAdminMember(ADMIN, testUid));
         updateMemberService.removeIncludeMembers(ADMIN, GROUPING, testUids);
         updateMemberService.removeExcludeMembers(ADMIN, GROUPING, testUids);
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testUids);
 
         testUids.forEach(testUid -> {
             assertFalse(memberService.isOwner(GROUPING, testUid));
@@ -124,7 +124,6 @@ public class TestGroupingsRestControllerv2_1 {
             assertFalse(memberService.isAdmin(testUid));
         });
 
-        // Save the starting attribute settings for the test grouping.
         attributeMap.put(OptType.IN.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.IN.value()));
         attributeMap.put(OptType.OUT.value(), groupingAttributeService.isGroupAttribute(GROUPING, OptType.OUT.value()));
         groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), false);
@@ -137,11 +136,15 @@ public class TestGroupingsRestControllerv2_1 {
 
     @AfterAll
     public void cleanUp() {
-        // Set the test grouping's attribute settings back.
-        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(),
-                attributeMap.get(OptType.IN.value()));
-        groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(),
-                attributeMap.get(OptType.OUT.value()));
+        Boolean optIn = attributeMap.get(OptType.IN.value());
+        Boolean optOut = attributeMap.get(OptType.OUT.value());
+
+        if (optIn != null) {
+            groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.IN.value(), optIn);
+        }
+        if (optOut != null) {
+            groupingAttributeService.changeGroupAttributeStatus(GROUPING, ADMIN, OptType.OUT.value(), optOut);
+        }
     }
 
     @Test
@@ -364,6 +367,99 @@ public class TestGroupingsRestControllerv2_1 {
             assertNotNull(
                     objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GroupingGroupsMembers.class));
         }
+    }
+
+    @Test
+    @WithMockUhAdmin
+    public void getAllMembersTest() throws Exception {
+        String url = API_BASE_URL + "groupings/all-members?sortBy="
+                + SortBy.NAME.value()
+                + "&page=1&size=20&isAscending=true";
+
+        List<String> paths = Arrays.asList(
+                GROUPING,
+                GROUPING_INCLUDE,
+                GROUPING_EXCLUDE,
+                GROUPING_OWNERS
+        );
+
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertNotNull(mvcResult);
+        assertNotNull(objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                GroupingPagedMembers.class));
+    }
+
+    @Test
+    @WithMockUhAdmin
+    public void startAllMembersProgressTest() throws Exception {
+        String url = API_BASE_URL + "groupings/all-members/start?sortBy="
+                + SortBy.NAME.value()
+                + "&size=20&isAscending=true";
+
+        List<String> paths = Arrays.asList(
+                GROUPING,
+                GROUPING_INCLUDE,
+                GROUPING_EXCLUDE,
+                GROUPING_OWNERS
+        );
+
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtil.asJson(paths)))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        Map<String, Object> response = objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                Map.class);
+
+        assertNotNull(response);
+        assertTrue(response.containsKey("requestId"));
+        assertTrue(response.containsKey("loadedCount"));
+        assertTrue(response.containsKey("complete"));
+        assertTrue(response.containsKey("failed"));
+        assertTrue(response.containsKey("message"));
+    }
+
+    @Test
+    @WithMockUhAdmin
+    public void getAllMembersProgressTest() throws Exception {
+        String requestId = "missing-request-id";
+        String url = API_BASE_URL + "groupings/all-members/progress/" + requestId;
+
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Map<String, Object> response = objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                Map.class);
+
+        assertNotNull(response);
+        assertEquals(requestId, response.get("requestId"));
+        assertEquals(0, response.get("loadedCount"));
+        assertEquals(false, response.get("complete"));
+        assertEquals(true, response.get("failed"));
+        assertEquals("Request not found.", response.get("message"));
+    }
+
+    @Test
+    @WithMockUhAdmin
+    public void getAllMembersResultTest() throws Exception {
+        String requestId = "missing-request-id";
+        String url = API_BASE_URL + "groupings/all-members/result/" + requestId;
+
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertNotNull(mvcResult);
     }
 
     @Test
