@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+import java.util.Locale;
 
 public final class Dates {
 
@@ -110,7 +111,7 @@ public final class Dates {
         String result;
 
         try {
-            result = datetime.format(DateTimeFormatter.ofPattern(formatStr));
+            result = datetime.format(DateTimeFormatter.ofPattern(formatStr, Locale.ENGLISH));
         } catch (Exception e) {
             // Try again with a basic pattern.
             result = formatDateBasicPattern(datetime);
