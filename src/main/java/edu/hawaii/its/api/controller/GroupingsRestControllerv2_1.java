@@ -26,12 +26,12 @@ import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
 import edu.hawaii.its.api.groupings.GroupingGroupMembers;
-import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingGroupsMembers;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingOptAttributes;
+import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
@@ -331,6 +331,49 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getGroupingMembersIsBasis(currentUser, groupingPath, uhIdentifiers));
+    }
+    
+    /**
+     * Check which of the given uhIdentifiers are already members of a grouping's include group.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/include-members/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInInclude(
+            @PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInInclude...");
+	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInInclude(currentUser, groupingPath, uhIdentifiers));
+    }
+
+    /**
+     * Check which of the given uhIdentifiers are already members of a grouping's exclude group.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/exclude-members/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInExclude(@PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInExclude...");
+	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInExclude(currentUser, groupingPath, uhIdentifiers));
+    }
+
+    /**
+     * Check which of the given uhIdentifiers are already owners of a grouping.
+     */
+    @PostMapping(value = "/groupings/{groupingPath}/owners/in-list")
+    @ResponseBody
+    public ResponseEntity<GroupingMembers> getMembersExistInOwners(@PathVariable String groupingPath,
+            @RequestBody List<String> uhIdentifiers) {
+        logger.info("Entered REST getMembersExistInOwners...");
+	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity
+                .ok()
+                .body(groupingOwnerService.getMembersExistInOwners(currentUser, groupingPath, uhIdentifiers));
     }
 
     /**
