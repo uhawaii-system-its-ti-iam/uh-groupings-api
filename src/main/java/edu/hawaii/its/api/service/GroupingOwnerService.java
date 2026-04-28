@@ -81,9 +81,7 @@ public class GroupingOwnerService {
                 isAscending);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
         groupingGroupsMembers.setPageNumber(pageNumber);
-        if (grouperService instanceof OotbGrouperApiService && pageNumber > 1) {
-            groupingGroupsMembers.setPaginationCompleteTrue();
-        }
+
         return groupingGroupsMembers;
     }
 
