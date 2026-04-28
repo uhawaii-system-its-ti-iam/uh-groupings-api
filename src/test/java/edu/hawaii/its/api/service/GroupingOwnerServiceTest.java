@@ -136,7 +136,7 @@ public class GroupingOwnerServiceTest {
 
         String searchString = "test";
 
-        doReturn(true).when(memberService).isAdmin(TEST_UIDS.get(0));
+        doReturn(true).when(memberService).isCurrentUserAdmin();
 
         groupingGroupMembers = groupingOwnerService.getGroupingMembers(
                 TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, null);
@@ -152,7 +152,7 @@ public class GroupingOwnerServiceTest {
         assertNotNull(groupingGroupMembers);
         assertFalse(groupingGroupMembers.getMembers().isEmpty());
 
-        doReturn(false).when(memberService).isAdmin(TEST_UIDS.get(0));
+        doReturn(false).when(memberService).isCurrentUserAdmin();
         doReturn(true).when(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
 
         groupingGroupMembers = groupingOwnerService.getGroupingMembers(
@@ -161,7 +161,7 @@ public class GroupingOwnerServiceTest {
         assertNotNull(groupingGroupMembers);
         assertFalse(groupingGroupMembers.getMembers().isEmpty());
 
-        doReturn(false).when(memberService).isAdmin(TEST_UIDS.get(0));
+        doReturn(false).when(memberService).isCurrentUserAdmin();
         doReturn(false).when(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
 
         assertThrows(AccessDeniedException.class,

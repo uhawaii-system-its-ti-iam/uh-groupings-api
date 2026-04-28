@@ -57,7 +57,9 @@ public class GroupingAssignmentService {
      */
     public GroupingPaths allGroupingPaths(String adminUhIdentifier) {
         logger.info(String.format("allGroupings; adminUhIdentifier: %s;", adminUhIdentifier));
-        if (!memberService.isAdmin(adminUhIdentifier)) {
+        // Use JWT for general admin check instead of querying Grouper
+        // Note: adminUhIdentifier is the currentUser from the controller
+        if (!memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
         return new GroupingPaths(groupingsService.allGroupAttributeResults());
@@ -68,7 +70,9 @@ public class GroupingAssignmentService {
      */
     public GroupingGroupMembers groupingAdmins(String adminUhIdentifier) {
         logger.info(String.format("groupingAdmins; adminUhIdentifier: %s;", adminUhIdentifier));
-        if (!memberService.isAdmin(adminUhIdentifier)) {
+        // Use JWT for general admin check instead of querying Grouper
+        // Note: adminUhIdentifier is the currentUser from the controller
+        if (!memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
         return new GroupingGroupMembers(grouperService.getMembersResult(adminUhIdentifier, GROUPING_ADMINS));
@@ -141,7 +145,9 @@ public class GroupingAssignmentService {
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupPath, currentUser)) {
+        if (!memberService.isCurrentUserAdmin()
+                && !memberService.isOwner(groupPath, currentUser)
+                && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingAllOwners(currentUser, groupPath).getOwners();
@@ -160,7 +166,8 @@ public class GroupingAssignmentService {
     public Integer numberOfDirectOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingDirectOwners; currentUser: %s; groupingPath: %s;",
                 currentUser, groupingPath));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupingPath, currentUser)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingOwnerMembers immediateOwners = new GroupingOwnerMembers(grouperService
@@ -182,7 +189,9 @@ public class GroupingAssignmentService {
     public Map<String, OwnerResult> compareOwnerGroupings(String currentUser, String groupPath) {
         logger.info(String.format("compareOwnerGroupings; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupPath, currentUser)) {
+        if (!memberService.isCurrentUserAdmin()
+                && !memberService.isOwner(groupPath, currentUser)
+                && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers immediateOwners = groupingImmediateOwners(currentUser, groupPath).getOwners();

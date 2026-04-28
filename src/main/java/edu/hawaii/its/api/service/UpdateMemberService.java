@@ -352,19 +352,22 @@ public class UpdateMemberService {
     }
 
     public void checkIfOwnerOrAdminUser(String currentUser, String groupingPath) {
-        if (!memberService.isOwner(groupingPath, currentUser) && !memberService.isAdmin(currentUser)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        if (!memberService.isOwner(groupingPath, currentUser) && !memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
     }
 
     public void checkIfAdminUser(String currentUser) {
-        if (!memberService.isAdmin(currentUser)) {
+        // Use JWT for general admin check instead of querying Grouper
+        if (!memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
     }
 
     public void checkIfSelfOptOrAdmin(String currentUser, String identifier) {
-        if (!currentUser.equals(identifier) && !memberService.isAdmin(currentUser)) {
+        // Use JWT for general admin check instead of querying Grouper
+        if (!currentUser.equals(identifier) && !memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
     }
