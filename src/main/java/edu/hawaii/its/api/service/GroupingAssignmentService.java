@@ -198,8 +198,7 @@ public class GroupingAssignmentService {
                 ownerGroupings.add(name);
                 continue;
             }
-            // For direct owners, we intentionally leave OwnerResult.paths empty (no initial path)
-            // to indicate a DIRECT ownership source; only owner-grouping sources add paths below.
+            // For direct owners, we do not add a path to indicate DIRECT ownership; only owner-groupings add a path below.
             existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid()));
         }
 
