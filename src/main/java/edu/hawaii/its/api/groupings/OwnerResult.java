@@ -10,11 +10,10 @@ public class OwnerResult {
     private final String uid;
     private final List<String> paths = new ArrayList<>();
 
-    public OwnerResult(String uhUuid, String name, String uid, String initialPath) {
+    public OwnerResult(String uhUuid, String name, String uid) {
         this.uhUuid = uhUuid;
         this.name = name;
         this.uid = uid;
-        this.paths.add(initialPath);
     }
 
     public String getUhUuid() {
@@ -37,4 +36,3 @@ public class OwnerResult {
         this.paths.add(path);
     }
 }
-

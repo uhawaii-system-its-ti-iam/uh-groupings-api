@@ -198,7 +198,8 @@ public class GroupingAssignmentService {
                 ownerGroupings.add(name);
                 continue;
             }
-            existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid(), "DIRECT"));
+            // For direct owners, we do not add a path to indicate DIRECT ownership; only owner-groupings add a path below.
+            existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid()));
         }
 
         // Iterate through each owner-grouping to find duplicate owners
@@ -216,7 +217,9 @@ public class GroupingAssignmentService {
                     duplicates.get(uhUuid).addPath(path);
                 } else {
                     // Place it in existing map if it's seen for the first time
-                    existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, owner.getName(), owner.getUid(), path));
+                    OwnerResult ownerResult = new OwnerResult(uhUuid, owner.getName(), owner.getUid());
+                    ownerResult.addPath(path);
+                    existingUhUuids.put(uhUuid, ownerResult);
                 }
             }
         }

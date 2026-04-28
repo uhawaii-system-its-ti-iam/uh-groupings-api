@@ -226,7 +226,7 @@ public class TestGroupingAssignmentService {
         GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertTrue(ownersWithGroup.getOwners().getMembers().stream()
-                        .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
+                .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
 
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
@@ -354,7 +354,10 @@ public class TestGroupingAssignmentService {
         assertEquals(initialDuplicatesCount + 1, duplicates.size());
         assertTrue(duplicates.containsKey(duplicateOwnerUhUuid));
         assertEquals(duplicates.get(duplicateOwnerUhUuid).getUhUuid(), duplicateOwnerUhUuid);
-        assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths().contains("DIRECT"));
         assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths().contains(OWNER_GROUPING));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths().contains(OWNER_GROUPING));
+        assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths()
+                .stream()
+                .noneMatch(path -> path.contains("DIRECT")));
     }
 }
