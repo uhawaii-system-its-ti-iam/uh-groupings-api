@@ -175,12 +175,11 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * Compare direct owners and owner-groupings
      * Returns a Map of all owners with multiple ownerships and sources of ownership for those owners.
      * The value is an OwnerResult object containing the owner's details and list of paths that make them an owner.
      */
-    public Map<String, OwnerResult> compareOwnerGroupings(String currentUser, String groupPath) {
-        logger.info(String.format("compareOwnerGroupings; currentUser: %s; groupPath: %s;",
+    public Map<String, OwnerResult> getDuplicateOwners(String currentUser, String groupPath) {
+        logger.info(String.format("getDuplicateOwners; currentUser: %s; groupPath: %s;",
                 currentUser, groupPath));
         if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();

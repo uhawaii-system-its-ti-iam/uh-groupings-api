@@ -298,7 +298,7 @@ public class TestGroupingAssignmentService {
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        int duplicateOwners = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
+        int duplicateOwners = groupingAssignmentService.getDuplicateOwners(ADMIN, GROUPING).size();
         int afterAdd = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         assertEquals(initialOwners + basisMembers + includeMembers - duplicateOwners, afterAdd);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
@@ -325,7 +325,7 @@ public class TestGroupingAssignmentService {
     }
 
     @Test
-    public void compareOwnerGroupingsTest() {
+    public void getDuplicateOwnersTest() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
 
@@ -342,13 +342,13 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
 
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        int initialDuplicatesCount = groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING).size();
+        int initialDuplicatesCount = groupingAssignmentService.getDuplicateOwners(ADMIN, GROUPING).size();
 
         // Add the member as a direct owner to create the duplicate (member is already in OWNER_GROUPING).
         grouperService.addMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
 
         Map<String, OwnerResult> duplicates =
-                groupingAssignmentService.compareOwnerGroupings(ADMIN, GROUPING);
+                groupingAssignmentService.getDuplicateOwners(ADMIN, GROUPING);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, duplicateOwnerUhUuid);
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         assertEquals(initialDuplicatesCount + 1, duplicates.size());
