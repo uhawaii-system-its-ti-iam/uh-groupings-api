@@ -113,14 +113,14 @@ public class TestMemberAttributeService {
 
         // Should not contain any invalid uhIdentifiers.
         List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("bogus-user");
+        uhIdentifiers.add("bogusUser");
         results = memberAttributeService.getMemberAttributeResults(ADMIN, uhIdentifiers);
         assertEquals(Collections.emptyList(), results.getResults());
         assertEquals(uhIdentifiers, results.getInvalid());
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMemberAttributeResults("bogus-owner-admin", null));
+                () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
 
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
@@ -153,14 +153,14 @@ public class TestMemberAttributeService {
 
         // Should not contain any invalid uhIdentifiers.
         List<String> uhIdentifiers = new ArrayList<>();
-        uhIdentifiers.add("bogus-user");
+        uhIdentifiers.add("bogusUser");
         results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, uhIdentifiers);
         assertNotNull(results.join().getResults());
         assertTrue(results.join().getResults().isEmpty());
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMemberAttributeResults("bogus-owner-admin", null));
+                () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
 
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);

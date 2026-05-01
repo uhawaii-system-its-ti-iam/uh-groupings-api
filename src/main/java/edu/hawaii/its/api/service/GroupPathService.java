@@ -4,6 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.hawaii.its.api.exception.GroupPathNotFoundException;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +22,8 @@ import edu.hawaii.its.api.wrapper.Group;
  */
 @Service
 public class GroupPathService {
+
+    private static final Log logger = LogFactory.getLog(GroupPathService.class);
 
     private final GrouperService grouperService;
 
@@ -38,11 +45,16 @@ public class GroupPathService {
             this.grouperService = grouperService;
     }
 
+    @PostConstruct
+    public void init() {
+        GROUP_PATH_PATTERN = Pattern.compile(PATH_REGEX);
+    }
     /**
      * Throw an exception if path is invalid.
      */
-    public void checkPath(String path) {
+    public void checkPath(String currentUser, String path) {
         if (!isWellFormedPath(path)) {
+            logger.warn(String.format("Malformed path input rejected from currentUser: %s;", currentUser));
             throw new InvalidGroupPathException(path);
         }
         if (!isValidPath(path)) {
@@ -56,9 +68,6 @@ public class GroupPathService {
         }
         if (path.length() > MAX_PATH_LENGTH) {
             return false;
-        }
-        if (GROUP_PATH_PATTERN == null) {
-            GROUP_PATH_PATTERN = Pattern.compile(PATH_REGEX);
         }
         return GROUP_PATH_PATTERN.matcher(path).matches();
     }

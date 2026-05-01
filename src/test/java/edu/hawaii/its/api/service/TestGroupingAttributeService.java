@@ -584,4 +584,43 @@ public class TestGroupingAttributeService {
         groupingAttributeService.updateDescription(GROUPING, ADMIN, descriptionOriginal);
         assertEquals(descriptionOriginal, groupingsService.getGroupingDescription(GROUPING));
     }
+
+    @Test
+    public void validateAndSanitizeDescriptionTest() {
+        //valid description
+        try {
+            groupingAttributeService.validateAndSanitizeDescription(DEFAULT_DESCRIPTION);
+        } catch (InvalidDescriptionException e) {
+            fail("Should not throw an exception if description is valid");
+        }
+        //invalid description (null)
+        try {
+            groupingAttributeService.validateAndSanitizeDescription(null);
+            fail("Should throw an exception if path is null");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid description (empty)
+        try {
+            groupingAttributeService.validateAndSanitizeDescription("");
+            fail("Should throw an exception if path is empty");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid description (too long)
+        try {
+            String longDescription = "a".repeat(1010);
+            groupingAttributeService.validateAndSanitizeDescription(longDescription);
+            fail("Should throw an exception if path is too long");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+        //invalid description (bad characters)
+        try {
+            groupingAttributeService.validateAndSanitizeDescription("@invalid-description");
+            fail("Should throw an exception if path contains invalid characters");
+        } catch (InvalidDescriptionException e) {
+            JsonUtil.printJson(e);
+        }
+    }
 }

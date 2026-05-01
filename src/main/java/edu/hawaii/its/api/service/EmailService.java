@@ -48,7 +48,7 @@ public class EmailService {
     public EmailResult sendFeedback(String currentUser, Feedback feedback) {
         logger.info("Feedback received in EmailService: " + feedback);
 
-        if (!subjectService.isValidIdentifier(currentUser)) {
+        if (!subjectService.isValidIdentifier(currentUser, currentUser)) {
             throw new AccessDeniedException();
         }
 
@@ -97,7 +97,7 @@ public class EmailService {
     public EmailResult sendStackTrace(String currentUser, String stackTrace) {
         logger.info("Feedback Error email has been triggered.");
 
-        if (!subjectService.isValidIdentifier(currentUser)) {
+        if (!subjectService.isValidIdentifier(currentUser, currentUser)) {
             throw new AccessDeniedException();
         }
 

@@ -59,6 +59,9 @@ public class UpdateMemberServiceTest {
     @Value("${groupings.api.test.uids}")
     private List<String> TEST_UIDS;
 
+    @Value("${groupings.api.test.admin_user}")
+    private String ADMIN;
+
     private final String groupPath = "group-path";
 
     private final String ownerGrouping = "owner-grouping";
@@ -81,10 +84,10 @@ public class UpdateMemberServiceTest {
 
         subjectsResults = groupingsTestConfiguration.getSubjectResultUidFailureTestData();
         assertNotNull(subjectsResults);
-        doReturn(subjectsResults).when(grouperService).getSubjects("bogus-identifier");
+        doReturn(subjectsResults).when(grouperService).getSubjects("bogusIdentifier");
 
         assertThrows(UhIdentifierNotFoundException.class,
-                () -> updateMemberService.addAdminMember(TEST_UIDS.get(1), "bogus-identifier"));
+                () -> updateMemberService.addAdminMember(TEST_UIDS.get(1), "bogusIdentifier"));
     }
 
     @Test
@@ -106,10 +109,10 @@ public class UpdateMemberServiceTest {
 
         subjectsResults = groupingsTestConfiguration.getSubjectResultUidFailureTestData();
         assertNotNull(subjectsResults);
-        doReturn(subjectsResults).when(grouperService).getSubjects("bogus-identifier");
+        doReturn(subjectsResults).when(grouperService).getSubjects("bogusIdentifier");
 
         assertThrows(UhIdentifierNotFoundException.class,
-                () -> updateMemberService.removeAdminMember(TEST_UIDS.get(1), "bogus-identifier"));
+                () -> updateMemberService.removeAdminMember(TEST_UIDS.get(1), "bogusIdentifier"));
     }
 
     @Test
@@ -132,7 +135,7 @@ public class UpdateMemberServiceTest {
 
         AddMembersResults addMembersResults = groupingsTestConfiguration.addMemberResultsFailureTestData();
         assertNotNull(addMembersResults);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(TEST_UIDS);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(ADMIN, TEST_UIDS);
         doReturn(addMembersResults).when(grouperService)
                 .addMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
@@ -217,7 +220,7 @@ public class UpdateMemberServiceTest {
 
         AddMemberResult addMemberResult = groupingsTestConfiguration.addMemberResultFailureTestData();
         assertNotNull(addMemberResult);
-        String validIdentifier = subjectService.getValidUhUuid(TEST_UIDS.get(1));
+        String validIdentifier = subjectService.getValidUhUuid(ADMIN, TEST_UIDS.get(1));
         doReturn(addMemberResult).when(grouperService)
                 .addMember(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifier);
 
@@ -246,7 +249,7 @@ public class UpdateMemberServiceTest {
 
         RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         assertNotNull(removeMembersResults);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(TEST_UIDS);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(ADMIN, TEST_UIDS);
         doReturn(removeMembersResults).when(grouperService)
                 .removeMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
@@ -268,7 +271,7 @@ public class UpdateMemberServiceTest {
         SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
 
-        List<String> validIdentifiers = subjectService.getValidUhUuids(TEST_UIDS);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(ADMIN, TEST_UIDS);
         RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         doReturn(removeMembersResults).when(grouperService)
                 .removeMembers(TEST_UIDS.get(0), groupPath + GroupType.EXCLUDE.value(), validIdentifiers);
@@ -296,7 +299,7 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
 
-        List<String> validIdentifiers = subjectService.getValidUhUuids(TEST_UIDS);
+        List<String> validIdentifiers = subjectService.getValidUhUuids(ADMIN, TEST_UIDS);
         RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         doReturn(removeMembersResults).when(grouperService)
                 .removeMembers(TEST_UIDS.get(0), groupPath + GroupType.INCLUDE.value(), validIdentifiers);

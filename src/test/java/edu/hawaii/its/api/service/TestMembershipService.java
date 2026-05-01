@@ -95,10 +95,10 @@ public class TestMembershipService {
 
         // Should throw an exception if uid passed is bogus.
         try {
-            membershipService.membershipResults("bogus-user");
+            membershipService.membershipResults("bogusUser");
             fail("Should throw an exception if user passed is bogus.");
         } catch (UhIdentifierNotFoundException e) {
-            assertEquals("404 NOT_FOUND \"bogus-user\"", e.getMessage());
+            assertEquals("404 NOT_FOUND \"bogusUser\"", e.getMessage());
         }
 
         grouperService.addMember(ADMIN, GROUPING_BASIS, testUids.get(0));
@@ -176,7 +176,7 @@ public class TestMembershipService {
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
 
         // Should return and empty list if uid passed is bogus.
-        manageSubjectResults = membershipService.manageSubjectResults(ADMIN, "bogus-user");
+        manageSubjectResults = membershipService.manageSubjectResults(ADMIN, "bogusUser");
         assertTrue(manageSubjectResults.getResults().isEmpty());
     }
 

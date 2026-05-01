@@ -2,6 +2,8 @@ package edu.hawaii.its.api.service;
 
 import java.util.regex.Pattern;
 
+import jakarta.annotation.PostConstruct;
+
 import edu.hawaii.its.api.exception.GrouperException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,7 +60,7 @@ public class GroupingAttributeService {
     private final UpdateTimestampService timestampService;
 
     @Value("${groupings.api.validation.description.maxlength}")
-    private int DESCIPTION_MAX_LENGTH;
+    private int DESCRIPTION_MAX_LENGTH;
 
     @Value("${groupings.api.validation.description.regex}")
     private String DESCRIPTION_REGEX;
@@ -73,6 +75,11 @@ public class GroupingAttributeService {
         this.memberService = memberService;
         this.groupingsService = groupingsService;
         this.timestampService = timestampService;
+    }
+
+    @PostConstruct
+    public void init() {
+        DESCRIPTION_PATTERN = Pattern.compile(DESCRIPTION_REGEX);
     }
 
     /**
@@ -142,26 +149,28 @@ public class GroupingAttributeService {
      */
     public GroupingUpdateDescriptionResult updateDescription(String groupPath, String ownerUid,
             String description) {
-        logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s; description: %s;",
-                groupPath, ownerUid, description));
+        logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s;",
+                groupPath, ownerUid));
 
         if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isAdmin(
                 ownerUid)) {
             throw new AccessDeniedException();
         }
-        String santized_description = validateAndSanitizeDescription(description);
-        return groupingsService.updateGroupingDescription(groupPath, santized_description);
+        try {
+            String sanitizedDescription = validateAndSanitizeDescription(description);
+            return groupingsService.updateGroupingDescription(groupPath, sanitizedDescription);
+        } catch (InvalidDescriptionException e) {
+            logger.warn(String.format("Malformed description rejected from user: %s;", ownerUid));
+            throw e;
+        }
     }
 
     public String validateAndSanitizeDescription(String description) {
         if (description == null || description.isEmpty()) {
             throw new InvalidDescriptionException("Description cannot be null or empty.");
         }
-        if (description.length() > DESCIPTION_MAX_LENGTH) {
+        if (description.length() > DESCRIPTION_MAX_LENGTH) {
             throw new InvalidDescriptionException("Description length is too long.");
-        }
-        if (DESCRIPTION_PATTERN == null) {
-            DESCRIPTION_PATTERN = Pattern.compile(DESCRIPTION_REGEX);
         }
         if (!DESCRIPTION_PATTERN.matcher(description).matches()) {
             throw new InvalidDescriptionException("Description contains invalid characters.");

@@ -73,7 +73,7 @@ public class EmailServiceTest {
 
     @BeforeEach
     public void setUp() {
-        doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0));
+        doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0), TEST_UIDS.get(0));
 
         emailService.setEnabled(true);
         emailService.setRecipient("address");
@@ -94,7 +94,7 @@ public class EmailServiceTest {
 
     @Test
     public void validUhIdentifier() {
-        doReturn(false).when(subjectService).isValidIdentifier(TEST_UIDS.get(0));
+        doReturn(false).when(subjectService).isValidIdentifier(TEST_UIDS.get(0), TEST_UIDS.get(0));
 
         assertThrows(AccessDeniedException.class, () -> emailService.sendFeedback(TEST_UIDS.get(0), feedback));
         assertThrows(AccessDeniedException.class, () -> emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace"));
@@ -160,7 +160,7 @@ public class EmailServiceTest {
     @Test
     public void sendFeedbackWithMailExceptionThrown() {
         doThrow(MailSendException.class).when(javaMailSender).send((SimpleMailMessage) any());
-        doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0));
+        doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0), TEST_UIDS.get(0));
 
         emailService.sendFeedback(TEST_UIDS.get(0), feedback);
         assertFalse(wasSent);

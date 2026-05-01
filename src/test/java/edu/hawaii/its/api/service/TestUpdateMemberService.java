@@ -117,14 +117,14 @@ public class TestUpdateMemberService {
         assertFalse(memberService.isAdmin(testUids.get(0)));
 
         try {
-            updateMemberService.addAdminMember(ADMIN, "bogus-admin-to-add");
+            updateMemberService.addAdminMember(ADMIN, "bogusAdminToAdd");
             fail("Should throw an exception if an invalid adminToAdd is passed.");
         } catch (UhIdentifierNotFoundException e) {
             assertNull(e.getCause());
         }
 
         try {
-            updateMemberService.removeAdminMember(ADMIN, "bogus-admin-to-remove");
+            updateMemberService.removeAdminMember(ADMIN, "bogusAdminToRemove");
             fail("Should throw an exception if an invalid adminToRemove is passed.");
         } catch (UhIdentifierNotFoundException e) {
             assertNull(e.getCause());
