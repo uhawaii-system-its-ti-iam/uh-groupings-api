@@ -1092,12 +1092,12 @@ public class GroupingsRestControllerv2_1Test {
 	
 	@Test
 	@WithMockUhAdmin
-	public void compareOwnerGroupingsTest() throws Exception {
-		MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING + "/owners/compare"))
+	public void getDuplicateOwnersTest() throws Exception {
+		MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING + "/owners/duplicates"))
 				.andExpect(status().isOk())
 				.andReturn();
 		assertNotNull(mvcResult);
-		verify(groupingAssignmentService, times(1)).compareOwnerGroupings(ADMIN, GROUPING);
+		verify(groupingAssignmentService, times(1)).getDuplicateOwners(ADMIN, GROUPING);
 	}
 	
     @Test

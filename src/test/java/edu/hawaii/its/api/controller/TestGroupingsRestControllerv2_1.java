@@ -892,8 +892,8 @@ public class TestGroupingsRestControllerv2_1 {
 
     @Test
     @WithMockUhAdmin
-    public void compareOwnerGroupingsTest() throws Exception {
-        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/compare";
+    public void getDuplicateOwners() throws Exception {
+        String url = API_BASE_URL + "/groupings/" + GROUPING + "/owners/duplicates";
         MvcResult mvcResult = mockMvc.perform(get(url)
                         )
                 .andExpect(status().isOk()).andReturn();
