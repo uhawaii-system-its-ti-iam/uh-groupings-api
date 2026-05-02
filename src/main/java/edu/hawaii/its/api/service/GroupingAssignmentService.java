@@ -125,7 +125,7 @@ public class GroupingAssignmentService {
     public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
         logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
-        if (!memberService.isOwner(groupPath, currentUser)) {
+        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
         GroupingGroupMembers owners = groupingImmediateOwners(currentUser, groupPath).getOwners();

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +51,10 @@ public class GroupingGroupsMembersTest {
         String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
         WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
         assertNotNull(wsGetMembersResults);
+
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         assertNotNull(getMembersResults);
+
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
 
         assertNotNull(groupingGroupsMembers);
@@ -97,7 +100,9 @@ public class GroupingGroupsMembersTest {
         assertEquals(2, includeMembers.size());
         assertEquals(2, excludeMembers.size());
         assertEquals(1, ownersMembers.size());
-        assertEquals(3, allGroupingMembers.size());
+
+        // constructor no longer auto-finalizes allMembers
+        assertTrue(allGroupingMembers.isEmpty());
 
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
@@ -126,19 +131,100 @@ public class GroupingGroupsMembersTest {
         assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
         assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndInclude)));
         assertTrue(ownersMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndExclude)));
+    }
+
+    @Test
+    public void finalizeMembersSuccess() {
+        String onlyInclude = "testiwta";
+        String basisAndInclude = "testiwtb";
+        String onlyExclude = "testiwtc";
+        String onlyBasis = "testiwtf";
+
+        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
+        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
+        assertNotNull(wsGetMembersResults);
+
+        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        assertNotNull(getMembersResults);
+
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+
+        GroupingGroupMembers basis = groupingGroupsMembers.getGroupingBasis();
+        GroupingGroupMembers include = groupingGroupsMembers.getGroupingInclude();
+        GroupingGroupMembers exclude = groupingGroupsMembers.getGroupingExclude();
+
+        GroupingGroupMember basisOnlyMember = basis.getMembers().stream()
+                .filter(member -> onlyBasis.equals(member.getUhUuid()))
+                .findFirst()
+                .orElseThrow();
+
+        GroupingGroupMember basisAndIncludeMember = basis.getMembers().stream()
+                .filter(member -> basisAndInclude.equals(member.getUhUuid()))
+                .findFirst()
+                .orElseThrow();
+
+        GroupingGroupMember includeOnlyMember = include.getMembers().stream()
+                .filter(member -> onlyInclude.equals(member.getUhUuid()))
+                .findFirst()
+                .orElseThrow();
+
+        GroupingGroupMember excludeOnlyMember = exclude.getMembers().stream()
+                .filter(member -> onlyExclude.equals(member.getUhUuid()))
+                .findFirst()
+                .orElseThrow();
+
+        GroupingGroupMembers composite = new GroupingGroupMembers();
+        composite.setGroupPath("group-path");
+
+        List<GroupingGroupMember> compositeMembers = new ArrayList<>();
+        compositeMembers.add(basisOnlyMember);
+        compositeMembers.add(basisAndIncludeMember);
+        compositeMembers.add(includeOnlyMember);
+        compositeMembers.add(excludeOnlyMember);
+        composite.setGroupingGroupMembers(compositeMembers);
+
+        groupingGroupsMembers.getGroupsMembersList().add(composite);
+
+        groupingGroupsMembers.finalizeMembers();
+
+        List<GroupingMember> allGroupingMembers = groupingGroupsMembers.getAllMembers().getMembers();
+
+        assertEquals(4, allGroupingMembers.size());
 
         assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
         assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyInclude)));
         assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(basisAndExclude)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(owner)));
-        assertTrue(allGroupingMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyExclude)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis & Include"))
-                .allMatch(member -> member.getUhUuid().equals(basisAndInclude)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
-                .allMatch(member -> member.getUhUuid().equals(onlyBasis)));
-        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Include"))
-                .allMatch(member -> member.getUhUuid().equals(onlyInclude)));
+        assertTrue(allGroupingMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyExclude)));
+
+        assertTrue(allGroupingMembers.stream()
+                .filter(member -> onlyBasis.equals(member.getUhUuid()))
+                .allMatch(member -> "Basis".equals(member.getWhereListed())));
+
+        assertTrue(allGroupingMembers.stream()
+                .filter(member -> onlyInclude.equals(member.getUhUuid()))
+                .allMatch(member -> "Include".equals(member.getWhereListed())));
+
+        assertTrue(allGroupingMembers.stream()
+                .filter(member -> basisAndInclude.equals(member.getUhUuid()))
+                .allMatch(member -> "Basis & Include".equals(member.getWhereListed())));
+
+        assertTrue(allGroupingMembers.stream()
+                .filter(member -> onlyExclude.equals(member.getUhUuid()))
+                .allMatch(member -> "Unknown".equals(member.getWhereListed())));
+    }
+
+    @Test
+    public void setPaginationCompleteTrue() {
+        GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers();
+
+        groupingGroupsMembers.setBasis(true);
+        groupingGroupsMembers.setPaginationComplete();
+
+        assertFalse(groupingGroupsMembers.isPaginationComplete());
+
+        groupingGroupsMembers.setPaginationCompleteTrue();
+
+        assertTrue(groupingGroupsMembers.isPaginationComplete());
     }
 
     @Test
@@ -146,6 +232,7 @@ public class GroupingGroupsMembersTest {
         WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
         GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
+
         assertNotNull(groupingGroupsMembers);
         assertEquals("FAILURE", groupingGroupsMembers.getResultCode());
         assertEquals(0, groupingGroupsMembers.getPageNumber());
@@ -183,5 +270,4 @@ public class GroupingGroupsMembersTest {
         assertNotNull(groupingGroupsMembers.getAllMembers().getMembers());
         assertTrue(groupingGroupsMembers.getAllMembers().getMembers().isEmpty());
     }
-
 }
