@@ -57,7 +57,7 @@ public class MemberAttributeService {
             throw new AccessDeniedException();
         }
         List<String> invalidUhIdentifiers = uhIdentifiers.parallelStream()
-                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                .filter(uhIdentifier -> !subjectService.isValidIdentifier(currentUser, uhIdentifier))
                 .collect(Collectors.toList());
         if (!invalidUhIdentifiers.isEmpty()) {
             return new MemberAttributeResults(invalidUhIdentifiers);
@@ -79,7 +79,7 @@ public class MemberAttributeService {
             throw new AccessDeniedException();
         }
         List<String> invalid = uhIdentifiers.parallelStream()
-                .filter(uhIdentifier -> !subjectService.isValidIdentifier(uhIdentifier))
+                .filter(uhIdentifier -> !subjectService.isValidIdentifier(currentUser, uhIdentifier))
                 .collect(Collectors.toList());
         if (!invalid.isEmpty()) {
             return CompletableFuture.completedFuture(new MemberAttributeResults(invalid));

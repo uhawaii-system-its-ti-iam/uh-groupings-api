@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class InvalidGroupPathExceptionTest {
+public class InvalidUhIdentifierExceptionTest {
 
     @Test
     public void construction() {
-        InvalidGroupPathException exception = new InvalidGroupPathException("fail");
+        InvalidUhIdentifierException exception = new InvalidUhIdentifierException("fail");
         assertNotNull(exception);
         assertEquals("400 BAD_REQUEST \"fail\"", exception.getMessage());
     }

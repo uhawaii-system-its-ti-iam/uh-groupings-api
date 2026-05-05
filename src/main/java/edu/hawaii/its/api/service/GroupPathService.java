@@ -2,9 +2,16 @@ package edu.hawaii.its.api.service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
-import edu.hawaii.its.api.exception.GrouperException;
+import jakarta.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import edu.hawaii.its.api.exception.GroupPathNotFoundException;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -16,6 +23,8 @@ import edu.hawaii.its.api.wrapper.Group;
 @Service
 public class GroupPathService {
 
+    private static final Log logger = LogFactory.getLog(GroupPathService.class);
+
     private final GrouperService grouperService;
 
     private static final String BASIS = "basis";
@@ -24,17 +33,43 @@ public class GroupPathService {
     private static final String OWNERS = "owners";
     private static final String RESULT_CODE_SUCCESS = "SUCCESS";
 
+    @Value("${groupings.api.validation.path.maxlength}")
+    private int MAX_PATH_LENGTH;
+
+    @Value("${groupings.api.validation.path.regex}")
+    private String PATH_REGEX;
+
+    private static Pattern GROUP_PATH_PATTERN;
+
     public GroupPathService(GrouperService grouperService) {
             this.grouperService = grouperService;
     }
 
+    @PostConstruct
+    public void init() {
+        GROUP_PATH_PATTERN = Pattern.compile(PATH_REGEX);
+    }
     /**
      * Throw an exception if path is invalid.
      */
-    public void checkPath(String path) {
-        if (!isValidPath(path)) {
+    public void checkPath(String currentUser, String path) {
+        if (!isWellFormedPath(path)) {
+            logger.warn(String.format("Malformed path input rejected from currentUser: %s;", currentUser));
             throw new InvalidGroupPathException(path);
         }
+        if (!isValidPath(path)) {
+            throw new GroupPathNotFoundException(path);
+        }
+    }
+
+    private boolean isWellFormedPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return false;
+        }
+        if (path.length() > MAX_PATH_LENGTH) {
+            return false;
+        }
+        return GROUP_PATH_PATTERN.matcher(path).matches();
     }
 
     public boolean isValidPath(String path) {

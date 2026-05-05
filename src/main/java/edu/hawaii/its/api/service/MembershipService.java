@@ -56,7 +56,7 @@ public class MembershipService {
     public MembershipResults membershipResults(String currentUser) {
         logger.info(String.format("membershipResults; currentUser: %s;", currentUser));
 
-        String uhUuid = subjectService.getValidUhUuid(currentUser);
+        String uhUuid = subjectService.getValidUhUuid(currentUser, currentUser);
         if (uhUuid.equals("")) {
             throw new UhIdentifierNotFoundException(currentUser);
         }
@@ -113,7 +113,7 @@ public class MembershipService {
             throw new AccessDeniedException();
         }
         ManageSubjectResults manageSubjectResults = new ManageSubjectResults();
-        String uhUuid = subjectService.getValidUhUuid(uid);
+        String uhUuid = subjectService.getValidUhUuid(currentUser, uid);
         if (uhUuid.equals("")) {
             return manageSubjectResults;
         }

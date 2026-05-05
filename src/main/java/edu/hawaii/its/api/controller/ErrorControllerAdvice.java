@@ -3,6 +3,8 @@ package edu.hawaii.its.api.controller;
 import java.io.IOException;
 
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
+import edu.hawaii.its.api.exception.GroupPathNotFoundException;
+import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import jakarta.mail.MessagingException;
 
@@ -147,6 +149,24 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
 
+    @ExceptionHandler(GroupPathNotFoundException.class)
+    protected ResponseEntity<ApiError> handlePathNotFound(GroupPathNotFoundException pnfe) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes.getRequest().getRequestURI();
+
+        emailService.sendWithStack(pnfe, "Group Path Not Found Exception", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.NOT_FOUND)
+                .message("Group Path found failed")
+                .stackTrace(ExceptionUtils.getStackTrace(pnfe))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
     @ExceptionHandler(UhIdentifierNotFoundException.class)
     protected ResponseEntity<ApiError> handleUhMemberNotFound(UhIdentifierNotFoundException mnfe) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -175,6 +195,24 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.BAD_REQUEST)
                 .message("Invalid Group Path Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(igpe))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(InvalidUhIdentifierException.class)
+    public ResponseEntity<ApiError> handleInvalidUhMemberException(InvalidUhIdentifierException iume) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes.getRequest().getRequestURI();
+
+        emailService.sendWithStack(iume, "Invalid Uh Member Exception", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Invalid Uh Member Exception")
+                .stackTrace(ExceptionUtils.getStackTrace(iume))
                 .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
