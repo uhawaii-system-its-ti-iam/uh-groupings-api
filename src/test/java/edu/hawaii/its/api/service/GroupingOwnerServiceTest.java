@@ -306,6 +306,7 @@ public class GroupingOwnerServiceTest {
 
         GroupingSyncDestination mockDestination = new GroupingSyncDestination();
         mockDestination.setDescription("Test description with ${srhfgs}");
+        mockDestination.setTooltip("Test tooltip for ${srhfgs}");
         when(attributesResult.getDescription()).thenReturn(JsonUtil.asJson(mockDestination));
         when(attributesResult.getName()).thenReturn("test-attribute");
 
@@ -317,5 +318,6 @@ public class GroupingOwnerServiceTest {
         GroupingSyncDestination destination = result.get(0);
         assertEquals("test-attribute", destination.getName());
         assertEquals("Test description with test-group", destination.getDescription());
+        assertEquals("Test tooltip for test-group", destination.getTooltip());
     }
 }
