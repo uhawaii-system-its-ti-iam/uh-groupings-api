@@ -14,6 +14,7 @@ public class GroupingGroupMember extends MemberResult {
         setName(subject.getName());
         setFirstName(subject.getFirstName());
         setLastName(subject.getLastName());
+        setOrphan(subject.isOrphan());
         setResultCode(subject.getResultCode());
     }
 

@@ -93,13 +93,18 @@ public class GroupingGroupsMembersTest {
         assertNotNull(ownersMembers);
         assertNotNull(allGroupingMembers);
 
-        assertEquals(3, basisMembers.size());
+        assertEquals(4, basisMembers.size());
         assertEquals(2, includeMembers.size());
         assertEquals(2, excludeMembers.size());
         assertEquals(1, ownersMembers.size());
-        assertEquals(3, allGroupingMembers.size());
+        assertEquals(4, allGroupingMembers.size());
 
+        assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals("99999999")));
+        assertTrue(basisMembers.stream().filter(member -> member.getUhUuid().equals("99999999"))
+                .allMatch(GroupingGroupMember::isOrphan));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
+        assertTrue(basisMembers.stream().filter(member -> member.getUhUuid().equals(onlyBasis))
+                .noneMatch(GroupingGroupMember::isOrphan));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndExclude)));
         assertTrue(basisMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyInclude)));
@@ -136,7 +141,9 @@ public class GroupingGroupsMembersTest {
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis & Include"))
                 .allMatch(member -> member.getUhUuid().equals(basisAndInclude)));
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
-                .allMatch(member -> member.getUhUuid().equals(onlyBasis)));
+                .anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
+        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
+                .anyMatch(member -> member.getUhUuid().equals("99999999")));
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Include"))
                 .allMatch(member -> member.getUhUuid().equals(onlyInclude)));
     }

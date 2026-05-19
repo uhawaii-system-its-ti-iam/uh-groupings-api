@@ -48,7 +48,9 @@ public class JsonUtilTest {
     @Test
     public void asJsonAsObject() {
         String subjectJson = JsonUtil.asJson(subject0);
+        assertNotNull(subjectJson);
         Subject subject1 = JsonUtil.asObject(subjectJson, Subject.class);
+        assertNotNull(subject1);
         assertEquals(subject0.getName(), subject1.getName());
         assertEquals(subject0.getUhUuid(), subject1.getUhUuid());
         assertEquals(subject0.getUid(), subject1.getUid());

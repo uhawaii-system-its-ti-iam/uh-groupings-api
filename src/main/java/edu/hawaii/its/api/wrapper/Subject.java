@@ -3,6 +3,8 @@ package edu.hawaii.its.api.wrapper;
 import java.util.Arrays;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 /**
@@ -146,11 +148,29 @@ public class Subject extends Results {
     /**
      * A WsSubject containing empty string for all attribute values returns false.
      */
+    @JsonIgnore
     public boolean hasUHAttributes() {
         String[] attributeValues = this.wsSubject.getAttributeValues();
         if (attributeValues == null) {
             return false;
         }
         return !Arrays.stream(attributeValues).allMatch(value -> value.equals(""));
+    }
+
+    /**
+     * Whether this subject should appear in grouping member lists. Includes LDAP-enriched members and orphans
+     * (listed in Grouper with a uhUuid but no LDAP attribute data).
+     */
+    @JsonIgnore
+    public boolean isIncludedAsMember() {
+        return hasUHAttributes() || !getUhUuid().isEmpty();
+    }
+
+    /**
+     * Listed in Grouper with a uhUuid but no LDAP attribute data (e.g. name may still be "entity not found").
+     */
+    @JsonIgnore
+    public boolean isOrphan() {
+        return !hasUHAttributes() && !getUhUuid().isEmpty();
     }
 }
