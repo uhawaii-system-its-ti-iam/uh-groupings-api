@@ -6,7 +6,6 @@ public abstract class MemberResult {
     private String name;
     private String firstName;
     private String lastName;
-    private boolean orphan;
 
     public String getUid() {
         return uid;
@@ -46,13 +45,5 @@ public abstract class MemberResult {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public boolean isOrphan() {
-        return orphan;
-    }
-
-    public void setOrphan(boolean orphan) {
-        this.orphan = orphan;
     }
 }

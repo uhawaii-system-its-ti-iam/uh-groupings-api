@@ -7,6 +7,7 @@ import edu.hawaii.its.api.wrapper.Subject;
  */
 public class GroupingGroupMember extends MemberResult {
     private String resultCode;
+    private boolean orphan;
 
     public GroupingGroupMember(Subject subject) {
         setUid(subject.getUid());
@@ -24,5 +25,13 @@ public class GroupingGroupMember extends MemberResult {
 
     public void setResultCode(String resultCode) {
         this.resultCode = resultCode;
+    }
+
+    public boolean isOrphan() {
+        return orphan;
+    }
+
+    public void setOrphan(boolean orphan) {
+        this.orphan = orphan;
     }
 }

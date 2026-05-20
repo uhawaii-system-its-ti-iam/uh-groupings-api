@@ -154,7 +154,7 @@ public class Subject extends Results {
         if (attributeValues == null) {
             return false;
         }
-        return !Arrays.stream(attributeValues).allMatch(value -> value.equals(""));
+        return !Arrays.stream(attributeValues).allMatch(value -> value == null || value.equals(""));
     }
 
     /**
