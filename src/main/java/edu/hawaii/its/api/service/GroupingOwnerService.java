@@ -181,15 +181,20 @@ public class GroupingOwnerService {
             GroupAttributeResults groupAttributeResults) {
         List<AttributesResult> attributesResults = findAttributesResults.getResults();
         List<GroupingSyncDestination> syncDestinationList = new ArrayList<>();
+        String groupExtension = groupAttributeResults.getGroups().stream()
+                .findFirst()
+                .map(Group::getExtension)
+                .orElse("");
         for (AttributesResult attributesResult : attributesResults) {
             GroupingSyncDestination groupingSyncDestination =
                     JsonUtil.asObject(attributesResult.getDescription(), GroupingSyncDestination.class);
             groupingSyncDestination.setName(attributesResult.getName());
             groupingSyncDestination.setDescription(groupingSyncDestination.getDescription()
-                    .replaceFirst("\\$\\{srhfgs}", groupAttributeResults.getGroups().stream()
-                            .findFirst()
-                            .map(Group::getExtension)
-                            .orElse("")));
+                    .replaceFirst("\\$\\{srhfgs}", groupExtension));
+            if (groupingSyncDestination.getTooltip() != null) {
+                groupingSyncDestination.setTooltip(groupingSyncDestination.getTooltip()
+                        .replaceFirst("\\$\\{srhfgs}", groupExtension));
+            }
             groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
                     .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributesResult.getName())));
             syncDestinationList.add(groupingSyncDestination);
