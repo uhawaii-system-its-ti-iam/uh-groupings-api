@@ -27,7 +27,9 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
+import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingMembers;
+import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
@@ -401,13 +403,14 @@ public class TestUpdateMemberService {
             ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", originalLimit);
         }
 
-        int directOwnersCount =
-                groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING);
-        GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(directOwnersCount);
-        List<String> uidsToRemove = testGroupingMembers.getUids();
-
+        GroupingOwnerMembers groupingImmediateOwners = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
+        List<String> uhUuidsToRemove = groupingImmediateOwners.getOwners().getMembers().stream()
+                .map(GroupingGroupMember::getUhUuid)
+                .filter(uid -> uid != null && !uid.isBlank())
+                .toList();
         try {
-            updateMemberService.removeOwnerships(ADMIN, GROUPING, uidsToRemove);
+            updateMemberService.removeOwnerships(ADMIN, GROUPING, uhUuidsToRemove);
+            updateMemberService.addOwnerships(ADMIN, GROUPING, uhUuidsToRemove);
             fail("Should throw an exception if the number of valid owners being removed "
                     + "is greater than or equal to the number of direct owners");
         } catch (DirectOwnerRemovedException e) {
