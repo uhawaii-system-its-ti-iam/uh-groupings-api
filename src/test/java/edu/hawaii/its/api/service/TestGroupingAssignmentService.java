@@ -101,11 +101,12 @@ public class TestGroupingAssignmentService {
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
         testUidList = Arrays.asList(testUid);
+
         grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
-        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
 
+        assertFalse(memberService.isOwner(GROUPING, testUid));
     }
 
     @Test
@@ -269,7 +270,6 @@ public class TestGroupingAssignmentService {
 
     @Test
     public void numberOfImmediateOwners() {
-        grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
         int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
