@@ -1,26 +1,38 @@
 package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -68,6 +80,9 @@ public class GroupingOwnerServiceTest {
 
     @MockitoSpyBean
     private MemberService memberService;
+
+    @MockitoSpyBean
+    private EmailService emailService;
 
     @Autowired
     private GroupingOwnerService groupingOwnerService;
@@ -284,6 +299,24 @@ public class GroupingOwnerServiceTest {
     }
 
     @Test
+    public void groupingsSyncDestinationsGrouperErrorReturnsEmptyResultTest() {
+        doThrow(new RuntimeException("Grouper unavailable"))
+                .when(grouperService)
+                .findAttributesResults(TEST_UIDS.get(0), SYNC_DESTINATIONS_CHECKBOXES, SYNC_DESTINATIONS_LOCATION);
+
+        clearInvocations(emailService);
+
+        GroupingSyncDestinations result =
+                groupingOwnerService.groupingsSyncDestinations(TEST_UIDS.get(0), groupingPath);
+
+        assertNotNull(result);
+        assertNotNull(result.getSyncDestinations());
+        assertTrue(result.getSyncDestinations().isEmpty());
+        assertEquals("FAILURE", result.getResultCode());
+        verify(emailService).sendWithStack(any(Exception.class), eq("Sync Destination Error"), anyString());
+    }
+
+    @Test
     public void createGroupingSyncDestinationListTest() {
         FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
         GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
@@ -319,6 +352,348 @@ public class GroupingOwnerServiceTest {
         assertEquals("test-attribute", destination.getName());
         assertEquals("Test description with test-group", destination.getDescription());
         assertEquals("Test tooltip for test-group", destination.getTooltip());
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListNullDescriptionSkippedTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        // Bad entry: null description — simulates a Grouper attribute with no description set.
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:bad");
+        when(badAttributesResult.getDescription()).thenReturn(null);
+
+        // Good entry: valid JSON description.
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid description");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        List<GroupingSyncDestination> result = groupingOwnerService.createGroupingSyncDestinationList(
+                findAttributesResults, groupAttributeResults);
+
+        // The bad entry is skipped; the good entry is returned without error.
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListBlankDescriptionSkippedTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:blank");
+        when(badAttributesResult.getDescription()).thenReturn("   ");
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListMalformedJsonSkippedTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult1 = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult2 = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        // Bad entry: malformed JSON that cannot be deserialized into a GroupingSyncDestination.
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:bad");
+        when(badAttributesResult.getDescription()).thenReturn("{NOT_VALID_JSON}");
+
+        // Good entries: valid JSON descriptions.
+        GroupingSyncDestination goodDestination1 = new GroupingSyncDestination();
+        goodDestination1.setDescription("Sync to Google");
+        when(goodAttributesResult1.getName()).thenReturn("uh-grouping:sync:google");
+        when(goodAttributesResult1.getDescription()).thenReturn(JsonUtil.asJson(goodDestination1));
+
+        GroupingSyncDestination goodDestination2 = new GroupingSyncDestination();
+        goodDestination2.setDescription("Sync to Listserv");
+        when(goodAttributesResult2.getName()).thenReturn("uh-grouping:sync:listserv");
+        when(goodAttributesResult2.getDescription()).thenReturn(JsonUtil.asJson(goodDestination2));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(goodAttributesResult1, badAttributesResult, goodAttributesResult2));
+
+        List<GroupingSyncDestination> result = groupingOwnerService.createGroupingSyncDestinationList(
+                findAttributesResults, groupAttributeResults);
+
+        // The bad entry is skipped; both good entries are returned correctly.
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(d -> d.getName().equals("uh-grouping:sync:google")));
+        assertTrue(result.stream().anyMatch(d -> d.getName().equals("uh-grouping:sync:listserv")));
+        assertFalse(result.stream().anyMatch(d -> d.getName().equals("uh-grouping:sync:bad")));
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListNullJsonResultSkippedTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:null-json");
+        when(badAttributesResult.getDescription()).thenReturn("null");
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListMissingDestinationDescriptionSkippedTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:missing-description");
+        when(badAttributesResult.getDescription()).thenReturn("{\"tooltip\":\"Missing description\"}");
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListWithoutRequestUsesUnknownPathForErrorEmailTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:bad");
+        when(badAttributesResult.getDescription()).thenReturn(null);
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        clearInvocations(emailService);
+        RequestContextHolder.resetRequestAttributes();
+
+        List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+        verify(emailService).sendWithStack(any(Exception.class), eq("Sync Destination Error"), eq("unknown"));
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListWithRequestUsesRequestPathForErrorEmailTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:bad");
+        when(badAttributesResult.getDescription()).thenReturn(null);
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/groupings/tmp:grouping:path/groupings-sync-destinations");
+
+        clearInvocations(emailService);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        try {
+            List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                    groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals("uh-grouping:sync:good", result.get(0).getName());
+            verify(emailService).sendWithStack(any(Exception.class), eq("Sync Destination Error"),
+                    eq("/groupings/tmp:grouping:path/groupings-sync-destinations"));
+        } finally {
+            RequestContextHolder.resetRequestAttributes();
+        }
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListMultipleErrorsSendsOneAggregateEmailTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult1 = mock(AttributesResult.class);
+        AttributesResult badAttributesResult2 = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult1.getName()).thenReturn("uh-grouping:sync:bad-null");
+        when(badAttributesResult1.getDescription()).thenReturn(null);
+
+        when(badAttributesResult2.getName()).thenReturn("uh-grouping:sync:bad-json");
+        when(badAttributesResult2.getDescription()).thenReturn("{NOT_VALID_JSON}");
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult1, goodAttributesResult, badAttributesResult2));
+
+        clearInvocations(emailService);
+
+        List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("uh-grouping:sync:good", result.get(0).getName());
+
+        ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+        verify(emailService, times(1)).sendWithStack(exceptionCaptor.capture(), eq("Sync Destination Error"),
+                anyString());
+        assertTrue(exceptionCaptor.getValue().getMessage().contains("Skipped 2 malformed sync destination(s)"));
+        assertTrue(exceptionCaptor.getValue().getMessage().contains("uh-grouping:sync:bad-null"));
+        assertTrue(exceptionCaptor.getValue().getMessage().contains("uh-grouping:sync:bad-json"));
+        assertEquals(2, exceptionCaptor.getValue().getSuppressed().length);
+    }
+
+    @Test
+    public void createGroupingSyncDestinationListEmailErrorDoesNotStopValidDestinationsTest() {
+        FindAttributesResults findAttributesResults = mock(FindAttributesResults.class);
+        GroupAttributeResults groupAttributeResults = mock(GroupAttributeResults.class);
+
+        AttributesResult badAttributesResult = mock(AttributesResult.class);
+        AttributesResult goodAttributesResult = mock(AttributesResult.class);
+
+        Group group = mock(Group.class);
+        when(group.getExtension()).thenReturn("test-group");
+        when(groupAttributeResults.getGroups()).thenReturn(Collections.singletonList(group));
+        when(groupAttributeResults.getGroupAttributes()).thenReturn(Collections.emptyList());
+
+        when(badAttributesResult.getName()).thenReturn("uh-grouping:sync:bad");
+        when(badAttributesResult.getDescription()).thenReturn(null);
+
+        GroupingSyncDestination goodDestination = new GroupingSyncDestination();
+        goodDestination.setDescription("Valid destination");
+        when(goodAttributesResult.getName()).thenReturn("uh-grouping:sync:good");
+        when(goodAttributesResult.getDescription()).thenReturn(JsonUtil.asJson(goodDestination));
+
+        when(findAttributesResults.getResults())
+                .thenReturn(Arrays.asList(badAttributesResult, goodAttributesResult));
+
+        clearInvocations(emailService);
+        doThrow(new RuntimeException("Email failed"))
+                .when(emailService)
+                .sendWithStack(any(Exception.class), eq("Sync Destination Error"), anyString());
+
+        try {
+            List<GroupingSyncDestination> result = assertDoesNotThrow(() ->
+                    groupingOwnerService.createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults));
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals("uh-grouping:sync:good", result.get(0).getName());
+            verify(emailService).sendWithStack(any(Exception.class), eq("Sync Destination Error"), anyString());
+        } finally {
+            reset(emailService);
+        }
     }
 	
 	@Test
