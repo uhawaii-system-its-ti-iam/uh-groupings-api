@@ -280,4 +280,50 @@ public class SubjectTest {
         assertFalse(subject.hasUHAttributes());
     }
 
+    @Test
+    public void isIncludedAsMemberWithUhAttributesTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setAttributeValues(new String[]{"uid"});
+        wsSubject.setId("99997010");
+        Subject subject = new Subject(wsSubject);
+        assertTrue(subject.isIncludedAsMember());
+    }
+
+    @Test
+    public void isIncludedAsMemberOrphanTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setId("25528222");
+        wsSubject.setAttributeValues(new String[]{"", "", "", "", "", "", "", "", ""});
+        Subject subject = new Subject(wsSubject);
+        assertFalse(subject.hasUHAttributes());
+        assertTrue(subject.isIncludedAsMember());
+    }
+
+    @Test
+    public void isIncludedAsMemberNoIdentityTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setAttributeValues(null);
+        Subject subject = new Subject(wsSubject);
+        assertFalse(subject.isIncludedAsMember());
+    }
+
+    @Test
+    public void isOrphanTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setId("25528222");
+        wsSubject.setName("25528222 entity not found");
+        wsSubject.setAttributeValues(new String[]{"", "", "", "", "", "", "", "", ""});
+        Subject subject = new Subject(wsSubject);
+        assertTrue(subject.isOrphan());
+    }
+
+    @Test
+    public void isOrphanFalseWhenLdapAttributesPresentTest() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setId("99997010");
+        wsSubject.setAttributeValues(new String[]{"testiwta"});
+        Subject subject = new Subject(wsSubject);
+        assertFalse(subject.isOrphan());
+    }
+
 }

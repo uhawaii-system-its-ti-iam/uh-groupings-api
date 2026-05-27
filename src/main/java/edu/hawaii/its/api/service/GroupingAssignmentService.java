@@ -250,9 +250,6 @@ public class GroupingAssignmentService {
             Group group = new Group(membersResult.getGroup().getGroupPath());
             List<Subject> subjects = membersResult.getSubjects();
             for (Subject subject : subjects) {
-                if (!subject.hasUHAttributes()) {
-                    continue;
-                }
                 if (group.getPath().endsWith(GroupType.BASIS.value()) && subject.getSourceId() != null
                         && subject.getSourceId()
                         .equals(STALE_SUBJECT_ID)) {
