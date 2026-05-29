@@ -42,7 +42,14 @@ public class Announcements {
 
     @JsonProperty
     private void setAnnouncements(AttributesResult attributesResult) {
-        this.announcements = JsonUtil.asList(attributesResult.getDescription(), Announcement.class);
+        String description = attributesResult.getDescription();
+
+        if (description == null || description.trim().isEmpty()) {
+            this.announcements = new ArrayList<>();
+            return;
+        }
+
+        this.announcements = JsonUtil.asList(description, Announcement.class);
     }
 
     private void setAnnouncements(List<Announcement> announcements) {
