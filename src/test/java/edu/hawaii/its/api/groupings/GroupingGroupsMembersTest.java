@@ -7,22 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingGroupsMembersTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeEach() {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void constructor() {
@@ -47,10 +48,8 @@ public class GroupingGroupsMembersTest {
         String owner = "testiwte";
         String onlyBasis = "testiwtf";
 
-        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessMultipleGroupsTestData();
         assertNotNull(getMembersResults);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
 

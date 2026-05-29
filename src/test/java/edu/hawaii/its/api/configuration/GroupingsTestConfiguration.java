@@ -11,14 +11,18 @@ import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.AssignAttributeResult;
 import edu.hawaii.its.api.wrapper.AssignAttributesResults;
+import edu.hawaii.its.api.wrapper.AttributeAssignmentsResults;
 import edu.hawaii.its.api.wrapper.AssignGrouperPrivilegesResult;
 import edu.hawaii.its.api.wrapper.FindAttributesResults;
 import edu.hawaii.its.api.wrapper.FindGroupsResults;
 import edu.hawaii.its.api.wrapper.GetGroupsResults;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
+import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttribute;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 import edu.hawaii.its.api.wrapper.GroupSaveResults;
+import edu.hawaii.its.api.wrapper.GroupsResults;
+import edu.hawaii.its.api.wrapper.HasMemberResult;
 import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
@@ -27,7 +31,6 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 import edu.hawaii.its.api.wrapper.UpdatedTimestampResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
@@ -38,7 +41,9 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignments
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroupSaveResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
@@ -93,9 +98,32 @@ public class GroupingsTestConfiguration {
         return new HasMembersResults(getWsResultTestData("ws.has.member.results.null.group", WsHasMemberResults.class));
     }
 
-    public HasMembersResults hasMemberResultNullSubjectResultCodeTestData() {
-        return new HasMembersResults(
-                getWsResultTestData("ws.has.member.result.null.subject.result.code", WsHasMemberResults.class));
+    public HasMembersResults hasMemberResultsMixedTestData() {
+        WsHasMemberResults wsMemberResults =
+                getWsResultTestData("ws.has.member.results.is.members.uid", WsHasMemberResults.class);
+        WsHasMemberResults wsNonMemberResults =
+                getWsResultTestData("ws.has.member.results.is.not.members.uid", WsHasMemberResults.class);
+
+        WsHasMemberResults wsMixedResults = new WsHasMemberResults();
+        wsMixedResults.setResultMetadata(wsMemberResults.getResultMetadata());
+        wsMixedResults.setWsGroup(wsMemberResults.getWsGroup());
+
+        int totalResults = 5;
+        WsHasMemberResult[] mixedResults = new WsHasMemberResult[totalResults];
+        mixedResults[0] = wsMemberResults.getResults()[0];
+        mixedResults[1] = wsMemberResults.getResults()[1];
+        mixedResults[2] = wsNonMemberResults.getResults()[0];
+        mixedResults[3] = wsMemberResults.getResults()[2];
+        mixedResults[4] = wsNonMemberResults.getResults()[1];
+
+        wsMixedResults.setResults(mixedResults);
+
+        return new HasMembersResults(wsMixedResults);
+    }
+
+    public HasMemberResult hasMemberResultNullSubjectResultCodeTestData() {
+        return new HasMemberResult(
+                getWsResultTestData("ws.has.member.result.null.subject.result.code", WsHasMemberResult.class));
     }
 
     public AddMembersResults addMemberResultsSuccessTestData() {
@@ -186,6 +214,27 @@ public class GroupingsTestConfiguration {
         return new Subject(getWsResultTestData("ws.subject.success.uid", WsSubject.class));
     }
 
+    public Subject subjectSuccessUhuuidTestData() {
+        return new Subject(getWsResultTestData("ws.subject.success.uhuuid", WsSubject.class));
+    }
+
+    public Subject subjectUidNotFoundTestData() {
+        return new Subject(getWsResultTestData("ws.subject.subject.uid.not.found", WsSubject.class));
+    }
+
+    public Subject subjectUhuuidNotFoundTestData() {
+        return new Subject(getWsResultTestData("ws.subject.subject.uhuuid.not.found", WsSubject.class));
+    }
+
+    public Subject subjectSuccessNullValuesTestData() {
+        return new Subject(getWsResultTestData("ws.subject.success.null.values", WsSubject.class));
+    }
+
+    public Group groupSuccessTestData() {
+        WsGroup wsGroup = getWsResultTestData("ws.group", WsGroup.class);
+        return new Group(wsGroup);
+    }
+
     public GroupSaveResults groupSaveResultsDescriptionUpdatedTestData() {
         return new GroupSaveResults(
                 getWsResultTestData("ws.group.save.results.description.updated", WsGroupSaveResults.class));
@@ -233,14 +282,25 @@ public class GroupingsTestConfiguration {
     }
 
     public AssignAttributeResult assignAttributesResultsTurnOffOptInSuccessTestData() {
-        return new AssignAttributeResult(getWsResultTestData("ws.assign.attributes.results.turn.off.opt.in.success",
-                WsAssignAttributeResult.class));
+
+        WsAssignAttributesResults wsAssignAttributesResults =
+                getWsResultTestData(
+                        "ws.assign.attributes.results.turn.off.opt.in.success",
+                        WsAssignAttributesResults.class);
+
+        return new AssignAttributeResult(
+                wsAssignAttributesResults.getWsAttributeAssignResults()[0]);
     }
 
-    public AssignAttributesResults assignAttributesResultsNullAssignAttributeResultTestData() {
-        return new AssignAttributesResults(
-                getWsResultTestData("ws.assign.attributes.results.null.assign.attribute.result",
-                        WsAssignAttributesResults.class));
+    public AssignAttributeResult assignAttributesResultsNullAssignAttributeResultTestData() {
+
+        WsAssignAttributesResults wsAssignAttributesResults =
+                getWsResultTestData(
+                        "ws.assign.attributes.results.null.assign.attribute.result",
+                        WsAssignAttributesResults.class);
+
+        return new AssignAttributeResult(
+                wsAssignAttributesResults.getWsAttributeAssignResults()[0]);
     }
 
     public AssignAttributesResults assignAttributesResultsChangedTrueTestData() {
@@ -304,6 +364,30 @@ public class GroupingsTestConfiguration {
                 getWsResultTestData("ws.get.groups.results.empty.groups", WsGetGroupsResults.class));
     }
 
+    public GetGroupsResults getGroupsResultsEmptyResultsTestData() {
+        WsGetGroupsResults wsGetGroupsResults =
+                getWsResultTestData("ws.empty.results", WsGetGroupsResults.class);
+        return new GetGroupsResults(wsGetGroupsResults);
+    }
+
+    public GroupsResults groupsResultsSuccessTestData() {
+        WsGetGroupsResults wsGetGroupsResults =
+                getWsResultTestData("groups.results", WsGetGroupsResults.class);
+        return new GroupsResults(wsGetGroupsResults);
+    }
+
+    public GroupsResults groupsResultsEmptyResultsTestData() {
+        WsGetGroupsResults wsGetGroupsResults =
+                getWsResultTestData("groups.results.empty.results", WsGetGroupsResults.class);
+        return new GroupsResults(wsGetGroupsResults);
+    }
+
+    public GroupsResults groupsResultsEmptyGroupsTestData() {
+        WsGetGroupsResults wsGetGroupsResults =
+                getWsResultTestData("groups.results.empty.groups", WsGetGroupsResults.class);
+        return new GroupsResults(wsGetGroupsResults);
+    }
+
     public GetMembersResults getMembersResultsSuccessTestData() {
         WsGetMembersResults
                 wsGetMembersResults = getWsResultTestData("ws.get.members.results.success", WsGetMembersResults.class);
@@ -319,6 +403,12 @@ public class GroupingsTestConfiguration {
     public GetMembersResults getMembersResultsNullTestData() {
         WsGetMembersResults wsGetMembersResults =
                 getWsResultTestData("ws.get.members.results.null", WsGetMembersResults.class);
+        return new GetMembersResults(wsGetMembersResults);
+    }
+
+    public GetMembersResults getMembersResultsEmptyResultsTestData() {
+        WsGetMembersResults wsGetMembersResults =
+                getWsResultTestData("ws.empty.results", WsGetMembersResults.class);
         return new GetMembersResults(wsGetMembersResults);
     }
 
@@ -360,6 +450,24 @@ public class GroupingsTestConfiguration {
     public GroupAttributeResults getAttributeAssignmentResultsOptInOffOptOutOffTestData() {
         return new GroupAttributeResults(getWsResultTestData("ws.get.attribute.assignment.results.optIn-off.optOut-off",
                 WsGetAttributeAssignmentsResults.class));
+    }
+
+    public AttributeAssignmentsResults attributeAssignmentOptInResultTestData() {
+        WsGetAttributeAssignmentsResults wsResults =
+                getWsResultTestData("attribute.assignment.opt.in.result", WsGetAttributeAssignmentsResults.class);
+        return new AttributeAssignmentsResults(wsResults);
+    }
+
+    public AttributeAssignmentsResults attributeAssignmentOptOutResultTestData() {
+        WsGetAttributeAssignmentsResults wsResults =
+                getWsResultTestData("attribute.assignment.opt.out.result", WsGetAttributeAssignmentsResults.class);
+        return new AttributeAssignmentsResults(wsResults);
+    }
+
+    public AttributeAssignmentsResults attributeAssignmentEmptyResultTestData() {
+        WsGetAttributeAssignmentsResults wsResults =
+                getWsResultTestData("attribute.assignment.empty.result", WsGetAttributeAssignmentsResults.class);
+        return new AttributeAssignmentsResults(wsResults);
     }
 
     public GroupAttribute attributeAssignSuccessTestData() {
