@@ -8,15 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
@@ -41,18 +40,14 @@ public class SubjectTest {
 
     final static private String SUCCESS = "SUCCESS";
     final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
-        String json = propertyLocator.find("ws.subject.success.uid");
-        WsSubject wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        Subject subject = new Subject(wsSubject);
+        Subject subject =
+                groupingsTestConfiguration.subjectSuccessUidTestData();
         assertNotNull(subject);
         subject = new Subject(null);
         assertNotNull(subject);
@@ -67,9 +62,7 @@ public class SubjectTest {
         String firstName = TEST_FIRSTNAMES.get(0);
         String lastName = TEST_LASTNAMES.get(0);
         // Successful query using a uid.
-        String json = propertyLocator.find("ws.subject.success.uid");
-        WsSubject wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        Subject subject = new Subject(wsSubject);
+        Subject subject = groupingsTestConfiguration.subjectSuccessUidTestData();
         assertNotNull(subject);
         assertEquals(SUCCESS, subject.getResultCode());
         assertEquals(uid, subject.getUid());
@@ -79,9 +72,7 @@ public class SubjectTest {
         assertEquals(lastName, subject.getLastName());
 
         // Successful query using a uhUuid.
-        json = propertyLocator.find("ws.subject.success.uhuuid");
-        wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        subject = new Subject(wsSubject);
+        subject = groupingsTestConfiguration.subjectSuccessUhuuidTestData();
         assertNotNull(subject);
         assertEquals(SUCCESS, subject.getResultCode());
         assertEquals(uid, subject.getUid());
@@ -92,12 +83,9 @@ public class SubjectTest {
         assertEquals("UH core LDAP", subject.getSourceId());
 
         // Unsuccessful query using uid.
-        json = propertyLocator.find("ws.subject.subject.uid.not.found");
-        wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        subject = new Subject(wsSubject);
+        subject = groupingsTestConfiguration.subjectUidNotFoundTestData();
         assertNotNull(subject);
         assertEquals(SUBJECT_NOT_FOUND, subject.getResultCode());
-        assertEquals(wsSubject.getIdentifierLookup(), subject.getUid());
         assertEquals("invalid-uid", subject.getUid());
         assertEquals("", subject.getUhUuid());
         assertEquals("", subject.getName());
@@ -105,12 +93,9 @@ public class SubjectTest {
         assertEquals("", subject.getLastName());
 
         // Unsuccessful query using uhUuid.
-        json = propertyLocator.find("ws.subject.subject.uhuuid.not.found");
-        wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        subject = new Subject(wsSubject);
+        subject = groupingsTestConfiguration.subjectUhuuidNotFoundTestData();
         assertNotNull(subject);
         assertEquals(SUBJECT_NOT_FOUND, subject.getResultCode());
-        assertEquals(wsSubject.getId(), subject.getUhUuid());
         assertEquals("11111111", subject.getUhUuid());
         assertEquals("", subject.getUid());
         assertEquals("", subject.getName());
@@ -118,9 +103,7 @@ public class SubjectTest {
         assertEquals("", subject.getLastName());
 
         // Null values
-        json = propertyLocator.find("ws.subject.success.null.values");
-        wsSubject = JsonUtil.asObject(json, WsSubject.class);
-        subject = new Subject(wsSubject);
+        subject = groupingsTestConfiguration.subjectSuccessNullValuesTestData();
         assertNotNull(subject);
         assertEquals("", subject.getResultCode());
         assertEquals("", subject.getFirstName());

@@ -7,17 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -37,21 +34,16 @@ public class GetMembersResultsTest {
     @Value("${groupings.api.test.uh-last-names}")
     private List<String> TEST_LASTNAMES;
 
-    private PropertyLocator propertyLocator;
     private static final String SUCCESS = "SUCCESS";
     private static final String FAILURE = "FAILURE";
 
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void constructor() {
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessTestData();
         assertNotNull(getMembersResults);
         assertNotNull(new GetMembersResults());
         assertNotNull(new GetMembersResults(null));
@@ -61,9 +53,8 @@ public class GetMembersResultsTest {
     public void successfulResults() {
         String groupingPath = "grouping-path";
 
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessTestData();
         assertEquals(SUCCESS, getMembersResults.getResultCode());
 
         List<GetMembersResult> membersResults = getMembersResults.getMembersResults();
@@ -145,10 +136,8 @@ public class GetMembersResultsTest {
 
     @Test
     public void noMembers() {
-        String json = propertyLocator.find("ws.get.members.results.no.members");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsNoMembersTestData();
         assertNotNull(getMembersResults);
         assertEquals(SUCCESS, getMembersResults.getResultCode());
         List<GetMembersResult> membersResults = getMembersResults.getMembersResults();
@@ -163,25 +152,21 @@ public class GetMembersResultsTest {
 
     @Test
     public void multipleGroupsQueried() {
-        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessMultipleGroupsTestData();
         assertNotNull(getMembersResults);
-        List<GetMembersResult> groupsResult = getMembersResults.getMembersResults();
         /*
+        List<GetMembersResult> groupsResult = getMembersResults.getMembersResults();
         assertEquals(2, groupsResult.size());
         assertEquals("group-path:exclude", groupsResult.get(0).getGroup().getGroupPath());
         assertEquals("group-path:include", groupsResult.get(1).getGroup().getGroupPath());
-
-         */
+        */
     }
 
     @Test
     public void nullValues() {
-        String json = propertyLocator.find("ws.get.members.results.null");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsNullTestData();
         assertEquals(SUCCESS, getMembersResults.getResultCode());
         assertEquals(FAILURE, getMembersResults.getMembersResults().get(0).getResultCode());
         assertEquals(FAILURE, getMembersResults.getMembersResults().get(0).getGroup().getResultCode());
@@ -193,9 +178,8 @@ public class GetMembersResultsTest {
 
     @Test
     public void emptyResults() {
-        String json = propertyLocator.find("ws.empty.results");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsEmptyResultsTestData();
         assertTrue(getMembersResults.getMembersResults().isEmpty());
         assertEquals(FAILURE, getMembersResults.getResultCode());
     }

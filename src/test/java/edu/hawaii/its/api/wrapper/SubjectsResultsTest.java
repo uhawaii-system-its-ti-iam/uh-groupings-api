@@ -7,30 +7,28 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class SubjectsResultsTest {
 
     final static private String SUCCESS = "SUCCESS";
     final static private String SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND";
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
-        String json = propertyLocator.find("ws.get.subjects.results.success");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         assertNotNull(subjectsResults);
 
         subjectsResults = new SubjectsResults(null);
@@ -42,9 +40,8 @@ public class SubjectsResultsTest {
 
     @Test
     public void successfulResultsTest() {
-        String json = propertyLocator.find("ws.get.subjects.results.success");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         List<Subject> subjects = subjectsResults.getSubjects();
         assertNotNull(subjectsResults);
         assertEquals(SUCCESS, subjectsResults.getResultCode());
@@ -64,9 +61,8 @@ public class SubjectsResultsTest {
 
     @Test
     public void failedResultsTest() {
-        String json = propertyLocator.find("ws.get.subjects.results.failure");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsFailureTestData();
         List<Subject> subjects = subjectsResults.getSubjects();
         assertNotNull(subjectsResults);
         assertEquals("FAILURE", subjectsResults.getResultCode());
@@ -75,9 +71,8 @@ public class SubjectsResultsTest {
 
     @Test
     public void emptyResultsTest() {
-        String json = propertyLocator.find("ws.get.subjects.results.empty");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsEmptyTestData();
         List<Subject> subjects = subjectsResults.getSubjects();
         assertNotNull(subjectsResults);
         assertEquals("FAILURE", subjectsResults.getResultCode());
