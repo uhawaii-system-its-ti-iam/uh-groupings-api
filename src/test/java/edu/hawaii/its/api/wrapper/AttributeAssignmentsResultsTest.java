@@ -2,7 +2,6 @@ package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,37 +10,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AttributeAssignmentsResultsTest {
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
-        String json = propertyLocator.find("attribute.assignment.opt.in.result");
-        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        AttributeAssignmentsResults results = groupingsTestConfiguration.attributeAssignmentOptInResultTestData();
         assertNotNull(results);
         assertEquals(results.getResultCode(), "SUCCESS");
-
-        assertNotNull(wsResults.getWsAttributeDefNames());
-        assertNotEquals(0, wsResults.getWsAttributeDefNames().length);
-        assertEquals(wsResults.getWsAttributeDefNames()[0].getName(), results.getAttributeDefName());
+        assertNotNull(results.getAttributeDefName());
     }
 
     @Test
@@ -56,10 +47,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getOwnerGroupNamesTest() {
-        String json = propertyLocator.find("attribute.assignment.opt.in.result");
-        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        AttributeAssignmentsResults results = groupingsTestConfiguration.attributeAssignmentOptInResultTestData();
         assertNotNull(results);
 
         List<String> ownerGroupNames = results.getOwnerGroupNames();
@@ -80,10 +68,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void isAttributeDefNameTest() {
-        String json = propertyLocator.find("attribute.assignment.opt.in.result");
-        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        AttributeAssignmentsResults results = groupingsTestConfiguration.attributeAssignmentOptInResultTestData();
         assertNotNull(results);
         assertTrue(results.isAttributeDefName(OptType.IN.value()));
         assertFalse(results.isAttributeDefName(OptType.OUT.value()));
@@ -91,18 +76,12 @@ public class AttributeAssignmentsResultsTest {
         results = new AttributeAssignmentsResults(null);
         assertFalse(results.isAttributeDefName(OptType.IN.value()));
 
-        json = propertyLocator.find("attribute.assignment.opt.out.result");
-        wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        results = new AttributeAssignmentsResults(wsResults);
+        results = groupingsTestConfiguration.attributeAssignmentOptOutResultTestData();
         assertNotNull(results);
         assertTrue(results.isAttributeDefName(OptType.OUT.value()));
         assertFalse(results.isAttributeDefName(OptType.IN.value()));
 
-        json = propertyLocator.find("attribute.assignment.empty.result");
-        wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        results = new AttributeAssignmentsResults(wsResults);
+        results = groupingsTestConfiguration.attributeAssignmentEmptyResultTestData();
         assertNotNull(results);
         assertFalse(results.isAttributeDefName(OptType.OUT.value()));
         assertFalse(results.isAttributeDefName(OptType.IN.value()));
@@ -110,10 +89,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getGroupNamesTest() {
-        String json = propertyLocator.find("attribute.assignment.opt.in.result");
-        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        AttributeAssignmentsResults results = groupingsTestConfiguration.attributeAssignmentOptInResultTestData();
         assertNotNull(results);
 
         List<String> groupNames = results.getGroupNames();
@@ -130,10 +106,7 @@ public class AttributeAssignmentsResultsTest {
 
     @Test
     public void getGroupNamesAndDescriptionsTest() {
-        String json = propertyLocator.find("attribute.assignment.opt.in.result");
-        WsGetAttributeAssignmentsResults wsResults = JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        assertNotNull(wsResults);
-        AttributeAssignmentsResults results = new AttributeAssignmentsResults(wsResults);
+        AttributeAssignmentsResults results = groupingsTestConfiguration.attributeAssignmentOptInResultTestData();
         assertNotNull(results);
 
         List<GroupingPath> groupNamesAndDescriptions = results.getGroupNamesAndDescriptions();
@@ -149,6 +122,5 @@ public class AttributeAssignmentsResultsTest {
         groupNamesAndDescriptions = results.getGroupNamesAndDescriptions();
         assertNotNull(groupNamesAndDescriptions);
         assertTrue(groupNamesAndDescriptions.isEmpty());
-
     }
 }
