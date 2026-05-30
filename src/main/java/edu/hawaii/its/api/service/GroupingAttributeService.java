@@ -49,7 +49,7 @@ public class GroupingAttributeService {
 
     private static final Log logger = LogFactory.getLog(GroupingAttributeService.class);
 
-    private final PolicyFactory policy = Sanitizers.FORMATTING;;
+    private final PolicyFactory policy = Sanitizers.FORMATTING;
 
     private final GrouperService grouperService;
 
@@ -152,8 +152,9 @@ public class GroupingAttributeService {
         logger.info(String.format("updateDescription; groupPath: %s; ownerUid: %s;",
                 groupPath, ownerUid));
 
-        if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isAdmin(
-                ownerUid)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        // Note: ownerUid is the currentUser from the controller
+        if (!memberService.isOwner(groupPath, ownerUid) && !memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();
         }
         try {
@@ -184,7 +185,10 @@ public class GroupingAttributeService {
      * Helper - changeOptStatus, changeGroupAttributeStatus
      */
     private void checkPrivileges(String groupingPath, String ownerIdentifier) {
-        if (!memberService.isOwner(groupingPath, ownerIdentifier) && !memberService.isAdmin(ownerIdentifier)) {
+        // ownerIdentifier is the current user at all current call sites, so use the JWT-backed
+        // admin check (isCurrentUserAdmin) and a Grouper-backed grouping-specific ownership check.
+        if (!memberService.isCurrentUserAdmin()
+                && !memberService.isOwner(groupingPath, ownerIdentifier)) {
             throw new AccessDeniedException();
         }
     }
