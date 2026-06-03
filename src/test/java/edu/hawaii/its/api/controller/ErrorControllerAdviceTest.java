@@ -132,7 +132,7 @@ public class ErrorControllerAdviceTest {
 
         MvcResult result = mockMvc.perform(get(API_BASE + "/members/memberships"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.status").value("404 NOT_FOUND"))
                 .andExpect(jsonPath("$.resultCode").value("FAILURE"))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.message").value("UH Member found failed"))

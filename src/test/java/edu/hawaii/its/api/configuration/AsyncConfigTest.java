@@ -3,16 +3,10 @@ package edu.hawaii.its.api.configuration;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("localTest")
-@SpringBootTest(classes = {SpringBootWebApplication.class})
 public class AsyncConfigTest {
 
-    @Autowired
-    private AsyncConfig asyncConfig;
+    private final AsyncConfig asyncConfig = new AsyncConfig();
 
     @Test
     public void construction() {
