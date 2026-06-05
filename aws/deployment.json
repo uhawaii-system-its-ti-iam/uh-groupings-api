@@ -1,0 +1,25 @@
+{
+  "owner": "mhodges",
+  "project": "groupings",
+  "environment": "sandbox",
+  "component": "api",
+
+  "deployment": {
+    "awsRegion": "us-west-2",
+    "sourceRepository": "uhawaii-system-its-ti-iam/uh-groupings-api",
+
+    "pipeline": {
+      "source": "github",
+      "build": "codebuild",
+      "deploy": "codepipeline"
+    },
+
+    "runtime": {
+      "platform": "ecs-fargate"
+    },
+
+    "artifacts": {
+      "containerImage": true
+    }
+  }
+}
