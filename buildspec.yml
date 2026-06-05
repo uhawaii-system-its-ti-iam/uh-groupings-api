@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password ...
+  build:
+    commands:
+      - docker build -t groupings-api .
+      - docker tag groupings-api $ECR_REPOSITORY_URI:latest
+  post_build:
+    commands:
+      - docker push $ECR_REPOSITORY_URI:latest
+
+artifacts:
+  files:
+    - imagedefinitions.json

@@ -1,0 +1,10 @@
+{
+    "owner": "mhodges",
+    "project": "groupings",
+    "environment": "sandbox",
+    "component": "api",
+    "service": "uh-groupings-api",
+    "containerName": "uh-groupings-api",
+    "containerPort": 8080,
+    "healthCheckPath": "/health"
+  }
