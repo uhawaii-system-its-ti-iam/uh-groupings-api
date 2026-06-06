@@ -5,29 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetAttributeAssignmentsResults;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingOptAttributesTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeEach() {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void constructor() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-on");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults =
+                groupingsTestConfiguration.getAttributeAssignmentResultsOptInOnOptOutOnTestData();
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertNotNull(groupingOptAttributes);
         groupingOptAttributes = new GroupingOptAttributes();
@@ -36,10 +35,8 @@ public class GroupingOptAttributesTest {
 
     @Test
     public void optInOnOptOutOn() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-on");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults =
+                groupingsTestConfiguration.getAttributeAssignmentResultsOptInOnOptOutOnTestData();
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertEquals("SUCCESS", groupingOptAttributes.getResultCode());
         assertNotNull(groupingOptAttributes.getGroupPath());
@@ -50,24 +47,19 @@ public class GroupingOptAttributesTest {
 
     @Test
     public void optInOnOptOutOff() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-on.optOut-off");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults =
+                groupingsTestConfiguration.getAttributeAssignmentResultsOptInOnOptOutOffTestData();
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertEquals("SUCCESS", groupingOptAttributes.getResultCode());
         assertNotNull(groupingOptAttributes.getGroupPath());
         assertTrue(groupingOptAttributes.isOptInOn());
         assertFalse(groupingOptAttributes.isOptOutOn());
-
     }
 
     @Test
     public void optInOffOptOutOn() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-off.optOut-on");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults =
+                groupingsTestConfiguration.getAttributeAssignmentResultsOptInOffOptOutOnTestData();
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertEquals("SUCCESS", groupingOptAttributes.getResultCode());
         assertNotNull(groupingOptAttributes.getGroupPath());
@@ -77,10 +69,8 @@ public class GroupingOptAttributesTest {
 
     @Test
     public void optInOffOptOutOff() {
-        String json = propertyLocator.find("ws.get.attribute.assignment.results.optIn-off.optOut-off");
-        WsGetAttributeAssignmentsResults wsGetAttributeAssignmentsResults =
-                JsonUtil.asObject(json, WsGetAttributeAssignmentsResults.class);
-        GroupAttributeResults groupAttributeResults = new GroupAttributeResults(wsGetAttributeAssignmentsResults);
+        GroupAttributeResults groupAttributeResults =
+                groupingsTestConfiguration.getAttributeAssignmentResultsOptInOffOptOutOffTestData();
         GroupingOptAttributes groupingOptAttributes = new GroupingOptAttributes(groupAttributeResults);
         assertEquals("SUCCESS", groupingOptAttributes.getResultCode());
         assertNotNull(groupingOptAttributes.getGroupPath());

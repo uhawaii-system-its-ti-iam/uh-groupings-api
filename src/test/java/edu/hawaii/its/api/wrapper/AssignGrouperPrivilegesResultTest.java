@@ -4,30 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignGrouperPrivilegesLiteResult;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AssignGrouperPrivilegesResultTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.assign.grouper.privileges.results.success");
-        WsAssignGrouperPrivilegesLiteResult wsAssignGrouperPrivilegesLiteResult =
-                JsonUtil.asObject(json, WsAssignGrouperPrivilegesLiteResult.class);
-        assertNotNull(wsAssignGrouperPrivilegesLiteResult);
         AssignGrouperPrivilegesResult assignGrouperPrivilegesResult =
-                new AssignGrouperPrivilegesResult(wsAssignGrouperPrivilegesLiteResult);
+                groupingsTestConfiguration.assignGrouperPrivilegesResultsSuccessTestData();
         assertNotNull(assignGrouperPrivilegesResult);
         assertEquals("SUCCESS", assignGrouperPrivilegesResult.getResultCode());
         assertNotNull(assignGrouperPrivilegesResult.getGroup());

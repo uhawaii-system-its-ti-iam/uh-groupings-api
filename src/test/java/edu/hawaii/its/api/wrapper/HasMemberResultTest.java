@@ -5,23 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsHasMemberResults;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class HasMemberResultTest {
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void construction() {
@@ -31,10 +28,10 @@ public class HasMemberResultTest {
 
     @Test
     public void nullSubject() {
-        String json = propertyLocator.find("ws.has.member.result.null.subject.result.code");
-        WsHasMemberResult wsHasMemberResult = JsonUtil.asObject(json, WsHasMemberResult.class);
-        assertNotNull(wsHasMemberResult);
-        HasMemberResult hasMemberResult = new HasMemberResult(wsHasMemberResult);
+
+        HasMemberResult hasMemberResult =
+                groupingsTestConfiguration.hasMemberResultNullSubjectResultCodeTestData();
+
         assertEquals("", hasMemberResult.getName());
         assertEquals("", hasMemberResult.getFirstName());
         assertEquals("", hasMemberResult.getLastName());
@@ -43,28 +40,34 @@ public class HasMemberResultTest {
         assertEquals("", hasMemberResult.getResultCode());
         assertNotNull(hasMemberResult.getSubject());
     }
-	
-	@Test
-	public void isMemberReturnsTrue() {
-		String json = propertyLocator.find("ws.has.member.results.is.members.uid");
-		WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-		assertNotNull(wsHasMemberResults);
-		WsHasMemberResult wsHasMemberResult = wsHasMemberResults.getResults()[0];
-		HasMemberResult hasMemberResult = new HasMemberResult(wsHasMemberResult);
-		assertNotNull(hasMemberResult);
-		assertEquals("IS_MEMBER", hasMemberResult.getResultCode());
-		assertTrue(hasMemberResult.isMember());
-	}
-	
-	@Test
-	public void isMemberReturnsFalse() {
-		String json = propertyLocator.find("ws.has.member.results.is.not.members.uid");
-		WsHasMemberResults wsHasMemberResults = JsonUtil.asObject(json, WsHasMemberResults.class);
-		assertNotNull(wsHasMemberResults);
-		WsHasMemberResult wsHasMemberResult = wsHasMemberResults.getResults()[0];
-		HasMemberResult hasMemberResult = new HasMemberResult(wsHasMemberResult);
-		assertNotNull(hasMemberResult);
-		assertEquals("IS_NOT_MEMBER", hasMemberResult.getResultCode());
-		assertFalse(hasMemberResult.isMember());
-	}
+
+    @Test
+    public void isMemberReturnsTrue() {
+
+        HasMembersResults hasMembersResults =
+                groupingsTestConfiguration
+                        .hasMemberResultsIsMembersUidTestData();
+
+        HasMemberResult hasMemberResult =
+                hasMembersResults.getResults().get(0);
+
+        assertNotNull(hasMemberResult);
+        assertEquals("IS_MEMBER", hasMemberResult.getResultCode());
+        assertTrue(hasMemberResult.isMember());
+    }
+
+    @Test
+    public void isMemberReturnsFalse() {
+
+        HasMembersResults hasMembersResults =
+                groupingsTestConfiguration
+                        .hasMemberResultsIsNotMembersUidTestData();
+
+        HasMemberResult hasMemberResult =
+                hasMembersResults.getResults().get(0);
+
+        assertNotNull(hasMemberResult);
+        assertEquals("IS_NOT_MEMBER", hasMemberResult.getResultCode());
+        assertFalse(hasMemberResult.isMember());
+    }
 }

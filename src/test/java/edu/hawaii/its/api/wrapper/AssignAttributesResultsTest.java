@@ -4,30 +4,31 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AssignAttributesResultsTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.assign.attributes.results.turn.off.opt.in.success");
-        WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
-        AssignAttributesResults assignAttributesResults = new AssignAttributesResults(wsAssignAttributesResults);
+        AssignAttributesResults assignAttributesResults =
+                groupingsTestConfiguration.assignAttributesResultsChangedTrueTestData();
+
         assertNotNull(assignAttributesResults);
         assertEquals("SUCCESS", assignAttributesResults.getResultCode());
         assertNotNull(assignAttributesResults.getGroup());

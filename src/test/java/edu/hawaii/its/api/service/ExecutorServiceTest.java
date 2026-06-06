@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
@@ -14,8 +15,8 @@ import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.wrapper.Command;
 import edu.hawaii.its.api.wrapper.MockCommand;
 import edu.hawaii.its.api.wrapper.MockResults;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,11 +25,15 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class ExecutorServiceTest {
 
-    @Spy
     private MockCommand mockCommand;
 
     @Autowired
     private ExecutorService exec;
+
+    @BeforeEach
+    public void setUp() {
+        mockCommand = spy(new MockCommand());
+    }
 
     @Test
     public void successfulExecutionWithRetry() {

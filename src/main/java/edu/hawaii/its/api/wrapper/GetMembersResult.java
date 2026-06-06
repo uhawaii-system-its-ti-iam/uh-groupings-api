@@ -56,10 +56,10 @@ public class GetMembersResult extends Results {
                 continue;
             }
             Subject subject = new Subject(wsSubject);
-            if (!subject.hasUHAttributes()) {
+            if (!subject.isIncludedAsMember()) {
                 continue;
             }
-            subjects.add(new Subject(wsSubject));
+            subjects.add(subject);
         }
         return subjects;
     }

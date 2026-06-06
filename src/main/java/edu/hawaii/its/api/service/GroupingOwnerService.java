@@ -9,6 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.GroupingDescription;
@@ -49,16 +51,20 @@ public class GroupingOwnerService {
 
     private final MemberService memberService;
 
-    public GroupingOwnerService(GrouperService grouperService, MemberService memberService) {
+    private final EmailService emailService;
+
+    public GroupingOwnerService(GrouperService grouperService, MemberService memberService, EmailService emailService) {
         this.grouperService = grouperService;
         this.memberService = memberService;
+        this.emailService = emailService;
     }
 
     /**
      * Get the number of grouping members: Basis + Include - Exclude.
      */
     public Integer numberOfGroupingMembers(String currentUser, String groupingPath) {
-        log.debug(String.format("numberOfGroupingMembers; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        log.debug(String.format("numberOfGroupingMembers; currentUser: %s; groupingPath: %s;", currentUser,
+                groupingPath));
         GetMembersResult getMembersResult = grouperService.getMembersResult(currentUser, groupingPath);
         return getMembersResult.getSubjects().size();
     }
@@ -103,10 +109,11 @@ public class GroupingOwnerService {
     public GroupingGroupMembers getGroupingMembers(String currentUser, String groupingPath, Integer pageNumber,
             Integer pageSize, String sortString, Boolean isAscending, String searchString) {
         log.debug(String.format(
-            "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b; searchString: %s;",
-            currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
+                "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b; searchString: %s;",
+                currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
 
-        if (!memberService.isAdmin(currentUser) && !memberService.isOwner(groupingPath, currentUser)) {
+        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
+        if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException();
         }
 
@@ -119,7 +126,8 @@ public class GroupingOwnerService {
         return new GroupingGroupMembers(subjectsResults).sort(sortString, isAscending).paginate(pageNumber, pageSize);
     }
 
-    public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+    public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath,
+            List<String> uhIdentifiers) {
         HasMembersResults hasMembersResultsBasis = grouperService.hasMembersResults(currentUser,
                 groupingPath + GroupType.BASIS.value(), uhIdentifiers);
         HasMembersResults hasMembersResultsInclude = grouperService.hasMembersResults(currentUser,
@@ -128,49 +136,50 @@ public class GroupingOwnerService {
         return new GroupingMembers(hasMembersResultsBasis, hasMembersResultsInclude);
     }
 
-    public GroupingMembers getGroupingMembersIsBasis(String currentUser, String groupingPath, List<String> uhIdentifiers) {
+    public GroupingMembers getGroupingMembersIsBasis(String currentUser, String groupingPath,
+            List<String> uhIdentifiers) {
         HasMembersResults hasMembersResults = grouperService.hasMembersResults(currentUser,
                 groupingPath + GroupType.BASIS.value(), uhIdentifiers);
         return new GroupingMembers(hasMembersResults);
     }
-    
+
     public GroupingMembers getMembersExistInInclude(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         HasMembersResults hasMembersResults = grouperService.hasMembersResults(
                 currentUser,
                 groupingPath + GroupType.INCLUDE.value(),
                 uhIdentifiers);
-        
+
         List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
-        
+
         return GroupingMembers.fromFilteredResults(filteredList);
-        
+
     }
-    
+
     public GroupingMembers getMembersExistInExclude(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         HasMembersResults hasMembersResults = grouperService.hasMembersResults(
                 currentUser,
                 groupingPath + GroupType.EXCLUDE.value(),
                 uhIdentifiers);
-        
+
         List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
-        
+
         return GroupingMembers.fromFilteredResults(filteredList);
     }
-    
+
     public GroupingMembers getMembersExistInOwners(String currentUser, String groupingPath,
             List<String> uhIdentifiers) {
         HasMembersResults hasMembersResults = grouperService.hasMembersResults(
                 currentUser,
                 groupingPath + GroupType.OWNERS.value(),
                 uhIdentifiers);
-        
+
         List<HasMemberResult> filteredList = hasMembersResults.getExistingMembers();
-        
+
         return GroupingMembers.fromFilteredResults(filteredList);
     }
-    
+
     /**
      * Get the opt attributes of a selected grouping.
      */
@@ -194,43 +203,117 @@ public class GroupingOwnerService {
     public GroupingSyncDestinations groupingsSyncDestinations(String currentUser, String groupingPath) {
         log.debug(String.format("groupingsSyncDestinations; currentUser: %s; groupingPath: %s;", currentUser,
                 groupingPath));
-        FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
-                currentUser,
-                SYNC_DESTINATIONS_CHECKBOXES,
-                SYNC_DESTINATIONS_LOCATION);
+        GroupAttributeResults groupAttributeResults;
+        try {
+            FindAttributesResults findAttributesResults = grouperService.findAttributesResults(
+                    currentUser,
+                    SYNC_DESTINATIONS_CHECKBOXES,
+                    SYNC_DESTINATIONS_LOCATION);
 
-        GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(
-                currentUser,
-                findAttributesResults.getResults().stream().map(AttributesResult::getName).collect(Collectors.toList()),
-                groupingPath);
+            groupAttributeResults = grouperService.groupAttributeResults(
+                    currentUser,
+                    findAttributesResults.getResults().stream().map(AttributesResult::getName)
+                            .collect(Collectors.toList()),
+                    groupingPath);
 
-        List<GroupingSyncDestination> syncDestinationList =
-                createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
+            List<GroupingSyncDestination> syncDestinationList =
+                    createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
 
-        return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults, syncDestinationList);
+            return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults, syncDestinationList);
+        } catch (Exception e) {
+            log.error(String.format("groupingsSyncDestinations; currentUser: %s; groupingPath: %s; error: %s;",
+                    currentUser, groupingPath, e.getMessage()), e);
+            sendSyncDestinationErrorEmail(e);
+            return new GroupingSyncDestinations();
+        }
     }
 
     /**
      * Create a list of groupingSyncDestination with findAttributesResults and groupAttributeResults
      */
-    public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults findAttributesResults,
-            GroupAttributeResults groupAttributeResults) {
+    public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults
+            findAttributesResults, GroupAttributeResults groupAttributeResults) {
         List<AttributesResult> attributesResults = findAttributesResults.getResults();
         List<GroupingSyncDestination> syncDestinationList = new ArrayList<>();
+        List<Exception> syncDestinationErrors = new ArrayList<>();
+        List<String> syncDestinationErrorMessages = new ArrayList<>();
+        String groupExtension = groupAttributeResults.getGroups().stream()
+                .findFirst()
+                .map(Group::getExtension)
+                .orElse("");
         for (AttributesResult attributesResult : attributesResults) {
-            GroupingSyncDestination groupingSyncDestination =
-                    JsonUtil.asObject(attributesResult.getDescription(), GroupingSyncDestination.class);
-            groupingSyncDestination.setName(attributesResult.getName());
-            groupingSyncDestination.setDescription(groupingSyncDestination.getDescription()
-                    .replaceFirst("\\$\\{srhfgs}", groupAttributeResults.getGroups().stream()
-                            .findFirst()
-                            .map(Group::getExtension)
-                            .orElse("")));
-            groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
-                    .anyMatch(groupAttribute -> groupAttribute.getAttributeName().equals(attributesResult.getName())));
-            syncDestinationList.add(groupingSyncDestination);
+            String name = attributesResult.getName();
+            try {
+                String rawDescription = attributesResult.getDescription();
+                if (rawDescription == null || rawDescription.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "description field is null or blank — cannot deserialize GroupingSyncDestination");
+                }
+
+                GroupingSyncDestination groupingSyncDestination =
+                        JsonUtil.asObject(rawDescription, GroupingSyncDestination.class);
+
+                if (groupingSyncDestination == null) {
+                    throw new IllegalStateException(
+                            "JsonUtil.asObject returned null — description may contain the literal string \"null\"");
+                }
+
+                groupingSyncDestination.setName(name);
+
+                String destinationDescription = groupingSyncDestination.getDescription();
+                if (destinationDescription == null) {
+                    throw new IllegalStateException(
+                            "deserialized GroupingSyncDestination has a null description field — "
+                                    + "JSON is missing the \"description\" property");
+                }
+                groupingSyncDestination.setDescription(destinationDescription
+                        .replaceFirst("\\$\\{srhfgs}", groupExtension));
+
+                if (groupingSyncDestination.getTooltip() != null) {
+                    groupingSyncDestination.setTooltip(groupingSyncDestination.getTooltip()
+                            .replaceFirst("\\$\\{srhfgs}", groupExtension));
+                }
+                groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
+                        .anyMatch(groupAttribute -> groupAttribute.getAttributeName()
+                                .equals(attributesResult.getName())));
+                syncDestinationList.add(groupingSyncDestination);
+
+            } catch (Exception e) {
+                log.error(String.format("createGroupingSyncDestinationList; skipping sync destination '%s': %s",
+                        name, e.getMessage()), e);
+                syncDestinationErrors.add(e);
+                syncDestinationErrorMessages.add(String.format("'%s': %s", name, e.getMessage()));
+            }
+        }
+        if (!syncDestinationErrors.isEmpty()) {
+            sendSyncDestinationErrorEmail(
+                    createSyncDestinationError(syncDestinationErrors, syncDestinationErrorMessages));
         }
         syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
         return syncDestinationList;
+    }
+
+    private Exception createSyncDestinationError(List<Exception> syncDestinationErrors,
+            List<String> syncDestinationErrorMessages) {
+        Exception syncDestinationError = new RuntimeException(String.format(
+                "Skipped %d malformed sync destination(s): %s",
+                syncDestinationErrors.size(),
+                String.join("; ", syncDestinationErrorMessages)));
+        syncDestinationErrors.forEach(syncDestinationError::addSuppressed);
+        return syncDestinationError;
+    }
+
+    private void sendSyncDestinationErrorEmail(Exception e) {
+        try {
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            String path = attributes != null && attributes.getRequest() != null
+                    ? attributes.getRequest().getRequestURI()
+                    : "unknown";
+            emailService.sendWithStack(e, "Sync Destination Error", path);
+        } catch (Exception emailException) {
+            log.error(String.format("sendSyncDestinationErrorEmail; failed to send error email: %s",
+                    emailException.getMessage()), emailException);
+        }
     }
 }

@@ -433,8 +433,9 @@ public class GroupingsRestControllerv2_1Test {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(JsonUtil.asJson(paths)))
                     .andExpect(status().isOk())
+                    .andExpect(content().json(JsonUtil.asJson(groupingGroupsMembers)))
                     .andReturn();
-            assertEquals(JsonUtil.asJson(groupingGroupsMembers), result.getResponse().getContentAsString());
+            assertNotNull(result);
             verify(groupingOwnerService).paginatedGrouping(TEST_USER, paths, 1, 700, sortBy.sortString(), true);
         }
     }
@@ -456,9 +457,9 @@ public class GroupingsRestControllerv2_1Test {
                             get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortBy=" + sortBy.value()
                                     + "&isAscending=true&searchString=test"))
                     .andExpect(status().isOk())
+                    .andExpect(content().json(JsonUtil.asJson(groupingGroupMembers)))
                     .andReturn();
             assertNotNull(result);
-            assertEquals(JsonUtil.asJson(groupingGroupMembers), result.getResponse().getContentAsString());
             verify(groupingOwnerService, times(1)).getGroupingMembers(TEST_USER, path,
                     1, 700, sortBy.sortString(), true, "test");
         }
@@ -1010,9 +1011,9 @@ public class GroupingsRestControllerv2_1Test {
                 groupingDescription);
         MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING + "/description"))
                 .andExpect(status().isOk())
+                .andExpect(content().json(JsonUtil.asJson(groupingDescription)))
                 .andReturn();
         assertNotNull(result);
-        assertEquals(JsonUtil.asJson(groupingDescription), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
                 .groupingsDescription(TEST_USER, GROUPING);
     }
@@ -1031,9 +1032,9 @@ public class GroupingsRestControllerv2_1Test {
                 .willReturn(groupingOptAttributes);
         MvcResult result = mockMvc.perform(get(API_BASE + "/groupings/" + GROUPING + "/opt-attributes"))
                 .andExpect(status().isOk())
+                .andExpect(content().json(JsonUtil.asJson(groupingOptAttributes)))
                 .andReturn();
         assertNotNull(result);
-        assertEquals(JsonUtil.asJson(groupingOptAttributes), result.getResponse().getContentAsString());
         verify(groupingOwnerService, times(1))
                 .groupingOptAttributes(TEST_USER, GROUPING);
     }

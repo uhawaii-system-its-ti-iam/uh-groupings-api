@@ -7,22 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingGroupsMembersTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeEach() {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void constructor() {
@@ -47,10 +48,8 @@ public class GroupingGroupsMembersTest {
         String owner = "testiwte";
         String onlyBasis = "testiwtf";
 
-        String json = propertyLocator.find("ws.get.members.results.success.multiple.groups");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        assertNotNull(wsGetMembersResults);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessMultipleGroupsTestData();
         assertNotNull(getMembersResults);
         GroupingGroupsMembers groupingGroupsMembers = new GroupingGroupsMembers(getMembersResults);
 
@@ -93,13 +92,18 @@ public class GroupingGroupsMembersTest {
         assertNotNull(ownersMembers);
         assertNotNull(allGroupingMembers);
 
-        assertEquals(3, basisMembers.size());
+        assertEquals(4, basisMembers.size());
         assertEquals(2, includeMembers.size());
         assertEquals(2, excludeMembers.size());
         assertEquals(1, ownersMembers.size());
-        assertEquals(3, allGroupingMembers.size());
+        assertEquals(4, allGroupingMembers.size());
 
+        assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals("99999999")));
+        assertTrue(basisMembers.stream().filter(member -> member.getUhUuid().equals("99999999"))
+                .allMatch(GroupingGroupMember::isOrphan));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
+        assertTrue(basisMembers.stream().filter(member -> member.getUhUuid().equals(onlyBasis))
+                .noneMatch(GroupingGroupMember::isOrphan));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndInclude)));
         assertTrue(basisMembers.stream().anyMatch(member -> member.getUhUuid().equals(basisAndExclude)));
         assertTrue(basisMembers.stream().noneMatch(member -> member.getUhUuid().equals(onlyInclude)));
@@ -136,7 +140,9 @@ public class GroupingGroupsMembersTest {
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis & Include"))
                 .allMatch(member -> member.getUhUuid().equals(basisAndInclude)));
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
-                .allMatch(member -> member.getUhUuid().equals(onlyBasis)));
+                .anyMatch(member -> member.getUhUuid().equals(onlyBasis)));
+        assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Basis"))
+                .anyMatch(member -> member.getUhUuid().equals("99999999")));
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Include"))
                 .allMatch(member -> member.getUhUuid().equals(onlyInclude)));
     }

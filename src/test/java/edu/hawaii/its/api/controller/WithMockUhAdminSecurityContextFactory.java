@@ -20,7 +20,7 @@ public class WithMockUhAdminSecurityContextFactory implements WithSecurityContex
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         List<SimpleGrantedAuthority> authorities = Stream.of(
-                new SimpleGrantedAuthority("ROLE_ADMINISTRATOR"),
+                new SimpleGrantedAuthority("ROLE_ADMIN"),
                 new SimpleGrantedAuthority("ROLE_UH")
         ).toList();
 

@@ -1,30 +1,30 @@
 package edu.hawaii.its.api.wrapper;
 
-import static edu.hawaii.its.api.util.JsonUtil.asObject;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindGroupsResults;
 
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class FindGroupsResultsTest {
 
     private static final String SUCCESS = "SUCCESS";
     private static final String FAILURE = "FAILURE";
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void nullConstruction() {
@@ -47,9 +47,8 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getDescription() {
-        String json = propertyLocator.find("find.groups.results.description");
         FindGroupsResults results =
-                new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
+                groupingsTestConfiguration.findGroupsResultsDescriptionTestData();
         assertThat(results.getResultCode(), equalTo(SUCCESS));
         assertThat(results.getGroup().getDescription(), equalTo("Test Many Groups In Basis"));
         assertThat(results.getGroup().getResultCode(), equalTo(SUCCESS));
@@ -58,9 +57,8 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getNullDescription() {
-        String json = propertyLocator.find("find.groups.results.null.description");
         FindGroupsResults results =
-                new FindGroupsResults(asObject(json, WsFindGroupsResults.class));
+                groupingsTestConfiguration.findGroupsResultsNullDescriptionTestData();
         assertThat(results.getResultCode(), equalTo(SUCCESS));
         assertThat(results.getGroup().getDescription(), equalTo(""));
         assertThat(results.getGroup().getResultCode(), equalTo(SUCCESS));
@@ -69,9 +67,8 @@ public class FindGroupsResultsTest {
 
     @Test
     public void getEmptyDescription() {
-        String json = propertyLocator.find("find.groups.results.empty.description");
-        WsFindGroupsResults wsFindGroupsResults = asObject(json, WsFindGroupsResults.class);
-        FindGroupsResults results = new FindGroupsResults(wsFindGroupsResults);
+        FindGroupsResults results =
+                groupingsTestConfiguration.findGroupsResultsEmptyDescriptionTestData();
         assertThat(results.getResultCode(), equalTo(SUCCESS));
         assertThat(results.getGroup().getDescription(), equalTo(""));
         assertThat(results.getGroup().getResultCode(), equalTo(SUCCESS));
@@ -80,9 +77,8 @@ public class FindGroupsResultsTest {
 
     @Test
     public void onFailure() {
-        String json = propertyLocator.find("find.groups.results.failure");
-        WsFindGroupsResults wsFindGroupsResults = asObject(json, WsFindGroupsResults.class);
-        FindGroupsResults results = new FindGroupsResults(wsFindGroupsResults);
+        FindGroupsResults results =
+                groupingsTestConfiguration.findGroupsResultsFailureTestData();
         assertThat(results.getResultCode(), equalTo(FAILURE));
     }
 }
