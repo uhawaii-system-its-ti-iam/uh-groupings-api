@@ -375,6 +375,7 @@ Pipeline:          its-iam-groupings-prod-pipeline
 - [AWS_QUICKSTART.md](./AWS_QUICKSTART.md) - Uses these conventions
 - [AWS_SETUP.md](./AWS_SETUP.md) - Detailed setup with naming
 - [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) - Deployment procedures
-- [aws/deployment.json](./aws/deployment.json) - Configuration file
+<!--suppress HtmlUnknownTarget -->
+- [aws/deployment.json](../aws/deployment.json) - Configuration file
 
 ---
