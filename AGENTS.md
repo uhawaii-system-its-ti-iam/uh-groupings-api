@@ -1,7 +1,7 @@
 # AGENTS.md — UH Groupings API
 
 ## What This Project Does
-A Spring Boot (Java 17) REST API that serves as middleware between the UH Groupings UI and the Internet2 **Grouper** enterprise access management system. It manages UH group memberships (basis, include, exclude, owners sub-groups) and exposes them through a JWT-secured REST API at `/api/groupings/v2.1`.
+A Spring Boot (Java 21) REST API that serves as middleware between the UH Groupings UI and the Internet2 **Grouper** enterprise access management system. It manages UH group memberships (basis, include, exclude, owners sub-groups) and exposes them through a JWT-secured REST API at `/api/groupings/v2.1`.
 
 ## Architecture Overview
 
