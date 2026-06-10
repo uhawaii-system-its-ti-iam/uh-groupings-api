@@ -19,3 +19,14 @@ src/docs/html/index.html
 src/docs/pdf/index.pdf
 *.csv
 
+# Docker - Local development environment files
+docker/.env
+docker/dev.env
+
+# AWS - Local temp files
+aws/pipeline.json
+aws/*-stack.json
+
+# IDE
+.vscode/
+

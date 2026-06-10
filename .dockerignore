@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+buildspec.yml
+
+# Documentation
+docs
+README.md
+*.md
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Build artifacts
+target
+*.class
+*.jar
+*.war
+
+# Test
+.mvn
+grouperClientFailoverState.bin
+
+# AWS
+aws
+
+# Docker
+docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
