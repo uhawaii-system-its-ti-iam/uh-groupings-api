@@ -51,10 +51,32 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 - **Service:** GitHub Enterprise
 - **Repository:** uhawaii-system-its-ti-iam/uh-groupings-api
 - **Branching Strategy:**
-  - `main` → Sandbox/Development
-  - `test` → Test/Staging environment
-  - `production` → Production environment
-- **Webhook:** Triggers CodePipeline on push/merge
+  - **Sandbox (Personal):** Any branch (e.g., `dev-mhodges-2203`, `feature/*`, `main`)
+  - **Dev (Shared):** `develop` or `main`
+  - **Test/Staging:** `release/*` or `test`
+  - **Production:** `main` or `production`
+- **Webhook:** Triggers CodePipeline on push/merge to configured branch
+- **Branch Flexibility:** Sandbox pipelines can watch any branch for isolated feature development
+
+#### Changing Deployment Branch
+
+Sandbox environments support deploying from any branch:
+
+```bash
+# Update pipeline to watch a different branch
+aws cloudformation update-stack \
+  --stack-name mhodges-groupings-sandbox-pipeline \
+  --use-previous-template \
+  --parameters \
+    ParameterKey=GitHubBranch,ParameterValue=dev-mhodges-2203 \
+    ParameterKey=Owner,UsePreviousValue=true \
+  --capabilities CAPABILITY_NAMED_IAM
+
+# Or via AWS Console:
+# CodePipeline → Your Pipeline → Edit → Source Stage → Change Branch
+```
+
+This allows you to deploy `dev-mhodges-2203` → sandbox, while team environments typically deploy from standard branches.
 
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
@@ -191,8 +213,8 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 ### Deployment Flow
 ```
-1. Developer → Git Push → GitHub Enterprise
-2. GitHub → Webhook → CodePipeline
+1. Developer → Git Push → GitHub Enterprise (any branch for sandbox)
+2. GitHub → Webhook → CodePipeline (watches configured branch)
 3. CodePipeline → Trigger → CodeBuild
 4. CodeBuild → Maven Build → Docker Build → ECR Push
 5. CodePipeline → Update ECS Service
@@ -202,6 +224,8 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 9. ECS → Drain old tasks
 10. Deployment complete
 ```
+
+**Note:** Sandbox pipelines can watch any branch (e.g., `dev-mhodges-2203`), while team environments typically watch standard branches (`develop`, `test`, `main`).
 
 ## Technology Stack
 
@@ -228,6 +252,49 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 - **CI/CD:** AWS CodePipeline + CodeBuild
 - **IaC:** AWS CloudFormation
 - **Monitoring:** CloudWatch
+
+## Environments
+
+### Environment Configuration
+
+| Environment | Purpose | Typical Branch | Owner | Auto-Deploy |
+|-------------|---------|----------------|-------|-------------|
+| **Sandbox** | Personal development & experimentation | Any (e.g., `dev-mhodges-2203`, `feature/*`, `main`) | Individual (e.g., `mhodges`) | Yes |
+| **Dev** | Shared integration testing | `develop` or `main` | Team (`its-iam`) | Yes |
+| **Test** | QA & staging | `release/*` or `test` | Team (`its-iam`) | Yes (with approval) |
+| **Production** | Live system | `main` or `production` | Team (`its-iam`) | Manual approval required |
+
+### Branch Flexibility
+
+**Sandbox Environments:**
+- Can deploy from **any branch** - ideal for isolated feature development
+- Change branch via CodePipeline configuration
+- Example: Deploy `dev-mhodges-2203` to `mhodges-groupings-sandbox`
+
+**Team Environments:**
+- Follow GitFlow or trunk-based development patterns
+- Branch protection and approval workflows enforced
+- Standard naming: `its-iam-groupings-<env>-*`
+
+### Changing Deployment Branch (Sandbox Example)
+
+```bash
+# Update sandbox pipeline to watch your feature branch
+aws cloudformation update-stack \
+  --stack-name mhodges-groupings-sandbox-pipeline \
+  --use-previous-template \
+  --parameters \
+    ParameterKey=GitHubBranch,ParameterValue=dev-mhodges-2203 \
+    ParameterKey=Owner,UsePreviousValue=true \
+    ParameterKey=Project,UsePreviousValue=true \
+    ParameterKey=Environment,UsePreviousValue=true \
+  --capabilities CAPABILITY_NAMED_IAM
+
+# Or in AWS Console:
+# CodePipeline → mhodges-groupings-sandbox-pipeline → Edit → Source → Change Branch
+```
+
+**Result:** Your sandbox will now automatically deploy whenever you push to `dev-mhodges-2203`!
 
 ## Security Architecture
 
