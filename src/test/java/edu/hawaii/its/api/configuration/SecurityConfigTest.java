@@ -83,6 +83,10 @@ public class SecurityConfigTest {
         mvcResult = mockMvc.perform(get(API_BASE_URL + "announcements"))
                 .andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
+
+        mvcResult = mockMvc.perform(get("/actuator/health"))
+                .andReturn();
+        assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
     @Test

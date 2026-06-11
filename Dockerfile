@@ -10,13 +10,16 @@ COPY .mvn .mvn
 COPY mvnw .
 
 # Download dependencies (cached layer)
-RUN ./mvnw dependency:go-offline -B
+RUN MAVEN_CONFIG="" ./mvnw dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
 # Build the application (skip tests for Docker build, run in CI/CD)
-RUN ./mvnw clean package -DskipTests -B
+RUN MAVEN_CONFIG="" ./mvnw clean package -DskipTests -B
+
+# Normalize executable artifact name for runtime stage copy
+RUN cp /app/target/uhgroupingsapi-*.war /app/target/app.war
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jre-jammy
@@ -31,8 +34,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app
 
-# Copy the built WAR file from builder stage
-COPY --from=builder /app/target/uhgroupingsapi.war app.war
+# Copy the built executable WAR from builder stage
+COPY --from=builder /app/target/app.war app.war
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
@@ -40,12 +43,12 @@ RUN chown -R appuser:appuser /app
 # Switch to non-root user
 USER appuser
 
-# Expose port 8080 (Spring Boot default)
-EXPOSE 8080
+# Expose port 8081 to match application.properties
+EXPOSE 8081
 
 # Health check for ECS
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8081/uhgroupingsapi/actuator/health || exit 1
 
 # JVM options for containerized environment
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"

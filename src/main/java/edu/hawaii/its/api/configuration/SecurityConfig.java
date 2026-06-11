@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
+                                "/actuator/health",
+                                "/actuator/health/**",
                                 "/api/groupings/v2.1/announcements/**"
                         ).permitAll()
                         .anyRequest().authenticated()
