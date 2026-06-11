@@ -4,14 +4,12 @@ This guide explains how to manage secrets and configuration for the UH Groupings
 
 ## Overview
 
-The application uses **two different approaches** for secrets management:
+The application uses **two approaches** for secrets management:
 
-| Environment           | Method                   | Storage Location    | Injection Method    |
-|-----------------------|--------------------------|---------------------|---------------------|
-| **Local Development** | Properties file + Script | `~/.yourname-conf/` | Docker .env file    |
-| **AWS Production**    | AWS Secrets Manager      | AWS Cloud           | ECS Task Definition |
-
-**Never commit secrets to Git!** Both approaches keep secrets out of version control.
+| Environment           | Method                       | Storage Location     | Injection Method                       |
+|-----------------------|------------------------------|----------------------|----------------------------------------|
+| **Local Development** | Properties file + bind mount | `~/.yourname-conf/`  | Docker volume + `SPRING_CONFIG_IMPORT` |
+| **AWS Production**    | AWS Secrets Manager          | AWS Cloud            | ECS Task Definition                    |
 
 ---
 
@@ -33,14 +31,9 @@ The application uses **two different approaches** for secrets management:
    jwt.secret.key=your-local-jwt-secret
    ```
 
-3. **Generate Docker environment file:**
+3. **Start the application:**
    ```bash
-   ./docker/dev-overrides-properties.sh
-   ```
-
-4. **Start the application:**
-   ```bash
-   docker-compose up
+   docker compose up
    ```
 
 ### How It Works
@@ -52,73 +45,43 @@ The application uses **two different approaches** for secrets management:
 │ (Spring Boot properties)                 │
 └───────────┬──────────────────────────────┘
             │
-            │ ./docker/dev-overrides-properties.sh
-            │ (converts to env vars)
+            │ docker compose up
+            │ (bind mount, read-only)
             ▼
-┌──────────────────────────────────────────┐
-│ docker/.env                              │
-│ (Docker environment variables)           │
-└───────────┬──────────────────────────────┘
-            │
-            │ docker-compose up
-            │ (loads env vars)
-            ▼
-┌──────────────────────────────────────────┐
-│ Docker Container                         │
-│ (environment variables available)        │
-└──────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│ Docker Container                                  │
+│ /app/config/uh-groupings-api-overrides.properties │
+│ (loaded via SPRING_CONFIG_IMPORT)                 │
+└───────────────────────────────────────────────────┘
 ```
 
 ### Required Properties for Local Development
 
-Create `~/.$(whoami)-conf/uh-groupings-api-overrides.properties` with:
+Create `~/.$(whoami)-conf/uh-groupings-api-overrides.properties` with properties:
 
 ```properties
-# ============================================================================
-# Grouper Configuration
-# ============================================================================
-grouper.api.url=https://grouper-dev.example.com/grouper-ws/servicesRest/json/v2_5_000
-grouper.username=your-dev-username
-grouper.password=your-dev-password
+# Provide your UH username for both of the following
+groupings.api.localhost.user=your_username
+groupings.api.test.admin_user=your_username
 
-# ============================================================================
-# JWT Configuration
-# ============================================================================
-jwt.secret.key=your-local-jwt-secret-for-development-only-change-in-production
-jwt.expiration.ms=86400000
+# Grouper client settings
+grouperClient.webService.url=https://grouper-test.its.hawaii.edu/grouper-ws/servicesRest/
+grouperClient.webService.login = _groupings_api_2
+grouperClient.webService.password = redacted 
 
-# ============================================================================
-# Email Configuration (if needed)
-# ============================================================================
-spring.mail.host=smtp.example.com
-spring.mail.port=587
-spring.mail.username=noreply@example.com
-spring.mail.password=your-mail-password
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
+email.is.enabled=false
+email.send.recipient=mhodges@hawaii.edu
 
-# ============================================================================
-# Vault Configuration (for local Vault instance)
-# ============================================================================
-spring.cloud.vault.enabled=false
-spring.cloud.vault.uri=http://localhost:8200
-spring.cloud.vault.token=your-dev-vault-token
+# Instructions: <https://uhawaii.atlassian.net/wiki/spaces/SITARd/pages/2040561680>
+jwt.secret.key=you_generiate_it
 
-# ============================================================================
-# Logging
-# ============================================================================
-logging.level.root=INFO
-logging.level.edu.hawaii.its=DEBUG
-
-# ============================================================================
-# Actuator
-# ============================================================================
-management.endpoints.web.exposure.include=health,info,metrics
+# Flag indicates a successful loading of the personal overrides file.
+properties.override.result=OVERRIDDEN
 ```
 
-### Property Name Conversion
+### Optional Property Name Conversion
 
-The `dev-overrides-properties.sh` script automatically converts Spring property names to environment variable names:
+If needed for other tooling, `dev-overrides-properties.sh` can convert Spring property names to environment variable names:
 
 | Spring Property              | Environment Variable         |
 |------------------------------|------------------------------|
@@ -139,8 +102,6 @@ The `dev-overrides-properties.sh` script automatically converts Spring property 
 ```bash
 # Set restrictive permissions on your properties file
 chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-
-# The script automatically sets docker/.env to 600
 ```
 
 **Best Practices:**
@@ -148,7 +109,7 @@ chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 - ✅ Never use production credentials locally
 - ✅ Keep properties file in your home directory
 - ✅ Set file permissions to 600 (owner read/write only)
-- ❌ Never commit docker/.env to Git (it's in .gitignore)
+- ❌ Never commit generated `.env` files to Git (optional converter workflow)
 - ❌ Never share your properties file
 
 ### Troubleshooting Local Development
@@ -168,18 +129,17 @@ mkdir -p ~/.$(whoami)-conf
 touch ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
 
-**Problem:** Docker Compose can't find .env
+**Problem:** Docker Compose can't mount overrides file
 ```bash
-ERROR: Couldn't find env file: docker/.env
+Error response from daemon: invalid mount config for type "bind"
 ```
 
 **Solution:**
 ```bash
-# Run the conversion script
-./docker/dev-overrides-properties.sh
-
-# Verify it was created
-ls -la docker/.env
+# Ensure file exists and has correct permissions
+mkdir -p ~/.$(whoami)-conf
+touch ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
+chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
 
 **More help:** See [docker/README.md](../docker/README.md)
@@ -490,17 +450,17 @@ aws secretsmanager list-secrets \
 
 ## Comparison: Local vs AWS
 
-| Aspect             | Local Development        | AWS Production                      |
-|--------------------|--------------------------|-------------------------------------|
-| **Storage**        | `~/.yourname-conf/` file | AWS Secrets Manager                 |
-| **Format**         | Spring properties        | Key-value pairs                     |
-| **Encryption**     | None (local machine)     | AES-256 (at rest), TLS (in transit) |
-| **Access Control** | File permissions         | IAM policies                        |
-| **Rotation**       | Manual edit              | Manual or automated                 |
-| **Injection**      | Docker .env file         | ECS task definition                 |
-| **Auditing**       | None                     | CloudTrail logs                     |
-| **Cost**           | Free                     | ~$0.40/secret/month                 |
-| **Use Case**       | Development/testing      | Staging/production                  |
+| Aspect             | Local Development          | AWS Production                      |
+|--------------------|----------------------------|-------------------------------------|
+| **Storage**        | `~/.yourname-conf/` file   | AWS Secrets Manager                 |
+| **Format**         | Spring properties          | Key-value pairs                     |
+| **Encryption**     | None (local machine)       | AES-256 (at rest), TLS (in transit) |
+| **Access Control** | File permissions           | IAM policies                        |
+| **Rotation**       | Manual edit                | Manual or automated                 |
+| **Injection**      | Bind mount + Spring import | ECS task definition                 |
+| **Auditing**       | None                       | CloudTrail logs                     |
+| **Cost**           | Free                       | ~$0.40/secret/month                 |
+| **Use Case**       | Development/testing        | Staging/production                  |
 
 ---
 
@@ -643,11 +603,8 @@ mkdir -p ~/.$(whoami)-conf
 nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 # Add your configuration (see docker/README.md for format)
 
-# 2. Generate Docker .env file
-./docker/dev-overrides-properties.sh
-
-# 3. Start application
-docker-compose up
+# 2. Start application (mounts overrides file read-only)
+docker compose up
 ```
 
 ### AWS Production Workflow

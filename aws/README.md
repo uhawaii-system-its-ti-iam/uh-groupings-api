@@ -8,6 +8,7 @@ This directory contains all AWS-related configuration and infrastructure-as-code
 aws/
 ├── README.md                          # This file
 ├── setup.sh                           # Automated setup script
+├── buildspec.yml                      # CodeBuild specification
 ├── deployment.json                    # Deployment configuration
 ├── task-definition.json               # ECS task definition template
 ├── appspec.yml                        # CodeDeploy specification
@@ -128,6 +129,22 @@ aws ecs register-task-definition --cli-input-json file://task-definition.json
 ### appspec.yml
 
 CodeDeploy specification for blue/green deployments (advanced).
+
+### buildspec.yml
+
+CodeBuild specification for CI/CD pipeline Docker image building.
+
+**Important:** Since `buildspec.yml` is located in the `aws/` subdirectory, configure your CodeBuild project to use the custom buildspec path:
+
+```bash
+aws codebuild create-project \
+  --name uh-groupings-api-build \
+  --buildspec aws/buildspec.yml \
+  # ... other parameters ...
+```
+
+Or in the AWS Console:
+- **Build > Buildspec name:** `aws/buildspec.yml`
 
 ## Environment Variables
 

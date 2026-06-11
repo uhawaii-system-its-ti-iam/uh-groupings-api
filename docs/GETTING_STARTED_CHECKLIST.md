@@ -46,9 +46,6 @@
    mkdir -p ~/.$(whoami)-conf
    nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
    # Add your Grouper credentials (see docker/README.md)
-   
-   # Generate Docker .env file
-   ./docker/dev-overrides-properties.sh
    ```
 
 2. [ ] **Test locally first**

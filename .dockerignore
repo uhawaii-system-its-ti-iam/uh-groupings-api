@@ -24,7 +24,6 @@ target
 *.war
 
 # Test
-.mvn
 grouperClientFailoverState.bin
 
 # AWS
