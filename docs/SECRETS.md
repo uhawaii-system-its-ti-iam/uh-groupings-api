@@ -6,9 +6,9 @@ This guide explains how to manage secrets and configuration for the UH Groupings
 
 The application uses **two approaches** for configuration and secrets:
 
-| Environment           | Method                       | Storage Location     | Injection Method                       |
-|-----------------------|------------------------------|----------------------|----------------------------------------|
-| **Local Development** | Properties file + bind mount | `~/.yourname-conf/`  | Docker volume + `SPRING_CONFIG_IMPORT` |
+| Environment           | Method                       | Storage Location     | Injection Method                                |
+|-----------------------|------------------------------|----------------------|-------------------------------------------------|
+| **Local Development** | Properties file + bind mount | `~/.yourname-conf/`  | Docker volume + `SPRING_CONFIG_IMPORT`          |
 | **AWS Production**    | Secrets Manager + ECS env    | AWS Cloud            | ECS Task Definition (`secrets` + `environment`) |
 
 ---
@@ -87,7 +87,7 @@ properties.override.result=OVERRIDDEN
 ```
 
 **Note on Secrets:** Only the following properties contain secrets and should be kept secure:
-- `grouperClient.webService.login` — Grouper service account username (secret)
+- `grouperClient.webService.password` — Grouper service account password (secret)
 - `jwt.secret.key` — JWT signing key (secret)
 
 All other properties are managed as non-secret settings (not stored in AWS Secrets Manager).
@@ -101,15 +101,15 @@ For reference, here are the primary properties in the overrides file:
 | `groupings.api.localhost.user`      | Setting     | Your UH username for local testing                |
 | `groupings.api.test.admin_user`     | Setting     | Admin username for test operations                |
 | `grouperClient.webService.url`      | Setting     | Grouper API endpoint URL                          |
-| `grouperClient.webService.login`    | Setting     | Grouper service account username (sensitive)      |
-| `grouperClient.webService.password` | **Secret**  | Grouper web service password setting              |
+| `grouperClient.webService.login`    | Setting     | Grouper service account username                  |
+| `grouperClient.webService.password` | **Secret**  | Grouper web service password setting (sensitive)  |
 | `email.is.enabled`                  | Setting     | Enable/disable email notifications                |
 | `email.send.recipient`              | Setting     | Default email recipient for notifications         |
 | `jwt.secret.key`                    | **Secret**  | JWT signing key for token generation (sensitive)  |
 | `properties.override.result`        | Setting     | Flag indicating successful override file loading  |
 
 **Secrets vs Settings:**
-- **Secrets** (marked with ⭐ above): `grouperClient.webService.login`, `jwt.secret.key`
+- **Secrets**: `grouperClient.webService.password`, `jwt.secret.key`
   - These contain sensitive credentials and should be treated as secrets
   - In AWS: stored in AWS Secrets Manager
   - In local dev: stored in your local properties file with restricted permissions
@@ -206,10 +206,10 @@ This split provides:
 
 Only **two properties** are managed as secrets in AWS Secrets Manager:
 
-| Secret Name                   | Spring Property                  | Description                          |
-|-------------------------------|----------------------------------|--------------------------------------|
-| `groupings/api/grouper-login` | `grouperClient.webService.login` | Grouper service account username     |
-| `groupings/api/jwt-secret`    | `jwt.secret.key`                 | JWT signing key for token generation |
+| Secret Name                      | Spring Property                      | Description                          |
+|----------------------------------|--------------------------------------|--------------------------------------|
+| `groupings/api/grouper-password` | `grouperClient.webService.password`  | Grouper service account username     |
+| `groupings/api/jwt-secret`       | `jwt.secret.key`                     | JWT signing key for token generation |
 
 All other configuration properties are passed directly as environment variables in the ECS task definition and do **not** use AWS Secrets Manager.
 
@@ -444,31 +444,6 @@ aws secretsmanager rotate-secret \
 - Coordination with the secret backend (e.g., database)
 - See [AWS documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html)
 
-### Security Best Practices
-
-#### ✅ DO
-
-- ✅ Use unique, strong passwords for each secret
-- ✅ Generate JWT secrets with: `openssl rand -base64 32`
-- ✅ Use different secrets for each environment (sandbox, test, production)
-- ✅ Rotate secrets regularly (at least annually)
-- ✅ Use least-privilege IAM policies
-- ✅ Enable CloudTrail logging for audit
-- ✅ Tag secrets with environment and application
-- ✅ Use secret versioning for safe rotation
-- ✅ Document secret rotation procedures
-
-#### ❌ DON'T
-
-- ❌ Never commit secrets to Git
-- ❌ Never log secret values
-- ❌ Never share secrets via email or Slack
-- ❌ Never use the same secrets across environments
-- ❌ Never use weak or default passwords
-- ❌ Never bypass IAM access controls
-- ❌ Never store secrets in EC2 user data or CloudFormation templates
-- ❌ Never use production secrets in development
-
 ### Monitoring and Auditing
 
 #### CloudWatch Logs
@@ -549,7 +524,7 @@ When you're ready to deploy to AWS:
    ```
 
 2. **Identify which properties are secrets:**
-   - Secrets: `grouperClient.webService.login`, `jwt.secret.key`
+   - Secrets: `grouperClient.webService.password`, `jwt.secret.key`
    - Settings: all others
 
 3. **Create AWS Secrets for sensitive properties:**
