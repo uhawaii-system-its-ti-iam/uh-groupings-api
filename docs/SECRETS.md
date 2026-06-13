@@ -4,12 +4,12 @@ This guide explains how to manage secrets and configuration for the UH Groupings
 
 ## Overview
 
-The application uses **two approaches** for secrets management:
+The application uses **two approaches** for configuration and secrets:
 
 | Environment           | Method                       | Storage Location     | Injection Method                       |
 |-----------------------|------------------------------|----------------------|----------------------------------------|
 | **Local Development** | Properties file + bind mount | `~/.yourname-conf/`  | Docker volume + `SPRING_CONFIG_IMPORT` |
-| **AWS Production**    | AWS Secrets Manager          | AWS Cloud            | ECS Task Definition                    |
+| **AWS Production**    | Secrets Manager + ECS env    | AWS Cloud            | ECS Task Definition (`secrets` + `environment`) |
 
 ---
 
@@ -25,10 +25,15 @@ The application uses **two approaches** for secrets management:
 
 2. **Add your configuration** (Spring Boot properties format):
    ```properties
-   grouper.api.url=https://grouper-dev.example.com/grouper-ws
-   grouper.username=your-dev-username
-   grouper.password=your-dev-password
-   jwt.secret.key=your-local-jwt-secret
+   groupings.api.localhost.user=your_username
+   groupings.api.test.admin_user=your_username
+   grouperClient.webService.url=https://grouper-test.its.hawaii.edu/grouper-ws/servicesRest/
+   grouperClient.webService.login=_groupings_api_2
+   grouperClient.webService.password=redacted
+   email.is.enabled=false
+   email.send.recipient=your_email@hawaii.edu
+   jwt.secret.key=your_local_jwt_secret_here
+   properties.override.result=OVERRIDDEN
    ```
 
 3. **Start the application:**
@@ -57,45 +62,63 @@ The application uses **two approaches** for secrets management:
 
 ### Required Properties for Local Development
 
-Create `~/.$(whoami)-conf/uh-groupings-api-overrides.properties` with properties:
+Create `~/.$(whoami)-conf/uh-groupings-api-overrides.properties` with the following configuration:
 
 ```properties
-# Provide your UH username for both of the following
+# UH Usernames for testing
 groupings.api.localhost.user=your_username
 groupings.api.test.admin_user=your_username
 
-# Grouper client settings
+# Grouper API client configuration
 grouperClient.webService.url=https://grouper-test.its.hawaii.edu/grouper-ws/servicesRest/
-grouperClient.webService.login = _groupings_api_2
-grouperClient.webService.password = redacted 
+grouperClient.webService.login=_groupings_api_2
+grouperClient.webService.password=redacted
 
+# Email configuration
 email.is.enabled=false
-email.send.recipient=mhodges@hawaii.edu
+email.send.recipient=your_email@hawaii.edu
 
+# Secret keys (generate fresh for local development)
 # Instructions: <https://uhawaii.atlassian.net/wiki/spaces/SITARd/pages/2040561680>
-jwt.secret.key=you_generiate_it
+jwt.secret.key=your_local_jwt_secret_here
 
-# Flag indicates a successful loading of the personal overrides file.
+# Flag indicates a successful loading of the personal overrides file
 properties.override.result=OVERRIDDEN
 ```
 
-### Optional Property Name Conversion
+**Note on Secrets:** Only the following properties contain secrets and should be kept secure:
+- `grouperClient.webService.login` — Grouper service account username (secret)
+- `jwt.secret.key` — JWT signing key (secret)
 
-If needed for other tooling, `dev-overrides-properties.sh` can convert Spring property names to environment variable names:
+All other properties are managed as non-secret settings (not stored in AWS Secrets Manager).
 
-| Spring Property              | Environment Variable         |
-|------------------------------|------------------------------|
-| `grouper.api.url`            | `GROUPER_API_URL`            |
-| `grouper.username`           | `GROUPER_USERNAME`           |
-| `grouper.password`           | `GROUPER_PASSWORD`           |
-| `spring.datasource.url`      | `SPRING_DATASOURCE_URL`      |
-| `spring.datasource.password` | `SPRING_DATASOURCE_PASSWORD` |
-| `jwt.secret.key`             | `JWT_SECRET_KEY`             |
+### Property Reference
 
-**Conversion Rules:**
-- Lowercase → UPPERCASE
-- Dots (`.`) → Underscores (`_`)
-- Hyphens (`-`) → Underscores (`_`)
+For reference, here are the primary properties in the overrides file:
+
+| Spring Property                     | Type        | Description                                       |
+|-------------------------------------|-------------|---------------------------------------------------|
+| `groupings.api.localhost.user`      | Setting     | Your UH username for local testing                |
+| `groupings.api.test.admin_user`     | Setting     | Admin username for test operations                |
+| `grouperClient.webService.url`      | Setting     | Grouper API endpoint URL                          |
+| `grouperClient.webService.login`    | Setting     | Grouper service account username (sensitive)      |
+| `grouperClient.webService.password` | **Secret**  | Grouper web service password setting              |
+| `email.is.enabled`                  | Setting     | Enable/disable email notifications                |
+| `email.send.recipient`              | Setting     | Default email recipient for notifications         |
+| `jwt.secret.key`                    | **Secret**  | JWT signing key for token generation (sensitive)  |
+| `properties.override.result`        | Setting     | Flag indicating successful override file loading  |
+
+**Secrets vs Settings:**
+- **Secrets** (marked with ⭐ above): `grouperClient.webService.login`, `jwt.secret.key`
+  - These contain sensitive credentials and should be treated as secrets
+  - In AWS: stored in AWS Secrets Manager
+  - In local dev: stored in your local properties file with restricted permissions
+  
+- **Settings**: All other properties
+  - These are configuration values that control application behavior
+  - Can be committed to repository (if not sensitive)
+  - In AWS: typically passed as environment variables or task definition overrides
+  - In local dev: stored in the properties file alongside secrets
 
 ### Security for Local Development
 
@@ -146,11 +169,13 @@ chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 
 ---
 
-## AWS Production (Secrets Manager)
+## AWS Production (ECS + Secrets Manager)
 
 ### Overview
 
-In AWS, secrets are stored in **AWS Secrets Manager** and automatically injected into ECS containers at runtime. This provides:
+In AWS container deployments, only sensitive values are stored in **AWS Secrets Manager**. Non-sensitive settings are configured in the ECS task definition `environment` array.
+
+This split provides:
 
 - ✅ Encryption at rest and in transit
 - ✅ Fine-grained access control (IAM)
@@ -161,40 +186,48 @@ In AWS, secrets are stored in **AWS Secrets Manager** and automatically injected
 ### Architecture
 
 ```
-┌────────────────────────────┐
-│  AWS Secrets Manager       │
-│  (Encrypted secrets)       │
-└──────────┬─────────────────┘
-           │
-           │ IAM Role grants access
-           │
-┌──────────▼─────────────────┐
-│  ECS Task Execution Role   │
-│  (Retrieves secrets)       │
-└──────────┬─────────────────┘
-           │
-           │ Injects as environment variables
-           │
-┌──────────▼─────────────────┐
-│  ECS Task (Container)      │
-│  (Secrets available as     │
-│   environment variables)   │
-└────────────────────────────┘
+┌────────────────────────────┐      ┌────────────────────────────┐
+│  AWS Secrets Manager       │      │ ECS Task Definition        │
+│  (2 sensitive properties)  │      │ environment[] settings     │
+└──────────┬─────────────────┘      └──────────┬─────────────────┘
+           │                                    │
+           │ IAM Role grants access             │ Task definition values
+           │                                    │
+           └──────────────┬─────────────────────┘
+                          ▼
+               ┌────────────────────────────┐
+               │  ECS Task (Container)      │
+               │  (all values available as  │
+               │   environment variables)   │
+               └────────────────────────────┘
 ```
 
 ### Required Secrets
 
-Create these secrets in AWS Secrets Manager:
+Only **two properties** are managed as secrets in AWS Secrets Manager:
 
-| Secret Name                      | Description             | Example Value                           |
-|----------------------------------|-------------------------|-----------------------------------------|
-| `groupings/api/grouper-url`      | Grouper API endpoint    | `https://grouper.hawaii.edu/grouper-ws` |
-| `groupings/api/grouper-username` | Grouper service account | `uh-groupings-service`                  |
-| `groupings/api/grouper-password` | Grouper password        | `<strong-password>`                     |
-| `groupings/api/jwt-secret`       | JWT signing key         | `<random-32-byte-base64>`               |
-| `groupings/api/db-password`      | Database password       | `<strong-password>`                     |
-| `groupings/api/db-url`           | Database connection URL | `jdbc:postgresql://...`                 |
-| `groupings/api/mail-password`    | SMTP password           | `<mail-password>`                       |
+| Secret Name                   | Spring Property                  | Description                          |
+|-------------------------------|----------------------------------|--------------------------------------|
+| `groupings/api/grouper-login` | `grouperClient.webService.login` | Grouper service account username     |
+| `groupings/api/jwt-secret`    | `jwt.secret.key`                 | JWT signing key for token generation |
+
+All other configuration properties are passed directly as environment variables in the ECS task definition and do **not** use AWS Secrets Manager.
+
+### Required Settings (ECS Task Definition)
+
+Configure these non-secret properties in the ECS task definition `environment` array:
+
+| Spring Property                  | ECS Environment Variable         | Example Value                                                  |
+|----------------------------------|----------------------------------|----------------------------------------------------------------|
+| `groupings.api.localhost.user`   | `GROUPINGS_API_LOCALHOST_USER`   | `your_username`                                                |
+| `groupings.api.test.admin_user`  | `GROUPINGS_API_TEST_ADMIN_USER`  | `your_username`                                                |
+| `grouperClient.webService.url`   | `GROUPERCLIENT_WEBSERVICE_URL`   | `https://grouper-prod.its.hawaii.edu/grouper-ws/servicesRest/` |
+| `grouperClient.webService.login` | `GROUPERCLIENT_WEBSERVICE_LOGIN` | `configured-value`                                             |
+| `email.is.enabled`               | `EMAIL_IS_ENABLED`               | `false`                                                        |
+| `email.send.recipient`           | `EMAIL_SEND_RECIPIENT`           | `groupings-alerts@hawaii.edu`                                  |
+| `properties.override.result`     | `PROPERTIES_OVERRIDE_RESULT`     | `OVERRIDDEN`                                                   |
+
+These settings are defined in your task definition JSON (for example, `aws/task-definition.json`) under `containerDefinitions[].environment` and then applied when you deploy/register the task definition in ECS.
 
 ### Creating Secrets in AWS
 
@@ -204,23 +237,11 @@ Create these secrets in AWS Secrets Manager:
 # Set your environment
 export AWS_REGION="us-west-2"
 
-# Create Grouper configuration secrets
+# Create Grouper login secret
 aws secretsmanager create-secret \
-  --name groupings/api/grouper-url \
-  --description "Grouper API endpoint URL" \
-  --secret-string "https://grouper.hawaii.edu/grouper-ws/servicesRest/json/v2_5_000" \
-  --region $AWS_REGION
-
-aws secretsmanager create-secret \
-  --name groupings/api/grouper-username \
+  --name groupings/api/grouper-login \
   --description "Grouper service account username" \
-  --secret-string "uh-groupings-production" \
-  --region $AWS_REGION
-
-aws secretsmanager create-secret \
-  --name groupings/api/grouper-password \
-  --description "Grouper service account password" \
-  --secret-string "YOUR_STRONG_PASSWORD_HERE" \
+  --secret-string "your-grouper-service-account" \
   --region $AWS_REGION
 
 # Generate and create JWT secret
@@ -230,27 +251,9 @@ aws secretsmanager create-secret \
   --description "JWT signing key for token generation" \
   --secret-string "$JWT_SECRET" \
   --region $AWS_REGION
-
-# Create database secrets
-aws secretsmanager create-secret \
-  --name groupings/api/db-url \
-  --description "Database connection URL" \
-  --secret-string "jdbc:postgresql://your-rds-endpoint:5432/groupings" \
-  --region $AWS_REGION
-
-aws secretsmanager create-secret \
-  --name groupings/api/db-password \
-  --description "Database password" \
-  --secret-string "YOUR_DB_PASSWORD_HERE" \
-  --region $AWS_REGION
-
-# Create email configuration secret
-aws secretsmanager create-secret \
-  --name groupings/api/mail-password \
-  --description "SMTP password for email notifications" \
-  --secret-string "YOUR_MAIL_PASSWORD_HERE" \
-  --region $AWS_REGION
 ```
+
+**Note:** All other configuration properties (URLs, email settings, etc.) are passed as environment variables directly in the ECS task definition, not as AWS Secrets Manager secrets.
 
 #### Method 2: Using AWS Console
 
@@ -260,7 +263,7 @@ aws secretsmanager create-secret \
 4. Choose **"Plaintext"** tab
 5. Enter your secret value
 6. Click **"Next"**
-7. Enter secret name (e.g., `groupings/api/grouper-password`)
+7. Enter secret name (e.g., `groupings/api/grouper-login`)
 8. Add description
 9. Click **"Next"** through remaining screens
 10. Click **"Store"**
@@ -268,19 +271,39 @@ aws secretsmanager create-secret \
 ### Updating Secrets
 
 ```bash
-# Update an existing secret
+# Update Grouper login secret
 aws secretsmanager update-secret \
-  --secret-id groupings/api/grouper-password \
-  --secret-string "NEW_PASSWORD_HERE" \
+  --secret-id groupings/api/grouper-login \
+  --secret-string "NEW_GROUPER_LOGIN" \
   --region $AWS_REGION
+
+# Update JWT secret
+aws secretsmanager update-secret \
+  --secret-id groupings/api/jwt-secret \
+  --secret-string "$(openssl rand -base64 32)" \
+  --region $AWS_REGION
+
+# After updating secrets, force ECS to restart tasks with new values
+aws ecs update-service \
+  --cluster uh-groupings-production \
+  --service uh-groupings-api-service \
+  --force-new-deployment
 ```
+
+To update non-secret configuration properties (URLs, email settings, etc.), update the ECS task definition's `environment` array and deploy the new task definition.
 
 ### Retrieving Secrets (for verification)
 
 ```bash
-# Get a secret value
+# Get a secret value (BE CAREFUL - displays secret!)
 aws secretsmanager get-secret-value \
-  --secret-id groupings/api/grouper-url \
+  --secret-id groupings/api/grouper-login \
+  --query SecretString \
+  --output text \
+  --region $AWS_REGION
+
+aws secretsmanager get-secret-value \
+  --secret-id groupings/api/jwt-secret \
   --query SecretString \
   --output text \
   --region $AWS_REGION
@@ -295,7 +318,7 @@ aws secretsmanager list-secrets \
 
 ### ECS Task Definition Integration
 
-The secrets are referenced in `aws/task-definition.json`:
+The task definition references secrets in AWS Secrets Manager and passes non-secret settings in `environment`. Example:
 
 ```json
 {
@@ -304,16 +327,42 @@ The secrets are referenced in `aws/task-definition.json`:
       "name": "uh-groupings-api",
       "secrets": [
         {
-          "name": "GROUPER_API_URL",
-          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-url"
+          "name": "GROUPERCLIENT_WEBSERVICE_LOGIN",
+          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-login"
         },
         {
-          "name": "GROUPER_USERNAME",
-          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-username"
+          "name": "JWT_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/jwt-secret"
+        }
+      ],
+      "environment": [
+        {
+          "name": "GROUPINGS_API_LOCALHOST_USER",
+          "value": "your_username"
         },
         {
-          "name": "GROUPER_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-password"
+          "name": "GROUPINGS_API_TEST_ADMIN_USER",
+          "value": "your_username"
+        },
+        {
+          "name": "GROUPERCLIENT_WEBSERVICE_URL",
+          "value": "https://grouper-prod.its.hawaii.edu/grouper-ws/servicesRest/"
+        },
+        {
+          "name": "GROUPERCLIENT_WEBSERVICE_PASSWORD",
+          "value": "configured-value"
+        },
+        {
+          "name": "EMAIL_IS_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "EMAIL_SEND_RECIPIENT",
+          "value": "groupings-alerts@hawaii.edu"
+        },
+        {
+          "name": "PROPERTIES_OVERRIDE_RESULT",
+          "value": "OVERRIDDEN"
         }
       ]
     }
@@ -321,10 +370,17 @@ The secrets are referenced in `aws/task-definition.json`:
 }
 ```
 
-**ECS automatically:**
-1. Retrieves secrets from Secrets Manager
-2. Injects them as environment variables
-3. Makes them available to your application
+**How it works:**
+
+- **`secrets` array:** References sensitive values from AWS Secrets Manager
+  - Injected as environment variables at container startup
+  - Automatically decrypted by ECS
+  - Not visible in task definition or logs
+  
+- **`environment` array:** Non-sensitive configuration properties
+  - Passed directly as environment variables
+  - Plain text (not encrypted)
+  - Visible in ECS console and task definition
 
 ### IAM Permissions
 
@@ -354,10 +410,15 @@ This is automatically configured by the CloudFormation template `aws/cloudformat
 #### Manual Rotation
 
 ```bash
-# Update the secret with a new value
+# Update the Grouper login secret
 aws secretsmanager update-secret \
-  --secret-id groupings/api/grouper-password \
-  --secret-string "NEW_PASSWORD_HERE"
+  --secret-id groupings/api/grouper-login \
+  --secret-string "NEW_GROUPER_LOGIN"
+
+# Update the JWT secret
+aws secretsmanager update-secret \
+  --secret-id groupings/api/jwt-secret \
+  --secret-string "$(openssl rand -base64 32)"
 
 # Force ECS to restart tasks with new secret
 aws ecs update-service \
@@ -373,7 +434,7 @@ AWS Secrets Manager supports automatic rotation with Lambda functions:
 ```bash
 # Enable automatic rotation (requires Lambda function)
 aws secretsmanager rotate-secret \
-  --secret-id groupings/api/db-password \
+  --secret-id groupings/api/jwt-secret \
   --rotation-lambda-arn arn:aws:lambda:us-west-2:123456789012:function:SecretsManagerRotation \
   --rotation-rules AutomaticallyAfterDays=30
 ```
@@ -438,7 +499,7 @@ aws cloudtrail lookup-events \
 # - $0.40 per secret per month
 # - $0.05 per 10,000 API calls
 
-# Example cost for 7 secrets: ~$2.80/month
+# Example cost for 2 secrets: ~$0.80/month
 
 # List all secrets (for cost tracking)
 aws secretsmanager list-secrets \
@@ -448,19 +509,31 @@ aws secretsmanager list-secrets \
 
 ---
 
+## Secrets vs. Configuration Settings
+
+This project distinguishes between **secrets** (sensitive credentials) and **settings** (configuration values):
+
+| Category     | Properties                                                                                                                                                                                                  | Local Storage                                 | AWS Storage                             | Visibility                                     |
+|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|-----------------------------------------|------------------------------------------------|
+| **Secrets**  | `grouperClient.webService.password`, `jwt.secret.key`                                                                                                                                                       | Encrypted properties file (~/.yourname-conf/) | AWS Secrets Manager                     | Not logged, not visible in console             |
+| **Settings** | `groupings.api.localhost.user`, `groupings.api.test.admin_user`, `grouperClient.webService.url`, `grouperClient.webService.login`, `email.is.enabled`, `email.send.recipient`, `properties.override.result` | Properties file                               | ECS task definition `environment` array | Visible in task definition, may appear in logs |
+
+**Key Principle:** Only truly sensitive credentials (passwords, tokens, keys) belong in Secrets Manager. Configuration values should be passed as environment variables.
+
+---
+
 ## Comparison: Local vs AWS
 
-| Aspect             | Local Development          | AWS Production                      |
-|--------------------|----------------------------|-------------------------------------|
-| **Storage**        | `~/.yourname-conf/` file   | AWS Secrets Manager                 |
-| **Format**         | Spring properties          | Key-value pairs                     |
-| **Encryption**     | None (local machine)       | AES-256 (at rest), TLS (in transit) |
-| **Access Control** | File permissions           | IAM policies                        |
-| **Rotation**       | Manual edit                | Manual or automated                 |
-| **Injection**      | Bind mount + Spring import | ECS task definition                 |
-| **Auditing**       | None                       | CloudTrail logs                     |
-| **Cost**           | Free                       | ~$0.40/secret/month                 |
-| **Use Case**       | Development/testing        | Staging/production                  |
+| Aspect               | Local Development            | AWS Production                          |
+|----------------------|------------------------------|-----------------------------------------|
+| **Secrets Storage**  | `~/.yourname-conf/` file     | AWS Secrets Manager                     |
+| **Settings Storage** | Properties file with secrets | ECS task definition `environment` array |
+| **Format**           | Spring properties            | Environment variables                   |
+| **Encryption**       | None (local machine)         | AES-256 (at rest), TLS (in transit)     |
+| **Access Control**   | File permissions             | IAM policies                            |
+| **Rotation**         | Manual edit                  | Manual or automated                     |
+| **Auditing**         | None                         | CloudTrail logs                         |
+| **Use Case**         | Development/testing          | Staging/production                      |
 
 ---
 
@@ -470,25 +543,42 @@ aws secretsmanager list-secrets \
 
 When you're ready to deploy to AWS:
 
-1. **Review your local properties:**
+1. **Review your local properties file:**
    ```bash
    cat ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
    ```
 
-2. **Create corresponding AWS secrets:**
+2. **Identify which properties are secrets:**
+   - Secrets: `grouperClient.webService.login`, `jwt.secret.key`
+   - Settings: all others
+
+3. **Create AWS Secrets for sensitive properties:**
    ```bash
-   # For each property, create a secret
-   # Example: grouper.api.url → groupings/api/grouper-url
+   # Only create secrets for sensitive credentials
+   aws secretsmanager create-secret \
+     --name groupings/api/grouper-login \
+     --secret-string "your-grouper-service-account"
+   
+   aws secretsmanager create-secret \
+     --name groupings/api/jwt-secret \
+     --secret-string "$(openssl rand -base64 32)"
    ```
 
-3. **Update task definition** (already configured in `aws/task-definition.json`)
+4. **Update ECS task definition** with configuration settings in the `environment` array:
+   - `grouperClient.webService.url`
+   - `grouperClient.webService.login`
+   - `groupings.api.localhost.user`
+   - `groupings.api.test.admin_user`
+   - `email.is.enabled`
+   - `email.send.recipient`
+   - `properties.override.result`
 
-4. **Deploy to ECS:**
+5. **Deploy to ECS:**
    ```bash
    aws ecs update-service --force-new-deployment ...
    ```
 
-5. **Verify secrets are loading:**
+6. **Verify secrets and settings are loading:**
    ```bash
    aws logs tail /ecs/uh-groupings-api --follow
    ```
@@ -497,23 +587,23 @@ When you're ready to deploy to AWS:
 
 Use different secret names for each environment:
 
-| Environment  | Secret Naming Pattern        |
-|--------------|------------------------------|
-| Sandbox      | `groupings/sandbox/api/*`    |
-| Test         | `groupings/test/api/*`       |
-| Production   | `groupings/production/api/*` |
+| Environment  | Secret Naming Pattern                    |
+|--------------|------------------------------------------|
+| Sandbox      | `groupings/sandbox/api/grouper-login`    |
+| Test         | `groupings/test/api/grouper-login`       |
+| Production   | `groupings/production/api/grouper-login` |
 
 **Example:**
 ```bash
 # Sandbox
 aws secretsmanager create-secret \
-  --name groupings/sandbox/api/grouper-password \
-  --secret-string "sandbox-password"
+  --name groupings/sandbox/api/grouper-login \
+  --secret-string "sandbox-grouper-account"
 
 # Production
 aws secretsmanager create-secret \
-  --name groupings/production/api/grouper-password \
-  --secret-string "strong-production-password"
+  --name groupings/production/api/grouper-login \
+  --secret-string "production-grouper-account"
 ```
 
 Update task definitions accordingly for each environment.
@@ -535,7 +625,7 @@ Error: Unable to fetch secret from AWS Secrets Manager
 ```bash
 # 1. Verify secret exists
 aws secretsmanager describe-secret \
-  --secret-id groupings/api/grouper-password
+  --secret-id groupings/api/grouper-login
 
 # 2. Verify task execution role has permission
 aws iam get-role-policy \
@@ -566,11 +656,12 @@ aws iam put-role-policy \
 
 #### Wrong Environment Variable Name
 
-**Problem:** Secret loads but application can't find it
+**Problem:** Secret or setting is present in ECS but Spring Boot cannot bind it
 
 **Solution:** Verify environment variable naming matches your Spring Boot configuration:
-- Task definition: `GROUPER_API_URL`
-- Spring Boot expects: `GROUPER_API_URL` or `grouper.api.url`
+- `grouperClient.webService.url` -> `GROUPERCLIENT_WEBSERVICE_URL`
+- `groupings.api.test.admin_user` -> `GROUPINGS_API_TEST_ADMIN_USER`
+- `jwt.secret.key` -> `JWT_SECRET_KEY`
 
 ### Verification Commands
 
@@ -580,13 +671,13 @@ aws secretsmanager list-secrets --region us-west-2
 
 # Get a secret value (BE CAREFUL - displays secret!)
 aws secretsmanager get-secret-value \
-  --secret-id groupings/api/grouper-url
+  --secret-id groupings/api/grouper-login
 
 # Check IAM permissions
 aws iam simulate-principal-policy \
   --policy-source-arn arn:aws:iam::123456789012:role/uh-groupings-ecs-execution \
   --action-names secretsmanager:GetSecretValue \
-  --resource-arns arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-password
+  --resource-arns arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-login
 
 # View CloudTrail logs for secret access
 aws cloudtrail lookup-events \
@@ -610,12 +701,16 @@ docker compose up
 ### AWS Production Workflow
 
 ```bash
-# 1. Create secrets
+# 1. Create only the two secrets
 aws secretsmanager create-secret \
-  --name groupings/api/grouper-password \
-  --secret-string "YOUR_PASSWORD"
+  --name groupings/api/grouper-login \
+  --secret-string "your-grouper-service-account"
 
-# 2. Update task definition (already configured)
+aws secretsmanager create-secret \
+  --name groupings/api/jwt-secret \
+  --secret-string "$(openssl rand -base64 32)"
+
+# 2. Put non-secret settings in task definition environment[]
 # 3. Deploy
 aws ecs update-service --force-new-deployment ...
 
