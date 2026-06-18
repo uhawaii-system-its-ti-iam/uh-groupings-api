@@ -1,11 +1,10 @@
 package edu.hawaii.its.api.service;
 
-import static edu.hawaii.its.api.service.PathFilter.disjoint;
+import static edu.hawaii.its.api.service.PathFilter.onlyGroupingPaths;
 import static edu.hawaii.its.api.service.PathFilter.nameGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import static edu.hawaii.its.api.service.PathFilter.parentGroupingPaths;
 import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
-import static edu.hawaii.its.api.service.PathFilter.pathHasExclude;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 import java.util.ArrayList;
@@ -57,26 +56,20 @@ public class MembershipService {
         logger.info(String.format("membershipResults; currentUser: %s;", currentUser));
 
         String uhUuid = subjectService.getValidUhUuid(currentUser, currentUser);
-        if (uhUuid.equals("")) {
+        if (uhUuid.isEmpty()) {
             throw new UhIdentifierNotFoundException(currentUser);
         }
-        // Get all basis, include and exclude paths from grouper.
-        List<String> basisIncludeExcludePaths =
-                groupingsService.groupPaths(currentUser, pathHasBasis().or(pathHasInclude().or(pathHasExclude())));
+        // Get all group paths the user is a member of from Grouper
+        List<String> allGroupPaths = groupingsService.allGroupPaths(currentUser);
+        // Filter to get only composite grouping paths
+        List<String> groupingMembershipPaths = groupingsService.filterGroupPaths(allGroupPaths, onlyGroupingPaths());
         // Get all basis and include paths to check the opt-out attribute.
         List<String> basisAndInclude =
-                groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasBasis().or(pathHasInclude()));
-        // Get all exclude paths for the disjoint.
-        List<String> excludePaths = groupingsService.filterGroupPaths(basisIncludeExcludePaths, pathHasExclude());
-        // The disjoint of basis plus include and exclude: (Basis + Include) - Exclude
-        List<String> groupingMembershipPaths = disjoint(parentGroupingPaths(basisIncludeExcludePaths),
-                parentGroupingPaths(excludePaths));
-        // A list of all group paths, in which the uhIdentifier is listed (including curated groupings), so we can find the intersection with curated groupings
-        List<String> trioAndCuratedGroupingsPaths = groupingsService.allGroupPaths(currentUser);
+                groupingsService.filterGroupPaths(allGroupPaths, pathHasBasis().or(pathHasInclude()));
         // The list of all curated groupings
         List<String> curatedGroupingsPaths = groupingsService.curatedGroupings();
-        // Intersect the two lists so groupAndCuratedGroupingsPaths is all curated paths the uhIdentifier is listed
-        curatedGroupingsPaths.retainAll(trioAndCuratedGroupingsPaths);
+        // Intersect the two lists so curatedGroupingsPaths is all curated paths the uhIdentifier is listed
+        curatedGroupingsPaths.retainAll(allGroupPaths);
         // Send all the grouping Membership paths to grouper to obtain grouping descriptions.
         List<Group> membershipGroupings = groupPathService.getValidGroupings(groupingMembershipPaths);
         // Get a list of groupings paths of all basis and include groups that have the opt-out attribute.
@@ -115,7 +108,7 @@ public class MembershipService {
         }
         ManageSubjectResults manageSubjectResults = new ManageSubjectResults();
         String uhUuid = subjectService.getValidUhUuid(currentUser, uid);
-        if (uhUuid.equals("")) {
+        if (uhUuid.isEmpty()) {
             return manageSubjectResults;
         }
         List<String> groupPaths;
