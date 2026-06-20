@@ -1,32 +1,29 @@
 package edu.hawaii.its.api.groupings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupingGroupMembersTest {
 
-    private PropertyLocator propertyLocator;
-
-    @BeforeEach
-    public void beforeEach() {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void testDefaultConstructor() {
@@ -40,9 +37,8 @@ public class GroupingGroupMembersTest {
 
     @Test
     public void testConstructorWithGetMembersResults() {
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessTestData();
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResults.getMembersResults()
                 .get(0));
         assertNotNull(groupingGroupMembers);
@@ -55,9 +51,8 @@ public class GroupingGroupMembersTest {
 
     @Test
     public void testConstructorWithSubjectsResults() {
-        String json = propertyLocator.find("ws.get.subjects.results.success");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
         assertNotNull(groupingGroupMembers);
         assertEquals("SUCCESS", groupingGroupMembers.getResultCode());
@@ -68,9 +63,8 @@ public class GroupingGroupMembersTest {
 
     @Test
     public void testSort() {
-        String json = propertyLocator.find("ws.get.members.results.success");
-        WsGetMembersResults wsGetMembersResults = JsonUtil.asObject(json, WsGetMembersResults.class);
-        GetMembersResults getMembersResults = new GetMembersResults(wsGetMembersResults);
+        GetMembersResults getMembersResults =
+                groupingsTestConfiguration.getMembersResultsSuccessTestData();
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResults.getMembersResults()
                 .get(0));
         assertNotNull(groupingGroupMembers);
@@ -93,9 +87,8 @@ public class GroupingGroupMembersTest {
 
     @Test
     public void testPaginate() {
-        String json = propertyLocator.find("ws.get.subjects.results.success");
-        WsGetSubjectsResults wsGetSubjectsResults = JsonUtil.asObject(json, WsGetSubjectsResults.class);
-        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
         assertNotNull(groupingGroupMembers);
         List<Subject> subjects = subjectsResults.getSubjects();

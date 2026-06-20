@@ -4,31 +4,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
-
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 
 @ActiveProfiles("localTest")
-@SpringBootTest(classes = { SpringBootWebApplication.class }) public class GroupTest {
-    private PropertyLocator propertyLocator;
+@SpringBootTest(classes = { SpringBootWebApplication.class })
+public class GroupTest {
 
-    @BeforeEach public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.group");
-        WsGroup wsGroup = JsonUtil.asObject(json, WsGroup.class);
-        assertNotNull(wsGroup);
-        Group group = new Group(wsGroup);
+        Group group = groupingsTestConfiguration.groupSuccessTestData();
         assertNotNull(group);
         assertEquals("SUCCESS", group.getResultCode());
         assertEquals("extension", group.getExtension());

@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.service;
 
+import java.time.Clock;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,16 +13,18 @@ import edu.hawaii.its.api.wrapper.FindAttributesResults;
 @Service
 public class AnnouncementsService {
 
-    @Value("${groupings.api.announcements}") 
+    @Value("${groupings.api.announcements}")
     private String ANNOUNCEMENTS_ATTR_NAME;
 
-    @Value("${groupings.api.propertystring}") 
+    @Value("${groupings.api.propertystring}")
     private String ANNOUNCEMENTS_ATTR_DEF;
 
     private final GrouperService grouperService;
+    private final Clock clock;
 
-    public AnnouncementsService(GrouperService grouperService) {
+    public AnnouncementsService(GrouperService grouperService, Clock clock) {
         this.grouperService = grouperService;
+        this.clock = clock;
     }
 
     public Announcements getAnnouncements() {
@@ -31,7 +34,7 @@ public class AnnouncementsService {
 
         // Filter to only return announcements with state 'Active'
         List<Announcement> activeAnnouncements = allAnnouncements.getAnnouncements().stream()
-                .filter(announcement -> announcement.getState() == Announcement.State.Active).toList();
+                .filter(announcement -> announcement.getState(clock) == Announcement.State.Active).toList();
 
         return new Announcements(activeAnnouncements);
     }

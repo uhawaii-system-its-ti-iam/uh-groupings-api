@@ -13,6 +13,7 @@ public class GroupingMember {
     private final String name;
     private final String firstName;
     private final String lastName;
+    private final boolean orphan;
     private String whereListed;
     private static final String MEMBER = "IS_MEMBER";
 
@@ -22,6 +23,7 @@ public class GroupingMember {
         this.lastName = groupingGroupMember.getLastName();
         this.uhUuid = groupingGroupMember.getUhUuid();
         this.uid = groupingGroupMember.getUid();
+        this.orphan = groupingGroupMember.isOrphan();
         this.whereListed = whereListed;
     }
 
@@ -31,6 +33,7 @@ public class GroupingMember {
         this.lastName = hasMemberResult.getLastName();
         this.uhUuid = hasMemberResult.getUhUuid();
         this.uid = hasMemberResult.getUid();
+        this.orphan = false;
         setWhereListed(hasMemberResult, groupingExtension);
     }
 
@@ -41,6 +44,7 @@ public class GroupingMember {
         this.lastName = hasMemberResult1.getLastName();
         this.uhUuid = hasMemberResult1.getUhUuid();
         this.uid = hasMemberResult1.getUid();
+        this.orphan = false;
         setWhereListed(hasMemberResult1, groupingExtension1, hasMemberResult2, groupingExtension2);
     }
 
@@ -50,6 +54,7 @@ public class GroupingMember {
         this.lastName = "";
         this.uhUuid = "";
         this.uid = "";
+        this.orphan = false;
         this.whereListed = "";
     }
     
@@ -59,6 +64,7 @@ public class GroupingMember {
         this.lastName = result.getLastName();
         this.uhUuid = result.getUhUuid();
         this.uid = result.getUid();
+        this.orphan = false;
         this.whereListed = "";
     }
     public String getName() {
@@ -83,6 +89,10 @@ public class GroupingMember {
 
     public String getWhereListed() {
         return whereListed;
+    }
+
+    public boolean isOrphan() {
+        return orphan;
     }
 
     private void setWhereListed(HasMemberResult hasMemberResult, String groupingExtension) {
