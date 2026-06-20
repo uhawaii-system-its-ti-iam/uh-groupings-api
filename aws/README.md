@@ -20,16 +20,58 @@ aws/
 
 ## Quick Start
 
-### Option 1: Automated Setup (Recommended)
+### Configure
+
+1. **Review and edit `aws/.env` with your configuration:**
+
+2. **Ensure AWS credentials are configured:**
+   ```bash
+   # If not already done
+   aws configure
+   ```
+
+### Option 1: Using Make (Recommended)
+
+From the repository root:
 
 ```bash
-# Run the automated setup script
-./aws/setup.sh
+# Interactive setup
+make aws-setup
+
+# Non-interactive (CI/CD)
+make aws-setup-ci
+
+# Setup via Docker AWS CLI container
+make aws-docker-setup
 ```
+
+### Option 2: Direct Execution
+
+```bash
+cd aws/
+./setup.sh
+
+# Override variables inline
+AWS_REGION=us-east-1 AWS_ENV=production ./setup.sh
+
+# Non-interactive mode (for CI/CD)
+NON_INTERACTIVE=true ./setup.sh
+```
+
+**Available Environment Variables:**
+- `AWS_REGION` - AWS region to deploy to (default: `us-west-2`)
+- `AWS_ENV` - Deployment environment (default: `sandbox`)
+  - Options: `sandbox`, `development`, `test`, `production`
+- `AWS_PROJECT_ID` - AWS project identifier (required)
+- `PROJECT_NAME` - Project display name used in script output (defaults to `AWS_PROJECT_ID`)
+- `NON_INTERACTIVE` - Skip confirmation prompts
+- `VPC_ID` - VPC ID to use (prompts if not set)
+- `SUBNET_IDS` - Comma-separated subnet IDs (prompts if not set)
+- `DESIRED_COUNT` - Number of ECS tasks (default: `2`)
 
 This will create all necessary AWS resources in about 30 minutes.
 
-### Option 2: Manual Setup
+### Manual Setup
 
 Follow the detailed guide in [docs/AWS_SETUP.md](../docs/AWS_SETUP.md)
 
@@ -148,13 +190,57 @@ Or in the AWS Console:
 
 ## Environment Variables
 
-Required environment variables for deployment:
+Configure deployment by setting variables in `aws/.env` or passing them inline:
 
+| Variable          | Description                | Default          | Example             |
+|-------------------|----------------------------|------------------|---------------------|
+| `AWS_REGION`      | AWS region                 | `us-west-2`      | `us-east-1`         |
+| `AWS_ENV`         | Environment name           | `sandbox`        | `production`        |
+| `AWS_PROJECT_ID`  | Project identifier         | (required)       | `uh-groupings-api`  |
+| `PROJECT_NAME`    | Display name               | `AWS_PROJECT_ID` | `UH Groupings API`  |
+| `NON_INTERACTIVE` | Skip prompts               | (unset)          | `true`              |
+| `VPC_ID`          | Existing VPC ID            | (prompted)       | `vpc-12345678`      |
+| `SUBNET_IDS`      | Comma-separated subnet IDs | (prompted)       | `subnet-a,subnet-b` |
+| `DESIRED_COUNT`   | ECS task count             | `2`              | `1`                 |
+
+**Usage (from repo root via Make):**
 ```bash
-export AWS_REGION="us-west-2"
-export AWS_ACCOUNT_ID="123456789012"
-export ENVIRONMENT="sandbox"  # or development, test, production
+# Interactive mode (loads aws/.env automatically)
+make aws-setup
+
+# Non-interactive mode (CI/CD)
+make aws-setup-ci
+
+# Override variables
+AWS_REGION=us-east-1 make aws-setup
+
+# Override multiple variables
+AWS_REGION=eu-west-1 AWS_ENV=production make aws-setup-ci
 ```
+
+**Usage (direct, from aws/ directory):**
+```bash
+cd aws/
+
+# Interactive mode
+./setup.sh
+
+# Override region
+AWS_REGION=us-east-1 ./setup.sh
+
+# Override environment
+AWS_ENV=production ./setup.sh
+
+# Non-interactive
+NON_INTERACTIVE=true ./setup.sh
+
+# Set for session (persists across commands)
+export AWS_REGION=us-east-1
+export AWS_ENV=production
+./setup.sh
+```
+
+**Note:** These are deployment script variables. AWS credentials should be configured via `aws configure` or AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
 
 ## Secrets Management
 
@@ -280,15 +366,15 @@ aws ecs describe-tasks \
 
 ## Security Best Practices
 
-1. ✅ Use IAM roles with least privilege
-2. ✅ Store all secrets in Secrets Manager
-3. ✅ Enable ECR image scanning
-4. ✅ Use VPC endpoints to avoid public internet
-5. ✅ Enable CloudTrail for audit logging
-6. ✅ Regularly update container images
-7. ✅ Review security group rules
-8. ✅ Enable Container Insights
-9. ✅ Use encryption at rest and in transit
+1. Use IAM roles with least privilege
+2. Store all secrets in Secrets Manager
+3. Enable ECR image scanning
+4. Use VPC endpoints to avoid public internet
+5. Enable CloudTrail for audit logging
+6. Regularly update container images
+7. Review security group rules
+8. Enable Container Insights
+9. Use encryption at rest and in transit
 
 ## Additional Resources
 

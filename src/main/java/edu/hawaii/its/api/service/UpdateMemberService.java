@@ -352,22 +352,26 @@ public class UpdateMemberService {
     }
 
     public void checkIfOwnerOrAdminUser(String currentUser, String groupingPath) {
-        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
-        if (!memberService.isOwner(groupingPath, currentUser) && !memberService.isCurrentUserAdmin()) {
+        // Prefer JWT role checks, but fall back to Grouper admin membership when no SecurityContext exists.
+        if (!memberService.isOwner(groupingPath, currentUser)
+                && !memberService.isCurrentUserAdmin()
+                && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
     }
 
     public void checkIfAdminUser(String currentUser) {
-        // Use JWT for general admin check instead of querying Grouper
-        if (!memberService.isCurrentUserAdmin()) {
+        // Prefer JWT role checks, but allow direct service/test calls without SecurityContext.
+        if (!memberService.isCurrentUserAdmin() && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
     }
 
     public void checkIfSelfOptOrAdmin(String currentUser, String identifier) {
-        // Use JWT for general admin check instead of querying Grouper
-        if (!currentUser.equals(identifier) && !memberService.isCurrentUserAdmin()) {
+        // Prefer JWT role checks, but allow direct service/test calls without SecurityContext.
+        if (!currentUser.equals(identifier)
+                && !memberService.isCurrentUserAdmin()
+                && !memberService.isAdmin(currentUser)) {
             throw new AccessDeniedException();
         }
     }

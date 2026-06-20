@@ -1,212 +1,326 @@
-#!/bin/bash
-# AWS Setup Script for UH Groupings API
-# This script automates the AWS infrastructure setup
+#!/usr/bin/env bash
+# aws/setup.sh - AWS setup script for UH Groupings API.
 
-set -e
+set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+readonly REPO_ROOT
+readonly ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
+readonly ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-cluster.yml"
 
-# Configuration
-AWS_REGION="${AWS_REGION:-us-west-2}"
-ENVIRONMENT="${ENVIRONMENT:-sandbox}"
-PROJECT_NAME="uh-groupings-api"
+AWS_ACCOUNT_ID=""
+ECR_REPOSITORY_URI=""
+ALB_URL=""
 
-echo -e "${GREEN}=== UH Groupings API - AWS Setup ===${NC}"
-echo ""
+usage() {
+    cat <<EOF
+Usage: ./setup.sh  (run from the aws/ directory, or use 'make aws-setup' from repo root)
 
-# Check prerequisites
-echo "Checking prerequisites..."
+Environment Variables:
+  AWS_REGION      AWS region to deploy to (default: us-west-2)
+  AWS_ENV         Deployment environment (default: sandbox)
+                   Options: sandbox, development, test, production
+  AWS_PROJECT_ID  AWS project identifier (required)
+  PROJECT_NAME    Project display name (defaults to AWS_PROJECT_ID)
+  NON_INTERACTIVE Set to any value to skip confirmation prompts
+  VPC_ID          Existing VPC ID to use for ECS deployment
+  SUBNET_IDS      Comma-separated subnet IDs to use for ECS deployment
+  DESIRED_COUNT   Desired ECS task count (default: 2)
+EOF
+}
 
-if ! command -v aws &> /dev/null; then
-    echo -e "${RED}Error: AWS CLI not installed${NC}"
-    exit 1
-fi
+log() {
+    printf '%s\n' "$1"
+}
 
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}Error: Docker not installed${NC}"
-    exit 1
-fi
+error() {
+    printf 'Error: %s\n' "$1" >&2
+}
 
-echo -e "${GREEN}✓ Prerequisites met${NC}"
-echo ""
+parse_args() {
+    if [[ $# -gt 0 ]]; then
+        error "Unknown option: $1"
+        usage
+        exit 1
+    fi
+}
 
-# Get AWS Account ID
-AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-echo "AWS Account ID: $AWS_ACCOUNT_ID"
-echo "AWS Region: $AWS_REGION"
-echo "Environment: $ENVIRONMENT"
-echo ""
+load_env_file() {
+    local env_file="${SCRIPT_DIR}/.env"
 
-# Prompt for confirmation
-read -p "Continue with setup? (y/n) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    exit 1
-fi
+    if [[ ! -f "${env_file}" ]]; then
+        return
+    fi
 
-# Step 1: Create ECR Repository
-echo -e "${YELLOW}Step 1: Creating ECR Repository...${NC}"
-aws cloudformation create-stack \
-  --stack-name uh-groupings-ecr-${ENVIRONMENT} \
-  --template-body file://aws/cloudformation/ecr-repository.yml \
-  --parameters \
-    ParameterKey=RepositoryName,ParameterValue=${PROJECT_NAME} \
-    ParameterKey=Environment,ParameterValue=${ENVIRONMENT} \
-  --region ${AWS_REGION}
+    # Capture any variables already set by the caller so they take precedence.
+    local -A caller_overrides=()
+    local var
+    for var in NON_INTERACTIVE AWS_REGION AWS_ENV AWS_PROJECT_ID PROJECT_NAME \
+               DESIRED_COUNT VPC_ID SUBNET_IDS; do
+        if [[ "${!var+x}" == x ]]; then
+            caller_overrides["${var}"]="${!var}"
+        fi
+    done
 
-echo "Waiting for ECR stack creation..."
-aws cloudformation wait stack-create-complete \
-  --stack-name uh-groupings-ecr-${ENVIRONMENT} \
-  --region ${AWS_REGION}
+    set -a
+    # shellcheck disable=SC1090
+    source "${env_file}"
+    set +a
 
-ECR_REPOSITORY_URI=$(aws cloudformation describe-stacks \
-  --stack-name uh-groupings-ecr-${ENVIRONMENT} \
-  --query 'Stacks[0].Outputs[?OutputKey==`RepositoryUri`].OutputValue' \
-  --output text \
-  --region ${AWS_REGION})
+    # Restore caller overrides.
+    for var in "${!caller_overrides[@]}"; do
+        printf -v "${var}" '%s' "${caller_overrides[${var}]}"
+    done
+}
 
-echo -e "${GREEN}✓ ECR Repository created: ${ECR_REPOSITORY_URI}${NC}"
-echo ""
+initialize_config() {
+    NON_INTERACTIVE="${NON_INTERACTIVE:-}"
+    AWS_REGION="${AWS_REGION:-us-west-2}"
+    AWS_ENV="${AWS_ENV:-sandbox}"
+    AWS_PROJECT_ID="${AWS_PROJECT_ID:-}"
+    PROJECT_NAME="${PROJECT_NAME:-${AWS_PROJECT_ID}}"
+    DESIRED_COUNT="${DESIRED_COUNT:-2}"
+    VPC_ID="${VPC_ID:-}"
+    SUBNET_IDS="${SUBNET_IDS:-}"
+}
 
-# Step 2: Build and push initial image
-echo -e "${YELLOW}Step 2: Building and pushing initial Docker image...${NC}"
+validate_config() {
+    if [[ -z "${AWS_PROJECT_ID}" ]]; then
+        error "AWS_PROJECT_ID must be set."
+        exit 1
+    fi
+}
 
-# Login to ECR
-aws ecr get-login-password --region ${AWS_REGION} | \
-  docker login --username AWS --password-stdin ${ECR_REPOSITORY_URI}
+check_prerequisites() {
+    log "Checking prerequisites..."
 
-# Build image
-docker build -t ${PROJECT_NAME}:latest .
+    if ! command -v aws >/dev/null 2>&1; then
+        error "AWS CLI not installed"
+        exit 1
+    fi
 
-# Tag and push
-docker tag ${PROJECT_NAME}:latest ${ECR_REPOSITORY_URI}:latest
-docker push ${ECR_REPOSITORY_URI}:latest
+    if ! command -v docker >/dev/null 2>&1; then
+        error "Docker not installed"
+        exit 1
+    fi
 
-echo -e "${GREEN}✓ Image pushed to ECR${NC}"
-echo ""
+    if ! command -v openssl >/dev/null 2>&1; then
+        error "OpenSSL not installed"
+        exit 1
+    fi
 
-# Step 3: Create secrets
-echo -e "${YELLOW}Step 3: Setting up AWS Secrets Manager...${NC}"
-echo "Please enter your configuration values:"
+    log "✓ Prerequisites met"
+    log ""
+}
 
-read -p "Grouper API URL: " GROUPER_URL
-read -p "Grouper Username: " GROUPER_USERNAME
-read -s -p "Grouper Password: " GROUPER_PASSWORD
-echo ""
-read -s -p "Database Password: " DB_PASSWORD
-echo ""
+print_configuration() {
+    log "=== ${PROJECT_NAME} - AWS Setup ==="
+    log ""
+    log "Configuration:"
+    log "  AWS Region:    ${AWS_REGION}"
+    log "  Environment:   ${AWS_ENV}"
+    log "  Project:       ${AWS_PROJECT_ID}"
+    log ""
+}
 
-# Generate JWT secret
-JWT_SECRET=$(openssl rand -base64 32)
+fetch_aws_account_id() {
+    AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+    log "AWS Account ID: ${AWS_ACCOUNT_ID}"
+    log ""
+}
 
-# Create secrets
-aws secretsmanager create-secret \
-  --name groupings/api/grouper-url \
-  --secret-string "${GROUPER_URL}" \
-  --region ${AWS_REGION} 2>/dev/null || \
-  aws secretsmanager update-secret \
-  --secret-id groupings/api/grouper-url \
-  --secret-string "${GROUPER_URL}" \
-  --region ${AWS_REGION}
+confirm_setup() {
+    if [[ -n "${NON_INTERACTIVE}" ]]; then
+        return
+    fi
 
-aws secretsmanager create-secret \
-  --name groupings/api/grouper-username \
-  --secret-string "${GROUPER_USERNAME}" \
-  --region ${AWS_REGION} 2>/dev/null || \
-  aws secretsmanager update-secret \
-  --secret-id groupings/api/grouper-username \
-  --secret-string "${GROUPER_USERNAME}" \
-  --region ${AWS_REGION}
+    local reply
+    read -r -p "Continue with setup? (y/n) " -n 1 reply
+    echo
 
-aws secretsmanager create-secret \
-  --name groupings/api/grouper-password \
-  --secret-string "${GROUPER_PASSWORD}" \
-  --region ${AWS_REGION} 2>/dev/null || \
-  aws secretsmanager update-secret \
-  --secret-id groupings/api/grouper-password \
-  --secret-string "${GROUPER_PASSWORD}" \
-  --region ${AWS_REGION}
+    if [[ ! "${reply}" =~ ^[Yy]$ ]]; then
+        log "Setup cancelled."
+        exit 1
+    fi
 
-aws secretsmanager create-secret \
-  --name groupings/api/jwt-secret \
-  --secret-string "${JWT_SECRET}" \
-  --region ${AWS_REGION} 2>/dev/null || \
-  aws secretsmanager update-secret \
-  --secret-id groupings/api/jwt-secret \
-  --secret-string "${JWT_SECRET}" \
-  --region ${AWS_REGION}
+    log ""
+}
 
-aws secretsmanager create-secret \
-  --name groupings/api/db-password \
-  --secret-string "${DB_PASSWORD}" \
-  --region ${AWS_REGION} 2>/dev/null || \
-  aws secretsmanager update-secret \
-  --secret-id groupings/api/db-password \
-  --secret-string "${DB_PASSWORD}" \
-  --region ${AWS_REGION}
+create_ecr_repository() {
+    log "Step 1: Creating ECR Repository..."
+    aws cloudformation create-stack \
+      --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
+      --template-body "file://${ECR_TEMPLATE_PATH}" \
+      --parameters \
+        "ParameterKey=RepositoryName,ParameterValue=${AWS_PROJECT_ID}" \
+        "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
+      --region "${AWS_REGION}"
 
-echo -e "${GREEN}✓ Secrets configured${NC}"
-echo ""
+    log "Waiting for ECR stack creation..."
+    aws cloudformation wait stack-create-complete \
+      --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
+      --region "${AWS_REGION}"
 
-# Step 4: Get VPC information
-echo -e "${YELLOW}Step 4: Checking VPC configuration...${NC}"
-echo "Available VPCs:"
-aws ec2 describe-vpcs --query "Vpcs[*].[VpcId,Tags[?Key=='Name'].Value|[0],CidrBlock]" --output table --region ${AWS_REGION}
+    ECR_REPOSITORY_URI="$(aws cloudformation describe-stacks \
+      --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
+      --query 'Stacks[0].Outputs[?OutputKey==`RepositoryUri`].OutputValue' \
+      --output text \
+      --region "${AWS_REGION}")"
 
-read -p "Enter VPC ID to use: " VPC_ID
+    log "✓ ECR Repository created: ${ECR_REPOSITORY_URI}"
+    log ""
+}
 
-echo "Available subnets in VPC ${VPC_ID}:"
-aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" \
-  --query "Subnets[*].[SubnetId,AvailabilityZone,CidrBlock]" --output table --region ${AWS_REGION}
+build_and_push_image() {
+    log "Step 2: Building and pushing initial Docker image..."
 
-read -p "Enter Subnet IDs (comma-separated, at least 2): " SUBNET_IDS
+    aws ecr get-login-password --region "${AWS_REGION}" | \
+      docker login --username AWS --password-stdin "${ECR_REPOSITORY_URI}"
 
-echo ""
+    docker build -t "${AWS_PROJECT_ID}:latest" "${REPO_ROOT}"
+    docker tag "${AWS_PROJECT_ID}:latest" "${ECR_REPOSITORY_URI}:latest"
+    docker push "${ECR_REPOSITORY_URI}:latest"
 
-# Step 5: Deploy ECS infrastructure
-echo -e "${YELLOW}Step 5: Creating ECS cluster and service...${NC}"
-aws cloudformation create-stack \
-  --stack-name uh-groupings-ecs-${ENVIRONMENT} \
-  --template-body file://aws/cloudformation/ecs-cluster.yml \
-  --parameters \
-    ParameterKey=Environment,ParameterValue=${ENVIRONMENT} \
-    ParameterKey=VpcId,ParameterValue=${VPC_ID} \
-    ParameterKey=SubnetIds,ParameterValue=\"${SUBNET_IDS}\" \
-    ParameterKey=ContainerImage,ParameterValue=${ECR_REPOSITORY_URI}:latest \
-    ParameterKey=DesiredCount,ParameterValue=2 \
-  --capabilities CAPABILITY_NAMED_IAM \
-  --region ${AWS_REGION}
+    log "✓ Image pushed to ECR"
+    log ""
+}
 
-echo "Waiting for ECS stack creation (this may take 10 minutes)..."
-aws cloudformation wait stack-create-complete \
-  --stack-name uh-groupings-ecs-${ENVIRONMENT} \
-  --region ${AWS_REGION}
+create_or_update_secret() {
+    local secret_name="$1"
+    local secret_value="$2"
 
-ALB_URL=$(aws cloudformation describe-stacks \
-  --stack-name uh-groupings-ecs-${ENVIRONMENT} \
-  --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
-  --output text \
-  --region ${AWS_REGION})
+    aws secretsmanager create-secret \
+      --name "${secret_name}" \
+      --secret-string "${secret_value}" \
+      --region "${AWS_REGION}" 2>/dev/null || \
+      aws secretsmanager update-secret \
+        --secret-id "${secret_name}" \
+        --secret-string "${secret_value}" \
+        --region "${AWS_REGION}"
+}
 
-echo -e "${GREEN}✓ ECS cluster created${NC}"
-echo -e "${GREEN}Application URL: ${ALB_URL}${NC}"
-echo ""
+configure_secrets() {
+    local grouper_url
+    local grouper_username
+    local grouper_password
+    local db_password
+    local jwt_secret
 
-# Summary
-echo -e "${GREEN}=== Setup Complete ===${NC}"
-echo ""
-echo "Resources created:"
-echo "  - ECR Repository: ${ECR_REPOSITORY_URI}"
-echo "  - ECS Cluster: uh-groupings-${ENVIRONMENT}"
-echo "  - Application URL: ${ALB_URL}"
-echo ""
-echo "Next steps:"
-echo "  1. Configure GitHub Enterprise connection in AWS Console"
-echo "  2. Deploy CodePipeline stack"
-echo "  3. Test the application: curl ${ALB_URL}/actuator/health"
-echo ""
-echo "For detailed instructions, see docs/AWS_SETUP.md"
+    log "Step 3: Setting up AWS Secrets Manager..."
+    log "Please enter your configuration values:"
+
+    read -r -p "Grouper API URL: " grouper_url
+    read -r -p "Grouper Username: " grouper_username
+    read -r -s -p "Grouper Password: " grouper_password
+    echo
+    read -r -s -p "Database Password: " db_password
+    echo
+
+    jwt_secret="$(openssl rand -base64 32)"
+
+    create_or_update_secret "groupings/api/grouper-url" "${grouper_url}"
+    create_or_update_secret "groupings/api/grouper-username" "${grouper_username}"
+    create_or_update_secret "groupings/api/grouper-password" "${grouper_password}"
+    create_or_update_secret "groupings/api/jwt-secret" "${jwt_secret}"
+    create_or_update_secret "groupings/api/db-password" "${db_password}"
+
+    log "✓ Secrets configured"
+    log ""
+}
+
+collect_network_configuration() {
+    log "Step 4: Checking VPC configuration..."
+
+    if [[ -z "${VPC_ID}" ]]; then
+        log "Available VPCs:"
+        aws ec2 describe-vpcs \
+          --query "Vpcs[*].[VpcId,Tags[?Key=='Name'].Value|[0],CidrBlock]" \
+          --output table \
+          --region "${AWS_REGION}"
+        read -r -p "Enter VPC ID to use: " VPC_ID
+    else
+        log "Using VPC ID from environment: ${VPC_ID}"
+    fi
+
+    if [[ -z "${SUBNET_IDS}" ]]; then
+        log "Available subnets in VPC ${VPC_ID}:"
+        aws ec2 describe-subnets \
+          --filters "Name=vpc-id,Values=${VPC_ID}" \
+          --query "Subnets[*].[SubnetId,AvailabilityZone,CidrBlock]" \
+          --output table \
+          --region "${AWS_REGION}"
+        read -r -p "Enter Subnet IDs (comma-separated, at least 2): " SUBNET_IDS
+    else
+        log "Using Subnet IDs from environment: ${SUBNET_IDS}"
+    fi
+
+    log ""
+}
+
+deploy_ecs_infrastructure() {
+    log "Step 5: Creating ECS cluster and service..."
+
+    aws cloudformation create-stack \
+      --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+      --template-body "file://${ECS_TEMPLATE_PATH}" \
+      --parameters \
+        "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
+        "ParameterKey=VpcId,ParameterValue=${VPC_ID}" \
+        "ParameterKey=SubnetIds,ParameterValue=${SUBNET_IDS}" \
+        "ParameterKey=ContainerImage,ParameterValue=${ECR_REPOSITORY_URI}:latest" \
+        "ParameterKey=DesiredCount,ParameterValue=${DESIRED_COUNT}" \
+      --capabilities CAPABILITY_NAMED_IAM \
+      --region "${AWS_REGION}"
+
+    log "Waiting for ECS stack creation (this may take 10 minutes)..."
+    aws cloudformation wait stack-create-complete \
+      --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+      --region "${AWS_REGION}"
+
+    ALB_URL="$(aws cloudformation describe-stacks \
+      --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+      --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
+      --output text \
+      --region "${AWS_REGION}")"
+
+    log "✓ ECS cluster created"
+    log "Application URL: ${ALB_URL}"
+    log ""
+}
+
+print_summary() {
+    log "=== Setup Complete ==="
+    log ""
+    log "Resources created:"
+    log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
+    log "  - ECS Cluster: ${AWS_PROJECT_ID}-${AWS_ENV}"
+    log "  - Application URL: ${ALB_URL}"
+    log ""
+    log "Next steps:"
+    log "  1. Configure GitHub Enterprise connection in AWS Console"
+    log "  2. Deploy CodePipeline stack"
+    log "  3. Test the application: curl ${ALB_URL}/actuator/health"
+    log ""
+    log "For detailed instructions, see docs/AWS_SETUP.md"
+}
+
+main() {
+    parse_args "$@"
+    load_env_file
+    initialize_config
+    validate_config
+    print_configuration
+    check_prerequisites
+    fetch_aws_account_id
+    confirm_setup
+    create_ecr_repository
+    build_and_push_image
+    configure_secrets
+    collect_network_configuration
+    deploy_ecs_infrastructure
+    print_summary
+}
+
+main "$@"

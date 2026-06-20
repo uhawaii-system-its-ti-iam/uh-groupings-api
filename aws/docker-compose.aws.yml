@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  # AWS CLI for infrastructure operations
+  aws-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.aws-cli
+    container_name: uh-groupings-aws-cli
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount AWS credentials (read-only for security)
+      - ${HOME}/.aws:/root/.aws:ro
+      # Mount aws directory for scripts and templates
+      - .:/aws
+    env_file:
+      - .env
+    environment:
+      # Allow override from command line
+      - AWS_REGION=${AWS_REGION}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - NON_INTERACTIVE=${NON_INTERACTIVE}
+      - PROJECT_NAME=${PROJECT_NAME:-uh-groupings-api}
+      - VPC_ID=${VPC_ID}
+      - SUBNET_IDS=${SUBNET_IDS}
+      - DESIRED_COUNT=${DESIRED_COUNT:-2}
+    working_dir: /aws
+    entrypoint: /bin/bash
+    profiles:
+      - tools
+
+networks:
+  default:
+    name: uh-groupings-aws-tools

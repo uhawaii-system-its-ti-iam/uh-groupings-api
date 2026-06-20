@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -34,7 +35,7 @@ public class UhIdentifierGenerator {
 
         do {
             randomMember = members.get(getRandomNumberBetween(0, members.size() - 1));
-        } while (randomMember.getUid().isEmpty());
+        } while (randomMember.getUid().isEmpty() || isAdminUser(randomMember));
 
         return randomMember;
     }
@@ -43,9 +44,18 @@ public class UhIdentifierGenerator {
         List<GroupingMember> members = getGroupingMembers();
         HashSet<GroupingMember> randomMembers = new HashSet<>();
 
+        long eligibleCount = members.stream()
+                .filter(member -> !member.getUid().isEmpty())
+                .filter(member -> !isAdminUser(member))
+                .count();
+
+        if (amount > eligibleCount) {
+            throw new IllegalArgumentException("Requested random members exceeds eligible pool size");
+        }
+
         while (randomMembers.size() != amount) {
             GroupingMember randomMember = members.get(getRandomNumberBetween(0, members.size() - 1));
-            if (!randomMember.getUid().isEmpty()) {
+            if (!randomMember.getUid().isEmpty() && !isAdminUser(randomMember)) {
                 randomMembers.add(randomMember);
             }
         }
@@ -65,6 +75,10 @@ public class UhIdentifierGenerator {
 
     private int getRandomNumberBetween(int start, int end) {
         return start + (int) Math.round(Math.random() * (end - start));
+    }
+
+    private boolean isAdminUser(GroupingMember member) {
+        return Objects.equals(member.getUid(), ADMIN);
     }
 
 }

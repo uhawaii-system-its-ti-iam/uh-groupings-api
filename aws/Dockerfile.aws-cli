@@ -1,0 +1,22 @@
+# aws/Dockerfle.aws-cli
+
+FROM amazon/aws-cli:latest
+
+# Install additional tools needed for the setup script
+RUN yum install -y \
+    bash \
+    jq \
+    && yum clean all
+
+# Copy the setup script
+COPY setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
+
+# Set working directory
+WORKDIR /aws
+
+# Copy CloudFormation templates
+COPY cloudformation /aws/cloudformation
+
+# Default entrypoint is bash for interactive use
+ENTRYPOINT ["/bin/bash"]
