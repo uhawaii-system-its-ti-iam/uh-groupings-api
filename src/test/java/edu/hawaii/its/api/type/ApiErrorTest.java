@@ -1,10 +1,13 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -79,6 +82,20 @@ public class ApiErrorTest {
     }
 
     @Test
+    public void testStackTraceIsNotSerialized() throws Exception {
+        ApiError apiError = new ApiError.Builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .message("Test error message")
+                .stackTrace("Test stack trace error message")
+                .resultCode("BACKEND_UNAVAILABLE")
+                .path("Test path error message")
+                .build();
+
+        String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(apiError);
+        assertFalse(json.contains("stackTrace"));
+    }
+
+    @Test
     public void testApiErrorBuilderRequiredFields() {
         // Attempting to build without required fields should throw NullPointerException
         assertThrows(NullPointerException.class, () -> errorBuilder.build());
@@ -103,17 +120,6 @@ public class ApiErrorTest {
             errorBuilder
                     .status(HttpStatus.BAD_REQUEST)
                     .stackTrace("Test stack trace error message")
-                    .resultCode("Test result code error message")
-                    .path("Test path error message")
-                    .build();
-        });
-
-        // Try building ApiError without stack trace
-        assertThrows(NullPointerException.class, () -> {
-            errorBuilder = new ApiError.Builder();
-            errorBuilder
-                    .status(HttpStatus.BAD_REQUEST)
-                    .message("Test error message")
                     .resultCode("Test result code error message")
                     .path("Test path error message")
                     .build();
