@@ -7,9 +7,6 @@ SHELL := /bin/bash
 AWS_DIR := aws
 
 # Docker Desktop check — verifies the Docker daemon is reachable.
-
-.PHONY: check_docker
-
 define check_docker
 	@if ! docker info >/dev/null 2>&1; then \
 		echo "Error: Docker Desktop is not running. Please start Docker Desktop and try again."; \
@@ -39,7 +36,11 @@ aws-teardown:
 
 # --- Application ---
 
-.PHONY: run test test-unit test-integration test-single build build-run
+.PHONY: run test test-unit test-integration test-single build build-run clean
+
+## Remove build artifacts
+clean:
+	./mvnw clean
 
 ## Build WAR artifact
 build:
@@ -51,6 +52,11 @@ run:
 	$(check_docker)
 	./mvnw clean spring-boot:run
 
+## Build then run (reuses the artifact from build, no second clean)
+build-run: build
+	$(check_docker)
+	./mvnw spring-boot:run
+
 ## Run all tests (unit + integration)
 test:
 	$(check_docker)
@@ -58,7 +64,6 @@ test:
 
 ## Run unit tests only (classes ending with Test)
 test-unit:
-	$(check_docker)
 	./mvnw clean test -Dtest='*Test'
 
 ## Run integration tests only (Test* classes, requires live Grouper API credentials)
@@ -68,13 +73,13 @@ test-integration:
 
 ## Run a single test class: make test-single CLASS=GroupPathServiceTest
 test-single:
+	@[ -n "$(CLASS)" ] || { echo "Usage: make test-single CLASS=ClassName"; exit 1; }
 	$(check_docker)
 	./mvnw clean test -Dtest=$(CLASS)
 
 # --- Docker desktop ---
 
 .PHONY: docker-up
-
 
 ## Start the full Docker stack (app + dependencies)
 docker-up:
@@ -95,6 +100,7 @@ help:
 	@echo "    build              Build WAR artifact"
 	@echo "    run                Run Spring Boot application"
 	@echo "    build-run          Build then run"
+	@echo "    clean              Remove build artifacts"
 	@echo "    docker-up          Start full Docker stack"
 	@echo ""
 	@echo "  Testing:"
