@@ -1,35 +1,26 @@
 #!/usr/bin/env bash
 # aws/setup.sh - AWS setup script for UH Groupings API.
+# All configuration settings are read from aws/.env.
 
 set -euo pipefail
 
+#
+# Variables
+#
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_DIR
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-readonly REPO_ROOT
-readonly ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
-readonly ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-cluster.yml"
+ENV_FILE="${SCRIPT_DIR}/.env"
+ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
+ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-cluster.yml"
 
 AWS_ACCOUNT_ID=""
 ECR_REPOSITORY_URI=""
 ALB_URL=""
 
-usage() {
-    cat <<EOF
-Usage: ./setup.sh  (run from the aws/ directory, or use 'make aws-setup' from repo root)
-
-Environment Variables:
-  AWS_REGION      AWS region to deploy to (default: us-west-2)
-  AWS_ENV         Deployment environment (default: sandbox)
-                   Options: sandbox, development, test, production
-  AWS_PROJECT_ID  AWS project identifier (required)
-  PROJECT_NAME    Project display name (defaults to AWS_PROJECT_ID)
-  NON_INTERACTIVE Set to any value to skip confirmation prompts
-  VPC_ID          Existing VPC ID to use for ECS deployment
-  SUBNET_IDS      Comma-separated subnet IDs to use for ECS deployment
-  DESIRED_COUNT   Desired ECS task count (default: 2)
-EOF
-}
+#
+# Functions
+#
 
 log() {
     printf '%s\n' "$1"
@@ -39,56 +30,33 @@ error() {
     printf 'Error: %s\n' "$1" >&2
 }
 
-parse_args() {
-    if [[ $# -gt 0 ]]; then
-        error "Unknown option: $1"
-        usage
+load_env_file() {
+    if [[ ! -f "${ENV_FILE}" ]]; then
+        error "Configuration file not found: ${ENV_FILE}"
         exit 1
     fi
-}
-
-load_env_file() {
-    local env_file="${SCRIPT_DIR}/.env"
-
-    if [[ ! -f "${env_file}" ]]; then
-        return
-    fi
-
-    # Capture any variables already set by the caller so they take precedence.
-    local -A caller_overrides=()
-    local var
-    for var in NON_INTERACTIVE AWS_REGION AWS_ENV AWS_PROJECT_ID PROJECT_NAME \
-               DESIRED_COUNT VPC_ID SUBNET_IDS; do
-        if [[ "${!var+x}" == x ]]; then
-            caller_overrides["${var}"]="${!var}"
-        fi
-    done
 
     set -a
     # shellcheck disable=SC1090
-    source "${env_file}"
+    source "${ENV_FILE}"
     set +a
-
-    # Restore caller overrides.
-    for var in "${!caller_overrides[@]}"; do
-        printf -v "${var}" '%s' "${caller_overrides[${var}]}"
-    done
 }
 
-initialize_config() {
+apply_defaults() {
     NON_INTERACTIVE="${NON_INTERACTIVE:-}"
     AWS_REGION="${AWS_REGION:-us-west-2}"
     AWS_ENV="${AWS_ENV:-sandbox}"
     AWS_PROJECT_ID="${AWS_PROJECT_ID:-}"
     PROJECT_NAME="${PROJECT_NAME:-${AWS_PROJECT_ID}}"
-    DESIRED_COUNT="${DESIRED_COUNT:-2}"
+    AWS_OWNER="${AWS_OWNER:-mhodges}"
+    ECS_TASK_COUNT="${ECS_TASK_COUNT:-2}"
     VPC_ID="${VPC_ID:-}"
     SUBNET_IDS="${SUBNET_IDS:-}"
 }
 
 validate_config() {
     if [[ -z "${AWS_PROJECT_ID}" ]]; then
-        error "AWS_PROJECT_ID must be set."
+        error "AWS_PROJECT_ID must be set in aws/.env."
         exit 1
     fi
 }
@@ -121,7 +89,8 @@ print_configuration() {
     log "Configuration:"
     log "  AWS Region:    ${AWS_REGION}"
     log "  Environment:   ${AWS_ENV}"
-    log "  Project:       ${AWS_PROJECT_ID}"
+    log "  Project ID:    ${AWS_PROJECT_ID}    (used in stack and resource names)"
+    log "  CFN Owner:     ${AWS_OWNER}"
     log ""
 }
 
@@ -149,12 +118,13 @@ confirm_setup() {
 }
 
 create_ecr_repository() {
-    log "Step 1: Creating ECR Repository..."
+    log "Step 3: Creating ECR Repository..."
     aws cloudformation create-stack \
       --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
       --template-body "file://${ECR_TEMPLATE_PATH}" \
       --parameters \
-        "ParameterKey=RepositoryName,ParameterValue=${AWS_PROJECT_ID}" \
+        "ParameterKey=Owner,ParameterValue=${AWS_OWNER}" \
+        "ParameterKey=Project,ParameterValue=${AWS_PROJECT_ID}" \
         "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
       --region "${AWS_REGION}"
 
@@ -174,7 +144,7 @@ create_ecr_repository() {
 }
 
 build_and_push_image() {
-    log "Step 2: Building and pushing initial Docker image..."
+    log "Step 4: Building and pushing initial Docker image..."
 
     aws ecr get-login-password --region "${AWS_REGION}" | \
       docker login --username AWS --password-stdin "${ECR_REPOSITORY_URI}"
@@ -202,36 +172,29 @@ create_or_update_secret() {
 }
 
 configure_secrets() {
-    local grouper_url
-    local grouper_username
     local grouper_password
-    local db_password
     local jwt_secret
 
-    log "Step 3: Setting up AWS Secrets Manager..."
-    log "Please enter your configuration values:"
+    log "Step 2: Setting up AWS Secrets Manager..."
+    log "Storing only the two truly sensitive runtime values."
+    log "Non-secret values (Grouper URL, username, etc.) are configured in the"
+    log "ECS task definition environment[] array, not here."
+    log ""
 
-    read -r -p "Grouper API URL: " grouper_url
-    read -r -p "Grouper Username: " grouper_username
     read -r -s -p "Grouper Password: " grouper_password
-    echo
-    read -r -s -p "Database Password: " db_password
     echo
 
     jwt_secret="$(openssl rand -base64 32)"
 
-    create_or_update_secret "groupings/api/grouper-url" "${grouper_url}"
-    create_or_update_secret "groupings/api/grouper-username" "${grouper_username}"
     create_or_update_secret "groupings/api/grouper-password" "${grouper_password}"
     create_or_update_secret "groupings/api/jwt-secret" "${jwt_secret}"
-    create_or_update_secret "groupings/api/db-password" "${db_password}"
 
-    log "✓ Secrets configured"
+    log "✓ Secrets configured: grouper-password, jwt-secret"
     log ""
 }
 
 collect_network_configuration() {
-    log "Step 4: Checking VPC configuration..."
+    log "Step 1: Checking VPC configuration..."
 
     if [[ -z "${VPC_ID}" ]]; then
         log "Available VPCs:"
@@ -241,7 +204,7 @@ collect_network_configuration() {
           --region "${AWS_REGION}"
         read -r -p "Enter VPC ID to use: " VPC_ID
     else
-        log "Using VPC ID from environment: ${VPC_ID}"
+        log "Using VPC ID from aws/.env: ${VPC_ID}"
     fi
 
     if [[ -z "${SUBNET_IDS}" ]]; then
@@ -253,7 +216,7 @@ collect_network_configuration() {
           --region "${AWS_REGION}"
         read -r -p "Enter Subnet IDs (comma-separated, at least 2): " SUBNET_IDS
     else
-        log "Using Subnet IDs from environment: ${SUBNET_IDS}"
+        log "Using Subnet IDs from aws/.env: ${SUBNET_IDS}"
     fi
 
     log ""
@@ -266,11 +229,13 @@ deploy_ecs_infrastructure() {
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
       --template-body "file://${ECS_TEMPLATE_PATH}" \
       --parameters \
+        "ParameterKey=Owner,ParameterValue=${AWS_OWNER}" \
+        "ParameterKey=Project,ParameterValue=${AWS_PROJECT_ID}" \
         "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
         "ParameterKey=VpcId,ParameterValue=${VPC_ID}" \
         "ParameterKey=SubnetIds,ParameterValue=${SUBNET_IDS}" \
         "ParameterKey=ContainerImage,ParameterValue=${ECR_REPOSITORY_URI}:latest" \
-        "ParameterKey=DesiredCount,ParameterValue=${DESIRED_COUNT}" \
+        "ParameterKey=DesiredCount,ParameterValue=${ECS_TASK_COUNT}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --region "${AWS_REGION}"
 
@@ -295,7 +260,8 @@ print_summary() {
     log ""
     log "Resources created:"
     log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
-    log "  - ECS Cluster: ${AWS_PROJECT_ID}-${AWS_ENV}"
+    log "  - ECS Cluster:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+    log "  - ECS Service:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
     log "  - Application URL: ${ALB_URL}"
     log ""
     log "Next steps:"
@@ -306,21 +272,25 @@ print_summary() {
     log "For detailed instructions, see docs/AWS_SETUP.md"
 }
 
-main() {
-    parse_args "$@"
-    load_env_file
-    initialize_config
-    validate_config
-    print_configuration
-    check_prerequisites
-    fetch_aws_account_id
-    confirm_setup
-    create_ecr_repository
-    build_and_push_image
-    configure_secrets
-    collect_network_configuration
-    deploy_ecs_infrastructure
-    print_summary
-}
+#
+# Main
+#
 
-main "$@"
+# Phase 1 - load and verify configuration
+load_env_file
+apply_defaults
+validate_config
+print_configuration
+check_prerequisites
+fetch_aws_account_id
+confirm_setup
+
+# Phase 2 - collect all interactive input up front (network, secrets)
+collect_network_configuration
+configure_secrets
+
+# Phase 3 - provision AWS resources
+create_ecr_repository
+build_and_push_image
+deploy_ecs_infrastructure
+print_summary

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # AWS CLI for infrastructure operations
   aws-cli:
@@ -10,22 +8,23 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      # Mount AWS credentials (read-only for security)
-      - ${HOME}/.aws:/root/.aws:ro
-      # Mount aws directory for scripts and templates
-      - .:/aws
+      # Mount the host repo so the docker CLI inside this container can read
+      # the build context. The CLI tars the context up and ships it to the
+      # host daemon over the socket, so the path only needs to make sense
+      # inside the container.
+      - ../:/workspace
+      # Bind-mount the host docker socket so the docker CLI inside the
+      # container sends commands to the host daemon (no docker-in-docker).
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     environment:
-      # Allow override from command line
-      - AWS_REGION=${AWS_REGION}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - NON_INTERACTIVE=${NON_INTERACTIVE}
-      - PROJECT_NAME=${PROJECT_NAME:-uh-groupings-api}
-      - VPC_ID=${VPC_ID}
-      - SUBNET_IDS=${SUBNET_IDS}
-      - DESIRED_COUNT=${DESIRED_COUNT:-2}
-    working_dir: /aws
+      # AWS credentials are injected by aws-vault — see aws/README.md.
+      # Listing the names without values means "pass through from the calling shell".
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+    working_dir: /workspace/aws
     entrypoint: /bin/bash
     profiles:
       - tools

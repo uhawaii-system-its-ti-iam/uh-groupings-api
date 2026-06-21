@@ -14,9 +14,9 @@ Parameters:
   
   Environment:
     Type: String
-    Default: sandbox
+    Default: sandbx
     AllowedValues:
-      - sandbox
+      - sandbx
       - dev
       - test
       - prod
@@ -110,7 +110,7 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
           - Name: IMAGE_REPO_NAME
-            Value: uh-groupings-api
+            Value: !Sub '${Owner}-${Project}-${Environment}'
           - Name: IMAGE_TAG
             Value: latest
       Source:

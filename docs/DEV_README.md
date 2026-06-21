@@ -131,7 +131,7 @@ kill -9 <PID>
 
 **Error:**
 ```
-ERROR: source properties file not found: ~/.yourname-conf/uh-groupings-api-overrides.properties
+ERROR: source properties file not found: ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
 
 **Solution:**

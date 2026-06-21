@@ -14,9 +14,9 @@ Parameters:
   
   Environment:
     Type: String
-    Default: sandbox
+    Default: sandbx
     AllowedValues:
-      - sandbox
+      - sandbx
       - dev
       - test
       - prod
@@ -24,12 +24,7 @@ Parameters:
       - future-test
       - future-prod
     Description: Environment name
-  
-  Component:
-    Type: String
-    Description: Component identifier
-    Default: api
-  
+
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID where the ECS cluster will be deployed
@@ -72,8 +67,6 @@ Resources:
           Value: !Ref Project
         - Key: Environment
           Value: !Ref Environment
-        - Key: Component
-          Value: cluster
         - Key: ManagedBy
           Value: CloudFormation
 
@@ -81,7 +74,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/ecs/${Owner}-${Project}-${Environment}-${Component}'
+      LogGroupName: !Sub '/ecs/${Owner}-${Project}-${Environment}'
       RetentionInDays: 30
 
   # Security Group for ECS Tasks
@@ -128,7 +121,7 @@ Resources:
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub 'uh-groupings-alb-${Environment}'
+      Name: !Sub '${Owner}-${Project}-${Environment}-alb'
       Scheme: internet-facing
       Type: application
       Subnets: !Ref SubnetIds
@@ -242,7 +235,7 @@ Resources:
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub '${Owner}-${Project}-${Environment}-${Component}'
+      Family: !Sub '${Owner}-${Project}-${Environment}'
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -251,7 +244,7 @@ Resources:
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       ContainerDefinitions:
-        - Name: !Sub '${Owner}-${Project}-${Environment}-${Component}'
+        - Name: !Sub '${Owner}-${Project}-${Environment}'
           Image: !Ref ContainerImage
           Essential: true
           PortMappings:
@@ -294,7 +287,7 @@ Resources:
           SecurityGroups:
             - !Ref ECSSecurityGroup
       LoadBalancers:
-        - ContainerName: !Sub '${Owner}-${Project}-${Environment}-${Component}'
+        - ContainerName: !Sub '${Owner}-${Project}-${Environment}'
           ContainerPort: 8080
           TargetGroupArn: !Ref TargetGroup
       HealthCheckGracePeriodSeconds: 60
@@ -310,8 +303,6 @@ Resources:
           Value: !Ref Project
         - Key: Environment
           Value: !Ref Environment
-        - Key: Component
-          Value: !Ref Component
 
 Outputs:
   ClusterName:

@@ -14,9 +14,9 @@ Parameters:
   
   Environment:
     Type: String
-    Default: sandbox
+    Default: sandbx
     AllowedValues:
-      - sandbox
+      - sandbx
       - dev
       - test
       - prod
@@ -24,17 +24,12 @@ Parameters:
       - future-test
       - future-prod
     Description: Environment name (follows organizational standards)
-  
-  Component:
-    Type: String
-    Description: Component identifier
-    Default: api
 
 Resources:
   ECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub '${Owner}-${Project}-${Environment}-${Component}'
+      RepositoryName: !Sub '${Owner}-${Project}-${Environment}'
       ImageScanningConfiguration:
         ScanOnPush: true
       EncryptionConfiguration:
@@ -86,15 +81,13 @@ Resources:
           }
       Tags:
         - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-${Component}'
+          Value: !Sub '${Owner}-${Project}-${Environment}'
         - Key: Owner
           Value: !Ref Owner
         - Key: Project
           Value: !Ref Project
         - Key: Environment
           Value: !Ref Environment
-        - Key: Component
-          Value: !Ref Component
         - Key: ManagedBy
           Value: CloudFormation
 

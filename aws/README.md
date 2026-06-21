@@ -7,9 +7,9 @@ This directory contains all AWS-related configuration and infrastructure-as-code
 ```
 aws/
 ├── README.md                          # This file
-├── setup.sh                           # Automated setup script
+├── setup.sh                           # Automated infrastructure setup script
+├── setup-vault.sh                     # Idempotent aws-vault installer/profile setup
 ├── buildspec.yml                      # CodeBuild specification
-├── deployment.json                    # Deployment configuration
 ├── task-definition.json               # ECS task definition template
 ├── appspec.yml                        # CodeDeploy specification
 └── cloudformation/                    # CloudFormation templates
@@ -20,60 +20,107 @@ aws/
 
 ## Quick Start
 
-### Configure
+All AWS commands run inside a Docker container that has the AWS CLI installed, so you do **not** need the AWS CLI on your host. You only need Docker Desktop, GNU Make, and `aws-vault` for credential management.
 
-1. **Review and edit `aws/.env` with your configuration:**
+### Step 1: Edit `aws/.env`
 
-2. **Ensure AWS credentials are configured:**
-   ```bash
-   # If not already done
-   aws configure
-   ```
-
-### Option 1: Using Make (Recommended)
-
-From the repository root:
+Set deployment parameters (region, environment name, project ID, VPC, subnets):
 
 ```bash
-# Interactive setup
-make aws-setup
-
-# Non-interactive (CI/CD)
-make aws-setup-ci
-
-# Setup via Docker AWS CLI container
-make aws-docker-setup
+AWS_REGION=us-west-2
+AWS_ENV=sandbox
+AWS_PROJECT_ID=uh-groupings-api
+VPC_ID=vpc-xxxxx
+SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
+ECS_TASK_COUNT=1
 ```
 
-### Option 2: Direct Execution
+This file holds **non-secret** deployment configuration only. Secrets are prompted at runtime by `setup.sh` and written to AWS Secrets Manager.
+
+### Step 2: Provision AWS credentials with `aws-vault`
+
+[`aws-vault`](https://github.com/99designs/aws-vault) stores your AWS access keys in your operating system's keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service) instead of leaving them in plaintext on disk. It releases credentials only for the duration of a single command, as ephemeral environment variables.
+
+Run the one-time setup target:
 
 ```bash
-cd aws/
-./setup.sh
-
-# Override variables inline
-AWS_REGION=us-east-1 AWS_ENV=production ./setup.sh
-
-# Non-interactive mode (for CI/CD)
-NON_INTERACTIVE=true ./setup.sh
+make aws-vault-setup
 ```
 
-**Available Environment Variables:**
-- `AWS_REGION` - AWS region to deploy to (default: `us-west-2`)
-- `AWS_ENV` - Deployment environment (default: `sandbox`)
-  - Options: `sandbox`, `development`, `test`, `production`
-- `AWS_PROJECT_ID` - AWS project identifier (required)
-- `PROJECT_NAME` - Project display name used in script output (defaults to `AWS_PROJECT_ID`)
-- `NON_INTERACTIVE` - Skip confirmation prompts
-- `VPC_ID` - VPC ID to use (prompts if not set)
-- `SUBNET_IDS` - Comma-separated subnet IDs (prompts if not set)
-- `DESIRED_COUNT` - Number of ECS tasks (default: `2`)
+This invokes `aws/setup-vault.sh`, which is idempotent:
 
-This will create all necessary AWS resources in about 30 minutes.
+1. Verifies `aws-vault` is installed; on macOS it offers to install it via Homebrew if missing.
+2. Checks whether a profile named `uh-groupings` already has credentials in your keychain. If yes, it prints a confirmation and exits. If not, it runs `aws-vault add uh-groupings` and prompts you for the **Access Key ID** and **Secret Access Key**.
+
+You can re-run `make aws-vault-setup` any time; it will not overwrite existing credentials. To use a different profile name, set `AWS_VAULT_PROFILE`:
+
+```bash
+AWS_VAULT_PROFILE=uh-groupings-prod make aws-vault-setup
+```
+
+The Docker container in this project reads `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` from environment variables, which `aws-vault` injects automatically.
+
+If you cannot install `aws-vault`, see [Credential alternatives](#credential-alternatives) below.
+
+
+### Step 3: Run setup
+
+Wrap any `make aws-*` command with `aws-vault exec`:
+
+```bash
+aws-vault exec uh-groupings -- make aws-setup
+```
+
+This launches `setup.sh` inside the AWS CLI container with credentials supplied as session-scoped environment variables. The credentials live only inside that one container invocation; they are not written to disk and disappear when the command finishes.
+
+You will be prompted for the Grouper URL, Grouper service account credentials, and the database password. The script generates a JWT signing key and stores all secrets in AWS Secrets Manager.
+
+### Make Targets
+
+| Target | Description |
+|--------|-------------|
+| `make aws-setup` | Run interactive infrastructure setup (creates ECR, ECS, ALB, secrets) |
+| `make aws-teardown` | Delete all CloudFormation stacks (prompts for confirmation) |
+| `make aws-stack-events` | Show CloudFormation `CREATE_FAILED` events |
+| `make aws-service-events` | Show recent ECS service events |
+| `make aws-task-status` | Show why the most recent ECS task stopped |
+| `make aws-logs` | Tail CloudWatch logs for the API |
+
+Every target above must be wrapped with `aws-vault exec uh-groupings --` to receive credentials.
+
+**Tip:** Create a shell alias to avoid retyping the wrapper:
+
+```bash
+alias avx='aws-vault exec uh-groupings --'
+# Then:
+avx make aws-setup
+avx make aws-logs
+```
+
+### Available `aws/.env` Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AWS_REGION` | Target AWS region | `us-west-2` |
+| `AWS_ENV` | Deployment environment (`sandbox`, `development`, `test`, `production`) | `sandbox` |
+| `AWS_PROJECT_ID` | Project identifier (required) | _none_ |
+| `PROJECT_NAME` | Display name used in setup-script output | `AWS_PROJECT_ID` |
+| `NON_INTERACTIVE` | Skip confirmation prompts | unset |
+| `VPC_ID` | Existing VPC ID (prompts if blank) | _prompted_ |
+| `SUBNET_IDS` | Comma-separated subnet IDs (prompts if blank) | _prompted_ |
+| `ECS_TASK_COUNT` | Number of ECS tasks to run | `2` |
+
+### Credential Alternatives
+
+`aws-vault` is recommended, but the docker-compose passes through any `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` already present in the shell environment, so the following also work:
+
+- **AWS IAM Identity Center (SSO):** `aws sso login --profile <profile>` followed by `aws-vault exec` or by exporting credentials yourself.
+- **Direct environment variables:** `export AWS_ACCESS_KEY_ID=...` etc. before running `make`. Useful in CI/CD where the runner already provides credentials.
+- **Static `~/.aws/credentials`:** Re-add `${HOME}/.aws:/root/.aws:ro` to `docker-compose.aws.yml` and run `aws configure` on the host. This is the least secure option and is **not recommended**.
 
 ### Manual Setup
 
-Follow the detailed guide in [docs/AWS_SETUP.md](../docs/AWS_SETUP.md)
+If you prefer not to use the script, follow the step-by-step guide in [../docs/AWS_SETUP.md](../docs/AWS_SETUP.md). The same `aws-vault exec` wrapper applies to any `aws` CLI commands you issue manually.
 
 ## CloudFormation Templates
 
@@ -145,10 +192,6 @@ aws cloudformation create-stack \
 
 ## Configuration Files
 
-### deployment.json
-
-Project metadata and deployment configuration. Used for documentation and tooling.
-
 ### task-definition.json
 
 ECS task definition template with:
@@ -190,61 +233,23 @@ Or in the AWS Console:
 
 ## Environment Variables
 
-Configure deployment by setting variables in `aws/.env` or passing them inline:
+Configure deployment by setting variables in `aws/.env`. The script reads only from this file — environment-variable overrides and command-line arguments are not supported. To change region, environment, or any other parameter, edit `aws/.env`.
 
-| Variable          | Description                | Default          | Example             |
-|-------------------|----------------------------|------------------|---------------------|
-| `AWS_REGION`      | AWS region                 | `us-west-2`      | `us-east-1`         |
-| `AWS_ENV`         | Environment name           | `sandbox`        | `production`        |
-| `AWS_PROJECT_ID`  | Project identifier         | (required)       | `uh-groupings-api`  |
-| `PROJECT_NAME`    | Display name               | `AWS_PROJECT_ID` | `UH Groupings API`  |
-| `NON_INTERACTIVE` | Skip prompts               | (unset)          | `true`              |
-| `VPC_ID`          | Existing VPC ID            | (prompted)       | `vpc-12345678`      |
-| `SUBNET_IDS`      | Comma-separated subnet IDs | (prompted)       | `subnet-a,subnet-b` |
-| `DESIRED_COUNT`   | ECS task count             | `2`              | `1`                 |
+**Usage:**
 
-**Usage (from repo root via Make):**
+From the repository root, with credentials supplied via `aws-vault`:
+
 ```bash
-# Interactive mode (loads aws/.env automatically)
-make aws-setup
-
-# Non-interactive mode (CI/CD)
-make aws-setup-ci
-
-# Override variables
-AWS_REGION=us-east-1 make aws-setup
-
-# Override multiple variables
-AWS_REGION=eu-west-1 AWS_ENV=production make aws-setup-ci
+aws-vault exec uh-groupings -- make aws-setup
 ```
 
-**Usage (direct, from aws/ directory):**
-```bash
-cd aws/
+To run non-interactively (skips confirmation prompts), set `NON_INTERACTIVE=true` in `aws/.env` before running.
 
-# Interactive mode
-./setup.sh
-
-# Override region
-AWS_REGION=us-east-1 ./setup.sh
-
-# Override environment
-AWS_ENV=production ./setup.sh
-
-# Non-interactive
-NON_INTERACTIVE=true ./setup.sh
-
-# Set for session (persists across commands)
-export AWS_REGION=us-east-1
-export AWS_ENV=production
-./setup.sh
-```
-
-**Note:** These are deployment script variables. AWS credentials should be configured via `aws configure` or AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
+**Note:** AWS credentials are managed by `aws-vault` (see Step 2 above). Do not commit credentials to `aws/.env` — only deployment parameters belong there.
 
 ## Secrets Management
 
-Store secrets in AWS Secrets Manager (never in Git):
+Store secrets in AWS Secrets Manager:
 
 ```bash
 # Grouper configuration
@@ -339,30 +344,39 @@ aws secretsmanager delete-secret --secret-id groupings/api/db-password --force-d
 
 ## Troubleshooting
 
+All troubleshooting commands run via the project's `Makefile`, which executes the AWS CLI inside the Docker container so you don't need it installed locally.
+
 ### Stack Creation Failed
 
+Show the CloudFormation events that failed during ECS stack creation:
+
 ```bash
-# View stack events to identify the issue
-aws cloudformation describe-stack-events \
-  --stack-name uh-groupings-ecs-sandbox \
-  --query 'StackEvents[?ResourceStatus==`CREATE_FAILED`]'
+make aws-stack-events
 ```
 
 ### Service Won't Start
 
-```bash
-# Check service events
-aws ecs describe-services \
-  --cluster uh-groupings-sandbox \
-  --services uh-groupings-api-service \
-  --query 'services[0].events[0:10]'
+Show recent ECS service events:
 
-# Check task stopped reason
-aws ecs describe-tasks \
-  --cluster uh-groupings-sandbox \
-  --tasks $(aws ecs list-tasks --cluster uh-groupings-sandbox --query 'taskArns[0]' --output text) \
-  --query 'tasks[0].{StoppedReason:stoppedReason,Containers:containers[*].{Name:name,Reason:reason}}'
+```bash
+make aws-service-events
 ```
+
+Show the stopped reason for the most recent task:
+
+```bash
+make aws-task-status
+```
+
+### View Application Logs
+
+Tail the API's CloudWatch logs:
+
+```bash
+make aws-logs
+```
+
+Each target sources `aws/.env` for region and project naming, then queries the relevant CloudFormation stack outputs to discover the cluster and service names automatically.
 
 ## Security Best Practices
 
@@ -378,17 +392,8 @@ aws ecs describe-tasks \
 
 ## Additional Resources
 
-- [AWS Quick Start Guide](../docs/AWS_QUICKSTART.md)
-- [AWS Detailed Setup Guide](../docs/AWS_SETUP.md)
-- [AWS Deployment Guide](../docs/AWS_DEPLOYMENT.md)
-- [Architecture Documentation](../docs/ARCHITECTURE.md)
+- [Project docs directory
 - [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
 - [AWS CodePipeline Documentation](https://docs.aws.amazon.com/codepipeline/)
-
-## Support
-
-For issues or questions:
-- Internal: #groupings-dev Slack channel
-- AWS Support: Through AWS Console
 
 ---

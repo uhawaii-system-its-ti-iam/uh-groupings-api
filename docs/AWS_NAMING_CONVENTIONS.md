@@ -2,146 +2,152 @@
 
 ## Overview
 
-All AWS resources for the UH Groupings API follow standardized naming and tagging conventions to ensure consistency, searchability, and proper cost allocation.
+All AWS resources for the UH Groupings family of projects (Spring API, Angular UI, React UI) follow a single, length-aware naming convention so they can coexist in the same AWS account without collision and remain easy to attribute by owner, project, and environment.
+
+<!-- TOC -->
+* [AWS Naming Conventions and Tagging Standards](#aws-naming-conventions-and-tagging-standards)
+  * [Overview](#overview)
+  * [Naming Convention](#naming-convention)
+    * [Standard format](#standard-format)
+    * [Why `AWS_PROJECT_ID` is short](#why-aws_project_id-is-short)
+    * [Examples](#examples)
+      * [Sandbox (PoC development)](#sandbox-poc-development)
+      * [Test (team)](#test-team)
+      * [Production (team)](#production-team)
+  * [CloudFormation Stack Names](#cloudformation-stack-names)
+  * [Tagging Standards](#tagging-standards)
+    * [Optional tags](#optional-tags)
+  * [Environment Values](#environment-values)
+  * [CloudFormation Parameters](#cloudformation-parameters)
+  * [Driving the Convention from `aws/.env`](#driving-the-convention-from-awsenv)
+  * [Resource Naming by Type](#resource-naming-by-type)
+  * [Validation Checklist](#validation-checklist)
+  * [Related Documentation](#related-documentation)
+<!-- TOC -->
 
 ---
 
 ## Naming Convention
 
-### Standard Format
+### Standard format
 
 ```
-<Owner>-<Project>-<Environment>-<Resource>
+<AWS_OWNER>-<AWS_PROJECT_ID>-<AWS_ENV>-<resource-suffix>
 ```
 
-### Components
+The three identifier components are read from `aws/.env` and passed to the CloudFormation templates as the `Owner`, `Project`, and `Environment` parameters.
 
-| Component       | Description               | Examples                         |
-|-----------------|---------------------------|----------------------------------|
-| **Owner**       | Person or team identifier | `mhodges`, `its-iam`, `jsmith`   |
-| **Project**     | Project name              | `groupings`                      |
-| **Environment** | Deployment environment    | `sandbox`, `dev`, `test`, `prod` |
-| **Resource**    | AWS resource type/purpose | `api`, `pipeline`, `vpc`, `ecr`  |
+| Component           | Purpose                                 | Examples                                                |
+|---------------------|-----------------------------------------|---------------------------------------------------------|
+| **AWS_OWNER**       | Person or team identifier               | `mhodges`, `its-iam`                                    |
+| **AWS_PROJECT_ID**  | Short project identifier (≤13 chars)    | `groupings-api`, `groupings-aui`, `groupings-ui`       |
+| **AWS_ENV**         | Deployment environment                  | `sandbx`, `dev`, `test`, `prod`                         |
+| **resource-suffix** | Appended by CloudFormation per resource | `cluster`, `service`, `tg`, `alb`, `role-ecs-execution` |
+
+### Why `AWS_PROJECT_ID` is short
+
+AWS imposes a 32-character limit on Application Load Balancer and target group names. Keeping `AWS_PROJECT_ID` to ≤13 characters and `AWS_ENV` to ≤6 characters leaves enough room for owner and suffix:
+
+```
+mhodges - groupings-api - sandbx - alb
+   7    +      13       +    6   +  3   = 32 chars  ✅ at the limit, fits
+```
+
+This is why the canonical sandbox environment uses **`sandbx`** rather than the more familiar `sandbox` — `sandbox` (7 chars) would push `mhodges-groupings-api-sandbox-alb` to 33 chars and AWS would reject the ALB. The other allowed environment values (`dev`, `test`, `prod`) are short enough not to hit the limit.
 
 ### Examples
 
-#### Sandbox Environment (Personal Development)
+#### Sandbox (PoC development)
+
 ```
-mhodges-groupings-sandbox-api
-mhodges-groupings-sandbox-ecr
-mhodges-groupings-sandbox-pipeline
-mhodges-groupings-sandbox-vpc
-mhodges-groupings-sandbox-cluster
+mhodges-groupings-api-sandbx            (ECR repository)
+mhodges-groupings-api-sandbx-cluster    (ECS cluster)
+mhodges-groupings-api-sandbx-service    (ECS service)
+mhodges-groupings-api-sandbx-tg         (target group)
+mhodges-groupings-api-sandbx-alb        (load balancer)
+mhodges-groupings-api-sandbx-role-ecs-execution
+mhodges-groupings-api-sandbx-role-ecs-task
+/ecs/mhodges-groupings-api-sandbx       (CloudWatch log group)
 ```
 
-#### Test Environment (Team/Shared)
+#### Test (team)
+
 ```
-its-iam-groupings-test-api
-its-iam-groupings-test-ecr
-its-iam-groupings-test-pipeline
-its-iam-groupings-test-vpc
-its-iam-groupings-test-cluster
+its-iam-groupings-api-test-cluster
+its-iam-groupings-api-test-service
+its-iam-groupings-api-test-tg
+its-iam-groupings-api-test-alb
 ```
 
-#### Production Environment
+#### Production (team)
+
 ```
-its-iam-groupings-prod-api
-its-iam-groupings-prod-ecr
-its-iam-groupings-prod-pipeline
-its-iam-groupings-prod-vpc
-its-iam-groupings-prod-cluster
+its-iam-groupings-api-prod-cluster
+its-iam-groupings-api-prod-service
+its-iam-groupings-api-prod-tg
+its-iam-groupings-api-prod-alb
 ```
+
+---
+
+## CloudFormation Stack Names
+
+`aws/setup.sh` creates three stacks per environment, named with `AWS_PROJECT_ID` and `AWS_ENV`:
+
+```
+groupings-api-ecr-sandbx
+groupings-api-ecs-sandbx
+groupings-api-pipeline-sandbx
+```
+
+Stack names always lead with `AWS_PROJECT_ID` so each project's stacks are listable as a group via `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE | grep '^groupings-api-'`.
 
 ---
 
 ## Tagging Standards
 
-### Required Tags
+Every resource created by the project's CloudFormation templates carries this tag set:
 
-All resources **MUST** include these tags:
+| Tag           | Source                                        | Example                                  |
+|---------------|-----------------------------------------------|------------------------------------------|
+| `Name`        | `${Owner}-${Project}-${Environment}-{suffix}` | `mhodges-groupings-api-sandbx-cluster`   |
+| `Owner`       | `Owner` parameter                             | `mhodges`                                |
+| `Project`     | `Project` parameter                           | `groupings-api`                          |
+| `Environment` | `Environment` parameter                       | `sandbx`                                 |
+| `ManagedBy`   | Literal string                                | `CloudFormation`                         |
 
-| Tag Key         | Description            | Allowed Values                                                               | Example              |
-|-----------------|------------------------|------------------------------------------------------------------------------|----------------------|
-| **Owner**       | Resource owner         | Any valid username/team                                                      | `mhodges`, `its-iam` |
-| **Project**     | Project identifier     | `groupings`                                                                  | `groupings`          |
-| **Environment** | Deployment environment | `sandbox`, `dev`, `test`, `prod`, `future-dev`, `future-test`, `future-prod` | `sandbox`            |
-| **Component**   | Component/service type | `api`, `ui`, `db`, `pipeline`, etc.                                          | `api`                |
-| **ManagedBy**   | Management method      | `CloudFormation`, `Terraform`, `Manual`                                      | `CloudFormation`     |
+### Optional tags
 
-### Tag Policy Definition
+Add these manually when relevant:
 
-```json
-{
-  "tags": {
-    "Owner": {},
-    "Project": {},
-    "Environment": {
-      "tag_value": {
-        "@@assign": [
-          "sandbox",
-          "dev",
-          "test",
-          "prod",
-          "future-dev",
-          "future-test",
-          "future-prod"
-        ]
-      }
-    },
-    "Component": {},
-    "ManagedBy": {}
-  }
-}
-```
-
-### Optional Tags
-
-| Tag Key        | Description           | Example                                      |
-|----------------|-----------------------|----------------------------------------------|
-| **CostCenter** | Billing allocation    | `ITS-IAM-001`                                |
-| **Contact**    | Primary contact email | `groupings-dev@hawaii.edu`                   |
-| **Repository** | Source code location  | `uhawaii-system-its-ti-iam/uh-groupings-api` |
-| **Version**    | Application version   | `1.0.0`                                      |
+| Tag          | Purpose               | Example                                      |
+|--------------|-----------------------|----------------------------------------------|
+| `CostCenter` | Billing allocation    | `ITS-IAM-001`                                |
+| `Contact`    | Primary contact email | `groupings-dev@hawaii.edu`                   |
+| `Repository` | Source code location  | `uhawaii-system-its-ti-iam/uh-groupings-api` |
+| `Version`    | Application version   | `1.0.0`                                      |
 
 ---
 
-## Environment Definitions
+## Environment Values
 
-### Sandbox
-- **Purpose:** Individual developer experimentation
-- **Owner:** Individual (e.g., `mhodges`, `jsmith`)
-- **Lifecycle:** Short-lived, can be deleted anytime
-- **Example:** `mhodges-groupings-sandbox-api`
+The `Environment` CloudFormation parameter accepts:
 
-### Dev
-- **Purpose:** Shared development environment
-- **Owner:** Team (e.g., `its-iam`)
-- **Lifecycle:** Persistent, regularly updated
-- **Example:** `its-iam-groupings-dev-api`
+```
+sandbx  dev  test  prod 
+```
 
-### Test
-- **Purpose:** QA and integration testing
-- **Owner:** Team (e.g., `its-iam`)
-- **Lifecycle:** Persistent, stable releases
-- **Example:** `its-iam-groupings-test-api`
-
-### Prod
-- **Purpose:** Production workloads
-- **Owner:** Team (e.g., `its-iam`)
-- **Lifecycle:** Persistent, change-controlled
-- **Example:** `its-iam-groupings-prod-api`
-
-### Future Environments
-- **future-dev**, **future-test**, **future-prod**
-- Reserved for planned infrastructure upgrades or migrations
-
+| Environment | Purpose                              | Owner                        | Lifecycle                     |
+|-------------|--------------------------------------|------------------------------|-------------------------------|
+| `sandbx`    | Individual developer experimentation | Individual (e.g., `mhodges`) | Short-lived                   |
+| `dev`       | Shared development environment       | Team (e.g., `its-iam`)       | Persistent                    |
+| `test`      | QA and integration testing           | Team                         | Persistent                    |
+| `prod`      | Production workloads                 | Team                         | Persistent, change-controlled |
 ---
 
 ## CloudFormation Parameters
 
-### Standard Parameter Set
-
-Every CloudFormation template should include:
+Both `aws/cloudformation/ecr-repository.yml` and `aws/cloudformation/ecs-cluster.yml` accept three identifier parameters:
 
 ```yaml
 Parameters:
@@ -149,233 +155,79 @@ Parameters:
     Type: String
     Description: Owner identifier (e.g., mhodges, its-iam)
     Default: mhodges
-  
   Project:
     Type: String
-    Description: Project name
-    Default: groupings
-  
+    Description: Project identifier (≤13 chars; e.g., groupings-api, groupings-aui, groupings-ui)
+    Default: groupings-api
   Environment:
     Type: String
-    Default: sandbox
+    Default: sandbx
     AllowedValues:
-      - sandbox
+      - sandbx
       - dev
       - test
       - prod
-      - future-dev
-      - future-test
-      - future-prod
-    Description: Environment name
-  
-  Component:
-    Type: String
-    Description: Component identifier (api, ui, db, etc.)
-    Default: api
 ```
 
-### Resource Naming in Templates
+Templates compose resource names via `!Sub`:
 
 ```yaml
-Resources:
-  MyResource:
-    Type: AWS::...
-    Properties:
-      # Use Sub function to build names
-      Name: !Sub '${Owner}-${Project}-${Environment}-${Component}'
-      
-      # Apply standard tags
-      Tags:
-        - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-${Component}'
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Project
-          Value: !Ref Project
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: Component
-          Value: !Ref Component
-        - Key: ManagedBy
-          Value: CloudFormation
+ClusterName: !Sub '${Owner}-${Project}-${Environment}-cluster'
 ```
+
+There is no `Component` parameter. Earlier versions of these templates used a separate `Component` value (e.g., `api`), but it has been folded into `AWS_PROJECT_ID` itself (`groupings-api` already says "API," `groupings-aui` already says "Angular UI"). Adding a separate component layer produced redundant names like `mhodges-groupings-api-sandbx-api` and was removed.
 
 ---
 
-## CLI Usage Examples
+## Driving the Convention from `aws/.env`
 
-### Creating Resources with Naming Convention
+`aws/setup.sh` reads:
 
 ```bash
-# Set your variables
-export OWNER="mhodges"
-export PROJECT="groupings"
-export ENVIRONMENT="sandbox"
-export COMPONENT="api"
-
-# Deploy ECR repository
-aws cloudformation create-stack \
-  --stack-name ${OWNER}-${PROJECT}-${ENVIRONMENT}-ecr \
-  --template-body file://aws/cloudformation/ecr-repository.yml \
-  --parameters \
-    ParameterKey=Owner,ParameterValue=${OWNER} \
-    ParameterKey=Project,ParameterValue=${PROJECT} \
-    ParameterKey=Environment,ParameterValue=${ENVIRONMENT} \
-    ParameterKey=Component,ParameterValue=${COMPONENT}
-
-# Deploy ECS cluster
-aws cloudformation create-stack \
-  --stack-name ${OWNER}-${PROJECT}-${ENVIRONMENT}-ecs \
-  --template-body file://aws/cloudformation/ecs-cluster.yml \
-  --parameters \
-    ParameterKey=Owner,ParameterValue=${OWNER} \
-    ParameterKey=Project,ParameterValue=${PROJECT} \
-    ParameterKey=Environment,ParameterValue=${ENVIRONMENT} \
-    ParameterKey=Component,ParameterValue=${COMPONENT} \
-    ParameterKey=VpcId,ParameterValue=vpc-xxxxx \
-    ParameterKey=SubnetIds,ParameterValue="subnet-xxxxx,subnet-yyyyy" \
-  --capabilities CAPABILITY_NAMED_IAM
-
-# Deploy pipeline
-aws cloudformation create-stack \
-  --stack-name ${OWNER}-${PROJECT}-${ENVIRONMENT}-pipeline \
-  --template-body file://aws/cloudformation/codepipeline.yml \
-  --parameters \
-    ParameterKey=Owner,ParameterValue=${OWNER} \
-    ParameterKey=Project,ParameterValue=${PROJECT} \
-    ParameterKey=Environment,ParameterValue=${ENVIRONMENT} \
-    ParameterKey=Component,ParameterValue=${COMPONENT} \
-  --capabilities CAPABILITY_NAMED_IAM
+AWS_OWNER=mhodges
+AWS_PROJECT_ID=groupings-api
+AWS_ENV=sandbx
 ```
 
-### Querying Resources by Tags
+…and passes them to CloudFormation as `Owner`, `Project`, `Environment`. The companion UI projects use the same `setup.sh` pattern with their own `AWS_PROJECT_ID` values.
 
-```bash
-# Find all sandbox resources for a user
-aws resourcegroupstaggingapi get-resources \
-  --tag-filters \
-    Key=Owner,Values=mhodges \
-    Key=Environment,Values=sandbox \
-    Key=Project,Values=groupings
-
-# Find all production groupings resources
-aws resourcegroupstaggingapi get-resources \
-  --tag-filters \
-    Key=Project,Values=groupings \
-    Key=Environment,Values=prod
-
-# Find all resources for cost allocation
-aws resourcegroupstaggingapi get-resources \
-  --tag-filters \
-    Key=Project,Values=groupings \
-  --resource-type-filters \
-    ecs:cluster \
-    ecs:service \
-    elasticloadbalancing:loadbalancer
-```
+To deploy under a different owner or to a different environment, edit `aws/.env` and re-run `make aws-setup`. There are no script flags or environment-variable overrides — the `.env` file is the single source of truth.
 
 ---
 
-## Benefits
+## Resource Naming by Type
 
-### Consistency
-- All resources follow the same pattern
-- Easy to identify resource ownership and purpose
-- Reduces naming conflicts
-
-### Searchability
-- Quickly find resources by owner, project, or environment
-- Tag-based filtering in AWS Console
-- Programmatic resource discovery
-
-### Cost Allocation
-- Track costs by owner, project, or environment
-- Cost Explorer filtering by tags
-- Chargeback and showback reports
-
-### Automation
-- Scripted resource creation with consistent naming
-- CloudFormation parameter validation
-- Infrastructure as Code friendly
-
-### Security & Compliance
-- Clear ownership for security audits
-- Environment isolation
-- Access control by tags (IAM conditions)
-
----
-
-## Common Resource Types
-
-| Resource Type            | Component Suffix  | Example                                  |
-|--------------------------|-------------------|------------------------------------------|
-| **ECR Repository**       | `ecr`             | `mhodges-groupings-sandbox-ecr`          |
-| **ECS Cluster**          | `cluster`         | `mhodges-groupings-sandbox-cluster`      |
-| **ECS Service**          | `api`             | `mhodges-groupings-sandbox-api`          |
-| **Load Balancer**        | `alb`             | `mhodges-groupings-sandbox-alb`          |
-| **CodePipeline**         | `pipeline`        | `mhodges-groupings-sandbox-pipeline`     |
-| **CodeBuild**            | `build`           | `mhodges-groupings-sandbox-build`        |
-| **VPC**                  | `vpc`             | `mhodges-groupings-sandbox-vpc`          |
-| **Security Group**       | `sg-*`            | `mhodges-groupings-sandbox-sg-ecs`       |
-| **IAM Role**             | `role-*`          | `mhodges-groupings-sandbox-role-ecs`     |
-| **S3 Bucket**            | `s3-*`            | `mhodges-groupings-sandbox-s3-artifacts` |
-| **CloudWatch Log Group** | `logs`            | `/ecs/mhodges-groupings-sandbox-api`     |
+| Resource                   | Final Name                                              |
+|----------------------------|---------------------------------------------------------|
+| ECR repository             | `${Owner}-${Project}-${Environment}`                    |
+| ECS cluster                | `${Owner}-${Project}-${Environment}-cluster`            |
+| ECS service                | `${Owner}-${Project}-${Environment}-service`            |
+| ECS task definition family | `${Owner}-${Project}-${Environment}`                    |
+| Container name             | `${Owner}-${Project}-${Environment}`                    |
+| Target group               | `${Owner}-${Project}-${Environment}-tg`                 |
+| Application Load Balancer  | `${Owner}-${Project}-${Environment}-alb`                |
+| IAM execution role         | `${Owner}-${Project}-${Environment}-role-ecs-execution` |
+| IAM task role              | `${Owner}-${Project}-${Environment}-role-ecs-task`      |
+| CloudWatch log group       | `/ecs/${Owner}-${Project}-${Environment}`               |
+| CloudFormation stacks      | `${Project}-{ecr\|ecs\|pipeline}-${Environment}`        |
 
 ---
 
 ## Validation Checklist
 
-Before deploying resources, verify:
+Before deploying:
 
-- [ ] Resource name follows `<Owner>-<Project>-<Environment>-<Resource>` format
-- [ ] All required tags are present (Owner, Project, Environment, Component, ManagedBy)
-- [ ] Environment value is from allowed list
-- [ ] Owner matches your AWS account username or team identifier
-- [ ] Component name accurately describes the resource
-- [ ] CloudFormation stack name matches resource naming convention
-
----
-
-## Examples by Environment
-
-### Personal Sandbox (mhodges)
-```bash
-Stack Name:        mhodges-groupings-sandbox-ecr
-ECR Repository:    mhodges-groupings-sandbox-api
-ECS Cluster:       mhodges-groupings-sandbox-cluster
-ECS Service:       mhodges-groupings-sandbox-api
-ALB:               mhodges-groupings-sandbox-alb
-Pipeline:          mhodges-groupings-sandbox-pipeline
-```
-
-### Team Test Environment (its-iam)
-```bash
-Stack Name:        its-iam-groupings-test-ecr
-ECR Repository:    its-iam-groupings-test-api
-ECS Cluster:       its-iam-groupings-test-cluster
-ECS Service:       its-iam-groupings-test-api
-ALB:               its-iam-groupings-test-alb
-Pipeline:          its-iam-groupings-test-pipeline
-```
-
-### Production (its-iam)
-```bash
-Stack Name:        its-iam-groupings-prod-ecr
-ECR Repository:    its-iam-groupings-prod-api
-ECS Cluster:       its-iam-groupings-prod-cluster
-ECS Service:       its-iam-groupings-prod-api
-ALB:               its-iam-groupings-prod-alb
-Pipeline:          its-iam-groupings-prod-pipeline
-```
+- [ ] `AWS_PROJECT_ID` is ≤10 characters
+- [ ] `AWS_OWNER` is set (defaults to `mhodges`)
+- [ ] `AWS_ENV` is one of the allowed values
+- [ ] No conflict with another developer's existing deployment in the same account
 
 ---
 
 ## Related Documentation
 
-- [AWS_QUICKSTART.md](./AWS_QUICKSTART.md) - Uses these conventions
-- [AWS_SETUP.md](./AWS_SETUP.md) - Detailed setup with naming
-- [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) - Deployment procedures
-<!--suppress HtmlUnknownTarget -->
-- [aws/deployment.json](../aws/deployment.json) - Configuration file
-
----
+- [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — provisioning workflow that uses these conventions
+- [AWS_SETUP.md](AWS_SETUP.md) — detailed setup with the same conventions
+- [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) — ongoing operations
+- [SECRETS.md](SECRETS.md) — how secrets are stored separately from naming
+- [aws/cloudformation/](../aws/cloudformation/) — the templates that consume the parameters

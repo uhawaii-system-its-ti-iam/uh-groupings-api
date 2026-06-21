@@ -4,11 +4,11 @@ This guide walks you through setting up the complete AWS infrastructure and CI/C
 
 ## Prerequisites
 
-- AWS Account with appropriate permissions
-- AWS CLI installed and configured (`aws configure`)
-- Docker Desktop installed and running
-- GitHub repository access
-- Basic understanding of terminal commands
+- AWS account with IAM permissions for ECR, ECS, CloudFormation, IAM, and Secrets Manager
+- Docker Desktop installed and running (the AWS CLI runs inside a project-provided container; you do **not** need it on your host)
+- `aws-vault` configured via `make aws-vault-setup` (one time)
+- Access to the project's GitHub repository
+- An existing VPC with at least 2 subnets in different Availability Zones
 
 ## Architecture Overview
 
@@ -19,6 +19,17 @@ GitHub → CodePipeline → CodeBuild → ECR → ECS/Fargate
                                       ↓
                                CloudWatch Logs
 ```
+
+## Configuration & Secrets Model — at a glance
+
+The full model is documented in [SECRETS.md](SECRETS.md). The short version, repeated here so the AWS workflow makes sense in isolation:
+
+- The deployed API has exactly **two secrets** at runtime: `grouperClient.webService.password` and `jwt.secret.key`. Both live in **AWS Secrets Manager** under `groupings/api/grouper-password` and `groupings/api/jwt-secret`.
+- All other configuration (Grouper URL, username, email flags, etc.) is non-secret and travels in the ECS task definition's `environment[]` array.
+- **AWS account credentials** (the IAM access key a developer uses to run `make aws-*` commands) are unrelated to application secrets. They are stored separately in the developer's OS keychain via `aws-vault`. See [SECRETS.md](SECRETS.md#aws-account-credentials-developer-side).
+- `aws/.env` is **not** a secrets store; it carries non-sensitive deployment parameters.
+
+For technical specifics — task-definition wiring, IAM, manual CLI for secret manipulation — see the [Secrets Manager Integration](#secrets-manager-integration) section below.
 
 ## Phase 1: Automated Setup (ECR + ECS)
 
@@ -32,70 +43,38 @@ The `aws/setup.sh` script automates the following:
 
 ### Running the Setup Script
 
-**From the repository root (recommended):**
+**From the repository root:**
 
 ```bash
 make aws-setup
 ```
 
-**Or directly:**
-
-```bash
-cd aws/
-./setup.sh
-```
-
-**Non-interactive (CI/CD):**
-
-```bash
-make aws-setup-ci
-```
+This runs `aws/setup.sh` inside the AWS CLI Docker container.
 
 ### What You'll Need During Setup
 
 The script will prompt for:
-- **Grouper API URL** — your Grouper WS endpoint
-- **Grouper Username/Password** — service account credentials
-- **Database Password** — application database password
+- **Grouper Password** (silent input) — service account password
 - **VPC ID** — an existing VPC (the script lists available VPCs)
 - **Subnet IDs** — at least 2 subnets in different Availability Zones (the script lists available subnets)
 
-A JWT secret is auto-generated via `openssl rand -base64 32`.
+A JWT secret is auto-generated via `openssl rand -base64 32` and stored in Secrets Manager. This key is used by `JwtService` to sign and verify authentication tokens shared between the API and UI. It is generated once during initial setup and must remain stable — regenerating it invalidates all active user sessions. Treat it as a secret (never commit it to the repository); rotate it only with a coordinated redeployment of both the API and UI.
+
+The script does **not** prompt for the Grouper URL or username — those are non-secret values that belong in the ECS task definition `environment[]` array, not Secrets Manager.
 
 ### Configuration
 
-Edit `aws/.env` before running:
+Edit `aws/.env` before running.
 
-```bash
-# Required
-AWS_REGION=us-west-2
-AWS_ENV=sandbox
-AWS_PROJECT_ID=uh-groupings-api
-
-# Display name
-PROJECT_NAME="UH Groupings API"
-
-# Network (leave as placeholders to be prompted)
-VPC_ID=vpc-xxxxx
-SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
-
-# ECS
-DESIRED_COUNT=1
-```
-
-Environment variables passed inline take precedence over `.env` values:
-
-```bash
-AWS_REGION=us-east-1 AWS_ENV=production make aws-setup
-```
+The script reads configuration only from `aws/.env`. To change any parameter, edit the file before running. 
 
 ### What the Script Creates
 
 | Resource | Stack Name | Description |
 |----------|-----------|-------------|
-| ECR Repository | `{project}-ecr-{env}` | Docker image registry with scanning and lifecycle policies |
-| ECS Cluster + ALB | `{project}-ecs-{env}` | Fargate cluster, service, load balancer, security groups, IAM roles |
-| Secrets | `groupings/api/*` | Grouper URL, credentials, JWT secret, DB password |
+| ECR Repository | `${AWS_PROJECT_ID}-ecr-${AWS_ENV}` | Docker image registry with scanning and lifecycle policies |
+| ECS Cluster + ALB | `${AWS_PROJECT_ID}-ecs-${AWS_ENV}` | Fargate cluster, service, load balancer, security groups, IAM roles |
+| Secrets | `groupings/api/grouper-password`, `groupings/api/jwt-secret` | The two sensitive values the deployed API reads at startup |
 
 ### After Setup Completes
 
@@ -211,34 +190,182 @@ aws cloudwatch put-metric-alarm \
   --evaluation-periods 2
 ```
 
+## Secrets Manager Integration
+
+This section is the technical reference for how the two AWS Secrets Manager entries (`groupings/api/grouper-password` and `groupings/api/jwt-secret`) are wired into the deployed ECS task. For the conceptual overview of secrets in this project, see [SECRETS.md](SECRETS.md).
+
+### How `setup.sh` provisions the two secrets
+
+During `make aws-setup`, the script's `configure_secrets` step:
+
+- Prompts the developer (silent input) for the **Grouper Password**.
+- Generates the **JWT signing key** with `openssl rand -base64 32`.
+- Writes both to AWS Secrets Manager via a create-or-update helper:
+  ```bash
+  aws secretsmanager create-secret --name "$NAME" --secret-string "$VALUE" \
+    || aws secretsmanager update-secret --secret-id "$NAME" --secret-string "$VALUE"
+  ```
+- Re-running the setup is therefore safe: existing secrets are updated in place rather than duplicated.
+
+### ECS task definition wiring
+
+`aws/task-definition.json` (and the equivalent CloudFormation in `aws/cloudformation/ecs-cluster.yml`) splits values into two arrays — `secrets[]` for sensitive values pulled from Secrets Manager, `environment[]` for everything else:
+
+```json
+{
+  "containerDefinitions": [
+    {
+      "name": "uh-groupings-api",
+      "secrets": [
+        {
+          "name": "GROUPERCLIENT_WEBSERVICE_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/grouper-password"
+        },
+        {
+          "name": "JWT_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:groupings/api/jwt-secret"
+        }
+      ],
+      "environment": [
+        { "name": "GROUPERCLIENT_WEBSERVICE_URL",   "value": "https://grouper-prod.its.hawaii.edu/grouper-ws/servicesRest/" },
+        { "name": "GROUPERCLIENT_WEBSERVICE_LOGIN", "value": "_groupings_api_2" },
+        { "name": "GROUPINGS_API_LOCALHOST_USER",   "value": "service_account_user" },
+        { "name": "GROUPINGS_API_TEST_ADMIN_USER",  "value": "service_account_user" },
+        { "name": "EMAIL_IS_ENABLED",               "value": "false" },
+        { "name": "EMAIL_SEND_RECIPIENT",           "value": "groupings-alerts@hawaii.edu" },
+        { "name": "PROPERTIES_OVERRIDE_RESULT",     "value": "OVERRIDDEN" }
+      ]
+    }
+  ]
+}
+```
+
+How each array behaves at runtime:
+
+- **`secrets[]`** — ECS calls Secrets Manager at container startup, decrypts each value, and exposes it as the named environment variable inside the container. The plaintext never appears in the task definition, the ECS console, or CloudWatch logs.
+- **`environment[]`** — values are baked into the task definition as plain text. They appear in the ECS console and may show up in logs if the application echoes them. Use this only for non-sensitive settings.
+
+The Spring application binds environment variables to property names automatically — `GROUPERCLIENT_WEBSERVICE_PASSWORD` becomes `grouperClient.webService.password`, etc.
+
+### IAM permissions
+
+The ECS task **execution** role needs read access to the two secrets so ECS can fetch them at container start. The CloudFormation in `aws/cloudformation/ecs-cluster.yml` creates a role named `${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-role-ecs-execution` (e.g., `mhodges-groupings-api-sandbx-role-ecs-execution`) with the following inline policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [ "secretsmanager:GetSecretValue" ],
+      "Resource": [
+        "arn:aws:secretsmanager:us-west-2:*:secret:groupings/api/*"
+      ]
+    }
+  ]
+}
+```
+
+The wildcard `groupings/api/*` covers both current secrets and any future ones added under the same prefix without requiring an IAM policy update.
+
+### Manual operations
+
+These commands are for ad-hoc work (rotation, inspection). All run inside the AWS CLI Docker container with `aws-vault` providing credentials.
+
+#### Update a secret
+
+```bash
+aws-vault exec uh-groupings -- aws secretsmanager update-secret \
+  --secret-id groupings/api/grouper-password \
+  --secret-string "NEW_GROUPER_PASSWORD" \
+  --region us-west-2
+
+# Force ECS to restart tasks with the new value
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --force-new-deployment
+```
+
+#### Rotate the JWT key
+
+The JWT key is shared between the API and any UI consumer. Rotation requires redeploying every consumer to pick up the new value at the same time; otherwise tokens issued by one and validated by the other will fail.
+
+```bash
+aws-vault exec uh-groupings -- aws secretsmanager update-secret \
+  --secret-id groupings/api/jwt-secret \
+  --secret-string "$(openssl rand -base64 32)" \
+  --region us-west-2
+```
+
+After updating, redeploy the API and every UI service.
+
+#### Inspect a secret value (carefully — prints in plaintext)
+
+```bash
+aws-vault exec uh-groupings -- aws secretsmanager get-secret-value \
+  --secret-id groupings/api/grouper-password \
+  --query SecretString \
+  --output text \
+  --region us-west-2
+```
+
+#### List the project's secrets
+
+```bash
+aws-vault exec uh-groupings -- aws secretsmanager list-secrets \
+  --filters Key=name,Values=groupings/ \
+  --query 'SecretList[*].[Name,CreatedDate]' \
+  --output table \
+  --region us-west-2
+```
+
+### Auditing
+
+CloudTrail records every Secrets Manager API call. To view recent `GetSecretValue` events:
+
+```bash
+aws-vault exec uh-groupings -- aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=GetSecretValue \
+  --max-results 10 \
+  --region us-west-2
+```
+
+### Cost
+
+AWS Secrets Manager pricing (as of writing): $0.40 per secret per month + $0.05 per 10,000 API calls. With two secrets, the project pays roughly $0.80/month for secret storage. ECS retrieves each secret once at task start, so retrieval costs are negligible.
+
+### Automated rotation (advanced)
+
+AWS Secrets Manager supports Lambda-driven automatic rotation. This project does not currently use it because:
+
+- The Grouper password is owned by an upstream team's identity provider, not by AWS, so rotation must be coordinated externally.
+- The JWT key is shared across the API and UI services; rotation requires a coordinated multi-service redeploy.
+
+If automated rotation becomes appropriate later, the entry point is `aws secretsmanager rotate-secret --rotation-lambda-arn ... --rotation-rules AutomaticallyAfterDays=30`. See AWS's [rotating secrets](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html) documentation.
+
 ## Troubleshooting
 
 ### Common Issues
 
 **ECS tasks fail to start**
-```bash
-# Check task stopped reason
-aws ecs describe-tasks \
-  --cluster "${ECS_CLUSTER}" \
-  --tasks $(aws ecs list-tasks --cluster "${ECS_CLUSTER}" --query 'taskArns[0]' --output text) \
-  --query 'tasks[0].stoppedReason'
 
-# Check CloudWatch logs
-aws logs tail /ecs/uh-groupings-api --since 30m
+Use the Make targets that wrap the AWS CLI in Docker (so you don't need it on your host):
+
+```bash
+aws-vault exec uh-groupings -- make aws-task-status   # why the most recent task stopped
+aws-vault exec uh-groupings -- make aws-logs          # tail CloudWatch logs
 ```
 
 **Health checks failing**
-- Verify Spring Boot is listening on the expected port
+- Verify the deployed Spring Boot is listening on the expected port (8080 in the `prod`/`test` profiles)
 - Check security group allows inbound traffic
 - Ensure `/actuator/health` endpoint is accessible
 
 **Secrets not loading**
-```bash
-# Verify task execution role has Secrets Manager permissions
-aws iam get-role-policy \
-  --role-name "uh-groupings-ecs-execution-${AWS_ENV}" \
-  --policy-name SecretsManagerAccess
-```
+
+The IAM execution role created by `setup.sh` is named `${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-role-ecs-execution` (e.g., `mhodges-groupings-api-sandbx-role-ecs-execution`). Verify it has the `SecretsManagerAccess` inline policy attached.
 
 **Pipeline not triggering on push**
 - Verify the CodeStar connection status is `Available` (not `Pending`)
@@ -250,35 +377,24 @@ aws iam get-role-policy \
 ### Stack Creation Failed
 
 ```bash
-aws cloudformation describe-stack-events \
-  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
-  --query 'StackEvents[?ResourceStatus==`CREATE_FAILED`]'
+aws-vault exec uh-groupings -- make aws-stack-events
 ```
 
 ## Teardown
 
-Remove all AWS resources:
+Remove all AWS resources via the Makefile (runs inside the AWS CLI Docker container):
 
 ```bash
-make aws-teardown
+aws-vault exec uh-groupings -- make aws-teardown
 ```
 
-Or manually:
+This deletes the pipeline, ECS, and ECR CloudFormation stacks. To also remove the two secrets:
 
 ```bash
-cd aws/
-source .env
-
-aws cloudformation delete-stack --stack-name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}"
-aws cloudformation delete-stack --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}"
-aws cloudformation delete-stack --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}"
-
-# Delete secrets
-aws secretsmanager delete-secret --secret-id groupings/api/grouper-url --force-delete-without-recovery
-aws secretsmanager delete-secret --secret-id groupings/api/grouper-username --force-delete-without-recovery
-aws secretsmanager delete-secret --secret-id groupings/api/grouper-password --force-delete-without-recovery
-aws secretsmanager delete-secret --secret-id groupings/api/jwt-secret --force-delete-without-recovery
-aws secretsmanager delete-secret --secret-id groupings/api/db-password --force-delete-without-recovery
+aws-vault exec uh-groupings -- aws secretsmanager delete-secret \
+  --secret-id groupings/api/grouper-password --force-delete-without-recovery
+aws-vault exec uh-groupings -- aws secretsmanager delete-secret \
+  --secret-id groupings/api/jwt-secret --force-delete-without-recovery
 ```
 
 ## Cost Estimation (Sandbox)
@@ -308,8 +424,8 @@ aws ecs describe-services --cluster "${ECS_CLUSTER}" --services "${ECS_SERVICE}"
 # Scale ECS service
 aws ecs update-service --cluster "${ECS_CLUSTER}" --service "${ECS_SERVICE}" --desired-count 3
 
-# View recent logs
-aws logs tail /ecs/uh-groupings-api --since 1h --follow
+# View recent logs (use `make aws-logs` for the convenience target)
+aws logs tail "/ecs/${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}" --since 1h --follow
 
 # Force new deployment (without code change)
 aws ecs update-service --cluster "${ECS_CLUSTER}" --service "${ECS_SERVICE}" --force-new-deployment

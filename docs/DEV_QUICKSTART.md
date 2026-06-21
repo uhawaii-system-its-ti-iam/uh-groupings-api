@@ -20,7 +20,7 @@ Verify: `docker --version && git --version`
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.example.com/uhawaii-system-its-ti-iam/uh-groupings-api.git
+git clone https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api.git
 cd uh-groupings-api
 ```
 
@@ -46,7 +46,7 @@ grouperClient.webService.login = _groupings_api_2
 grouperClient.webService.password = redacted 
 
 email.is.enabled=false
-email.send.recipient=mhodges@hawaii.edu
+email.send.recipient=your_email@hawaii.edu
 
 # Instructions: <https://uhawaii.atlassian.net/wiki/spaces/SITARd/pages/2040561680>
 jwt.secret.key=you_generiate_it

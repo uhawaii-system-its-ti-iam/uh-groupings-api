@@ -1,5 +1,60 @@
 # Architecture Documentation - UH Groupings API
 
+<!-- TOC -->
+* [Architecture Documentation - UH Groupings API](#architecture-documentation---uh-groupings-api)
+  * [System Overview](#system-overview)
+  * [High-Level Architecture](#high-level-architecture)
+  * [Component Details](#component-details)
+    * [1. Source Control](#1-source-control)
+      * [Changing Deployment Branch](#changing-deployment-branch)
+    * [2. CI/CD Pipeline (AWS CodePipeline)](#2-cicd-pipeline-aws-codepipeline)
+      * [Stage 1: Source](#stage-1-source)
+      * [Stage 2: Build (AWS CodeBuild)](#stage-2-build-aws-codebuild)
+      * [Stage 3: Deploy (ECS)](#stage-3-deploy-ecs)
+    * [3. Container Registry (Amazon ECR)](#3-container-registry-amazon-ecr)
+    * [4. Compute (Amazon ECS Fargate)](#4-compute-amazon-ecs-fargate)
+      * [Cluster Configuration](#cluster-configuration)
+      * [Service Configuration](#service-configuration)
+      * [Task IAM Roles](#task-iam-roles)
+    * [5. Load Balancing (Application Load Balancer)](#5-load-balancing-application-load-balancer)
+    * [6. Secrets Management (AWS Secrets Manager)](#6-secrets-management-aws-secrets-manager)
+    * [7. Monitoring & Logging](#7-monitoring--logging)
+      * [CloudWatch Logs](#cloudwatch-logs)
+      * [CloudWatch Metrics](#cloudwatch-metrics)
+      * [Alarms (Recommended)](#alarms-recommended)
+    * [8. Networking](#8-networking)
+      * [VPC Configuration](#vpc-configuration)
+      * [Network Flow](#network-flow)
+  * [Data Flow](#data-flow)
+    * [Request Flow](#request-flow)
+    * [Deployment Flow](#deployment-flow)
+  * [Technology Stack](#technology-stack)
+    * [Application Layer](#application-layer)
+    * [Infrastructure Layer](#infrastructure-layer)
+    * [DevOps Tools](#devops-tools)
+  * [Environments](#environments)
+    * [Environment Configuration](#environment-configuration)
+    * [Branch Flexibility](#branch-flexibility)
+    * [Changing Deployment Branch](#changing-deployment-branch-1)
+  * [Security Architecture](#security-architecture)
+    * [Authentication & Authorization](#authentication--authorization)
+    * [Secrets Management](#secrets-management)
+    * [Network Security](#network-security)
+    * [Container Security](#container-security)
+    * [Compliance](#compliance)
+  * [Scalability & Resilience](#scalability--resilience)
+    * [Horizontal Scaling](#horizontal-scaling)
+    * [High Availability](#high-availability)
+    * [Disaster Recovery](#disaster-recovery)
+  * [Cost Optimization](#cost-optimization)
+    * [Current Costs (Estimated - Sandbox)](#current-costs-estimated---sandbox)
+    * [Cost Reduction Strategies](#cost-reduction-strategies)
+  * [Future Enhancements](#future-enhancements)
+    * [Short Term](#short-term)
+    * [Medium Term](#medium-term)
+    * [Long Term](#long-term)
+<!-- TOC -->
+
 ## System Overview
 
 The UH Groupings API is a Spring Boot application deployed on AWS using a modern, cloud-native architecture with full CI/CD automation.
@@ -50,25 +105,26 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 ### 1. Source Control
 - **Service:** GitHub Enterprise
 - **Repository:** uhawaii-system-its-ti-iam/uh-groupings-api
+- **Default Branch:** `main`
 - **Branching Strategy:**
-  - **Sandbox (Personal):** Any branch (e.g., `dev-mhodges-2203`, `feature/*`, `main`)
+  - **Sandbox / Pilot:** `main` (configurable per pilot — see below)
   - **Dev (Shared):** `develop` or `main`
   - **Test/Staging:** `release/*` or `test`
   - **Production:** `main` or `production`
 - **Webhook:** Triggers CodePipeline on push/merge to configured branch
-- **Branch Flexibility:** Sandbox pipelines can watch any branch for isolated feature development
+- **Branch Flexibility:** Sandbox pipelines can watch any branch for isolated feature development; the canonical configuration uses `main`.
 
 #### Changing Deployment Branch
 
-Sandbox environments support deploying from any branch:
+Sandbox environments can deploy from any branch:
 
 ```bash
-# Update pipeline to watch a different branch
+# Update pipeline to watch a different branch (canonical: main)
 aws cloudformation update-stack \
-  --stack-name mhodges-groupings-sandbox-pipeline \
+  --stack-name groupings-api-pipeline-sandbx \
   --use-previous-template \
   --parameters \
-    ParameterKey=GitHubBranch,ParameterValue=dev-mhodges-2203 \
+    ParameterKey=GitHubBranch,ParameterValue=main \
     ParameterKey=Owner,UsePreviousValue=true \
   --capabilities CAPABILITY_NAMED_IAM
 
@@ -76,7 +132,7 @@ aws cloudformation update-stack \
 # CodePipeline → Your Pipeline → Edit → Source Stage → Change Branch
 ```
 
-This allows you to deploy `dev-mhodges-2203` → sandbox, while team environments typically deploy from standard branches.
+For pilot/feature work, this same command can be used to point the pipeline at a feature branch.
 
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
@@ -157,14 +213,18 @@ This allows you to deploy `dev-mhodges-2203` → sandbox, while team environment
 
 ### 6. Secrets Management (AWS Secrets Manager)
 
-Secrets stored (never in code):
-- `groupings/api/grouper-url`
-- `groupings/api/grouper-username`
-- `groupings/api/grouper-password`
-- `groupings/api/jwt-secret`
-- `groupings/api/db-password`
+Only **two** values are stored in AWS Secrets Manager — the truly sensitive runtime credentials the API needs at startup:
 
-**Access:** Task execution role injects secrets as environment variables at container startup.
+- `groupings/api/grouper-password` — Grouper service account password (`grouperClient.webService.password`)
+- `groupings/api/jwt-secret` — JWT signing key (`jwt.secret.key`), generated at provisioning by `aws/setup.sh`
+
+Non-secret values that the deployed API still needs (`grouperClient.webService.url`, `grouperClient.webService.login`, email flags, etc.) live in the ECS task definition `environment[]` array — not in Secrets Manager.
+
+**Provisioning:** `aws/setup.sh` (invoked via `aws-vault exec uh-groupings -- make aws-setup`) creates both secrets idempotently — re-running updates rather than duplicates them.
+
+**Access at runtime:** The ECS task execution role injects the two secrets as environment variables (`GROUPERCLIENT_WEBSERVICE_PASSWORD`, `JWT_SECRET_KEY`) when the container starts. The values never appear in plaintext task config or logs.
+
+**JWT key ownership:** The API project owns this key. Future UI projects consume the same `groupings/api/jwt-secret` rather than generating their own. See [SECRETS.md](SECRETS.md#jwt-secret-ownership-api-generates-ui-consumes).
 
 ### 7. Monitoring & Logging
 
@@ -203,7 +263,7 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 ### Request Flow
 ```
-1. User → HTTPS → ALB
+1. User → HTTP → ALB    (HTTPS:443 listener planned; current is HTTP:80 only)
 2. ALB → Health Check → ECS Task:8080/actuator/health
 3. ALB → Route Request → ECS Task:8080/api/v2.1/*
 4. ECS Task → Authenticate (JWT) → Process Request
@@ -225,7 +285,7 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 10. Deployment complete
 ```
 
-**Note:** Sandbox pipelines can watch any branch (e.g., `dev-mhodges-2203`), while team environments typically watch standard branches (`develop`, `test`, `main`).
+**Note:** The canonical configuration deploys from `main`. Pilot or sandbox pipelines may temporarily watch a feature branch via the pipeline's `GitHubBranch` parameter; team environments (dev/test/prod) watch standard branches (`develop`, `test`, `main`).
 
 ## Technology Stack
 
@@ -259,7 +319,7 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 | Environment    | Purpose                                | Typical Branch                                      | Owner                        | Auto-Deploy              |
 |----------------|----------------------------------------|-----------------------------------------------------|------------------------------|--------------------------|
-| **Sandbox**    | Personal development & experimentation | Any (e.g., `dev-mhodges-2203`, `feature/*`, `main`) | Individual (e.g., `mhodges`) | Yes                      |
+| **Sandbox**    | Personal development & experimentation | `main` (configurable per pilot — feature branches allowed) | Individual (e.g., `mhodges`) | Yes                      |
 | **Dev**        | Shared integration testing             | `develop` or `main`                                 | Team (`its-iam`)             | Yes                      |
 | **Test**       | QA & staging                           | `release/*` or `test`                               | Team (`its-iam`)             | Yes (with approval)      |
 | **Production** | Live system                            | `main` or `production`                              | Team (`its-iam`)             | Manual approval required |
@@ -267,34 +327,34 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 ### Branch Flexibility
 
 **Sandbox Environments:**
-- Can deploy from **any branch** - ideal for isolated feature development
+- Default to `main` for the canonical configuration
+- May temporarily watch a feature branch for isolated pilot work
 - Change branch via CodePipeline configuration
-- Example: Deploy `dev-mhodges-2203` to `mhodges-groupings-sandbox`
 
 **Team Environments:**
 - Follow GitFlow or trunk-based development patterns
 - Branch protection and approval workflows enforced
 - Standard naming: `its-iam-groupings-<env>-*`
 
-### Changing Deployment Branch (Sandbox Example)
+### Changing Deployment Branch
 
 ```bash
-# Update sandbox pipeline to watch your feature branch
+# Point the sandbox pipeline at a feature branch (e.g., for a pilot)
 aws cloudformation update-stack \
-  --stack-name mhodges-groupings-sandbox-pipeline \
+  --stack-name groupings-api-pipeline-sandbx \
   --use-previous-template \
   --parameters \
-    ParameterKey=GitHubBranch,ParameterValue=dev-mhodges-2203 \
+    ParameterKey=GitHubBranch,ParameterValue=feature/your-branch \
     ParameterKey=Owner,UsePreviousValue=true \
     ParameterKey=Project,UsePreviousValue=true \
     ParameterKey=Environment,UsePreviousValue=true \
   --capabilities CAPABILITY_NAMED_IAM
 
 # Or in AWS Console:
-# CodePipeline → mhodges-groupings-sandbox-pipeline → Edit → Source → Change Branch
+# CodePipeline → groupings-api-pipeline-sandbx → Edit → Source → Change Branch
 ```
 
-**Result:** Your sandbox will now automatically deploy whenever you push to `dev-mhodges-2203`!
+When the pilot work is complete, switch the pipeline back to `main`.
 
 ## Security Architecture
 
@@ -304,18 +364,23 @@ aws cloudformation update-stack \
 - **Secrets:** Local (properties file) or AWS Secrets Manager (encrypted at rest)
 
 ### Secrets Management
-- **Local Development:** 
-  - Properties file: `~/.yourname-conf/uh-groupings-api-overrides.properties`
-  - Converted to Docker .env via `docker/dev-overrides-properties.sh`
-- **AWS Production:**
-  - Stored in AWS Secrets Manager (AES-256 encryption)
-  - Injected into containers via ECS Task Definition
-  - Access controlled by IAM policies
-- **See:** [docs/SECRETS.md](SECRETS.md) for complete guide
+
+The project handles two distinct categories of secrets, stored differently:
+
+**Application secrets** (Grouper password, JWT key) — read by the running API at startup:
+- **Local development:** `~/.$(whoami)-conf/uh-groupings-api-overrides.properties`, bind-mounted read-only into the Docker container and loaded via `SPRING_CONFIG_IMPORT`. The file is never committed.
+- **AWS deployment:** AWS Secrets Manager (`groupings/api/*`), encrypted at rest (AES-256), injected into ECS tasks via the task definition's `secrets[]` array.
+
+**AWS account credentials** (IAM access key + secret) — used only by developers running `make aws-setup` and other AWS Make targets:
+- Stored in the macOS Keychain (or equivalent OS keychain on Linux/Windows) via [`aws-vault`](https://github.com/99designs/aws-vault). Released as ephemeral environment variables for the duration of one `aws-vault exec` call. Never on disk in plaintext.
+- Bootstrapped once per developer with `make aws-vault-setup`. Subsequent commands are wrapped: `aws-vault exec uh-groupings -- make aws-setup`.
+- Holds **no application secrets**. The CLI inside the AWS-cli Docker container reads `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` from the environment that aws-vault injects; `~/.aws` is not bind-mounted.
+
+**See:** [docs/SECRETS.md](SECRETS.md) for the complete model, including IAM permissions and rotation guidance.
 
 ### Network Security
-- **Encryption in Transit:** HTTPS (ALB to client)
-- **Internal Communication:** HTTP over private networking
+- **Encryption in Transit:** ALB currently exposes HTTP:80; HTTPS:443 with ACM certificate is planned (see "Future Enhancements")
+- **Internal Communication:** HTTP between ALB and ECS tasks (private VPC)
 - **Security Groups:** Principle of least privilege
 
 ### Container Security

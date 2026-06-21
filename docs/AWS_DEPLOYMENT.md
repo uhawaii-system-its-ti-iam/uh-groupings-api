@@ -4,326 +4,271 @@
 
 **Purpose:** Operating and deploying to existing AWS infrastructure.
 
-**Need to create infrastructure first?** See [AWS_QUICKSTART.md](./AWS_QUICKSTART.md)
+**Need to create infrastructure first?** See [AWS_QUICKSTART.md](./AWS_QUICKSTART.md).
 
-**This guide assumes:** You have already deployed the AWS infrastructure (ECR, ECS, ALB, Pipeline).
+**This guide assumes:** You have already deployed the AWS infrastructure (ECR, ECS, ALB, Pipeline) via `make aws-setup`.
 
 ---
 
 ## Quick Reference
 
+The Makefile wraps every AWS operation so you don't need the AWS CLI installed locally — it runs inside the project's AWS CLI Docker container, with credentials supplied by `aws-vault`.
+
 ```bash
-# Common deployment operations
-export OWNER="mhodges"
-export PROJECT="groupings"
-export ENVIRONMENT="sandbox"
-export CLUSTER="${OWNER}-${PROJECT}-${ENVIRONMENT}-cluster"
-export SERVICE="${OWNER}-${PROJECT}-${ENVIRONMENT}-service"
+# One-time per developer
+make aws-vault-setup
 
-# Force new deployment
-aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment
-
-# Scale up/down
-aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --desired-count 4
-
-# View logs
-aws logs tail /ecs/${OWNER}-${PROJECT}-${ENVIRONMENT}-api --follow
-
-# Check service status
-aws ecs describe-services --cluster ${CLUSTER} --services ${SERVICE}
+# Operations (all wrapped with aws-vault exec)
+aws-vault exec uh-groupings -- make aws-logs            # tail CloudWatch logs
+aws-vault exec uh-groupings -- make aws-service-events  # recent ECS service events
+aws-vault exec uh-groupings -- make aws-task-status     # why the most recent task stopped
+aws-vault exec uh-groupings -- make aws-stack-events    # CloudFormation CREATE_FAILED events
 ```
+
+For ad-hoc operations not covered by Make targets, the same pattern applies:
+
+```bash
+aws-vault exec uh-groupings -- aws ecs ...
+```
+
+The examples below use the resource names produced by the project's naming convention. If you've changed `AWS_OWNER` or `AWS_PROJECT_ID` in `aws/.env`, substitute accordingly.
 
 ---
 
-The pipeline automatically deploys to ECS when code is pushed to the main branch.
+## Deployment Methods
+
+### 1. Pipeline-Triggered Deployment (default)
+
+The CodePipeline created by `aws/cloudformation/codepipeline.yml` automatically deploys to ECS when code is pushed to the configured branch (canonical: `main`).
 
 **Flow:**
+
 ```
 Push to GitHub → CodePipeline → CodeBuild → ECR → ECS Rolling Update
 ```
 
-**Deployment Settings:**
-- **MaximumPercent:** 200% (can run 2x desired tasks during deployment)
-- **MinimumHealthyPercent:** 100% (maintains full capacity during deployment)
-- **Health Check Grace Period:** 60 seconds
+**Deployment settings (from `ecs-cluster.yml`):**
+- `MaximumPercent`: 200% (can run 2× desired tasks during deployment)
+- `MinimumHealthyPercent`: 100% (maintains full capacity during deployment)
+- Health check grace period: 60 seconds
 
 ### 2. Manual Deployment
 
-**Force new deployment without code changes:**
+Force a new deployment without code changes:
+
 ```bash
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
+# Resolve cluster and service names from your aws/.env
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" \
+  --service "${SERVICE}" \
   --force-new-deployment
 ```
 
-**Deploy specific image tag:**
+Deploy a specific image tag:
+
 ```bash
-# Update task definition with new image
-aws ecs register-task-definition \
+aws-vault exec uh-groupings -- aws ecs register-task-definition \
   --cli-input-json file://aws/task-definition.json
 
-# Update service
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --task-definition uh-groupings-api:LATEST_VERSION
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" \
+  --service "${SERVICE}" \
+  --task-definition "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}:LATEST_REVISION"
 ```
 
-### 3. Blue/Green Deployment (Advanced)
+### 3. Blue/Green Deployment (advanced)
 
-For zero-downtime deployments with instant rollback capability.
-
-**Prerequisites:**
+For zero-downtime deployments with instant rollback. Requires:
 - CodeDeploy application and deployment group
 - Two target groups (blue and green)
 
-**Steps to enable:**
-1. Modify ECS service to use CODE_DEPLOY deployment controller
-2. Create CodeDeploy application:
-```bash
-aws deploy create-application \
-  --application-name uh-groupings-api \
-  --compute-platform ECS
-```
+Steps to enable:
+1. Modify the ECS service to use the `CODE_DEPLOY` deployment controller
+2. Create a CodeDeploy application:
+   ```bash
+   aws-vault exec uh-groupings -- aws deploy create-application \
+     --application-name "${AWS_PROJECT_ID}" \
+     --compute-platform ECS
+   ```
+3. Create a deployment group with blue/green configuration
+4. Add `appspec.yml` to the repository (already present in `aws/`)
 
-3. Create deployment group with blue/green configuration
-4. Add `appspec.yml` to repository
+---
 
 ## Rollback Procedures
 
-### Option 1: Rollback via Pipeline
+### Option 1 — Revert via Git
 
 ```bash
-# Revert Git commit
 git revert <commit-hash>
 git push origin main
-
-# Pipeline will automatically redeploy previous version
 ```
 
-### Option 2: Rollback via ECS Service
+The pipeline automatically deploys the reverted state.
+
+### Option 2 — Roll back the ECS service to a previous task definition
 
 ```bash
-# Get previous task definition
-aws ecs list-task-definitions \
-  --family-prefix uh-groupings-api \
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+TASK_FAMILY="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}"
+
+# List recent task definition revisions
+aws-vault exec uh-groupings -- aws ecs list-task-definitions \
+  --family-prefix "${TASK_FAMILY}" \
   --sort DESC \
   --max-items 5
 
-# Update service to previous task definition
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --task-definition uh-groupings-api:PREVIOUS_REVISION
+# Update service to a previous revision
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" \
+  --service "${SERVICE}" \
+  --task-definition "${TASK_FAMILY}:PREVIOUS_REVISION"
 ```
 
-### Option 3: Deploy Previous ECR Image
+### Option 3 — Re-tag a previous ECR image as `latest`
 
 ```bash
-# List recent images
-aws ecr describe-images \
-  --repository-name uh-groupings-api \
+ECR_REPO="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}"
+
+aws-vault exec uh-groupings -- aws ecr describe-images \
+  --repository-name "${ECR_REPO}" \
   --query 'sort_by(imageDetails,& imagePushedAt)[-5:].[imageTags[0],imagePushedAt]' \
   --output table
-
-# Tag and deploy previous image as 'latest'
-aws ecr batch-get-image \
-  --repository-name uh-groupings-api \
-  --image-ids imageTag=<PREVIOUS_TAG> \
-  --query 'images[].imageManifest' \
-  --output text | \
-aws ecr put-image \
-  --repository-name uh-groupings-api \
-  --image-tag latest \
-  --image-manifest -
-
-# Force new deployment
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --force-new-deployment
 ```
+
+Then re-push or re-tag the desired image and force a new deployment as in Option 2.
+
+---
 
 ## Deployment Verification
 
-### Pre-Deployment Checklist
+### Pre-deployment checklist
 
-- [ ] All tests passing locally
-- [ ] Environment variables configured in Secrets Manager
-- [ ] Task definition CPU/memory limits appropriate
-- [ ] Health check endpoint responding
-- [ ] Database migrations completed (if applicable)
-- [ ] Deployment window communicated to stakeholders
+- [ ] All tests passing locally (`make test`)
+- [ ] Secrets present in Secrets Manager (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
+- [ ] Task-definition CPU/memory limits appropriate
+- [ ] Health check endpoint reachable
+- [ ] Stakeholders notified for production
 
-### Post-Deployment Verification
+### Post-deployment verification
 
-**1. Check Service Status:**
 ```bash
-aws ecs describe-services \
-  --cluster uh-groupings-sandbox \
-  --services uh-groupings-api-service \
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+
+# Service status
+aws-vault exec uh-groupings -- aws ecs describe-services \
+  --cluster "${CLUSTER}" --services "${SERVICE}" \
   --query 'services[0].{Status:status,Running:runningCount,Desired:desiredCount,Deployments:deployments}'
+
+# Tail logs
+aws-vault exec uh-groupings -- make aws-logs
+
+# Test the load balancer
+ALB_URL=$(aws-vault exec uh-groupings -- aws cloudformation describe-stacks \
+  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+  --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
+  --output text \
+  --region "${AWS_REGION}")
+
+curl -f "${ALB_URL}/actuator/health"
 ```
 
-**2. Monitor Logs:**
-```bash
-# Real-time logs
-aws logs tail /ecs/uh-groupings-api --follow
+---
 
-# Check for errors
-aws logs filter-log-events \
-  --log-group-name /ecs/uh-groupings-api \
-  --filter-pattern "ERROR" \
-  --start-time $(date -u -d '5 minutes ago' +%s)000
-```
+## Environment-specific Deployments
 
-**3. Test Endpoints:**
-```bash
-# Get ALB URL
-ALB_URL=$(aws elbv2 describe-load-balancers \
-  --names uh-groupings-alb-sandbox \
-  --query 'LoadBalancers[0].DNSName' \
-  --output text)
+| Environment | Branch | Approval | Frequency | Rollback risk |
+|-------------|--------|----------|-----------|---------------|
+| Sandbox | `main` (or temporary feature branch) | Auto | Multiple times per day | Low |
+| Dev | `develop` or `main` | Auto | Daily | Low |
+| Test/Staging | `release/*` or `test` | Auto with approval gate | Daily/per sprint | Medium |
+| Production | `main` or tagged release | Manual approval required | Weekly/bi-weekly | High |
 
-# Health check
-curl -f http://${ALB_URL}/actuator/health
+Production deployments additionally require:
+- Change management ticket
+- Deployment window scheduled
+- Documented rollback plan
+- Stakeholder notification
 
-# API test
-curl -H "Authorization: Bearer <token>" http://${ALB_URL}/api/v2.1/groupings
-
-# Load test (optional)
-ab -n 100 -c 10 http://${ALB_URL}/actuator/health
-```
-
-**4. Verify Container Health:**
-```bash
-# List running tasks
-aws ecs list-tasks \
-  --cluster uh-groupings-sandbox \
-  --service-name uh-groupings-api-service
-
-# Check task health
-TASK_ARN=$(aws ecs list-tasks \
-  --cluster uh-groupings-sandbox \
-  --service-name uh-groupings-api-service \
-  --query 'taskArns[0]' --output text)
-
-aws ecs describe-tasks \
-  --cluster uh-groupings-sandbox \
-  --tasks ${TASK_ARN} \
-  --query 'tasks[0].{Health:healthStatus,Status:lastStatus,Started:startedAt}'
-```
-
-## Environment-Specific Deployments
-
-### Sandbox (Development)
-- **Branch:** `main` or `develop`
-- **Approval:** Auto-deploy on merge
-- **Frequency:** Multiple times per day
-- **Rollback Risk:** Low (non-production)
-
-### Test/Staging
-- **Branch:** `release/*` or `test`
-- **Approval:** Auto-deploy with manual approval gate
-- **Frequency:** Daily or per sprint
-- **Rollback Risk:** Medium
-
-### Production
-- **Branch:** `production` or tagged releases
-- **Approval:** Manual approval required
-- **Frequency:** Weekly or bi-weekly
-- **Rollback Risk:** High (plan carefully)
-- **Requirements:**
-  - Change management ticket
-  - Deployment window scheduled
-  - Rollback plan documented
-  - Stakeholder notification
-  - Database backup confirmed
+---
 
 ## Pipeline Configuration
 
-### Environment Variables in CodeBuild
+### CodeBuild environment variables
 
-Set these in your CodeBuild project:
+Set these in the CodeBuild project (created by `codepipeline.yml`):
 
-| Variable             | Description         | Example                |
-|----------------------|---------------------|------------------------|
-| `AWS_ACCOUNT_ID`     | AWS Account ID      | `123456789012`         |
-| `AWS_DEFAULT_REGION` | AWS Region          | `us-west-2`            |
-| `IMAGE_REPO_NAME`    | ECR repository name | `uh-groupings-api`     |
-| `IMAGE_TAG`          | Docker image tag    | `latest` or commit SHA |
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `AWS_ACCOUNT_ID` | AWS Account ID | `123456789012` |
+| `AWS_DEFAULT_REGION` | AWS Region | `us-west-2` |
+| `IMAGE_REPO_NAME` | ECR repository name | `mhodges-groupings-api-sandbx` |
+| `IMAGE_TAG` | Docker image tag | `latest` or commit SHA |
 
-### Adding Manual Approval Stage
+### Adding a manual approval stage
 
-To add manual approval before production deployment:
+For production pipelines:
 
 ```bash
-# Edit CodePipeline
-aws codepipeline get-pipeline --name uh-groupings-api-pipeline-production > pipeline.json
-
-# Add approval stage (edit pipeline.json)
-{
-  "name": "Approval",
-  "actions": [{
-    "name": "ManualApproval",
-    "actionTypeId": {
-      "category": "Approval",
-      "owner": "AWS",
-      "provider": "Manual",
-      "version": "1"
-    },
-    "configuration": {
-      "CustomData": "Please review and approve production deployment",
-      "NotificationArn": "arn:aws:sns:us-west-2:123456789012:deployment-approvals"
-    }
-  }]
-}
-
-# Update pipeline
-aws codepipeline update-pipeline --cli-input-json file://pipeline.json
+aws-vault exec uh-groupings -- aws codepipeline get-pipeline \
+  --name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}" > pipeline.json
+# Edit pipeline.json to add an Approval stage between Build and Deploy
+aws-vault exec uh-groupings -- aws codepipeline update-pipeline \
+  --cli-input-json file://pipeline.json
 ```
+
+---
 
 ## Scaling Operations
 
-### Manual Scaling
+### Manual scaling
 
 ```bash
-# Scale up
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 4
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
 
-# Scale down
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 1
+# Scale up
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 4
+
+# Scale down (or to zero to save sandbox cost)
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 0
 ```
 
-### Auto Scaling (Target Tracking)
+### Auto-scaling (target tracking)
 
 ```bash
-# Register scalable target
-aws application-autoscaling register-scalable-target \
-  --service-namespace ecs \
-  --resource-id service/uh-groupings-sandbox/uh-groupings-api-service \
-  --scalable-dimension ecs:service:DesiredCount \
-  --min-capacity 2 \
-  --max-capacity 10
+SERVICE_NAMESPACE=ecs
+RESOURCE_ID="service/${CLUSTER}/${SERVICE}"
 
-# CPU-based scaling policy
-aws application-autoscaling put-scaling-policy \
-  --service-namespace ecs \
-  --resource-id service/uh-groupings-sandbox/uh-groupings-api-service \
+aws-vault exec uh-groupings -- aws application-autoscaling \
+  register-scalable-target \
+  --service-namespace "${SERVICE_NAMESPACE}" \
+  --resource-id "${RESOURCE_ID}" \
+  --scalable-dimension ecs:service:DesiredCount \
+  --min-capacity 2 --max-capacity 10
+
+aws-vault exec uh-groupings -- aws application-autoscaling \
+  put-scaling-policy \
+  --service-namespace "${SERVICE_NAMESPACE}" \
+  --resource-id "${RESOURCE_ID}" \
   --scalable-dimension ecs:service:DesiredCount \
   --policy-name cpu-scaling-policy \
   --policy-type TargetTrackingScaling \
   --target-tracking-scaling-policy-configuration file://scaling-policy.json
 ```
 
-**scaling-policy.json:**
+`scaling-policy.json`:
 ```json
 {
   "TargetValue": 75.0,
@@ -335,114 +280,90 @@ aws application-autoscaling put-scaling-policy \
 }
 ```
 
+---
+
 ## Troubleshooting Deployments
 
-### Deployment Stuck/Not Progressing
+### Deployment stuck
 
-**Check deployment status:**
 ```bash
-aws ecs describe-services \
-  --cluster uh-groupings-sandbox \
-  --services uh-groupings-api-service \
-  --query 'services[0].deployments'
+aws-vault exec uh-groupings -- make aws-service-events
 ```
 
-**Common causes:**
+Common causes:
 1. Health checks failing
 2. Resource constraints (CPU/memory)
 3. Port conflicts
 4. Security group blocking traffic
 
-**Force stop stuck deployment:**
+If everything is stuck, force-stop running tasks to trigger fresh placement:
+
 ```bash
-# Stop all tasks to force fresh deployment
-TASK_ARNS=$(aws ecs list-tasks \
-  --cluster uh-groupings-sandbox \
-  --service-name uh-groupings-api-service \
+TASK_ARNS=$(aws-vault exec uh-groupings -- aws ecs list-tasks \
+  --cluster "${CLUSTER}" --service-name "${SERVICE}" \
   --query 'taskArns' --output text)
 
 for task in $TASK_ARNS; do
-  aws ecs stop-task --cluster uh-groupings-sandbox --task $task
+  aws-vault exec uh-groupings -- aws ecs stop-task \
+    --cluster "${CLUSTER}" --task "$task"
 done
 ```
 
-### Tasks Failing to Start
-
-**View stopped task reason:**
-```bash
-# Get most recent stopped task
-STOPPED_TASK=$(aws ecs list-tasks \
-  --cluster uh-groupings-sandbox \
-  --desired-status STOPPED \
-  --query 'taskArns[0]' --output text)
-
-aws ecs describe-tasks \
-  --cluster uh-groupings-sandbox \
-  --tasks $STOPPED_TASK \
-  --query 'tasks[0].{StoppedReason:stoppedReason,StoppedAt:stoppedAt,Containers:containers[0].reason}'
-```
-
-### Image Pull Errors
+### Tasks failing to start
 
 ```bash
-# Verify ECR permissions
-aws ecr get-repository-policy --repository-name uh-groupings-api
-
-# Test ECR login manually
-aws ecr get-login-password --region us-west-2 | \
-  docker login --username AWS --password-stdin \
-  ${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
+aws-vault exec uh-groupings -- make aws-task-status
 ```
+
+### Image pull errors
+
+```bash
+aws-vault exec uh-groupings -- aws ecr get-repository-policy \
+  --repository-name "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}"
+```
+
+---
 
 ## Maintenance Windows
 
-### Scheduled Maintenance
-
-1. **Announce maintenance window**
-2. **Scale down to 0 or enable maintenance mode**
 ```bash
-# Option 1: Scale to 0
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 0
+# Scale to zero before maintenance
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 0
 
-# Option 2: Update ALB to return maintenance page
-# (requires custom target group with maintenance page)
+# (perform maintenance)
+
+# Scale back up
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 2
 ```
 
-3. **Perform maintenance (DB updates, etc.)**
-4. **Scale back up**
-```bash
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 2
-```
-5. **Verify functionality**
-6. **Announce maintenance complete**
+---
 
 ## Deployment Checklist
 
-### Before Every Deployment
+### Before every deployment
 
 - [ ] Review changes in pull request
 - [ ] All CI checks passing
-- [ ] Database migrations tested
-- [ ] Environment secrets verified
+- [ ] Environment secrets verified (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
 - [ ] Capacity planning reviewed
 - [ ] Rollback plan documented
 
-### After Every Deployment
+### After every deployment
 
-- [ ] Monitor logs for errors (15 minutes)
+- [ ] Monitor logs for 15 minutes (`make aws-logs`)
 - [ ] Verify health check passing
 - [ ] Test critical user flows
 - [ ] Check CloudWatch metrics
-- [ ] Update deployment log/wiki
+- [ ] Update deployment log
 - [ ] Notify stakeholders of completion
 
 ---
 
-**Last Updated:** 2026-06-09  
-**Maintained by:** UH ITS DevOps Team
+## Related Documentation
+
+- [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — initial provisioning
+- [AWS_SETUP.md](AWS_SETUP.md) — detailed setup
+- [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) — how the resource names above are derived
+- [SECRETS.md](SECRETS.md) — secrets model (aws-vault for developer credentials, Secrets Manager for app runtime)

@@ -1,398 +1,223 @@
-# 🚀 Getting Started Checklist - AWS CI/CD Pipeline
+# Getting Started Checklist
 
-## Quick Reference Card for Your First AWS Project
+A printable checklist for bringing the UH Groupings Spring API up — locally first, then on AWS.
 
 ---
 
-## ✅ Pre-Deployment Checklist
-
-### Local Environment Setup
-- [ ] **AWS CLI installed and configured**
-  ```bash
-  aws --version
-  aws configure  # Enter your credentials
-  aws sts get-caller-identity  # Verify it works
-  ```
+## Pre-flight (one time per developer)
 
 - [ ] **Docker Desktop installed and running**
   ```bash
   docker --version
-  docker ps  # Should not error
+  docker ps   # should not error
   ```
 
-- [ ] **Git configured with GitHub Enterprise**
+- [ ] **Make installed** (standard on macOS and Linux)
+  ```bash
+  make --version
+  ```
+
+- [ ] **Git configured**
   ```bash
   git config --global user.name "Your Name"
   git config --global user.email "your.email@hawaii.edu"
   ```
 
-- [ ] **Credentials ready**
-  - [ ] AWS Access Key ID and Secret
-  - [ ] Grouper API URL
-  - [ ] Grouper username and password
-  - [ ] Database credentials (if applicable)
+- [ ] **Access to the GitHub repository**
+  Push/pull to `https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api`.
+
+You don't need the AWS CLI installed locally — `make aws-*` runs it inside a Docker container.
 
 ---
 
-## 🎯 Choose Your Path
+## Phase 1 — Run Locally (~10 min)
 
-### Option A: Quick Automated Setup (Recommended) ⭐
-
-**Time: ~60 minutes**
-
-1. [ ] **Set up local development environment**
-   ```bash
-   # Create properties file
-   mkdir -p ~/.$(whoami)-conf
-   nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-   # Add your Grouper credentials (see docker/README.md)
-   ```
-
-2. [ ] **Test locally first**
-   ```bash
-   docker-compose up
-   # Open http://localhost:8080/actuator/health
-   # Press Ctrl+C when done
-   docker-compose down
-   ```
-
-3. [ ] **Run automated AWS setup**
-   ```bash
-   chmod +x aws/setup.sh
-   ./aws/setup.sh
-   ```
-   **The script will prompt you for:**
-   - Grouper API URL
-   - Grouper username/password
-   - Database password
-   - VPC and Subnet IDs
-
-4. [ ] **Configure GitHub Enterprise Connection**
-   - Open [AWS CodeStar Connections](https://console.aws.amazon.com/codesuite/settings/connections)
-   - Create new connection
-   - Connect to your GitHub Enterprise server
-   - Note the Connection ARN
-
-5. [ ] **Deploy CodePipeline**
-   ```bash
-   # See docs/AWS_QUICKSTART.md for exact commands
-   ```
-
-6. [ ] **Test your deployment**
-   ```bash
-   curl http://your-alb-url/actuator/health
-   ```
-
-✅ **Done!** Go to: [docs/AWS_QUICKSTART.md](docs/AWS_QUICKSTART.md)
-
----
-
-### Option B: Manual Step-by-Step Setup
-
-**Time: ~90 minutes | Learn every detail**
-
-- [ ] **Phase 1: ECR Repository (5 min)**
-  - Deploy `aws/cloudformation/ecr-repository.yml`
-  - Build and push Docker image
-
-- [ ] **Phase 2: Secrets Manager (10 min)**
-  - Create 5 secrets for application config
-
-- [ ] **Phase 3: VPC & Networking (15 min)**
-  - Identify VPC and subnets
-  - Verify network configuration
-
-- [ ] **Phase 4: ECS Cluster (20 min)**
-  - Deploy `aws/cloudformation/ecs-cluster.yml`
-  - Wait for ALB and ECS service
-
-- [ ] **Phase 5: CodePipeline (25 min)**
-  - Configure GitHub connection
-  - Deploy `aws/cloudformation/codepipeline.yml`
-  - Test the pipeline
-
-- [ ] **Phase 6: Verification (10 min)**
-  - Test endpoints
-  - Check logs
-  - Monitor metrics
-
-✅ **Done!** Go to: [docs/AWS_SETUP.md](docs/AWS_SETUP.md)
-
----
-
-## 📋 Post-Deployment Checklist
-
-### Immediate Verification
-
-- [ ] **Health endpoint responding**
+- [ ] **Clone the repo**
   ```bash
-  curl http://your-alb-url/actuator/health
+  git clone https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api.git
+  cd uh-groupings-api
+  ```
+
+- [ ] **Create the local properties file**
+  ```bash
+  mkdir -p ~/.$(whoami)-conf
+  nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
+  chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
+  ```
+  Paste the template from [DEV_QUICKSTART.md](DEV_QUICKSTART.md#2-create-configuration-file) and fill in your Grouper credentials, JWT key, and email.
+
+- [ ] **Start the application**
+  ```bash
+  docker-compose up
+  ```
+
+- [ ] **Verify health**
+  ```bash
+  curl http://localhost:8081/uhgroupingsapi/actuator/health
+  # Expected: {"status":"UP"}
+  ```
+  Swagger UI: <http://localhost:8081/uhgroupingsapi/swagger-ui.html>
+
+- [ ] **Stop when done**
+  ```bash
+  docker-compose down
+  ```
+
+You're now running locally. Continue to Phase 2 only if you intend to deploy to AWS.
+
+---
+
+## Phase 2 — Provision AWS Credentials (~5 min)
+
+- [ ] **Have your IAM Access Key ID and Secret Access Key ready**
+  Create them in the AWS Console under IAM → Users → Security credentials → Create access key (use case: "Command Line Interface (CLI)"). The secret is shown only once.
+
+- [ ] **Run the vault setup**
+  ```bash
+  make aws-vault-setup
+  ```
+  The script installs `aws-vault` if needed (Homebrew on macOS), then prompts you for the access key pair and stores them in your OS keychain under the profile name `uh-groupings`. Idempotent — re-runs do nothing if the profile already exists.
+
+- [ ] **(Optional) Create a shell alias** to save typing
+  ```bash
+  alias avx='aws-vault exec uh-groupings --'
+  ```
+
+---
+
+## Phase 3 — Configure `aws/.env` (~5 min)
+
+- [ ] **Edit `aws/.env`** with your deployment parameters:
+  ```bash
+  AWS_REGION=us-west-2
+  AWS_ENV=sandbx
+  AWS_PROJECT_ID=groupings-api
+  AWS_OWNER=mhodges      # or your username
+  PROJECT_NAME="UH Groupings API"
+  VPC_ID=vpc-xxxxx       # leave as placeholder to be prompted
+  SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
+  ECS_TASK_COUNT=1
+  ```
+
+- [ ] **Confirm the project ID is short** (≤10 chars). The companion projects use `groupings-aui` and `groupings-rui`. See [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) for why.
+
+---
+
+## Phase 4 — Provision AWS Infrastructure (~30 min)
+
+- [ ] **Run setup**
+  ```bash
+  aws-vault exec uh-groupings -- make aws-setup
+  # Or with the alias:
+  # avx make aws-setup
+  ```
+  The script will:
+  - Create the ECR repository
+  - Build and push the initial Docker image
+  - Prompt for the **Grouper Password** (silent input)
+  - Generate a JWT signing key
+  - Write both to AWS Secrets Manager (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
+  - Prompt for VPC ID and subnets if your `.env` has placeholders
+  - Create the ECS cluster, service, ALB, target group, and IAM roles
+
+- [ ] **Verify the deployment**
+  ```bash
+  avx make aws-logs
+  ```
+
+- [ ] **Hit the load balancer**
+  ```bash
+  source aws/.env
+  ALB_URL=$(avx aws cloudformation describe-stacks \
+    --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+    --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
+    --output text \
+    --region "${AWS_REGION}")
+  curl -f "${ALB_URL}/actuator/health"
   # Expected: {"status":"UP"}
   ```
 
-- [ ] **Logs are flowing to CloudWatch**
-  ```bash
-  aws logs tail /ecs/uh-groupings-api --follow
-  ```
+---
 
-- [ ] **ECS service running**
-  ```bash
-  aws ecs describe-services \
-    --cluster uh-groupings-sandbox \
-    --services uh-groupings-api-service \
-    --query 'services[0].{Running:runningCount,Desired:desiredCount}'
-  ```
+## Phase 5 — CI/CD Pipeline (Optional, ~15 min)
 
-- [ ] **Pipeline triggered on push**
-  ```bash
-  # Make a test commit
-  echo "# Test" >> README.md
-  git add README.md
-  git commit -m "Test CI/CD pipeline"
-  git push origin main
-  
-  # Check pipeline status
-  aws codepipeline get-pipeline-state \
-    --name uh-groupings-api-pipeline-sandbox
-  ```
+The CodeStar GitHub connection requires a manual OAuth handshake in the AWS Console; the rest is automated. See [AWS_SETUP.md → Phase 2](AWS_SETUP.md#phase-2-codepipeline-setup-manual) for details.
 
-### Security & Monitoring Setup
-
-- [ ] **Verify secrets are not in Git**
-  ```bash
-  git status  # dev.env should not appear
-  grep -r "password" .git/  # Should find nothing
-  ```
-
-- [ ] **CloudWatch alarms configured** (optional but recommended)
-  - CPU utilization > 80%
-  - Memory utilization > 80%
-  - ALB 5xx errors
-  - ECS task failures
-
-- [ ] **IAM roles reviewed**
-  - Task execution role has minimal permissions
-  - Task role has application permissions only
-
-### Documentation & Team
-
-- [ ] **Document your AWS account details**
-  - AWS Account ID: _______________
-  - Region: _______________
-  - VPC ID: _______________
-  - Subnet IDs: _______________
-
-- [ ] **Share access with team**
-  - Add team members to AWS IAM
-  - Share documentation links
-  - Schedule knowledge transfer session
-
-- [ ] **Update project README**
-  - Add deployment instructions
-  - Link to this documentation
-  - Add application URL
+- [ ] **Create CodeStar GitHub connection** in the AWS Console; complete OAuth.
+- [ ] **Note the connection ARN.**
+- [ ] **Deploy the pipeline stack** with `aws/cloudformation/codepipeline.yml`, supplying the connection ARN, repo owner/branch, and the ECS cluster+service names from Phase 4.
+- [ ] **Test by pushing a commit** to the configured branch (canonical: `main`).
 
 ---
 
-## 🔧 Essential Commands Reference
-
-### Daily Operations
+## Daily Operations Checklist
 
 ```bash
-# View logs
-aws logs tail /ecs/uh-groupings-api --follow
+# Tail logs
+avx make aws-logs
 
 # Check service status
-aws ecs describe-services \
-  --cluster uh-groupings-sandbox \
-  --services uh-groupings-api-service
+avx make aws-service-events
 
-# Force new deployment
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --force-new-deployment
+# Check why a task stopped
+avx make aws-task-status
 
-# Scale up
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 4
+# Force a redeploy after a manual ECR push
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+avx aws ecs update-service --cluster "${CLUSTER}" --service "${SERVICE}" --force-new-deployment
+```
 
-# Scale down (save costs)
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
+For the full operations playbook, see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
+
+---
+
+## Cost Awareness
+
+Sandbox approximate monthly cost: **$50–70** (ECS Fargate ~$30–40, ALB ~$20, ECR + CloudWatch + CodeBuild ~$5).
+
+To save money when not actively testing, scale the service to zero:
+
+```bash
+source aws/.env
+avx aws ecs update-service \
+  --cluster "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster" \
+  --service "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service" \
   --desired-count 0
 ```
 
-### Troubleshooting
+To delete everything for the environment:
 
 ```bash
-# Check recent errors in logs
-aws logs filter-log-events \
-  --log-group-name /ecs/uh-groupings-api \
-  --filter-pattern "ERROR" \
-  --start-time $(date -u -d '30 minutes ago' +%s)000
-
-# Check why task stopped
-aws ecs describe-tasks \
-  --cluster uh-groupings-sandbox \
-  --tasks $(aws ecs list-tasks --cluster uh-groupings-sandbox --query 'taskArns[0]' --output text) \
-  --query 'tasks[0].stoppedReason'
-
-# View pipeline execution
-aws codepipeline get-pipeline-state \
-  --name uh-groupings-api-pipeline-sandbox
+avx make aws-teardown
 ```
 
 ---
 
-## 📚 Documentation Map
+## Success Criteria
 
-### Read These First
-1. **[AWS_QUICKSTART.md](docs/AWS_QUICKSTART.md)** - 60-minute automated setup
-2. **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Understand what you built
+You're done when:
 
-### Deep Dives
-3. **[AWS_SETUP.md](docs/AWS_SETUP.md)** - Detailed manual setup
-4. **[AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md)** - Deployment operations
-5. **[aws/README.md](aws/README.md)** - AWS infrastructure details
-
-### Quick Reference
-- **This file** - Your checklist and command reference
-- **[docs/README.md](docs/README.md)** - Documentation hub
+- [x] Local Docker container starts cleanly
+- [x] `http://localhost:8081/uhgroupingsapi/actuator/health` returns `{"status":"UP"}`
+- [x] `aws-vault list` shows the `uh-groupings` profile
+- [x] AWS deployment's ALB returns `{"status":"UP"}`
+- [x] `avx make aws-logs` streams the deployed application's output
+- [x] (Optional) A `git push` to the configured branch triggers a pipeline build and ECS rolling deploy
 
 ---
 
-## 🆘 Common Issues & Solutions
+## Documentation Map
 
-### Issue: "Cannot connect to Docker daemon"
-**Solution:**
-```bash
-open -a Docker  # Start Docker Desktop
-# Wait 30 seconds, then retry
-```
-
-### Issue: "AWS credentials not found"
-**Solution:**
-```bash
-aws configure
-# Enter: Access Key ID, Secret, Region (us-west-2), Format (json)
-aws sts get-caller-identity  # Verify
-```
-
-### Issue: "Health checks failing in ECS"
-**Solution:**
-```bash
-# Check application logs
-aws logs tail /ecs/uh-groupings-api --follow
-
-# Check if app is listening on port 8080
-# Check if /actuator/health endpoint exists
-# Verify security groups allow traffic
-```
-
-### Issue: "Pipeline not triggering"
-**Solution:**
-- Verify GitHub webhook exists in repo settings
-- Check CodeStar connection status is "Available"
-- Ensure branch name matches pipeline config
-
-### Issue: "Task keeps restarting"
-**Solution:**
-```bash
-# Check stopped task reason
-aws ecs describe-tasks \
-  --cluster uh-groupings-sandbox \
-  --tasks <task-id> \
-  --query 'tasks[0].{Reason:stoppedReason,Containers:containers[*].reason}'
-
-# Common causes:
-# - Secrets not found (check Secrets Manager)
-# - Health check failing (check /actuator/health)
-# - Out of memory (increase task memory)
-```
-
----
-
-## 💰 Cost Management
-
-### Current Monthly Estimate
-- **Sandbox:** ~$50-70/month
-- **Production:** ~$100-150/month (with more capacity)
-
-### Save Money
-```bash
-# Stop when not in use
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 0
-
-# Start again when needed
-aws ecs update-service \
-  --cluster uh-groupings-sandbox \
-  --service uh-groupings-api-service \
-  --desired-count 2
-```
-
-### Clean Up Everything (when done testing)
-```bash
-# WARNING: This deletes all resources!
-aws cloudformation delete-stack --stack-name uh-groupings-pipeline-sandbox
-aws cloudformation delete-stack --stack-name uh-groupings-ecs-sandbox
-aws cloudformation delete-stack --stack-name uh-groupings-ecr-sandbox
-
-# Delete secrets
-aws secretsmanager delete-secret \
-  --secret-id groupings/api/grouper-url \
-  --force-delete-without-recovery
-# (repeat for all secrets)
-```
-
----
-
-## 🎉 Success Criteria
-
-You're successful when:
-
-✅ Local Docker container runs without errors  
-✅ Application accessible via ALB URL  
-✅ Health endpoint returns `{"status":"UP"}`  
-✅ Logs visible in CloudWatch  
-✅ Git push triggers pipeline automatically  
-✅ Deployment completes without errors  
-✅ Application responds to API requests  
-
----
-
-## 🚀 Next Level
-
-After basic setup works:
-
-- [ ] **Add SSL certificate** (AWS Certificate Manager + ALB)
-- [ ] **Configure custom domain** (Route 53)
-- [ ] **Set up autoscaling** (target tracking)
-- [ ] **Add monitoring dashboard** (CloudWatch)
-- [ ] **Configure alarms** (email/Slack notifications)
-- [ ] **Deploy to production** (separate environment)
-- [ ] **Implement blue/green deployments** (CodeDeploy)
-
----
-
-## 📞 Getting Help
-
-1. **Check docs:** Start with [docs/AWS_QUICKSTART.md](docs/AWS_QUICKSTART.md)
-2. **Search logs:** `aws logs tail /ecs/uh-groupings-api --follow`
-3. **Troubleshooting:** [docs/AWS_SETUP.md#troubleshooting](docs/AWS_SETUP.md#troubleshooting)
-4. **Internal support:** #groupings-dev Slack channel
-5. **AWS support:** Through AWS Console
-
----
-
-**You've got this!** 💪 This is your first AWS project, not your last.
-
-**Quick Start:** Open [docs/AWS_QUICKSTART.md](docs/AWS_QUICKSTART.md) and begin! 🚀
-
----
+| Doc | When to read |
+|-----|--------------|
+| [DEV_QUICKSTART.md](DEV_QUICKSTART.md) | Getting the app running locally for the first time |
+| [DEV_README.md](DEV_README.md) | Day-to-day local development tasks and troubleshooting |
+| [AWS_QUICKSTART.md](AWS_QUICKSTART.md) | First AWS deployment, end-to-end |
+| [AWS_SETUP.md](AWS_SETUP.md) | Deeper AWS setup details, especially the manual CodePipeline step |
+| [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) | Ongoing AWS operations, scaling, rollback |
+| [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) | Why resources are named the way they are |
+| [SECRETS.md](SECRETS.md) | The two-category secrets model (overrides file vs. Secrets Manager + aws-vault) |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design and components |
+| [AGENTS.md](../AGENTS.md) | Project conventions for engineers and agents |
