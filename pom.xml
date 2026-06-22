@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>4.0.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.16</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -68,6 +68,11 @@
             <artifactId>spring-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -77,7 +82,7 @@
         <dependency>
             <groupId>edu.internet2.middleware.grouper</groupId>
             <artifactId>grouperClient</artifactId>
-            <version>4.21.0</version>
+            <version>4.23.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -89,7 +94,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-vault-config</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -149,6 +154,25 @@
                 <version>4.3.0</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-byte-buddy-agent</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>byte-buddy-agent</includeArtifactIds>
+                            <includeScope>test</includeScope>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.13</version>
@@ -178,6 +202,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
                 <configuration>
+                    <argLine>@{argLine} "-javaagent:${project.build.directory}/byte-buddy-agent.jar"</argLine>
                     <excludes>
                         <exclude>**/Test*.java</exclude>
                     </excludes>
