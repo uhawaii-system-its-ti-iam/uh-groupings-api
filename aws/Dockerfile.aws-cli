@@ -4,7 +4,7 @@ FROM amazon/aws-cli:latest
 
 # Tools needed by aws/setup.sh:
 #   - bash, jq:    general scripting
-#   - openssl:     generate JWT signing keys
+#   - openssl:     generate JWT signing key
 #   - tar, gzip:   extract the static docker CLI tarball
 #   - curl:        download the static docker CLI tarball
 RUN yum install -y \

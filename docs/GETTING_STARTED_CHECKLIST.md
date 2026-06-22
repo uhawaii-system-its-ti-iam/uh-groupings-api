@@ -94,10 +94,12 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
   AWS_PROJECT_ID=groupings-api
   AWS_OWNER=mhodges      # or your username
   PROJECT_NAME="UH Groupings API"
-  VPC_ID=vpc-xxxxx       # leave as placeholder to be prompted
-  SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
+  VPC_ID=vpc-xxxxx       # required — replace with a real VPC ID
+  SUBNET_IDS=subnet-xxxxx,subnet-yyyyy   # required — at least 2 real subnet IDs in different AZs
   ECS_TASK_COUNT=1
   ```
+
+  Setup is non-interactive and rejects the placeholder values shown above. Replace them with real IDs before running `make aws-setup`.
 
 - [ ] **Confirm the project ID is short** (≤10 chars). The companion projects use `groupings-aui` and `groupings-rui`. See [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) for why.
 

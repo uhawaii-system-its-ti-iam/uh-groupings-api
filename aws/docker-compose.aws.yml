@@ -16,6 +16,10 @@ services:
       # Bind-mount the host docker socket so the docker CLI inside the
       # container sends commands to the host daemon (no docker-in-docker).
       - /var/run/docker.sock:/var/run/docker.sock
+      # Bind-mount the developer's overrides file (read-only) so setup.sh can
+      # read application secrets from it. Path inside the container matches the
+      # `dockerhost` Spring profile's `spring.config.import` location.
+      - ${HOME}/.${USER}-conf/uh-groupings-api-overrides.properties:/overrides/uh-groupings-api-overrides.properties:ro
     env_file:
       - .env
     environment:

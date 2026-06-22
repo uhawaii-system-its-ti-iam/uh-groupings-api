@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 # aws/setup.sh - AWS setup script for UH Groupings API.
-# All configuration settings are read from aws/.env.
+#
+# This script is non-interactive end to end. All inputs come from files; the
+# script never prompts. If any required input is missing the script exits
+# before any AWS API call.
+#
+# Sources of input:
+#   - aws/.env                                   non-secret deployment configuration
+#                                                (required: AWS_PROJECT_ID, VPC_ID, SUBNET_IDS)
+#   - $HOME/.$USER-conf/uh-groupings-api-overrides.properties
+#                                                Grouper service-account password
+#                                                (`grouperClient.webService.password`);
+#                                                bind-mounted into the AWS CLI container
+#                                                at /overrides/
+#
+# JWT signing key:
+#   Generated here with `openssl rand -base64 32` and written to
+#   groupings/api/jwt-secret. The API project owns this value; companion UI
+#   projects reference the same Secrets Manager entry from their own task
+#   definitions. Re-running setup preserves the existing JWT secret to avoid
+#   silently invalidating UI tokens; rotate it explicitly via the CLI command
+#   documented in docs/AWS_SETUP.md.
 
 set -euo pipefail
 
@@ -14,9 +34,15 @@ ENV_FILE="${SCRIPT_DIR}/.env"
 ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
 ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-cluster.yml"
 
+# Application secrets are read from the developer's overrides file, which
+# docker-compose.aws.yml bind-mounts into the AWS CLI container at /overrides/.
+# The path is overridable for running the script outside the container.
+OVERRIDES_FILE="${OVERRIDES_FILE:-/overrides/uh-groupings-api-overrides.properties}"
+
 AWS_ACCOUNT_ID=""
 ECR_REPOSITORY_URI=""
 ALB_URL=""
+GROUPER_PASSWORD=""
 
 #
 # Functions
@@ -43,7 +69,6 @@ load_env_file() {
 }
 
 apply_defaults() {
-    NON_INTERACTIVE="${NON_INTERACTIVE:-}"
     AWS_REGION="${AWS_REGION:-us-west-2}"
     AWS_ENV="${AWS_ENV:-sandbox}"
     AWS_PROJECT_ID="${AWS_PROJECT_ID:-}"
@@ -61,6 +86,27 @@ validate_config() {
     fi
 }
 
+validate_network_configuration() {
+    log "Validating network configuration..."
+
+    if [[ -z "${VPC_ID}" || "${VPC_ID}" == *xxxxx* ]]; then
+        error "VPC_ID is not set in aws/.env (current value: '${VPC_ID:-<unset>}')."
+        error "Set it to a real VPC ID (e.g., vpc-0a1b2c3d4e5f6789a) and re-run."
+        exit 1
+    fi
+
+    if [[ -z "${SUBNET_IDS}" || "${SUBNET_IDS}" == *xxxxx* || "${SUBNET_IDS}" == *yyyyy* ]]; then
+        error "SUBNET_IDS is not set in aws/.env (current value: '${SUBNET_IDS:-<unset>}')."
+        error "Set it to a comma-separated list of real subnet IDs in at least 2 AZs and re-run."
+        exit 1
+    fi
+
+    log "  VPC ID:     ${VPC_ID}"
+    log "  Subnet IDs: ${SUBNET_IDS}"
+    log "✓ Network configuration validated"
+    log ""
+}
+
 check_prerequisites() {
     log "Checking prerequisites..."
 
@@ -75,7 +121,7 @@ check_prerequisites() {
     fi
 
     if ! command -v openssl >/dev/null 2>&1; then
-        error "OpenSSL not installed"
+        error "OpenSSL not installed (required to generate the JWT signing key)"
         exit 1
     fi
 
@@ -100,25 +146,65 @@ fetch_aws_account_id() {
     log ""
 }
 
-confirm_setup() {
-    if [[ -n "${NON_INTERACTIVE}" ]]; then
-        return
-    fi
+# Read a single property value from a Java-style properties file.
+#   - Lines starting with '#' are treated as comments.
+#   - The first '=' on a line separates key from value.
+#   - Whitespace around the key, around the value, and a trailing CR are stripped
+#     (matching the Java properties loader's behavior).
+#   - Prints the value to stdout, or nothing if the key is absent.
+read_property() {
+    local file="$1"
+    local key="$2"
 
-    local reply
-    read -r -p "Continue with setup? (y/n) " -n 1 reply
-    echo
+    awk -v key="${key}" '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*$/ { next }
+        {
+            idx = index($0, "=")
+            if (idx == 0) next
+            k = substr($0, 1, idx - 1)
+            v = substr($0, idx + 1)
+            gsub(/\r$/, "", v)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", k)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+            if (k == key) {
+                print v
+                exit
+            }
+        }
+    ' "${file}"
+}
 
-    if [[ ! "${reply}" =~ ^[Yy]$ ]]; then
-        log "Setup cancelled."
+load_overrides_file() {
+    log "Validating overrides file..."
+
+    if [[ ! -f "${OVERRIDES_FILE}" ]]; then
+        error "Overrides file not found: ${OVERRIDES_FILE}"
+        error ""
+        error "The setup script reads the Grouper service-account password from this file."
+        error "Inside the AWS CLI container the file is bind-mounted from the host:"
+        error "  \$HOME/.\$USER-conf/uh-groupings-api-overrides.properties"
+        error ""
+        error "Create that file (see docs/DEV_QUICKSTART.md for the template) and re-run."
         exit 1
     fi
 
+    GROUPER_PASSWORD="$(read_property "${OVERRIDES_FILE}" "grouperClient.webService.password")"
+
+    if [[ -z "${GROUPER_PASSWORD}" ]]; then
+        error "Required property missing or empty in ${OVERRIDES_FILE}:"
+        error "  grouperClient.webService.password"
+        error ""
+        error "Add the Grouper service-account password and re-run."
+        exit 1
+    fi
+
+    log "✓ Overrides file present with Grouper password"
     log ""
 }
 
 create_ecr_repository() {
-    log "Step 3: Creating ECR Repository..."
+    log "Step 1: Creating ECR Repository..."
     aws cloudformation create-stack \
       --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
       --template-body "file://${ECR_TEMPLATE_PATH}" \
@@ -144,7 +230,7 @@ create_ecr_repository() {
 }
 
 build_and_push_image() {
-    log "Step 4: Building and pushing initial Docker image..."
+    log "Step 2: Building and pushing initial Docker image..."
 
     aws ecr get-login-password --region "${AWS_REGION}" | \
       docker login --username AWS --password-stdin "${ECR_REPOSITORY_URI}"
@@ -171,59 +257,43 @@ create_or_update_secret() {
         --region "${AWS_REGION}"
 }
 
-configure_secrets() {
-    local grouper_password
-    local jwt_secret
-
-    log "Step 2: Setting up AWS Secrets Manager..."
-    log "Storing only the two truly sensitive runtime values."
-    log "Non-secret values (Grouper URL, username, etc.) are configured in the"
-    log "ECS task definition environment[] array, not here."
-    log ""
-
-    read -r -s -p "Grouper Password: " grouper_password
-    echo
-
-    jwt_secret="$(openssl rand -base64 32)"
-
-    create_or_update_secret "groupings/api/grouper-password" "${grouper_password}"
-    create_or_update_secret "groupings/api/jwt-secret" "${jwt_secret}"
-
-    log "✓ Secrets configured: grouper-password, jwt-secret"
-    log ""
+jwt_secret_exists_in_aws() {
+    aws secretsmanager describe-secret \
+        --secret-id "groupings/api/jwt-secret" \
+        --region "${AWS_REGION}" \
+        >/dev/null 2>&1
 }
 
-collect_network_configuration() {
-    log "Step 1: Checking VPC configuration..."
+configure_secrets() {
+    log "Step 3: Configuring secrets in AWS Secrets Manager..."
+    log ""
 
-    if [[ -z "${VPC_ID}" ]]; then
-        log "Available VPCs:"
-        aws ec2 describe-vpcs \
-          --query "Vpcs[*].[VpcId,Tags[?Key=='Name'].Value|[0],CidrBlock]" \
-          --output table \
-          --region "${AWS_REGION}"
-        read -r -p "Enter VPC ID to use: " VPC_ID
+    # Grouper password — overwrite from the overrides file, which is the
+    # canonical source for this value (it's owned by the upstream IdP).
+    create_or_update_secret "groupings/api/grouper-password" "${GROUPER_PASSWORD}"
+    log "✓ groupings/api/grouper-password (from overrides file)"
+
+    # JWT key — generated here once and preserved on re-run. The API project
+    # owns this value; companion UI projects reference the same Secrets Manager
+    # entry. Overwriting it on re-run would silently invalidate every active UI
+    # token, so we only create it if it doesn't already exist. To rotate
+    # explicitly, use the manual CLI command in docs/AWS_SETUP.md.
+    if jwt_secret_exists_in_aws; then
+        log "✓ groupings/api/jwt-secret already exists; preserving existing value"
+        log "  (rotate explicitly via the CLI command in docs/AWS_SETUP.md;"
+        log "  rotation requires redeploying every UI consumer)"
     else
-        log "Using VPC ID from aws/.env: ${VPC_ID}"
+        local generated_jwt
+        generated_jwt="$(openssl rand -base64 32)"
+        create_or_update_secret "groupings/api/jwt-secret" "${generated_jwt}"
+        log "✓ groupings/api/jwt-secret generated and stored"
+        log "  (UI projects must reference this same secret; they do not generate their own)"
     fi
-
-    if [[ -z "${SUBNET_IDS}" ]]; then
-        log "Available subnets in VPC ${VPC_ID}:"
-        aws ec2 describe-subnets \
-          --filters "Name=vpc-id,Values=${VPC_ID}" \
-          --query "Subnets[*].[SubnetId,AvailabilityZone,CidrBlock]" \
-          --output table \
-          --region "${AWS_REGION}"
-        read -r -p "Enter Subnet IDs (comma-separated, at least 2): " SUBNET_IDS
-    else
-        log "Using Subnet IDs from aws/.env: ${SUBNET_IDS}"
-    fi
-
     log ""
 }
 
 deploy_ecs_infrastructure() {
-    log "Step 5: Creating ECS cluster and service..."
+    log "Step 4: Creating ECS cluster and service..."
 
     aws cloudformation create-stack \
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
@@ -276,21 +346,19 @@ print_summary() {
 # Main
 #
 
-# Phase 1 - load and verify configuration
+# Phase 1 - load and validate every input before any AWS API call
 load_env_file
 apply_defaults
 validate_config
+validate_network_configuration
+load_overrides_file
 print_configuration
 check_prerequisites
 fetch_aws_account_id
-confirm_setup
 
-# Phase 2 - collect all interactive input up front (network, secrets)
-collect_network_configuration
-configure_secrets
-
-# Phase 3 - provision AWS resources
+# Phase 2 - provision AWS resources
 create_ecr_repository
 build_and_push_image
+configure_secrets
 deploy_ecs_infrastructure
 print_summary

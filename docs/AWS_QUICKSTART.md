@@ -70,7 +70,7 @@ AWS_OWNER=mhodges
 # Display name shown in setup script output
 PROJECT_NAME="UH Groupings API"
 
-# Network — leave as placeholders to be prompted at runtime
+# Network — required (real values, not placeholders)
 VPC_ID=vpc-xxxxx
 SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
 
@@ -90,21 +90,21 @@ See [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md) for why `AWS_PROJEC
 aws-vault exec uh-groupings -- make aws-setup
 ```
 
-The script (`aws/setup.sh`) runs inside the AWS CLI Docker container and:
+The script (`aws/setup.sh`) runs inside the AWS CLI Docker container and is **non-interactive end to end** — it never prompts. The flow is:
 
 1. Loads `aws/.env`.
-2. Verifies prerequisites and your AWS account ID.
-3. Asks for confirmation (skip with `NON_INTERACTIVE=true` in `.env`).
-4. **Step 1 — Network:** prompts for `VPC_ID` and `SUBNET_IDS` if they're placeholders in `.env`.
-5. **Step 2 — Secrets:** prompts (silent) for the **Grouper Password**; auto-generates a JWT signing key with `openssl rand -base64 32`. Writes both to AWS Secrets Manager as `groupings/api/grouper-password` and `groupings/api/jwt-secret`.
-6. **Step 3 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
-7. **Step 4 — Image:** builds and pushes the initial Docker image to the new ECR repo.
-8. **Step 5 — ECS:** creates the Fargate cluster, service, ALB, target group, and IAM roles via `aws/cloudformation/ecs-cluster.yml`.
+2. Validates that `AWS_PROJECT_ID`, `VPC_ID`, and `SUBNET_IDS` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if any is missing.
+3. Validates the developer's overrides file (`~/.$(whoami)-conf/uh-groupings-api-overrides.properties`); exits if `grouperClient.webService.password` is missing or empty.
+4. Verifies prerequisites and your AWS account ID.
+5. **Step 1 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
+6. **Step 2 — Image:** builds and pushes the initial Docker image to the new ECR repo.
+7. **Step 3 — Secrets:** writes `groupings/api/grouper-password` from your overrides file. Generates a fresh JWT signing key with `openssl rand -base64 32` and writes it to `groupings/api/jwt-secret`, *unless that secret already exists* — in which case the existing value is preserved so re-running setup does not invalidate UI tokens.
+8. **Step 4 — ECS:** creates the Fargate cluster, service, ALB, target group, and IAM roles via `aws/cloudformation/ecs-cluster.yml`.
 9. Prints the ECR URI, cluster/service names, and ALB URL.
 
-The Grouper URL and username are **not** prompted — they are non-secret values that belong in the ECS task definition `environment[]` array (currently in `aws/task-definition.json`).
+The Grouper URL and username are **not** read by `setup.sh` — they are non-secret values that belong in the ECS task definition `environment[]` array (currently in `aws/task-definition.json`).
 
-The script is idempotent for secret values (`create-or-update`) but not for stack creation. If a run fails partway through, see "Recovery" below.
+The script is idempotent for the Grouper password (`create-or-update`) and the JWT key (preserved if already present), but not for stack creation. If a run fails partway through, see "Recovery" below.
 
 ---
 
