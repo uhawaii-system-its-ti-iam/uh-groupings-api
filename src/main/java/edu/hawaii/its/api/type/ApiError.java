@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -22,8 +24,14 @@ public class ApiError {
         this.stackTrace = builder.stackTrace;
     }
 
+    @JsonIgnore
     public HttpStatus getStatus() {
         return status;
+    }
+
+    @JsonProperty("status")
+    public String getStatusName() {
+        return status.name();
     }
 
     public String getResultCode() {
