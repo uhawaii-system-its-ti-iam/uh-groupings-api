@@ -23,6 +23,7 @@ import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.Strings;
 import edu.hawaii.its.api.wrapper.AttributesResult;
@@ -80,6 +81,7 @@ public class GroupingOwnerService {
         log.debug(String.format(
                 "paginatedGrouping; currentUser: %s; groupPaths: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
                 currentUser, groupPaths, pageNumber, pageSize, sortString, isAscending));
+        validatePagination(pageNumber, pageSize);
         GetMembersResults getMembersResults = grouperService.getMembersResults(
                 currentUser,
                 groupPaths,
@@ -98,6 +100,7 @@ public class GroupingOwnerService {
         log.debug(String.format(
                 "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b;",
                 currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending));
+        validatePagination(pageNumber, pageSize);
         GetMembersResult getMembersResult = grouperService.getMembersResult(
                 currentUser,
                 groupingPath,
@@ -121,13 +124,31 @@ public class GroupingOwnerService {
             throw new AccessDeniedException();
         }
 
+        validatePagination(pageNumber, pageSize);
+
         if (Strings.isEmpty(searchString)) {
             return getGroupingMembers(currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending);
         }
 
         SubjectsResults subjectsResults = grouperService.getSubjects(groupingPath, searchString);
+        SortBy sortBy = SortBy.find(sortString);
 
-        return new GroupingGroupMembers(subjectsResults).sort(sortString, isAscending).paginate(pageNumber, pageSize);
+        return new GroupingGroupMembers(subjectsResults).sort(sortBy, isAscending).paginate(pageNumber, pageSize);
+    }
+
+    private void validatePagination(Integer pageNumber, Integer pageSize) {
+        if (pageNumber == null) {
+            throw new IllegalArgumentException("pageNumber must be provided");
+        }
+        if (pageSize == null) {
+            throw new IllegalArgumentException("pageSize must be provided");
+        }
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("pageNumber must be greater than 0");
+        }
+        if (pageSize < 1) {
+            throw new IllegalArgumentException("pageSize must be greater than 0");
+        }
     }
 
     public GroupingMembers getGroupingMembersWhereListed(String currentUser, String groupingPath,
