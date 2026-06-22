@@ -52,7 +52,7 @@ public class GroupingGroupMembers implements GroupingResult {
         return resultCode;
     }
 
-    public void setResultCode(String resultCode) {
+    private void setResultCode(String resultCode) {
         this.resultCode = resultCode;
     }
 
@@ -60,7 +60,7 @@ public class GroupingGroupMembers implements GroupingResult {
         return groupPath;
     }
 
-    public void setGroupPath(String groupPath) {
+    private void setGroupPath(String groupPath) {
         this.groupPath = groupPath;
     }
 
@@ -68,7 +68,7 @@ public class GroupingGroupMembers implements GroupingResult {
         return size;
     }
 
-    public void setSize(int size) {
+    private void setSize(int size) {
         this.size = size;
     }
 
@@ -76,7 +76,7 @@ public class GroupingGroupMembers implements GroupingResult {
         return this.members;
     }
 
-    public void setMembers(List<Subject> subjects) {
+    private void setMembers(List<Subject> subjects) {
         this.members = new ArrayList<>();
         for (Subject subject : subjects) {
             this.members.add(new GroupingGroupMember(subject));
