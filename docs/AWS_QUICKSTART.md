@@ -136,9 +136,9 @@ aws-vault exec uh-groupings -- make aws-stack-events
 
 ## Step 5: CodePipeline (Optional, ~15 min)
 
-The pipeline cannot be fully automated because the GitHub CodeStar connection requires a manual OAuth handshake. See [AWS_SETUP.md → Phase 2](./AWS_SETUP.md#phase-2-codepipeline-setup-manual) for the full procedure. Summary:
+The pipeline cannot be fully automated because the GitHub CodeConnections handshake requires a manual OAuth approval. See [AWS_DEPLOYMENT.md → CodePipeline Setup (Manual)](./AWS_DEPLOYMENT.md#codepipeline-setup-manual) for the full procedure. Summary:
 
-1. Create a CodeStar Connections entry in the AWS Console; authorize via GitHub OAuth.
+1. Create an AWS CodeConnections entry in the AWS Console; authorize via GitHub OAuth.
 2. Note the connection ARN.
 3. Deploy `aws/cloudformation/codepipeline.yml` with the connection ARN, GitHub owner/repo/branch, and the ECS cluster + service names from Step 4.
 
@@ -207,7 +207,6 @@ aws-vault exec uh-groupings -- aws ecs update-service \
 ## What's Next
 
 - **Ongoing operations:** [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md)
-- **Detailed setup walkthrough:** [AWS_SETUP.md](./AWS_SETUP.md)
 - **Naming conventions:** [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md)
 - **Secrets model:** [SECRETS.md](./SECRETS.md)
 - **Architecture overview:** [ARCHITECTURE.md](./ARCHITECTURE.md)
@@ -226,7 +225,7 @@ A previous run left resources behind. Use `make aws-teardown` and start fresh, o
 Your IAM user/role lacks permissions. Check what `aws-vault exec uh-groupings -- aws sts get-caller-identity` returns and verify the IAM policies attached to that identity cover ECR, ECS, CloudFormation, IAM, and Secrets Manager.
 
 **Pipeline not triggering on push**
-Verify the CodeStar connection status is `Available` (not `Pending`). The OAuth handshake from Step 5 must be completed in the AWS Console.
+Verify the CodeConnections connection status is `Available` (not `Pending`). The OAuth handshake from Step 5 must be completed in the AWS Console.
 
 ---
 

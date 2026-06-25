@@ -227,7 +227,6 @@ Before deploying:
 ## Related Documentation
 
 - [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — provisioning workflow that uses these conventions
-- [AWS_SETUP.md](AWS_SETUP.md) — detailed setup with the same conventions
 - [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) — ongoing operations
 - [SECRETS.md](SECRETS.md) — how secrets are stored separately from naming
 - [aws/cloudformation/](../aws/cloudformation/) — the templates that consume the parameters

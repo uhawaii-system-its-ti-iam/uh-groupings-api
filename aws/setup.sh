@@ -20,7 +20,8 @@
 #   projects reference the same Secrets Manager entry from their own task
 #   definitions. Re-running setup preserves the existing JWT secret to avoid
 #   silently invalidating UI tokens; rotate it explicitly via the CLI command
-#   documented in docs/AWS_SETUP.md.
+#   documented in docs/SECRETS.md (Secrets Manager Integration → Rotate the
+#   JWT key).
 
 set -euo pipefail
 
@@ -277,10 +278,11 @@ configure_secrets() {
     # owns this value; companion UI projects reference the same Secrets Manager
     # entry. Overwriting it on re-run would silently invalidate every active UI
     # token, so we only create it if it doesn't already exist. To rotate
-    # explicitly, use the manual CLI command in docs/AWS_SETUP.md.
+    # explicitly, use the manual CLI command in docs/SECRETS.md
+    # (Secrets Manager Integration → Rotate the JWT key).
     if jwt_secret_exists_in_aws; then
         log "✓ groupings/api/jwt-secret already exists; preserving existing value"
-        log "  (rotate explicitly via the CLI command in docs/AWS_SETUP.md;"
+        log "  (rotate explicitly via the CLI command in docs/SECRETS.md;"
         log "  rotation requires redeploying every UI consumer)"
     else
         local generated_jwt
@@ -339,7 +341,7 @@ print_summary() {
     log "  2. Deploy CodePipeline stack"
     log "  3. Test the application: curl ${ALB_URL}/actuator/health"
     log ""
-    log "For detailed instructions, see docs/AWS_SETUP.md"
+    log "For detailed instructions, see docs/AWS_QUICKSTART.md and docs/AWS_DEPLOYMENT.md"
 }
 
 #

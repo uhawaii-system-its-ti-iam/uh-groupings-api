@@ -20,9 +20,6 @@ Parameters:
       - dev
       - test
       - prod
-      - future-dev
-      - future-test
-      - future-prod
     Description: Environment name
   
   Component:
@@ -188,13 +185,13 @@ Resources:
 
   # GitHub Connection (needs manual approval in Console)
   GitHubConnection:
-    Type: AWS::CodeStarConnections::Connection
+    Type: AWS::CodeConnections::Connection
     Properties:
       ConnectionName: !Sub 'github-enterprise-${Environment}'
       ProviderType: GitHubEnterpriseServer
       HostArn: !Ref GitHubEnterpriseHost
   GitHubEnterpriseHost:
-    Type: AWS::CodeStarConnections::Host
+    Type: AWS::CodeConnections::Host
     Properties:
       Name: !Sub 'github-enterprise-${Environment}'
       ProviderEndpoint: !Ref GitHubEnterpriseUrl
@@ -240,7 +237,7 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - codestar-connections:UseConnection
+                  - codeconnections:UseConnection
                 Resource: !Ref GitHubConnection
 
   # IAM Role for CodeBuild

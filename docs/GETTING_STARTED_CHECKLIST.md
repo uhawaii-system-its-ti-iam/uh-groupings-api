@@ -143,9 +143,9 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
 
 ## Phase 5 — CI/CD Pipeline (Optional, ~15 min)
 
-The CodeStar GitHub connection requires a manual OAuth handshake in the AWS Console; the rest is automated. See [AWS_SETUP.md → Phase 2](AWS_SETUP.md#phase-2-codepipeline-setup-manual) for details.
+The AWS CodeConnections handshake to GitHub requires a manual OAuth approval in the AWS Console; the rest is automated. See [AWS_DEPLOYMENT.md → CodePipeline Setup (Manual)](AWS_DEPLOYMENT.md#codepipeline-setup-manual) for details.
 
-- [ ] **Create CodeStar GitHub connection** in the AWS Console; complete OAuth.
+- [ ] **Create the AWS CodeConnections GitHub connection** in the AWS Console; complete OAuth.
 - [ ] **Note the connection ARN.**
 - [ ] **Deploy the pipeline stack** with `aws/cloudformation/codepipeline.yml`, supplying the connection ARN, repo owner/branch, and the ECS cluster+service names from Phase 4.
 - [ ] **Test by pushing a commit** to the configured branch (canonical: `main`).
@@ -217,7 +217,6 @@ You're done when:
 | [DEV_QUICKSTART.md](DEV_QUICKSTART.md) | Getting the app running locally for the first time |
 | [DEV_README.md](DEV_README.md) | Day-to-day local development tasks and troubleshooting |
 | [AWS_QUICKSTART.md](AWS_QUICKSTART.md) | First AWS deployment, end-to-end |
-| [AWS_SETUP.md](AWS_SETUP.md) | Deeper AWS setup details, especially the manual CodePipeline step |
 | [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) | Ongoing AWS operations, scaling, rollback |
 | [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) | Why resources are named the way they are |
 | [SECRETS.md](SECRETS.md) | The two-category secrets model (overrides file vs. Secrets Manager + aws-vault) |

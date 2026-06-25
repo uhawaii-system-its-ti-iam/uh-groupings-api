@@ -35,6 +35,85 @@ The examples below use the resource names produced by the project's naming conve
 
 ---
 
+## CodePipeline Setup (Manual)
+
+`make aws-setup` creates the ECR, ECS, ALB, and Secrets Manager resources, but it does **not** create the CI/CD pipeline. The pipeline requires an AWS CodeConnections connection to GitHub that is authorized through the AWS Console via OAuth — that handshake cannot be automated. Once the connection exists, the pipeline stack itself can be created from the CLI.
+
+This is a one-time setup per environment. After the pipeline exists, ongoing deploys are handled by the [Deployment Methods](#deployment-methods) section below.
+
+### Step 1: Create GitHub Connection
+
+1. Go to **AWS Console → Developer Tools → Settings → Connections**.
+2. Click **Create connection**.
+3. Select **GitHub** (or GitHub Enterprise Server).
+4. Enter your GitHub URL.
+5. Complete the OAuth authorization flow.
+6. Copy the **Connection ARN**.
+
+The connection starts in `PENDING` status and becomes `AVAILABLE` after authorization.
+
+### Step 2: Deploy the CodePipeline Stack
+
+```bash
+cd aws/
+
+# Source your environment
+source .env
+
+# Resolve ECS resource names from the stack created by setup.sh
+ECS_CLUSTER=$(aws-vault exec uh-groupings -- aws cloudformation describe-stacks \
+  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+  --query 'Stacks[0].Outputs[?OutputKey==`ClusterName`].OutputValue' \
+  --output text \
+  --region "${AWS_REGION}")
+
+ECS_SERVICE=$(aws-vault exec uh-groupings -- aws cloudformation describe-stacks \
+  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+  --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
+  --output text \
+  --region "${AWS_REGION}")
+
+# Deploy the pipeline
+aws-vault exec uh-groupings -- aws cloudformation create-stack \
+  --stack-name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}" \
+  --template-body file://cloudformation/codepipeline.yml \
+  --parameters \
+    ParameterKey=Environment,ParameterValue="${AWS_ENV}" \
+    ParameterKey=GitHubEnterpriseUrl,ParameterValue="https://github.com" \
+    ParameterKey=GitHubOwner,ParameterValue="${GITHUB_ORG}" \
+    ParameterKey=GitHubRepo,ParameterValue="${GITHUB_REPO}" \
+    ParameterKey=GitHubBranch,ParameterValue="${GITHUB_BRANCH}" \
+    ParameterKey=ECSClusterName,ParameterValue="${ECS_CLUSTER}" \
+    ParameterKey=ECSServiceName,ParameterValue="${ECS_SERVICE}" \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --region "${AWS_REGION}"
+
+# Wait for completion
+aws-vault exec uh-groupings -- aws cloudformation wait stack-create-complete \
+  --stack-name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}" \
+  --region "${AWS_REGION}"
+```
+
+**Important:** `buildspec.yml` lives in the `aws/` subdirectory. Ensure the CodeBuild project references `aws/buildspec.yml` as its buildspec path.
+
+### Step 3: Verify the Pipeline
+
+```bash
+# Trigger the pipeline manually
+aws-vault exec uh-groupings -- aws codepipeline start-pipeline-execution \
+  --name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}"
+
+# Watch its state
+aws-vault exec uh-groupings -- aws codepipeline get-pipeline-state \
+  --name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}"
+```
+
+The canonical branch is `main`. For pilot work, you can temporarily point the pipeline at a feature branch by re-deploying with a different `GitHubBranch` parameter.
+
+If the pipeline doesn't trigger on push, verify the CodeConnections connection status is `Available` (not `Pending`). The OAuth handshake from Step 1 must be completed in the AWS Console.
+
+---
+
 ## Deployment Methods
 
 ### 1. Pipeline-Triggered Deployment (default)
@@ -282,6 +361,46 @@ aws-vault exec uh-groupings -- aws application-autoscaling \
 
 ---
 
+## CloudWatch Monitoring
+
+CloudWatch metrics for ECS are emitted automatically. To get paged on resource pressure, attach alarms to the standard CPU and memory metrics. Both alarms below assume the cluster and service names from the project's [naming convention](AWS_NAMING_CONVENTIONS.md).
+
+```bash
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
+
+# CPU above 80% sustained for 10 minutes
+aws-vault exec uh-groupings -- aws cloudwatch put-metric-alarm \
+  --alarm-name "${AWS_PROJECT_ID}-high-cpu-${AWS_ENV}" \
+  --alarm-description "Alert when CPU exceeds 80%" \
+  --metric-name CPUUtilization \
+  --namespace AWS/ECS \
+  --statistic Average \
+  --period 300 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 2 \
+  --dimensions "Name=ClusterName,Value=${CLUSTER}" "Name=ServiceName,Value=${SERVICE}"
+
+# Memory above 80% sustained for 10 minutes
+aws-vault exec uh-groupings -- aws cloudwatch put-metric-alarm \
+  --alarm-name "${AWS_PROJECT_ID}-high-memory-${AWS_ENV}" \
+  --alarm-description "Alert when memory exceeds 80%" \
+  --metric-name MemoryUtilization \
+  --namespace AWS/ECS \
+  --statistic Average \
+  --period 300 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 2 \
+  --dimensions "Name=ClusterName,Value=${CLUSTER}" "Name=ServiceName,Value=${SERVICE}"
+```
+
+Add `--alarm-actions <SNS_TOPIC_ARN>` to route alarm state changes to email, Slack, PagerDuty, etc.
+
+---
+
 ## Troubleshooting Deployments
 
 ### Deployment stuck
@@ -361,9 +480,41 @@ aws-vault exec uh-groupings -- aws ecs update-service \
 
 ---
 
+## Useful Commands
+
+A quick reference for ad-hoc operations. All commands assume `source aws/.env` has set `AWS_REGION`, `AWS_OWNER`, `AWS_PROJECT_ID`, and `AWS_ENV`, and that `CLUSTER` and `SERVICE` are derived as `${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-{cluster|service}`.
+
+```bash
+# Pipeline status
+aws-vault exec uh-groupings -- aws codepipeline get-pipeline-state \
+  --name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}"
+
+# Manually start the pipeline
+aws-vault exec uh-groupings -- aws codepipeline start-pipeline-execution \
+  --name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}"
+
+# Recent ECS service events (the 5 most recent)
+aws-vault exec uh-groupings -- aws ecs describe-services \
+  --cluster "${CLUSTER}" --services "${SERVICE}" \
+  --query 'services[0].events[0:5]'
+
+# Scale ECS service
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 3
+
+# Tail recent logs (or use `make aws-logs`)
+aws-vault exec uh-groupings -- aws logs tail \
+  "/ecs/${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}" --since 1h --follow
+
+# Force a new deployment without a code change
+aws-vault exec uh-groupings -- aws ecs update-service \
+  --cluster "${CLUSTER}" --service "${SERVICE}" --force-new-deployment
+```
+
+---
+
 ## Related Documentation
 
 - [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — initial provisioning
-- [AWS_SETUP.md](AWS_SETUP.md) — detailed setup
 - [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) — how the resource names above are derived
 - [SECRETS.md](SECRETS.md) — secrets model (aws-vault for developer credentials, Secrets Manager for app runtime)

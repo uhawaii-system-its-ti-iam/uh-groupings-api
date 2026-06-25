@@ -119,7 +119,7 @@ avx make aws-logs
 
 ### Manual Setup
 
-If you prefer not to use the script, follow the step-by-step guide in [../docs/AWS_SETUP.md](../docs/AWS_SETUP.md). The same `aws-vault exec` wrapper applies to any `aws` CLI commands you issue manually.
+If you prefer not to use the script, the [CloudFormation Templates](#cloudformation-templates) section below shows the per-stack `aws cloudformation create-stack` commands. The same `aws-vault exec` wrapper applies to any `aws` CLI commands you issue manually.
 
 ## CloudFormation Templates
 

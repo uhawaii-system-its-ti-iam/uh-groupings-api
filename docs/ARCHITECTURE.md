@@ -137,7 +137,7 @@ For pilot/feature work, this same command can be used to point the pipeline at a
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
 #### Stage 1: Source
-- **Provider:** GitHub Enterprise (via CodeStar Connection)
+- **Provider:** GitHub Enterprise (via AWS CodeConnections)
 - **Trigger:** Automatic on commit to monitored branch
 - **Output:** Source code ZIP artifact
 
