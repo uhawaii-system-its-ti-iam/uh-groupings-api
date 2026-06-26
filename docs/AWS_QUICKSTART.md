@@ -27,15 +27,30 @@ This is a one-time setup. After completion, all ongoing operations are documente
 
 You need:
 
-- **Docker Desktop** running locally (the AWS CLI is invoked inside a Docker container; you do **not** need it installed on your host)
+- **Docker Desktop** running locally
+  - The AWS CLI is invoked inside a Docker container; you do **not** need it installed on your host.
 - **Make** (standard on macOS and Linux)
-- **`aws-vault`** for credential storage — installed automatically by `make aws-vault-setup`
+- **`aws-vault`** for credential storage. It is installed automatically using `make aws-vault-setup`
 - An IAM access key pair from your AWS account
-- VPC and at least 2 subnets in different Availability Zones
+- An AWS VPC with at least 2 public subnets in different Availability Zones (see Step 2)
 
 ---
 
-## Step 1: Configure Credentials (5 min)
+## Step 1: Configure Credentials (5–10 min)
+
+### Get an AWS access key pair
+
+`make aws-vault-setup` (next step) prompts for an **Access Key ID** and **Secret Access Key**. Create them in the AWS Console first:
+
+1. **Log in** to the AWS Console. Need an account? [Sign up at aws.amazon.com](https://aws.amazon.com/free/) — the free tier covers everything this stack creates for testing.
+
+2. **Create an IAM user** for deploying this project: IAM console → **Users** → **Create user**, name it something like `groupings-deploy`. On the permissions step, attach **AdministratorAccess** for a personal sandbox. In a team account, ask your IAM admin to scope it to CloudFormation, ECR, ECS, EC2 (VPC/subnet read), ELBv2, IAM (role create), CloudWatch Logs, Secrets Manager, and STS.
+
+3. **Generate the access key**: IAM console → **Users** → click your user → **Security credentials** tab → **Create access key** → use case **Command Line Interface (CLI)** → acknowledge the recommendation → **Create access key**. Copy both values now — the Secret Access Key is displayed only at this moment. If you lose it, you have to delete the key and create a new one.
+
+> **Using SSO / IAM Identity Center?** Skip the IAM-user step. Run `aws sso login --profile <name>` and `aws-vault exec` will pick up your cached session. See [Credential alternatives](../aws/README.md#credential-alternatives) for the full procedure.
+
+### Run the vault setup
 
 `aws-vault` stores your IAM access key in your operating system's keychain rather than in a plaintext file on disk. From the repository root:
 
@@ -45,16 +60,55 @@ make aws-vault-setup
 
 The script will:
 1. Install `aws-vault` via Homebrew if it's not already present (macOS).
+  
 2. Prompt for your **AWS Access Key ID** and **Secret Access Key**.
 3. Store them under a profile named `uh-groupings` in your OS keychain.
 
-The script is idempotent — re-running it skips both steps if everything is already configured.
+The script is idempotent.
 
 Every subsequent AWS command is wrapped with `aws-vault exec`, which releases the credentials only as ephemeral environment variables for the duration of one command. They never touch disk.
 
 ---
 
-## Step 2: Configure `aws/.env` (5 min)
+## Step 2: Configure `aws/.env` (5–15 min)
+
+### Prepare your VPC and subnets first
+
+The setup script consumes existing VPC and subnet IDs; it does not create networking. Before editing `aws/.env`, you need:
+
+- A VPC in your target region.
+- Two **public** subnets in that VPC, in **different Availability Zones**.
+- Each subnet with auto-assign public IPv4 enabled and associated with a route table containing `0.0.0.0/0 → igw-...`.
+
+The 2-AZ minimum is an AWS-side constraint on Application Load Balancers, not a project choice — `CreateLoadBalancer` rejects a single-AZ ALB.
+
+**Personal sandbox (easiest):** Use your account's default VPC. Each region has one with public subnets across several AZs already wired to an Internet Gateway.
+
+```bash
+aws-vault exec uh-groupings -- aws ec2 describe-subnets \
+  --filters "Name=default-for-az,Values=true" \
+  --query 'Subnets[].{Id:SubnetId,AZ:AvailabilityZone,CIDR:CidrBlock}' \
+  --output table --region us-west-2
+```
+
+Pick any two rows in different AZs.
+
+**Custom VPC (e.g., a `sandbox-vpc-01` you manage yourself):** In the VPC console → **Subnets** → **Create subnet**, add two `/28` subnets (16 IPs each, the AWS minimum, plenty for `ECS_TASK_COUNT=1`) in your VPC in different AZs. Enable auto-assign public IPv4 on both, and associate both with a route table that points `0.0.0.0/0` at an Internet Gateway. See the [AWS subnet creation guide](https://docs.aws.amazon.com/vpc/latest/userguide/create-subnets.html) for the UI walkthrough.
+
+**Enterprise or team accounts:** The VPC is probably owned by your network team. Ask for two public subnet IDs in the same VPC across two different AZs.
+
+Verify before continuing:
+
+```bash
+aws-vault exec uh-groupings -- aws ec2 describe-subnets \
+  --subnet-ids subnet-aaaa1111 subnet-bbbb2222 \
+  --query 'Subnets[].{Id:SubnetId,AZ:AvailabilityZone,Public:MapPublicIpOnLaunch}' \
+  --output table --region us-west-2
+```
+
+Two rows, two distinct AZs, both `Public: True`.
+
+### Edit `aws/.env`
 
 Edit `aws/.env` to set deployment parameters. The defaults work for a personal sandbox:
 

@@ -106,7 +106,7 @@ avx make aws-logs
 | `AWS_PROJECT_ID` | Project identifier (required) | _none_ |
 | `PROJECT_NAME` | Display name used in setup-script output | `AWS_PROJECT_ID` |
 | `VPC_ID` | Existing VPC ID (required; setup fails fast if missing or still a placeholder) | _none_ |
-| `SUBNET_IDS` | Comma-separated subnet IDs in at least 2 AZs (required; setup fails fast if missing) | _none_ |
+| `SUBNET_IDS` | Comma-separated public subnet IDs across at least 2 AZs (required; AWS Application Load Balancers must span 2 AZs). Setup fails fast if missing | _none_ |
 | `ECS_TASK_COUNT` | Number of ECS tasks to run | `2` |
 
 ### Credential Alternatives

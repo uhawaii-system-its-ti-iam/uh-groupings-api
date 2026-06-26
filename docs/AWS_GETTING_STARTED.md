@@ -1,6 +1,12 @@
-# Getting Started Checklist
+# AWS Getting Started Checklist
 
-A printable checklist for bringing the UH Groupings Spring API up — locally first, then on AWS.
+A printable checklist for deploying the UH Groupings Spring API to AWS for the first time.
+
+**Read this only if you're deploying to AWS.** For local development, see the project [README](../README.md).
+
+**Other AWS docs:**
+- [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — Narrative walkthrough of the same setup (longer, more context)
+- [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) — Ongoing operations after the first deployment (scaling, rollback, troubleshooting)
 
 ---
 
@@ -17,60 +23,18 @@ A printable checklist for bringing the UH Groupings Spring API up — locally fi
   make --version
   ```
 
-- [ ] **Git configured**
-  ```bash
-  git config --global user.name "Your Name"
-  git config --global user.email "your.email@hawaii.edu"
-  ```
-
-- [ ] **Access to the GitHub repository**
-  Push/pull to `https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api`.
-
 You don't need the AWS CLI installed locally — `make aws-*` runs it inside a Docker container.
 
 ---
 
-## Phase 1 — Run Locally (~10 min)
+## Phase 1 — Provision AWS Credentials (~5 min)
 
-- [ ] **Clone the repo**
-  ```bash
-  git clone https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api.git
-  cd uh-groupings-api
-  ```
+- [ ] **Create or retrieve an IAM Access Key ID and Secret Access Key**
+  - **Personal sandbox:** AWS Console → IAM → **Users** → your user → **Security credentials** → **Create access key** → use case "Command Line Interface (CLI)". Attach `AdministratorAccess` to the user first if it doesn't already have permissions.
+  - **Team account:** ask your AWS admin for credentials, or use IAM Identity Center (`aws sso login --profile <name>` works with `aws-vault exec`).
+  - **Save both values immediately** — the Secret Access Key is shown only at creation. If lost, you must delete the key and create a new one.
 
-- [ ] **Create the local properties file**
-  ```bash
-  mkdir -p ~/.$(whoami)-conf
-  nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-  chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-  ```
-  Paste the template from [DEV_QUICKSTART.md](DEV_QUICKSTART.md#2-create-configuration-file) and fill in your Grouper credentials, JWT key, and email.
-
-- [ ] **Start the application**
-  ```bash
-  docker-compose up
-  ```
-
-- [ ] **Verify health**
-  ```bash
-  curl http://localhost:8081/uhgroupingsapi/actuator/health
-  # Expected: {"status":"UP"}
-  ```
-  Swagger UI: <http://localhost:8081/uhgroupingsapi/swagger-ui.html>
-
-- [ ] **Stop when done**
-  ```bash
-  docker-compose down
-  ```
-
-You're now running locally. Continue to Phase 2 only if you intend to deploy to AWS.
-
----
-
-## Phase 2 — Provision AWS Credentials (~5 min)
-
-- [ ] **Have your IAM Access Key ID and Secret Access Key ready**
-  Create them in the AWS Console under IAM → Users → Security credentials → Create access key (use case: "Command Line Interface (CLI)"). The secret is shown only once.
+  See [AWS_QUICKSTART.md → Step 1](AWS_QUICKSTART.md#step-1-configure-credentials-510-min) for the full walkthrough and required IAM permissions.
 
 - [ ] **Run the vault setup**
   ```bash
@@ -85,7 +49,7 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
 
 ---
 
-## Phase 3 — Configure `aws/.env` (~5 min)
+## Phase 2 — Configure `aws/.env` (~5 min)
 
 - [ ] **Edit `aws/.env`** with your deployment parameters:
   ```bash
@@ -95,17 +59,17 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
   AWS_OWNER=mhodges      # or your username
   PROJECT_NAME="UH Groupings API"
   VPC_ID=vpc-xxxxx       # required — replace with a real VPC ID
-  SUBNET_IDS=subnet-xxxxx,subnet-yyyyy   # required — at least 2 real subnet IDs in different AZs
+  SUBNET_IDS=subnet-xxxxx,subnet-yyyyy   # required — 2 public subnet IDs in different AZs (AWS ALB constraint)
   ECS_TASK_COUNT=1
   ```
 
-  Setup is non-interactive and rejects the placeholder values shown above. Replace them with real IDs before running `make aws-setup`.
+  Setup is non-interactive and rejects the placeholder values shown above. Replace them with real IDs before running `make aws-setup`. See [AWS_QUICKSTART.md → Step 2](AWS_QUICKSTART.md#step-2-configure-awsenv-515-min) for how to find or create your VPC and subnets.
 
 - [ ] **Confirm the project ID is short** (≤10 chars). The companion projects use `groupings-aui` and `groupings-rui`. See [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) for why.
 
 ---
 
-## Phase 4 — Provision AWS Infrastructure (~30 min)
+## Phase 3 — Provision AWS Infrastructure (~30 min)
 
 - [ ] **Run setup**
   ```bash
@@ -119,7 +83,6 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
   - Prompt for the **Grouper Password** (silent input)
   - Generate a JWT signing key
   - Write both to AWS Secrets Manager (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
-  - Prompt for VPC ID and subnets if your `.env` has placeholders
   - Create the ECS cluster, service, ALB, target group, and IAM roles
 
 - [ ] **Verify the deployment**
@@ -141,13 +104,13 @@ You're now running locally. Continue to Phase 2 only if you intend to deploy to 
 
 ---
 
-## Phase 5 — CI/CD Pipeline (Optional, ~15 min)
+## Phase 4 — CI/CD Pipeline (Optional, ~15 min)
 
 The AWS CodeConnections handshake to GitHub requires a manual OAuth approval in the AWS Console; the rest is automated. See [AWS_DEPLOYMENT.md → CodePipeline Setup (Manual)](AWS_DEPLOYMENT.md#codepipeline-setup-manual) for details.
 
 - [ ] **Create the AWS CodeConnections GitHub connection** in the AWS Console; complete OAuth.
 - [ ] **Note the connection ARN.**
-- [ ] **Deploy the pipeline stack** with `aws/cloudformation/codepipeline.yml`, supplying the connection ARN, repo owner/branch, and the ECS cluster+service names from Phase 4.
+- [ ] **Deploy the pipeline stack** with `aws/cloudformation/codepipeline.yml`, supplying the connection ARN, repo owner/branch, and the ECS cluster+service names from Phase 3.
 - [ ] **Test by pushing a commit** to the configured branch (canonical: `main`).
 
 ---
@@ -201,24 +164,7 @@ avx make aws-teardown
 
 You're done when:
 
-- [x] Local Docker container starts cleanly
-- [x] `http://localhost:8081/uhgroupingsapi/actuator/health` returns `{"status":"UP"}`
 - [x] `aws-vault list` shows the `uh-groupings` profile
 - [x] AWS deployment's ALB returns `{"status":"UP"}`
 - [x] `avx make aws-logs` streams the deployed application's output
 - [x] (Optional) A `git push` to the configured branch triggers a pipeline build and ECS rolling deploy
-
----
-
-## Documentation Map
-
-| Doc | When to read |
-|-----|--------------|
-| [DEV_QUICKSTART.md](DEV_QUICKSTART.md) | Getting the app running locally for the first time |
-| [DEV_README.md](DEV_README.md) | Day-to-day local development tasks and troubleshooting |
-| [AWS_QUICKSTART.md](AWS_QUICKSTART.md) | First AWS deployment, end-to-end |
-| [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) | Ongoing AWS operations, scaling, rollback |
-| [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) | Why resources are named the way they are |
-| [SECRETS.md](SECRETS.md) | The two-category secrets model (overrides file vs. Secrets Manager + aws-vault) |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System design and components |
-| [AGENTS.md](../AGENTS.md) | Project conventions for engineers and agents |

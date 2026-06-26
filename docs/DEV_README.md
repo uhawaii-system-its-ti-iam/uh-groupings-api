@@ -270,7 +270,7 @@ curl -X POST http://localhost:8081/uhgroupingsapi/api/v2.1/endpoint \
 ```yaml
 environment:
   - SPRING_PROFILES_ACTIVE=localhost  # Spring profile
-  - JAVA_OPTS=-Xmx1g -Xms512m        # JVM memory
+  - JAVA_OPTS=-Xmx1g -Xms512m         # JVM memory
 ```
 
 ### Spring Profiles
@@ -331,7 +331,3 @@ Now that your local environment is running:
    - [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md) - Ongoing AWS operations
 
 ---
-
-**Last Updated:** 2026-06-10  
-**Maintained By:** UH ITS DevOps Team
-

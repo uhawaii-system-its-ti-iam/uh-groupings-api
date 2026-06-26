@@ -125,7 +125,7 @@ chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 
 ## Next Steps
 
-✅ **You're running!** Now you can:
+**You're running!** Now you can:
 - **Edit code and restart:** `docker-compose down && docker-compose up --build`
 - **View logs:** `docker-compose logs -f`
 - **Run tests:** `./mvnw test`

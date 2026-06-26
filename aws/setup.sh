@@ -98,7 +98,8 @@ validate_network_configuration() {
 
     if [[ -z "${SUBNET_IDS}" || "${SUBNET_IDS}" == *xxxxx* || "${SUBNET_IDS}" == *yyyyy* ]]; then
         error "SUBNET_IDS is not set in aws/.env (current value: '${SUBNET_IDS:-<unset>}')."
-        error "Set it to a comma-separated list of real subnet IDs in at least 2 AZs and re-run."
+        error "Set it to a comma-separated list of two real subnet IDs in different Availability Zones and re-run."
+        error "(AWS requires Application Load Balancers to span at least 2 AZs.)"
         exit 1
     fi
 
