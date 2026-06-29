@@ -98,6 +98,12 @@ public class GroupingGroupMembers implements GroupingResult {
     }
 
     public GroupingGroupMembers paginate(int pageNumber, int pageSize) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("pageNumber must be greater than 0");
+        }
+        if (pageSize < 1) {
+            throw new IllegalArgumentException("pageSize must be greater than 0");
+        }
         int fromIndex = (pageNumber - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, members.size());
 
