@@ -91,6 +91,7 @@ public class GroupingGroupMembers implements GroupingResult {
         );
         Comparator<GroupingGroupMember> comparator = comparatorMap.get(sortString);
 
+        // do not sort in-place to prevent any side effects in pagination
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(this);
         groupingGroupMembers.members.sort(isAscending ? comparator : comparator.reversed());
 
