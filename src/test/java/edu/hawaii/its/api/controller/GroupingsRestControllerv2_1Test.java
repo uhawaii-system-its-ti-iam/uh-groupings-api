@@ -1100,7 +1100,7 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhOwner
-    public void getNumberOfMembershipsTrueNotFoundReturnsNotFoundTest() throws Exception {
+    public void getNumberOfMembershipsNotFoundReturnsNotFoundTest() throws Exception {
         given(membershipService.numberOfMemberships(TEST_USER))
                 .willThrow(new UhIdentifierNotFoundException(TEST_USER));
 
