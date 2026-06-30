@@ -3,34 +3,27 @@ package edu.hawaii.its.api.wrapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeAssign;
-import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class GroupAttributeTest {
-    private PropertyLocator propertyLocator;
     private static final String TRIO = "uh-settings:attributes:for-groups:uh-grouping:is-trio";
 
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void constructor() {
-        String json = propertyLocator.find("ws.attribute.assign.success");
-        WsAttributeAssign wsAttributeAssign = JsonUtil.asObject(json, WsAttributeAssign.class);
-        assertNotNull(new GroupAttribute(wsAttributeAssign));
-
+        assertNotNull(groupingsTestConfiguration.attributeAssignSuccessTestData());
         assertNotNull(new GroupAttribute(null));
         assertNotNull(new GroupAttribute());
         assertNotNull(new GroupAttribute(new WsAttributeAssign()));
@@ -38,17 +31,16 @@ public class GroupAttributeTest {
 
     @Test
     public void accessors() {
-        String json = propertyLocator.find("ws.attribute.assign.success");
-        WsAttributeAssign wsAttributeAssign = JsonUtil.asObject(json, WsAttributeAssign.class);
-        GroupAttribute groupAttribute = new GroupAttribute(wsAttributeAssign);
+        GroupAttribute groupAttribute =
+                groupingsTestConfiguration.attributeAssignSuccessTestData();
+
         assertNotNull(groupAttribute);
         assertEquals("SUCCESS", groupAttribute.getResultCode());
         assertEquals("group-path", groupAttribute.getGroupPath());
         assertEquals(TRIO, groupAttribute.getAttributeName());
 
-        json = propertyLocator.find("ws.attribute.assign.failure");
-        wsAttributeAssign = JsonUtil.asObject(json, WsAttributeAssign.class);
-        groupAttribute = new GroupAttribute(wsAttributeAssign);
+        groupAttribute =
+                groupingsTestConfiguration.attributeAssignFailureTestData();
         assertNotNull(groupAttribute);
         assertEquals("FAILURE", groupAttribute.getResultCode());
         assertEquals("", groupAttribute.getGroupPath());

@@ -5,39 +5,33 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.util.JsonUtil;
-import edu.hawaii.its.api.util.PropertyLocator;
+import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributeResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsAssignAttributesResults;
-
+@ActiveProfiles("localTest")
+@SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AssignAttributeResultTest {
-    private PropertyLocator propertyLocator;
 
-    @BeforeEach
-    public void beforeAll() throws Exception {
-        propertyLocator = new PropertyLocator("src/test/resources", "grouper.test.properties");
-    }
+    @Autowired
+    private GroupingsTestConfiguration groupingsTestConfiguration;
 
     @Test
     public void test() {
-        String json = propertyLocator.find("ws.assign.attributes.results.turn.off.opt.in.success");
-        WsAssignAttributesResults wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
-        WsAssignAttributeResult wsAssignAttributeResult = wsAssignAttributesResults.getWsAttributeAssignResults()[0];
-        AssignAttributeResult assignAttributeResult = new AssignAttributeResult(wsAssignAttributeResult);
+        AssignAttributeResult assignAttributeResult =
+                groupingsTestConfiguration.assignAttributesResultsTurnOffOptInSuccessTestData();
         assertNotNull(assignAttributeResult);
         assertEquals("SUCCESS", assignAttributeResult.getResultCode());
         assertTrue(assignAttributeResult.isAttributeChanged());
         assertFalse(assignAttributeResult.isAttributeValuesChanged());
         assertTrue(assignAttributeResult.isAttributeRemoved());
 
-        json = propertyLocator.find("ws.assign.attributes.results.null.assign.attribute.result");
-        wsAssignAttributesResults = JsonUtil.asObject(json, WsAssignAttributesResults.class);
-        wsAssignAttributeResult = wsAssignAttributesResults.getWsAttributeAssignResults()[0];
-        assignAttributeResult = new AssignAttributeResult(wsAssignAttributeResult);
+        assignAttributeResult =
+                groupingsTestConfiguration.assignAttributesResultsNullAssignAttributeResultTestData();
         assertNotNull(assignAttributeResult);
         assertEquals("FAILURE", assignAttributeResult.getResultCode());
         assertFalse(assignAttributeResult.isAttributeChanged());
