@@ -269,7 +269,7 @@ public class ErrorControllerAdvice {
     @ExceptionHandler(GrouperException.class)
     public ResponseEntity<ApiError> handleGrouperException(GrouperException ex) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        String path = attributes.getRequest().getRequestURI();
+        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
 
         logger.error("Backend dependency unavailable for path: " + path, ex);
         emailService.sendWithStack(ex, "Grouper Exception", path);
