@@ -75,7 +75,7 @@ public class SubjectService {
         }
         SubjectsResults subjectsResults = grouperService.getSubjects(wellFormed);
         if (!subjectsResults.isSuccessful()) {
-            throw new GrouperException("Grouper subject lookup failed");
+            throw new GrouperException("Grouper subject lookup failed (rawResultCode=" + subjectsResults.getRawResultCode() + ")");
         }
         for (Subject subject : subjectsResults.getSubjects()) {
             if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
