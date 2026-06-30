@@ -9,10 +9,10 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.hawaii.its.api.exception.GrouperException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -74,6 +74,9 @@ public class SubjectService {
             return results;
         }
         SubjectsResults subjectsResults = grouperService.getSubjects(wellFormed);
+        if (!subjectsResults.isSuccessful()) {
+            throw new GrouperException("Grouper subject lookup failed (rawResultCode=" + subjectsResults.getRawResultCode() + ")");
+        }
         for (Subject subject : subjectsResults.getSubjects()) {
             if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
                 continue;
@@ -103,19 +106,20 @@ public class SubjectService {
     }
 
     private Subject getSubject(String uhIdentifier) {
-        try {
-            SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
-            List<Subject> subjects = subjectsResults.getSubjects();
+        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifier);
+        if (!subjectsResults.isSuccessful()) {
+            throw new GrouperException("Grouper subject lookup failed");
+        }
 
-            if (subjectsResults.getResultCode().equals("SUBJECT_NOT_FOUND")) {
+        List<Subject> subjects = subjectsResults.getSubjects();
+        if (!subjects.isEmpty()) {
+            Subject subject = subjects.get(0);
+            if (subject.getResultCode().equals("SUBJECT_NOT_FOUND")) {
                 return new Subject();
             }
-            if (subjects.size() >= 1) {
-                return subjects.get(0);
-            }
-            return new Subject();
-        } catch (GrouperException e) {
-            return new Subject();
+            return subject;
         }
+
+        return new Subject();
     }
 }

@@ -7,6 +7,7 @@ import edu.hawaii.its.api.type.GroupType;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.internet2.middleware.grouperClientExt.com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -69,6 +70,19 @@ public class SubjectsResults extends Results {
             }
         }
         return failure;
+    }
+
+    public boolean isSuccessful() {
+        return getRawResultCode().startsWith("SUCCESS");
+    }
+
+    public String getRawResultCode() {
+        WsResultMeta resultMetadata = wsGetSubjectsResults.getResultMetadata();
+        if (resultMetadata == null) {
+            return "";
+        }
+        String resultCode = resultMetadata.getResultCode();
+        return resultCode != null ? resultCode : "";
     }
 
     @JsonIgnore

@@ -137,7 +137,7 @@ public class ErrorControllerAdviceTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.message").value("UH Member found failed"))
                 .andExpect(jsonPath("$.path").value("/api/groupings/v2.1/members/memberships"))
-                .andExpect(jsonPath("$.stackTrace").exists())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
 
                 .andReturn();
 

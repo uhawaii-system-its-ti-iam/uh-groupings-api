@@ -9,6 +9,8 @@ import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import jakarta.mail.MessagingException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -29,9 +31,14 @@ import edu.hawaii.its.api.type.ApiError;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class ErrorControllerAdvice {
+    private static final Log logger = LogFactory.getLog(ErrorControllerAdvice.class);
+
     private final EmailService emailService;
 
     private static final String RESULT_CODE_FAILURE = "FAILURE";
+    private static final String RESULT_CODE_BACKEND_UNAVAILABLE = "BACKEND_UNAVAILABLE";
+    private static final String BACKEND_UNAVAILABLE_MESSAGE =
+            "Groupings data is temporarily unavailable. Please try again later.";
 
     public ErrorControllerAdvice(EmailService emailService) {
         this.emailService = emailService;
@@ -262,15 +269,15 @@ public class ErrorControllerAdvice {
     @ExceptionHandler(GrouperException.class)
     public ResponseEntity<ApiError> handleGrouperException(GrouperException ex) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        String path = attributes.getRequest().getRequestURI();
+        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
 
+        logger.error("Backend dependency unavailable for path: " + path, ex);
         emailService.sendWithStack(ex, "Grouper Exception", path);
 
         ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.BAD_GATEWAY)
-                .message("An error occurred upstream from GrouperClient")
-                .stackTrace(ExceptionUtils.getStackTrace(ex))
-                .resultCode(RESULT_CODE_FAILURE)
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .message(BACKEND_UNAVAILABLE_MESSAGE)
+                .resultCode(RESULT_CODE_BACKEND_UNAVAILABLE)
                 .path(path);
 
         ApiError apiError = errorBuilder.build();

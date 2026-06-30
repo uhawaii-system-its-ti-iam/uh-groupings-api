@@ -40,6 +40,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import edu.hawaii.its.api.configuration.SecurityTestConfig;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.exception.GrouperException;
+import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
 import edu.hawaii.its.api.groupings.GroupingDescription;
@@ -60,6 +62,7 @@ import edu.hawaii.its.api.groupings.GroupingUpdatedAttributeResult;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.service.AnnouncementsService;
 import edu.hawaii.its.api.service.AsyncJobsManager;
 import edu.hawaii.its.api.service.GroupingAssignmentService;
 import edu.hawaii.its.api.service.GroupingAttributeService;
@@ -127,6 +130,9 @@ public class GroupingsRestControllerv2_1Test {
     private UpdateMemberService updateMemberService;
     @MockitoBean
     private GroupingOwnerService groupingOwnerService;
+
+    @MockitoBean
+    private AnnouncementsService announcementsService;
 
     @MockitoBean
     private GroupingsService groupingsService;
@@ -1002,6 +1008,25 @@ public class GroupingsRestControllerv2_1Test {
 
     @Test
     @WithMockUhOwner
+    public void getNumberOfGroupingsGrouperFailureReturnsServiceUnavailableTest() throws Exception {
+        given(memberAttributeService.numberOfGroupings(TEST_USER))
+                .willThrow(new GrouperException("Grouper unavailable"));
+
+        mockMvc.perform(get(API_BASE + "/owners/groupings/count"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.resultCode").value("BACKEND_UNAVAILABLE"))
+                .andExpect(jsonPath("$.message")
+                        .value("Groupings data is temporarily unavailable. Please try again later."))
+                .andExpect(jsonPath("$.path").value(API_BASE + "/owners/groupings/count"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist());
+
+        verify(memberAttributeService, times(1))
+                .numberOfGroupings(TEST_USER);
+    }
+
+    @Test
+    @WithMockUhOwner
     public void getGroupingDescriptionTest() throws Exception {
         String json = propertyLocator.find("find.groups.results.description");
         WsFindGroupsResults wsFindGroupsResults = JsonUtil.asObject(json, WsFindGroupsResults.class);
@@ -1049,6 +1074,42 @@ public class GroupingsRestControllerv2_1Test {
         mockMvc.perform(get(API_BASE + "/members/memberships/count"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("369"));
+
+        verify(membershipService, times(1))
+                .numberOfMemberships(TEST_USER);
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void getNumberOfMembershipsGrouperFailureReturnsServiceUnavailableTest() throws Exception {
+        given(membershipService.numberOfMemberships(TEST_USER))
+                .willThrow(new GrouperException("Grouper unavailable"));
+
+        mockMvc.perform(get(API_BASE + "/members/memberships/count"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.resultCode").value("BACKEND_UNAVAILABLE"))
+                .andExpect(jsonPath("$.message")
+                        .value("Groupings data is temporarily unavailable. Please try again later."))
+                .andExpect(jsonPath("$.path").value(API_BASE + "/members/memberships/count"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist());
+
+        verify(membershipService, times(1))
+                .numberOfMemberships(TEST_USER);
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void getNumberOfMembershipsNotFoundReturnsNotFoundTest() throws Exception {
+        given(membershipService.numberOfMemberships(TEST_USER))
+                .willThrow(new UhIdentifierNotFoundException(TEST_USER));
+
+        mockMvc.perform(get(API_BASE + "/members/memberships/count"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("FAILURE"))
+                .andExpect(jsonPath("$.path").value(API_BASE + "/members/memberships/count"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist());
 
         verify(membershipService, times(1))
                 .numberOfMemberships(TEST_USER);
@@ -1122,6 +1183,23 @@ public class GroupingsRestControllerv2_1Test {
         verify(asyncJobsManager, times(1)).getJobResult(TEST_USER, jobId);
     }
 
+    @Test
+    public void getAnnouncementsGrouperFailureReturnsServiceUnavailableTest() throws Exception {
+        given(announcementsService.getAnnouncements())
+                .willThrow(new GrouperException("Grouper unavailable"));
+
+        mockMvc.perform(get(API_BASE + "/announcements"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.resultCode").value("BACKEND_UNAVAILABLE"))
+                .andExpect(jsonPath("$.message")
+                        .value("Groupings data is temporarily unavailable. Please try again later."))
+                .andExpect(jsonPath("$.path").value(API_BASE + "/announcements"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist());
+
+        verify(announcementsService, times(1))
+                .getAnnouncements();
+    }
 
     @Test
     @WithMockUhOwner
