@@ -54,6 +54,14 @@ public class SubjectServiceTest {
         assertThrows(GrouperException.class, () -> subjectService.getValidUhUuid(TEST_USER, TEST_USER));
     }
 
+    @Test
+    public void getValidUhUuidsThrowsGrouperExceptionWhenRawSubjectLookupFails() {
+        given(grouperService.getSubjects(java.util.List.of(TEST_USER)))
+                .willReturn(subjectsResults("FAILURE", "SUBJECT_NOT_FOUND"));
+
+        assertThrows(GrouperException.class,
+                () -> subjectService.getValidUhUuids(TEST_USER, java.util.List.of(TEST_USER)));
+    }
     private SubjectsResults subjectsResults(String rawResultCode, String subjectResultCode) {
         WsResultMeta resultMetadata = new WsResultMeta();
         resultMetadata.setResultCode(rawResultCode);
