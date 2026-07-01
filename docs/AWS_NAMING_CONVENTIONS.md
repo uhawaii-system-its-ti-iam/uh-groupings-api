@@ -2,7 +2,7 @@
 
 ## Overview
 
-All AWS resources for the UH Groupings family of projects (Spring API, Angular UI, React UI) follow a single, length-aware naming convention so they can coexist in the same AWS account without collision and remain easy to attribute by owner, project, and environment.
+All AWS resources for the UH Groupings family of projects (Spring API, Angular UI, React UI) follow a single, length-aware naming convention. This allows them to coexist in the same AWS account without collision and remain easy to attribute by owner, project, and environment.
 
 <!-- TOC -->
 * [AWS Naming Conventions and Tagging Standards](#aws-naming-conventions-and-tagging-standards)
@@ -37,12 +37,12 @@ All AWS resources for the UH Groupings family of projects (Spring API, Angular U
 
 The three identifier components are read from `aws/.env` and passed to the CloudFormation templates as the `Owner`, `Project`, and `Environment` parameters.
 
-| Component           | Purpose                                 | Examples                                                |
-|---------------------|-----------------------------------------|---------------------------------------------------------|
-| **AWS_OWNER**       | Person or team identifier               | `mhodges`, `its-iam`                                    |
-| **AWS_PROJECT_ID**  | Short project identifier (≤13 chars)    | `groupings-api`, `groupings-aui`, `groupings-ui`       |
-| **AWS_ENV**         | Deployment environment                  | `sandbx`, `dev`, `test`, `prod`                         |
-| **resource-suffix** | Appended by CloudFormation per resource | `cluster`, `service`, `tg`, `alb`, `role-ecs-execution` |
+| Component           | Purpose                                 | Examples                                                 |
+|---------------------|-----------------------------------------|----------------------------------------------------------|
+| **AWS_OWNER**       | Person or team identifier               | `mhodges`, `its-iam`                                     |
+| **AWS_PROJECT_ID**  | Short project identifier (≤13 chars)    | `groupings-api`, `groupings-aui`, `groupings-ui`         |
+| **AWS_ENV**         | Deployment environment                  | `sandbx`, `dev`, `test`, `prod`                          |
+| **resource-suffix** | Appended by CloudFormation per resource | `cluster`, `service`, `tg`, `alb`, `role-ecs-execution`  |
 
 ### Why `AWS_PROJECT_ID` is short
 
@@ -147,7 +147,7 @@ sandbx  dev  test  prod
 
 ## CloudFormation Parameters
 
-Both `aws/cloudformation/ecr-repository.yml` and `aws/cloudformation/ecs-cluster.yml` accept three identifier parameters:
+Both `aws/cloudformation/ecr-repository.yml` and `aws/cloudformation/ecs-service.yml` accept three identifier parameters:
 
 ```yaml
 Parameters:

@@ -147,13 +147,13 @@ The API itself needs Grouper service-account credentials, a JWT signing key, and
 The Spring property names are identical in both environments; only the source mechanism differs.
 
 ### AWS account credentials (used by developers who deploy)
-Only developers who run `make aws-setup` or other AWS Make targets need IAM access keys to authenticate **to** AWS. These are **never** stored on disk in plaintext, and they have nothing to do with application secrets — they only authorize a developer's CLI to call AWS APIs. The project uses [`aws-vault`](https://github.com/99designs/aws-vault):
+Only developers who run `make aws-setup` or other AWS Make targets need AWS credentials to authenticate **to** AWS. These are **never** stored on disk in plaintext, and they have nothing to do with application secrets — they only authorize a developer's CLI to call AWS APIs. The project uses **IAM Identity Center (SSO) temporary credentials** exclusively:
 
-- `make aws-vault-setup` (one time per developer) prompts for an Access Key ID and Secret Access Key, stores them in the macOS Keychain under a profile named `uh-groupings`.
-- Each AWS Make target is wrapped: `aws-vault exec uh-groupings -- make aws-setup`. aws-vault releases credentials only as ephemeral environment variables for the duration of one command.
-- `docker-compose.aws.yml` does not bind-mount `~/.aws`. The AWS CLI inside the container reads `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` from the environment that aws-vault injected.
+- `make aws-sso-setup` (one time per developer) launches the AWS CLI inside the `aws-cli` Docker service, prompts for SSO start URL / region / account ID / role, writes the profile to `aws/.aws-state/config`, and triggers `aws sso login` with device-code flow (the CLI prints a URL + short code; you open it in your host browser). Subsequent commands use `AWS_PROFILE=uh-groupings make ...` — no wrapper script needed. The container resolves credentials from the cached SSO token in `aws/.aws-state/sso/cache/` (gitignored, mounted at `/root/.aws`). Sessions expire (typically 1–12 h); refresh with `make aws-sso-login`. **No host AWS CLI install is required.**
 
-aws-vault does **not** hold `grouperClient.webService.password`, `jwt.secret.key`, or any other application-runtime value. Those go in AWS Secrets Manager (above) and are read by the ECS task at startup, not by aws-vault on a developer's laptop.
+`docker-compose.aws.yml` bind-mounts `aws/.aws-state` (the SSO profile + cached token) but does not mount the developer's host `~/.aws`. This produces an authenticated `aws` CLI inside the container without writing static credentials to disk.
+
+IAM Identity Center does not hold `grouperClient.webService.password`, `jwt.secret.key`, or any other application-runtime value. Those go in AWS Secrets Manager (above) and are read by the ECS task at startup, not by the developer credential mechanism on a developer's laptop.
 
 See [`docs/SECRETS.md`](docs/SECRETS.md) for the full reference, including the list of Spring properties classified as secrets vs settings.
 

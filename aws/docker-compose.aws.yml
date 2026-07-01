@@ -20,14 +20,19 @@ services:
       # read application secrets from it. Path inside the container matches the
       # `dockerhost` Spring profile's `spring.config.import` location.
       - ${HOME}/.${USER}-conf/uh-groupings-api-overrides.properties:/overrides/uh-groupings-api-overrides.properties:ro
+      # Persist the AWS CLI state (config file + cached SSO token) inside
+      # aws/.aws-state on the host so a single `aws sso login` lasts across
+      # container invocations. The directory is gitignored.
+      - ./.aws-state:/root/.aws
     env_file:
       - .env
     environment:
-      # AWS credentials are injected by aws-vault — see aws/README.md.
-      # Listing the names without values means "pass through from the calling shell".
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SESSION_TOKEN
+      # AWS credentials are resolved inside the container from the cached SSO
+      # session in /root/.aws (mounted from aws/.aws-state on the host). The
+      # caller selects the profile via AWS_PROFILE; AWS_SSO_PROFILE lets
+      # setup-sso.sh and aws-sso-login target a different named profile.
+      - AWS_PROFILE
+      - AWS_SSO_PROFILE
     working_dir: /workspace/aws
     entrypoint: /bin/bash
     profiles:

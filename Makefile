@@ -16,11 +16,22 @@ endef
 
 # --- AWS Infrastructure ---
 
-.PHONY: aws-vault-setup aws-setup aws-teardown aws-stack-events aws-service-events aws-task-status aws-logs
+.PHONY: aws-sso-setup aws-sso-login aws-setup aws-teardown aws-stack-events aws-service-events aws-task-status aws-logs
 
-## Ensure aws-vault is installed and the uh-groupings profile is configured
-aws-vault-setup:
-	$(AWS_DIR)/setup-vault.sh
+## Configure an IAM Identity Center (SSO) profile inside the AWS CLI Docker
+## container (no host AWS CLI install required). Persists state to
+## aws/.aws-state/ on the host so a single login lasts across invocations.
+aws-sso-setup:
+	$(check_docker)
+	mkdir -p $(AWS_DIR)/.aws-state && chmod 700 $(AWS_DIR)/.aws-state
+	cd $(AWS_DIR) && docker-compose -f docker-compose.aws.yml run --rm aws-cli bash setup-sso.sh
+
+## Refresh the cached SSO session (re-run after it expires, typically every 1-12 h)
+aws-sso-login:
+	$(check_docker)
+	mkdir -p $(AWS_DIR)/.aws-state && chmod 700 $(AWS_DIR)/.aws-state
+	cd $(AWS_DIR) && docker-compose -f docker-compose.aws.yml run --rm aws-cli \
+		bash -c 'aws sso login --profile $${AWS_SSO_PROFILE:-uh-groupings}'
 
 ## Run setup inside the Docker AWS CLI container
 aws-setup:
@@ -36,7 +47,9 @@ aws-teardown:
 		source .env && \
 		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-pipeline-$${AWS_ENV}" --region "$${AWS_REGION}" && \
 		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" --region "$${AWS_REGION}" && \
-		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-ecr-$${AWS_ENV}" --region "$${AWS_REGION}"'
+		aws cloudformation wait stack-delete-complete --stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" --region "$${AWS_REGION}" && \
+		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-ecr-$${AWS_ENV}" --region "$${AWS_REGION}" && \
+		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-vpc-$${AWS_ENV}" --region "$${AWS_REGION}"'
 
 ## Show CloudFormation events that failed during stack creation
 aws-stack-events:
@@ -151,13 +164,21 @@ docker-up:
 help:
 	@echo "UH Groupings API - Available targets:"
 	@echo ""
-	@echo "  AWS targets must be wrapped with aws-vault for credentials, e.g.:"
-	@echo "    aws-vault exec uh-groupings -- make aws-setup"
+	@echo "  AWS targets authenticate via IAM Identity Center (SSO). One-time:"
+	@echo "    make aws-sso-setup       # interactive, runs in container"
+	@echo ""
+	@echo "  Per command, set the profile:"
+	@echo "    AWS_PROFILE=uh-groupings make aws-setup"
+	@echo "  Or once per shell:"
+	@echo "    export AWS_PROFILE=uh-groupings"
+	@echo "    make aws-setup"
+	@echo ""
 	@echo "  See aws/README.md for details."
 	@echo ""
 	@echo "  AWS Infrastructure:"
-	@echo "    aws-vault-setup    Install aws-vault and configure profile (one-time, no wrapper)"
-	@echo "    aws-setup          Run interactive AWS setup (Docker)"
+	@echo "    aws-sso-setup      Configure IAM Identity Center profile (one-time, in container)"
+	@echo "    aws-sso-login      Refresh the cached SSO session"
+	@echo "    aws-setup          Run AWS setup (Docker)"
 	@echo "    aws-teardown       Delete all AWS CloudFormation stacks (Docker)"
 	@echo ""
 	@echo "  AWS Troubleshooting:"

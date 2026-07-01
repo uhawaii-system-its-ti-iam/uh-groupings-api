@@ -4,14 +4,11 @@ Get the application running in **~10 minutes**.
 
 **Looking for more details?** See [DEV_README.md](./DEV_README.md) for common tasks, troubleshooting, and workflow.
 
-**Need AWS?** See [AWS_QUICKSTART.md](./AWS_QUICKSTART.md) or [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md).
-
 ---
 
 ## Prerequisites
 
 - **Docker Desktop** ([Download](https://www.docker.com/products/docker-desktop))
-- **Git** and text editor (nano, vim, VSCode)
 
 Verify: `docker --version && git --version`
 
@@ -43,7 +40,7 @@ groupings.api.test.admin_user=your_username
 # Grouper client settings
 grouperClient.webService.url=https://grouper-test.its.hawaii.edu/grouper-ws/servicesRest/
 grouperClient.webService.login = _groupings_api_2
-grouperClient.webService.password = redacted 
+grouperClient.webService.password = redacted
 
 email.is.enabled=false
 email.send.recipient=your_email@hawaii.edu
@@ -89,10 +86,10 @@ curl http://localhost:8081/uhgroupingsapi/actuator/health
 ## 🎉 Success!
 
 Your application is now running locally! You should see:
-- ✅ Docker container running
-- ✅ Application logs streaming
-- ✅ Health endpoint returning `{"status":"UP"}`
-- ✅ Swagger UI accessible
+- Docker container running
+- Application logs streaming
+- Health endpoint returning `{"status":"UP"}`
+- Swagger UI accessible
 
 ---
 

@@ -12,6 +12,7 @@
 
 ## What You'll Create
 
+- Two public subnets (in different AZs) inside your existing VPC
 - ECR repository for Docker images
 - ECS Fargate cluster + service
 - Application Load Balancer
@@ -27,112 +28,95 @@ This is a one-time setup. After completion, all ongoing operations are documente
 
 You need:
 
-- **Docker Desktop** running locally
-  - The AWS CLI is invoked inside a Docker container; you do **not** need it installed on your host.
+- **Docker Desktop** running locally (the AWS CLI is invoked inside a Docker container; you do **not** need it installed on your host)
 - **Make** (standard on macOS and Linux)
-- **`aws-vault`** for credential storage. It is installed automatically using `make aws-vault-setup`
-- An IAM access key pair from your AWS account
-- An AWS VPC with at least 2 public subnets in different Availability Zones (see Step 2)
+- **AWS CLI v2 on the host** — needed for `aws sso login` (opens a browser). `make aws-sso-setup` offers to install it via Homebrew on macOS; on Linux, install it manually from [AWS's instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- An existing AWS VPC with public internet egress — its main route table routes `0.0.0.0/0` to an Internet Gateway (Step 2 helps you confirm this). `make aws-setup` creates the two subnets.
 
 ---
 
 ## Step 1: Configure Credentials (5–10 min)
 
-### Get an AWS access key pair
+This project uses **IAM Identity Center (SSO) temporary credentials** exclusively. Long-lived IAM access keys are not supported.
 
-`make aws-vault-setup` (next step) prompts for an **Access Key ID** and **Secret Access Key**. Create them in the AWS Console first:
+The Make targets pass `AWS_PROFILE` and SSO session state through to the AWS CLI Docker container. `aws/.aws-state/` is mounted at `/root/.aws` inside the container so the login persists across invocations.
 
-1. **Log in** to the AWS Console. Need an account? [Sign up at aws.amazon.com](https://aws.amazon.com/free/) — the free tier covers everything this stack creates for testing.
+### One-time setup
 
-2. **Create an IAM user** for deploying this project: IAM console → **Users** → **Create user**, name it something like `groupings-deploy`. On the permissions step, attach **AdministratorAccess** for a personal sandbox. In a team account, ask your IAM admin to scope it to CloudFormation, ECR, ECS, EC2 (VPC/subnet read), ELBv2, IAM (role create), CloudWatch Logs, Secrets Manager, and STS.
+1. **Gather four values from your AWS access portal.** Click your account in the portal, then "Access keys" or "Command line or programmatic access":
+   - SSO start URL:  Example - https://d-9267e44193.awsapps.com/start
+   - SSO region:     Example - us-west-2
+   - AWS account ID: Example - 610572473041 (sandbox)
+   - SSO role name:  Example - AWSAdministratorAccess
+   
+These values will need to be added to the aws/.env file.
 
-3. **Generate the access key**: IAM console → **Users** → click your user → **Security credentials** tab → **Create access key** → use case **Command Line Interface (CLI)** → acknowledge the recommendation → **Create access key**. Copy both values now — the Secret Access Key is displayed only at this moment. If you lose it, you have to delete the key and create a new one.
+2. **Run the SSO setup:**
 
-> **Using SSO / IAM Identity Center?** Skip the IAM-user step. Run `aws sso login --profile <name>` and `aws-vault exec` will pick up your cached session. See [Credential alternatives](../aws/README.md#credential-alternatives) for the full procedure.
+   ```bash
+   make aws-sso-setup
+   ```
 
-### Run the vault setup
+   The script (`aws/setup-sso.sh`) prompts for the four values, writes a profile named `uh-groupings` to `aws/.aws-state/config`, and opens a browser to complete `aws sso login`. Idempotent — re-running does nothing if the profile is already present.
 
-`aws-vault` stores your IAM access key in your operating system's keychain rather than in a plaintext file on disk. From the repository root:
+3. **Export the profile** (every new shell session):
+
+   ```bash
+   export AWS_PROFILE=uh-groupings
+   ```
+
+### Refreshing an expired session
+
+When your temporary credentials expire (duration set by your org, typically 1–8 h), refresh with:
 
 ```bash
-make aws-vault-setup
+make aws-sso-login
 ```
 
-The script will:
-1. Install `aws-vault` via Homebrew if it's not already present (macOS).
-  
-2. Prompt for your **AWS Access Key ID** and **Secret Access Key**.
-3. Store them under a profile named `uh-groupings` in your OS keychain.
-
-The script is idempotent.
-
-Every subsequent AWS command is wrapped with `aws-vault exec`, which releases the credentials only as ephemeral environment variables for the duration of one command. They never touch disk.
+Then re-run your command.
 
 ---
 
 ## Step 2: Configure `aws/.env` (5–15 min)
 
-### Prepare your VPC and subnets first
+### Prepare your VPC first
 
-The setup script consumes existing VPC and subnet IDs; it does not create networking. Before editing `aws/.env`, you need:
+`make aws-setup` creates the two public subnets for you (via `aws/cloudformation/vpc.yml`), so you only need an existing VPC — you do **not** create subnets or collect subnet IDs by hand. Before editing `aws/.env`, you need:
 
 - A VPC in your target region.
-- Two **public** subnets in that VPC, in **different Availability Zones**.
-- Each subnet with auto-assign public IPv4 enabled and associated with a route table containing `0.0.0.0/0 → igw-...`.
+- That VPC to provide public internet egress: its main route table routes `0.0.0.0/0` to an Internet Gateway. Subnets created by the stack inherit this route table, which is what makes them public.
 
-The 2-AZ minimum is an AWS-side constraint on Application Load Balancers, not a project choice — `CreateLoadBalancer` rejects a single-AZ ALB.
+The setup provisions two `/28` subnets in different Availability Zones (defaults `10.121.1.0/28` and `10.121.1.16/28`; override via the `SubnetACidr` / `SubnetBCidr` template parameters if those ranges are taken). The 2-AZ minimum is an AWS-side constraint on Application Load Balancers, not a project choice — `CreateLoadBalancer` rejects a single-AZ ALB.
 
-**Personal sandbox (easiest):** Use your account's default VPC. Each region has one with public subnets across several AZs already wired to an Internet Gateway.
+**Personal sandbox (easiest):** Use your account's default VPC. Each region has one whose main route table already routes to an Internet Gateway.
 
 ```bash
-aws-vault exec uh-groupings -- aws ec2 describe-subnets \
-  --filters "Name=default-for-az,Values=true" \
-  --query 'Subnets[].{Id:SubnetId,AZ:AvailabilityZone,CIDR:CidrBlock}' \
+aws ec2 describe-vpcs \
+  --filters "Name=isDefault,Values=true" \
+  --query 'Vpcs[].{Id:VpcId,CIDR:CidrBlock}' \
   --output table --region us-west-2
 ```
 
-Pick any two rows in different AZs.
+**Custom VPC (e.g., a `sandbox-vpc-01` you manage yourself):** Confirm its main route table has a `0.0.0.0/0 → igw-...` route. See the [AWS Internet Gateway guide](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) if you need to add one.
 
-**Custom VPC (e.g., a `sandbox-vpc-01` you manage yourself):** In the VPC console → **Subnets** → **Create subnet**, add two `/28` subnets (16 IPs each, the AWS minimum, plenty for `ECS_TASK_COUNT=1`) in your VPC in different AZs. Enable auto-assign public IPv4 on both, and associate both with a route table that points `0.0.0.0/0` at an Internet Gateway. See the [AWS subnet creation guide](https://docs.aws.amazon.com/vpc/latest/userguide/create-subnets.html) for the UI walkthrough.
+**Enterprise or team accounts:** The VPC is probably owned by your network team. Ask them for a VPC ID with public egress and confirm two free `/28` CIDR ranges you can use (or supply your own via the template parameters).
 
-**Enterprise or team accounts:** The VPC is probably owned by your network team. Ask for two public subnet IDs in the same VPC across two different AZs.
-
-Verify before continuing:
+Confirm your VPC has a public default route before continuing:
 
 ```bash
-aws-vault exec uh-groupings -- aws ec2 describe-subnets \
-  --subnet-ids subnet-aaaa1111 subnet-bbbb2222 \
-  --query 'Subnets[].{Id:SubnetId,AZ:AvailabilityZone,Public:MapPublicIpOnLaunch}' \
+aws ec2 describe-route-tables \
+  --filters "Name=vpc-id,Values=vpc-xxxxx" "Name=association.main,Values=true" \
+  --query 'RouteTables[].Routes[?DestinationCidrBlock==`0.0.0.0/0`]' \
   --output table --region us-west-2
 ```
 
-Two rows, two distinct AZs, both `Public: True`.
+A row with a `GatewayId` starting `igw-` means the VPC provides public egress.
 
 ### Edit `aws/.env`
 
 Edit `aws/.env` to set deployment parameters. The defaults work for a personal sandbox:
 
-```bash
-AWS_REGION=us-west-2
-AWS_ENV=sandbx
-
-# Project identifier — must be ≤10 chars (AWS naming-length limit on ALB/TG).
-# Companion projects: groupings-aui (Angular UI), groupings-rui (React UI).
-AWS_PROJECT_ID=groupings-api
-AWS_OWNER=mhodges
-
-# Display name shown in setup script output
-PROJECT_NAME="UH Groupings API"
-
-# Network — required (real values, not placeholders)
-VPC_ID=vpc-xxxxx
-SUBNET_IDS=subnet-xxxxx,subnet-yyyyy
-
-# ECS task count
-ECS_TASK_COUNT=1
-```
-
-The script reads only from `aws/.env`. Inline overrides and command-line flags are not supported.
+The script reads only from `aws/.env`.
 
 See [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md) for why `AWS_PROJECT_ID` must be short and how the values combine into resource names.
 
@@ -141,24 +125,27 @@ See [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md) for why `AWS_PROJEC
 ## Step 3: Run the Automated Setup (~30 min)
 
 ```bash
-aws-vault exec uh-groupings -- make aws-setup
+make aws-setup
 ```
+
+All `make aws-*` commands assume `export AWS_PROFILE=uh-groupings` is set in your shell (see Step 1).
 
 The script (`aws/setup.sh`) runs inside the AWS CLI Docker container and is **non-interactive end to end** — it never prompts. The flow is:
 
 1. Loads `aws/.env`.
-2. Validates that `AWS_PROJECT_ID`, `VPC_ID`, and `SUBNET_IDS` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if any is missing.
+2. Validates that `AWS_PROJECT_ID` and `VPC_ID` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if either is missing.
 3. Validates the developer's overrides file (`~/.$(whoami)-conf/uh-groupings-api-overrides.properties`); exits if `grouperClient.webService.password` is missing or empty.
 4. Verifies prerequisites and your AWS account ID.
-5. **Step 1 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
-6. **Step 2 — Image:** builds and pushes the initial Docker image to the new ECR repo.
-7. **Step 3 — Secrets:** writes `groupings/api/grouper-password` from your overrides file. Generates a fresh JWT signing key with `openssl rand -base64 32` and writes it to `groupings/api/jwt-secret`, *unless that secret already exists* — in which case the existing value is preserved so re-running setup does not invalidate UI tokens.
-8. **Step 4 — ECS:** creates the Fargate cluster, service, ALB, target group, and IAM roles via `aws/cloudformation/ecs-cluster.yml`.
-9. Prints the ECR URI, cluster/service names, and ALB URL.
+5. **Step 1 — VPC:** creates two public subnets in your VPC via `aws/cloudformation/vpc.yml` and reads their IDs from the stack outputs.
+6. **Step 2 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
+7. **Step 3 — Image:** builds and pushes the initial Docker image to the new ECR repo.
+8. **Step 4 — Secrets:** writes `groupings/api/grouper-password` from your overrides file. Generates a fresh JWT signing key with `openssl rand -base64 32` and writes it to `groupings/api/jwt-secret`, *unless that secret already exists* — in which case the existing value is preserved so re-running setup does not invalidate UI tokens.
+9. **Step 5 — ECS:** creates the Fargate cluster, service, ALB, target group, and IAM roles via `aws/cloudformation/ecs-service.yml`, using the subnet IDs from Step 1.
+10. Prints the ECR URI, cluster/service names, and ALB URL.
 
 The Grouper URL and username are **not** read by `setup.sh` — they are non-secret values that belong in the ECS task definition `environment[]` array (currently in `aws/task-definition.json`).
 
-The script is idempotent for the Grouper password (`create-or-update`) and the JWT key (preserved if already present), but not for stack creation. If a run fails partway through, see "Recovery" below.
+The whole script is now idempotent. Secrets use create-or-update (and the JWT key is preserved if it already exists), and each CloudFormation stack is applied with `aws cloudformation deploy`, which creates the stack on first run and updates it (or no-ops) on subsequent runs. A stack left in `ROLLBACK_COMPLETE` by a failed first create is deleted automatically before redeploying. So you can safely re-run `make aws-setup` to resume after a partial failure or to pick up template changes. If a run fails, see "Recovery" below.
 
 ---
 
@@ -166,10 +153,10 @@ The script is idempotent for the Grouper password (`create-or-update`) and the J
 
 ```bash
 # Tail the application's CloudWatch logs
-aws-vault exec uh-groupings -- make aws-logs
+make aws-logs
 
 # Test the load balancer
-curl "$(aws-vault exec uh-groupings -- aws cloudformation describe-stacks \
+curl "$(aws cloudformation describe-stacks \
   --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
   --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
   --output text \
@@ -181,9 +168,9 @@ Expected: `{"status":"UP"}` once the ECS task has finished its first health chec
 If anything fails, troubleshoot with:
 
 ```bash
-aws-vault exec uh-groupings -- make aws-service-events
-aws-vault exec uh-groupings -- make aws-task-status
-aws-vault exec uh-groupings -- make aws-stack-events
+make aws-service-events
+make aws-task-status
+make aws-stack-events
 ```
 
 ---
@@ -207,28 +194,34 @@ The canonical branch is `main`. For pilot work, you can temporarily point the pi
 If `make aws-setup` fails partway through, identify the cause:
 
 ```bash
-aws-vault exec uh-groupings -- make aws-stack-events
+make aws-stack-events
 ```
 
-Then either fix the input and re-run (CloudFormation will reject duplicate stacks) or tear down and start over:
+Then just re-run setup — `aws cloudformation deploy` updates the existing stacks (and clears any `ROLLBACK_COMPLETE` stack from a failed first create) rather than failing on them:
 
 ```bash
-aws-vault exec uh-groupings -- make aws-teardown
+make aws-setup
+```
+
+If the infrastructure is beyond repair, tear it down and start over:
+
+```bash
+make aws-teardown
 ```
 
 ### Tear everything down
 
 ```bash
-aws-vault exec uh-groupings -- make aws-teardown
+make aws-teardown
 ```
 
-This deletes the ECR, ECS, and pipeline CloudFormation stacks but **not** the Secrets Manager entries. To remove the secrets too:
+This deletes the ECR, ECS, VPC (subnets), and pipeline CloudFormation stacks but **not** the Secrets Manager entries. To remove the secrets too:
 
 ```bash
-aws-vault exec uh-groupings -- aws secretsmanager delete-secret \
+aws secretsmanager delete-secret \
   --secret-id groupings/api/grouper-password --force-delete-without-recovery
 
-aws-vault exec uh-groupings -- aws secretsmanager delete-secret \
+aws secretsmanager delete-secret \
   --secret-id groupings/api/jwt-secret --force-delete-without-recovery
 ```
 
@@ -238,12 +231,12 @@ aws-vault exec uh-groupings -- aws secretsmanager delete-secret \
 
 Per environment (sandbox):
 
-| Resource | Approx. monthly cost |
-|----------|----------------------|
-| ECS Fargate (1–2 tasks, 0.5 vCPU, 1 GB RAM) | $30–40 |
-| Application Load Balancer | $20 |
-| ECR + CloudWatch + CodeBuild | $5 |
-| **Total** | **$50–70** |
+| Resource                                    | Approx. monthly cost  |
+|---------------------------------------------|-----------------------|
+| ECS Fargate (1–2 tasks, 0.5 vCPU, 1 GB RAM) | $30–40                |
+| Application Load Balancer                   | $20                   |
+| ECR + CloudWatch + CodeBuild                | $5                    |
+| **Total**                                   | **$50–70**            |
 
 To save money in a sandbox, scale the service to 0 when not in use:
 
@@ -252,7 +245,7 @@ source aws/.env
 CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
 SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
 
-aws-vault exec uh-groupings -- aws ecs update-service \
+aws ecs update-service \
   --cluster "${CLUSTER}" --service "${SERVICE}" --desired-count 0
 ```
 
@@ -272,11 +265,11 @@ aws-vault exec uh-groupings -- aws ecs update-service \
 **"Cannot connect to Docker daemon"**
 Start Docker Desktop and retry. The Make targets check for Docker before invoking the AWS CLI container.
 
-**"Stack already exists"**
-A previous run left resources behind. Use `make aws-teardown` and start fresh, or import the existing stacks into your local state.
+**"Stack already exists" or `ROLLBACK_COMPLETE`**
+Re-running `make aws-setup` handles both: `aws cloudformation deploy` updates an existing stack, and a stack stuck in `ROLLBACK_COMPLETE` from a failed first create is deleted and recreated automatically. If a stack is otherwise wedged, `make aws-teardown` and start fresh.
 
 **"AccessDenied" calling AWS APIs**
-Your IAM user/role lacks permissions. Check what `aws-vault exec uh-groupings -- aws sts get-caller-identity` returns and verify the IAM policies attached to that identity cover ECR, ECS, CloudFormation, IAM, and Secrets Manager.
+Your IAM Identity Center role lacks permissions. Run `aws sts get-caller-identity` and verify the role/permission set attached to your profile covers ECR, ECS, CloudFormation, IAM, and Secrets Manager. If the session has expired, run `make aws-sso-login` and retry.
 
 **Pipeline not triggering on push**
 Verify the CodeConnections connection status is `Available` (not `Pending`). The OAuth handshake from Step 5 must be completed in the AWS Console.

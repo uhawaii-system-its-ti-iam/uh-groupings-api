@@ -20,9 +20,6 @@ Parameters:
       - dev
       - test
       - prod
-      - future-dev
-      - future-test
-      - future-prod
     Description: Environment name (follows organizational standards)
 
 Resources:

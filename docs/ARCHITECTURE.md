@@ -63,7 +63,7 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        GitHub Enterprise                        │
+│                           GitHub                              │
 │                     (Source Code Repository)                    │
 └────────────────┬────────────────────────────────────────────────┘
                  │
@@ -103,7 +103,7 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 ## Component Details
 
 ### 1. Source Control
-- **Service:** GitHub Enterprise
+- **Service:** GitHub (github.com)
 - **Repository:** uhawaii-system-its-ti-iam/uh-groupings-api
 - **Default Branch:** `main`
 - **Branching Strategy:**
@@ -137,7 +137,7 @@ For pilot/feature work, this same command can be used to point the pipeline at a
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
 #### Stage 1: Source
-- **Provider:** GitHub Enterprise (via AWS CodeConnections)
+- **Provider:** GitHub (via AWS CodeConnections)
 - **Trigger:** Automatic on commit to monitored branch
 - **Output:** Source code ZIP artifact
 
@@ -220,7 +220,7 @@ Only **two** values are stored in AWS Secrets Manager — the truly sensitive ru
 
 Non-secret values that the deployed API still needs (`grouperClient.webService.url`, `grouperClient.webService.login`, email flags, etc.) live in the ECS task definition `environment[]` array — not in Secrets Manager.
 
-**Provisioning:** `aws/setup.sh` (invoked via `aws-vault exec uh-groupings -- make aws-setup`) creates both secrets idempotently — re-running updates rather than duplicates them.
+**Provisioning:** `aws/setup.sh` (invoked via `make aws-setup` with `AWS_PROFILE=uh-groupings` exported) creates both secrets idempotently — re-running updates rather than duplicates them.
 
 **Access at runtime:** The ECS task execution role injects the two secrets as environment variables (`GROUPERCLIENT_WEBSERVICE_PASSWORD`, `JWT_SECRET_KEY`) when the container starts. The values never appear in plaintext task config or logs.
 
@@ -249,7 +249,8 @@ Non-secret values that the deployed API still needs (`grouperClient.webService.u
 ### 8. Networking
 
 #### VPC Configuration
-- **Subnets:** Minimum 2 public subnets in different AZs
+- **VPC:** Assumed to already exist and to provide public internet egress (main route table routes `0.0.0.0/0` to an Internet Gateway). Its ID is supplied via `VPC_ID` in `aws/.env`.
+- **Subnets:** Two public subnets in different AZs, created by `vpc.yml` inside the existing VPC. Their IDs are exported and consumed by `ecs-service.yml` (the 2-AZ minimum is an AWS ALB requirement).
 - **Security Groups:**
   - ALB SG: Inbound 80/443 from Internet
   - ECS SG: Inbound 8080 from ALB SG only
@@ -273,7 +274,7 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 ### Deployment Flow
 ```
-1. Developer → Git Push → GitHub Enterprise (any branch for sandbox)
+1. Developer → Git Push → GitHub (any branch for sandbox)
 2. GitHub → Webhook → CodePipeline (watches configured branch)
 3. CodePipeline → Trigger → CodeBuild
 4. CodeBuild → Maven Build → Docker Build → ECR Push
@@ -308,7 +309,7 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 - **Base Image:** Eclipse Temurin 21 JRE
 
 ### DevOps Tools
-- **Version Control:** Git (GitHub Enterprise)
+- **Version Control:** Git (GitHub)
 - **CI/CD:** AWS CodePipeline + CodeBuild
 - **IaC:** AWS CloudFormation
 - **Monitoring:** CloudWatch
@@ -317,12 +318,12 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 ### Environment Configuration
 
-| Environment    | Purpose                                | Typical Branch                                      | Owner                        | Auto-Deploy              |
-|----------------|----------------------------------------|-----------------------------------------------------|------------------------------|--------------------------|
-| **Sandbox**    | Personal development & experimentation | `main` (configurable per pilot — feature branches allowed) | Individual (e.g., `mhodges`) | Yes                      |
-| **Dev**        | Shared integration testing             | `develop` or `main`                                 | Team (`its-iam`)             | Yes                      |
-| **Test**       | QA & staging                           | `release/*` or `test`                               | Team (`its-iam`)             | Yes (with approval)      |
-| **Production** | Live system                            | `main` or `production`                              | Team (`its-iam`)             | Manual approval required |
+| Environment    | Purpose                                | Typical Branch                                             | Owner                         | Auto-Deploy              |
+|----------------|----------------------------------------|------------------------------------------------------------|-------------------------------|--------------------------|
+| **Sandbox**    | Personal development & experimentation | `main` (configurable per pilot — feature branches allowed) | Individual (e.g., `mhodges`)  | Yes                      |
+| **Dev**        | Shared integration testing             | `develop` or `main`                                        | Team (`its-iam`)              | Yes                      |
+| **Test**       | QA & staging                           | `release/*` or `test`                                      | Team (`its-iam`)              | Yes (with approval)      |
+| **Production** | Live system                            | `main` or `production`                                     | Team (`its-iam`)              | Manual approval required |
 
 ### Branch Flexibility
 
@@ -371,10 +372,10 @@ The project handles two distinct categories of secrets, stored differently:
 - **Local development:** `~/.$(whoami)-conf/uh-groupings-api-overrides.properties`, bind-mounted read-only into the Docker container and loaded via `SPRING_CONFIG_IMPORT`. The file is never committed.
 - **AWS deployment:** AWS Secrets Manager (`groupings/api/*`), encrypted at rest (AES-256), injected into ECS tasks via the task definition's `secrets[]` array.
 
-**AWS account credentials** (IAM access key + secret) — used only by developers running `make aws-setup` and other AWS Make targets:
-- Stored in the macOS Keychain (or equivalent OS keychain on Linux/Windows) via [`aws-vault`](https://github.com/99designs/aws-vault). Released as ephemeral environment variables for the duration of one `aws-vault exec` call. Never on disk in plaintext.
-- Bootstrapped once per developer with `make aws-vault-setup`. Subsequent commands are wrapped: `aws-vault exec uh-groupings -- make aws-setup`.
-- Holds **no application secrets**. The CLI inside the AWS-cli Docker container reads `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` from the environment that aws-vault injects; `~/.aws` is not bind-mounted.
+**AWS account credentials** (temporary SSO session tokens) — used only by developers running `make aws-setup` and other AWS Make targets:
+- Issued by IAM Identity Center (SSO) and cached in `aws/.aws-state/` (gitignored). Resolved by the AWS CLI Docker container via `AWS_PROFILE`. Sessions are short-lived (typically 1–12 h); refresh with `make aws-sso-login`.
+- Bootstrapped once per developer with `make aws-sso-setup`. Subsequent commands simply need `export AWS_PROFILE=uh-groupings`.
+- Holds **no application secrets**. The CLI inside the Docker container reads credentials from the cached SSO token; `~/.aws` is not bind-mounted.
 
 **See:** [docs/SECRETS.md](SECRETS.md) for the complete model, including IAM permissions and rotation guidance.
 
@@ -452,9 +453,3 @@ The project handles two distinct categories of secrets, stored differently:
 - [ ] Advanced autoscaling (predictive)
 - [ ] Cost anomaly detection
 - [ ] Chaos engineering implementation
-
----
-
-**Document Version:** 1.0  
-**Last Updated:** 2026-06-09  
-**Authors:** UH ITS DevOps Team

@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Networking for the UH Groupings API. This stack assumes the VPC already
+  exists (and provides public internet egress via its main route table, i.e.
+  a 0.0.0.0/0 route to an Internet Gateway). It provisions the two public
+  subnets, in different Availability Zones, that the Application Load Balancer
+  and the ECS Fargate tasks run in, and exports their IDs so the
+  ecs-service stack (and companion project stacks) can consume them instead
+  of hard-coding subnet IDs. The 2-AZ minimum is an AWS constraint on
+  Application Load Balancers.
+
+Parameters:
+  Owner:
+    Type: String
+    Description: Owner identifier (e.g., mhodges, its-iam)
+    Default: mhodges
+
+  Project:
+    Type: String
+    Description: Project name
+    Default: groupings
+
+  Environment:
+    Type: String
+    Default: sandbx
+    AllowedValues:
+      - sandbx
+      - dev
+      - test
+      - prod
+    Description: Environment name (follows organizational standards)
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID of the existing VPC the subnets are created in
+
+  SubnetACidr:
+    Type: String
+    Default: 10.121.1.0/28
+    Description: CIDR block for subnet A (must be unused within the VPC)
+
+  SubnetBCidr:
+    Type: String
+    Default: 10.121.1.16/28
+    Description: CIDR block for subnet B (must be unused within the VPC)
+
+Resources:
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      CidrBlock: !Ref SubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-a'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      CidrBlock: !Ref SubnetBCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-b'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+Outputs:
+  SubnetIds:
+    Description: Comma-separated public subnet IDs for the ALB and ECS service
+    Value: !Join [',', [!Ref SubnetA, !Ref SubnetB]]
+    Export:
+      Name: !Sub '${AWS::StackName}-SubnetIds'
+
+  SubnetAId:
+    Description: ID of subnet A
+    Value: !Ref SubnetA
+    Export:
+      Name: !Sub '${AWS::StackName}-SubnetAId'
+
+  SubnetBId:
+    Description: ID of subnet B
+    Value: !Ref SubnetB
+    Export:
+      Name: !Sub '${AWS::StackName}-SubnetBId'

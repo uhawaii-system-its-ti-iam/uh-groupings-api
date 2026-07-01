@@ -27,11 +27,6 @@ Parameters:
     Description: Component identifier
     Default: api
   
-  GitHubEnterpriseUrl:
-    Type: String
-    Description: GitHub Enterprise Server URL
-    Default: https://github.example.com
-  
   GitHubOwner:
     Type: String
     Description: GitHub repository owner/organization
@@ -46,6 +41,13 @@ Parameters:
     Type: String
     Description: Branch to deploy
     Default: main
+  
+  ConnectionArn:
+    Type: String
+    Description: >-
+      ARN of an existing AWS CodeConnections connection to github.com.
+      Create this manually in the AWS Console (Developer Tools → Connections)
+      and complete the OAuth handshake before deploying this stack.
   
   ECSClusterName:
     Type: String
@@ -147,7 +149,7 @@ Resources:
                 Provider: CodeStarSourceConnection
                 Version: '1'
               Configuration:
-                ConnectionArn: !Ref GitHubConnection
+                ConnectionArn: !Ref ConnectionArn
                 FullRepositoryId: !Sub '${GitHubOwner}/${GitHubRepo}'
                 BranchName: !Ref GitHubBranch
                 OutputArtifactFormat: CODE_ZIP
@@ -182,20 +184,6 @@ Resources:
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: BuildOutput
-
-  # GitHub Connection (needs manual approval in Console)
-  GitHubConnection:
-    Type: AWS::CodeConnections::Connection
-    Properties:
-      ConnectionName: !Sub 'github-enterprise-${Environment}'
-      ProviderType: GitHubEnterpriseServer
-      HostArn: !Ref GitHubEnterpriseHost
-  GitHubEnterpriseHost:
-    Type: AWS::CodeConnections::Host
-    Properties:
-      Name: !Sub 'github-enterprise-${Environment}'
-      ProviderEndpoint: !Ref GitHubEnterpriseUrl
-      ProviderType: GitHubEnterpriseServer
 
   # IAM Role for CodePipeline
   CodePipelineRole:
@@ -238,7 +226,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codeconnections:UseConnection
-                Resource: !Ref GitHubConnection
+                Resource: !Ref ConnectionArn
 
   # IAM Role for CodeBuild
   CodeBuildRole:

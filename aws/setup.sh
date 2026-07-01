@@ -7,7 +7,7 @@
 #
 # Sources of input:
 #   - aws/.env                                   non-secret deployment configuration
-#                                                (required: AWS_PROJECT_ID, VPC_ID, SUBNET_IDS)
+#                                                (required: AWS_PROJECT_ID, VPC_ID, AWS_ACCOUNT_ID)
 #   - $HOME/.$USER-conf/uh-groupings-api-overrides.properties
 #                                                Grouper service-account password
 #                                                (`grouperClient.webService.password`);
@@ -32,18 +32,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENV_FILE="${SCRIPT_DIR}/.env"
+VPC_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/vpc.yml"
 ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
-ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-cluster.yml"
+ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-service.yml"
 
 # Application secrets are read from the developer's overrides file, which
 # docker-compose.aws.yml bind-mounts into the AWS CLI container at /overrides/.
 # The path is overridable for running the script outside the container.
 OVERRIDES_FILE="${OVERRIDES_FILE:-/overrides/uh-groupings-api-overrides.properties}"
 
-AWS_ACCOUNT_ID=""
+AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-}"
 ECR_REPOSITORY_URI=""
 ALB_URL=""
 GROUPER_PASSWORD=""
+# Populated from the vpc stack outputs by create_vpc_stack().
+SUBNET_IDS=""
 
 #
 # Functions
@@ -77,7 +80,6 @@ apply_defaults() {
     AWS_OWNER="${AWS_OWNER:-mhodges}"
     ECS_TASK_COUNT="${ECS_TASK_COUNT:-2}"
     VPC_ID="${VPC_ID:-}"
-    SUBNET_IDS="${SUBNET_IDS:-}"
 }
 
 validate_config() {
@@ -96,15 +98,8 @@ validate_network_configuration() {
         exit 1
     fi
 
-    if [[ -z "${SUBNET_IDS}" || "${SUBNET_IDS}" == *xxxxx* || "${SUBNET_IDS}" == *yyyyy* ]]; then
-        error "SUBNET_IDS is not set in aws/.env (current value: '${SUBNET_IDS:-<unset>}')."
-        error "Set it to a comma-separated list of two real subnet IDs in different Availability Zones and re-run."
-        error "(AWS requires Application Load Balancers to span at least 2 AZs.)"
-        exit 1
-    fi
-
     log "  VPC ID:     ${VPC_ID}"
-    log "  Subnet IDs: ${SUBNET_IDS}"
+    log "  Subnets:    created by the vpc stack (aws/cloudformation/vpc.yml)"
     log "✓ Network configuration validated"
     log ""
 }
@@ -142,8 +137,12 @@ print_configuration() {
     log ""
 }
 
-fetch_aws_account_id() {
-    AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+validate_aws_account_id() {
+    if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
+        error "AWS_ACCOUNT_ID is not set in aws/.env."
+        error "Set it to your 12-digit AWS account ID and re-run."
+        exit 1
+    fi
     log "AWS Account ID: ${AWS_ACCOUNT_ID}"
     log ""
 }
@@ -205,20 +204,69 @@ load_overrides_file() {
     log ""
 }
 
-create_ecr_repository() {
-    log "Step 1: Creating ECR Repository..."
-    aws cloudformation create-stack \
-      --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
-      --template-body "file://${ECR_TEMPLATE_PATH}" \
-      --parameters \
-        "ParameterKey=Owner,ParameterValue=${AWS_OWNER}" \
-        "ParameterKey=Project,ParameterValue=${AWS_PROJECT_ID}" \
-        "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
+# CloudFormation's create-stack fails outright if the stack already exists, so
+# re-running setup would abort. `aws cloudformation deploy` instead does a
+# create-or-update via a change set and waits for it to finish. The one state
+# deploy cannot recover from is ROLLBACK_COMPLETE (left by a failed *first*
+# create): such a stack can be neither updated nor re-created, only deleted.
+# This helper clears that state so the deploy that follows can proceed, which
+# is what makes the whole script safely re-runnable.
+delete_stack_if_rollback_complete() {
+    local stack_name="$1"
+    local status
+    status="$(aws cloudformation describe-stacks \
+      --stack-name "${stack_name}" \
+      --query 'Stacks[0].StackStatus' \
+      --output text \
+      --region "${AWS_REGION}" 2>/dev/null || true)"
+
+    if [[ "${status}" == "ROLLBACK_COMPLETE" ]]; then
+        log "  ${stack_name} is in ROLLBACK_COMPLETE (failed prior create); deleting before redeploy..."
+        aws cloudformation delete-stack \
+          --stack-name "${stack_name}" \
+          --region "${AWS_REGION}"
+        aws cloudformation wait stack-delete-complete \
+          --stack-name "${stack_name}" \
+          --region "${AWS_REGION}"
+    fi
+}
+
+create_vpc_stack() {
+    log "Step 1: Creating VPC networking (subnets)..."
+    delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
+    aws cloudformation deploy \
+      --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
+      --template-file "${VPC_TEMPLATE_PATH}" \
+      --parameter-overrides \
+        "Owner=${AWS_OWNER}" \
+        "Project=${AWS_PROJECT_ID}" \
+        "Environment=${AWS_ENV}" \
+        "VpcId=${VPC_ID}" \
+      --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"
 
-    log "Waiting for ECR stack creation..."
-    aws cloudformation wait stack-create-complete \
+    SUBNET_IDS="$(aws cloudformation describe-stacks \
+      --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
+      --query 'Stacks[0].Outputs[?OutputKey==`SubnetIds`].OutputValue' \
+      --output text \
+      --region "${AWS_REGION}")"
+
+    log "✓ VPC networking created"
+    log "  Subnet IDs: ${SUBNET_IDS}"
+    log ""
+}
+
+create_ecr_repository() {
+    log "Step 2: Creating ECR Repository..."
+    delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-ecr-${AWS_ENV}"
+    aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
+      --template-file "${ECR_TEMPLATE_PATH}" \
+      --parameter-overrides \
+        "Owner=${AWS_OWNER}" \
+        "Project=${AWS_PROJECT_ID}" \
+        "Environment=${AWS_ENV}" \
+      --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"
 
     ECR_REPOSITORY_URI="$(aws cloudformation describe-stacks \
@@ -232,7 +280,7 @@ create_ecr_repository() {
 }
 
 build_and_push_image() {
-    log "Step 2: Building and pushing initial Docker image..."
+    log "Step 3: Building and pushing initial Docker image..."
 
     aws ecr get-login-password --region "${AWS_REGION}" | \
       docker login --username AWS --password-stdin "${ECR_REPOSITORY_URI}"
@@ -267,7 +315,7 @@ jwt_secret_exists_in_aws() {
 }
 
 configure_secrets() {
-    log "Step 3: Configuring secrets in AWS Secrets Manager..."
+    log "Step 4: Configuring secrets in AWS Secrets Manager..."
     log ""
 
     # Grouper password — overwrite from the overrides file, which is the
@@ -296,25 +344,21 @@ configure_secrets() {
 }
 
 deploy_ecs_infrastructure() {
-    log "Step 4: Creating ECS cluster and service..."
-
-    aws cloudformation create-stack \
+    log "Step 5: Creating ECS cluster and service (this may take 10 minutes)..."
+    delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-ecs-${AWS_ENV}"
+    aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
-      --template-body "file://${ECS_TEMPLATE_PATH}" \
-      --parameters \
-        "ParameterKey=Owner,ParameterValue=${AWS_OWNER}" \
-        "ParameterKey=Project,ParameterValue=${AWS_PROJECT_ID}" \
-        "ParameterKey=Environment,ParameterValue=${AWS_ENV}" \
-        "ParameterKey=VpcId,ParameterValue=${VPC_ID}" \
-        "ParameterKey=SubnetIds,ParameterValue=${SUBNET_IDS}" \
-        "ParameterKey=ContainerImage,ParameterValue=${ECR_REPOSITORY_URI}:latest" \
-        "ParameterKey=DesiredCount,ParameterValue=${ECS_TASK_COUNT}" \
+      --template-file "${ECS_TEMPLATE_PATH}" \
+      --parameter-overrides \
+        "Owner=${AWS_OWNER}" \
+        "Project=${AWS_PROJECT_ID}" \
+        "Environment=${AWS_ENV}" \
+        "VpcId=${VPC_ID}" \
+        "SubnetIds=${SUBNET_IDS}" \
+        "ContainerImage=${ECR_REPOSITORY_URI}:latest" \
+        "DesiredCount=${ECS_TASK_COUNT}" \
       --capabilities CAPABILITY_NAMED_IAM \
-      --region "${AWS_REGION}"
-
-    log "Waiting for ECS stack creation (this may take 10 minutes)..."
-    aws cloudformation wait stack-create-complete \
-      --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+      --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"
 
     ALB_URL="$(aws cloudformation describe-stacks \
@@ -332,13 +376,14 @@ print_summary() {
     log "=== Setup Complete ==="
     log ""
     log "Resources created:"
+    log "  - VPC Subnets:    ${SUBNET_IDS} (in ${VPC_ID})"
     log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
     log "  - ECS Cluster:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
     log "  - ECS Service:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
     log "  - Application URL: ${ALB_URL}"
     log ""
     log "Next steps:"
-    log "  1. Configure GitHub Enterprise connection in AWS Console"
+    log "  1. Create a GitHub connection in the AWS Console (see docs/AWS_DEPLOYMENT.md)"
     log "  2. Deploy CodePipeline stack"
     log "  3. Test the application: curl ${ALB_URL}/actuator/health"
     log ""
@@ -357,9 +402,10 @@ validate_network_configuration
 load_overrides_file
 print_configuration
 check_prerequisites
-fetch_aws_account_id
+validate_aws_account_id
 
 # Phase 2 - provision AWS resources
+create_vpc_stack
 create_ecr_repository
 build_and_push_image
 configure_secrets

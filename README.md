@@ -17,7 +17,7 @@ UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise a
 
 ## Getting Started
 
-Local development quick start. **Deploying to AWS?** See [docs/AWS_GETTING_STARTED.md](docs/AWS_GETTING_STARTED.md).
+Local development quick start. **Deploying to AWS?** See [docs/AWS_QUICKSTART.md](docs/AWS_QUICKSTART.md).
 
 ### Prerequisites
 
