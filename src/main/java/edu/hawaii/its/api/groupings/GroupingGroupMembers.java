@@ -14,6 +14,12 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
  * group such as include, exclude, owners.
  */
 public class GroupingGroupMembers implements GroupingResult {
+    private static final Map<String, Comparator<GroupingGroupMember>> SORT_COMPARATORS = Map.of(
+            "name", Comparator.comparing(GroupingGroupMember::getName),
+            "search_string0", Comparator.comparing(GroupingGroupMember::getUid),
+            "subjectId", Comparator.comparing(GroupingGroupMember::getUhUuid)
+    );
+
     private String resultCode;
     private String groupPath;
     private int size;
@@ -84,12 +90,7 @@ public class GroupingGroupMembers implements GroupingResult {
     }
 
     public GroupingGroupMembers sort(String sortString, boolean isAscending) {
-        Map<String, Comparator<GroupingGroupMember>> comparatorMap = Map.of(
-                "name", Comparator.comparing(GroupingGroupMember::getName),
-                "search_string0", Comparator.comparing(GroupingGroupMember::getUid),
-                "subjectId", Comparator.comparing(GroupingGroupMember::getUhUuid)
-        );
-        Comparator<GroupingGroupMember> comparator = comparatorMap.get(sortString);
+        Comparator<GroupingGroupMember> comparator = SORT_COMPARATORS.get(sortString);
 
         // do not sort in-place to prevent any side effects in pagination
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(this);
@@ -108,11 +109,8 @@ public class GroupingGroupMembers implements GroupingResult {
         int fromIndex = (pageNumber - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, members.size());
 
-        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(this);
-        groupingGroupMembers.members = fromIndex < toIndex
-                ? members.subList(fromIndex, toIndex)
-                : new ArrayList<>();
-
-        return groupingGroupMembers;
+        return fromIndex < toIndex
+                ? new GroupingGroupMembers(this, new ArrayList<>(members.subList(fromIndex, toIndex)))
+                : new GroupingGroupMembers(this, new ArrayList<>());
     }
 }
