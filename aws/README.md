@@ -61,6 +61,7 @@ All AWS operations are performed through the project's Makefile, which runs the 
 |---------------------------|--------------------------------------------------------------------------------------------|
 | `make aws-sso-setup`      | Configure SSO profile and sign in                                                          |
 | `make aws-sso-login`      | Force a fresh SSO login (refresh)                                                          |
+| `make aws-list-vpcs`      | List VPCs in the configured account/region                                                 |
 | `make aws-check-vpc`      | Validate the VPC meets requirements                                                        |
 | `make aws-github-connect` | Create/locate GitHub connection + display ARN for `aws/.env` (OAuth approval still manual) |
 | `make aws-setup`          | Provision AWS infrastructure                                                               |
@@ -89,6 +90,24 @@ The `aws/.env` file contains **deployment parameters only** such as:
 - ECS task count
 
 Application secrets are **not** stored in this file. Runtime secrets are managed through AWS Secrets Manager.
+
+## Identifying individual work in the shared sandbox
+
+Deployments target a **shared ITS sandbox account**, so `aws/.env` already carries the correct account/SSO values. To keep each developer's resources distinct, the project encodes an owner into every resource name and tag:
+
+- `AWS_OWNER` → your short identifier (e.g., your username, as in the default `mhodges`)
+- `AWS_PROJECT_ID` → `groupings-api`
+- `AWS_ENV` → environment label (e.g., `sandbx`)
+
+These combine into names like `mhodges-groupings-api-sandbx-cluster`, so your stacks, ECS resources, and connections are easy to tell apart from a teammate's. Set `AWS_OWNER` to your own value before running `make aws-setup`.
+
+Confirm you're authenticated to the shared account before provisioning:
+
+```bash
+aws sts get-caller-identity --query Account --output text   # matches AWS_ACCOUNT_ID in aws/.env
+```
+
+See [AWS_NAMING_CONVENTIONS.md](../docs/AWS_NAMING_CONVENTIONS.md) for how the values combine, and [`docs/AWS_QUICKSTART.md`](../docs/AWS_QUICKSTART.md) for the full setup path.
 
 ---
 

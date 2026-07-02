@@ -63,7 +63,7 @@ make aws-github-connect
 
 Recommended connection metadata (if you create it manually in the console):
 
-- **Connection name:** `${AWS_OWNER}-${AWS_PROJECT_ID}-github` (example: `mhodges-groupings-api-github`)
+- **Connection name:** `${AWS_OWNER}-${AWS_PROJECT_ID}-github` (example: `mhodges-groupings-api-github` in the shared ITS sandbox)
 - **Tags (optional):** `Owner=${AWS_OWNER}`, `Project=${AWS_PROJECT_ID}`, `Environment=${AWS_ENV}`
 
 ### Step 1: Create GitHub Connection
@@ -80,16 +80,16 @@ The connection starts in `PENDING` status and becomes `AVAILABLE` after authoriz
 After it is `AVAILABLE`, store its ARN in `aws/.env`:
 
 ```bash
-sed -i '' 's|^GITHUB_CONNECTION_ARN=.*|GITHUB_CONNECTION_ARN=arn:aws:codeconnections:us-west-2:123456789012:connection/REPLACE_ME|' aws/.env
+source aws/.env
+CONNECTION_ARN="arn:aws:codeconnections:${AWS_REGION}:${AWS_ACCOUNT_ID}:connection/REPLACE_ME"
+sed -i '' "s|^GITHUB_CONNECTION_ARN=.*|GITHUB_CONNECTION_ARN=${CONNECTION_ARN}|" aws/.env
 ```
 
 ### Step 2: Deploy the CodePipeline Stack
 
 ```bash
-cd aws/
-
-# Source your environment
-source .env
+# Source environment from the repo root
+source aws/.env
 
 # Resolve ECS resource names from the stack created by setup.sh
 ECS_CLUSTER=$(aws cloudformation describe-stacks \
@@ -107,7 +107,7 @@ ECS_SERVICE=$(aws cloudformation describe-stacks \
 # Deploy the pipeline
 aws cloudformation deploy \
   --stack-name "${AWS_PROJECT_ID}-pipeline-${AWS_ENV}" \
-  --template-file cloudformation/codepipeline.yml \
+  --template-file aws/cloudformation/codepipeline.yml \
   --parameter-overrides \
     "Owner=${AWS_OWNER}" \
     "Project=${AWS_PROJECT_ID}" \
@@ -352,7 +352,7 @@ Set these in the CodeBuild project (created by `codepipeline.yml`):
 |----------------------|---------------------|--------------------------------|
 | `AWS_ACCOUNT_ID`     | AWS Account ID      | `123456789012`                 |
 | `AWS_DEFAULT_REGION` | AWS Region          | `us-west-2`                    |
-| `IMAGE_REPO_NAME`    | ECR repository name | `mhodges-groupings-api-sandbx` |
+| `IMAGE_REPO_NAME`    | ECR repository name | `${AWS_OWNER}-groupings-api-sandbx` (example: `mhodges-groupings-api-sandbx`) |
 | `IMAGE_TAG`          | Docker image tag    | `latest` or commit SHA         |
 
 ### Adding a manual approval stage

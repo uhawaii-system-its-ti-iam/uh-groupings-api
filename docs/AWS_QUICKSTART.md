@@ -33,17 +33,18 @@ You need:
 - **Make** (standard on macOS and Linux)
 - An existing AWS VPC with public internet egress — its main route table routes `0.0.0.0/0` to an Internet Gateway (Step 2 helps you confirm this). `make aws-setup` creates the two subnets.
 
----
-
 ## Step 1: Configure Credentials (5–10 min)
 
-This project uses **IAM Identity Center (SSO) temporary credentials** exclusively. Long-lived IAM access keys are not supported.
+This project authenticates with **IAM Identity Center (SSO) temporary credentials**. The built-in auto-login only knows how to create **SSO** sessions — it does not configure long-lived IAM access keys.
 
-Authentication is **automatic**: every `make aws-*` target signs you in on demand. When there's no valid session, the target writes the `uh-groupings` SSO profile to your `~/.aws/config` (from the `aws/.env` values) and opens your browser to authorize — then continues.
+Authentication is **automatic**: every `make aws-*` target ensures a usable session on demand. Two things can happen:
+
+- **A valid session already exists** for the resolved profile (default `uh-groupings`, or whatever you set via `AWS_PROFILE`) → the tooling reuses it as-is, regardless of how you obtained it.
+- **No valid session** → the target writes the SSO profile to your `~/.aws/config` from the four `aws/.env` values below and opens your browser to authorize, then continues.
 
 ### Configure the four SSO values in `aws/.env`
 
-These drive the profile the tooling writes (no prompting):
+These drive the profile the tooling writes (no prompting). They point at the shared ITS sandbox account and are already set in the committed `aws/.env`:
 
 - `SSO_START_URL`  — e.g., `https://d-9267e44193.awsapps.com/start`
 - `AWS_REGION`     — e.g., `us-west-2` (also used as the SSO region)
@@ -81,33 +82,25 @@ make aws-sso-login
 
 The setup provisions two `/28` subnets in different Availability Zones. The 2-AZ minimum is an AWS-side constraint on Application Load Balancers.
 
-**Personal sandbox :** Use your account's default VPC. Each region has one whose main route table already routes to an Internet Gateway.
+List the VPCs in the account and note the ID designated for this project:
 
 ```bash
-aws ec2 describe-vpcs \
-  --filters "Name=isDefault,Values=true" \
-  --query 'Vpcs[].{Id:VpcId,CIDR:CidrBlock}' \
-  --output table --region us-west-2
+make aws-list-vpcs
 ```
 
-**Custom VPC (e.g., a `sandbox-vpc-01` you manage yourself):** Confirm its main route table has a `0.0.0.0/0 → igw-...` route. See the [AWS Internet Gateway guide](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) if you need to add one.
-
-**Enterprise or team accounts:** The VPC is probably owned by your network team. Ask them for a VPC ID with public egress and confirm two free `/28` CIDR ranges you can use (or supply your own via the template parameters).
+> The ITS sandbox has no default VPC, so a `Default` column showing `False` is expected — use the VPC ID your team designates for this work.
 
 Confirm your VPC has a public default route before continuing:
 
 ```bash
-aws ec2 describe-route-tables \
-  --filters "Name=vpc-id,Values=vpc-xxxxx" "Name=association.main,Values=true" \
-  --query 'RouteTables[].Routes[?DestinationCidrBlock==`0.0.0.0/0`]' \
-  --output table --region us-west-2
+make aws-check-vpc
 ```
 
-A row with a `GatewayId` starting `igw-` means the VPC provides public egress.
+In the output, a row with a `GatewayId` starting `igw-` means the VPC provides public egress. If it's missing, ask ITS to attach an Internet Gateway / add the `0.0.0.0/0` route. See the [AWS Internet Gateway guide](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) for background.
 
 ### Edit `aws/.env`
 
-Edit `aws/.env` to set deployment parameters. The defaults work for a personal sandbox:
+Edit `aws/.env` to set deployment parameters. The committed defaults already target the shared ITS sandbox; set `AWS_OWNER` to your own short identifier (e.g., your username, as in the default `mhodges`) so the resources you create are named and tagged distinctly — for example `mhodges-groupings-api-sandbx-cluster`.
 
 The script reads only from `aws/.env`.
 

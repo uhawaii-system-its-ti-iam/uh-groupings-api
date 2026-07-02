@@ -26,7 +26,7 @@ endef
 
 # --- AWS Infrastructure ---
 
-.PHONY: aws-sso-setup aws-sso-login aws-check-vpc aws-setup aws-teardown aws-stack-events aws-service-events aws-task-status aws-logs aws-github-connect
+.PHONY: aws-sso-setup aws-sso-login aws-list-vpcs aws-check-vpc aws-setup aws-teardown aws-stack-events aws-service-events aws-task-status aws-logs aws-github-connect
 
 ## Configure the IAM Identity Center (SSO) profile and sign in. One time per
 ## developer (also run any time you want to authenticate explicitly). Reads the
@@ -47,6 +47,16 @@ aws-sso-login:
 aws-github-connect:
 	$(check_aws)
 	cd $(AWS_DIR) && bash github-connect.sh
+
+## List VPCs in the configured account/region (from aws/.env)
+aws-list-vpcs:
+	$(check_aws)
+	cd $(AWS_DIR) && \
+		source .env && \
+		aws ec2 describe-vpcs \
+			--query "Vpcs[].{Id:VpcId,CIDR:CidrBlock,Default:IsDefault}" \
+			--output table \
+			--region "$${AWS_REGION}"
 
 ## Validate that the VPC in aws/.env meets project requirements
 aws-check-vpc:
@@ -201,6 +211,7 @@ help:
 	@echo "  AWS Infrastructure:"
 	@echo "    aws-sso-setup      Configure SSO profile + sign in (also auto-runs on demand)"
 	@echo "    aws-sso-login      Force a fresh SSO login (proactive refresh)"
+	@echo "    aws-list-vpcs      List VPCs in the configured account/region"
 	@echo "    aws-check-vpc      Validate VPC meets project requirements"
 	@echo "    aws-github-connect Create/locate a GitHub connection + display ARN for aws/.env"
 	@echo "    aws-setup          Provision AWS infrastructure"

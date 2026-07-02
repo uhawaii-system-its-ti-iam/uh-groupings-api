@@ -112,11 +112,11 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
   - **Test/Staging:** `release/*` or `test`
   - **Production:** `main` or `production`
 - **Webhook:** Triggers CodePipeline on push/merge to configured branch
-- **Branch Flexibility:** Sandbox pipelines can watch any branch for isolated feature development; the canonical configuration uses `main`.
+- **Branch Flexibility:** The shared sandbox pipeline can temporarily watch a feature branch for coordinated pilot work; the canonical configuration uses `main`.
 
 #### Changing Deployment Branch
 
-Sandbox environments can deploy from any branch:
+The shared sandbox environment can deploy from any branch:
 
 ```bash
 # Update pipeline to watch a different branch (canonical: main)
@@ -320,16 +320,16 @@ Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
 
 | Environment    | Purpose                                | Typical Branch                                             | Owner                         | Auto-Deploy              |
 |----------------|----------------------------------------|------------------------------------------------------------|-------------------------------|--------------------------|
-| **Sandbox**    | Personal development & experimentation | `main` (configurable per pilot — feature branches allowed) | Individual (e.g., `mhodges`)  | Yes                      |
+| **Sandbox**    | Shared team experimentation & pilot validation | `main` (configurable per pilot — feature branches allowed) | Individual contributor (e.g., `mhodges`) | Yes                      |
 | **Dev**        | Shared integration testing             | `develop` or `main`                                        | Team (`its-iam`)              | Yes                      |
 | **Test**       | QA & staging                           | `release/*` or `test`                                      | Team (`its-iam`)              | Yes (with approval)      |
 | **Production** | Live system                            | `main` or `production`                                     | Team (`its-iam`)              | Manual approval required |
 
 ### Branch Flexibility
 
-**Sandbox Environments:**
+**Shared Sandbox Environment:**
 - Default to `main` for the canonical configuration
-- May temporarily watch a feature branch for isolated pilot work
+- May temporarily watch a feature branch for coordinated pilot work
 - Change branch via CodePipeline configuration
 
 **Team Environments:**
