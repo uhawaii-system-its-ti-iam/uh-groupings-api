@@ -6,8 +6,8 @@
 #   1. VPC exists in the configured AWS_REGION.
 #   2. An Internet Gateway is attached to the VPC.
 #   3. The main route table has a 0.0.0.0/0 route to the IGW.
-#   4. At least two /28 CIDR ranges are available (checks that the default
-#      CIDRs 10.121.1.0/28 and 10.121.1.16/28 don't overlap existing subnets).
+#   4. The two subnet CIDRs (SUBNET_A_CIDR/SUBNET_B_CIDR from aws/.env) fall
+#      within the VPC's CIDR block and don't overlap existing subnets.
 #   5. The region has at least 2 Availability Zones.
 
 # Note: intentionally NOT using `set -e`. Each check manages its own
@@ -43,6 +43,16 @@ source "${SCRIPT_DIR}/lib-auth.sh"
 
 if [[ -z "${VPC_ID}" ]]; then
     printf 'Error: VPC_ID is not set in aws/.env\n' >&2
+    exit 1
+fi
+
+# Subnet CIDRs come from aws/.env (kept in sync with the vpc.yml parameter
+# defaults) — not hardcoded here.
+SUBNET_A_CIDR="${SUBNET_A_CIDR:-}"
+SUBNET_B_CIDR="${SUBNET_B_CIDR:-}"
+if [[ -z "${SUBNET_A_CIDR}" || -z "${SUBNET_B_CIDR}" ]]; then
+    printf 'Error: SUBNET_A_CIDR and SUBNET_B_CIDR must be set in aws/.env\n' >&2
+    printf '  (they must match the SubnetACidr/SubnetBCidr defaults in aws/cloudformation/vpc.yml)\n' >&2
     exit 1
 fi
 
@@ -108,9 +118,14 @@ else
     fi
 fi
 
-# 4. CIDR availability — check for overlap with existing subnets
-SUBNET_A_CIDR="${SUBNET_A_CIDR:-10.121.1.0/28}"
-SUBNET_B_CIDR="${SUBNET_B_CIDR:-10.121.1.16/28}"
+# 4. Subnet CIDRs (from aws/.env) are usable: inside the VPC's CIDR block(s)
+#    and not overlapping any existing subnet. This is the exact condition that,
+#    if violated, makes the vpc stack roll back during `make aws-setup`.
+VPC_CIDRS="$(aws ec2 describe-vpcs \
+  --vpc-ids "${VPC_ID}" \
+  --query 'Vpcs[0].CidrBlockAssociationSet[].CidrBlock' \
+  --output text \
+  --region "${AWS_REGION}")"
 
 EXISTING_CIDRS="$(aws ec2 describe-subnets \
   --filters "Name=vpc-id,Values=${VPC_ID}" \
@@ -118,23 +133,42 @@ EXISTING_CIDRS="$(aws ec2 describe-subnets \
   --output text \
   --region "${AWS_REGION}")"
 
-check_cidr_available() {
-    local cidr="$1"
-    # Simple substring check — not a full CIDR overlap calculation, but
-    # catches the common case of an exact duplicate.
-    if printf '%s' "${EXISTING_CIDRS}" | grep -qw "${cidr}"; then
-        fail "CIDR ${cidr} already in use by an existing subnet"
-    else
-        pass "CIDR ${cidr} not in use by existing subnets"
-    fi
-}
+CIDR_REPORT="$(VPC_CIDRS="${VPC_CIDRS}" EXISTING_CIDRS="${EXISTING_CIDRS}" \
+  CAND_A="${SUBNET_A_CIDR}" CAND_B="${SUBNET_B_CIDR}" python3 - <<'PY'
+import os, ipaddress
 
-check_cidr_available "${SUBNET_A_CIDR}"
-check_cidr_available "${SUBNET_B_CIDR}"
+vpc = [ipaddress.ip_network(c) for c in os.environ.get("VPC_CIDRS", "").split()]
+existing = [ipaddress.ip_network(c) for c in os.environ.get("EXISTING_CIDRS", "").split()]
+
+for name in ("A", "B"):
+    raw = os.environ["CAND_" + name]
+    try:
+        net = ipaddress.ip_network(raw)
+    except ValueError as e:
+        print(f"FAIL|{name} ({raw}): invalid CIDR ({e})")
+        continue
+    if not any(net.subnet_of(v) for v in vpc):
+        print(f"FAIL|{name} ({raw}): not within VPC CIDR [{', '.join(map(str, vpc))}]")
+        continue
+    clash = [str(s) for s in existing if net.overlaps(s)]
+    if clash:
+        print(f"FAIL|{name} ({raw}): overlaps existing subnet(s) {', '.join(clash)}")
+        continue
+    print(f"OK|{name} ({raw}): within VPC and unused")
+PY
+)"
+
+while IFS= read -r line; do
+    [[ -z "${line}" ]] && continue
+    case "${line}" in
+        OK\|*)   pass "Subnet CIDR ${line#OK|}" ;;
+        FAIL\|*) fail "Subnet CIDR ${line#FAIL|}" ;;
+        *)       warn "CIDR check: ${line}" ;;
+    esac
+done <<< "${CIDR_REPORT}"
 
 if [[ -n "${EXISTING_CIDRS}" ]]; then
-    warn "Existing subnets in VPC: $(printf '%s' "${EXISTING_CIDRS}" | tr '\n' ' ')"
-    warn "If the default CIDRs overlap, override via SubnetACidr/SubnetBCidr template parameters."
+    log "  (existing subnets in VPC: $(printf '%s' "${EXISTING_CIDRS}" | tr '\n' ' '))"
 fi
 
 # 5. Region has ≥2 AZs

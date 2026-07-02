@@ -233,10 +233,29 @@ delete_stack_if_rollback_complete() {
     fi
 }
 
+# When `aws cloudformation deploy` fails, the CLI only reports that the stack
+# operation failed — the actual reason lives in the stack events. Surface the
+# FAILED events so the cause is visible without opening the AWS console.
+report_stack_failure() {
+    local stack_name="$1"
+    error ""
+    error "Stack '${stack_name}' failed to deploy. Failure reason(s):"
+    aws cloudformation describe-stack-events \
+      --stack-name "${stack_name}" \
+      --query "reverse(StackEvents[?contains(ResourceStatus, 'FAILED')].[LogicalResourceId, ResourceStatusReason])" \
+      --output text \
+      --region "${AWS_REGION}" 2>/dev/null | sed 's/^/    /' || true
+    error ""
+    error "The stack will roll back automatically. Fix the cause above, then"
+    error "re-run 'make aws-setup' — a ROLLBACK_COMPLETE stack is deleted and"
+    error "recreated automatically. For subnet CIDR errors, adjust SubnetACidr/"
+    error "SubnetBCidr (or the VPC_ID) and validate first with 'make aws-check-vpc'."
+}
+
 create_vpc_stack() {
     log "Step 1: Creating VPC networking (subnets)..."
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
-    aws cloudformation deploy \
+    if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
       --template-file "${VPC_TEMPLATE_PATH}" \
       --parameter-overrides \
@@ -245,7 +264,10 @@ create_vpc_stack() {
         "Environment=${AWS_ENV}" \
         "VpcId=${VPC_ID}" \
       --no-fail-on-empty-changeset \
-      --region "${AWS_REGION}"
+      --region "${AWS_REGION}"; then
+        report_stack_failure "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
+        exit 1
+    fi
 
     SUBNET_IDS="$(aws cloudformation describe-stacks \
       --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
@@ -261,7 +283,7 @@ create_vpc_stack() {
 create_ecr_repository() {
     log "Step 2: Creating ECR Repository..."
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-ecr-${AWS_ENV}"
-    aws cloudformation deploy \
+    if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
       --template-file "${ECR_TEMPLATE_PATH}" \
       --parameter-overrides \
@@ -269,7 +291,10 @@ create_ecr_repository() {
         "Project=${AWS_PROJECT_ID}" \
         "Environment=${AWS_ENV}" \
       --no-fail-on-empty-changeset \
-      --region "${AWS_REGION}"
+      --region "${AWS_REGION}"; then
+        report_stack_failure "${AWS_PROJECT_ID}-ecr-${AWS_ENV}"
+        exit 1
+    fi
 
     ECR_REPOSITORY_URI="$(aws cloudformation describe-stacks \
       --stack-name "${AWS_PROJECT_ID}-ecr-${AWS_ENV}" \
@@ -348,7 +373,7 @@ configure_secrets() {
 deploy_ecs_infrastructure() {
     log "Step 5: Creating ECS cluster and service (this may take 10 minutes)..."
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-ecs-${AWS_ENV}"
-    aws cloudformation deploy \
+    if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
       --template-file "${ECS_TEMPLATE_PATH}" \
       --parameter-overrides \
@@ -361,7 +386,10 @@ deploy_ecs_infrastructure() {
         "DesiredCount=${ECS_TASK_COUNT}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --no-fail-on-empty-changeset \
-      --region "${AWS_REGION}"
+      --region "${AWS_REGION}"; then
+        report_stack_failure "${AWS_PROJECT_ID}-ecs-${AWS_ENV}"
+        exit 1
+    fi
 
     ALB_URL="$(aws cloudformation describe-stacks \
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \

@@ -252,7 +252,7 @@ Non-secret values that the deployed API still needs (`grouperClient.webService.u
 - **VPC:** Assumed to already exist and to provide public internet egress (main route table routes `0.0.0.0/0` to an Internet Gateway). Its ID is supplied via `VPC_ID` in `aws/.env`.
 - **Subnets:** Two public subnets in different AZs, created by `vpc.yml` inside the existing VPC. Their IDs are exported and consumed by `ecs-service.yml` (the 2-AZ minimum is an AWS ALB requirement).
 - **Security Groups:**
-  - ALB SG: Inbound 80/443 from Internet
+  - ALB SG: Inbound 80/443 from Internet today; **target posture is 443 only, restricted to the companion UI deployment** (see [Access Restriction](#access-restriction-https-from-the-ui-deployment-only-planned))
   - ECS SG: Inbound 8080 from ALB SG only
 
 #### Network Flow
@@ -383,6 +383,23 @@ The project handles two distinct categories of secrets, stored differently:
 - **Encryption in Transit:** ALB currently exposes HTTP:80; HTTPS:443 with ACM certificate is planned (see "Future Enhancements")
 - **Internal Communication:** HTTP between ALB and ECS tasks (private VPC)
 - **Security Groups:** Principle of least privilege
+- **Access restriction:** the deployed API is intended to accept HTTPS **only from the companion UI deployment**, not the public internet (see below)
+
+### Access Restriction: HTTPS from the UI Deployment Only (Planned)
+
+A companion project — the UH Groupings **UI** — is the sole intended client of this API.
+
+**Confirmed topology (server-to-server).** The end user's browser interacts *only* with the UI project. The UI server, in turn, handles user SSO against the campus **CAS** server and makes **REST** calls to this API for backend transactions. The browser never calls this API directly. Because the UI *server* (not the user's browser) is the API's network client, a network-level source restriction is genuinely enforceable — this is the deciding fact that makes the layers below work.
+
+The target production posture is that the API accepts **only HTTPS traffic originating from the UI deployment**, across three layers:
+
+1. **Transport (HTTPS-only).** The ALB terminates TLS on a 443 listener backed by an ACM certificate. The plaintext HTTP:80 listener is removed or set to redirect to 443. TLS terminates at the ALB; ALB→task traffic remains HTTP inside the VPC.
+
+2. **Network (source restriction).** The API's ALB security group ingress is narrowed from `0.0.0.0/0` to the UI deployment as the only source:
+   - **Same VPC (recommended):** the UI stack exports its security group ID, and `ecs-service.yml` references it as `SourceSecurityGroupId` on the 443 ingress rule via `Fn::ImportValue` — instead of opening 443 to the internet. This is the same cross-stack export pattern `vpc.yml` already uses for subnet IDs.
+   - **Cross-VPC:** restrict ingress to the UI's known egress/NAT IP range(s), and consider AWS WAF for finer-grained rules.
+
+3. **Application (defense in depth).** JWT authentication remains required on every non-public endpoint, and CORS is pinned to the UI's origin. User authentication happens at the UI via CAS; the API trusts the JWT presented on each REST call. The network scoping and JWT are complementary: the security group limits *who can reach* the ALB; JWT limits *who is authorized* once they do.
 
 ### Container Security
 - **Non-root User:** Application runs as `appuser`
