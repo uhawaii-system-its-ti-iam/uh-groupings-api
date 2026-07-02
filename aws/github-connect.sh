@@ -141,11 +141,6 @@ print_arn_instructions() {
     log "Paste this into aws/.env:"
     blank
     log "  GITHUB_CONNECTION_ARN=${arn}"
-    blank
-    log "Or run this to update it automatically:"
-    blank
-    log "  sed -i '' 's|^GITHUB_CONNECTION_ARN=.*|GITHUB_CONNECTION_ARN=${arn}|' \\"
-    log "    \"${SCRIPT_DIR}/.env\""
     log "─────────────────────────────────────────────────────────────────"
 }
 

@@ -52,7 +52,10 @@ aws-github-connect:
 aws-list-vpcs:
 	$(check_aws)
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
+		echo "" && \
+		echo "VPC_ID in aws/.env: $${VPC_ID}" && \
+		echo "" && \
 		aws ec2 describe-vpcs \
 			--query "Vpcs[].{Id:VpcId,CIDR:CidrBlock,Default:IsDefault}" \
 			--output table \
@@ -75,7 +78,7 @@ aws-teardown:
 	@echo "WARNING: This will delete all AWS resources for the project."
 	@read -r -p "Are you sure? (y/n) " confirm && [ "$$confirm" = "y" ] || exit 1
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
 		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-pipeline-$${AWS_ENV}" --region "$${AWS_REGION}" && \
 		aws cloudformation delete-stack --stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" --region "$${AWS_REGION}" && \
 		aws cloudformation wait stack-delete-complete --stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" --region "$${AWS_REGION}" && \
@@ -86,7 +89,7 @@ aws-teardown:
 aws-stack-events:
 	$(check_aws)
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
 		aws cloudformation describe-stack-events \
 			--stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" \
 			--query "StackEvents[?ResourceStatus==\`CREATE_FAILED\`]" \
@@ -96,7 +99,7 @@ aws-stack-events:
 aws-service-events:
 	$(check_aws)
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
 		CLUSTER=$$(aws cloudformation describe-stacks \
 			--stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" \
 			--query "Stacks[0].Outputs[?OutputKey==\`ClusterName\`].OutputValue" \
@@ -115,7 +118,7 @@ aws-service-events:
 aws-task-status:
 	$(check_aws)
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
 		CLUSTER=$$(aws cloudformation describe-stacks \
 			--stack-name "$${AWS_PROJECT_ID}-ecs-$${AWS_ENV}" \
 			--query "Stacks[0].Outputs[?OutputKey==\`ClusterName\`].OutputValue" \
@@ -134,7 +137,7 @@ aws-task-status:
 aws-logs:
 	$(check_aws)
 	cd $(AWS_DIR) && \
-		source .env && \
+		set -a && source .env && set +a && \
 		aws logs tail "/ecs/$${AWS_PROJECT_ID}" --follow --region "$${AWS_REGION}"
 
 # --- Application ---
@@ -198,13 +201,8 @@ help:
 	@echo "  AWS targets authenticate via IAM Identity Center (SSO). Requires the"
 	@echo "  AWS CLI v2 installed on your host (macOS: brew install awscli)."
 	@echo "  Any aws-* target signs you in automatically (browser) when needed;"
-	@echo "  set the SSO values in aws/.env first."
-	@echo ""
-	@echo "  Per command, set the profile:"
-	@echo "    AWS_PROFILE=uh-groupings make aws-setup"
-	@echo "  Or once per shell:"
-	@echo "    export AWS_PROFILE=uh-groupings"
-	@echo "    make aws-setup"
+	@echo "  set the SSO values in aws/.env first. AWS_PROFILE is set from .env"
+	@echo "  so no manual export is needed."
 	@echo ""
 	@echo "  See aws/README.md for details."
 	@echo ""
