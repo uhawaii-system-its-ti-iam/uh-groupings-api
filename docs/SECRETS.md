@@ -40,8 +40,8 @@ The project handles two distinct categories of credentials. They are stored, acc
 
 | Category                    | What it is                                                                                         | Who needs it                                                    | Where it lives                                                                                       |
 |-----------------------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| **Application secrets**     | Values the running API needs at startup: a Grouper service-account password and a JWT signing key. | The API itself, every time it starts.                           | **Local dev:** the developer's overrides properties file. **AWS:** AWS Secrets Manager.              |
-| **AWS account credentials** | Temporary session tokens from IAM Identity Center (SSO) that let a *developer* call AWS APIs. | Only developers who run `make aws-setup`, `make aws-logs`, etc. | Cached in `aws/.aws-state/` (gitignored) and resolved by the AWS CLI Docker container via `AWS_PROFILE`. |
+| **Application secrets**     | Values the running API needs at startup: a Grouper service-account password and a JWT signing key. | The API itself, every time it starts.                           | Local dev: the developer's overrides properties file. AWS: AWS Secrets Manager.                      |
+| **AWS account credentials** | Temporary session tokens from IAM Identity Center (SSO) that let a developer call AWS APIs.        | Only developers who run `make aws-setup`, `make aws-logs`, etc. | Cached by the AWS CLI in the developer's `~/.aws/` (SSO token cache) and resolved via `AWS_PROFILE`. |
 
 These categories serve different purposes:
 
@@ -56,14 +56,10 @@ They never mix. IAM Identity Center does not hold application secrets; AWS Secre
 
 ### Which Spring properties are secrets?
 
-Only two:
-
 | Spring property                     | Why it's a secret                                                                                          |
 |-------------------------------------|------------------------------------------------------------------------------------------------------------|
 | `grouperClient.webService.password` | Grants the API write access to the Grouper service account.                                                |
 | `jwt.secret.key`                    | Signs JWTs that authenticate every API request. Sharing or losing this key invalidates the trust boundary. |
-
-Everything else (`grouperClient.webService.url`, `grouperClient.webService.login`, email flags, validation regexes, etc.) is non-secret configuration. It can sit in the developer's overrides file locally and in the ECS task definition `environment[]` array on AWS.
 
 ### Storage by environment
 
@@ -74,11 +70,11 @@ Everything else (`grouperClient.webService.url`, `grouperClient.webService.login
 
 The Spring property names are identical in both environments; only the source mechanism differs.
 
-`aws/.env` is **not** a secrets store. It only carries non-sensitive deployment parameters for `setup.sh`. Application secrets reach AWS through `aws/setup.sh`: the Grouper password is read from the developer's overrides file and the JWT key is generated locally by `openssl`, then both are written to Secrets Manager.
+`aws/.env` is not a secrets store. It only carries non-sensitive deployment parameters for `setup.sh`. Application secrets reach AWS through `aws/setup.sh`: the Grouper password is read from the developer's overrides file and the JWT key is generated locally by `openssl`, then both are written to Secrets Manager.
 
 #### Provisioning vs runtime
 
-It's easy to confuse "where the secrets live" with "how they get there". Two different steps:
+Compare "where the secrets live" vs. "how they get there":
 
 | Step             | Local development                                                                                              | AWS deployment                                                                                                                                                                                                                                                             |
 |------------------|----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -94,7 +90,7 @@ If `grouperClient.webService.password` is missing or blank in the overrides file
 
 ### Local development setup
 
-The overrides file is the **single source** of application secrets when running locally — there is no fallback, no auto-generation, no environment-variable lookup. Spring imports the file at startup; the API uses whatever is in it.
+The overrides file is the **single source** of application secrets when running locally. There is no fallback, no auto-generation, no environment-variable lookup. Spring imports the file at startup; the API uses whatever is in it.
 
 At minimum the file must contain:
 
@@ -103,18 +99,12 @@ At minimum the file must contain:
 | `jwt.secret.key`                    | JWT signing key. **Required at startup.** `JwtService` reads it via `@Value("${jwt.secret.key}")` with no default, so omitting it stops Spring from starting. Generate one with `openssl rand -base64 32`. |
 | `grouperClient.webService.password` | Grouper service-account password. Declared with an empty default, so the app will boot without it, but every Grouper call will fail authentication. Treat it as required.                                  |
 
-In practice the same file also carries non-secret settings the developer needs to override locally (Grouper URL, username, email flags, etc.). The full template — secrets and settings together — is in [DEV_QUICKSTART.md → Create Configuration File](DEV_QUICKSTART.md#2-create-configuration-file).
+In practice the same file also carries non-secret settings the developer needs to override locally (Grouper URL, username, email flags, etc.). The full template (secrets and settings together) is in [DEV_QUICKSTART.md → Create Configuration File](DEV_QUICKSTART.md#2-create-configuration-file).
 
 To set up:
 
-1. Create the file:
-   ```bash
-   mkdir -p ~/.$(whoami)-conf
-   nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-   chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-   ```
-2. Paste the template from DEV_QUICKSTART.md and fill in real values. The file is never committed.
-3. Start the app:
+1. See the instruction in DEV_QUICKSTART.md and fill in real values. The overrides file lives outside the project and is never committed.
+2. Start the app:
    ```bash
    docker-compose up
    ```
@@ -125,7 +115,7 @@ To set up:
 
 `aws/setup.sh` (invoked via `make aws-setup` with `AWS_PROFILE=uh-groupings` exported) creates the two AWS Secrets Manager entries from two different sources:
 
-- `groupings/api/grouper-password` — read from `grouperClient.webService.password` in the developer's overrides file. The overrides file is bind-mounted read-only into the AWS CLI container at `/overrides/uh-groupings-api-overrides.properties` (see `aws/docker-compose.aws.yml`). If the file is missing or the property is blank, `setup.sh` exits before making any AWS API call.
+- `groupings/api/grouper-password` — read from `grouperClient.webService.password` in the developer's overrides file at `~/.$(id -un)-conf/uh-groupings-api-overrides.properties`. If the file is missing or the property is blank, `setup.sh` exits before making any AWS API call.
 - `groupings/api/jwt-secret` — generated by the script via `openssl rand -base64 32`. The API project owns this value; the companion Angular and React UI projects reference the same Secrets Manager entry from their own task definitions. Re-running `make aws-setup` preserves an existing JWT secret to avoid invalidating active UI sessions; rotation goes through the explicit CLI command in [Rotate the JWT key](#rotate-the-jwt-key).
 
 The deployed ECS task definition references both secrets via `secrets[]`. Non-secret values come from the task definition's `environment[]` array.
@@ -213,7 +203,7 @@ The wildcard `groupings/api/*` covers both current secrets and any future ones a
 
 ### Manual operations
 
-These commands are for ad-hoc work (rotation, inspection). All run inside the AWS CLI Docker container with `AWS_PROFILE=uh-groupings` providing credentials.
+These commands are for ad-hoc work (rotation, inspection). All run on the host with the AWS CLI, using `AWS_PROFILE=uh-groupings` for credentials.
 
 #### Update a secret
 
@@ -294,18 +284,18 @@ If automated rotation becomes appropriate later, the entry point is `aws secrets
 
 A developer who runs any `make aws-*` target must authenticate to AWS. This project uses **IAM Identity Center (SSO) temporary credentials** exclusively.
 
-| Aspect | Detail |
-|--------|--------|
-| Credential lifetime | Temporary (1–12 h, set by your org) |
-| Where credentials live | Cached SSO token in `aws/.aws-state/sso/cache/` (gitignored), mounted into the container at `/root/.aws` |
-| Host AWS CLI install | **Not required** — SSO login runs in container |
-| One-time setup | `make aws-sso-setup` |
-| Per-command form | `AWS_PROFILE=uh-groupings make <target>` |
-| Refresh | `make aws-sso-login` |
+| Aspect                 | Detail                                                                   |
+|------------------------|--------------------------------------------------------------------------|
+| Credential lifetime    | Temporary (1–12 h, set by your org)                                      |
+| Where credentials live | Cached SSO token in the developer's `~/.aws/sso/cache/`                  |
+| Host AWS CLI install   | **Required** — AWS CLI v2 (macOS: `brew install awscli`)                 |
+| Sign in                | Automatic on any `make aws-*` target, or explicitly `make aws-sso-setup` |
+| Per-command form       | `AWS_PROFILE=uh-groupings make <target>`                                 |
+| Refresh                | Automatic, or `make aws-sso-login`                                       |
 
-The container-resident flow means a fresh developer doesn't need to install the AWS CLI on the host — they only need Docker, Make, and a web browser to complete the device-code authorization.
+Any `make aws-*` target signs you in on demand: it reads the SSO values from `aws/.env`, writes the `uh-groupings` profile to `~/.aws/config` if it isn't there, and opens a browser when there's no valid session (see `aws/lib-auth.sh`). `make aws-sso-setup` does the same explicitly; `make aws-sso-login` forces a fresh login.
 
-IAM Identity Center does **not** hold application secrets. The CLI inside the Docker container reads credentials from the cached SSO token in `aws/.aws-state/`; it does not read `~/.aws` from the host.
+IAM Identity Center does **not** hold application secrets. The AWS CLI reads the developer's temporary session credentials from the cached SSO token in `~/.aws/`.
 
 ---
 
@@ -324,6 +314,8 @@ IAM Identity Center does **not** hold application secrets. The CLI inside the Do
 | `properties.override.result`        | Setting    | overrides file | ECS task definition `environment[]`                |
 
 **Key principle:** only sensitive credentials belong in Secrets Manager. Configuration values flow through plain environment variables.
+
+`aws/.aws-state/config` (when used) is operational AWS CLI profile state, not an application secret store. It holds normalized SSO profile metadata for tooling and should not be used to store runtime application credentials. See [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md#aws-state-configuration-normalization) for normalization details.
 
 ---
 
@@ -346,16 +338,16 @@ IAM Identity Center does **not** hold application secrets. The CLI inside the Do
 
 For specifics, follow the doc that owns each topic:
 
-| Topic                                                                         | Where to look                                                             |
-|-------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| Initial AWS infrastructure provisioning                                       | [AWS_QUICKSTART.md](AWS_QUICKSTART.md)                                    |
-| ECS task definition wiring, IAM permissions, manual CLI commands for secrets  | [Secrets Manager Integration](#secrets-manager-integration) (this doc)    |
-| Ongoing AWS operations (deploys, rollback, scaling)                           | [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)                                    |
+| Topic                                                                          | Where to look                                                             |
+|--------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Initial AWS infrastructure provisioning                                        | [AWS_QUICKSTART.md](AWS_QUICKSTART.md)                                    |
+| ECS task definition wiring, IAM permissions, manual CLI commands for secrets   | [Secrets Manager Integration](#secrets-manager-integration) (this doc)    |
+| Ongoing AWS operations (deploys, rollback, scaling)                            | [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)                                    |
 | IAM Identity Center credential setup and Docker-container flow                 | [aws/README.md](../aws/README.md)                                         |
-| Local Docker development                                                      | [DEV_QUICKSTART.md](DEV_QUICKSTART.md) and [DEV_README.md](DEV_README.md) |
-| Resource naming (why `AWS_PROJECT_ID=groupings-api`)                          | [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md)                    |
-| Architecture overview                                                         | [ARCHITECTURE.md](ARCHITECTURE.md)                                        |
-| Project conventions for engineers and agents                                  | [AGENTS.md](../AGENTS.md)                                                 |
+| Local Docker development                                                       | [DEV_QUICKSTART.md](DEV_QUICKSTART.md) and [DEV_README.md](DEV_README.md) |
+| Resource naming (why `AWS_PROJECT_ID=groupings-api`)                           | [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md)                    |
+| Architecture overview                                                          | [ARCHITECTURE.md](ARCHITECTURE.md)                                        |
+| Project conventions for engineers and agents                                   | [AGENTS.md](../AGENTS.md)                                                 |
 
 ---
 

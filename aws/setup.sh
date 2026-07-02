@@ -11,8 +11,7 @@
 #   - $HOME/.$USER-conf/uh-groupings-api-overrides.properties
 #                                                Grouper service-account password
 #                                                (`grouperClient.webService.password`);
-#                                                bind-mounted into the AWS CLI container
-#                                                at /overrides/
+#                                                read directly from the developer's home dir
 #
 # JWT signing key:
 #   Generated here with `openssl rand -base64 32` and written to
@@ -36,10 +35,13 @@ VPC_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/vpc.yml"
 ECR_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecr-repository.yml"
 ECS_TEMPLATE_PATH="${SCRIPT_DIR}/cloudformation/ecs-service.yml"
 
-# Application secrets are read from the developer's overrides file, which
-# docker-compose.aws.yml bind-mounts into the AWS CLI container at /overrides/.
-# The path is overridable for running the script outside the container.
-OVERRIDES_FILE="${OVERRIDES_FILE:-/overrides/uh-groupings-api-overrides.properties}"
+# Shared IAM Identity Center (SSO) auth helpers (ensure_aws_session).
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib-auth.sh"
+
+# Application secrets are read from the developer's overrides file in their
+# home directory. The path is overridable for non-standard setups.
+OVERRIDES_FILE="${OVERRIDES_FILE:-${HOME}/.$(id -un)-conf/uh-groupings-api-overrides.properties}"
 
 AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-}"
 ECR_REPOSITORY_URI=""
@@ -183,8 +185,8 @@ load_overrides_file() {
         error "Overrides file not found: ${OVERRIDES_FILE}"
         error ""
         error "The setup script reads the Grouper service-account password from this file."
-        error "Inside the AWS CLI container the file is bind-mounted from the host:"
-        error "  \$HOME/.\$USER-conf/uh-groupings-api-overrides.properties"
+        error "It lives in your home directory at:"
+        error "  \$HOME/.\$(id -un)-conf/uh-groupings-api-overrides.properties"
         error ""
         error "Create that file (see docs/DEV_QUICKSTART.md for the template) and re-run."
         exit 1
@@ -402,6 +404,7 @@ validate_network_configuration
 load_overrides_file
 print_configuration
 check_prerequisites
+ensure_aws_session || { error "AWS authentication failed."; exit 1; }
 validate_aws_account_id
 
 # Phase 2 - provision AWS resources

@@ -2,6 +2,8 @@
 
 This directory contains the AWS-specific artifacts used to provision, deploy, and operate the **UH Groupings API** on AWS.
 
+Be advised: this iteration of the project's scripts are macOS (and maybe Linux) compatible.
+
 The project intentionally separates:
 
 - **Application code** (Java/Spring Boot)
@@ -19,9 +21,11 @@ Detailed setup, deployment, architecture, and operational guidance are maintaine
 aws/
 ├── README.md
 ├── .env                        # Deployment configuration (non-secret)
-├── .aws-state/                 # Cached AWS CLI SSO state (gitignored)
 ├── setup.sh                    # Automated AWS infrastructure provisioning
-├── setup-sso.sh                # IAM Identity Center (SSO) setup
+├── auth.sh                     # SSO profile bootstrap + sign-in dispatcher
+├── lib-auth.sh                 # Shared SSO auth helpers (sourced by scripts)
+├── check-vpc.sh                # Validates the VPC in .env meets requirements
+├── github-connect.sh           # Creates/locates a GitHub CodeConnections connection
 ├── buildspec.yml               # AWS CodeBuild specification
 ├── appspec.yml                 # AWS CodeDeploy specification
 ├── task-definition.json        # ECS task definition template
@@ -38,12 +42,12 @@ aws/
 
 The CloudFormation templates are organized by infrastructure layer rather than deployment order.
 
-| Template               | Purpose                                                                                                                                 |
-|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| Template               | Purpose                                                                                                                                                                            |
+|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **vpc.yml**            | Public subnets (2 AZs) provisioned inside a pre-existing VPC; exports their IDs for `ecs-service.yml` and companion project stacks to consume. The VPC itself is assumed to exist. |
-| **ecr-repository.yml** | Container image repository.                                                                                                             |
-| **ecs-service.yml**    | Application runtime including ECS Fargate, Application Load Balancer, security groups, IAM roles, CloudWatch logs, and task definition. |
-| **codepipeline.yml**   | Continuous integration and deployment infrastructure.                                                                                   |
+| **ecr-repository.yml** | Container image repository.                                                                                                                                                        |
+| **ecs-service.yml**    | Application runtime including ECS Fargate, Application Load Balancer, security groups, IAM roles, CloudWatch logs, and task definition.                                            |
+| **codepipeline.yml**   | Continuous integration and deployment infrastructure.                                                                                                                              |
 
 Keeping these layers separate minimizes stack coupling and allows networking, compute, and CI/CD resources to evolve independently.
 
@@ -51,23 +55,25 @@ Keeping these layers separate minimizes stack coupling and allows networking, co
 
 # Common Make Targets
 
-All AWS operations are performed through the project's Makefile, which executes the AWS CLI inside a Docker container.
+All AWS operations are performed through the project's Makefile, which runs the AWS CLI directly on your host. The AWS CLI v2 must be installed (macOS: `brew install awscli`).
 
-| Command                   | Purpose                             |
-|---------------------------|-------------------------------------|
-| `make aws-sso-setup`      | Configure IAM Identity Center (SSO) |
-| `make aws-sso-login`      | Refresh an expired SSO session      |
-| `make aws-setup`          | Provision AWS infrastructure        |
-| `make aws-teardown`       | Remove deployed infrastructure      |
-| `make aws-stack-events`   | View CloudFormation failures        |
-| `make aws-service-events` | View ECS service events             |
-| `make aws-task-status`    | View recent ECS task status         |
-| `make aws-logs`           | Tail application CloudWatch logs    |
+| Command                   | Purpose                                                                                    |
+|---------------------------|--------------------------------------------------------------------------------------------|
+| `make aws-sso-setup`      | Configure SSO profile and sign in                                                          |
+| `make aws-sso-login`      | Force a fresh SSO login (refresh)                                                          |
+| `make aws-check-vpc`      | Validate the VPC meets requirements                                                        |
+| `make aws-github-connect` | Create/locate GitHub connection + display ARN for `aws/.env` (OAuth approval still manual) |
+| `make aws-setup`          | Provision AWS infrastructure                                                               |
+| `make aws-teardown`       | Remove deployed infrastructure                                                             |
+| `make aws-stack-events`   | View CloudFormation failures                                                               |
+| `make aws-service-events` | View ECS service events                                                                    |
+| `make aws-task-status`    | View recent ECS task status                                                                |
+| `make aws-logs`           | Tail application CloudWatch logs                                                           |
 
-Before running AWS commands, ensure the desired AWS profile has been exported:
+Any `aws-*` target signs you in automatically (opening a browser) when there's no valid session, using the SSO values in `aws/.env`. The scripts default to the `uh-groupings` profile; to use a different one, export it:
 
 ```bash
-export AWS_PROFILE=uh-groupings
+export AWS_PROFILE=my-other-profile
 ```
 
 ---

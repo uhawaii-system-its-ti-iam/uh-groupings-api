@@ -23,36 +23,20 @@ cd uh-groupings-api
 
 ---
 
-## 2. Create Configuration File
+## 2. Create Your Project Overrides File
 
+This is where it will be located (outside the project by design).
 ```bash
 mkdir -p ~/.$(whoami)-conf
-nano ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
 
-**Copy and paste this template, then update with your values:**
+**Create your project overrides file, then update with your values:**
 
-```properties
-# Provide your UH username for both of the following
-groupings.api.localhost.user=your_username
-groupings.api.test.admin_user=your_username
+The project file `uh-groupings-api-overrides.skeleton.properties` should be copied to `~/.$(whoami)-conf` and secured.
 
-# Grouper client settings
-grouperClient.webService.url=https://grouper-test.its.hawaii.edu/grouper-ws/servicesRest/
-grouperClient.webService.login = _groupings_api_2
-grouperClient.webService.password = redacted
-
-email.is.enabled=false
-email.send.recipient=your_email@hawaii.edu
-
-# Instructions: <https://uhawaii.atlassian.net/wiki/spaces/SITARd/pages/2040561680>
-jwt.secret.key=you_generiate_it
-
-# Flag indicates a successful loading of the personal overrides file.
-properties.override.result=OVERRIDDEN
+```bash
+chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
-**Secure:** `chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties`
-
 ---
 
 ## 3. Start the Application
@@ -83,7 +67,7 @@ curl http://localhost:8081/uhgroupingsapi/actuator/health
 
 ---
 
-## 🎉 Success!
+## Success!
 
 Your application is now running locally! You should see:
 - Docker container running
@@ -111,9 +95,7 @@ lsof -i :8081
 **Properties file not found?**
 ```bash
 # Verify file exists and create if needed
-mkdir -p ~/.$(whoami)-conf
-touch ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
-chmod 600 ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
+ls -al ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 ```
 
 **For more troubleshooting help,** see [DEV_README.md](./DEV_README.md#troubleshooting)

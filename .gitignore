@@ -26,7 +26,6 @@ docker/dev.env
 # AWS - Local temp files
 aws/pipeline.json
 aws/*-stack.json
-# AWS - IAM Identity Center cached config + tokens (mounted into the aws-cli container)
 aws/.aws-state/
 
 # IDE

@@ -28,9 +28,9 @@ This is a one-time setup. After completion, all ongoing operations are documente
 
 You need:
 
-- **Docker Desktop** running locally (the AWS CLI is invoked inside a Docker container; you do **not** need it installed on your host)
+- **AWS CLI v2** installed on your host (macOS: `brew install awscli`; Linux: [AWS's instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)). All `make aws-*` targets call it directly.
+- **Docker Desktop** running locally — needed by `make aws-setup` to build and push the application image to ECR.
 - **Make** (standard on macOS and Linux)
-- **AWS CLI v2 on the host** — needed for `aws sso login` (opens a browser). `make aws-sso-setup` offers to install it via Homebrew on macOS; on Linux, install it manually from [AWS's instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - An existing AWS VPC with public internet egress — its main route table routes `0.0.0.0/0` to an Internet Gateway (Step 2 helps you confirm this). `make aws-setup` creates the two subnets.
 
 ---
@@ -39,41 +39,34 @@ You need:
 
 This project uses **IAM Identity Center (SSO) temporary credentials** exclusively. Long-lived IAM access keys are not supported.
 
-The Make targets pass `AWS_PROFILE` and SSO session state through to the AWS CLI Docker container. `aws/.aws-state/` is mounted at `/root/.aws` inside the container so the login persists across invocations.
+Authentication is **automatic**: every `make aws-*` target signs you in on demand. When there's no valid session, the target writes the `uh-groupings` SSO profile to your `~/.aws/config` (from the `aws/.env` values) and opens your browser to authorize — then continues.
 
-### One-time setup
+### Configure the four SSO values in `aws/.env`
 
-1. **Gather four values from your AWS access portal.** Click your account in the portal, then "Access keys" or "Command line or programmatic access":
-   - SSO start URL:  Example - https://d-9267e44193.awsapps.com/start
-   - SSO region:     Example - us-west-2
-   - AWS account ID: Example - 610572473041 (sandbox)
-   - SSO role name:  Example - AWSAdministratorAccess
-   
-These values will need to be added to the aws/.env file.
+These drive the profile the tooling writes (no prompting):
 
-2. **Run the SSO setup:**
+- `SSO_START_URL`  — e.g., `https://d-9267e44193.awsapps.com/start`
+- `AWS_REGION`     — e.g., `us-west-2` (also used as the SSO region)
+- `AWS_ACCOUNT_ID` — e.g., `610572473041`
+- `SSO_ROLE_NAME`  — e.g., `AWSAdministratorAccess`
 
-   ```bash
-   make aws-sso-setup
-   ```
+### Sign in
 
-   The script (`aws/setup-sso.sh`) prompts for the four values, writes a profile named `uh-groupings` to `aws/.aws-state/config`, and opens a browser to complete `aws sso login`. Idempotent — re-running does nothing if the profile is already present.
+You can authorize up front:
 
-3. **Export the profile** (every new shell session):
+```bash
+make aws-sso-setup
+```
 
-   ```bash
-   export AWS_PROFILE=uh-groupings
-   ```
+…or simply run the target you actually want (e.g., `make aws-check-vpc`) and let it open the browser for you. Both write the profile if it's missing and skip the login if a valid session already exists.
 
 ### Refreshing an expired session
 
-When your temporary credentials expire (duration set by your org, typically 1–8 h), refresh with:
+Sessions expire (typically 1–12 h, set by your org). Any target re-authenticates automatically when that happens, or you can refresh proactively:
 
 ```bash
 make aws-sso-login
 ```
-
-Then re-run your command.
 
 ---
 
@@ -81,14 +74,14 @@ Then re-run your command.
 
 ### Prepare your VPC first
 
-`make aws-setup` creates the two public subnets for you (via `aws/cloudformation/vpc.yml`), so you only need an existing VPC — you do **not** create subnets or collect subnet IDs by hand. Before editing `aws/.env`, you need:
+`make aws-setup` creates the two public subnets (via `aws/cloudformation/vpc.yml`), only an existing VPC is required. Before editing `aws/.env`, you need:
 
 - A VPC in your target region.
 - That VPC to provide public internet egress: its main route table routes `0.0.0.0/0` to an Internet Gateway. Subnets created by the stack inherit this route table, which is what makes them public.
 
-The setup provisions two `/28` subnets in different Availability Zones (defaults `10.121.1.0/28` and `10.121.1.16/28`; override via the `SubnetACidr` / `SubnetBCidr` template parameters if those ranges are taken). The 2-AZ minimum is an AWS-side constraint on Application Load Balancers, not a project choice — `CreateLoadBalancer` rejects a single-AZ ALB.
+The setup provisions two `/28` subnets in different Availability Zones. The 2-AZ minimum is an AWS-side constraint on Application Load Balancers.
 
-**Personal sandbox (easiest):** Use your account's default VPC. Each region has one whose main route table already routes to an Internet Gateway.
+**Personal sandbox :** Use your account's default VPC. Each region has one whose main route table already routes to an Internet Gateway.
 
 ```bash
 aws ec2 describe-vpcs \
@@ -120,6 +113,8 @@ The script reads only from `aws/.env`.
 
 See [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md) for why `AWS_PROJECT_ID` must be short and how the values combine into resource names.
 
+Authentication-backed commands normalize your SSO inputs into an AWS profile configuration. By default, that profile is written to `~/.aws/config`; if your shell exports `AWS_CONFIG_FILE=aws/.aws-state/config`, the same normalized profile is written to `aws/.aws-state/config` instead. For the full lifecycle, see [AWS_DEPLOYMENT.md → AWS State Configuration Normalization](./AWS_DEPLOYMENT.md#aws-state-configuration-normalization).
+
 ---
 
 ## Step 3: Run the Automated Setup (~30 min)
@@ -130,7 +125,7 @@ make aws-setup
 
 All `make aws-*` commands assume `export AWS_PROFILE=uh-groupings` is set in your shell (see Step 1).
 
-The script (`aws/setup.sh`) runs inside the AWS CLI Docker container and is **non-interactive end to end** — it never prompts. The flow is:
+The script (`aws/setup.sh`) runs on your host and is **non-interactive end to end** — it never prompts. The flow is:
 
 1. Loads `aws/.env`.
 2. Validates that `AWS_PROJECT_ID` and `VPC_ID` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if either is missing.
@@ -177,7 +172,32 @@ make aws-stack-events
 
 ## Step 5: CodePipeline (Optional, ~15 min)
 
-The pipeline cannot be fully automated because the GitHub CodeConnections handshake requires a manual OAuth approval. See [AWS_DEPLOYMENT.md → CodePipeline Setup (Manual)](./AWS_DEPLOYMENT.md#codepipeline-setup-manual) for the full procedure. Summary:
+The pipeline cannot be fully automated because the GitHub CodeConnections handshake requires a manual OAuth approval in the browser. The project automates everything *around* that boundary.
+
+Use the helper first:
+
+```bash
+make aws-github-connect
+```
+
+What this helper does:
+
+- Ensures your AWS CLI session is valid.
+- Reuses an existing `AVAILABLE` GitHub connection when present.
+- Otherwise, creates a `PENDING` connection and opens browser pages for completion.
+- Polls until the connection becomes `AVAILABLE` and prints the exact ARN to put in `aws/.env` (`GITHUB_CONNECTION_ARN=...`).
+
+What still must be done manually:
+
+- In AWS Console → Connections, click **Update pending connection**.
+- Complete the GitHub OAuth consent flow.
+
+Recommended metadata when creating a connection manually:
+
+- **Connection name:** `${AWS_OWNER}-${AWS_PROJECT_ID}-github` (example: `mhodges-groupings-api-github`)
+- **Tags (optional):** `Owner=${AWS_OWNER}`, `Project=${AWS_PROJECT_ID}`, `Environment=${AWS_ENV}`
+
+See [AWS_DEPLOYMENT.md → CodePipeline Setup (Manual)](./AWS_DEPLOYMENT.md#codepipeline-setup-manual) for the full procedure. Summary:
 
 1. Create an AWS CodeConnections entry in the AWS Console; authorize via GitHub OAuth.
 2. Note the connection ARN.
@@ -263,7 +283,7 @@ aws ecs update-service \
 ## Common Issues
 
 **"Cannot connect to Docker daemon"**
-Start Docker Desktop and retry. The Make targets check for Docker before invoking the AWS CLI container.
+Only `make aws-setup` needs Docker (to build and push the application image). Start Docker Desktop and retry.
 
 **"Stack already exists" or `ROLLBACK_COMPLETE`**
 Re-running `make aws-setup` handles both: `aws cloudformation deploy` updates an existing stack, and a stack stuck in `ROLLBACK_COMPLETE` from a failed first create is deleted and recreated automatically. If a stack is otherwise wedged, `make aws-teardown` and start fresh.

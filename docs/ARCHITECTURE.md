@@ -373,9 +373,9 @@ The project handles two distinct categories of secrets, stored differently:
 - **AWS deployment:** AWS Secrets Manager (`groupings/api/*`), encrypted at rest (AES-256), injected into ECS tasks via the task definition's `secrets[]` array.
 
 **AWS account credentials** (temporary SSO session tokens) — used only by developers running `make aws-setup` and other AWS Make targets:
-- Issued by IAM Identity Center (SSO) and cached in `aws/.aws-state/` (gitignored). Resolved by the AWS CLI Docker container via `AWS_PROFILE`. Sessions are short-lived (typically 1–12 h); refresh with `make aws-sso-login`.
-- Bootstrapped once per developer with `make aws-sso-setup`. Subsequent commands simply need `export AWS_PROFILE=uh-groupings`.
-- Holds **no application secrets**. The CLI inside the Docker container reads credentials from the cached SSO token; `~/.aws` is not bind-mounted.
+- Issued by IAM Identity Center (SSO) and cached by the AWS CLI in the developer's `~/.aws/` SSO token cache. Resolved via `AWS_PROFILE`. Sessions are short-lived (typically 1–12 h); any `make aws-*` target re-authenticates automatically, or refresh with `make aws-sso-login`.
+- Bootstrapped automatically on the first `make aws-*` command (writes the profile from `aws/.env` and opens a browser to sign in); requires the AWS CLI v2 installed on the host.
+- Holds **no application secrets**. The CLI reads credentials from the cached SSO token in `~/.aws/`.
 
 **See:** [docs/SECRETS.md](SECRETS.md) for the complete model, including IAM permissions and rotation guidance.
 

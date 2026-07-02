@@ -12,17 +12,12 @@
 
 ## Quick Reference
 
-The Makefile wraps every AWS operation so you don't need the AWS CLI installed locally — it runs inside the project's AWS CLI Docker container, with credentials supplied by IAM Identity Center (SSO). See [AWS_QUICKSTART.md → Step 1](AWS_QUICKSTART.md#step-1-configure-credentials-510-min) for setup.
+The Makefile wraps every AWS operation and runs the AWS CLI directly on your host (AWS CLI v2 required), with credentials supplied by IAM Identity Center (SSO). See [AWS_QUICKSTART.md → Step 1](AWS_QUICKSTART.md#step-1-configure-credentials-510-min) for setup.
 
 ```bash
-# One-time per developer
-make aws-sso-setup       # IAM Identity Center (runs in container)
-
-# Export your profile once per shell session
-export AWS_PROFILE=uh-groupings
-
-# Refresh SSO session when it expires
-make aws-sso-login
+# Sign in (optional — any aws-* target below does this automatically on demand)
+make aws-sso-setup        # writes the profile + browser login
+make aws-sso-login        # force a fresh login when a session expires
 
 # Operations
 make aws-logs             # tail ECS logs
@@ -47,6 +42,30 @@ The examples below use the resource names produced by the project's naming conve
 
 This is a one-time setup per environment. After the pipeline exists, ongoing deploys are handled by the [Deployment Methods](#deployment-methods) section below.
 
+### Automation boundary (what scripts can and cannot do)
+
+Automated by project scripts:
+
+- Validate AWS auth/session.
+- Find/reuse an existing `AVAILABLE` GitHub connection.
+- Create a new `PENDING` connection if none exists.
+- Print the resolved connection ARN for `aws/.env`.
+
+Manual by design (AWS/GitHub security boundary):
+
+- The browser OAuth approval that turns a `PENDING` connection into `AVAILABLE`.
+
+Use the helper command first:
+
+```bash
+make aws-github-connect
+```
+
+Recommended connection metadata (if you create it manually in the console):
+
+- **Connection name:** `${AWS_OWNER}-${AWS_PROJECT_ID}-github` (example: `mhodges-groupings-api-github`)
+- **Tags (optional):** `Owner=${AWS_OWNER}`, `Project=${AWS_PROJECT_ID}`, `Environment=${AWS_ENV}`
+
 ### Step 1: Create GitHub Connection
 
 1. Go to **AWS Console → Developer Tools → Settings → Connections**.
@@ -57,6 +76,12 @@ This is a one-time setup per environment. After the pipeline exists, ongoing dep
 6. Paste the ARN into `aws/.env` as `GITHUB_CONNECTION_ARN`.
 
 The connection starts in `PENDING` status and becomes `AVAILABLE` after authorization. You only need one connection per AWS account — it works for any repo on github.com.
+
+After it is `AVAILABLE`, store its ARN in `aws/.env`:
+
+```bash
+sed -i '' 's|^GITHUB_CONNECTION_ARN=.*|GITHUB_CONNECTION_ARN=arn:aws:codeconnections:us-west-2:123456789012:connection/REPLACE_ME|' aws/.env
+```
 
 ### Step 2: Deploy the CodePipeline Stack
 
@@ -280,6 +305,40 @@ Production deployments additionally require:
 - Deployment window scheduled
 - Documented rollback plan
 - Stakeholder notification
+
+---
+
+## AWS State Configuration Normalization
+
+To keep `make aws-*` behavior predictable, the auth helpers normalize SSO-related values from `aws/.env` into a concrete AWS CLI profile configuration.
+
+### Source of truth
+
+- `aws/.env` provides raw inputs (`SSO_START_URL`, `AWS_REGION`, `AWS_ACCOUNT_ID`, `SSO_ROLE_NAME`).
+- `aws/lib-auth.sh` treats these as required when it needs to write a profile.
+
+### Normalization and write path
+
+When `ensure_aws_session` runs (directly or through any `make aws-*` target):
+
+1. It resolves the profile name from `AWS_PROFILE`, then `AWS_SSO_PROFILE`, then default `uh-groupings`.
+2. If no valid session exists, it ensures a matching profile block exists.
+3. Profile content is written by `write_sso_profile` to:
+   - `${AWS_CONFIG_FILE}` when set, or
+   - `~/.aws/config` by default.
+
+In environments that export `AWS_CONFIG_FILE=aws/.aws-state/config`, this is the mechanism that populates `aws/.aws-state/config`.
+
+### How downstream commands use normalized state
+
+- `ensure_aws_session` exports `AWS_PROFILE`, so subsequent `aws` CLI calls use the normalized profile.
+- The AWS CLI reads the selected profile from the configured config file path (`AWS_CONFIG_FILE` or default `~/.aws/config`).
+- SSO tokens remain in the standard AWS CLI cache (`~/.aws/sso/cache/`); only profile metadata is written to the config file.
+
+### Operational notes
+
+- Changing SSO values in `aws/.env` requires rerunning an auth-backed target (for example `make aws-sso-setup`) to refresh profile configuration.
+- If profile state appears stale, remove the generated config file and rerun setup.
 
 ---
 
