@@ -267,6 +267,7 @@ aws ecs update-service \
 ## What's Next
 
 - **Ongoing operations:** [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md)
+- **Certificate strategy:** [CERT_MANAGEMENT.md](./CERT_MANAGEMENT.md)
 - **Naming conventions:** [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md)
 - **Secrets model:** [SECRETS.md](./SECRETS.md)
 - **Architecture overview:** [ARCHITECTURE.md](./ARCHITECTURE.md)

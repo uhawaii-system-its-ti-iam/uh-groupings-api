@@ -111,7 +111,9 @@ Stateless JWT. `JwtAuthenticationFilter` populates `SecurityContextHolder` befor
 docker-compose up --build
 ```
 
-**Default server port is `8081`** (not 8080). Health: `http://localhost:8081/uhgroupingsapi/actuator/health`. Swagger: `http://localhost:8081/uhgroupingsapi/swagger-ui.html`.
+**Local dev server port is `8081`** (base `application.properties`). Health: `http://localhost:8081/uhgroupingsapi/actuator/health`. Swagger: `http://localhost:8081/uhgroupingsapi/swagger-ui.html`.
+
+**In AWS the service runs on `8080`** — the `aws-test` and `aws-prod` Spring profiles set `server.port=8080`, and `ecs-service.yml` also sets `SERVER_PORT=8080` so every AWS environment binds 8080 (matching the ECS container port and ALB target group). The servlet context path is `/uhgroupingsapi` in all environments, so the health endpoint is `/uhgroupingsapi/actuator/health` (ALB/container health checks must include it).
 
 ## Spring Profiles
 | Profile           | Use case                                                                                                                                  |
@@ -120,7 +122,10 @@ docker-compose up --build
 | `dockerhost`      | Docker-based local runtime; imports `/overrides/uh-groupings-api-overrides.properties` and enables Vault-based Grouper password overrides |
 | `localTest`       | Unit tests with mocked/no Grouper (`GrouperApiServiceTest`)                                                                               |
 | `integrationTest` | Integration tests hitting live Grouper (`TestGrouperApiService`, `TestGroupingAssignmentService`)                                         |
-| `prod`            | Production (AWS ECS)                                                                                                                      |
+| `aws-test`        | AWS test tier (ECS). `server.port=8080`; grouper-test URL/login baked in; secrets injected from Secrets Manager. Used by all non-prod AWS environments — the sandbox today (`AWS_ENV=sandbx`) and a real test environment later |
+| `aws-prod`        | AWS production tier (ECS). `server.port=8080`; production Grouper URL/login (candidate — confirm before first prod deploy). Selected when `AWS_ENV=prod` |
+
+`ecs-service.yml` maps the AWS environment to the Spring profile: `prod` → `aws-prod`, everything else → `aws-test`. (The pre-existing `test`/`prod` Spring profiles are no longer used by the AWS deployment path; the AWS runtime uses `aws-test`/`aws-prod`.)
 
 ## Test Naming Convention
 - `*Test.java` (e.g., `GrouperApiServiceTest`) — unit/local tests, `@ActiveProfiles("localTest")`

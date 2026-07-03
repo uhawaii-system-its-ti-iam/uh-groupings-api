@@ -119,6 +119,7 @@ This README intentionally provides only a directory overview.
 |-------------------------------|----------------------------------------------------------|
 | `docs/AWS_QUICKSTART.md`      | Initial AWS infrastructure provisioning                  |
 | `docs/AWS_DEPLOYMENT.md`      | Day-to-day deployment, rollback, scaling, and operations |
+| `docs/CERT_MANAGEMENT.md`     | TLS certificate strategy and rotation plan               |
 | `docs/ARCHITECTURE.md`        | AWS architecture and resource relationships              |
 | `docs/SECRETS.md`             | Secrets management and AWS Secrets Manager integration   |
 

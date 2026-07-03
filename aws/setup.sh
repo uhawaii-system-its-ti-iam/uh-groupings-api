@@ -49,6 +49,9 @@ ALB_URL=""
 GROUPER_PASSWORD=""
 # Populated from the vpc stack outputs by create_vpc_stack().
 SUBNET_IDS=""
+# Populated from Secrets Manager by configure_secrets(); passed to the ECS stack.
+GROUPER_PASSWORD_SECRET_ARN=""
+JWT_SECRET_ARN=""
 
 #
 # Functions
@@ -82,6 +85,8 @@ apply_defaults() {
     AWS_OWNER="${AWS_OWNER:-mhodges}"
     ECS_TASK_COUNT="${ECS_TASK_COUNT:-2}"
     VPC_ID="${VPC_ID:-}"
+    APP_TIER="${APP_TIER:-test}"
+    API_HOSTNAME="${API_HOSTNAME:-}"
 }
 
 validate_config() {
@@ -89,6 +94,53 @@ validate_config() {
         error "AWS_PROJECT_ID must be set in aws/.env."
         exit 1
     fi
+}
+
+# APP_TIER is the single source of truth for the deployment tier: it selects the
+# Spring profile (aws-<tier>) in the ECS stack and, with API_HOSTNAME, the public
+# hostname/cert. This guard keeps it valid and consistent with AWS_ENV and the
+# "test in non-prod hostname" convention — before any AWS API call.
+validate_tier() {
+    log "Validating deployment tier..."
+
+    case "${APP_TIER}" in
+        test|prod) ;;
+        *)
+            error "APP_TIER must be 'test' or 'prod' (got '${APP_TIER}')."
+            exit 1
+            ;;
+    esac
+
+    # A prod tier must only run in the prod environment.
+    if [[ "${APP_TIER}" == "prod" && "${AWS_ENV}" != "prod" ]]; then
+        error "APP_TIER=prod is only allowed when AWS_ENV=prod (got AWS_ENV=${AWS_ENV})."
+        error "Set APP_TIER=test for non-prod environments."
+        exit 1
+    fi
+
+    # Hostname convention: non-prod must contain 'test'; prod must not.
+    if [[ -n "${API_HOSTNAME}" ]]; then
+        if [[ "${APP_TIER}" == "prod" ]]; then
+            if [[ "${API_HOSTNAME}" == *test* ]]; then
+                error "prod API_HOSTNAME must not contain 'test': ${API_HOSTNAME}"
+                exit 1
+            fi
+        else
+            if [[ "${API_HOSTNAME}" != *test* ]]; then
+                error "non-prod API_HOSTNAME must contain 'test': ${API_HOSTNAME}"
+                exit 1
+            fi
+        fi
+    fi
+
+    log "  Tier:        ${APP_TIER} (Spring profile aws-${APP_TIER})"
+    if [[ -n "${API_HOSTNAME}" ]]; then
+        log "  Hostname:    ${API_HOSTNAME}"
+    else
+        log "  Hostname:    <none> (LoadBalancerUrl uses the raw ALB DNS name)"
+    fi
+    log "✓ Deployment tier validated"
+    log ""
 }
 
 validate_network_configuration() {
@@ -370,6 +422,15 @@ configure_secrets() {
         log "✓ groupings/api/jwt-secret generated and stored"
         log "  (UI projects must reference this same secret; they do not generate their own)"
     fi
+
+    # Capture the full secret ARNs (they include a random 6-char suffix) so the
+    # ECS task definition can reference them in its secrets[] block.
+    GROUPER_PASSWORD_SECRET_ARN="$(aws secretsmanager describe-secret \
+      --secret-id "groupings/api/grouper-password" \
+      --query 'ARN' --output text --region "${AWS_REGION}")"
+    JWT_SECRET_ARN="$(aws secretsmanager describe-secret \
+      --secret-id "groupings/api/jwt-secret" \
+      --query 'ARN' --output text --region "${AWS_REGION}")"
     log ""
 }
 
@@ -405,10 +466,14 @@ deploy_ecs_infrastructure() {
         "Owner=${AWS_OWNER}" \
         "Project=${AWS_PROJECT_ID}" \
         "Environment=${AWS_ENV}" \
+        "Tier=${APP_TIER}" \
+        "Hostname=${API_HOSTNAME}" \
         "VpcId=${VPC_ID}" \
         "SubnetIds=${SUBNET_IDS}" \
         "ContainerImage=${ECR_REPOSITORY_URI}:latest" \
         "DesiredCount=${ECS_TASK_COUNT}" \
+        "GrouperPasswordSecretArn=${GROUPER_PASSWORD_SECRET_ARN}" \
+        "JwtSecretArn=${JWT_SECRET_ARN}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"; then
@@ -453,6 +518,7 @@ print_summary() {
 load_env_file
 apply_defaults
 validate_config
+validate_tier
 validate_network_configuration
 load_overrides_file
 print_configuration

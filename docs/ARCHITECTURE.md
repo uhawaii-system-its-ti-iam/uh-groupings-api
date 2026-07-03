@@ -6,7 +6,6 @@
   * [High-Level Architecture](#high-level-architecture)
   * [Component Details](#component-details)
     * [1. Source Control](#1-source-control)
-      * [Changing Deployment Branch](#changing-deployment-branch)
     * [2. CI/CD Pipeline (AWS CodePipeline)](#2-cicd-pipeline-aws-codepipeline)
       * [Stage 1: Source](#stage-1-source)
       * [Stage 2: Build (AWS CodeBuild)](#stage-2-build-aws-codebuild)
@@ -23,7 +22,9 @@
       * [CloudWatch Metrics](#cloudwatch-metrics)
       * [Alarms (Recommended)](#alarms-recommended)
     * [8. Networking](#8-networking)
-      * [VPC Configuration](#vpc-configuration)
+      * [Sandbox Architecture (Current)](#sandbox-architecture-current)
+      * [Production Architecture (Target)](#production-architecture-target)
+      * [Security Groups](#security-groups)
       * [Network Flow](#network-flow)
   * [Data Flow](#data-flow)
     * [Request Flow](#request-flow)
@@ -34,12 +35,11 @@
     * [DevOps Tools](#devops-tools)
   * [Environments](#environments)
     * [Environment Configuration](#environment-configuration)
-    * [Branch Flexibility](#branch-flexibility)
-    * [Changing Deployment Branch](#changing-deployment-branch-1)
   * [Security Architecture](#security-architecture)
     * [Authentication & Authorization](#authentication--authorization)
     * [Secrets Management](#secrets-management)
     * [Network Security](#network-security)
+    * [Access Restriction: HTTPS from the UI Deployment Only (Planned)](#access-restriction-https-from-the-ui-deployment-only-planned)
     * [Container Security](#container-security)
     * [Compliance](#compliance)
   * [Scalability & Resilience](#scalability--resilience)
@@ -63,7 +63,7 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                           GitHub                              │
+│                           GitHub                                │
 │                     (Source Code Repository)                    │
 └────────────────┬────────────────────────────────────────────────┘
                  │
@@ -106,33 +106,8 @@ The UH Groupings API is a Spring Boot application deployed on AWS using a modern
 - **Service:** GitHub (github.com)
 - **Repository:** uhawaii-system-its-ti-iam/uh-groupings-api
 - **Default Branch:** `main`
-- **Branching Strategy:**
-  - **Sandbox / Pilot:** `main` (configurable per pilot — see below)
-  - **Dev (Shared):** `develop` or `main`
-  - **Test/Staging:** `release/*` or `test`
-  - **Production:** `main` or `production`
-- **Webhook:** Triggers CodePipeline on push/merge to configured branch
-- **Branch Flexibility:** The shared sandbox pipeline can temporarily watch a feature branch for coordinated pilot work; the canonical configuration uses `main`.
-
-#### Changing Deployment Branch
-
-The shared sandbox environment can deploy from any branch:
-
-```bash
-# Update pipeline to watch a different branch (canonical: main)
-aws cloudformation update-stack \
-  --stack-name groupings-api-pipeline-sandbx \
-  --use-previous-template \
-  --parameters \
-    ParameterKey=GitHubBranch,ParameterValue=main \
-    ParameterKey=Owner,UsePreviousValue=true \
-  --capabilities CAPABILITY_NAMED_IAM
-
-# Or via AWS Console:
-# CodePipeline → Your Pipeline → Edit → Source Stage → Change Branch
-```
-
-For pilot/feature work, this same command can be used to point the pipeline at a feature branch.
+- **Webhook:** Triggers CodePipeline on push/merge to the branch configured in `aws/.env` (`GITHUB_BRANCH`).
+- **Branch Flexibility:** To change the deployed branch, update `GITHUB_BRANCH` in `aws/.env` and redeploy the pipeline stack (see [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)).
 
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
@@ -160,7 +135,7 @@ For pilot/feature work, this same command can be used to point the pipeline at a
 #### Stage 3: Deploy (ECS)
 - **Target:** ECS Fargate Service
 - **Strategy:** Rolling update (MinimumHealthyPercent: 100%)
-- **Health Check:** ALB monitors `/actuator/health`
+- **Health Check:** ALB monitors `/uhgroupingsapi/actuator/health` on port 8080
 - **Rollback:** Automatic on deployment failure
 
 ### 3. Container Registry (Amazon ECR)
@@ -206,7 +181,7 @@ For pilot/feature work, this same command can be used to point the pipeline at a
 - **Target Group:**
   - Protocol: HTTP
   - Port: 8080
-  - Health Check: `/actuator/health`
+  - Health Check: `/uhgroupingsapi/actuator/health`
   - Health Check Interval: 30s
   - Healthy Threshold: 2
   - Unhealthy Threshold: 3
@@ -366,11 +341,11 @@ restricts the ALB to UI-only traffic, and uses a properly sized VPC.
 
 #### Security Groups
 
-| Security Group | Inbound | Source | Notes |
-|---------------|---------|--------|-------|
-| ALB SG | 80 + 443 (sandbox); 443 only (production) | `0.0.0.0/0` (sandbox) → UI SG (production) | Sandbox currently listens on HTTP:80 |
-| ECS SG | 8080 | ALB SG | Same in both environments |
-| VPC Endpoint SG | 443 | Subnet CIDRs | Interface endpoints only |
+| Security Group  | Inbound                                   | Source                                     | Notes                                |
+|-----------------|-------------------------------------------|--------------------------------------------|--------------------------------------|
+| ALB SG          | 80 + 443 (sandbox); 443 only (production) | `0.0.0.0/0` (sandbox) → UI SG (production) | Sandbox currently listens on HTTP:80 |
+| ECS SG          | 8080                                      | ALB SG                                     | Same in both environments            |
+| VPC Endpoint SG | 443                                       | Subnet CIDRs                               | Interface endpoints only             |
 
 #### Network Flow
 ```
@@ -385,8 +360,8 @@ Production:  Internet → ALB (public subnets) → ECS task (private subnets) �
 ### Request Flow
 ```
 1. User → HTTP → ALB    (HTTPS:443 listener planned; current is HTTP:80 only)
-2. ALB → Health Check → ECS Task:8080/actuator/health
-3. ALB → Route Request → ECS Task:8080/api/v2.1/*
+2. ALB → Health Check → ECS Task:8080/uhgroupingsapi/actuator/health
+3. ALB → Route Request → ECS Task:8080/uhgroupingsapi/api/groupings/v2.1/*
 4. ECS Task → Authenticate (JWT) → Process Request
 5. ECS Task → Query Grouper API (external)
 6. ECS Task → Response → ALB → User
@@ -438,44 +413,13 @@ Production:  Internet → ALB (public subnets) → ECS task (private subnets) �
 
 ### Environment Configuration
 
-| Environment    | Purpose                                | Typical Branch                                             | Owner                         | Auto-Deploy              |
-|----------------|----------------------------------------|------------------------------------------------------------|-------------------------------|--------------------------|
-| **Sandbox**    | Shared team experimentation & pilot validation | `main` (configurable per pilot — feature branches allowed) | Individual contributor (e.g., `mhodges`) | Yes                      |
-| **Dev**        | Shared integration testing             | `develop` or `main`                                        | Team (`its-iam`)              | Yes                      |
-| **Test**       | QA & staging                           | `release/*` or `test`                                      | Team (`its-iam`)              | Yes (with approval)      |
-| **Production** | Live system                            | `main` or `production`                                     | Team (`its-iam`)              | Manual approval required |
+| Environment    | Purpose                                | Branch (from `GITHUB_BRANCH` in `aws/.env`) | Owner                         | Auto-Deploy              |
+|----------------|----------------------------------------|---------------------------------------------|-------------------------------|--------------------------|
+| **Sandbox**    | Shared team experimentation            | Feature branch or `main`                    | Individual contributor        | Yes                      |
+| **Test**       | QA & staging                           | `test` or `main`                            | Team (`its-iam`)              | Yes (with approval)      |
+| **Production** | Live system                            | `main`                                      | Team (`its-iam`)              | Manual approval required |
 
-### Branch Flexibility
-
-**Shared Sandbox Environment:**
-- Default to `main` for the canonical configuration
-- May temporarily watch a feature branch for coordinated pilot work
-- Change branch via CodePipeline configuration
-
-**Team Environments:**
-- Follow GitFlow or trunk-based development patterns
-- Branch protection and approval workflows enforced
-- Standard naming: `its-iam-groupings-<env>-*`
-
-### Changing Deployment Branch
-
-```bash
-# Point the sandbox pipeline at a feature branch (e.g., for a pilot)
-aws cloudformation update-stack \
-  --stack-name groupings-api-pipeline-sandbx \
-  --use-previous-template \
-  --parameters \
-    ParameterKey=GitHubBranch,ParameterValue=feature/your-branch \
-    ParameterKey=Owner,UsePreviousValue=true \
-    ParameterKey=Project,UsePreviousValue=true \
-    ParameterKey=Environment,UsePreviousValue=true \
-  --capabilities CAPABILITY_NAMED_IAM
-
-# Or in AWS Console:
-# CodePipeline → groupings-api-pipeline-sandbx → Edit → Source → Change Branch
-```
-
-When the pilot work is complete, switch the pipeline back to `main`.
+To change the deployed branch, update `GITHUB_BRANCH` in `aws/.env` and redeploy the pipeline stack (see [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)). The pipeline watches whichever branch `.env` specifies.
 
 ## Security Architecture
 

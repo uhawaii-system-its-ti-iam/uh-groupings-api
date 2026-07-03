@@ -20,11 +20,15 @@
       "environment": [
         {
           "name": "SPRING_PROFILES_ACTIVE",
-          "value": "production"
+          "value": "prod"
         },
         {
           "name": "AWS_REGION",
           "value": "{AWS_REGION}"
+        },
+        {
+          "name": "SERVER_PORT",
+          "value": "8080"
         },
         {
           "name": "JAVA_OPTS",
@@ -64,7 +68,7 @@
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "curl -f http://localhost:8080/actuator/health || exit 1"
+          "curl -f http://localhost:8080/uhgroupingsapi/actuator/health || exit 1"
         ],
         "interval": 30,
         "timeout": 5,

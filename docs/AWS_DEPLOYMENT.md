@@ -348,12 +348,12 @@ In environments that export `AWS_CONFIG_FILE=aws/.aws-state/config`, this is the
 
 Set these in the CodeBuild project (created by `codepipeline.yml`):
 
-| Variable             | Description         | Example                        |
-|----------------------|---------------------|--------------------------------|
-| `AWS_ACCOUNT_ID`     | AWS Account ID      | `123456789012`                 |
-| `AWS_DEFAULT_REGION` | AWS Region          | `us-west-2`                    |
+| Variable             | Description         | Example                                                                       |
+|----------------------|---------------------|-------------------------------------------------------------------------------|
+| `AWS_ACCOUNT_ID`     | AWS Account ID      | `123456789012`                                                                |
+| `AWS_DEFAULT_REGION` | AWS Region          | `us-west-2`                                                                   |
 | `IMAGE_REPO_NAME`    | ECR repository name | `${AWS_OWNER}-groupings-api-sandbx` (example: `mhodges-groupings-api-sandbx`) |
-| `IMAGE_TAG`          | Docker image tag    | `latest` or commit SHA         |
+| `IMAGE_TAG`          | Docker image tag    | `latest` or commit SHA                                                        |
 
 ### Adding a manual approval stage
 
@@ -581,3 +581,4 @@ aws ecs update-service \
 - [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — initial provisioning
 - [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) — how the resource names above are derived
 - [SECRETS.md](SECRETS.md) — secrets model (IAM Identity Center for developer credentials, Secrets Manager for app runtime)
+- [CERT_MANAGEMENT.md](CERT_MANAGEMENT.md) — recommended TLS certificate and rotation strategy

@@ -22,6 +22,19 @@ Parameters:
       - prod
     Description: Environment name
 
+  Tier:
+    Type: String
+    Default: test
+    AllowedValues:
+      - test
+      - prod
+    Description: >-
+      Deployment tier — the single source of truth for application config
+      (APP_TIER in aws/.env). Selects the Spring profile (aws-<Tier>) and,
+      together with Hostname/CertificateArn, the public identity of the service.
+      Decoupled from Environment, which only names resources. AllowedValues
+      turns a typo into a deploy-time error instead of a mis-tiered deploy.
+
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID where the ECS cluster will be deployed
@@ -38,6 +51,51 @@ Parameters:
   ContainerImage:
     Type: String
     Description: Container image URI from ECR
+
+  GrouperPasswordSecretArn:
+    Type: String
+    Description: >-
+      ARN of the groupings/api/grouper-password secret in Secrets Manager.
+      Passed by setup.sh; injected into the container as
+      GROUPERCLIENT_WEBSERVICE_PASSWORD.
+
+  JwtSecretArn:
+    Type: String
+    Description: >-
+      ARN of the groupings/api/jwt-secret secret in Secrets Manager.
+      Passed by setup.sh; injected into the container as JWT_SECRET_KEY.
+
+  CertificateArn:
+    Type: String
+    Default: ''
+    Description: >-
+      ARN of an ACM certificate to terminate TLS at the ALB. May be an
+      ACM-managed (domain-validated) cert or a self-signed cert imported via
+      `aws acm import-certificate`. When empty (the default), the stack is
+      HTTP-only on port 80 — the current sandbox behavior. When provided, an
+      HTTPS listener is added on 443 and port 80 redirects to 443.
+
+  Hostname:
+    Type: String
+    Default: ''
+    Description: >-
+      Public FQDN clients use to reach the API (e.g.,
+      groupings-api-test.its.hawaii.edu). Convention: non-prod hostnames must
+      contain "test"; prod must not (enforced by setup.sh). When set, it is
+      used in the LoadBalancerUrl output instead of the raw ALB DNS name. Leave
+      empty in the sandbox until DNS/cert are provisioned.
+
+Conditions:
+  # Spring profile is taken directly from Tier (aws-<Tier>), so no
+  # prod-vs-test inference condition is needed here — the tier is explicit.
+
+  # When a certificate ARN is supplied, enable TLS at the ALB (HTTPS listener
+  # + HTTP→HTTPS redirect). Empty string keeps the HTTP-only sandbox posture.
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+
+  # When a public hostname is supplied, the LoadBalancerUrl output uses it
+  # instead of the raw ALB DNS name.
+  HasHostname: !Not [!Equals [!Ref Hostname, '']]
 
 Resources:
   # ECS Cluster
@@ -144,7 +202,7 @@ Resources:
       TargetType: ip
       VpcId: !Ref VpcId
       HealthCheckEnabled: true
-      HealthCheckPath: /actuator/health
+      HealthCheckPath: /uhgroupingsapi/actuator/health
       HealthCheckProtocol: HTTP
       HealthCheckIntervalSeconds: 30
       HealthCheckTimeoutSeconds: 5
@@ -153,16 +211,43 @@ Resources:
       Matcher:
         HttpCode: 200
 
-  # ALB Listener
+  # ALB Listener (port 80)
+  # - No certificate: forward HTTP straight to the target group (sandbox default).
+  # - Certificate present: redirect all HTTP to HTTPS so every client connection
+  #   is TLS.
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - !If
+          - HasCertificate
+          - Type: redirect
+            RedirectConfig:
+              Protocol: HTTPS
+              Port: '443'
+              StatusCode: HTTP_301
+          - Type: forward
+            TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # HTTPS Listener (port 443) — only created when a certificate ARN is provided.
+  # Terminates TLS at the ALB and forwards plaintext HTTP to the task on 8080
+  # inside the VPC. SslPolicy pins a modern TLS 1.2/1.3 policy.
+  HTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: HasCertificate
     Properties:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
       LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
 
   # IAM Roles
   ECSTaskExecutionRole:
@@ -186,7 +271,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
-                Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:groupings/${Environment}/*'
+                Resource:
+                  - !Ref GrouperPasswordSecretArn
+                  - !Ref JwtSecretArn
       Tags:
         - Key: Name
           Value: !Sub '${Owner}-${Project}-${Environment}-role-ecs-execution'
@@ -248,10 +335,28 @@ Resources:
             - ContainerPort: 8080
               Protocol: tcp
           Environment:
+            # Spring profile is the deployment tier, taken directly from the
+            # Tier parameter (APP_TIER in aws/.env) — the single source of
+            # truth. Maps 1:1: aws-test | aws-prod. Decoupled from the AWS_ENV
+            # name, so the shared sandbox (AWS_ENV=sandbx) runs the test tier.
             - Name: SPRING_PROFILES_ACTIVE
-              Value: !Ref Environment
+              Value: !Sub 'aws-${Tier}'
             - Name: AWS_REGION
               Value: !Ref AWS::Region
+            # Bind the app to 8080 in every AWS environment, matching the
+            # container port and target group.
+            - Name: SERVER_PORT
+              Value: '8080'
+          # Secrets are stored in Secrets Manager by setup.sh, then injected
+          # here as environment variables at container start. Spring relaxed
+          # binding maps GROUPERCLIENT_WEBSERVICE_PASSWORD → the
+          # grouperClient.webService.password property and JWT_SECRET_KEY →
+          # jwt.secret.key (a required placeholder; the app won't start without it).
+          Secrets:
+            - Name: GROUPERCLIENT_WEBSERVICE_PASSWORD
+              ValueFrom: !Ref GrouperPasswordSecretArn
+            - Name: JWT_SECRET_KEY
+              ValueFrom: !Ref JwtSecretArn
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -261,7 +366,7 @@ Resources:
           HealthCheck:
             Command:
               - CMD-SHELL
-              - curl -f http://localhost:8080/actuator/health || exit 1
+              - curl -f http://localhost:8080/uhgroupingsapi/actuator/health || exit 1
             Interval: 30
             Timeout: 5
             Retries: 3
@@ -316,6 +421,11 @@ Outputs:
   
   LoadBalancerUrl:
     Description: URL of the Application Load Balancer
-    Value: !Sub 'http://${ApplicationLoadBalancer.DNSName}'
+    # Scheme follows certificate presence (https when TLS is enabled); host
+    # follows hostname presence (the public FQDN when set, else the raw ALB DNS).
+    Value: !Sub
+      - '${Scheme}://${Host}'
+      - Scheme: !If [HasCertificate, 'https', 'http']
+        Host: !If [HasHostname, !Ref Hostname, !GetAtt ApplicationLoadBalancer.DNSName]
     Export:
       Name: !Sub '${AWS::StackName}-LoadBalancerUrl'
