@@ -248,16 +248,136 @@ Non-secret values that the deployed API still needs (`grouperClient.webService.u
 
 ### 8. Networking
 
-#### VPC Configuration
-- **VPC:** Assumed to already exist and to provide public internet egress (main route table routes `0.0.0.0/0` to an Internet Gateway). Its ID is supplied via `VPC_ID` in `aws/.env`.
-- **Subnets:** Two public subnets in different AZs, created by `vpc.yml` inside the existing VPC. Their IDs are exported and consumed by `ecs-service.yml` (the 2-AZ minimum is an AWS ALB requirement).
-- **Security Groups:**
-  - ALB SG: Inbound 80/443 from Internet today; **target posture is 443 only, restricted to the companion UI deployment** (see [Access Restriction](#access-restriction-https-from-the-ui-deployment-only-planned))
-  - ECS SG: Inbound 8080 from ALB SG only
+#### Sandbox Architecture (Current)
+
+The sandbox deploys all components into two shared subnets. Tasks have no public IP;
+VPC endpoints provide access to AWS services, and a VPN route (once configured)
+provides the path back to the on-prem Grouper server.
+
+```
+                              Internet
+                                 │
+                          Internet Gateway
+                                 │
+  ┌──────────────────── VPC: 172.18.0.128/25 ─────────────────────┐
+  │                                                               │
+  │   Application Load Balancer (internet-facing, spans both AZs) │
+  │        ┌──────────────────────┴──────────────────────┐        │
+  │  ┌─────┴─────────────────────┐  ┌────────────────────┴─────┐  │
+  │  │ Subnet A (AZ-1)           │  │ Subnet B (AZ-2)          │  │
+  │  │ 172.18.0.176/28           │  │ 172.18.0.192/28          │  │
+  │  │                           │  │                          │  │
+  │  │  • ALB ENI                │  │  • ALB ENI               │  │
+  │  │  • Fargate task :8080     │  │  (task may run here      │  │
+  │  │    (ECS_TASK_COUNT=1;     │  │   instead — ECS picks    │  │
+  │  │     no public IP)         │  │   the subnet)            │  │
+  │  │  • Interface endpoints:   │  │                          │  │
+  │  │    ecr.api, ecr.dkr,      │  │                          │  │
+  │  │    secretsmanager, logs   │  │                          │  │
+  │  │    (Subnet A only)        │  │                          │  │
+  │  └───────────────────────────┘  └──────────────────────────┘  │
+  │                                                               │
+  │   S3 Gateway endpoint → attached to main route table          │
+  │                                                               │
+  │   Main Route Table:                                           │
+  │     172.18.0.128/25  → local                                  │
+  │     0.0.0.0/0        → Internet Gateway                       │
+  │     128.171.0.0/16   → Virtual Private Gateway  *             │
+  └───────────────────────────────┼───────────────────────────────┘
+                                  │
+                    Virtual Private Gateway  *
+                                  │
+                          IPsec VPN Tunnel  *
+                                  │
+                       UH Firewall / Router
+                                  │
+                      Grouper Web Services
+                       128.171.94.186:443
+
+  * The VPN already exists in the account; the 128.171.0.0/16 route is not
+    yet added to the route table — required for Grouper connectivity.
+```
+
+**Key characteristics:**
+- ALB and Fargate tasks share the same two subnets. The internet-facing ALB places an ENI in each AZ (both AZs required); the single task lands in whichever subnet ECS selects.
+- Fargate tasks have no public IP (`AssignPublicIp: DISABLED`); the subnets set `MapPublicIpOnLaunch: false`. The internet-facing ALB still gets public IPs on its own ENIs.
+- Interface VPC endpoints (`ecr.api`, `ecr.dkr`, `secretsmanager`, `logs`) live in **Subnet A only** to reduce cost; private DNS lets a task in either subnet reach them cross-AZ. The S3 gateway endpoint attaches to the main route table (free).
+- Security groups: ALB SG allows inbound 80/443 from internet; ECS SG allows inbound 8080 from the ALB SG only; endpoint SG allows 443 from the subnet CIDRs.
+- The VPN tunnel already exists in the account, but the `128.171.0.0/16 → VGW` route is not yet added to the route table — required for Grouper access (see notes in `aws/.env`).
+- Single task (`ECS_TASK_COUNT=1`) — no HA requirement for sandbox.
+
+#### Production Architecture (Target)
+
+Production separates public and private subnets, adds HTTPS termination,
+restricts the ALB to UI-only traffic, and uses a properly sized VPC.
+
+```
+                                Internet
+                                   │
+                            Internet Gateway
+                                   │
+               ┌─────────────────────────────────────┐
+               │   VPC (larger CIDR, e.g. /24)       │
+               │                                     │
+               │  ┌────────────────────────────────┐ │
+               │  │      Public Subnets (2 AZs)    │ │
+               │  │                                │ │
+               │  │   ┌──────ALB (HTTPS:443)─────┐ │ │
+               │  │   │  ACM cert, UI SG only    │ │ │
+               │  │   └────────────┬─────────────┘ │ │
+               │  └────────────────┼───────────────┘ │
+               │                   │                 │
+               │  ┌────────────────┼───────────────┐ │
+               │  │     Private Subnets (2 AZs)    │ │
+               │  │                │               │ │
+               │  │  ┌─────────┐   │  ┌─────────┐  │ │
+               │  │  │ Fargate │   │  │ Fargate │  │ │
+               │  │  │ Task    │   │  │ Task    │  │ │
+               │  │  └────┬────┘   │  └────┬────┘  │ │
+               │  │       │        │       │       │ │
+               │  └───────┼────────┼───────┼───────┘ │
+               │          │                │         │
+               │        VPC Endpoints (ECR, S3,      │
+               │          Secrets Mgr, Logs)         │
+               │                   │                 │
+               │         Private Route Table         │
+               │          128.171.0.0/16 → VGW       │
+               │           (no IGW route)            │
+               └───────────────────┼─────────────────┘
+                                   │
+                        Virtual Private Gateway
+                                   │
+                            IPsec VPN Tunnel
+                                   │
+                         UH Firewall / Router
+                                   │
+                         Grouper Web Services
+                         128.171.94.186:443
+```
+
+**Key differences from sandbox:**
+- **Public/private subnet separation:** ALB lives in public subnets (IGW route); Fargate tasks live in private subnets (no IGW route, VPN route only).
+- **HTTPS-only:** ALB listener on 443 with an ACM certificate; HTTP:80 removed or redirected.
+- **UI-only access:** ALB security group ingress restricted to the companion UI deployment's security group (`SourceSecurityGroupId` via cross-stack import) — not open to the internet.
+- **Multi-AZ HA:** `ECS_TASK_COUNT >= 2`, tasks spread across AZs.
+- **Larger VPC CIDR** to accommodate the additional subnets and future growth.
+- **VPN route** on the private route table provides the only egress path for task → Grouper traffic (no internet path from tasks).
+- **Auto Scaling:** CPU/memory target tracking for horizontal scaling.
+
+#### Security Groups
+
+| Security Group | Inbound | Source | Notes |
+|---------------|---------|--------|-------|
+| ALB SG | 80 + 443 (sandbox); 443 only (production) | `0.0.0.0/0` (sandbox) → UI SG (production) | Sandbox currently listens on HTTP:80 |
+| ECS SG | 8080 | ALB SG | Same in both environments |
+| VPC Endpoint SG | 443 | Subnet CIDRs | Interface endpoints only |
 
 #### Network Flow
 ```
-Internet → ALB (public subnets) → ECS Tasks (public subnets) → Grouper API
+Sandbox:     Internet → ALB → ECS task (shared subnet) → VPN * → Grouper API
+Production:  Internet → ALB (public subnets) → ECS task (private subnets) → VPN → Grouper API
+
+  * sandbox VPN route pending
 ```
 
 ## Data Flow

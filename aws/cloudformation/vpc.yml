@@ -1,12 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
   Networking for the UH Groupings API. This stack assumes the VPC already
-  exists (and provides public internet egress via its main route table, i.e.
-  a 0.0.0.0/0 route to an Internet Gateway). It provisions the two public
-  subnets, in different Availability Zones, that the Application Load Balancer
-  and the ECS Fargate tasks run in, and exports their IDs so the
-  ecs-service stack (and companion project stacks) can consume them instead
-  of hard-coding subnet IDs.
+  exists. It provisions two subnets in different Availability Zones for the
+  ALB and ECS Fargate tasks, plus VPC endpoints so the tasks can pull images
+  from ECR and read secrets from Secrets Manager without a public IP or NAT
+  gateway. Subnet and endpoint IDs are exported for the ecs-service stack.
 
 Parameters:
   Owner:
@@ -33,6 +31,13 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     Description: ID of the existing VPC the subnets are created in
 
+  MainRouteTableId:
+    Type: String
+    Description: >-
+      ID of the VPC's main route table (used by the S3 Gateway endpoint).
+      Find it in the VPC console under Route Tables → filter by your VPC →
+      the one marked "Yes" under Main.
+
   SubnetACidr:
     Type: String
     Default: 172.18.0.176/28
@@ -56,7 +61,7 @@ Resources:
       VpcId: !Ref VpcId
       CidrBlock: !Ref SubnetACidr
       AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub '${Owner}-${Project}-${Environment}-subnet-a'
@@ -75,7 +80,7 @@ Resources:
       VpcId: !Ref VpcId
       CidrBlock: !Ref SubnetBCidr
       AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: true
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub '${Owner}-${Project}-${Environment}-subnet-b'
@@ -88,9 +93,108 @@ Resources:
         - Key: ManagedBy
           Value: CloudFormation
 
+  # -------------------------------------------------------------------
+  # VPC Endpoints — allow Fargate tasks (no public IP) to reach AWS
+  # services without a NAT gateway.
+  #
+  # ECR image pull requires three endpoints:
+  #   - ecr.api       (ECR API calls: GetAuthorizationToken, etc.)
+  #   - ecr.dkr       (Docker registry: image layer downloads)
+  #   - s3 (Gateway)  (image layers are stored in S3 behind the scenes)
+  #
+  # Secrets Manager requires:
+  #   - secretsmanager (task definition secrets[] injection at startup)
+  #
+  # CloudWatch Logs requires:
+  #   - logs           (awslogs driver sends container stdout/stderr)
+  # -------------------------------------------------------------------
+
+  EndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${Owner}-${Project}-${Environment} - VPC endpoint access from tasks'
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref SubnetACidr
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref SubnetBCidr
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-sg-vpce'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  EcrApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref SubnetA
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+
+  EcrDkrEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref SubnetA
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref MainRouteTableId
+
+  SecretsManagerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.secretsmanager'
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref SubnetA
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+
+  LogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref SubnetA
+      SecurityGroupIds:
+        - !Ref EndpointSecurityGroup
+
 Outputs:
   SubnetIds:
-    Description: Comma-separated public subnet IDs for the ALB and ECS service
+    Description: Comma-separated subnet IDs for the ALB and ECS service
     Value: !Join [',', [!Ref SubnetA, !Ref SubnetB]]
     Export:
       Name: !Sub '${AWS::StackName}-SubnetIds'

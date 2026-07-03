@@ -109,11 +109,13 @@ validate_network_configuration() {
 check_prerequisites() {
     log "Checking prerequisites..."
 
+    # The CLI is required for enabling Browser-based authentication.
     if ! command -v aws >/dev/null 2>&1; then
         error "AWS CLI not installed"
         exit 1
     fi
 
+    # Docker is required for building the image before it gets pushed.
     if ! command -v docker >/dev/null 2>&1; then
         error "Docker not installed"
         exit 1
@@ -263,6 +265,7 @@ create_vpc_stack() {
         "Project=${AWS_PROJECT_ID}" \
         "Environment=${AWS_ENV}" \
         "VpcId=${VPC_ID}" \
+        "MainRouteTableId=${MAIN_ROUTE_TABLE_ID}" \
       --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"; then
         report_stack_failure "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
@@ -370,8 +373,30 @@ configure_secrets() {
     log ""
 }
 
+# ECS requires an account-wide service-linked role (AWSServiceRoleForECS).
+# AWS usually auto-creates it on first ECS use, but in restricted/shared
+# accounts that doesn't always happen, and cluster creation then fails with
+# "Unable to assume the service linked role." Create it once, idempotently.
+ensure_ecs_service_linked_role() {
+    if aws iam get-role --role-name AWSServiceRoleForECS >/dev/null 2>&1; then
+        return 0
+    fi
+    log "  Creating the ECS service-linked role (one-time per account)..."
+    aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com >/dev/null 2>&1 || true
+    if aws iam get-role --role-name AWSServiceRoleForECS >/dev/null 2>&1; then
+        log "  ✓ ECS service-linked role present"
+    else
+        error "Could not create the ECS service-linked role (AWSServiceRoleForECS)."
+        error "Create it once with:"
+        error "  aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com"
+        error "then re-run 'make aws-setup'."
+        exit 1
+    fi
+}
+
 deploy_ecs_infrastructure() {
     log "Step 5: Creating ECS cluster and service (this may take 10 minutes)..."
+    ensure_ecs_service_linked_role
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-ecs-${AWS_ENV}"
     if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
