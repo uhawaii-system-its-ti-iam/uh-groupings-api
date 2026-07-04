@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.service;
 
+import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -112,8 +114,10 @@ public class GroupingOwnerService {
                 "getGroupingMembers; currentUser: %s; groupingPath: %s; pageNumber: %d; pageSize: %d; sortString: %s; isAscending: %b; searchString: %s;",
                 currentUser, groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
 
-        // Check specific grouping ownership (Grouper) OR general admin role (JWT)
-        if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {
+        // groupingPath may be a composite path (e.g. "grouping:owners"), so use the parent
+        // grouping path for the ownership check to avoid appending ":owners" twice.
+        if (!memberService.isCurrentUserAdmin()
+                && !memberService.isOwner(parentGroupingPath(groupingPath), currentUser)) {
             throw new AccessDeniedException();
         }
 

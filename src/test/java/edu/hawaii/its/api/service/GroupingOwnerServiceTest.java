@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -182,6 +183,36 @@ public class GroupingOwnerServiceTest {
         assertThrows(AccessDeniedException.class,
                 () -> groupingOwnerService.getGroupingMembers(
                         TEST_UIDS.get(0), groupingPath, pageNumber, pageSize, sortString, isAscending, searchString));
+    }
+
+    // A composite group path must have its ownership check run against the parent grouping path.
+    @Test
+    public void getGroupingMembersNormalizesCompositePathTest() {
+        Integer pageNumber = 1;
+        Integer pageSize = 10;
+        String sortString = "name";
+        Boolean isAscending = true;
+        String searchString = "test";
+
+        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+
+        for (GroupType groupType : List.of(GroupType.OWNERS, GroupType.INCLUDE, GroupType.EXCLUDE, GroupType.BASIS)) {
+            clearInvocations(memberService);
+            String compositePath = groupingPath + groupType.value();
+
+            doReturn(subjectsResults).when(grouperService).getSubjects(compositePath, searchString);
+            doReturn(false).when(memberService).isCurrentUserAdmin();
+            // Only the parent grouping path grants ownership, not the composite path.
+            doReturn(true).when(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
+            doReturn(false).when(memberService).isOwner(compositePath, TEST_UIDS.get(0));
+
+            GroupingGroupMembers groupingGroupMembers = groupingOwnerService.getGroupingMembers(
+                    TEST_UIDS.get(0), compositePath, pageNumber, pageSize, sortString, isAscending, searchString);
+
+            assertNotNull(groupingGroupMembers);
+            verify(memberService).isOwner(groupingPath, TEST_UIDS.get(0));
+            verify(memberService, never()).isOwner(compositePath, TEST_UIDS.get(0));
+        }
     }
 
     @Test
