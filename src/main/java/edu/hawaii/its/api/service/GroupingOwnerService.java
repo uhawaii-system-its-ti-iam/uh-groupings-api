@@ -23,6 +23,7 @@ import edu.hawaii.its.api.groupings.GroupingOptAttributes;
 import edu.hawaii.its.api.groupings.GroupingSyncDestination;
 import edu.hawaii.its.api.groupings.GroupingSyncDestinations;
 import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.Strings;
 import edu.hawaii.its.api.wrapper.AttributesResult;
@@ -130,8 +131,9 @@ public class GroupingOwnerService {
         }
 
         SubjectsResults subjectsResults = grouperService.getSubjects(groupingPath, searchString);
+        SortBy sortBy = SortBy.find(sortString);
 
-        return new GroupingGroupMembers(subjectsResults).sort(sortString, isAscending).paginate(pageNumber, pageSize);
+        return new GroupingGroupMembers(subjectsResults).sort(sortBy, isAscending).paginate(pageNumber, pageSize);
     }
 
     private void validatePagination(Integer pageNumber, Integer pageSize) {

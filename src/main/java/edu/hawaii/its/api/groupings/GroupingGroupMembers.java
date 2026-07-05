@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -14,10 +15,10 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
  * group such as include, exclude, owners.
  */
 public class GroupingGroupMembers implements GroupingResult {
-    private static final Map<String, Comparator<GroupingGroupMember>> SORT_COMPARATORS = Map.of(
-            "name", Comparator.comparing(GroupingGroupMember::getName),
-            "search_string0", Comparator.comparing(GroupingGroupMember::getUid),
-            "subjectId", Comparator.comparing(GroupingGroupMember::getUhUuid)
+    private static final Map<SortBy, Comparator<GroupingGroupMember>> SORT_COMPARATORS = Map.of(
+            SortBy.NAME, Comparator.comparing(GroupingGroupMember::getName),
+            SortBy.UID, Comparator.comparing(GroupingGroupMember::getUid),
+            SortBy.UH_UUID, Comparator.comparing(GroupingGroupMember::getUhUuid)
     );
 
     private String resultCode;
