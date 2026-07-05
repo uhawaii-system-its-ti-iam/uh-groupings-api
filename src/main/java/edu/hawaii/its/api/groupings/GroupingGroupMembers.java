@@ -85,11 +85,17 @@ public class GroupingGroupMembers implements GroupingResult {
         return this.members;
     }
 
-    private void setMembers(List<Subject> subjects) {
-        this.members = new ArrayList<>();
+    public void setMembers(List<Subject> subjects) {
+        List<GroupingGroupMember> groupMembers = new ArrayList<>(subjects.size());
         for (Subject subject : subjects) {
-            this.members.add(new GroupingGroupMember(subject));
+            groupMembers.add(new GroupingGroupMember(subject));
         }
+        setGroupingMembers(groupMembers);
+    }
+
+    private void setGroupingMembers(List<GroupingGroupMember> members) {
+        this.members = members;
+        setSize(members.size());
     }
 
     public GroupingGroupMembers sort(String sortString, boolean isAscending) {
