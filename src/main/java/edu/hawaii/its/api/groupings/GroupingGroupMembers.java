@@ -99,8 +99,11 @@ public class GroupingGroupMembers implements GroupingResult {
         setSize(members.size());
     }
 
-    public GroupingGroupMembers sort(String sortString, boolean isAscending) {
-        Comparator<GroupingGroupMember> comparator = SORT_COMPARATORS.get(sortString);
+    public GroupingGroupMembers sort(SortBy sortBy, boolean isAscending) {
+        if (sortBy == null) {
+            throw new IllegalArgumentException("sortBy must not be null");
+        }
+        Comparator<GroupingGroupMember> comparator = SORT_COMPARATORS.get(sortBy);
 
         // do not sort in-place to prevent any side effects in pagination
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(this);
