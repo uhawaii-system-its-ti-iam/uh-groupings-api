@@ -48,10 +48,13 @@ public class GroupingGroupMembers implements GroupingResult {
     }
 
     private GroupingGroupMembers(GroupingGroupMembers other) {
-        this.resultCode = other.resultCode;
-        this.groupPath = other.groupPath;
-        this.size = other.size;
-        this.members = other.members;
+        this(other, new ArrayList<>(other.members));
+    }
+
+    private GroupingGroupMembers(GroupingGroupMembers other, List<GroupingGroupMember> members) {
+        setResultCode(other.getResultCode());
+        setGroupPath(other.getGroupPath());
+        setGroupingMembers(members);
     }
 
     @Override public String getResultCode() {
