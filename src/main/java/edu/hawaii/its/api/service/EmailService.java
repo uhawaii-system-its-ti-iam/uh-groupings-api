@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,8 @@ public class EmailService {
     private final SubjectService subjectService;
 
     private static final String DEV_HELP_LIST_ADDRESS = "its-iam-web-app-dev-help-l@lists.hawaii.edu";
+
+    private static final String IAM_TEAM_EMAIL = "its-iam-help@lists.hawaii.edu";
 
     public EmailService(JavaMailSender javaMailSender, SubjectService subjectService) {
         this.javaMailSender = javaMailSender;
@@ -178,6 +181,76 @@ public class EmailService {
         } catch (MailException ex) {
             logger.error("Error", ex);
         }
+    }
+
+    public void sendRetireGroupingEmails(String groupingPath, String requestorUid, String requestorEmail,
+            String groupingName, String description, List<String> ownerEmails, String requestorName) {
+        logger.info("Starting retire grouping email notifications for: " + groupingPath);
+
+        if (!isEnabled) {
+            logger.warn("Email service is not enabled. Skipping email notifications.");
+            return;
+        }
+
+        String iamSubject = "[groupings] Owner request to retire " + groupingName;
+        String iamBody = buildIamTeamEmailBody(groupingPath, requestorEmail);
+        sendEmail(IAM_TEAM_EMAIL, iamSubject, iamBody);
+
+        if (ownerEmails.isEmpty()) {
+            logger.warn("No owner emails found for grouping: " + groupingPath);
+            return;
+        }
+
+        String ownersSubject = "Request sent to IAM to retire grouping " + groupingName;
+        String ownersBody = buildOwnersEmailBody(groupingName, description, groupingPath, requestorName);
+        sendEmail(ownerEmails.toArray(new String[0]), ownersSubject, ownersBody);
+    }
+
+    private void sendEmail(String recipient, String subject, String body) {
+        sendEmail(new String[] { recipient }, subject, body);
+    }
+
+    private void sendEmail(String[] recipients, String subject, String body) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(recipients);
+        msg.setFrom(from);
+        msg.setText(body);
+        msg.setSubject(subject);
+
+        try {
+            javaMailSender.send(msg);
+            logger.info("Email sent successfully with subject: " + subject);
+        } catch (MailException ex) {
+            logger.error("Error sending email with subject: " + subject, ex);
+        }
+    }
+
+    private String buildIamTeamEmailBody(String groupingPath, String requestorEmail) {
+        StringBuilder body = new StringBuilder();
+        body.append("Grouping to retire: ").append(groupingPath).append("\n\n");
+        body.append("Requesting by owner: ").append(requestorEmail).append("\n\n");
+        body.append("The IAM team will follow up with the requestor in order to determine the disposition ")
+                .append("of any sync destinations such as LISTSERV lists or Google groups before the grouping is ")
+                .append("retired.\n\n");
+        body.append("The requestor and the grouping owners have received an email notification that this request has ")
+                .append("been made.");
+        return body.toString();
+    }
+
+    private String buildOwnersEmailBody(String groupingName, String description, String groupingPath,
+            String requestorName) {
+        StringBuilder body = new StringBuilder();
+        body.append("This is an automated notification to inform you that the IAM team has received a request from ")
+                .append(requestorName)
+                .append(" to retire the following grouping:\n\n");
+        body.append("  o Name: ").append(groupingName).append(" - ").append(description).append("\n");
+        body.append("  o Path: ").append(groupingPath).append("\n\n");
+        body.append("The IAM team will follow up with the requestor in order to determine the disposition ")
+                .append("of any sync destinations such as LISTSERV lists or Google groups before the grouping is ")
+                .append("retired.\n\n");
+        body.append("If you have any questions please contact the requestor, or the IAM team at ")
+                .append("<its-iam-help@lists.hawaii.edu>.");
+        return body.toString();
     }
 
     public void setEnabled(boolean enabled) {

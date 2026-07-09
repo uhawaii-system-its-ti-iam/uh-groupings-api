@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,8 @@ public class EmailServiceTest {
     private static boolean wasSent;
 
     private static SimpleMailMessage messageSent;
+
+    private static List<SimpleMailMessage> messagesSent;
 
     private static Feedback feedback;
 
@@ -66,6 +70,7 @@ public class EmailServiceTest {
                 public void send(SimpleMailMessage mailMessage) throws MailException {
                     wasSent = true;
                     messageSent = mailMessage;
+                    messagesSent.add(mailMessage);
                 }
             };
         }
@@ -81,6 +86,7 @@ public class EmailServiceTest {
 
 
         wasSent = false;
+        messagesSent = new ArrayList<>();
         
 
         feedback = new Feedback();
@@ -109,6 +115,9 @@ public class EmailServiceTest {
         emailService.sendStackTrace(TEST_UIDS.get(0), "stackTrace");
         assertFalse(wasSent);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
+        assertFalse(wasSent);
+        emailService.sendRetireGroupingEmails("path:to:grouping", TEST_UIDS.get(0), "owner@hawaii.edu",
+                "grouping", "description", List.of("other-owner@hawaii.edu"), "Owner Name");
         assertFalse(wasSent);
     }
 
@@ -188,5 +197,36 @@ public class EmailServiceTest {
         assertEquals("dev", environment);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertTrue(messageSent.getSubject().contains("(dev)"));
+    }
+
+    @Test
+    public void sendRetireGroupingEmails() {
+        emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                TEST_UIDS.get(0),
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals(2, messagesSent.size());
+
+        SimpleMailMessage iamMessage = messagesSent.get(0);
+        assertTrue(Arrays.asList(iamMessage.getTo()).contains("its-iam-help@lists.hawaii.edu"));
+        assertEquals("[groupings] Owner request to retire JTTEST-L", iamMessage.getSubject());
+        assertTrue(iamMessage.getText().contains("Grouping to retire: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
+        assertTrue(iamMessage.getText().contains("Requesting by owner: requestor@hawaii.edu"));
+        assertTrue(iamMessage.getText().contains("LISTSERV lists or Google groups"));
+        assertTrue(iamMessage.getText().contains("grouping owners have received an email notification"));
+
+        SimpleMailMessage ownersMessage = messagesSent.get(1);
+        assertTrue(Arrays.asList(ownersMessage.getTo()).contains("owner-one@hawaii.edu"));
+        assertTrue(Arrays.asList(ownersMessage.getTo()).contains("owner-two@hawaii.edu"));
+        assertEquals("Request sent to IAM to retire grouping JTTEST-L", ownersMessage.getSubject());
+        assertTrue(ownersMessage.getText().contains("request from Requestor Name"));
+        assertTrue(ownersMessage.getText().contains("  o Name: JTTEST-L - Changing description test"));
+        assertTrue(ownersMessage.getText().contains("  o Path: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
+        assertTrue(ownersMessage.getText().contains("<its-iam-help@lists.hawaii.edu>"));
     }
 }
