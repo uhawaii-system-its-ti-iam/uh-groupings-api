@@ -64,12 +64,12 @@ public class RetireGroupingServiceTest {
 
     @Test
     public void retireGrouping() {
-        Subject requestor = subject(CURRENT_USER, "Requestor Name", "11111111", "requestor@hawaii.edu");
-        Subject directOwner = subject("ownerone", "Owner One", "22222222", "owner-one@hawaii.edu");
-        Subject duplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "duplicate@hawaii.edu");
+        Subject requestor = subject(CURRENT_USER, "Requestor Name", "11111111", "Requestor Name");
+        Subject directOwner = subject("ownerone", "Owner One", "22222222", "Owner One");
+        Subject duplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "Duplicated Owner");
         Subject ownerGrouping = subject("", "hawaii.edu:custom:test:owner-grouping", "", "");
-        Subject indirectOwner = subject("ownertwo", "Owner Two", "44444444", "owner-two@hawaii.edu");
-        Subject indirectDuplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "duplicate@hawaii.edu");
+        Subject indirectOwner = subject("ownertwo", "Owner Two", "44444444", "Owner Two");
+        Subject indirectDuplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "Duplicated Owner");
 
         given(memberService.isCurrentUserAdmin()).willReturn(false);
         given(memberService.isOwner(GROUPING_PATH, CURRENT_USER)).willReturn(true);
@@ -94,7 +94,7 @@ public class RetireGroupingServiceTest {
         verify(emailService).sendRetireGroupingEmails(
                 eq(GROUPING_PATH),
                 eq(CURRENT_USER),
-                eq("requestor@hawaii.edu"),
+                eq("rainem@hawaii.edu"),
                 eq("JTTEST-L"),
                 eq("Changing description test"),
                 ownerEmailsCaptor.capture(),
@@ -102,9 +102,9 @@ public class RetireGroupingServiceTest {
 
         List<String> ownerEmails = ownerEmailsCaptor.getValue();
         assertEquals(3, ownerEmails.size());
-        assertTrue(ownerEmails.contains("owner-one@hawaii.edu"));
-        assertTrue(ownerEmails.contains("owner-two@hawaii.edu"));
-        assertTrue(ownerEmails.contains("duplicate@hawaii.edu"));
+        assertTrue(ownerEmails.contains("ownerone@hawaii.edu"));
+        assertTrue(ownerEmails.contains("ownertwo@hawaii.edu"));
+        assertTrue(ownerEmails.contains("duplicated@hawaii.edu"));
     }
 
     @Test

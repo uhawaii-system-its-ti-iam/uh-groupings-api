@@ -24,7 +24,7 @@ public class RetireGroupingService {
 
     private static final Log logger = LogFactory.getLog(RetireGroupingService.class);
 
-    private static final int EMAIL_ATTRIBUTE_INDEX = 4;
+    private static final String EMAIL_DOMAIN = "@hawaii.edu";
 
     private final GrouperService grouperService;
 
@@ -47,7 +47,7 @@ public class RetireGroupingService {
         String groupingDescription = getGroupingDescription(currentUser, groupingPath);
         Subject requestor = getSubject(currentUser);
         String requestorName = !requestor.getName().isEmpty() ? requestor.getName() : currentUser;
-        String requestorEmail = getEmail(requestor);
+        String requestorEmail = getEmailAddress(currentUser);
         List<String> ownerEmails = new ArrayList<>(gatherOwnerEmails(currentUser, groupingPath));
 
         emailService.sendRetireGroupingEmails(
@@ -74,7 +74,7 @@ public class RetireGroupingService {
                 continue;
             }
 
-            String email = getEmail(owner);
+            String email = getEmailAddress(owner.getUid());
             if (!email.isEmpty()) {
                 ownerEmails.add(email);
             }
@@ -88,7 +88,7 @@ public class RetireGroupingService {
         GetMembersResult ownerGroupingMembers = grouperService.getImmediateMembers(currentUser, ownerGroupingPath);
 
         for (Subject member : ownerGroupingMembers.getSubjects()) {
-            String email = getEmail(member);
+            String email = getEmailAddress(member.getUid());
             if (!email.isEmpty()) {
                 emails.add(email);
             }
@@ -101,21 +101,12 @@ public class RetireGroupingService {
         return subject.getName().contains(":");
     }
 
-    private String getEmail(Subject subject) {
-        String email = subject.getAttributeValue(EMAIL_ATTRIBUTE_INDEX);
-        if (!email.isEmpty()) {
-            return email;
-        }
-        return lookupEmail(subject.getUid());
-    }
-
-    private String lookupEmail(String uid) {
+    private String getEmailAddress(String uid) {
         if (uid == null || uid.isEmpty()) {
             return "";
         }
 
-        Subject subject = getSubject(uid);
-        return subject.getAttributeValue(EMAIL_ATTRIBUTE_INDEX);
+        return uid + EMAIL_DOMAIN;
     }
 
     private Subject getSubject(String uid) {
