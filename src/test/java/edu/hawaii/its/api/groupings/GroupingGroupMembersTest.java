@@ -72,15 +72,15 @@ public class GroupingGroupMembersTest {
         GroupingGroupMember firstMember = members.get(0);
         GroupingGroupMember secondMember = members.get(1);
 
-        groupingGroupMembers = groupingGroupMembers.sort("name", false);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.NAME, false);
         assertEquals(firstMember.getName(), groupingGroupMembers.getMembers().get(1).getName());
         assertEquals(secondMember.getName(), groupingGroupMembers.getMembers().get(0).getName());
 
-        groupingGroupMembers = groupingGroupMembers.sort("search_string0", true);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.UID, true);
         assertEquals(firstMember.getUid(), groupingGroupMembers.getMembers().get(0).getUid());
         assertEquals(secondMember.getUid(), groupingGroupMembers.getMembers().get(1).getUid());
 
-        groupingGroupMembers = groupingGroupMembers.sort("subjectId", false);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.UH_UUID, false);
         assertEquals(firstMember.getUhUuid(), groupingGroupMembers.getMembers().get(1).getUhUuid());
         assertEquals(secondMember.getUhUuid(), groupingGroupMembers.getMembers().get(0).getUhUuid());
     }
@@ -97,6 +97,7 @@ public class GroupingGroupMembersTest {
             subjects.addAll(duplicateSubjects);
         }
         groupingGroupMembers.setMembers(subjects);
+        assertEquals(subjects.size(), groupingGroupMembers.getSize());
 
         assertEquals(20, groupingGroupMembers.paginate(1, 20).getMembers().size());
         assertEquals(12, groupingGroupMembers.paginate(2, 20).getMembers().size());
