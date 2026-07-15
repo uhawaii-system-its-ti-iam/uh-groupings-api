@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -103,7 +104,31 @@ public class GroupingGroupMembersTest {
         assertEquals(12, groupingGroupMembers.paginate(2, 20).getMembers().size());
         assertEquals(0, groupingGroupMembers.paginate(3, 20).getMembers().size());
         assertEquals(0, groupingGroupMembers.paginate(10, 20).getMembers().size());
-        assertThrows(IndexOutOfBoundsException.class, () -> groupingGroupMembers.paginate(-1, 20));
-        assertThrows(IndexOutOfBoundsException.class, () -> groupingGroupMembers.paginate(0, 20));
+    }
+
+    @Test
+    public void testPaginateValidatesPageArguments() {
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
+
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(0, 20));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(-1, 20));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(1, 0));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(1, -1));
+    }
+
+    @Test
+    public void testPaginateDoesNotShareListStateWithOriginal() {
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
+
+        GroupingGroupMembers paginated = groupingGroupMembers.paginate(1, 1);
+        List<GroupingGroupMember> expectedPage = new ArrayList<>(paginated.getMembers());
+
+        groupingGroupMembers.getMembers().clear();
+
+        assertEquals(expectedPage, paginated.getMembers());
     }
 }
