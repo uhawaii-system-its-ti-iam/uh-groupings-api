@@ -2,6 +2,8 @@ package edu.hawaii.its.api.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.type.GroupType;
@@ -78,27 +80,32 @@ public class GroupingGroupsMembers implements GroupingResult {
         List<GroupingGroupMember> include = getGroupingInclude().getMembers();
         List<GroupingGroupMember> exclude = getGroupingExclude().getMembers();
 
-        List<GroupingGroupMember> intersectionBasisInclude = basis.stream()
-                .distinct().filter(groupingsGroupMember -> include.stream()
-                        .anyMatch(includeMember -> includeMember.getUhUuid().equals(groupingsGroupMember.getUhUuid())))
-                .collect(Collectors.toList());
+        Set<String> includeUuids = include.stream()
+                .map(GroupingGroupMember::getUhUuid).collect(Collectors.toSet());
+        Set<String> excludeUuids = exclude.stream()
+                .map(GroupingGroupMember::getUhUuid).collect(Collectors.toSet());
+        Set<String> addedUuids = new HashSet<>();
 
         // Basis plus Include.
         for (GroupingGroupMember groupingGroupMember : intersectionBasisInclude) {
             this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis & Include"));
         }
         for (GroupingGroupMember groupingGroupMember : basis) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis"));
+            String uhUuid = groupingGroupMember.getUhUuid();
+            if (excludeUuids.contains(uhUuid) || !addedUuids.add(uhUuid)) {
+                continue;
             }
+            String whereListed = includeUuids.contains(uhUuid) ? "Basis & Include" : "Basis";
+            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, whereListed));
         }
         for (GroupingGroupMember groupingGroupMember : include) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
+            String uhUuid = groupingGroupMember.getUhUuid();
+            if (excludeUuids.contains(uhUuid) || !addedUuids.add(uhUuid)) {
+                continue;
             }
+            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
         }
+    }
 
         // Minus Exclude
         this.allMembers.getMembers().removeIf(groupingMember -> exclude.stream()
