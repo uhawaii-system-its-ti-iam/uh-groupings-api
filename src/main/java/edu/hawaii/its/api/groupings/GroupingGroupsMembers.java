@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,7 @@ import edu.hawaii.its.api.wrapper.GetMembersResults;
 public class GroupingGroupsMembers implements GroupingResult {
     private String resultCode;
     private String groupPath;
-    private List<GroupingGroupMembers> groupsMembersList;
+    private Map<String, GroupingGroupMembers> groupsMembersByExtension;
     private boolean isBasis;
     private boolean isInclude;
     private boolean isExclude;
@@ -28,7 +29,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     public GroupingGroupsMembers(GetMembersResults getMembersResults) {
         setGroupPath("");
         setResultCode(getMembersResults.getResultCode());
-        setGroupsMembersList(getMembersResults);
+        indexGroupsMembersByExtension(getMembersResults);
         setAllMembers();
         setBasis(hasMembers(GroupType.BASIS.value()));
         setInclude(hasMembers(GroupType.INCLUDE.value()));
@@ -41,7 +42,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     public GroupingGroupsMembers() {
         setGroupPath("");
         setResultCode("");
-        this.groupsMembersList = new ArrayList<>();
+        this.groupsMembersByExtension = new HashMap<>();
         setAllMembers();
         setBasis(false);
         setInclude(false);
@@ -67,10 +68,16 @@ public class GroupingGroupsMembers implements GroupingResult {
         this.groupPath = groupPath;
     }
 
-    private void setGroupsMembersList(GetMembersResults getMembersResults) {
-        this.groupsMembersList = new ArrayList<>();
+    private void indexGroupsMembersByExtension(GetMembersResults getMembersResults) {
+        this.groupsMembersByExtension = new HashMap<>();
         for (GetMembersResult getMembersResult : getMembersResults.getMembersResults()) {
-            groupsMembersList.add(new GroupingGroupMembers(getMembersResult));
+            GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResult);
+            for (GroupType groupType : GroupType.values()) {
+                if (groupingGroupMembers.getGroupPath().endsWith(groupType.value())) {
+                    groupsMembersByExtension.putIfAbsent(groupType.value(), groupingGroupMembers);
+                    break;
+                }
+            }
         }
     }
 
@@ -181,21 +188,11 @@ public class GroupingGroupsMembers implements GroupingResult {
     }
 
     private boolean hasMembers(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return !groupingGroupMembers.getMembers().isEmpty();
-            }
-        }
-        return false;
+        return !getMembersOf(groupExtension).getMembers().isEmpty();
     }
 
     private GroupingGroupMembers getMembersOf(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return groupingGroupMembers;
-            }
-        }
-        return new GroupingGroupMembers();
+        return groupsMembersByExtension.getOrDefault(groupExtension, new GroupingGroupMembers());
     }
 
     public void setPaginationCompleteTrue() {
