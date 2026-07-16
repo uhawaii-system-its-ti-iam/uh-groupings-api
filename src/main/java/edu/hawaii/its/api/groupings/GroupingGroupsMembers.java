@@ -93,10 +93,6 @@ public class GroupingGroupsMembers implements GroupingResult {
                 .map(GroupingGroupMember::getUhUuid).collect(Collectors.toSet());
         Set<String> addedUuids = new HashSet<>();
 
-        // Basis plus Include.
-        for (GroupingGroupMember groupingGroupMember : intersectionBasisInclude) {
-            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis & Include"));
-        }
         for (GroupingGroupMember groupingGroupMember : basis) {
             String uhUuid = groupingGroupMember.getUhUuid();
             if (excludeUuids.contains(uhUuid) || !addedUuids.add(uhUuid)) {

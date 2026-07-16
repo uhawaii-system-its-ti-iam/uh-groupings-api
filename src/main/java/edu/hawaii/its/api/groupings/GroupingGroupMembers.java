@@ -104,7 +104,9 @@ public class GroupingGroupMembers implements GroupingResult {
             throw new IllegalArgumentException("sortBy must not be null");
         }
         Comparator<GroupingGroupMember> comparator = SORT_COMPARATORS.get(sortBy);
-
+        if (comparator == null) {
+            throw new IllegalArgumentException("Unsupported sortBy: " + sortBy);
+        }
         // do not sort in-place to prevent any side effects in pagination
         GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(this);
         groupingGroupMembers.members.sort(isAscending ? comparator : comparator.reversed());

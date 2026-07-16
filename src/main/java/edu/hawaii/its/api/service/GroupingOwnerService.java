@@ -131,7 +131,18 @@ public class GroupingOwnerService {
         }
 
         SubjectsResults subjectsResults = grouperService.getSubjects(groupingPath, searchString);
-        SortBy sortBy = SortBy.find(sortString);
+
+        SortBy sortBy = null;
+        for (SortBy candidate : SortBy.values()) {
+            if (candidate.sortString().equalsIgnoreCase(sortString)
+                    || candidate.value().equalsIgnoreCase(sortString)) {
+                sortBy = candidate;
+                break;
+            }
+        }
+        if (sortBy == null) {
+            throw new IllegalArgumentException("Invalid sortBy: " + sortString);
+        }
 
         return new GroupingGroupMembers(subjectsResults).sort(sortBy, isAscending).paginate(pageNumber, pageSize);
     }
