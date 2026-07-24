@@ -99,7 +99,7 @@ At minimum the file must contain:
 | `jwt.secret.key`                    | JWT signing key. **Required at startup.** `JwtService` reads it via `@Value("${jwt.secret.key}")` with no default, so omitting it stops Spring from starting. Generate one with `openssl rand -base64 32`. |
 | `grouperClient.webService.password` | Grouper service-account password. Declared with an empty default, so the app will boot without it, but every Grouper call will fail authentication. Treat it as required.                                  |
 
-In practice the same file also carries non-secret settings the developer needs to override locally (Grouper URL, username, email flags, etc.). The full template (secrets and settings together) is in [DEV_QUICKSTART.md → Create Configuration File](DEV_QUICKSTART.md#2-create-configuration-file).
+In practice the same file also carries non-secret settings the developer needs to override locally (Grouper URL, username, email flags, etc.). The full template (secrets and settings together) is in [DEV_QUICKSTART.md → Create Configuration File](../../docs/DEV_QUICKSTART.md#2-create-configuration-file).
 
 To set up:
 
@@ -343,12 +343,11 @@ For specifics, follow the doc that owns each topic:
 | Initial AWS infrastructure provisioning                                        | [AWS_QUICKSTART.md](AWS_QUICKSTART.md)                                    |
 | ECS task definition wiring, IAM permissions, manual CLI commands for secrets   | [Secrets Manager Integration](#secrets-manager-integration) (this doc)    |
 | Ongoing AWS operations (deploys, rollback, scaling)                            | [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)                                    |
-| TLS certificates, InCommon usage, and rotation strategy                        | [CERT_MANAGEMENT.md](CERT_MANAGEMENT.md)                                  |
-| IAM Identity Center credential setup and Docker-container flow                 | [aws/README.md](../aws/README.md)                                         |
-| Local Docker development                                                       | [DEV_QUICKSTART.md](DEV_QUICKSTART.md) and [DEV_README.md](DEV_README.md) |
+| IAM Identity Center credential setup and Docker-container flow                 | [aws/README.md](../README.md)                                         |
+| Local Docker development                                                       | [DEV_QUICKSTART.md](../../docs/DEV_QUICKSTART.md) and [DEV_README.md](../../docs/DEV_README.md) |
 | Resource naming (why `AWS_PROJECT_ID=groupings-api`)                           | [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md)                    |
-| Architecture overview                                                          | [ARCHITECTURE.md](ARCHITECTURE.md)                                        |
-| Project conventions for engineers and agents                                   | [AGENTS.md](../AGENTS.md)                                                 |
+| Architecture overview                                                          | [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md)                                        |
+| Project conventions for engineers and agents                                   | [AGENTS.md](../../AGENTS.md)                                                 |
 
 ---
 

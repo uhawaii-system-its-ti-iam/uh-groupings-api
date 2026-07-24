@@ -1,0 +1,40 @@
+flowchart TB
+
+    Browser(["End-user browser"])
+    CF["Cloudflare\nDNS, TLS, WAF, Tunnel ingress\nUI config - external to AWS"]
+    Grouper(["Grouper WS\nUH data center\nHTTPS 443 - live dependency"])
+
+    subgraph VPC["AWS us-west-2 -- Provided VPC -- VPC team"]
+      direction TB
+
+      DCGW["Data-center connectivity to Grouper\nPENDING INFRA CONFIRMATION\nVGW+VPN or TGW or Direct Connect"]
+
+      subgraph APIREPO["API repo -- uh-groupings-api -- private, no public ingress"]
+        direction TB
+        APITASK["ECS Fargate API task\nport 8080, sg-api-backend\nAssignPublicIp DISABLED"]
+        NET["Private subnets, 2 AZ /28\nDesiredCount 1, single-AZ runtime"]
+        VPCE["VPC Endpoints, sg-vpce, no NAT\nECR api/dkr, S3 gw, Secrets Mgr, CW Logs"]
+        CL["ECS cluster + Service Connect namespace\nexported to UI"]
+        SUP["ECR, Secrets Manager, IAM roles\nCloudWatch Logs, CI/CD pipeline"]
+      end
+
+      subgraph UIREPO["UI repo -- uh-groupings-ui -- companion"]
+        direction TB
+        UITASK["ECS Fargate UI task, sg-ui-apps\nruns cloudflared, outbound tunnel"]
+        UINET["UI subnets + tunnel egress\nUI-owned"]
+        UIING["Adds ingress sg-ui-apps to sg-api-backend 8080\njoins API Service Connect namespace"]
+      end
+    end
+
+    OPENQ["OPEN QUESTIONS -- infra team\n1 mechanism  2 route + owner\n3 endpoint host/IP  4 DNS from VPC\n5 firewall allow-list  6 client cert\n7 HA / redundant link"]
+
+    Browser -->|"HTTPS 443"| CF
+    CF -->|"Cloudflare Tunnel"| UITASK
+    UITASK -->|"Service Connect 8080"| APITASK
+    UIING -.->|"refs exported sg + namespace"| APITASK
+
+    APITASK -->|"publishes into"| CL
+    APITASK -->|"HTTPS AWS APIs"| VPCE
+    APITASK -->|"HTTPS 443, path pending"| DCGW
+    DCGW -.->|"pending infra"| Grouper
+    DCGW -.->|"see questions"| OPENQ

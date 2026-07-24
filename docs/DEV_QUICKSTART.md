@@ -109,7 +109,7 @@ ls -al ~/.$(whoami)-conf/uh-groupings-api-overrides.properties
 - **View logs:** `docker-compose logs -f`
 - **Run tests:** `./mvnw test`
 - **Learn more:** [DEV_README.md](./DEV_README.md) - common tasks, advanced troubleshooting, development workflow
-- **Deploy to AWS:** [AWS_QUICKSTART.md](./AWS_QUICKSTART.md)
+- **Deploy to AWS:** [AWS_QUICKSTART.md](../aws/docs/AWS_QUICKSTART.md)
 
 ---
 

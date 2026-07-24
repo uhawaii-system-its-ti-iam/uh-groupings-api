@@ -6,7 +6,7 @@
 
 **Already have infrastructure?** See [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md) for ongoing operations.
 
-**Want to run locally first?** See [DEV_QUICKSTART.md](./DEV_QUICKSTART.md).
+**Want to run locally first?** See [DEV_QUICKSTART.md](../../docs/DEV_QUICKSTART.md).
 
 ---
 
@@ -267,10 +267,9 @@ aws ecs update-service \
 ## What's Next
 
 - **Ongoing operations:** [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md)
-- **Certificate strategy:** [CERT_MANAGEMENT.md](./CERT_MANAGEMENT.md)
 - **Naming conventions:** [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md)
 - **Secrets model:** [SECRETS.md](./SECRETS.md)
-- **Architecture overview:** [ARCHITECTURE.md](./ARCHITECTURE.md)
+- **Architecture overview:** [AWS_ARCHITECTURE.md](./AWS_ARCHITECTURE.md)
 
 ---
 

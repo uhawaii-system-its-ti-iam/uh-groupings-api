@@ -1,3 +1,25 @@
+# Overview
+
+The UH Groupings API project setup produces a complete, usable private API deployment. The UH Groupings UI project setup adds public UI access without changing API-owned subnets or route tables.
+
+## API project (this project) owns
+
+API ECS service and task security group
+Internal API ALB
+Private subnets used by the API
+ECR, S3, Secrets Manager, and CloudWatch VPC endpoints
+An API ALB rule allowing traffic only from the UI service/security group
+CloudFormation exports or SSM parameters that form a documented interface for the UI stack
+
+## UI project owns
+
+Internet Gateway
+Public route tables and public subnets for the UI ALB
+Public HTTPS UI ALB and certificate
+UI ECS service and task security group
+Connectivity from the UI service to the internal API ALB
+NAT or another outbound mechanism if the UI tasks must contact CAS or other public services
+
 # AWS Infrastructure
 
 This directory contains the AWS-specific artifacts used to provision, deploy, and operate the **UH Groupings API** on AWS.
@@ -21,6 +43,7 @@ Detailed setup, deployment, architecture, and operational guidance are maintaine
 aws/
 ├── README.md
 ├── .env                        # Deployment configuration (non-secret)
+├── AGENTS.md                   # AWS deployment scope and ownership guide
 ├── setup.sh                    # Automated AWS infrastructure provisioning
 ├── auth.sh                     # SSO profile bootstrap + sign-in dispatcher
 ├── lib-auth.sh                 # Shared SSO auth helpers (sourced by scripts)
@@ -29,11 +52,18 @@ aws/
 ├── buildspec.yml               # AWS CodeBuild specification
 ├── appspec.yml                 # AWS CodeDeploy specification
 ├── task-definition.json        # ECS task definition template
-└── cloudformation/
-    ├── vpc.yml                 # Public subnets created in an existing VPC
-    ├── ecr-repository.yml      # Amazon ECR repository
-    ├── ecs-service.yml         # ECS Fargate service and supporting resources
-    └── codepipeline.yml        # CI/CD pipeline
+├── cloudformation/
+│   ├── vpc.yml                 # Public subnets created in an existing VPC
+│   ├── ecr-repository.yml      # Amazon ECR repository
+│   ├── ecs-service.yml         # ECS Fargate service and supporting resources
+│   └── codepipeline.yml        # CI/CD pipeline
+└── docs/
+    ├── AWS_ARCHITECTURE.md     # AWS architecture and resource relationships
+    ├── AWS_DEPLOYMENT.md       # Day-to-day deployment, rollback, scaling
+    ├── AWS_NAMING_CONVENTIONS.md # Resource naming and tagging standards
+    ├── AWS_QUICKSTART.md       # Initial AWS infrastructure provisioning
+    ├── SECRETS.md              # Secrets management (local + AWS)
+    └── aws-architecture.mmd    # Architecture diagram source (Mermaid)
 ```
 
 ---
@@ -107,7 +137,7 @@ Confirm you're authenticated to the shared account before provisioning:
 aws sts get-caller-identity --query Account --output text   # matches AWS_ACCOUNT_ID in aws/.env
 ```
 
-See [AWS_NAMING_CONVENTIONS.md](../docs/AWS_NAMING_CONVENTIONS.md) for how the values combine, and [`docs/AWS_QUICKSTART.md`](../docs/AWS_QUICKSTART.md) for the full setup path.
+See [AWS_NAMING_CONVENTIONS.md](docs/AWS_NAMING_CONVENTIONS.md) for how the values combine, and [`docs/AWS_QUICKSTART.md`](docs/AWS_QUICKSTART.md) for the full setup path.
 
 ---
 
@@ -119,8 +149,7 @@ This README intentionally provides only a directory overview.
 |-------------------------------|----------------------------------------------------------|
 | `docs/AWS_QUICKSTART.md`      | Initial AWS infrastructure provisioning                  |
 | `docs/AWS_DEPLOYMENT.md`      | Day-to-day deployment, rollback, scaling, and operations |
-| `docs/CERT_MANAGEMENT.md`     | TLS certificate strategy and rotation plan               |
-| `docs/ARCHITECTURE.md`        | AWS architecture and resource relationships              |
+| `docs/AWS_ARCHITECTURE.md`    | AWS architecture and resource relationships              |
 | `docs/SECRETS.md`             | Secrets management and AWS Secrets Manager integration   |
 
 ---

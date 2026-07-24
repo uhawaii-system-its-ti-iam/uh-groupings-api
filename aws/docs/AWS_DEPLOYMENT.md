@@ -581,4 +581,3 @@ aws ecs update-service \
 - [AWS_QUICKSTART.md](AWS_QUICKSTART.md) — initial provisioning
 - [AWS_NAMING_CONVENTIONS.md](AWS_NAMING_CONVENTIONS.md) — how the resource names above are derived
 - [SECRETS.md](SECRETS.md) — secrets model (IAM Identity Center for developer credentials, Secrets Manager for app runtime)
-- [CERT_MANAGEMENT.md](CERT_MANAGEMENT.md) — recommended TLS certificate and rotation strategy

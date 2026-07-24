@@ -45,7 +45,6 @@ OVERRIDES_FILE="${OVERRIDES_FILE:-${HOME}/.$(id -un)-conf/uh-groupings-api-overr
 
 AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-}"
 ECR_REPOSITORY_URI=""
-ALB_URL=""
 GROUPER_PASSWORD=""
 # Populated from the vpc stack outputs by create_vpc_stack().
 SUBNET_IDS=""
@@ -87,6 +86,8 @@ apply_defaults() {
     VPC_ID="${VPC_ID:-}"
     APP_TIER="${APP_TIER:-test}"
     API_HOSTNAME="${API_HOSTNAME:-}"
+    API_CERTIFICATE_ARN="${API_CERTIFICATE_ARN:-}"
+    API_HOSTED_ZONE_ID="${API_HOSTED_ZONE_ID:-}"
 }
 
 validate_config() {
@@ -118,27 +119,8 @@ validate_tier() {
         exit 1
     fi
 
-    # Hostname convention: non-prod must contain 'test'; prod must not.
-    if [[ -n "${API_HOSTNAME}" ]]; then
-        if [[ "${APP_TIER}" == "prod" ]]; then
-            if [[ "${API_HOSTNAME}" == *test* ]]; then
-                error "prod API_HOSTNAME must not contain 'test': ${API_HOSTNAME}"
-                exit 1
-            fi
-        else
-            if [[ "${API_HOSTNAME}" != *test* ]]; then
-                error "non-prod API_HOSTNAME must contain 'test': ${API_HOSTNAME}"
-                exit 1
-            fi
-        fi
-    fi
-
     log "  Tier:        ${APP_TIER} (Spring profile aws-${APP_TIER})"
-    if [[ -n "${API_HOSTNAME}" ]]; then
-        log "  Hostname:    ${API_HOSTNAME}"
-    else
-        log "  Hostname:    <none> (LoadBalancerUrl uses the raw ALB DNS name)"
-    fi
+    log "  Ingress:     none — API is private (ECS Service Connect + sg-api-backend, no ALB)"
     log "✓ Deployment tier validated"
     log ""
 }
@@ -467,7 +449,6 @@ deploy_ecs_infrastructure() {
         "Project=${AWS_PROJECT_ID}" \
         "Environment=${AWS_ENV}" \
         "Tier=${APP_TIER}" \
-        "Hostname=${API_HOSTNAME}" \
         "VpcId=${VPC_ID}" \
         "SubnetIds=${SUBNET_IDS}" \
         "ContainerImage=${ECR_REPOSITORY_URI}:latest" \
@@ -481,14 +462,7 @@ deploy_ecs_infrastructure() {
         exit 1
     fi
 
-    ALB_URL="$(aws cloudformation describe-stacks \
-      --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
-      --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
-      --output text \
-      --region "${AWS_REGION}")"
-
-    log "✓ ECS cluster created"
-    log "Application URL: ${ALB_URL}"
+    log "✓ ECS cluster and API service created"
     log ""
 }
 
@@ -500,12 +474,18 @@ print_summary() {
     log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
     log "  - ECS Cluster:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
     log "  - ECS Service:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
-    log "  - Application URL: ${ALB_URL}"
+    log "  - API task SG:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-sg-api-backend (exported for the UI stack)"
+    log ""
+    log "The API is private: no load balancer, no public endpoint. It is reached by"
+    log "the companion UI over ECS Service Connect, and can be exercised in-VPC via"
+    log "'aws ecs execute-command' against a running task."
+    log ""
+    log "NOTE: the API health endpoint depends on Grouper, which is not yet wired"
+    log "(VPN deferred), so the task may report unhealthy — expected for now."
     log ""
     log "Next steps:"
     log "  1. Create a GitHub connection in the AWS Console (see docs/AWS_DEPLOYMENT.md)"
-    log "  2. Deploy CodePipeline stack"
-    log "  3. Test the application: curl ${ALB_URL}/actuator/health"
+    log "  2. Deploy the CodePipeline stack"
     log ""
     log "For detailed instructions, see docs/AWS_QUICKSTART.md and docs/AWS_DEPLOYMENT.md"
 }

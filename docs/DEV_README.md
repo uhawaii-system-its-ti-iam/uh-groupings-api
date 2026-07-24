@@ -289,10 +289,9 @@ Default: `~/.$(whoami)-conf/uh-groupings-api-overrides.properties`
 
 ### Documentation
 - **[DEV_QUICKSTART.md](./DEV_QUICKSTART.md)** - Quick start guide (10 minutes)
-- **[SECRETS.md](./SECRETS.md)** - Local vs AWS secrets management
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and architecture
-- **[AWS_QUICKSTART.md](./AWS_QUICKSTART.md)** - AWS deployment guide
-- **[docs/README.md](./README.md)** - Documentation index
+- **[SECRETS.md](../aws/docs/SECRETS.md)** - Local vs AWS secrets management
+- **[AWS_ARCHITECTURE.md](../aws/docs/AWS_ARCHITECTURE.md)** - AWS architecture and deployment
+- **[AWS_QUICKSTART.md](../aws/docs/AWS_QUICKSTART.md)** - AWS deployment guide
 
 ### External Resources
 - [Docker Documentation](https://docs.docker.com/)
@@ -314,7 +313,7 @@ Now that your local environment is running:
    - `src/main/java/` - Application code
    - `src/test/java/` - Tests
    - `src/main/resources/` - Configuration
-   - `docs/ARCHITECTURE.md` - See AGENTS.md for detailed architecture
+   - See AGENTS.md for architecture; AWS details in `aws/docs/`
 
 2. **Make changes and test:**
    - Edit code in your IDE
@@ -322,12 +321,12 @@ Now that your local environment is running:
    - Test endpoints with curl or Swagger UI
 
 3. **Read detailed docs:**
-   - [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
-   - [SECRETS.md](./SECRETS.md) - Secrets management
+   - [AWS_ARCHITECTURE.md](../aws/docs/AWS_ARCHITECTURE.md) - AWS architecture
+   - [SECRETS.md](../aws/docs/SECRETS.md) - Secrets management
    - [AGENTS.md](../AGENTS.md) - Development agent guidelines
 
 4. **Deploy to AWS when ready:**
-   - [AWS_QUICKSTART.md](./AWS_QUICKSTART.md) - AWS deployment
-   - [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md) - Ongoing AWS operations
+   - [AWS_QUICKSTART.md](../aws/docs/AWS_QUICKSTART.md) - AWS deployment
+   - [AWS_DEPLOYMENT.md](../aws/docs/AWS_DEPLOYMENT.md) - Ongoing AWS operations
 
 ---

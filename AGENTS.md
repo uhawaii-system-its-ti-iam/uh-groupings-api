@@ -70,7 +70,7 @@ Every grouping path has four sub-groups: `{path}:basis`, `{path}:include`, `{pat
 ### Authentication
 Stateless JWT. `JwtAuthenticationFilter` populates `SecurityContextHolder` before every request. Only `/v3/api-docs/**`, `/swagger-ui/**`, and `/api/groupings/v2.1/announcements/**` are public. Use `SecurityContextRoleService` (not a Grouper call) to check the current user's admin/owner role within service methods.
 
-**Intended production access posture:** the deployed API is meant to accept **HTTPS only, and only from the companion UH Groupings UI deployment** — enforced at the ALB (HTTPS-only listener plus a security-group or IP source restriction) and reinforced by JWT and CORS pinned to the UI origin. The topology is server-to-server: the end user's browser talks only to the UI; the UI server handles CAS SSO and makes REST calls to this API. Because the UI *server* is the API's network client (not the browser), the ALB security-group source restriction is enforceable — use it. Do not widen public network exposure or add plaintext HTTP paths. See `docs/ARCHITECTURE.md` → "Access Restriction: HTTPS from the UI Deployment Only".
+**Intended production access posture:** the deployed API is meant to accept **HTTPS only, and only from the companion UH Groupings UI deployment** — enforced at the ALB (HTTPS-only listener plus a security-group or IP source restriction) and reinforced by JWT and CORS pinned to the UI origin. The topology is server-to-server: the end user's browser talks only to the UI; the UI server handles CAS SSO and makes REST calls to this API. Because the UI *server* is the API's network client (not the browser), the ALB security-group source restriction is enforceable — use it. Do not widen public network exposure or add plaintext HTTP paths. See `aws/docs/AWS_ARCHITECTURE.md` → "Access Restriction: HTTPS from the UI Deployment Only".
 
 ### Async Operations
 `UpdateMemberService` uses `@Async` for add/remove operations. `AsyncJobsManager` tracks in-flight jobs. The controller returns a job ID immediately; callers poll for completion.
@@ -162,7 +162,7 @@ The `make aws-*` targets run the AWS CLI directly on the host; `make aws-setup` 
 
 IAM Identity Center does not hold `grouperClient.webService.password`, `jwt.secret.key`, or any other application-runtime value. Those go in AWS Secrets Manager (above) and are read by the ECS task at startup, not by the developer credential mechanism on a developer's laptop.
 
-See [`docs/SECRETS.md`](docs/SECRETS.md) for the full reference, including the list of Spring properties classified as secrets vs settings.
+See [`aws/docs/SECRETS.md`](aws/docs/SECRETS.md) for the full reference, including the list of Spring properties classified as secrets vs settings.
 
 ## Adding a New Grouper Operation
 1. Create a `*Command` class in `wrapper/` extending `GrouperCommand<T>` (builder pattern, fluent API).

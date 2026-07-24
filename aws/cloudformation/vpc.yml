@@ -40,7 +40,7 @@ Parameters:
 
   SubnetACidr:
     Type: String
-    Default: 172.18.0.176/28
+    Default: 172.18.10.16/28
     Description: >-
       CIDR block for subnet A. Must fall within the VPC's CIDR block and not
       overlap an existing subnet. Default sized for sandbox-vpc-01
@@ -48,7 +48,7 @@ Parameters:
 
   SubnetBCidr:
     Type: String
-    Default: 172.18.0.192/28
+    Default: 172.18.10.32/28
     Description: >-
       CIDR block for subnet B. Must fall within the VPC's CIDR block and not
       overlap an existing subnet or subnet A. Default sized for sandbox-vpc-01

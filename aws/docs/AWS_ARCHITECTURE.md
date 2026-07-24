@@ -59,7 +59,7 @@
 
 The UH Groupings API is a Spring Boot application deployed on AWS using a modern, cloud-native architecture with full CI/CD automation.
 
-## High-Level Architecture
+## PiC High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -223,54 +223,79 @@ Non-secret values that the deployed API still needs (`grouperClient.webService.u
 
 ### 8. Networking
 
-#### Sandbox Architecture (Current)
+#### Deployment Architecture
 
 The sandbox deploys all components into two shared subnets. Tasks have no public IP;
 VPC endpoints provide access to AWS services, and a VPN route (once configured)
 provides the path back to the on-prem Grouper server.
 
 ```
-                              Internet
-                                 │
-                          Internet Gateway
-                                 │
-  ┌──────────────────── VPC: 172.18.0.128/25 ─────────────────────┐
-  │                                                               │
-  │   Application Load Balancer (internet-facing, spans both AZs) │
-  │        ┌──────────────────────┴──────────────────────┐        │
-  │  ┌─────┴─────────────────────┐  ┌────────────────────┴─────┐  │
-  │  │ Subnet A (AZ-1)           │  │ Subnet B (AZ-2)          │  │
-  │  │ 172.18.0.176/28           │  │ 172.18.0.192/28          │  │
-  │  │                           │  │                          │  │
-  │  │  • ALB ENI                │  │  • ALB ENI               │  │
-  │  │  • Fargate task :8080     │  │  (task may run here      │  │
-  │  │    (ECS_TASK_COUNT=1;     │  │   instead — ECS picks    │  │
-  │  │     no public IP)         │  │   the subnet)            │  │
-  │  │  • Interface endpoints:   │  │                          │  │
-  │  │    ecr.api, ecr.dkr,      │  │                          │  │
-  │  │    secretsmanager, logs   │  │                          │  │
-  │  │    (Subnet A only)        │  │                          │  │
-  │  └───────────────────────────┘  └──────────────────────────┘  │
-  │                                                               │
-  │   S3 Gateway endpoint → attached to main route table          │
-  │                                                               │
-  │   Main Route Table:                                           │
-  │     172.18.0.128/25  → local                                  │
-  │     0.0.0.0/0        → Internet Gateway                       │
-  │     128.171.0.0/16   → Virtual Private Gateway  *             │
-  └───────────────────────────────┼───────────────────────────────┘
-                                  │
-                    Virtual Private Gateway  *
-                                  │
-                          IPsec VPN Tunnel  *
-                                  │
-                       UH Firewall / Router
-                                  │
-                      Grouper Web Services
-                       128.171.94.186:443
+                                          Internet
+                                              │
+                                       Internet Gateway
+                                              │
+      ┌──────────────────────────── VPC: 172.18.0.128/25 ──────────────────────────────┐
+      │                                                                                │
+      │                     Public Application Load Balancer                           │
+      │                        (internet-facing, HTTPS :443)                           │
+      │                                      │                                         │
+      │         ┌────────────────────────────┴────────────────────────────┐            │
+      │         │                                                         │            │
+      │  ┌──────┴────────────────────┐                     ┌──────────────┴──────────┐ │
+      │  │ Public Subnet A (AZ-1)    │                     │ Public Subnet B (AZ-2)  │ │
+      │  │                           │                     │                         │ │
+      │  │ • Public ALB ENI          │                     │ • Public ALB ENI        │ │
+      │  │ • uh-groupings-ui         │                     │ • uh-groupings-ui       │ │
+      │  │   Fargate task            │                     │   Fargate task          │ │
+      │  │   (no public IP)          │                     │   (no public IP)        │ │
+      │  └──────────────┬────────────┘                     └────────────┬────────────┘ │
+      │                 │                                               │              │
+      │                 └────────────── HTTPS ──────────────────────────┘              │
+      │                                 │                                              │
+      │                                 ▼                                              │
+      │                    Internal Application Load Balancer                          │
+      │                          (private, API only)                                   │
+      │                                 │                                              │
+      │         ┌───────────────────────┴────────────────────────┐                     │
+      │         │                                                │                     │
+      │  ┌──────┴────────────────────┐            ┌──────────────┴─────────────────┐   │
+      │  │ Private Subnet A (AZ-1)   │            │ Private Subnet B (AZ-2)        │   │
+      │  │                           │            │                                │   │
+      │  │ • Internal ALB ENI        │            │ • Internal ALB ENI             │   │
+      │  │ • uh-groupings-api        │            │ • uh-groupings-api             │   │
+      │  │   Fargate task :8080      │            │   Fargate task :8080           │   │
+      │  │ • Interface endpoints:    │            │                                │   │
+      │  │   ecr.api                 │            │                                │   │
+      │  │   ecr.dkr                 │            │                                │   │
+      │  │   secretsmanager          │            │                                │   │
+      │  │   logs                    │            │                                │   │
+      │  └───────────────────────────┘            └────────────────────────────────┘   │
+      │                                                                                │
+      │  Security Groups                                                               │
+      │    Public ALB  → UI tasks (HTTPS)                                              │
+      │    UI tasks    → Internal ALB (HTTPS)                                          │
+      │    Internal ALB → API tasks (:8080)                                            │
+      │    API tasks accept traffic ONLY from Internal ALB/UI security group           │
+      │                                                                                │
+      │  S3 Gateway Endpoint → attached to main route table                            │
+      │                                                                                │
+      │  Main Route Table                                                              │
+      │    172.18.0.128/25 → local                                                     │
+      │    0.0.0.0/0       → Internet Gateway (public subnets only)                    │
+      │    128.171.0.0/16  → Virtual Private Gateway *                                 │
+      └────────────────────────────────────────────┬───────────────────────────────────┘
+                                                   │
+                                      Virtual Private Gateway *
+                                                   │
+                                            IPsec VPN Tunnel *
+                                                   │
+                                           UH Firewall / Router
+                                                   │
+                                          Grouper Web Services
+                                           128.171.94.186:443
 
-  * The VPN already exists in the account; the 128.171.0.0/16 route is not
-    yet added to the route table — required for Grouper connectivity.
+      * Existing VPN connection.
+        Add 128.171.0.0/16 to the private route table to enable API → Grouper traffic.
 ```
 
 **Key characteristics:**
@@ -291,43 +316,7 @@ restricts the ALB to UI-only traffic, and uses a properly sized VPC.
                                    │
                             Internet Gateway
                                    │
-               ┌─────────────────────────────────────┐
-               │   VPC (larger CIDR, e.g. /24)       │
-               │                                     │
-               │  ┌────────────────────────────────┐ │
-               │  │      Public Subnets (2 AZs)    │ │
-               │  │                                │ │
-               │  │   ┌──────ALB (HTTPS:443)─────┐ │ │
-               │  │   │  ACM cert, UI SG only    │ │ │
-               │  │   └────────────┬─────────────┘ │ │
-               │  └────────────────┼───────────────┘ │
-               │                   │                 │
-               │  ┌────────────────┼───────────────┐ │
-               │  │     Private Subnets (2 AZs)    │ │
-               │  │                │               │ │
-               │  │  ┌─────────┐   │  ┌─────────┐  │ │
-               │  │  │ Fargate │   │  │ Fargate │  │ │
-               │  │  │ Task    │   │  │ Task    │  │ │
-               │  │  └────┬────┘   │  └────┬────┘  │ │
-               │  │       │        │       │       │ │
-               │  └───────┼────────┼───────┼───────┘ │
-               │          │                │         │
-               │        VPC Endpoints (ECR, S3,      │
-               │          Secrets Mgr, Logs)         │
-               │                   │                 │
-               │         Private Route Table         │
-               │          128.171.0.0/16 → VGW       │
-               │           (no IGW route)            │
-               └───────────────────┼─────────────────┘
-                                   │
-                        Virtual Private Gateway
-                                   │
-                            IPsec VPN Tunnel
-                                   │
-                         UH Firewall / Router
-                                   │
-                         Grouper Web Services
-                         128.171.94.186:443
+                                  TBD
 ```
 
 **Key differences from sandbox:**

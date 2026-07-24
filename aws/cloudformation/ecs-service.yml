@@ -1,17 +1,29 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'ECS Fargate Cluster and Service for UH Groupings API'
+Description: >-
+  ECS Fargate cluster and service for the UH Groupings API.
+
+  The API is a PRIVATE service: it has no load balancer of its own. Access is
+  controlled by the API task security group (sg-api-backend) and the companion
+  UI reaches it over ECS Service Connect. This stack creates the cluster, the
+  Service Connect namespace, the API service/task, sg-api-backend (exported for
+  the UI stack to reference), IAM roles, and the log group.
+
+  Test-env posture: SINGLE AZ, DesiredCount 1, no NAT (AWS access via VPC
+  endpoints), on-prem Grouper deferred. The container health check is
+  intentionally omitted while Grouper is unreachable, so the task is not
+  restart-looped. See aws/AGENTS.md and docs/aws-architecture.mmd.
 
 Parameters:
   Owner:
     Type: String
     Description: Owner identifier (e.g., mhodges, its-iam)
     Default: mhodges
-  
+
   Project:
     Type: String
     Description: Project name
     Default: groupings
-  
+
   Environment:
     Type: String
     Default: sandbx
@@ -30,24 +42,26 @@ Parameters:
       - prod
     Description: >-
       Deployment tier — the single source of truth for application config
-      (APP_TIER in aws/.env). Selects the Spring profile (aws-<Tier>) and,
-      together with Hostname/CertificateArn, the public identity of the service.
-      Decoupled from Environment, which only names resources. AllowedValues
-      turns a typo into a deploy-time error instead of a mis-tiered deploy.
+      (APP_TIER in aws/.env). Selects the Spring profile (aws-<Tier>).
+      Decoupled from Environment, which only names resources.
 
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: VPC ID where the ECS cluster will be deployed
-  
+    Description: VPC ID where the ECS cluster is deployed
+
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: List of subnet IDs for the ECS service
-  
+    Description: >-
+      Subnet IDs for the ECS service (from the vpc stack). The test env runs
+      SINGLE-AZ via DesiredCount 1 — the task lands in one of these subnets.
+
   DesiredCount:
     Type: Number
-    Default: 2
-    Description: Desired number of tasks
-  
+    Default: 1
+    Description: >-
+      Desired number of API tasks. Test env = 1 (single AZ). Multi-AZ / higher
+      counts are a prod concern.
+
   ContainerImage:
     Type: String
     Description: Container image URI from ECR
@@ -56,48 +70,27 @@ Parameters:
     Type: String
     Description: >-
       ARN of the groupings/api/grouper-password secret in Secrets Manager.
-      Passed by setup.sh; injected into the container as
-      GROUPERCLIENT_WEBSERVICE_PASSWORD.
+      Passed by setup.sh; injected as GROUPERCLIENT_WEBSERVICE_PASSWORD.
 
   JwtSecretArn:
     Type: String
     Description: >-
       ARN of the groupings/api/jwt-secret secret in Secrets Manager.
-      Passed by setup.sh; injected into the container as JWT_SECRET_KEY.
-
-  CertificateArn:
-    Type: String
-    Default: ''
-    Description: >-
-      ARN of an ACM certificate to terminate TLS at the ALB. May be an
-      ACM-managed (domain-validated) cert or a self-signed cert imported via
-      `aws acm import-certificate`. When empty (the default), the stack is
-      HTTP-only on port 80 — the current sandbox behavior. When provided, an
-      HTTPS listener is added on 443 and port 80 redirects to 443.
-
-  Hostname:
-    Type: String
-    Default: ''
-    Description: >-
-      Public FQDN clients use to reach the API (e.g.,
-      groupings-api-test.its.hawaii.edu). Convention: non-prod hostnames must
-      contain "test"; prod must not (enforced by setup.sh). When set, it is
-      used in the LoadBalancerUrl output instead of the raw ALB DNS name. Leave
-      empty in the sandbox until DNS/cert are provisioned.
-
-Conditions:
-  # Spring profile is taken directly from Tier (aws-<Tier>), so no
-  # prod-vs-test inference condition is needed here — the tier is explicit.
-
-  # When a certificate ARN is supplied, enable TLS at the ALB (HTTPS listener
-  # + HTTP→HTTPS redirect). Empty string keeps the HTTP-only sandbox posture.
-  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
-
-  # When a public hostname is supplied, the LoadBalancerUrl output uses it
-  # instead of the raw ALB DNS name.
-  HasHostname: !Not [!Equals [!Ref Hostname, '']]
+      Passed by setup.sh; injected as JWT_SECRET_KEY.
 
 Resources:
+  # -------------------------------------------------------------------
+  # ECS Service Connect namespace (Cloud Map HTTP namespace).
+  # API-owned. The API service publishes itself here; the companion UI service
+  # (deployed later, from the UI repo) joins the same namespace as a client to
+  # reach the API by name over Service Connect — no load balancer required.
+  # -------------------------------------------------------------------
+  ServiceConnectNamespace:
+    Type: AWS::ServiceDiscovery::HttpNamespace
+    Properties:
+      Name: !Sub '${Owner}-${Project}-${Environment}'
+      Description: !Sub 'Service Connect namespace for ${Owner}-${Project}-${Environment}'
+
   # ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -113,6 +106,8 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
+      ServiceConnectDefaults:
+        Namespace: !GetAtt ServiceConnectNamespace.Arn
       Tags:
         - Key: Name
           Value: !Sub '${Owner}-${Project}-${Environment}-cluster'
@@ -132,122 +127,33 @@ Resources:
       LogGroupName: !Sub '/ecs/${Owner}-${Project}-${Environment}'
       RetentionInDays: 30
 
-  # Security Group for ECS Tasks
-  ECSSecurityGroup:
+  # -------------------------------------------------------------------
+  # API task security group (sg-api-backend).
+  # NO ingress is defined here on purpose: the API is deployed FIRST and the
+  # UI's security group does not exist yet. The UI stack (deployed later) adds a
+  # standalone AWS::EC2::SecurityGroupIngress that allows 8080 from sg-ui-apps,
+  # referencing the exported id below. Until then the API has no inbound source
+  # (test it in-VPC via `aws ecs execute-command`). Egress defaults to allow-all
+  # so the task can reach VPC endpoints (and, later, on-prem Grouper via VPN).
+  # -------------------------------------------------------------------
+  ApiTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security group for UH Groupings API ECS tasks
+      GroupDescription: >-
+        UH Groupings API tasks (sg-api-backend). Ingress on 8080 is added later
+        by the UI stack, scoped to sg-ui-apps only.
       VpcId: !Ref VpcId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-sg-ecs'
+          Value: !Sub '${Owner}-${Project}-${Environment}-sg-api-backend'
         - Key: Owner
           Value: !Ref Owner
         - Key: Project
           Value: !Ref Project
         - Key: Environment
           Value: !Ref Environment
-
-  # Application Load Balancer Security Group
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for Application Load Balancer
-      VpcId: !Ref VpcId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-sg-alb'
-
-  # Application Load Balancer
-  ApplicationLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Name: !Sub '${Owner}-${Project}-${Environment}-alb'
-      Scheme: internet-facing
-      Type: application
-      Subnets: !Ref SubnetIds
-      SecurityGroups:
-        - !Ref ALBSecurityGroup
-      Tags:
-        - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-alb'
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Project
-          Value: !Ref Project
-        - Key: Environment
-          Value: !Ref Environment
-
-  # Target Group
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Sub '${Owner}-${Project}-${Environment}-tg'
-      Port: 8080
-      Protocol: HTTP
-      TargetType: ip
-      VpcId: !Ref VpcId
-      HealthCheckEnabled: true
-      HealthCheckPath: /uhgroupingsapi/actuator/health
-      HealthCheckProtocol: HTTP
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
-      Matcher:
-        HttpCode: 200
-
-  # ALB Listener (port 80)
-  # - No certificate: forward HTTP straight to the target group (sandbox default).
-  # - Certificate present: redirect all HTTP to HTTPS so every client connection
-  #   is TLS.
-  ALBListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - !If
-          - HasCertificate
-          - Type: redirect
-            RedirectConfig:
-              Protocol: HTTPS
-              Port: '443'
-              StatusCode: HTTP_301
-          - Type: forward
-            TargetGroupArn: !Ref TargetGroup
-      LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 80
-      Protocol: HTTP
-
-  # HTTPS Listener (port 443) — only created when a certificate ARN is provided.
-  # Terminates TLS at the ALB and forwards plaintext HTTP to the task on 8080
-  # inside the VPC. SslPolicy pins a modern TLS 1.2/1.3 policy.
-  HTTPSListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Condition: HasCertificate
-    Properties:
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref TargetGroup
-      LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 443
-      Protocol: HTTPS
-      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
-      Certificates:
-        - CertificateArn: !Ref CertificateArn
+        - Key: ManagedBy
+          Value: CloudFormation
 
   # IAM Roles
   ECSTaskExecutionRole:
@@ -331,27 +237,21 @@ Resources:
         - Name: !Sub '${Owner}-${Project}-${Environment}'
           Image: !Ref ContainerImage
           Essential: true
+          # Port mapping is NAMED so ECS Service Connect can publish it. The
+          # ServiceConnectConfiguration below references PortName 'api-8080'.
           PortMappings:
-            - ContainerPort: 8080
+            - Name: api-8080
+              ContainerPort: 8080
               Protocol: tcp
+              AppProtocol: http
           Environment:
-            # Spring profile is the deployment tier, taken directly from the
-            # Tier parameter (APP_TIER in aws/.env) — the single source of
-            # truth. Maps 1:1: aws-test | aws-prod. Decoupled from the AWS_ENV
-            # name, so the shared sandbox (AWS_ENV=sandbx) runs the test tier.
+            # Spring profile is the deployment tier (aws-test | aws-prod).
             - Name: SPRING_PROFILES_ACTIVE
               Value: !Sub 'aws-${Tier}'
             - Name: AWS_REGION
               Value: !Ref AWS::Region
-            # Bind the app to 8080 in every AWS environment, matching the
-            # container port and target group.
             - Name: SERVER_PORT
               Value: '8080'
-          # Secrets are stored in Secrets Manager by setup.sh, then injected
-          # here as environment variables at container start. Spring relaxed
-          # binding maps GROUPERCLIENT_WEBSERVICE_PASSWORD → the
-          # grouperClient.webService.password property and JWT_SECRET_KEY →
-          # jwt.secret.key (a required placeholder; the app won't start without it).
           Secrets:
             - Name: GROUPERCLIENT_WEBSERVICE_PASSWORD
               ValueFrom: !Ref GrouperPasswordSecretArn
@@ -363,19 +263,14 @@ Resources:
               awslogs-group: !Ref LogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - curl -f http://localhost:8080/uhgroupingsapi/actuator/health || exit 1
-            Interval: 30
-            Timeout: 5
-            Retries: 3
-            StartPeriod: 60
+          # NOTE: No container HealthCheck on purpose. The app health endpoint
+          # (/uhgroupingsapi/actuator/health) depends on reaching Grouper, which
+          # is DEFERRED (no VPN wiring yet). Adding a health check now would make
+          # ECS restart-loop the task. Re-add it when Grouper access is wired.
 
-  # ECS Service
+  # ECS Service — no load balancer. Reachable via Service Connect + sg-api-backend.
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBListener
     Properties:
       ServiceName: !Sub '${Owner}-${Project}-${Environment}-service'
       Cluster: !Ref ECSCluster
@@ -387,12 +282,16 @@ Resources:
           AssignPublicIp: DISABLED
           Subnets: !Ref SubnetIds
           SecurityGroups:
-            - !Ref ECSSecurityGroup
-      LoadBalancers:
-        - ContainerName: !Sub '${Owner}-${Project}-${Environment}'
-          ContainerPort: 8080
-          TargetGroupArn: !Ref TargetGroup
-      HealthCheckGracePeriodSeconds: 60
+            - !Ref ApiTaskSecurityGroup
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: !GetAtt ServiceConnectNamespace.Arn
+        Services:
+          - PortName: api-8080
+            DiscoveryName: groupings-api
+            ClientAliases:
+              - Port: 8080
+                DnsName: groupings-api
       DeploymentConfiguration:
         MaximumPercent: 200
         MinimumHealthyPercent: 100
@@ -412,20 +311,31 @@ Outputs:
     Value: !Ref ECSCluster
     Export:
       Name: !Sub '${AWS::StackName}-ClusterName'
-  
+
   ServiceName:
     Description: Name of the ECS service
     Value: !GetAtt ECSService.Name
     Export:
       Name: !Sub '${AWS::StackName}-ServiceName'
-  
-  LoadBalancerUrl:
-    Description: URL of the Application Load Balancer
-    # Scheme follows certificate presence (https when TLS is enabled); host
-    # follows hostname presence (the public FQDN when set, else the raw ALB DNS).
-    Value: !Sub
-      - '${Scheme}://${Host}'
-      - Scheme: !If [HasCertificate, 'https', 'http']
-        Host: !If [HasHostname, !Ref Hostname, !GetAtt ApplicationLoadBalancer.DNSName]
+
+  ApiTaskSecurityGroupId:
+    Description: >-
+      Security group id of the API tasks (sg-api-backend). The UI stack imports
+      this and adds an ingress rule allowing 8080 from sg-ui-apps.
+    Value: !Ref ApiTaskSecurityGroup
     Export:
-      Name: !Sub '${AWS::StackName}-LoadBalancerUrl'
+      Name: !Sub '${AWS::StackName}-ApiTaskSecurityGroupId'
+
+  ServiceConnectNamespaceArn:
+    Description: >-
+      ARN of the Service Connect (Cloud Map HTTP) namespace. The UI service
+      joins this namespace to reach the API.
+    Value: !GetAtt ServiceConnectNamespace.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceConnectNamespaceArn'
+
+  ServiceConnectDnsName:
+    Description: Service Connect DNS name the UI uses to reach the API (port 8080)
+    Value: groupings-api
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceConnectDnsName'
