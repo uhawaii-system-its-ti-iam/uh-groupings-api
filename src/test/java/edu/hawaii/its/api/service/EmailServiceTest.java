@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doAnswer;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -15,9 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -57,23 +55,15 @@ public class EmailServiceTest {
     @Value("${groupings.api.test.path:/api/groupings/v2.1}")
     private String testPath;
 
-    @TestConfiguration
-    public static class EmailServiceTestConfiguration {
-        @Bean
-        public JavaMailSender javaMailSender() {
-            return new MockJavaMailSender() {
-                @Override
-                public void send(SimpleMailMessage mailMessage) throws MailException {
-                    wasSent = true;
-                    messageSent = mailMessage;
-                }
-            };
-        }
-    }
-
     @BeforeEach
     public void setUp() {
         doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0), TEST_UIDS.get(0));
+
+        doAnswer(invocation -> {
+            wasSent = true;
+            messageSent = invocation.getArgument(0);
+            return null;
+        }).when(javaMailSender).send(any(SimpleMailMessage.class));
 
         emailService.setEnabled(true);
         emailService.setRecipient("address");
