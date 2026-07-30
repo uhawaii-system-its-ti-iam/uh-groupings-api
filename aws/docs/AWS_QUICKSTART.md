@@ -12,8 +12,9 @@
 
 ## What You'll Create
 
-- Two **private-posture** subnets (different AZs) inside your existing VPC
-- VPC endpoints (ECR api/dkr, S3 gateway, Secrets Manager, CloudWatch Logs) + `sg-vpce`
+- A **private** subnet (API task) and a **public** subnet (NAT Gateway only), both in one AZ
+- A **NAT Gateway with an Elastic IP** — the fixed source address the UH firewall must allow-list so the API can reach Grouper WS
+- A private route table (`0.0.0.0/0` → NAT) and the free S3 gateway endpoint
 - ECR repository for Docker images
 - ECS Fargate cluster, Service Connect namespace, and the API service
 - `sg-api-backend` — the API task security group, created with **no ingress rule**
@@ -22,6 +23,8 @@
 - Optionally, a CodePipeline that auto-deploys on `git push`
 
 **No load balancer and no public endpoint.** The API is deployed as a private service. The companion UI reaches it over ECS Service Connect, and the UI stack adds the one ingress rule that opens port 8080 to `sg-ui-apps`. Until the UI exists the API has no inbound client and is not functionally exercised — Step 4 verifies provisioning only.
+
+**Two follow-up actions this setup creates.** After the first run you must (1) record the NAT Gateway's EIP allocation id in `aws/.env`, and (2) ask the network team to allow-list its public IP on the UH Palo Alto firewall. Grouper calls fail until the second one is done, and the address changes on every teardown until the first one is done. `setup.sh` prints both values and reminds you.
 
 This is a one-time setup. After completion, all ongoing operations are documented in [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md).
 
@@ -34,7 +37,7 @@ You need:
 - **AWS CLI v2** installed on your host (macOS: `brew install awscli`; Linux: [AWS's instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)). All `make aws-*` targets call it directly.
 - **Docker Desktop** running locally — needed by `make aws-setup` to build and push the application image to ECR.
 - **Make** (standard on macOS and Linux)
-- An existing AWS VPC in your target region with one free `/28` CIDR range. `make aws-setup` creates the subnet. **No Internet Gateway, default route, NAT gateway, or second Availability Zone is required** — the API needs no internet egress and is single-AZ.
+- An existing AWS VPC in your target region with **two free `/28` CIDR ranges** and **an Internet Gateway** whose `0.0.0.0/0` route is on the main route table. `make aws-setup` creates the subnets and the NAT Gateway. A second Availability Zone is **not** required — the deployment is single-AZ.
 
 ## Step 1: Configure Credentials (5–10 min)
 
@@ -80,12 +83,13 @@ make aws-sso-login
 
 `make aws-setup` creates the subnet (via `aws/cloudformation/vpc.yml`), so only an existing VPC is required. You need:
 
-- A VPC in your target region, with one free `/28` CIDR range that doesn't overlap an existing subnet.
-- The VPC's main route table ID (`MAIN_ROUTE_TABLE_ID`) — the S3 gateway endpoint attaches to it.
+- A VPC in your target region, with **two** free `/28` CIDR ranges that don't overlap each other or an existing subnet — one for the API task, one for the NAT Gateway.
+- **An Internet Gateway attached to the VPC, with `0.0.0.0/0 → igw-...` on the main route table.** This is a hard requirement: the public subnet inherits the main route table, and that route is what gives the NAT Gateway its path out. If it's missing, ask ITS to add it.
+Nothing else — `vpc.yml` creates its own private route table, and the S3 gateway endpoint attaches to that rather than to the VPC's main table.
 
-The deployment is **single-subnet, single-AZ**: one subnet holding the API task ENI and the four interface-endpoint ENIs. That matches the single task (`ECS_TASK_COUNT=1`) and keeps all endpoint traffic within one AZ. Multi-AZ is a deliberate later change — add a second subnet in `vpc.yml` first; raising the task count alone would just stack tasks in the same AZ.
+The deployment is **single-AZ**: both subnets land in the region's first AZ, matching the single task (`ECS_TASK_COUNT=1`). Multi-AZ is a deliberate later change — add a second private subnet in `vpc.yml` first; raising the task count alone would just stack tasks in the same AZ.
 
-You do **not** need an Internet Gateway, a `0.0.0.0/0` route, or a NAT gateway. The API creates no load balancer and needs no internet egress: tasks run with `AssignPublicIp DISABLED` and reach AWS services through the VPC endpoints this setup creates.
+The task itself stays private (`AssignPublicIp DISABLED`) and has no inbound path. Its outbound traffic — to Grouper WS, and to the AWS service APIs — goes through the NAT Gateway. ECR image layers take the free S3 gateway endpoint instead, so image pulls avoid NAT data-processing charges.
 
 List the VPCs in the account and note the ID designated for this project:
 
@@ -101,11 +105,11 @@ Validate the VPC before continuing:
 make aws-check-vpc
 ```
 
-This hard-fails only on things that would actually break the deploy: a missing VPC, an unusable subnet CIDR, or a missing main route table. Lines prefixed `·` are informational — including Internet Gateway presence, AZ count, and whether a data-center route exists. A missing IGW is fine and will not block setup.
+This hard-fails on anything that would break the deploy: a missing VPC, a missing main route table, **a missing Internet Gateway or `0.0.0.0/0` route**, or subnet CIDRs that fall outside the VPC or overlap something (including each other). Lines prefixed `·` are informational — AZ count, whether a NAT Gateway already exists, and a reminder about the firewall allow-list.
 
 If you re-run this after the stack is already deployed, the CIDR check will report an overlap against this project's own subnet. That's expected; the script says so explicitly when it detects the existing vpc stack.
 
-One informational line worth reading: if no VGW or Transit Gateway route is reported, Grouper WS will be unreachable once the app starts. That path is pending infrastructure-team confirmation and does not block provisioning — see [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity-pending-infrastructure-confirmation).
+One informational line worth reading: the script reminds you that the NAT Gateway's Elastic IP must be allow-listed on the UH Palo Alto firewall before Grouper WS calls will succeed. It cannot verify that from here — it's a manual request to the network team. See [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity).
 
 ### Edit `aws/.env`
 
@@ -140,7 +144,7 @@ The script (`aws/setup.sh`) runs on your host and is **non-interactive end to en
 2. Validates that `AWS_PROJECT_ID` and `VPC_ID` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if either is missing.
 3. Validates the developer's overrides file (`~/.$(whoami)-conf/uh-groupings-api-overrides.properties`); exits if `grouperClient.webService.password` is missing or empty.
 4. Verifies prerequisites and your AWS account ID.
-5. **Step 1 — VPC:** creates the subnet plus `sg-vpce` and the VPC endpoints via `aws/cloudformation/vpc.yml`, then reads the subnet id from the stack outputs.
+5. **Step 1 — VPC:** creates both subnets, the NAT Gateway and its Elastic IP, the private route table, and the S3 gateway endpoint via `aws/cloudformation/vpc.yml`. Reads the private subnet id from the stack outputs, then prints the NAT's public IP and EIP allocation id with the two follow-up actions.
 6. **Step 2 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
 7. **Step 3 — Image:** builds and pushes the initial Docker image to the new ECR repo.
 8. **Step 4 — Secrets:** writes `groupings/api/grouper-password` from your overrides file. Generates a fresh JWT signing key with `openssl rand -base64 32` and writes it to `groupings/api/jwt-secret`, *unless that secret already exists* — in which case the existing value is preserved so re-running setup does not invalidate UI tokens.
@@ -195,7 +199,7 @@ Expect `ApiTaskSecurityGroupId`, `ServiceConnectNamespaceArn`, `ServiceConnectDn
 Two consequences worth internalizing:
 
 - **`runningCount: 1` is the meaningful signal.** It proves the image pulled through the ECR endpoints and both secrets resolved through the Secrets Manager endpoint — i.e. the no-NAT networking works. That is what this setup is actually proving.
-- **Grouper errors in the logs are expected.** The health endpoint depends on on-prem Grouper WS, whose connectivity mechanism is still pending infrastructure-team confirmation. This is also why the container health check is disabled: with it enabled, ECS would restart-loop the task. Do not expect `{"status":"UP"}`. See [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity-pending-infrastructure-confirmation).
+- **Grouper errors in the logs are expected until the firewall rule exists.** The health endpoint depends on Grouper WS, reached through the NAT Gateway. Until the UH Palo Alto firewall allow-lists the NAT's Elastic IP, those calls fail. This is also why the container health check is disabled: with it enabled, ECS would restart-loop the task. Do not expect `{"status":"UP"}` yet. See [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity).
 
 If anything fails, troubleshoot with:
 
@@ -205,7 +209,7 @@ make aws-task-status
 make aws-stack-events
 ```
 
-A task stuck in `PENDING` with `ResourceInitializationError` almost always means a VPC endpoint problem (image pull or secret fetch), since there is no NAT fallback path.
+A task stuck in `PENDING` with `ResourceInitializationError` almost always means the outbound path is broken — the image pull and secret fetch both go through the NAT Gateway. Check that the NAT is `available`, that the private route table points at it, and that the VPC's main route table still routes `0.0.0.0/0` to the IGW.
 
 ---
 
@@ -304,14 +308,17 @@ Per environment (sandbox, single task):
 | Resource                                  | Approx. monthly cost |
 |-------------------------------------------|----------------------|
 | ECS Fargate (1 task, 0.5 vCPU, 1 GB RAM)  | $15–20               |
-| Interface VPC endpoints (4 × 1 ENI)       | $30                  |
+| NAT Gateway ($0.045/hr)                   | $33                  |
+| Public IPv4 address for the NAT's EIP     | $4                   |
+| NAT data processing ($0.045/GB)           | pennies at sandbox volume |
+| S3 gateway endpoint                       | free                 |
 | ECR + CloudWatch Logs                     | $2–7                 |
 | CodeBuild                                 | ~$0.005/min, only while building |
-| **Total**                                 | **~$50–60**          |
+| **Total**                                 | **~$55–65**          |
 
-The four interface endpoints are the largest line item. They replace both an ALB (~$20) and a NAT gateway (~$32 plus data processing) while keeping all AWS traffic off the internet. The S3 gateway endpoint is free.
+The NAT Gateway is the largest line item and is not optional — it is the only way to give the task a stable source IP for the UH firewall allow-list. Keeping the free S3 gateway endpoint matters here: ECR image layers live in S3, so the bulk of the bytes bypass the NAT's per-GB charge.
 
-To save money in a sandbox, scale the service to 0 when not in use. Note that endpoint charges are hourly per ENI and continue regardless of task count:
+To save money in a sandbox, scale the service to 0 when not in use. Note this stops only the Fargate cost — the NAT Gateway and its EIP bill hourly regardless of task count, so stopping those requires tearing down the vpc stack:
 
 ```bash
 source aws/.env

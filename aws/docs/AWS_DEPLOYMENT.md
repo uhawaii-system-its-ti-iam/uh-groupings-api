@@ -469,7 +469,7 @@ make aws-service-events
 
 Common causes, in rough order of likelihood for this architecture:
 
-1. **`ResourceInitializationError` — VPC endpoint problem.** The most common failure here. With no NAT gateway there is no fallback path, so a task that cannot reach the `ecr.api`/`ecr.dkr`/`s3` endpoints cannot pull its image, and one that cannot reach the `secretsmanager` endpoint cannot start. Check that `sg-vpce` still admits 443 from both subnet CIDRs and that private DNS is enabled on the interface endpoints.
+1. **`ResourceInitializationError` — outbound path problem.** The most common failure here. The task pulls its image and fetches its secrets through the NAT Gateway, so anything that breaks that path stops the task from starting. Check, in order: the NAT Gateway is `available`; the private route table still has `0.0.0.0/0` → the NAT; and the VPC's main route table still has `0.0.0.0/0` → the IGW (the NAT's own path out). `make aws-check-vpc` verifies the last one.
 2. **Secret resolution failure.** A renamed or deleted Secrets Manager entry, or an execution role that no longer covers its ARN.
 3. Resource constraints (CPU/memory).
 4. Image tag missing in ECR.

@@ -1,13 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  Networking for the UH Groupings API. The VPC is assumed to already exist
-  (provided by the VPC team, never created here). Provisions ONE private-posture
-  subnet for the ECS Fargate API task, plus the AWS PrivateLink VPC endpoints
-  that let it reach AWS services with no public IP and no NAT gateway.
-  No load balancer and no public subnet: the API is a private service reached by
-  the companion UI over ECS Service Connect. SINGLE SUBNET / SINGLE AZ by design
-  (one task) — see the Subnet resource comment and aws/AGENTS.md before adding a
-  second. Exports the subnet id for the ecs-service and UI stacks.
+  Networking for the UH Groupings API sandbox. The VPC is assumed to already
+  exist (provided by the VPC team, never created here). Provisions two subnets
+  in ONE Availability Zone: a private subnet for the ECS Fargate API task, and a
+  small public subnet whose only occupant is a NAT Gateway. The NAT Gateway's
+  Elastic IP is the fixed source address the UH Palo Alto firewall allow-lists so
+  the API can reach Grouper WS over the public internet.
+  No load balancer, no public endpoint, no inbound path: the API is a private
+  service reached by the companion UI over ECS Service Connect.
+  See aws/AGENTS.md and aws/docs/aws-architecture.mmd.
 
 Parameters:
   Owner:
@@ -33,58 +34,66 @@ Parameters:
 
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: ID of the existing VPC the subnet is created in
-
-  MainRouteTableId:
-    Type: String
     Description: >-
-      ID of the VPC's main route table (used by the S3 Gateway endpoint).
-      Find it in the VPC console under Route Tables → filter by your VPC →
-      the one marked "Yes" under Main.
+      ID of the existing VPC. Its main route table MUST route 0.0.0.0/0 to an
+      Internet Gateway — the public subnet inherits that route table, which is
+      what gives the NAT Gateway its path out. Validate with
+      'make aws-check-vpc'.
 
-  SubnetCidr:
+  PrivateSubnetCidr:
     Type: String
     Default: 172.18.10.16/28
     Description: >-
-      CIDR block for the API subnet. Must fall within the VPC's CIDR block and
-      not overlap an existing subnet. Default sized for sandbox-vpc-01
-      (172.18.0.128/25). Must match SUBNET_CIDR in aws/.env — validate with
-      'make aws-check-vpc'. This subnet holds both the API task ENI and the
-      interface VPC endpoint ENIs.
+      CIDR for the private subnet that holds the API task. Must fall within the
+      VPC CIDR and not overlap an existing subnet. Must match
+      PRIVATE_SUBNET_CIDR in aws/.env.
+
+  PublicSubnetCidr:
+    Type: String
+    Default: 172.18.10.32/28
+    Description: >-
+      CIDR for the public subnet that holds ONLY the NAT Gateway. Must fall
+      within the VPC CIDR and not overlap the private subnet or an existing
+      subnet. Must match PUBLIC_SUBNET_CIDR in aws/.env.
+
+  NatEipAllocationId:
+    Type: String
+    Default: ''
+    Description: >-
+      Allocation ID (eipalloc-...) of a PRE-EXISTING Elastic IP to give the NAT
+      Gateway. Leave blank on the very first deploy and CloudFormation will
+      allocate one. STRONGLY RECOMMENDED: after the first deploy, record the
+      allocation id in aws/.env as NAT_EIP_ALLOCATION_ID. A CloudFormation-owned
+      EIP is RELEASED on teardown, so the next setup gets a different address and
+      silently invalidates the UH firewall allow-list. Supplying the id here keeps
+      the address stable across the teardown/re-setup loop.
+
+Conditions:
+  # Only create an EIP when the operator has not supplied a pre-existing one.
+  CreateNatEip: !Equals [!Ref NatEipAllocationId, '']
 
 Resources:
   # -------------------------------------------------------------------
-  # The single API subnet. Placed in the region's first Availability Zone.
-  # Private by posture: no public IP on launch, and the ECS service sets
-  # AssignPublicIp DISABLED. There is no route to an Internet Gateway or NAT.
+  # Private subnet — holds the API task ENI. No public IP on launch, and the
+  # ECS service sets AssignPublicIp DISABLED. Reaches the internet only
+  # outbound, through the NAT Gateway.
   #
-  # SINGLE SUBNET / SINGLE AZ IS DELIBERATE. The API runs one task
-  # (DesiredCount 1), so a second subnet would sit empty and misrepresent the
-  # deployment as multi-AZ. It is not. Keeping the task and all four interface
-  # endpoint ENIs in one subnet also keeps every endpoint call inside one AZ,
-  # avoiding cross-AZ data transfer charges.
-  #
-  # Do NOT add a second subnet speculatively. Enabling real multi-AZ is a
-  # coordinated change:
-  #   1. add a second AWS::EC2::Subnet in a different AZ (!Select [1, !GetAZs ''])
-  #   2. change the SubnetId output to a comma-joined list of both ids
-  #   3. add its CIDR to EndpointSecurityGroup ingress
-  #   4. decide whether the interface endpoints need an ENI in both subnets
-  #      (an extra hourly charge each) or should stay in one
-  #   5. raise DesiredCount in the ecs stack
-  # Raising DesiredCount alone does NOT buy availability — every task would
-  # land in this one subnet and AZ.
+  # SINGLE AZ IS DELIBERATE. One task, so a second AZ would add cost and imply
+  # HA that does not exist. Enabling multi-AZ is a coordinated change: add a
+  # second private subnet in another AZ, add it to the PrivateSubnetIds output,
+  # add a NAT Gateway per AZ (or accept cross-AZ NAT traffic), and raise
+  # DesiredCount. Raising DesiredCount alone buys nothing.
   # -------------------------------------------------------------------
-  Subnet:
+  PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VpcId
-      CidrBlock: !Ref SubnetCidr
+      CidrBlock: !Ref PrivateSubnetCidr
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-subnet'
+          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-private'
         - Key: Owner
           Value: !Ref Owner
         - Key: Project
@@ -95,46 +104,24 @@ Resources:
           Value: CloudFormation
 
   # -------------------------------------------------------------------
-  # VPC Endpoints (AWS PrivateLink) — allow the Fargate task (no public IP,
-  # no NAT gateway, no internet route) to reach AWS services over private
-  # IPv4 addresses. This is what makes the "no NAT" posture viable.
+  # Public subnet — the NAT Gateway is its ONLY occupant. No application
+  # workload belongs here.
   #
-  # ECR image pull requires three endpoints:
-  #   - ecr.api       (ECR API calls: GetAuthorizationToken, etc.)
-  #   - ecr.dkr       (Docker registry: image layer downloads)
-  #   - s3 (Gateway)  (image layers are stored in S3 behind the scenes)
-  #
-  # Secrets Manager requires:
-  #   - secretsmanager (task definition secrets[] injection at startup)
-  #
-  # CloudWatch Logs requires:
-  #   - logs           (awslogs driver sends container stdout/stderr)
-  #
-  # NOT required on Fargate: the ecs, ecs-agent, and ecs-telemetry endpoints.
-  # On the Fargate launch type the control-plane/agent traffic does not
-  # traverse the task ENI, so only the data-path services above need endpoints.
-  # ECS Service Connect likewise needs no additional endpoint — the Envoy
-  # sidecar is supplied and managed by the Fargate platform, not pulled
-  # through this VPC.
-  #
-  # All interface endpoints live in the single subnet alongside the task, so
-  # there is no cross-AZ endpoint traffic. The S3 gateway endpoint is a
-  # route-table entry and costs nothing.
+  # Note there is deliberately no route table for this subnet: it inherits the
+  # VPC's main route table, which must already route 0.0.0.0/0 to the Internet
+  # Gateway. That keeps this stack from creating or owning an IGW, which belongs
+  # to the VPC team. 'make aws-check-vpc' enforces the requirement.
   # -------------------------------------------------------------------
-
-  EndpointSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
     Properties:
-      GroupDescription: !Sub '${Owner}-${Project}-${Environment} - VPC endpoint access from the API task'
       VpcId: !Ref VpcId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref SubnetCidr
+      CidrBlock: !Ref PublicSubnetCidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-sg-vpce'
+          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-public-nat'
         - Key: Owner
           Value: !Ref Owner
         - Key: Project
@@ -144,30 +131,101 @@ Resources:
         - Key: ManagedBy
           Value: CloudFormation
 
-  EcrApiEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+  # -------------------------------------------------------------------
+  # Elastic IP for the NAT Gateway — the single fixed address the UH Palo Alto
+  # firewall allow-lists for Grouper access.
+  #
+  # Created only when NatEipAllocationId is blank. Once created, record its
+  # allocation id in aws/.env so subsequent deploys reuse it and teardown does
+  # not release it. See the parameter description above.
+  # -------------------------------------------------------------------
+  NatEip:
+    Type: AWS::EC2::EIP
+    Condition: CreateNatEip
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-eip-nat'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      AllocationId: !If
+        - CreateNatEip
+        - !GetAtt NatEip.AllocationId
+        - !Ref NatEipAllocationId
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-nat'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # -------------------------------------------------------------------
+  # Private route table — sends all non-local traffic to the NAT Gateway. This
+  # is what gives the task outbound access to Grouper WS and to the AWS service
+  # endpoints (ECR API, Secrets Manager, CloudWatch Logs).
+  #
+  # The private subnet MUST have its own route table rather than inheriting the
+  # VPC's main table, because the main table routes 0.0.0.0/0 to the Internet
+  # Gateway — useless to a task with no public IP.
+  # -------------------------------------------------------------------
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VpcId
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
-      VpcEndpointType: Interface
-      PrivateDnsEnabled: true
-      SubnetIds:
-        - !Ref Subnet
-      SecurityGroupIds:
-        - !Ref EndpointSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${Owner}-${Project}-${Environment}-rtb-private'
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
 
-  EcrDkrEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+  PrivateDefaultRoute:
+    Type: AWS::EC2::Route
     Properties:
-      VpcId: !Ref VpcId
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
-      VpcEndpointType: Interface
-      PrivateDnsEnabled: true
-      SubnetIds:
-        - !Ref Subnet
-      SecurityGroupIds:
-        - !Ref EndpointSecurityGroup
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
 
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  # -------------------------------------------------------------------
+  # S3 gateway endpoint — free, and it carries the bulk of the bytes, because
+  # ECR image layers are stored in S3. Attached to the PRIVATE route table so
+  # the task's S3-bound traffic uses the endpoint instead of the NAT Gateway
+  # (which would incur per-GB data processing charges on every image pull).
+  #
+  # The four interface endpoints (ecr.api, ecr.dkr, secretsmanager, logs) were
+  # REMOVED deliberately. Once a NAT Gateway exists for Grouper, they became a
+  # redundant second path costing ~$29/month. Those API calls now egress through
+  # the NAT; the traffic is small (auth tokens, secret fetches, log shipping).
+  # Re-add them if the production branch removes internet egress.
+  # -------------------------------------------------------------------
   S3GatewayEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -175,58 +233,60 @@ Resources:
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
       VpcEndpointType: Gateway
       RouteTableIds:
-        - !Ref MainRouteTableId
-
-  SecretsManagerEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VpcId
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.secretsmanager'
-      VpcEndpointType: Interface
-      PrivateDnsEnabled: true
-      SubnetIds:
-        - !Ref Subnet
-      SecurityGroupIds:
-        - !Ref EndpointSecurityGroup
-
-  LogsEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VpcId
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
-      VpcEndpointType: Interface
-      PrivateDnsEnabled: true
-      SubnetIds:
-        - !Ref Subnet
-      SecurityGroupIds:
-        - !Ref EndpointSecurityGroup
+        - !Ref PrivateRouteTable
 
 Outputs:
-  # One subnet, one output. setup.sh reads this and passes it to the ecs stack's
-  # SubnetIds parameter, which is a List<AWS::EC2::Subnet::Id> — a single id is a
-  # valid one-element list. If a second subnet is ever added, change this Value
-  # to !Join [',', [!Ref Subnet, !Ref SubnetB]] and nothing downstream needs to
-  # change.
-  SubnetId:
+  # Consumed by setup.sh and passed to the ecs stack's SubnetIds parameter,
+  # which is a List<AWS::EC2::Subnet::Id> — a single id is a valid one-element
+  # list. If a second private subnet is ever added, change this to
+  # !Join [',', [...]] and nothing downstream needs to change.
+  PrivateSubnetId:
     Description: >-
-      ID of the API subnet. Consumed by the ecs-service stack and available to
-      the companion UI stack.
-    Value: !Ref Subnet
+      ID of the private subnet holding the API task. Consumed by the
+      ecs-service stack and available to the companion UI stack.
+    Value: !Ref PrivateSubnet
     Export:
-      Name: !Sub '${AWS::StackName}-SubnetId'
+      Name: !Sub '${AWS::StackName}-PrivateSubnetId'
 
-  SubnetAvailabilityZone:
-    Description: >-
-      Availability Zone of the API subnet. The deployment is single-AZ; this is
-      that AZ.
-    Value: !GetAtt Subnet.AvailabilityZone
+  PublicSubnetId:
+    Description: ID of the public subnet holding only the NAT Gateway
+    Value: !Ref PublicSubnet
     Export:
-      Name: !Sub '${AWS::StackName}-SubnetAvailabilityZone'
+      Name: !Sub '${AWS::StackName}-PublicSubnetId'
 
-  EndpointSecurityGroupId:
-    Description: >-
-      Security group id of the interface VPC endpoints (sg-vpce). API-owned;
-      exported for visibility and troubleshooting.
-    Value: !Ref EndpointSecurityGroup
+  NatGatewayId:
+    Description: ID of the NAT Gateway providing outbound internet for the API task
+    Value: !Ref NatGateway
     Export:
-      Name: !Sub '${AWS::StackName}-EndpointSecurityGroupId'
+      Name: !Sub '${AWS::StackName}-NatGatewayId'
+
+  NatEipAddress:
+    Description: >-
+      PUBLIC IP OF THE NAT GATEWAY. This is the address the UH Palo Alto
+      firewall must allow-list for Grouper WS access. Give this value to the
+      network team.
+    Value: !If
+      - CreateNatEip
+      - !Ref NatEip
+      - 'see NAT_EIP_ALLOCATION_ID in aws/.env (pre-existing EIP)'
+    Export:
+      Name: !Sub '${AWS::StackName}-NatEipAddress'
+
+  NatEipAllocationIdOut:
+    Description: >-
+      Allocation ID of the NAT Gateway's Elastic IP. Record this in aws/.env as
+      NAT_EIP_ALLOCATION_ID so the address survives 'make aws-teardown'.
+    Value: !If
+      - CreateNatEip
+      - !GetAtt NatEip.AllocationId
+      - !Ref NatEipAllocationId
+    Export:
+      Name: !Sub '${AWS::StackName}-NatEipAllocationId'
+
+  PrivateRouteTableId:
+    Description: >-
+      ID of the private route table (0.0.0.0/0 to the NAT Gateway). Exported for
+      troubleshooting and for the UI stack if it routes egress through this NAT.
+    Value: !Ref PrivateRouteTable
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateRouteTableId'

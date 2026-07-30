@@ -11,7 +11,7 @@
     "  - Only two Secrets Manager entries exist: grouper-password and jwt-secret.",
     "    Grouper URL/login are NON-secret and belong in environment[].",
     "  - No healthCheck: the health endpoint depends on on-prem Grouper WS,",
-    "    whose connectivity mechanism is pending infra confirmation.",
+    "    reached via the NAT Gateway, pending the UH firewall allow-list.",
     "  - SPRING_PROFILES_ACTIVE is aws-<APP_TIER>, i.e. aws-test or aws-prod."
   ],
   "family": "{AWS_OWNER}-{AWS_PROJECT_ID}-{AWS_ENV}",

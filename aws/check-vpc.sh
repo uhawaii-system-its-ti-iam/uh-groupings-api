@@ -4,22 +4,27 @@
 #
 # Checks (hard requirements — a failure blocks `make aws-setup`):
 #   1. VPC exists in the configured AWS_REGION.
-#   2. The subnet CIDR (SUBNET_CIDR from aws/.env) falls within the VPC's CIDR
-#      block and doesn't overlap an existing subnet.
-#   3. The VPC has a main route table (the S3 gateway endpoint attaches to it).
+#   2. The VPC has a main route table.
+#   3. That main route table routes 0.0.0.0/0 to an Internet Gateway. REQUIRED:
+#      the public subnet created by vpc.yml inherits the main route table, and
+#      that IGW route is what gives the NAT Gateway its path to the internet.
+#      Without it the NAT is useless and the API cannot reach Grouper WS.
+#   4. Both subnet CIDRs (PRIVATE_SUBNET_CIDR / PUBLIC_SUBNET_CIDR from
+#      aws/.env) fall within the VPC's CIDR block, do not overlap each other,
+#      and do not overlap an existing subnet.
 #
-# The deployment is SINGLE-SUBNET / SINGLE-AZ, so there is no multi-AZ
-# requirement to validate.
+# The deployment is SINGLE-AZ (both subnets in the region's first AZ, one task),
+# so there is no multi-AZ requirement to validate.
 #
 # Informational only (reported, never fails the run):
-#   - Internet Gateway attachment and a 0.0.0.0/0 default route.
-#     The API deployment creates NO load balancer and needs NO internet egress:
-#     tasks run with AssignPublicIp DISABLED and reach AWS services through the
-#     VPC endpoints created by aws/cloudformation/vpc.yml. An IGW is therefore
-#     irrelevant to this project, and its absence must not block setup.
-#   - A route toward the UH data center for Grouper WS. Required eventually, but
-#     the mechanism is pending infra-team confirmation (see aws/AGENTS.md), so
-#     there is nothing definitive to assert yet.
+#   - Availability Zone count and which AZ the subnets will land in.
+#   - Whether a NAT Gateway already exists in the VPC.
+#
+# Note on Grouper connectivity: the API reaches Grouper WS over the PUBLIC
+# INTERNET via the NAT Gateway (Grouper is behind an F5 with a public IP). There
+# is no VPN, Transit Gateway, or Direct Connect to check for. What this script
+# cannot verify is whether the UH Palo Alto firewall allow-lists the NAT
+# Gateway's Elastic IP — that is a manual request to the network team.
 
 # Note: intentionally NOT using `set -e`. Each check manages its own
 # pass/fail and the script reports a summary + exit code at the end; letting
@@ -59,12 +64,14 @@ if [[ -z "${VPC_ID}" ]]; then
     exit 1
 fi
 
-# The subnet CIDR comes from aws/.env (kept in sync with the vpc.yml parameter
-# default) — not hardcoded here.
-SUBNET_CIDR="${SUBNET_CIDR:-}"
-if [[ -z "${SUBNET_CIDR}" ]]; then
-    printf 'Error: SUBNET_CIDR must be set in aws/.env\n' >&2
-    printf '  (it must match the SubnetCidr default in aws/cloudformation/vpc.yml)\n' >&2
+# The subnet CIDRs come from aws/.env (kept in sync with the vpc.yml parameter
+# defaults) — not hardcoded here.
+PRIVATE_SUBNET_CIDR="${PRIVATE_SUBNET_CIDR:-}"
+PUBLIC_SUBNET_CIDR="${PUBLIC_SUBNET_CIDR:-}"
+if [[ -z "${PRIVATE_SUBNET_CIDR}" || -z "${PUBLIC_SUBNET_CIDR}" ]]; then
+    printf 'Error: PRIVATE_SUBNET_CIDR and PUBLIC_SUBNET_CIDR must be set in aws/.env\n' >&2
+    printf '  (they must match the PrivateSubnetCidr/PublicSubnetCidr defaults in\n' >&2
+    printf '   aws/cloudformation/vpc.yml)\n' >&2
     exit 1
 fi
 
@@ -92,8 +99,7 @@ fi
 VPC_CIDR="$(printf '%s' "${VPC_INFO}" | python3 -c "import sys,json; print(json.load(sys.stdin)['CidrBlock'])")"
 pass "VPC exists (CIDR: ${VPC_CIDR})"
 
-# 2. Main route table must exist — the S3 gateway endpoint in vpc.yml attaches
-#    to it, so this one IS a hard requirement.
+# 2. Main route table must exist — the public subnet inherits it.
 MAIN_RT="$(aws ec2 describe-route-tables \
   --filters "Name=vpc-id,Values=${VPC_ID}" "Name=association.main,Values=true" \
   --query 'RouteTables[0].RouteTableId' \
@@ -101,20 +107,16 @@ MAIN_RT="$(aws ec2 describe-route-tables \
   --region "${AWS_REGION}")"
 
 if [[ -z "${MAIN_RT}" || "${MAIN_RT}" == "None" ]]; then
-    fail "No main route table found for ${VPC_ID} (required by the S3 gateway endpoint)"
+    fail "No main route table found for ${VPC_ID}"
 else
     pass "Main route table found (${MAIN_RT})"
-    if [[ -n "${MAIN_ROUTE_TABLE_ID:-}" && "${MAIN_ROUTE_TABLE_ID}" != "${MAIN_RT}" ]]; then
-        fail "MAIN_ROUTE_TABLE_ID in aws/.env is ${MAIN_ROUTE_TABLE_ID}, but the VPC's main route table is ${MAIN_RT}"
-    elif [[ -n "${MAIN_ROUTE_TABLE_ID:-}" ]]; then
-        pass "MAIN_ROUTE_TABLE_ID in aws/.env matches the VPC's main route table"
-    fi
 fi
 
-# 3. Internet Gateway / default route — INFORMATIONAL ONLY.
-#    The API has no load balancer and no internet egress requirement; AWS access
-#    is via VPC endpoints. Reported so the VPC's posture is visible, but never a
-#    failure. See the header comment.
+# 3. Internet Gateway + default route — HARD REQUIREMENT.
+#    The public subnet created by vpc.yml inherits the main route table. That
+#    table's 0.0.0.0/0 → IGW route is what gives the NAT Gateway its path out.
+#    Without it, the NAT Gateway is provisioned but useless and the API cannot
+#    reach Grouper WS.
 IGW_ID="$(aws ec2 describe-internet-gateways \
   --filters "Name=attachment.vpc-id,Values=${VPC_ID}" \
   --query 'InternetGateways[0].InternetGatewayId' \
@@ -122,9 +124,9 @@ IGW_ID="$(aws ec2 describe-internet-gateways \
   --region "${AWS_REGION}")"
 
 if [[ -z "${IGW_ID}" || "${IGW_ID}" == "None" ]]; then
-    info "No Internet Gateway attached — fine, the API needs none (no ALB, no NAT)"
+    fail "No Internet Gateway attached to ${VPC_ID} — required for NAT Gateway egress"
 else
-    info "Internet Gateway attached (${IGW_ID}) — not used by the API deployment"
+    pass "Internet Gateway attached (${IGW_ID})"
 fi
 
 if [[ -n "${MAIN_RT}" && "${MAIN_RT}" != "None" ]]; then
@@ -134,36 +136,32 @@ if [[ -n "${MAIN_RT}" && "${MAIN_RT}" != "None" ]]; then
       --output text \
       --region "${AWS_REGION}")"
 
-    if [[ -z "${DEFAULT_ROUTE}" || "${DEFAULT_ROUTE}" == "None" ]]; then
-        info "Main route table has no 0.0.0.0/0 route — fine, none is required"
+    if [[ "${DEFAULT_ROUTE}" == igw-* ]]; then
+        pass "Main route table routes 0.0.0.0/0 → ${DEFAULT_ROUTE} (NAT egress path)"
+    elif [[ -z "${DEFAULT_ROUTE}" || "${DEFAULT_ROUTE}" == "None" ]]; then
+        fail "Main route table (${MAIN_RT}) has no 0.0.0.0/0 route — NAT Gateway would have no path out"
     else
-        info "Main route table routes 0.0.0.0/0 → ${DEFAULT_ROUTE} (unused by API tasks)"
+        fail "Main route table (${MAIN_RT}) routes 0.0.0.0/0 → ${DEFAULT_ROUTE} (not an IGW)"
     fi
 fi
 
-# 3b. Data-center path for Grouper WS — INFORMATIONAL. The mechanism is pending
-#     infra confirmation, so only report what is present today.
-if [[ -n "${MAIN_RT}" && "${MAIN_RT}" != "None" ]]; then
-    DC_ROUTES="$(aws ec2 describe-route-tables \
-      --route-table-ids "${MAIN_RT}" \
-      --query "RouteTables[0].Routes[?GatewayId!=null && starts_with(GatewayId, 'vgw-')].DestinationCidrBlock" \
-      --output text \
-      --region "${AWS_REGION}" 2>/dev/null)"
-    TGW_ROUTES="$(aws ec2 describe-route-tables \
-      --route-table-ids "${MAIN_RT}" \
-      --query "RouteTables[0].Routes[?TransitGatewayId!=null].DestinationCidrBlock" \
-      --output text \
-      --region "${AWS_REGION}" 2>/dev/null)"
+# 3b. Existing NAT Gateway — INFORMATIONAL. Reported so a leftover NAT from a
+#     prior run (which still bills ~$32/month) does not go unnoticed.
+EXISTING_NAT="$(aws ec2 describe-nat-gateways \
+  --filter "Name=vpc-id,Values=${VPC_ID}" "Name=state,Values=available,pending" \
+  --query 'NatGateways[].NatGatewayId' \
+  --output text \
+  --region "${AWS_REGION}" 2>/dev/null)"
 
-    if [[ -n "${DC_ROUTES}" && "${DC_ROUTES}" != "None" ]]; then
-        info "Virtual private gateway route(s) present: ${DC_ROUTES}"
-    elif [[ -n "${TGW_ROUTES}" && "${TGW_ROUTES}" != "None" ]]; then
-        info "Transit gateway route(s) present: ${TGW_ROUTES}"
-    else
-        info "No VGW/TGW route found — Grouper WS will be unreachable until the"
-        info "  data-center path is provisioned (mechanism pending infra team)"
-    fi
+if [[ -n "${EXISTING_NAT}" && "${EXISTING_NAT}" != "None" ]]; then
+    info "NAT Gateway(s) already present in this VPC: ${EXISTING_NAT}"
+else
+    info "No NAT Gateway yet — 'make aws-setup' creates one"
 fi
+
+# 3c. The UH firewall allow-list cannot be verified from here. Remind, don't fail.
+info "Reminder: the NAT Gateway's Elastic IP must be allow-listed on the UH"
+info "  Palo Alto firewall before Grouper WS calls will succeed"
 
 # 4. The subnet CIDR (from aws/.env) is usable: inside the VPC's CIDR block(s)
 #    and not overlapping any existing subnet. This is the exact condition that,
@@ -186,26 +184,37 @@ EXISTING_CIDRS="$(aws ec2 describe-subnets \
   --region "${AWS_REGION}")"
 
 CIDR_REPORT="$(VPC_CIDRS="${VPC_CIDRS}" EXISTING_CIDRS="${EXISTING_CIDRS}" \
-  CANDIDATE="${SUBNET_CIDR}" python3 - <<'PY'
+  CAND_PRIVATE="${PRIVATE_SUBNET_CIDR}" CAND_PUBLIC="${PUBLIC_SUBNET_CIDR}" python3 - <<'PY'
 import os, ipaddress
 
 vpc = [ipaddress.ip_network(c) for c in os.environ.get("VPC_CIDRS", "").split()]
 existing = [ipaddress.ip_network(c) for c in os.environ.get("EXISTING_CIDRS", "").split()]
 
-raw = os.environ["CANDIDATE"]
-try:
-    net = ipaddress.ip_network(raw)
-except ValueError as e:
-    print(f"FAIL|({raw}): invalid CIDR ({e})")
-else:
+parsed = {}
+for label, key in (("private", "CAND_PRIVATE"), ("public (NAT)", "CAND_PUBLIC")):
+    raw = os.environ[key]
+    try:
+        net = ipaddress.ip_network(raw)
+    except ValueError as e:
+        print(f"FAIL|{label} ({raw}): invalid CIDR ({e})")
+        continue
+    parsed[label] = net
     if not any(net.subnet_of(v) for v in vpc):
-        print(f"FAIL|({raw}): not within VPC CIDR [{', '.join(map(str, vpc))}]")
+        print(f"FAIL|{label} ({raw}): not within VPC CIDR [{', '.join(map(str, vpc))}]")
+        continue
+    clash = [str(s) for s in existing if net.overlaps(s)]
+    if clash:
+        print(f"FAIL|{label} ({raw}): overlaps existing subnet(s) {', '.join(clash)}")
+        continue
+    print(f"OK|{label} ({raw}): within VPC and unused")
+
+# The two new subnets must not collide with each other.
+if len(parsed) == 2:
+    a, b = parsed["private"], parsed["public (NAT)"]
+    if a.overlaps(b):
+        print(f"FAIL|private ({a}) overlaps public ({b}) — they must be distinct")
     else:
-        clash = [str(s) for s in existing if net.overlaps(s)]
-        if clash:
-            print(f"FAIL|({raw}): overlaps existing subnet(s) {', '.join(clash)}")
-        else:
-            print(f"OK|({raw}): within VPC and unused")
+        print(f"OK|private and public CIDRs do not overlap each other")
 PY
 )"
 
@@ -223,7 +232,7 @@ done <<< "${CIDR_REPORT}"
 if aws cloudformation describe-stacks \
      --stack-name "${AWS_PROJECT_ID:-groupings-api}-vpc-${AWS_ENV:-sandbx}" \
      --region "${AWS_REGION}" >/dev/null 2>&1; then
-    info "The vpc stack already exists — a CIDR 'overlaps' failure above is likely its own subnet"
+    info "The vpc stack already exists — a CIDR 'overlaps' failure above is likely its own subnets"
 fi
 
 if [[ -n "${EXISTING_CIDRS}" ]]; then

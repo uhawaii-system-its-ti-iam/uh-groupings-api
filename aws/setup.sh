@@ -48,6 +48,8 @@ ECR_REPOSITORY_URI=""
 GROUPER_PASSWORD=""
 # Populated from the vpc stack outputs by create_vpc_stack().
 SUBNET_ID=""
+NAT_EIP_ADDRESS=""
+NAT_EIP_ALLOCATION_ID_OUT=""
 # Populated from Secrets Manager by configure_secrets(); passed to the ECS stack.
 GROUPER_PASSWORD_SECRET_ARN=""
 JWT_SECRET_ARN=""
@@ -86,6 +88,10 @@ apply_defaults() {
     # default in ecs-service.yml. Multi-AZ / higher counts are a prod concern.
     ECS_TASK_COUNT="${ECS_TASK_COUNT:-1}"
     VPC_ID="${VPC_ID:-}"
+    PRIVATE_SUBNET_CIDR="${PRIVATE_SUBNET_CIDR:-172.18.10.16/28}"
+    PUBLIC_SUBNET_CIDR="${PUBLIC_SUBNET_CIDR:-172.18.10.32/28}"
+    # Blank means "let CloudFormation allocate one". See report_nat_eip().
+    NAT_EIP_ALLOCATION_ID="${NAT_EIP_ALLOCATION_ID:-}"
     APP_TIER="${APP_TIER:-test}"
     # NOTE: API_HOSTNAME / API_CERTIFICATE_ARN / API_HOSTED_ZONE_ID are
     # deprecated and deliberately not read. The API is private (ECS Service
@@ -139,7 +145,13 @@ validate_network_configuration() {
     fi
 
     log "  VPC ID:     ${VPC_ID}"
-    log "  Subnet:     created by the vpc stack (aws/cloudformation/vpc.yml), single-AZ"
+    log "  Private:    ${PRIVATE_SUBNET_CIDR} (API task)"
+    log "  Public:     ${PUBLIC_SUBNET_CIDR} (NAT Gateway only)"
+    if [[ -n "${NAT_EIP_ALLOCATION_ID}" ]]; then
+        log "  NAT EIP:    ${NAT_EIP_ALLOCATION_ID} (pre-existing, survives teardown)"
+    else
+        log "  NAT EIP:    will be allocated (record the id in aws/.env afterwards)"
+    fi
     log "✓ Network configuration validated"
     log ""
 }
@@ -293,31 +305,84 @@ report_stack_failure() {
 }
 
 create_vpc_stack() {
-    log "Step 1: Creating VPC networking (subnet + endpoints)..."
+    log "Step 1: Creating VPC networking (subnets, NAT Gateway, routes)..."
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
+
+    # Build the parameter list as an array. NatEipAllocationId is included ONLY
+    # when set: passing an empty value through --parameter-overrides is
+    # unreliable, so omitting it lets the template's own '' default apply, which
+    # is what selects the CreateNatEip condition.
+    local vpc_params=(
+        "Owner=${AWS_OWNER}"
+        "Project=${AWS_PROJECT_ID}"
+        "Environment=${AWS_ENV}"
+        "VpcId=${VPC_ID}"
+        "PrivateSubnetCidr=${PRIVATE_SUBNET_CIDR}"
+        "PublicSubnetCidr=${PUBLIC_SUBNET_CIDR}"
+    )
+    if [[ -n "${NAT_EIP_ALLOCATION_ID}" ]]; then
+        vpc_params+=("NatEipAllocationId=${NAT_EIP_ALLOCATION_ID}")
+    fi
+
     if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
       --template-file "${VPC_TEMPLATE_PATH}" \
-      --parameter-overrides \
-        "Owner=${AWS_OWNER}" \
-        "Project=${AWS_PROJECT_ID}" \
-        "Environment=${AWS_ENV}" \
-        "VpcId=${VPC_ID}" \
-        "MainRouteTableId=${MAIN_ROUTE_TABLE_ID}" \
+      --parameter-overrides "${vpc_params[@]}" \
       --no-fail-on-empty-changeset \
       --region "${AWS_REGION}"; then
         report_stack_failure "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
         exit 1
     fi
 
-    SUBNET_ID="$(aws cloudformation describe-stacks \
-      --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
-      --query 'Stacks[0].Outputs[?OutputKey==`SubnetId`].OutputValue' \
-      --output text \
-      --region "${AWS_REGION}")"
+    SUBNET_ID="$(vpc_stack_output 'PrivateSubnetId')"
+    NAT_EIP_ADDRESS="$(vpc_stack_output 'NatEipAddress')"
+    NAT_EIP_ALLOCATION_ID_OUT="$(vpc_stack_output 'NatEipAllocationIdOut')"
 
     log "✓ VPC networking created"
-    log "  Subnet ID:  ${SUBNET_ID}"
+    log "  Private subnet: ${SUBNET_ID} (API task)"
+    log "  NAT Gateway:    egress for Grouper access"
+    log ""
+
+    report_nat_eip
+}
+
+# Read a named output from the vpc stack.
+vpc_stack_output() {
+    aws cloudformation describe-stacks \
+      --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
+      --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" \
+      --output text \
+      --region "${AWS_REGION}"
+}
+
+# The NAT Gateway's Elastic IP is the source address the UH Palo Alto firewall
+# allow-lists for Grouper WS. If this script allocated it (because
+# NAT_EIP_ALLOCATION_ID was blank), say so loudly: the operator must record the
+# allocation id in aws/.env, or the next teardown will release the address and
+# silently break Grouper access.
+report_nat_eip() {
+    if [[ -n "${NAT_EIP_ALLOCATION_ID}" ]]; then
+        log "  NAT Elastic IP: using pre-existing ${NAT_EIP_ALLOCATION_ID} (from aws/.env)"
+        log "  This address is stable across teardown. Nothing to do."
+        log ""
+        return 0
+    fi
+
+    log "  ============================================================"
+    log "  ACTION REQUIRED - NAT Elastic IP was allocated by this run"
+    log "  ============================================================"
+    log "  Public IP:      ${NAT_EIP_ADDRESS}"
+    log "  Allocation ID:  ${NAT_EIP_ALLOCATION_ID_OUT}"
+    log ""
+    log "  1. Record the allocation id in aws/.env:"
+    log "       NAT_EIP_ALLOCATION_ID=${NAT_EIP_ALLOCATION_ID_OUT}"
+    log "     Until you do, 'make aws-teardown' RELEASES this address and the"
+    log "     next setup gets a different one."
+    log ""
+    log "  2. Ask the network team to allow-list ${NAT_EIP_ADDRESS} on the UH"
+    log "     Palo Alto firewall for Grouper WS (grouper-test) on HTTPS 443."
+    log "     Grouper calls fail until that rule exists."
+    log "  ============================================================"
     log ""
 }
 
@@ -474,7 +539,8 @@ print_summary() {
     log "=== Setup Complete ==="
     log ""
     log "Resources created:"
-    log "  - VPC Subnet:     ${SUBNET_ID} (in ${VPC_ID}, single-AZ)"
+    log "  - Private subnet: ${SUBNET_ID} (in ${VPC_ID}, single-AZ)"
+    log "  - NAT Gateway:    outbound path to Grouper WS"
     log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
     log "  - ECS Cluster:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
     log "  - ECS Service:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
@@ -491,8 +557,8 @@ print_summary() {
     log "Check with 'make aws-service-events' and 'make aws-logs'."
     log ""
     log "NOTE: the API health endpoint depends on on-prem Grouper WS. Grouper is a"
-    log "live, required dependency, but the data-center connectivity mechanism is"
-    log "still pending infra-team confirmation, so Grouper calls will fail for now."
+    log "live, required dependency reached over the public internet. Until the UH"
+    log "firewall allow-lists the NAT Gateway's Elastic IP, Grouper calls will fail."
     log "The container health check is intentionally disabled so the task is not"
     log "restart-looped. See aws/AGENTS.md, 'Grouper WS connectivity'."
     log ""

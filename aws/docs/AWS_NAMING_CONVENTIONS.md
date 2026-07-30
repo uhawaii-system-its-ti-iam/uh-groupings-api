@@ -67,8 +67,11 @@ mhodges-groupings-api-sandbx                     (Service Connect namespace)
 mhodges-groupings-api-sandbx-cluster             (ECS cluster)
 mhodges-groupings-api-sandbx-service             (ECS service)
 mhodges-groupings-api-sandbx-sg-api-backend      (API task security group)
-mhodges-groupings-api-sandbx-sg-vpce             (VPC endpoint security group)
-mhodges-groupings-api-sandbx-subnet              (private subnet, single AZ)
+mhodges-groupings-api-sandbx-subnet-private      (API task subnet)
+mhodges-groupings-api-sandbx-subnet-public-nat   (NAT Gateway subnet)
+mhodges-groupings-api-sandbx-rtb-private         (private route table)
+mhodges-groupings-api-sandbx-nat                 (NAT Gateway)
+mhodges-groupings-api-sandbx-eip-nat             (NAT Elastic IP)
 mhodges-groupings-api-sandbx-role-ecs-execution
 mhodges-groupings-api-sandbx-role-ecs-task
 /ecs/mhodges-groupings-api-sandbx                (CloudWatch log group)
@@ -211,8 +214,12 @@ To deploy under a different owner or to a different environment, edit `aws/.env`
 | ECS task definition family  | `${Owner}-${Project}-${Environment}`                    |
 | Container name              | `${Owner}-${Project}-${Environment}`                    |
 | API task security group     | `${Owner}-${Project}-${Environment}-sg-api-backend`     |
-| VPC endpoint security group | `${Owner}-${Project}-${Environment}-sg-vpce`            |
-| Private subnet              | `${Owner}-${Project}-${Environment}-subnet`             |
+
+| Private subnet (API task)   | `${Owner}-${Project}-${Environment}-subnet-private`     |
+| Public subnet (NAT only)    | `${Owner}-${Project}-${Environment}-subnet-public-nat`  |
+| Private route table         | `${Owner}-${Project}-${Environment}-rtb-private`        |
+| NAT Gateway                 | `${Owner}-${Project}-${Environment}-nat`                |
+| NAT Elastic IP              | `${Owner}-${Project}-${Environment}-eip-nat`            |
 | IAM execution role          | `${Owner}-${Project}-${Environment}-role-ecs-execution` |
 | IAM task role               | `${Owner}-${Project}-${Environment}-role-ecs-task`      |
 | CloudWatch log group        | `/ecs/${Owner}-${Project}-${Environment}`               |

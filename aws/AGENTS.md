@@ -6,13 +6,18 @@
 > two CloudFormation stacks compose into one running system. The visual source
 > of record is [`docs/aws-architecture.mmd`](docs/aws-architecture.mmd);
 > narrative architecture lives in [`docs/AWS_ARCHITECTURE.md`](docs/AWS_ARCHITECTURE.md).
+>
+> **Scope:** this branch describes a single, simple **sandbox/development**
+> environment — one AZ, one task, no load balancer. Production is a separate
+> future branch and will make different tradeoffs.
 
 ## The one-sentence rule
 
 **The API repo (`uh-groupings-api`) deploys everything the API application needs
-to run as a *private* service; the UI repo (`uh-groupings-ui`) deploys the
-public-facing UI and the edge that fronts it. Neither repo creates the VPC or
-the data-center link.** The API is deployed **first** and must stand alone.
+to run as a *private* service and to reach Grouper WS; the UI repo
+(`uh-groupings-ui`) deploys the public-facing UI and the edge that fronts it.
+Neither repo creates the VPC or its Internet Gateway.** The API is deployed
+**first** and must stand alone.
 
 ## Edge model: Cloudflare Tunnel (no public load balancer)
 
@@ -29,11 +34,12 @@ provisions one**. (This supersedes the earlier internet-facing-ALB design.)
 |---|---|---|---|
 | VPC | VPC (`VPC_ID` in `aws/.env`) | — | — |
 | Internet edge | — | — | Cloudflare (DNS/TLS/WAF/DDoS) + Cloudflare Tunnel (`cloudflared`) |
-| Data-center link | Connectivity to on-prem Grouper WS — *mechanism pending infra confirmation* (see below) | — | — |
-| Subnets | — | **One** private subnet for the **API** task + the VPC endpoints (`SUBNET_CIDR` in `.env`) | **All** UI subnets, including outbound egress for the tunnel |
+| Internet Gateway | Pre-existing IGW + the main route table's `0.0.0.0/0` route | — | — |
+| Grouper connectivity | — | NAT Gateway + Elastic IP (public internet; no VPN/TGW/DX) | — |
+| Subnets | — | **One private** subnet (API task) + **one public** subnet (NAT Gateway only), both in one AZ | **All** UI subnets, including outbound egress for the tunnel |
 | Load balancing | — | **None** | **None** (Cloudflare Tunnel) |
 | Compute | — | ECS cluster, Service Connect namespace, **API** service + task def | **UI** service + task def (joins the API's namespace) + `cloudflared` |
-| Security groups | — | `sg-api-backend` (API tasks), `sg-vpce` (endpoints) | `sg-ui-apps` **and** the ingress rule that lets `sg-ui-apps` reach `sg-api-backend:8080` |
+| Security groups | — | `sg-api-backend` (API tasks) | `sg-ui-apps` **and** the ingress rule that lets `sg-ui-apps` reach `sg-api-backend:8080` |
 | Supporting | — | ECR repo, Secrets Manager secrets, IAM roles, CloudWatch logs, CI/CD pipeline | UI-side supporting resources + Cloudflare config (external to AWS) |
 
 **The API repo creates no UI-facing AWS elements** — no shared or public
@@ -45,20 +51,33 @@ and **joining** the API's Service Connect namespace.
 
 Mapped to the templates in `aws/cloudformation/`:
 
-- **`vpc.yml`** — Inside the pre-existing VPC: **one** subnet (CIDR from
-  `SUBNET_CIDR` in `.env`) that is **private by posture**
-  (`MapPublicIpOnLaunch: false`), plus the VPC endpoints that let the task reach
-  AWS services with **no public IP and no NAT**: `ecr.api`, `ecr.dkr`,
-  `secretsmanager`, `logs` (interface) and `s3` (gateway, on the main route
-  table), fronted by the `sg-vpce` endpoint security group. Exports the subnet
-  id. There are **no public subnets and no ALB**.
-  - **SINGLE SUBNET / SINGLE AZ is deliberate.** The API runs one task
-    (`DesiredCount: 1`), so a second subnet would sit empty and misrepresent the
-    deployment as multi-AZ. Do not add one speculatively. Enabling real multi-AZ
-    is a coordinated change: add a second subnet resource in a different AZ, add
-    the `SubnetId` output to a comma-joined list, widen `sg-vpce` ingress, decide
-    whether the interface endpoints need an ENI in both subnets, and raise
-    `DesiredCount`.
+- **`vpc.yml`** — Inside the pre-existing VPC, in **one AZ**:
+  - a **private subnet** (`PRIVATE_SUBNET_CIDR`) holding the API task ENI,
+    `MapPublicIpOnLaunch: false`, with its own route table sending `0.0.0.0/0`
+    to the NAT Gateway;
+  - a **public subnet** (`PUBLIC_SUBNET_CIDR`) whose **only** occupant is the
+    NAT Gateway. It has no route table of its own — it inherits the VPC's main
+    route table, which must already route `0.0.0.0/0` to an Internet Gateway.
+    That keeps this stack from creating or owning an IGW, which belongs to the
+    VPC team;
+  - a **NAT Gateway + Elastic IP**. The EIP is the fixed source address the UH
+    Palo Alto firewall allow-lists so the API can reach Grouper WS;
+  - the **S3 gateway endpoint** (free), attached to the **private** route table
+    so ECR image-layer traffic bypasses the NAT's per-GB charge.
+
+  There is **no ALB and no inbound path of any kind**.
+
+  - **The four interface endpoints were removed deliberately.** `ecr.api`,
+    `ecr.dkr`, `secretsmanager`, and `logs` (and `sg-vpce`) are gone. Once a NAT
+    Gateway exists for Grouper, they were a redundant second path costing
+    ~$29/month; those API calls now egress through the NAT. Re-add them only if
+    a future branch removes internet egress.
+  - **SINGLE AZ is deliberate.** One task, so a second AZ would add cost and
+    imply HA that does not exist. Enabling real multi-AZ is a coordinated
+    change: add a second private subnet in another AZ, make `PrivateSubnetId` a
+    comma-joined list, add a NAT Gateway per AZ (or accept cross-AZ NAT
+    traffic), and raise `DesiredCount`. Raising `DesiredCount` alone buys
+    nothing.
 - **`ecr-repository.yml`** — the container image registry.
 - **`ecs-service.yml`** — ECS Fargate cluster, the Service Connect namespace
   (exported), the **API** service + task definition (container port **8080**,
@@ -98,8 +117,9 @@ created by `setup.sh` and injected into the task via `secrets[]`.
   | `ServiceConnectNamespaceArn` | ecs | Namespace its own service joins |
   | `ServiceConnectDnsName` | ecs | Name it calls the API by (`groupings-api:8080`) |
   | `ClusterName` / `ServiceName` | ecs | Reference / operational lookups |
-  | `SubnetId` | vpc | Reference (the UI provisions its own subnets) |
-  | `EndpointSecurityGroupId` | vpc | Troubleshooting visibility only |
+  | `PrivateSubnetId` | vpc | Reference (the UI provisions its own subnets) |
+  | `NatGatewayId` / `PrivateRouteTableId` | vpc | If the UI routes its tunnel egress through the API's NAT |
+  | `NatEipAddress` / `NatEipAllocationIdOut` | vpc | The address to give the network team for the firewall allow-list |
 - The UI stack **only imports and adds**. It must **never mutate API-owned
   subnets, route tables, or security groups** — its sole reach into API
   territory is *adding* one ingress rule to `sg-api-backend` and *joining* the
@@ -108,38 +128,55 @@ created by `setup.sh` and injected into the task via `secrets[]`.
   talks only to Cloudflare/UI), the SG source restriction is genuinely
   enforceable and replaces the need for an API-side load balancer.
 
-## Grouper WS connectivity (pending infrastructure-team confirmation)
+## Grouper WS connectivity (resolved — public internet via NAT Gateway)
 
-Grouper WS in the UH data center is a **live, required dependency** of the API
-(no longer deferred). The API task reaches it over **HTTPS** (currently
-`128.171.94.186:443`). **How VPC traffic reaches the data center is not yet
-confirmed**, so the diagram marks this path as *pending infra*. Open questions
-for the infrastructure team:
+Grouper WS is a **live, required dependency**, reached over the **public
+internet**. Grouper sits behind an F5 with a public IP, so there is **no VPN, no
+Transit Gateway, and no Direct Connect** anywhere in this design. Earlier
+revisions of this document treated the mechanism as an open question; it is
+settled.
 
-1. **Mechanism** — VGW + IPsec site-to-site VPN, Transit Gateway, or Direct
-   Connect? Does the link already exist, or must it be provisioned?
-2. **Route + ownership** — which destination CIDR(s) route to the gateway (e.g.
-   `128.171.0.0/16`), and who adds the route to which route table?
-3. **Endpoint** — stable IP `128.171.94.186:443`, or a DNS name / VIP? Any
-   failover target?
-4. **DNS** — will the Grouper hostname resolve from inside the VPC, or must we
-   connect by IP?
-5. **On-prem firewall** — which source addresses must be allow-listed (our
-   subnet CIDR `172.18.10.16/28`, or a translated address)?
-6. **Client auth** — client certificate / mTLS or IP allow-listing required in
-   addition to the service-account credentials? Any CA trust bundle to ship?
-7. **HA / SLA** — is the link redundant across AZs; expected latency/bandwidth?
+**The path:** API task (private subnet, no public IP) → private route table
+`0.0.0.0/0` → NAT Gateway (public subnet) → Internet Gateway → `HTTPS 443` →
+`grouper-test.its.hawaii.edu` (F5 public IP).
 
-Until these are answered, the data-center path stays marked "pending infra" and
-the container health check (`/uhgroupingsapi/actuator/health`) remains disabled.
+**Access control is a firewall allow-list keyed on source IP.** Two distinct
+sources need entries, for two different reasons:
+
+| Source the firewall sees | Covers | Status |
+|---|---|---|
+| The NAT Gateway's **Elastic IP** | The deployed sandbox task | **Must be requested** per environment |
+| Campus network / UH VPN egress ranges | Developers running the API locally | Already in place |
+
+Consequences that shape the templates:
+
+- **The NAT Gateway's EIP must be stable.** `NAT_EIP_ALLOCATION_ID` in
+  `aws/.env` makes the EIP pre-existing so `make aws-teardown` leaves it alone.
+  Left blank, CloudFormation owns the EIP, teardown **releases** it, and the next
+  `make aws-setup` gets a different address — silently invalidating the firewall
+  rule. Since teardown/re-setup is the normal loop here, treat recording that
+  allocation id as part of first-time setup. `setup.sh` prints it and says so.
+- **An Internet Gateway is now a hard requirement** of the VPC, because the
+  public subnet inherits the main route table and the NAT depends on its
+  `0.0.0.0/0 → IGW` route. `check-vpc.sh` fails when it is missing.
+- **The container health check stays disabled** until the firewall rule exists
+  and Grouper calls actually succeed. See the note in `ecs-service.yml`.
+
+**Local development does not involve AWS at all.** A developer running Swagger
+against `docker-compose` on `localhost:8081` calls Grouper directly from their
+laptop. The NAT EIP is irrelevant to that path, and nothing in AWS needs to be
+configured for local Swagger to work. Do not add AWS resources to serve local
+development.
 
 ## Target traffic path
 
 ```
-Browser → Cloudflare (TLS/WAF) → Cloudflare Tunnel → UI task
-        → Service Connect (HTTP/TLS 8080) → API task
-        → AWS services via VPC endpoints
-        → on-prem Grouper WS via the data-center link (mechanism pending infra)
+Browser → Cloudflare (TLS/WAF, UH-network restricted) → Cloudflare Tunnel → UI task
+        → Service Connect (8080) → API task
+        → NAT Gateway → Internet Gateway → Grouper WS (HTTPS 443, F5 public IP)
+        → AWS APIs also via the NAT; S3/ECR layers via the S3 gateway endpoint
+
+Developer laptop → local docker-compose API → Grouper WS directly (bypasses AWS)
 ```
 
 ## Verification scope: the API is not exercised until the UI is deployed
@@ -201,21 +238,36 @@ namespace join, not at the API stack.
   one AZ** with **`DesiredCount: 1`**. Multi-AZ is a prod concern for both repos
   and requires adding a subnet, not just raising the task count (see `vpc.yml`
   above).
-- **More CIDR space** — revisit for prod; today's single `/28` (11 usable IPs
-  after AWS reserves 5) holds the task ENI plus four endpoint ENIs, which is
-  adequate for one task but leaves little headroom.
+- **More CIDR space** — revisit for prod. Each `/28` yields 11 usable addresses
+  after AWS reserves 5. The private subnet now holds only the task ENI (the four
+  endpoint ENIs are gone), and the public subnet holds only the NAT Gateway, so
+  both are comfortable for one task — but neither leaves room for growth.
+- **Restricting egress.** The NAT Gateway gives the task unrestricted outbound
+  internet access, where previously it had none. Acceptable for a sandbox;
+  a prod branch may want egress filtering or a proxy.
 
-*(On-prem Grouper connectivity is no longer in this list — it is a live
-dependency; only the connectivity **mechanism** is pending, as above.)*
+*(On-prem Grouper connectivity is no longer in this list, and no longer pending:
+it is a live dependency reached over the public internet via the NAT Gateway.)*
 
 ## Template status
 
-The API templates match this target: `ecs-service.yml` provisions **no ALB**
-(Service Connect + `sg-api-backend` only) and exports the cross-stack interface;
-`vpc.yml` creates only private-posture subnets + VPC endpoints. `aws/.env`
-retains `API_HOSTNAME`, `API_CERTIFICATE_ARN`, and `API_HOSTED_ZONE_ID` as
-blank/deprecated keys that `setup.sh` no longer reads, and `check-vpc.sh` treats
-Internet Gateway presence as informational rather than required.
+The API templates match this target:
+
+- `vpc.yml` — one private subnet + one public subnet (NAT only) in one AZ, a NAT
+  Gateway with an Elastic IP, a private route table, and the free S3 gateway
+  endpoint. The four interface endpoints and `sg-vpce` were removed.
+- `ecs-service.yml` — **no ALB** (Service Connect + `sg-api-backend` only),
+  exports the cross-stack interface, container health check disabled.
+- `check-vpc.sh` — the Internet Gateway and its `0.0.0.0/0` route are **hard
+  requirements** (the NAT depends on them). AZ count and existing NAT Gateways
+  are informational.
+- `aws/.env` — carries `PRIVATE_SUBNET_CIDR`, `PUBLIC_SUBNET_CIDR`, and
+  `NAT_EIP_ALLOCATION_ID`. It retains `API_HOSTNAME`, `API_CERTIFICATE_ARN`, and
+  `API_HOSTED_ZONE_ID` as blank/deprecated keys that `setup.sh` never reads —
+  the API has no public endpoint, hostname, or certificate. An ACM certificate
+  was considered and rejected: nothing in this architecture can terminate TLS
+  for it (ACM attaches only to an ALB/NLB/CloudFront/API Gateway, and ECS
+  Service Connect TLS requires AWS Private CA, not a public ACM cert).
 
 There is deliberately **no `appspec.yml`**: CodeDeploy blue/green for ECS
 requires a load balancer with two target groups, so it cannot apply to this
@@ -304,10 +356,11 @@ communicate, so get it right:
 
 - **The Groupings API project provisions only what the API application itself
   needs** — to run its container and to reach Grouper WS. That is: its private
-  subnets, its VPC endpoints, the ECS cluster and Service Connect namespace, the
-  API task definition and service, `sg-api-backend` and `sg-vpce`, and the
-  supporting ECR / Secrets Manager / IAM / CloudWatch / CI-CD resources. Nothing
-  else.
+  subnet and route table, the public subnet plus NAT Gateway and Elastic IP that
+  carry it to Grouper, the S3 gateway endpoint, the ECS cluster and Service
+  Connect namespace, the API task definition and service, `sg-api-backend`, and
+  the supporting ECR / Secrets Manager / IAM / CloudWatch / CI-CD resources.
+  Nothing else.
 - **The Groupings UI project provisions everything else**, including the AWS
   components that let the UI reach the API. The API repo creates
   `sg-api-backend` with **no ingress rule at all**; the UI repo adds the
@@ -333,8 +386,9 @@ communicate, so get it right:
   assertion the reader has to guess at.
 
 - **Solid arrows for live paths, dotted (`-.->`) for pending or
-  reference-only** relationships — the data-center link to Grouper and the UI's
-  cross-stack references are dotted for exactly this reason.
+  reference-only** relationships — the UI's cross-stack references and the
+  firewall-allow-list annotation are dotted for exactly this reason. The Grouper
+  path is now solid: it is a real, configured route.
 
 ### Structural rules
 
@@ -346,9 +400,14 @@ communicate, so get it right:
   `APIREPO` is `(Groupings API)`; every node in `UIREPO` is `(Groupings UI)`. A
   mismatch means either the marker or the placement is wrong — resolve it against
   the ownership table above, not by guessing.
-- **Keep the diagram consistent with the templates.** No ALB, no NAT, no public
-  subnets — if `ecs-service.yml` does not provision it, it does not appear as an
-  API-owned element.
-- **Pending infrastructure stays visibly pending.** The data-center path keeps
-  its `PENDING INFRA CONFIRMATION` label and its dotted edge until the
-  infrastructure team confirms the mechanism.
+- **Keep the diagram consistent with the templates.** No ALB and no inbound
+  path — if the templates do not provision it, it does not appear as an
+  API-owned element. Conversely, the NAT Gateway, its Elastic IP, and the public
+  subnet *are* API-owned and must appear.
+- **Show what is outside AWS when it explains a dependency.** The developer
+  laptop running local Swagger belongs in the diagram precisely because its path
+  to Grouper bypasses AWS entirely — omitting it invites the assumption that
+  local development depends on the deployed stack.
+- **Use `(Groupings API)` for this project's software even when it is not an AWS
+  resource** (the local `docker-compose` container). The first parenthetical
+  carries the "not AWS" fact; the second still answers "whose project".

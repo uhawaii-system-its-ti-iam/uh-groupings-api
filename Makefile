@@ -8,7 +8,8 @@
 #
 # This branch targets a SINGLE, SIMPLE sandbox environment only:
 #   - one ECS Fargate task, one private subnet, one Availability Zone
-#   - no load balancer, no public endpoint, no NAT gateway
+#   - no load balancer, no public endpoint, no inbound path
+#   - a NAT Gateway with a fixed Elastic IP for outbound Grouper access
 #   - the API is private; the companion UI reaches it over ECS Service Connect
 #   - teardown / re-setup is the normal iteration loop, not a last resort
 #
@@ -109,7 +110,8 @@ aws-setup:
 	cd $(AWS_DIR) && bash setup.sh
 
 ## Show sandbox provisioning status: stack states, whether the API task is
-## running, and the connection values (security group id, Service Connect
+## running, the NAT Gateway's Elastic IP (the address the UH firewall must
+## allow-list), and the connection values (security group id, Service Connect
 ## namespace and DNS name) that the companion UI project needs in order to
 ## reach the API. This is the whole verification story for this branch — the API
 ## is not functionally exercised until the UI is deployed (see aws/AGENTS.md,
@@ -119,6 +121,12 @@ aws-status:
 	@cd $(AWS_DIR) && $(aws_names) && \
 		echo "" && \
 		echo "Sandbox: $${BASE}   (region $${AWS_REGION}, tier $${APP_TIER})" && \
+		echo "" && \
+		echo "Grouper egress (UH firewall must allow-list this address):" && \
+		aws cloudformation describe-stacks --stack-name "$${STACK_VPC}" \
+			--query 'Stacks[0].Outputs[?OutputKey==`NatEipAddress` || OutputKey==`NatEipAllocationIdOut`].{Key:OutputKey,Value:OutputValue}' \
+			--output table --region "$${AWS_REGION}" 2>/dev/null \
+			|| echo "  (vpc stack not deployed)" && \
 		echo "" && \
 		echo "CloudFormation stacks:" && \
 		for s in "$${STACK_VPC}" "$${STACK_ECR}" "$${STACK_ECS}" "$${STACK_PIPELINE}"; do \
@@ -142,7 +150,7 @@ aws-status:
 		echo "" && \
 		echo "Reminder: a running task proves the image pulled and secrets resolved" && \
 		echo "through the VPC endpoints. Grouper errors in the logs are expected until" && \
-		echo "the data-center path is confirmed. There is no endpoint to curl." && \
+		echo "the UH firewall allow-lists the NAT EIP. There is no endpoint to curl." && \
 		echo ""
 
 ## Force a new ECS deployment without a code change (picks up a re-pushed
@@ -159,12 +167,15 @@ aws-redeploy:
 ## Delete all sandbox CloudFormation stacks (prompts for confirmation).
 ## Deletion is ordered and waited on: pipeline → ecs → ecr → vpc. Stacks that
 ## do not exist are skipped. Secrets Manager entries are PRESERVED so the JWT
-## key survives and UI tokens are not invalidated.
+## key survives and UI tokens are not invalidated. The NAT Gateway's Elastic IP
+## survives only if NAT_EIP_ALLOCATION_ID is set in aws/.env.
 aws-teardown:
 	$(check_aws)
 	@echo ""
 	@echo "WARNING: this deletes the sandbox CloudFormation stacks (pipeline, ecs, ecr, vpc)."
 	@echo "The pre-existing VPC and the Secrets Manager entries are NOT deleted."
+	@echo "The NAT Gateway IS deleted; its Elastic IP survives only if"
+	@echo "NAT_EIP_ALLOCATION_ID is set in aws/.env."
 	@echo ""
 	@read -r -p "Are you sure? (y/n) " confirm && [ "$$confirm" = "y" ] || exit 1
 	@cd $(AWS_DIR) && $(aws_names) && \
@@ -185,6 +196,17 @@ aws-teardown:
 		echo "Teardown complete. Secrets preserved:" && \
 		echo "  groupings/api/grouper-password" && \
 		echo "  groupings/api/jwt-secret" && \
+		echo "" && \
+		if [ -n "$${NAT_EIP_ALLOCATION_ID}" ]; then \
+			echo "NAT Elastic IP $${NAT_EIP_ALLOCATION_ID} preserved (set in aws/.env)."; \
+			echo "The UH firewall allow-list stays valid."; \
+		else \
+			echo "WARNING: NAT_EIP_ALLOCATION_ID is not set in aws/.env, so the NAT"; \
+			echo "Elastic IP was CloudFormation-owned and has been RELEASED. The next"; \
+			echo "'make aws-setup' will allocate a different address and the UH firewall"; \
+			echo "allow-list will need to be re-requested."; \
+		fi && \
+		echo "" && \
 		echo "Re-provision with 'make aws-setup'." && \
 		echo ""
 
@@ -218,8 +240,8 @@ aws-service-events:
 			--region "$${AWS_REGION}"
 
 ## Show the stopped reason for the most recent ECS task. The usual sandbox
-## failure is ResourceInitializationError, meaning a VPC endpoint could not be
-## reached for the image pull or secret fetch (there is no NAT fallback).
+## failure is ResourceInitializationError, meaning the outbound path is broken —
+## image pulls and secret fetches both go out through the NAT Gateway.
 aws-task-status:
 	$(check_aws)
 	cd $(AWS_DIR) && $(aws_names) && \

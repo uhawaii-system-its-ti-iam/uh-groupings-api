@@ -8,12 +8,12 @@ Description: >-
   Service Connect namespace, the API service/task, sg-api-backend (exported for
   the UI stack to reference), IAM roles, and the log group.
 
-  Test-env posture: SINGLE SUBNET, SINGLE AZ, DesiredCount 1, no NAT (AWS
-  access via VPC endpoints). On-prem Grouper WS is a LIVE, REQUIRED dependency, but the
-  data-center connectivity MECHANISM is still pending infrastructure-team
-  confirmation. The container health check is intentionally omitted until that
-  path is verified end to end, so the task is not restart-looped.
-  See aws/AGENTS.md and aws/docs/aws-architecture.mmd.
+  Sandbox posture: SINGLE AZ, DesiredCount 1. Outbound access (Grouper WS and
+  the AWS service APIs) goes through the NAT Gateway created by the vpc stack.
+  Grouper WS is a LIVE, REQUIRED dependency reached over the public internet;
+  until the UH firewall allow-lists the NAT Gateway's Elastic IP those calls
+  fail, so the container health check is intentionally omitted and the task is
+  not restart-looped. See aws/AGENTS.md and aws/docs/aws-architecture.mmd.
 
 Parameters:
   Owner:
@@ -147,7 +147,7 @@ Resources:
   # "Verification scope").
   #
   # Egress defaults to allow-all so the task can reach the VPC endpoints and,
-  # once the data-center path is provisioned, on-prem Grouper WS.
+  # the NAT Gateway, and through it Grouper WS and the AWS service APIs.
   # -------------------------------------------------------------------
   ApiTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -277,12 +277,11 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
           # NOTE: No container HealthCheck on purpose. The app health endpoint
-          # (/uhgroupingsapi/actuator/health) depends on reaching on-prem
-          # Grouper WS. Grouper is a live, required dependency, but the
-          # data-center connectivity mechanism is still PENDING INFRA
-          # CONFIRMATION, so the endpoint cannot succeed yet and a health check
-          # would make ECS restart-loop the task. Re-add it once the
-          # data-center path is verified end to end.
+          # (/uhgroupingsapi/actuator/health) depends on reaching Grouper WS
+          # over the public internet, via the NAT Gateway. Until the UH Palo
+          # Alto firewall allow-lists the NAT Gateway's Elastic IP, that call
+          # fails and a health check would make ECS restart-loop the task.
+          # Re-enable it once Grouper calls succeed.
 
   # ECS Service — no load balancer. Reachable via Service Connect + sg-api-backend.
   ECSService:

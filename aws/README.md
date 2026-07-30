@@ -11,8 +11,9 @@ The API provisions **only what the API application itself needs**: to run its co
 - ECS Fargate cluster, API service, and task definition (container port 8080)
 - ECS Service Connect namespace (AWS Cloud Map HTTP namespace), exported for the UI
 - `sg-api-backend` — the API task security group, created with **no ingress rule**
-- `sg-vpce` and the VPC endpoints (ECR api/dkr, S3 gateway, Secrets Manager, CloudWatch Logs)
-- One private subnet for the API task, created inside the pre-existing VPC (single-AZ by design)
+- One private subnet (API task) and one public subnet (NAT Gateway only), both in a single AZ
+- A NAT Gateway with an Elastic IP — the fixed source address the UH firewall allow-lists for Grouper access
+- A private route table (`0.0.0.0/0` → NAT) and the free S3 gateway endpoint
 - ECR repository, Secrets Manager entries, IAM task/execution roles, CloudWatch log group
 - The CI/CD pipeline (CodePipeline + CodeBuild)
 - CloudFormation exports forming a documented interface for the UI stack
@@ -32,7 +33,7 @@ The UI stack's only reach into API territory is *adding* that one ingress rule a
 
 ## Neither project owns
 
-The VPC itself and the data-center connectivity to Grouper WS are provided by the VPC/infrastructure team and are only referenced, never created. The Grouper connectivity **mechanism** is still pending confirmation — see [`AGENTS.md`](AGENTS.md) → "Grouper WS connectivity".
+The VPC and its Internet Gateway are provided by the VPC/infrastructure team and are only referenced, never created. Grouper WS itself is on-premises. The API reaches it over the public internet through the NAT Gateway — see [`AGENTS.md`](AGENTS.md) → "Grouper WS connectivity". One external dependency remains: the UH Palo Alto firewall must allow-list the NAT Gateway's Elastic IP.
 
 # AWS Infrastructure
 
@@ -87,7 +88,7 @@ The CloudFormation templates are organized by infrastructure layer rather than d
 
 | Template               | Purpose                                                                                                                                                                                                                    |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **vpc.yml**            | **One** private-posture subnet (single AZ) inside a pre-existing VPC, plus `sg-vpce` and the VPC endpoints (ECR api/dkr, S3 gateway, Secrets Manager, CloudWatch Logs). Exports the subnet id. No public subnets, no IGW, no NAT. |
+| **vpc.yml**            | Inside a pre-existing VPC, in one AZ: a private subnet (API task) with its own route table, a public subnet holding only a NAT Gateway, the NAT Gateway + Elastic IP, and the free S3 gateway endpoint. Exports the subnet id and the NAT's EIP. No load balancer; the IGW is referenced, never created. |
 | **ecr-repository.yml** | Container image repository.                                                                                                                                                                                                |
 | **ecs-service.yml**    | Application runtime: ECS Fargate cluster, Service Connect namespace, API service + task definition, `sg-api-backend` (no ingress), IAM roles, CloudWatch log group. **No load balancer.** Exports the cross-stack interface. |
 | **codepipeline.yml**   | Continuous integration and deployment infrastructure.                                                                                                                                                                      |
@@ -154,9 +155,9 @@ The `aws/.env` file contains **deployment parameters only** such as:
 - Environment name (`AWS_ENV`) — names and tags resources
 - Deployment tier (`APP_TIER`) — selects the Spring profile `aws-test` / `aws-prod`
 - Project identifier
-- VPC ID (the VPC must already exist; the subnet is created by `vpc.yml`)
-- Main route table ID (required by the S3 gateway endpoint)
-- `SUBNET_CIDR` — the single subnet's CIDR
+- VPC ID (the VPC must already exist, with an Internet Gateway; subnets are created by `vpc.yml`)
+- `PRIVATE_SUBNET_CIDR` and `PUBLIC_SUBNET_CIDR` — two `/28` ranges
+- `NAT_EIP_ALLOCATION_ID` — set after the first deploy so the NAT's Elastic IP survives teardown
 - ECS task count (1; the deployment is single-AZ)
 
 `API_HOSTNAME`, `API_CERTIFICATE_ARN`, and `API_HOSTED_ZONE_ID` are retained blank and **deprecated** — the API has no public endpoint, so there is no hostname or certificate to configure. Public DNS and TLS belong to the UI deployment.

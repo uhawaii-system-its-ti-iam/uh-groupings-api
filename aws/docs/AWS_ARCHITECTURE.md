@@ -31,7 +31,7 @@ The UH Groupings API is a Spring Boot application deployed on **Amazon ECS / AWS
 Two facts drive nearly every decision below:
 
 1. **The API is private.** Public entry, DNS, and TLS belong to the UI deployment (Cloudflare + Cloudflare Tunnel). There is no internet-facing AWS resource in this project.
-2. **The API needs no internet egress.** AWS service access is via VPC endpoints (AWS PrivateLink); Grouper access is via the UH data-center link. There is no Internet Gateway dependency and no NAT gateway.
+2. **The API reaches Grouper over the public internet.** Grouper sits behind an F5 with a public IP, so a NAT Gateway with a fixed Elastic IP provides egress and the UH firewall allow-lists that address. There is no VPN, Transit Gateway, or Direct Connect. The task itself keeps `AssignPublicIp DISABLED` and has no inbound path.
 
 > **Visual source of record:** [`aws-architecture.mmd`](aws-architecture.mmd). **Authoritative ownership rules:** [`../AGENTS.md`](../AGENTS.md). If this document and either of those disagree, they win.
 
@@ -42,10 +42,12 @@ Two facts drive nearly every decision below:
 | VPC | VPC/infrastructure team | Referenced via `VPC_ID`; never created by either repo |
 | Data-center link to Grouper | VPC/infrastructure team | Mechanism **pending confirmation** |
 | Internet edge (DNS, TLS, WAF, tunnel) | **Groupings UI** | Cloudflare — external to AWS |
-| API subnet, VPC endpoints | **Groupings API** | One subnet, private posture, single AZ |
+| API private subnet + route table | **Groupings API** | Holds the task ENI; `0.0.0.0/0` to the NAT |
+| Public subnet + NAT Gateway + EIP | **Groupings API** | NAT is the subnet's only occupant; the EIP is allow-listed |
+| Internet Gateway | VPC/infrastructure team | Pre-existing; referenced, never created |
 | ECS cluster, Service Connect namespace | **Groupings API** | Namespace exported for the UI to join |
 | API service, task definition | **Groupings API** | Container port 8080 |
-| `sg-api-backend`, `sg-vpce` | **Groupings API** | `sg-api-backend` created with **no ingress** |
+| `sg-api-backend` | **Groupings API** | Created with **no ingress** |
 | Ingress rule `sg-ui-apps` → `sg-api-backend:8080` | **Groupings UI** | The UI opens the door; the API only provides it |
 | ECR, Secrets Manager, IAM, CloudWatch, CI/CD | **Groupings API** | |
 | UI subnets, tunnel egress, `sg-ui-apps` | **Groupings UI** | |
@@ -78,9 +80,9 @@ The API repo creates **no UI-facing AWS elements** — no public subnets, no loa
   │   UI repo:  UI task (cloudflared) ──Service Connect 8080─┤          │
   │                                                          ▼          │
   │   API repo: API task :8080  (sg-api-backend, no public IP)          │
-  │               ├──▶ VPC endpoints (ECR, S3, Secrets Mgr, CW Logs)    │
-  │               └──▶ data-center path ──▶ on-prem Grouper WS :443     │
-  │                    (mechanism PENDING INFRA)                        │
+  │               ├──▶ S3 gateway endpoint (ECR image layers, free)     │
+  │               └──▶ NAT Gateway + EIP ──▶ IGW ──▶ Grouper WS :443    │
+  │                    (AWS APIs also egress via the NAT)               │
   └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -102,7 +104,7 @@ No Application Load Balancer appears in this picture, in either project. A singl
 
 Environment variables: `AWS_ACCOUNT_ID`, `AWS_DEFAULT_REGION`, `IMAGE_REPO_NAME`, `IMAGE_TAG`.
 
-CodeBuild runs in an AWS-managed VPC, not in this project's subnets, so it needs no VPC endpoints.
+CodeBuild runs in an AWS-managed VPC, not in this project's subnets, so it needs no networking from this stack.
 
 **Stage 3 — Deploy (ECS).** The ECS deploy action consumes `imagedefinitions.json` and performs a rolling update: `MaximumPercent` 200, `MinimumHealthyPercent` 100. Because the service has no load balancer, there is **no target-group health gate** on deployment — ECS replaces tasks based on task state alone.
 
@@ -115,7 +117,7 @@ Blue/green via CodeDeploy is **not available**: it requires a load balancer with
 - **Encryption:** AES-256
 - **Lifecycle:** retain recent images, expire untagged after 7 days
 
-Image pulls reach ECR through the `ecr.api` and `ecr.dkr` interface endpoints plus the S3 gateway endpoint — never over the internet.
+Image pulls reach the ECR API through the NAT Gateway, while the image layers themselves come via the free S3 gateway endpoint (ECR stores layers in S3), so the bulk of the bytes avoid NAT data-processing charges.
 
 ### 4. Compute (Amazon ECS on AWS Fargate)
 
@@ -133,7 +135,7 @@ Image pulls reach ECR through the `ecr.api` and `ecr.dkr` interface endpoints pl
 | Load balancer | **none** |
 | Container health check | **intentionally omitted** (see below) |
 
-**Why there is no container health check.** The Spring Actuator health endpoint (`/uhgroupingsapi/actuator/health`) depends on reaching Grouper WS. Grouper is a live, required dependency, but the data-center connectivity mechanism is unconfirmed, so the endpoint cannot succeed yet. Enabling a health check now would make ECS kill and restart the task in a loop. Re-add it once the Grouper path is verified end to end.
+**Why there is no container health check.** The Spring Actuator health endpoint (`/uhgroupingsapi/actuator/health`) depends on reaching Grouper WS. Until the UH firewall allow-lists the NAT Gateway's Elastic IP, that call fails, so enabling a health check would make ECS kill and restart the task in a loop. Re-enable it once Grouper calls succeed.
 
 **IAM roles.** The **execution** role pulls images, reads the two secrets, and writes logs. The **task** role carries application runtime permissions.
 
@@ -168,7 +170,7 @@ The task execution role resolves both at container start; plaintext never appear
 ### 7. Monitoring & Logging
 
 - **Log group:** `/ecs/${Owner}-${Project}-${Environment}`, 30-day retention, stream prefix `ecs`
-- **Delivery:** the `awslogs` driver via the CloudWatch Logs interface endpoint
+- **Delivery:** the `awslogs` driver, egressing through the NAT Gateway
 - **Metrics:** ECS service CPU/memory (Container Insights) and CodeBuild success/failure
 
 There are **no ALB metrics** (request count, latency, 5xx) because there is no ALB. Request-level observability, if needed, must come from the application or from Service Connect's Envoy metrics and access logs.
@@ -179,47 +181,67 @@ Recommended alarms: CPU >80%, memory >80%, ECS task failures, CodePipeline failu
 
 `aws/cloudformation/vpc.yml` creates, inside the pre-existing VPC:
 
-- **One subnet** (`SUBNET_CIDR`, a `/28`) in the region's first AZ, private by posture (`MapPublicIpOnLaunch: false`).
-- **`sg-vpce`** and the VPC endpoints below.
+- **A private subnet** (`PRIVATE_SUBNET_CIDR`, a `/28`) holding the API task ENI, `MapPublicIpOnLaunch: false`, with its own route table sending `0.0.0.0/0` to the NAT Gateway.
+- **A public subnet** (`PUBLIC_SUBNET_CIDR`, a `/28`) whose **only** occupant is the NAT Gateway. No application workload belongs here. It has no route table of its own — it inherits the VPC's main route table, whose `0.0.0.0/0 → IGW` route is what gives the NAT its path out. That keeps this stack from creating or owning an Internet Gateway, which belongs to the VPC team.
+- **A NAT Gateway with an Elastic IP.** The EIP is the fixed source address the UH Palo Alto firewall allow-lists.
+- **The S3 gateway endpoint** (free), attached to the **private** route table.
 
-**Single subnet, single AZ, deliberately.** The API runs one task, so a second subnet would sit empty while implying the deployment is multi-AZ. It is not. Enabling real multi-AZ means adding a subnet in another AZ, changing the `SubnetId` output to a comma-joined list, widening `sg-vpce` ingress, deciding whether the interface endpoints need an ENI in both subnets, and raising `DesiredCount` — a coordinated change, not a knob.
+Both subnets are in the region's first AZ.
 
-A `/28` yields 11 usable addresses after AWS reserves 5. Today that holds one task ENI plus four interface-endpoint ENIs, so it fits with room to spare but not much headroom — worth revisiting before prod.
+**Why the S3 gateway endpoint stays.** ECR image layers are stored in S3, and gateway endpoints intercept S3-bound traffic via the route table. Keeping it means image pulls — the bulk of the bytes — bypass the NAT Gateway's per-GB data processing charge entirely. It costs nothing.
 
-| Endpoint | Type | Purpose |
-|---|---|---|
-| `ecr.api` | Interface | ECR API calls (auth token, metadata) |
-| `ecr.dkr` | Interface | Docker registry / image layers |
-| `s3` | **Gateway** | Image layer storage; attaches to the main route table |
-| `secretsmanager` | Interface | `secrets[]` injection at task start |
-| `logs` | Interface | `awslogs` log delivery |
+**Why the four interface endpoints were removed.** `ecr.api`, `ecr.dkr`, `secretsmanager`, and `logs` (and `sg-vpce`) previously existed so a task with *no* internet route could reach AWS services. Once a NAT Gateway became mandatory for Grouper, they were a redundant second path costing ~$29/month. Those calls now egress through the NAT; the traffic is small (auth tokens, two secret fetches per task start, log shipping). The tradeoff accepted: no endpoint policies as a defense-in-depth control, and a NAT failure now breaks image pulls and secret resolution rather than just Grouper. Re-add them if a future branch removes internet egress.
 
-All four interface endpoints live in the same subnet as the task, so every endpoint call stays within one AZ — no cross-AZ data transfer charges, and no dependency on private DNS resolving to a remote ENI. The S3 gateway endpoint is a route-table entry and is free. Collapsing to one subnet removed the cross-AZ endpoint traffic the earlier two-subnet layout could incur.
+**Now required:** an Internet Gateway with a `0.0.0.0/0` route on the VPC's main route table. `make aws-check-vpc` **fails** without it, because the NAT Gateway would be provisioned but unable to reach anything.
 
-**Not required, and not created:** Internet Gateway, NAT gateway, public subnets, `0.0.0.0/0` route, load balancer. `make aws-check-vpc` reports IGW presence as informational only — its absence does not block setup.
+**Still not created:** any load balancer, any public endpoint, any inbound path.
 
 **Security groups:**
 
 | Security group | Ingress | Source | Owner |
 |---|---|---|---|
 | `sg-api-backend` | none at creation; later 8080 | UI stack adds `sg-ui-apps` | API creates it; UI adds the rule |
-| `sg-vpce` | 443 | The subnet CIDR | API |
 
-Egress on `sg-api-backend` is the default allow-all so the task can reach the VPC endpoints and, once wired, on-prem Grouper.
+Egress on `sg-api-backend` is the default allow-all so the task can reach the NAT Gateway, and through it Grouper WS and the AWS service endpoints. A NAT Gateway has no security group of its own — it is outbound-only by construction.
 
-## Grouper WS Connectivity (Pending Infrastructure Confirmation)
+**Single AZ, deliberately.** One task, so a second AZ would add cost and imply HA that does not exist. Enabling real multi-AZ means adding a second private subnet in another AZ, making `PrivateSubnetId` a comma-joined list, adding a NAT Gateway per AZ (or accepting cross-AZ NAT traffic), and raising `DesiredCount` — a coordinated change, not a knob. Raising `DesiredCount` alone buys nothing.
 
-Grouper WS in the UH data center is a **live, required dependency** — not deferred. The API reaches it over HTTPS (currently `128.171.94.186:443`). **How VPC traffic reaches the data center is not yet confirmed**, so this path is marked pending in the diagram and the container health check stays disabled.
+## Grouper WS Connectivity
 
-Open questions for the infrastructure team:
+Grouper WS is a **live, required dependency**, reached over the **public internet**. Grouper sits behind an F5 with a public IP, so there is **no VPN, no Transit Gateway, and no Direct Connect** in this design.
 
-1. **Mechanism** — Site-to-Site VPN (VGW), Transit Gateway, or Direct Connect? Does the link exist already?
-2. **Route and ownership** — which destination CIDR(s) route to the gateway (e.g. `128.171.0.0/16`), and who adds the route to which route table?
-3. **Endpoint** — stable IP, or a DNS name / VIP? Any failover target?
-4. **DNS** — will the Grouper hostname resolve from inside the VPC, or must we connect by IP?
-5. **On-prem firewall** — which source addresses must be allow-listed (the subnet CIDR `172.18.10.16/28`, or a translated address)?
-6. **Client auth** — client certificate / mTLS or IP allow-listing in addition to the service-account credentials? Any CA bundle to ship?
-7. **HA / SLA** — is the link redundant across AZs; expected latency and bandwidth?
+```
+API task (private subnet, no public IP)
+  → private route table 0.0.0.0/0
+  → NAT Gateway (public subnet, Elastic IP)
+  → Internet Gateway
+  → HTTPS 443 → grouper-test.its.hawaii.edu (F5 public IP)
+```
+
+Access control is a **firewall allow-list keyed on source IP**. Two distinct sources need entries:
+
+| Source the firewall sees | Covers | Status |
+|---|---|---|
+| The NAT Gateway's **Elastic IP** | The deployed sandbox task | **Must be requested** per environment |
+| Campus network / UH VPN egress ranges | Developers running the API locally | Already in place |
+
+### The Elastic IP must be stable
+
+`NAT_EIP_ALLOCATION_ID` in `aws/.env` makes the EIP pre-existing, so `make aws-teardown` leaves it alone. Left blank, CloudFormation owns the EIP, teardown **releases** it, and the next `make aws-setup` gets a different address — silently invalidating the firewall rule. Because teardown/re-setup is the normal loop on this branch, recording that allocation id is part of first-time setup. `setup.sh` prints the address and the allocation id, and says so explicitly.
+
+### Local development bypasses AWS entirely
+
+A developer running Swagger against `docker-compose` on `localhost:8081` calls Grouper **directly from their laptop**:
+
+```
+Developer browser → local container → HTTPS 443 → Grouper WS
+```
+
+The VPC, the NAT Gateway, and the deployed task are all outside that path. The NAT's Elastic IP is irrelevant to it, and **no AWS configuration is required for local Swagger to work**. This is why the API needs no public hostname and no certificate: developers use local Swagger, and the deployed API's only client is the UI over Service Connect.
+
+### Why the container health check is disabled
+
+`/uhgroupingsapi/actuator/health` depends on reaching Grouper. Until the firewall allow-list for the NAT EIP is in place, that call fails, and an enabled health check would make ECS restart-loop the task. Re-enable it once Grouper calls succeed.
 
 ## Data Flow
 
@@ -231,7 +253,7 @@ Open questions for the infrastructure team:
 3. UI task → Service Connect (HTTP 8080) → API task
       admitted only because sg-ui-apps is in sg-api-backend's ingress
 4. API task → validate JWT → process request
-5. API task → Grouper WS over the data-center path  [PENDING INFRA]
+5. API task → NAT Gateway → IGW → Grouper WS (HTTPS 443, from the NAT EIP)
 6. API task → response → UI task → Cloudflare → browser
 ```
 
@@ -244,7 +266,7 @@ The browser never contacts the API. Because the UI **server** is the API's netwo
 2. GitHub → CodeConnections webhook → CodePipeline
 3. CodePipeline → CodeBuild: Maven build → Docker build → ECR push
 4. CodePipeline → ECS deploy action (imagedefinitions.json)
-5. ECS pulls the new image through the ECR VPC endpoints
+5. ECS pulls the new image (ECR API via NAT, layers via the S3 gateway endpoint)
 6. ECS starts the replacement task (rolling update)
 7. ECS drains the old task
 ```
@@ -303,14 +325,21 @@ Rough monthly estimate for the sandbox (test tier, single task):
 | Resource | Approx. monthly |
 |---|---|
 | ECS Fargate — 1 task, 0.5 vCPU / 1 GB | $15–20 |
-| Interface VPC endpoints — 4 × 1 ENI | $30 |
+| NAT Gateway — $0.045/hr | $33 |
+| Public IPv4 address (the NAT's EIP) — $0.005/hr | $4 |
+| NAT data processing — $0.045/GB | pennies at sandbox volume |
+| S3 gateway endpoint | free |
 | ECR + CloudWatch Logs | $2–7 |
 | CodeBuild | ~$0.005/min, only while building |
-| **Total** | **~$50–60** |
+| **Total** | **~$55–65** |
 
-Two notes on the shape of this bill. Removing the ALB saved roughly $20/month, but the four interface endpoints cost about $30/month — cheaper than a NAT gateway (~$32 plus data processing) while keeping traffic off the internet, and they are what makes the no-NAT posture possible. Endpoints are billed per AZ per endpoint, which is why they are provisioned in one subnet rather than two.
+Three notes on the shape of this bill:
 
-To reduce sandbox cost, scale the service to zero when idle:
+- **The NAT Gateway is the largest line item and is not optional.** It is the only way to give the task a *stable* source IP for the UH firewall allow-list. Putting the task in a public subnet with its own public IP would be cheaper, but a Fargate task's public IP changes on every restart, which breaks the allow-list continuously.
+- **Dropping the four interface endpoints saved ~$29/month.** They existed to serve a task with no internet route; once the NAT became mandatory they were a redundant second path.
+- **Keeping the S3 gateway endpoint keeps data-processing charges near zero.** ECR image layers live in S3, so the bulk of the bytes bypass the NAT. Without it, every image pull would incur $0.045/GB.
+
+Scaling the service to zero saves the Fargate cost but **not** the NAT Gateway or EIP charges, which are hourly regardless:
 
 ```bash
 source aws/.env
@@ -320,12 +349,13 @@ aws ecs update-service \
   --desired-count 0
 ```
 
-Note that scaling to zero does not stop endpoint charges — those are hourly per ENI regardless of task count.
+To stop the NAT charges you must tear down the vpc stack — which is fine on this branch, provided `NAT_EIP_ALLOCATION_ID` is recorded so the address survives.
 
 ## Future Enhancements
 
 **Blocking / near term**
-- [ ] Confirm and provision the Grouper data-center path (the open questions above)
+- [ ] Get the NAT Gateway's Elastic IP allow-listed on the UH Palo Alto firewall
+- [ ] Record `NAT_EIP_ALLOCATION_ID` in `aws/.env` after the first deploy
 - [ ] Re-enable the container health check once Grouper is reachable
 - [ ] Deploy the companion UI stack and verify the Service Connect + security-group path end to end
 
