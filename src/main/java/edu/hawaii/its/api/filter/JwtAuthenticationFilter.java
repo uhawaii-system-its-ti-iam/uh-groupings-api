@@ -1,5 +1,6 @@
 package edu.hawaii.its.api.filter;
 
+import edu.hawaii.its.api.service.JwtRoleConverter;
 import edu.hawaii.its.api.service.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -8,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,11 +25,13 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final JwtRoleConverter jwtRoleConverter;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
-    public JwtAuthenticationFilter(JwtService jwtService,
+    public JwtAuthenticationFilter(JwtService jwtService, JwtRoleConverter jwtRoleConverter,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
+        this.jwtRoleConverter = jwtRoleConverter;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
@@ -59,11 +62,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Authenticate and validate the token
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtService.isTokenValid(jwt)) {
-                // Extract roles to create authorities.
+                // Map the roles claim onto Spring Security authorities, which is where the
+                // ROLE_ prefix gets applied. The token carries plain role names.
                 List<String> roles = jwtService.extractRoles(jwt);
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .toList();
+                List<GrantedAuthority> authorities = jwtRoleConverter.convert(roles);
 
                 UserDetails userDetails = new User(username, "", authorities);
 
