@@ -8,10 +8,12 @@ Description: >-
   Service Connect namespace, the API service/task, sg-api-backend (exported for
   the UI stack to reference), IAM roles, and the log group.
 
-  Test-env posture: SINGLE AZ, DesiredCount 1, no NAT (AWS access via VPC
-  endpoints), on-prem Grouper deferred. The container health check is
-  intentionally omitted while Grouper is unreachable, so the task is not
-  restart-looped. See aws/AGENTS.md and docs/aws-architecture.mmd.
+  Test-env posture: SINGLE SUBNET, SINGLE AZ, DesiredCount 1, no NAT (AWS
+  access via VPC endpoints). On-prem Grouper WS is a LIVE, REQUIRED dependency, but the
+  data-center connectivity MECHANISM is still pending infrastructure-team
+  confirmation. The container health check is intentionally omitted until that
+  path is verified end to end, so the task is not restart-looped.
+  See aws/AGENTS.md and aws/docs/aws-architecture.mmd.
 
 Parameters:
   Owner:
@@ -21,8 +23,9 @@ Parameters:
 
   Project:
     Type: String
-    Description: Project name
-    Default: groupings
+    Description: >-
+      Project identifier (<=13 chars). Must match AWS_PROJECT_ID in aws/.env.
+    Default: groupings-api
 
   Environment:
     Type: String
@@ -42,8 +45,10 @@ Parameters:
       - prod
     Description: >-
       Deployment tier — the single source of truth for application config
-      (APP_TIER in aws/.env). Selects the Spring profile (aws-<Tier>).
-      Decoupled from Environment, which only names resources.
+      (APP_TIER in aws/.env). Selects the Spring profile (aws-<Tier>), which in
+      turn selects the Grouper backend (grouper-test vs grouper). Decoupled from
+      Environment, which only names resources. No hostname or certificate is
+      derived from it: the API has no public endpoint of its own.
 
   VpcId:
     Type: AWS::EC2::VPC::Id
@@ -52,15 +57,18 @@ Parameters:
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: >-
-      Subnet IDs for the ECS service (from the vpc stack). The test env runs
-      SINGLE-AZ via DesiredCount 1 — the task lands in one of these subnets.
+      Subnet ID(s) for the ECS service, from the vpc stack's SubnetId output.
+      The vpc stack creates exactly ONE subnet, so this is a single-element
+      list and the deployment is single-AZ. The parameter stays a List so
+      multi-AZ can be enabled later without a template signature change.
 
   DesiredCount:
     Type: Number
     Default: 1
     Description: >-
-      Desired number of API tasks. Test env = 1 (single AZ). Multi-AZ / higher
-      counts are a prod concern.
+      Desired number of API tasks. 1 today. Raising this without adding a
+      second subnet would place every task in the same AZ — multi-AZ requires
+      changing vpc.yml as well.
 
   ContainerImage:
     Type: String
@@ -133,8 +141,13 @@ Resources:
   # UI's security group does not exist yet. The UI stack (deployed later) adds a
   # standalone AWS::EC2::SecurityGroupIngress that allows 8080 from sg-ui-apps,
   # referencing the exported id below. Until then the API has no inbound source
-  # (test it in-VPC via `aws ecs execute-command`). Egress defaults to allow-all
-  # so the task can reach VPC endpoints (and, later, on-prem Grouper via VPN).
+  # at all, and by project decision the API is NOT functionally exercised until
+  # the UI is deployed — EnableExecuteCommand is intentionally left off and the
+  # task role carries no ssmmessages:* permissions (see aws/AGENTS.md,
+  # "Verification scope").
+  #
+  # Egress defaults to allow-all so the task can reach the VPC endpoints and,
+  # once the data-center path is provisioned, on-prem Grouper WS.
   # -------------------------------------------------------------------
   ApiTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -264,9 +277,12 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
           # NOTE: No container HealthCheck on purpose. The app health endpoint
-          # (/uhgroupingsapi/actuator/health) depends on reaching Grouper, which
-          # is DEFERRED (no VPN wiring yet). Adding a health check now would make
-          # ECS restart-loop the task. Re-add it when Grouper access is wired.
+          # (/uhgroupingsapi/actuator/health) depends on reaching on-prem
+          # Grouper WS. Grouper is a live, required dependency, but the
+          # data-center connectivity mechanism is still PENDING INFRA
+          # CONFIRMATION, so the endpoint cannot succeed yet and a health check
+          # would make ECS restart-loop the task. Re-add it once the
+          # data-center path is verified end to end.
 
   # ECS Service — no load balancer. Reachable via Service Connect + sg-api-backend.
   ECSService:

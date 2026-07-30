@@ -9,8 +9,9 @@ Parameters:
   
   Project:
     Type: String
-    Description: Project name
-    Default: groupings
+    Description: >-
+      Project identifier (<=13 chars). Must match AWS_PROJECT_ID in aws/.env.
+    Default: groupings-api
   
   Environment:
     Type: String
@@ -21,11 +22,6 @@ Parameters:
       - test
       - prod
     Description: Environment name
-  
-  Component:
-    Type: String
-    Description: Component identifier
-    Default: api
   
   GitHubOwner:
     Type: String
@@ -114,7 +110,9 @@ Resources:
             Value: latest
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.yml
+        # The buildspec lives in the aws/ subdirectory, not the repo root.
+        # CodeBuild resolves this path relative to the source artifact root.
+        BuildSpec: aws/buildspec.yml
       Cache:
         Type: S3
         Location: !Sub '${ArtifactBucket}/build-cache'

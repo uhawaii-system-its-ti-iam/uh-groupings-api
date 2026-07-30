@@ -1,525 +1,342 @@
-# Architecture Documentation - UH Groupings API
+# AWS Architecture — UH Groupings API
 
 <!-- TOC -->
-* [Architecture Documentation - UH Groupings API](#architecture-documentation---uh-groupings-api)
+* [AWS Architecture — UH Groupings API](#aws-architecture--uh-groupings-api)
   * [System Overview](#system-overview)
+  * [Ownership Boundaries](#ownership-boundaries)
   * [High-Level Architecture](#high-level-architecture)
   * [Component Details](#component-details)
     * [1. Source Control](#1-source-control)
     * [2. CI/CD Pipeline (AWS CodePipeline)](#2-cicd-pipeline-aws-codepipeline)
-      * [Stage 1: Source](#stage-1-source)
-      * [Stage 2: Build (AWS CodeBuild)](#stage-2-build-aws-codebuild)
-      * [Stage 3: Deploy (ECS)](#stage-3-deploy-ecs)
     * [3. Container Registry (Amazon ECR)](#3-container-registry-amazon-ecr)
-    * [4. Compute (Amazon ECS Fargate)](#4-compute-amazon-ecs-fargate)
-      * [Cluster Configuration](#cluster-configuration)
-      * [Service Configuration](#service-configuration)
-      * [Task IAM Roles](#task-iam-roles)
-    * [5. Load Balancing (Application Load Balancer)](#5-load-balancing-application-load-balancer)
+    * [4. Compute (Amazon ECS on AWS Fargate)](#4-compute-amazon-ecs-on-aws-fargate)
+    * [5. Service-to-Service Connectivity (ECS Service Connect)](#5-service-to-service-connectivity-ecs-service-connect)
     * [6. Secrets Management (AWS Secrets Manager)](#6-secrets-management-aws-secrets-manager)
     * [7. Monitoring & Logging](#7-monitoring--logging)
-      * [CloudWatch Logs](#cloudwatch-logs)
-      * [CloudWatch Metrics](#cloudwatch-metrics)
-      * [Alarms (Recommended)](#alarms-recommended)
     * [8. Networking](#8-networking)
-      * [Sandbox Architecture (Current)](#sandbox-architecture-current)
-      * [Production Architecture (Target)](#production-architecture-target)
-      * [Security Groups](#security-groups)
-      * [Network Flow](#network-flow)
+  * [Grouper WS Connectivity (Pending Infrastructure Confirmation)](#grouper-ws-connectivity-pending-infrastructure-confirmation)
   * [Data Flow](#data-flow)
-    * [Request Flow](#request-flow)
-    * [Deployment Flow](#deployment-flow)
   * [Technology Stack](#technology-stack)
-    * [Application Layer](#application-layer)
-    * [Infrastructure Layer](#infrastructure-layer)
-    * [DevOps Tools](#devops-tools)
-  * [Environments](#environments)
-    * [Environment Configuration](#environment-configuration)
+  * [Environments and Tiers](#environments-and-tiers)
   * [Security Architecture](#security-architecture)
-    * [Authentication & Authorization](#authentication--authorization)
-    * [Secrets Management](#secrets-management)
-    * [Network Security](#network-security)
-    * [Access Restriction: HTTPS from the UI Deployment Only (Planned)](#access-restriction-https-from-the-ui-deployment-only-planned)
-    * [Container Security](#container-security)
-    * [Compliance](#compliance)
   * [Scalability & Resilience](#scalability--resilience)
-    * [Horizontal Scaling](#horizontal-scaling)
-    * [High Availability](#high-availability)
-    * [Disaster Recovery](#disaster-recovery)
-  * [Cost Optimization](#cost-optimization)
-    * [Current Costs (Estimated - Sandbox)](#current-costs-estimated---sandbox)
-    * [Cost Reduction Strategies](#cost-reduction-strategies)
+  * [Cost](#cost)
   * [Future Enhancements](#future-enhancements)
-    * [Short Term](#short-term)
-    * [Medium Term](#medium-term)
-    * [Long Term](#long-term)
 <!-- TOC -->
 
 ## System Overview
 
-The UH Groupings API is a Spring Boot application deployed on AWS using a modern, cloud-native architecture with full CI/CD automation.
+The UH Groupings API is a Spring Boot application deployed on **Amazon ECS / AWS Fargate** as a **private service**. It has no load balancer, no public endpoint, no hostname, and no TLS certificate of its own. Its only network client is the companion UH Groupings UI, which reaches it over **ECS Service Connect** inside the VPC.
 
-## PiC High-Level Architecture
+Two facts drive nearly every decision below:
+
+1. **The API is private.** Public entry, DNS, and TLS belong to the UI deployment (Cloudflare + Cloudflare Tunnel). There is no internet-facing AWS resource in this project.
+2. **The API needs no internet egress.** AWS service access is via VPC endpoints (AWS PrivateLink); Grouper access is via the UH data-center link. There is no Internet Gateway dependency and no NAT gateway.
+
+> **Visual source of record:** [`aws-architecture.mmd`](aws-architecture.mmd). **Authoritative ownership rules:** [`../AGENTS.md`](../AGENTS.md). If this document and either of those disagree, they win.
+
+## Ownership Boundaries
+
+| Layer | Owner | Notes |
+|---|---|---|
+| VPC | VPC/infrastructure team | Referenced via `VPC_ID`; never created by either repo |
+| Data-center link to Grouper | VPC/infrastructure team | Mechanism **pending confirmation** |
+| Internet edge (DNS, TLS, WAF, tunnel) | **Groupings UI** | Cloudflare — external to AWS |
+| API subnet, VPC endpoints | **Groupings API** | One subnet, private posture, single AZ |
+| ECS cluster, Service Connect namespace | **Groupings API** | Namespace exported for the UI to join |
+| API service, task definition | **Groupings API** | Container port 8080 |
+| `sg-api-backend`, `sg-vpce` | **Groupings API** | `sg-api-backend` created with **no ingress** |
+| Ingress rule `sg-ui-apps` → `sg-api-backend:8080` | **Groupings UI** | The UI opens the door; the API only provides it |
+| ECR, Secrets Manager, IAM, CloudWatch, CI/CD | **Groupings API** | |
+| UI subnets, tunnel egress, `sg-ui-apps` | **Groupings UI** | |
+
+The API repo creates **no UI-facing AWS elements** — no public subnets, no load balancer, no UI security groups.
+
+## High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                           GitHub                                │
-│                     (Source Code Repository)                    │
-└────────────────┬────────────────────────────────────────────────┘
-                 │
-                 │ Push/PR
-                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      AWS CodePipeline                           │
-│   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
-│   │  Source  │───▶│  Build   │───▶│ Deploy   │───▶│ Monitor  │  │
-│   └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                       │                    │
-                       │ CodeBuild          │ ECS API
-                       ▼                    ▼
-         ┌──────────────────────┐  ┌──────────────────────┐
-         │   AWS CodeBuild      │  │   Amazon ECS         │
-         │  ┌────────────────┐  │  │  ┌────────────────┐  │
-         │  │ Maven Build    │  │  │  │ Fargate Tasks  │  │
-         │  │ Docker Build   │  │  │  │  (Containers)  │  │
-         │  │ Push to ECR    │  │  │  └────────────────┘  │
-         │  └────────────────┘  │  └──────────────────────┘
-         └──────────────────────┘            │
-                    │                        │
-                    ▼                        ▼
-         ┌──────────────────────┐  ┌──────────────────────┐
-         │   Amazon ECR         │  │  Application Load    │
-         │ (Container Images)   │  │     Balancer         │
-         └──────────────────────┘  └──────────────────────┘
-                                             │
-                                             │ HTTPS
-                                             ▼
-                                    ┌──────────────────┐
-                                    │    End Users     │
-                                    └──────────────────┘
+                          GitHub (source)
+                                │ push to configured branch
+                                ▼
+                        AWS CodePipeline
+                    Source → Build → Deploy
+                                │
+                    ┌───────────┴───────────┐
+                    ▼                       ▼
+             AWS CodeBuild            Amazon ECS (Fargate)
+          Maven + Docker build         rolling update
+                    │
+                    ▼
+              Amazon ECR
+          (container images)
+
+
+  Browser ──HTTPS 443──▶ Cloudflare (TLS/WAF) ──tunnel──▶ UI task
+                                                             │
+  ┌──────────────── Provided VPC (VPC team) ─────────────────┼──────────┐
+  │                                                          │          │
+  │   UI repo:  UI task (cloudflared) ──Service Connect 8080─┤          │
+  │                                                          ▼          │
+  │   API repo: API task :8080  (sg-api-backend, no public IP)          │
+  │               ├──▶ VPC endpoints (ECR, S3, Secrets Mgr, CW Logs)    │
+  │               └──▶ data-center path ──▶ on-prem Grouper WS :443     │
+  │                    (mechanism PENDING INFRA)                        │
+  └─────────────────────────────────────────────────────────────────────┘
 ```
+
+No Application Load Balancer appears in this picture, in either project. A single-AZ test environment gains nothing from one, and the UI's Cloudflare Tunnel is an **outbound** connection that needs no inbound listener.
 
 ## Component Details
 
 ### 1. Source Control
-- **Service:** GitHub (github.com)
-- **Repository:** uhawaii-system-its-ti-iam/uh-groupings-api
-- **Default Branch:** `main`
-- **Webhook:** Triggers CodePipeline on push/merge to the branch configured in `aws/.env` (`GITHUB_BRANCH`).
-- **Branch Flexibility:** To change the deployed branch, update `GITHUB_BRANCH` in `aws/.env` and redeploy the pipeline stack (see [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)).
+- **Service:** GitHub
+- **Repository:** `uhawaii-system-its-ti-iam/uh-groupings-api`
+- **Trigger:** CodePipeline watches the branch set by `GITHUB_BRANCH` in `aws/.env`
+- **Changing branches:** update `GITHUB_BRANCH` and redeploy the pipeline stack (see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md))
 
 ### 2. CI/CD Pipeline (AWS CodePipeline)
 
-#### Stage 1: Source
-- **Provider:** GitHub (via AWS CodeConnections)
-- **Trigger:** Automatic on commit to monitored branch
-- **Output:** Source code ZIP artifact
+**Stage 1 — Source.** GitHub via AWS CodeConnections; emits a source ZIP artifact. The OAuth handshake is manual by design.
 
-#### Stage 2: Build (AWS CodeBuild)
-- **Image:** aws/codebuild/standard:7.0
-- **Runtime:** Ubuntu with Docker support
-- **Steps:**
-  1. Maven build (compiles Java, runs unit tests)
-  2. Docker multi-stage build
-  3. Docker image push to ECR
-  4. Generate `imagedefinitions.json`
-- **Environment Variables:**
-  - AWS_ACCOUNT_ID
-  - AWS_DEFAULT_REGION
-  - IMAGE_REPO_NAME
-  - IMAGE_TAG
-- **Artifacts:** imagedefinitions.json, task-definition.json
-- **Cache:** Maven dependencies cached in S3
+**Stage 2 — Build (AWS CodeBuild).** Image `aws/codebuild/standard:7.0`, privileged mode for Docker. Runs the Maven build (compile + unit tests), builds the image, pushes to ECR, and emits `imagedefinitions.json`. Maven dependencies are cached in S3. **The buildspec path is `aws/buildspec.yml`**, not the repo root.
 
-#### Stage 3: Deploy (ECS)
-- **Target:** ECS Fargate Service
-- **Strategy:** Rolling update (MinimumHealthyPercent: 100%)
-- **Health Check:** ALB monitors `/uhgroupingsapi/actuator/health` on port 8080
-- **Rollback:** Automatic on deployment failure
+Environment variables: `AWS_ACCOUNT_ID`, `AWS_DEFAULT_REGION`, `IMAGE_REPO_NAME`, `IMAGE_TAG`.
+
+CodeBuild runs in an AWS-managed VPC, not in this project's subnets, so it needs no VPC endpoints.
+
+**Stage 3 — Deploy (ECS).** The ECS deploy action consumes `imagedefinitions.json` and performs a rolling update: `MaximumPercent` 200, `MinimumHealthyPercent` 100. Because the service has no load balancer, there is **no target-group health gate** on deployment — ECS replaces tasks based on task state alone.
+
+Blue/green via CodeDeploy is **not available**: it requires a load balancer with two target groups. There is no appspec in the repo for that reason.
 
 ### 3. Container Registry (Amazon ECR)
 
-- **Repository:** uh-groupings-api
-- **Image Scanning:** Enabled on push
-- **Lifecycle Policy:**
-  - Keep last 10 production images
-  - Keep last 5 non-production images
-  - Expire untagged images after 7 days
+- **Repository:** `${Owner}-${Project}-${Environment}` (e.g., `mhodges-groupings-api-sandbx`)
+- **Image scanning:** on push
 - **Encryption:** AES-256
+- **Lifecycle:** retain recent images, expire untagged after 7 days
 
-### 4. Compute (Amazon ECS Fargate)
+Image pulls reach ECR through the `ecr.api` and `ecr.dkr` interface endpoints plus the S3 gateway endpoint — never over the internet.
 
-#### Cluster Configuration
-- **Name:** uh-groupings-{environment}
-- **Capacity Provider:** FARGATE (with FARGATE_SPOT fallback)
-- **Container Insights:** Enabled
+### 4. Compute (Amazon ECS on AWS Fargate)
 
-#### Service Configuration
-- **Launch Type:** Fargate
-- **Desired Count:** 2 (adjustable per environment)
-- **Task Definition:**
-  - CPU: 512 (0.5 vCPU)
-  - Memory: 1024 MB
-  - Port: 8080
-- **Deployment:**
-  - MaximumPercent: 200%
-  - MinimumHealthyPercent: 100%
-  - Health Check Grace: 60s
+**Cluster:** `${Owner}-${Project}-${Environment}-cluster`, capacity providers FARGATE and FARGATE_SPOT (default strategy pins FARGATE), Container Insights enabled, with the Service Connect namespace set as the cluster default.
 
-#### Task IAM Roles
-- **Execution Role:** Pulls images, reads secrets, writes logs
-- **Task Role:** Application runtime permissions
+**Service and task:**
 
-### 5. Load Balancing (Application Load Balancer)
+| Setting | Value |
+|---|---|
+| Launch type | Fargate |
+| Desired count | 1 (`ECS_TASK_COUNT`) — one task, one subnet, one AZ |
+| CPU / memory | 512 (0.5 vCPU) / 1024 MB |
+| Container port | 8080, named `api-8080` for Service Connect |
+| `AssignPublicIp` | `DISABLED` |
+| Load balancer | **none** |
+| Container health check | **intentionally omitted** (see below) |
 
-- **Type:** Application Load Balancer (Layer 7)
-- **Scheme:** Internet-facing
-- **Listeners:**
-  - HTTP:80 → Forward to target group
-  - (Future) HTTPS:443 → SSL termination
-- **Target Group:**
-  - Protocol: HTTP
-  - Port: 8080
-  - Health Check: `/uhgroupingsapi/actuator/health`
-  - Health Check Interval: 30s
-  - Healthy Threshold: 2
-  - Unhealthy Threshold: 3
+**Why there is no container health check.** The Spring Actuator health endpoint (`/uhgroupingsapi/actuator/health`) depends on reaching Grouper WS. Grouper is a live, required dependency, but the data-center connectivity mechanism is unconfirmed, so the endpoint cannot succeed yet. Enabling a health check now would make ECS kill and restart the task in a loop. Re-add it once the Grouper path is verified end to end.
+
+**IAM roles.** The **execution** role pulls images, reads the two secrets, and writes logs. The **task** role carries application runtime permissions.
+
+### 5. Service-to-Service Connectivity (ECS Service Connect)
+
+The API publishes itself into an **AWS Cloud Map HTTP namespace** created by this project and exported for the UI stack. The UI service joins the same namespace and reaches the API by name.
+
+| Item | Value |
+|---|---|
+| Namespace | `${Owner}-${Project}-${Environment}` (`AWS::ServiceDiscovery::HttpNamespace`) |
+| Port name | `api-8080` |
+| Discovery name | `groupings-api` |
+| Client alias | `groupings-api:8080` |
+
+Service Connect injects an Envoy sidecar that is supplied and managed by the Fargate platform, so it requires no additional VPC endpoint and no customer-side image pull.
+
+**Access control is purely by security group.** `sg-api-backend` is created with **no ingress rule at all**. The UI stack later adds a standalone `AWS::EC2::SecurityGroupIngress` permitting 8080 from `sg-ui-apps` only. Until then the API has no inbound client at all, and by project decision it is **not** functionally exercised before the UI is deployed — `aws ecs execute-command` is deliberately left disabled rather than widening the task role to obtain a shell. See [`../AGENTS.md`](../AGENTS.md) → "Verification scope".
 
 ### 6. Secrets Management (AWS Secrets Manager)
 
-Only **two** values are stored in AWS Secrets Manager — the truly sensitive runtime credentials the API needs at startup:
+Exactly **two** secrets, both created idempotently by `aws/setup.sh`:
 
-- `groupings/api/grouper-password` — Grouper service account password (`grouperClient.webService.password`)
-- `groupings/api/jwt-secret` — JWT signing key (`jwt.secret.key`), generated at provisioning by `aws/setup.sh`
+- `groupings/api/grouper-password` → injected as `GROUPERCLIENT_WEBSERVICE_PASSWORD`
+- `groupings/api/jwt-secret` → injected as `JWT_SECRET_KEY`
 
-Non-secret values that the deployed API still needs (`grouperClient.webService.url`, `grouperClient.webService.login`, email flags, etc.) live in the ECS task definition `environment[]` array — not in Secrets Manager.
+Non-secret runtime values (Grouper URL and login, email flags) live in the task definition `environment[]` array, or come from the `aws-test` / `aws-prod` Spring profile baked into the image.
 
-**Provisioning:** `aws/setup.sh` (invoked via `make aws-setup` with `AWS_PROFILE=uh-groupings` exported) creates both secrets idempotently — re-running updates rather than duplicates them.
+The task execution role resolves both at container start; plaintext never appears in task config or logs. Secrets Manager is reached through its interface VPC endpoint.
 
-**Access at runtime:** The ECS task execution role injects the two secrets as environment variables (`GROUPERCLIENT_WEBSERVICE_PASSWORD`, `JWT_SECRET_KEY`) when the container starts. The values never appear in plaintext task config or logs.
-
-**JWT key ownership:** The API project owns this key. Future UI projects consume the same `groupings/api/jwt-secret` rather than generating their own. See [SECRETS.md](SECRETS.md#jwt-secret-ownership-api-generates-ui-consumes).
+**JWT key ownership:** the API project owns this key. Companion UI projects read the same entry rather than generating their own. See [SECRETS.md](SECRETS.md#jwt-key-ownership).
 
 ### 7. Monitoring & Logging
 
-#### CloudWatch Logs
-- **Log Group:** `/ecs/uh-groupings-api`
-- **Retention:** 30 days
-- **Stream Prefix:** `ecs/{task-id}`
+- **Log group:** `/ecs/${Owner}-${Project}-${Environment}`, 30-day retention, stream prefix `ecs`
+- **Delivery:** the `awslogs` driver via the CloudWatch Logs interface endpoint
+- **Metrics:** ECS service CPU/memory (Container Insights) and CodeBuild success/failure
 
-#### CloudWatch Metrics
-- ECS Service CPU/Memory utilization
-- ALB request count, latency, error rates
-- CodeBuild success/failure rates
-- Custom application metrics (via Spring Boot Actuator)
+There are **no ALB metrics** (request count, latency, 5xx) because there is no ALB. Request-level observability, if needed, must come from the application or from Service Connect's Envoy metrics and access logs.
 
-#### Alarms (Recommended)
-- High CPU utilization (>80%)
-- High memory utilization (>80%)
-- ALB 5xx errors
-- ECS task failures
-- CodePipeline execution failures
+Recommended alarms: CPU >80%, memory >80%, ECS task failures, CodePipeline failures.
 
 ### 8. Networking
 
-#### Deployment Architecture
+`aws/cloudformation/vpc.yml` creates, inside the pre-existing VPC:
 
-The sandbox deploys all components into two shared subnets. Tasks have no public IP;
-VPC endpoints provide access to AWS services, and a VPN route (once configured)
-provides the path back to the on-prem Grouper server.
+- **One subnet** (`SUBNET_CIDR`, a `/28`) in the region's first AZ, private by posture (`MapPublicIpOnLaunch: false`).
+- **`sg-vpce`** and the VPC endpoints below.
 
-```
-                                          Internet
-                                              │
-                                       Internet Gateway
-                                              │
-      ┌──────────────────────────── VPC: 172.18.0.128/25 ──────────────────────────────┐
-      │                                                                                │
-      │                     Public Application Load Balancer                           │
-      │                        (internet-facing, HTTPS :443)                           │
-      │                                      │                                         │
-      │         ┌────────────────────────────┴────────────────────────────┐            │
-      │         │                                                         │            │
-      │  ┌──────┴────────────────────┐                     ┌──────────────┴──────────┐ │
-      │  │ Public Subnet A (AZ-1)    │                     │ Public Subnet B (AZ-2)  │ │
-      │  │                           │                     │                         │ │
-      │  │ • Public ALB ENI          │                     │ • Public ALB ENI        │ │
-      │  │ • uh-groupings-ui         │                     │ • uh-groupings-ui       │ │
-      │  │   Fargate task            │                     │   Fargate task          │ │
-      │  │   (no public IP)          │                     │   (no public IP)        │ │
-      │  └──────────────┬────────────┘                     └────────────┬────────────┘ │
-      │                 │                                               │              │
-      │                 └────────────── HTTPS ──────────────────────────┘              │
-      │                                 │                                              │
-      │                                 ▼                                              │
-      │                    Internal Application Load Balancer                          │
-      │                          (private, API only)                                   │
-      │                                 │                                              │
-      │         ┌───────────────────────┴────────────────────────┐                     │
-      │         │                                                │                     │
-      │  ┌──────┴────────────────────┐            ┌──────────────┴─────────────────┐   │
-      │  │ Private Subnet A (AZ-1)   │            │ Private Subnet B (AZ-2)        │   │
-      │  │                           │            │                                │   │
-      │  │ • Internal ALB ENI        │            │ • Internal ALB ENI             │   │
-      │  │ • uh-groupings-api        │            │ • uh-groupings-api             │   │
-      │  │   Fargate task :8080      │            │   Fargate task :8080           │   │
-      │  │ • Interface endpoints:    │            │                                │   │
-      │  │   ecr.api                 │            │                                │   │
-      │  │   ecr.dkr                 │            │                                │   │
-      │  │   secretsmanager          │            │                                │   │
-      │  │   logs                    │            │                                │   │
-      │  └───────────────────────────┘            └────────────────────────────────┘   │
-      │                                                                                │
-      │  Security Groups                                                               │
-      │    Public ALB  → UI tasks (HTTPS)                                              │
-      │    UI tasks    → Internal ALB (HTTPS)                                          │
-      │    Internal ALB → API tasks (:8080)                                            │
-      │    API tasks accept traffic ONLY from Internal ALB/UI security group           │
-      │                                                                                │
-      │  S3 Gateway Endpoint → attached to main route table                            │
-      │                                                                                │
-      │  Main Route Table                                                              │
-      │    172.18.0.128/25 → local                                                     │
-      │    0.0.0.0/0       → Internet Gateway (public subnets only)                    │
-      │    128.171.0.0/16  → Virtual Private Gateway *                                 │
-      └────────────────────────────────────────────┬───────────────────────────────────┘
-                                                   │
-                                      Virtual Private Gateway *
-                                                   │
-                                            IPsec VPN Tunnel *
-                                                   │
-                                           UH Firewall / Router
-                                                   │
-                                          Grouper Web Services
-                                           128.171.94.186:443
+**Single subnet, single AZ, deliberately.** The API runs one task, so a second subnet would sit empty while implying the deployment is multi-AZ. It is not. Enabling real multi-AZ means adding a subnet in another AZ, changing the `SubnetId` output to a comma-joined list, widening `sg-vpce` ingress, deciding whether the interface endpoints need an ENI in both subnets, and raising `DesiredCount` — a coordinated change, not a knob.
 
-      * Existing VPN connection.
-        Add 128.171.0.0/16 to the private route table to enable API → Grouper traffic.
-```
+A `/28` yields 11 usable addresses after AWS reserves 5. Today that holds one task ENI plus four interface-endpoint ENIs, so it fits with room to spare but not much headroom — worth revisiting before prod.
 
-**Key characteristics:**
-- ALB and Fargate tasks share the same two subnets. The internet-facing ALB places an ENI in each AZ (both AZs required); the single task lands in whichever subnet ECS selects.
-- Fargate tasks have no public IP (`AssignPublicIp: DISABLED`); the subnets set `MapPublicIpOnLaunch: false`. The internet-facing ALB still gets public IPs on its own ENIs.
-- Interface VPC endpoints (`ecr.api`, `ecr.dkr`, `secretsmanager`, `logs`) live in **Subnet A only** to reduce cost; private DNS lets a task in either subnet reach them cross-AZ. The S3 gateway endpoint attaches to the main route table (free).
-- Security groups: ALB SG allows inbound 80/443 from internet; ECS SG allows inbound 8080 from the ALB SG only; endpoint SG allows 443 from the subnet CIDRs.
-- The VPN tunnel already exists in the account, but the `128.171.0.0/16 → VGW` route is not yet added to the route table — required for Grouper access (see notes in `aws/.env`).
-- Single task (`ECS_TASK_COUNT=1`) — no HA requirement for sandbox.
+| Endpoint | Type | Purpose |
+|---|---|---|
+| `ecr.api` | Interface | ECR API calls (auth token, metadata) |
+| `ecr.dkr` | Interface | Docker registry / image layers |
+| `s3` | **Gateway** | Image layer storage; attaches to the main route table |
+| `secretsmanager` | Interface | `secrets[]` injection at task start |
+| `logs` | Interface | `awslogs` log delivery |
 
-#### Production Architecture (Target)
+All four interface endpoints live in the same subnet as the task, so every endpoint call stays within one AZ — no cross-AZ data transfer charges, and no dependency on private DNS resolving to a remote ENI. The S3 gateway endpoint is a route-table entry and is free. Collapsing to one subnet removed the cross-AZ endpoint traffic the earlier two-subnet layout could incur.
 
-Production separates public and private subnets, adds HTTPS termination,
-restricts the ALB to UI-only traffic, and uses a properly sized VPC.
+**Not required, and not created:** Internet Gateway, NAT gateway, public subnets, `0.0.0.0/0` route, load balancer. `make aws-check-vpc` reports IGW presence as informational only — its absence does not block setup.
 
-```
-                                Internet
-                                   │
-                            Internet Gateway
-                                   │
-                                  TBD
-```
+**Security groups:**
 
-**Key differences from sandbox:**
-- **Public/private subnet separation:** ALB lives in public subnets (IGW route); Fargate tasks live in private subnets (no IGW route, VPN route only).
-- **HTTPS-only:** ALB listener on 443 with an ACM certificate; HTTP:80 removed or redirected.
-- **UI-only access:** ALB security group ingress restricted to the companion UI deployment's security group (`SourceSecurityGroupId` via cross-stack import) — not open to the internet.
-- **Multi-AZ HA:** `ECS_TASK_COUNT >= 2`, tasks spread across AZs.
-- **Larger VPC CIDR** to accommodate the additional subnets and future growth.
-- **VPN route** on the private route table provides the only egress path for task → Grouper traffic (no internet path from tasks).
-- **Auto Scaling:** CPU/memory target tracking for horizontal scaling.
+| Security group | Ingress | Source | Owner |
+|---|---|---|---|
+| `sg-api-backend` | none at creation; later 8080 | UI stack adds `sg-ui-apps` | API creates it; UI adds the rule |
+| `sg-vpce` | 443 | The subnet CIDR | API |
 
-#### Security Groups
+Egress on `sg-api-backend` is the default allow-all so the task can reach the VPC endpoints and, once wired, on-prem Grouper.
 
-| Security Group  | Inbound                                   | Source                                     | Notes                                |
-|-----------------|-------------------------------------------|--------------------------------------------|--------------------------------------|
-| ALB SG          | 80 + 443 (sandbox); 443 only (production) | `0.0.0.0/0` (sandbox) → UI SG (production) | Sandbox currently listens on HTTP:80 |
-| ECS SG          | 8080                                      | ALB SG                                     | Same in both environments            |
-| VPC Endpoint SG | 443                                       | Subnet CIDRs                               | Interface endpoints only             |
+## Grouper WS Connectivity (Pending Infrastructure Confirmation)
 
-#### Network Flow
-```
-Sandbox:     Internet → ALB → ECS task (shared subnet) → VPN * → Grouper API
-Production:  Internet → ALB (public subnets) → ECS task (private subnets) → VPN → Grouper API
+Grouper WS in the UH data center is a **live, required dependency** — not deferred. The API reaches it over HTTPS (currently `128.171.94.186:443`). **How VPC traffic reaches the data center is not yet confirmed**, so this path is marked pending in the diagram and the container health check stays disabled.
 
-  * sandbox VPN route pending
-```
+Open questions for the infrastructure team:
+
+1. **Mechanism** — Site-to-Site VPN (VGW), Transit Gateway, or Direct Connect? Does the link exist already?
+2. **Route and ownership** — which destination CIDR(s) route to the gateway (e.g. `128.171.0.0/16`), and who adds the route to which route table?
+3. **Endpoint** — stable IP, or a DNS name / VIP? Any failover target?
+4. **DNS** — will the Grouper hostname resolve from inside the VPC, or must we connect by IP?
+5. **On-prem firewall** — which source addresses must be allow-listed (the subnet CIDR `172.18.10.16/28`, or a translated address)?
+6. **Client auth** — client certificate / mTLS or IP allow-listing in addition to the service-account credentials? Any CA bundle to ship?
+7. **HA / SLA** — is the link redundant across AZs; expected latency and bandwidth?
 
 ## Data Flow
 
-### Request Flow
+### Request flow
+
 ```
-1. User → HTTP → ALB    (HTTPS:443 listener planned; current is HTTP:80 only)
-2. ALB → Health Check → ECS Task:8080/uhgroupingsapi/actuator/health
-3. ALB → Route Request → ECS Task:8080/uhgroupingsapi/api/groupings/v2.1/*
-4. ECS Task → Authenticate (JWT) → Process Request
-5. ECS Task → Query Grouper API (external)
-6. ECS Task → Response → ALB → User
+1. Browser → HTTPS 443 → Cloudflare (TLS terminates at the edge)
+2. Cloudflare → Cloudflare Tunnel (outbound from the UI task) → UI task
+3. UI task → Service Connect (HTTP 8080) → API task
+      admitted only because sg-ui-apps is in sg-api-backend's ingress
+4. API task → validate JWT → process request
+5. API task → Grouper WS over the data-center path  [PENDING INFRA]
+6. API task → response → UI task → Cloudflare → browser
 ```
 
-### Deployment Flow
-```
-1. Developer → Git Push → GitHub (any branch for sandbox)
-2. GitHub → Webhook → CodePipeline (watches configured branch)
-3. CodePipeline → Trigger → CodeBuild
-4. CodeBuild → Maven Build → Docker Build → ECR Push
-5. CodePipeline → Update ECS Service
-6. ECS → Pull new image from ECR
-7. ECS → Start new tasks (rolling deployment)
-8. ALB → Health check new tasks
-9. ECS → Drain old tasks
-10. Deployment complete
-```
+The browser never contacts the API. Because the UI **server** is the API's network client, the security-group source restriction is genuinely enforceable — this is what makes an API-side load balancer unnecessary.
 
-**Note:** The canonical configuration deploys from `main`. Pilot or sandbox pipelines may temporarily watch a feature branch via the pipeline's `GitHubBranch` parameter; team environments (dev/test/prod) watch standard branches (`develop`, `test`, `main`).
+### Deployment flow
+
+```
+1. Developer → git push → GitHub
+2. GitHub → CodeConnections webhook → CodePipeline
+3. CodePipeline → CodeBuild: Maven build → Docker build → ECR push
+4. CodePipeline → ECS deploy action (imagedefinitions.json)
+5. ECS pulls the new image through the ECR VPC endpoints
+6. ECS starts the replacement task (rolling update)
+7. ECS drains the old task
+```
 
 ## Technology Stack
 
-### Application Layer
-- **Language:** Java 21
-- **Framework:** Spring Boot 4.0.6
-- **Packaging:** WAR (deployed as standalone)
-- **Dependencies:**
-  - Spring Web MVC
-  - Spring Security
-  - Spring Actuator
-  - Grouper Client 4.23.0
-  - JWT (Java Jason Web Token)
-  - Spring Cloud Vault
+**Application:** Java 21, Spring Boot, WAR packaged and run standalone, Spring Web MVC / Security / Actuator, Grouper Client, JWT, Spring Cloud Vault.
 
-### Infrastructure Layer
-- **Container Runtime:** Docker
-- **Orchestration:** ECS Fargate
-- **Build Tool:** Maven 3.9
-- **Base Image:** Eclipse Temurin 21 JRE
+**Infrastructure:** Docker, ECS Fargate, Maven, Eclipse Temurin 21 JRE base image, CloudFormation.
 
-### DevOps Tools
-- **Version Control:** Git (GitHub)
-- **CI/CD:** AWS CodePipeline + CodeBuild
-- **IaC:** AWS CloudFormation
-- **Monitoring:** CloudWatch
+**DevOps:** Git/GitHub, CodePipeline + CodeBuild, CloudFormation, CloudWatch.
 
-## Environments
+## Environments and Tiers
 
-### Environment Configuration
+The project separates two independent axes, and conflating them is the mistake this design exists to prevent:
 
-| Environment    | Purpose                                | Branch (from `GITHUB_BRANCH` in `aws/.env`) | Owner                         | Auto-Deploy              |
-|----------------|----------------------------------------|---------------------------------------------|-------------------------------|--------------------------|
-| **Sandbox**    | Shared team experimentation            | Feature branch or `main`                    | Individual contributor        | Yes                      |
-| **Test**       | QA & staging                           | `test` or `main`                            | Team (`its-iam`)              | Yes (with approval)      |
-| **Production** | Live system                            | `main`                                      | Team (`its-iam`)              | Manual approval required |
+- **`AWS_ENV`** — *resource identity*. Names and tags resources (`sandbx`, `dev`, `test`, `prod`). Also selects the stack names.
+- **`APP_TIER`** — *configuration tier*. `test` or `prod`. Selects the Spring profile `aws-${APP_TIER}`, which selects the Grouper backend (grouper-test vs grouper), the `app.environment` label, and the email flags.
 
-To change the deployed branch, update `GITHUB_BRANCH` in `aws/.env` and redeploy the pipeline stack (see [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)). The pipeline watches whichever branch `.env` specifies.
+`setup.sh` enforces that `APP_TIER=prod` is only permitted when `AWS_ENV=prod`.
+
+| `AWS_ENV` | `APP_TIER` | Spring profile | Grouper backend | Purpose |
+|---|---|---|---|---|
+| `sandbx` | `test` | `aws-test` | grouper-test | Shared ITS sandbox (today) |
+| `test` | `test` | `aws-test` | grouper-test | Future team test tier |
+| `prod` | `prod` | `aws-prod` | grouper (prod) | Production (not yet deployed) |
+
+`APP_TIER` no longer selects a hostname or certificate — the API has no public endpoint.
 
 ## Security Architecture
 
-### Authentication & Authorization
-- **User Auth:** JWT tokens
-- **AWS IAM:** Role-based access control
-- **Secrets:** Local (properties file) or AWS Secrets Manager (encrypted at rest)
+**Authentication and authorization.** Stateless JWT on every non-public endpoint. User authentication happens at the UI against campus CAS; the API trusts the JWT presented on each REST call. AWS access uses IAM roles.
 
-### Secrets Management
+**Network posture.** The strongest control here is that the API is simply **not reachable from the internet**: no public IP, no load balancer, no public subnet. Reachability is limited to holders of `sg-ui-apps` on port 8080. The network scoping and JWT are complementary — the security group limits *who can connect*, JWT limits *who is authorized* once connected.
 
-The project handles two distinct categories of secrets, stored differently:
+**Transport.** Browser→Cloudflare and Cloudflare→tunnel are TLS. UI→API is HTTP over Service Connect inside the VPC (Service Connect can be configured for TLS if a requirement emerges). API→Grouper is HTTPS 443 with normal certificate validation — never disable validation.
 
-**Application secrets** (Grouper password, JWT key) — read by the running API at startup:
-- **Local development:** `~/.$(whoami)-conf/uh-groupings-api-overrides.properties`, bind-mounted read-only into the Docker container and loaded via `SPRING_CONFIG_IMPORT`. The file is never committed.
-- **AWS deployment:** AWS Secrets Manager (`groupings/api/*`), encrypted at rest (AES-256), injected into ECS tasks via the task definition's `secrets[]` array.
+**Secrets.** Two Secrets Manager entries, AES-256 at rest, injected at container start via `secrets[]`. Locally, a developer-owned overrides file that is never committed. Developer AWS access uses short-lived IAM Identity Center (SSO) session tokens, which hold no application secrets. See [SECRETS.md](SECRETS.md).
 
-**AWS account credentials** (temporary SSO session tokens) — used only by developers running `make aws-setup` and other AWS Make targets:
-- Issued by IAM Identity Center (SSO) and cached by the AWS CLI in the developer's `~/.aws/` SSO token cache. Resolved via `AWS_PROFILE`. Sessions are short-lived (typically 1–12 h); any `make aws-*` target re-authenticates automatically, or refresh with `make aws-sso-login`.
-- Bootstrapped automatically on the first `make aws-*` command (writes the profile from `aws/.env` and opens a browser to sign in); requires the AWS CLI v2 installed on the host.
-- Holds **no application secrets**. The CLI reads credentials from the cached SSO token in `~/.aws/`.
+**Container.** Runs as non-root `appuser`; multi-stage build ships runtime only; ECR scans on push.
 
-**See:** [docs/SECRETS.md](SECRETS.md) for the complete model, including IAM permissions and rotation guidance.
-
-### Network Security
-- **Encryption in Transit:** ALB currently exposes HTTP:80; HTTPS:443 with ACM certificate is planned (see "Future Enhancements")
-- **Internal Communication:** HTTP between ALB and ECS tasks (private VPC)
-- **Security Groups:** Principle of least privilege
-- **Access restriction:** the deployed API is intended to accept HTTPS **only from the companion UI deployment**, not the public internet (see below)
-
-### Access Restriction: HTTPS from the UI Deployment Only (Planned)
-
-A companion project — the UH Groupings **UI** — is the sole intended client of this API.
-
-**Confirmed topology (server-to-server).** The end user's browser interacts *only* with the UI project. The UI server, in turn, handles user SSO against the campus **CAS** server and makes **REST** calls to this API for backend transactions. The browser never calls this API directly. Because the UI *server* (not the user's browser) is the API's network client, a network-level source restriction is genuinely enforceable — this is the deciding fact that makes the layers below work.
-
-The target production posture is that the API accepts **only HTTPS traffic originating from the UI deployment**, across three layers:
-
-1. **Transport (HTTPS-only).** The ALB terminates TLS on a 443 listener backed by an ACM certificate. The plaintext HTTP:80 listener is removed or set to redirect to 443. TLS terminates at the ALB; ALB→task traffic remains HTTP inside the VPC.
-
-2. **Network (source restriction).** The API's ALB security group ingress is narrowed from `0.0.0.0/0` to the UI deployment as the only source:
-   - **Same VPC (recommended):** the UI stack exports its security group ID, and `ecs-service.yml` references it as `SourceSecurityGroupId` on the 443 ingress rule via `Fn::ImportValue` — instead of opening 443 to the internet. This is the same cross-stack export pattern `vpc.yml` already uses for subnet IDs.
-   - **Cross-VPC:** restrict ingress to the UI's known egress/NAT IP range(s), and consider AWS WAF for finer-grained rules.
-
-3. **Application (defense in depth).** JWT authentication remains required on every non-public endpoint, and CORS is pinned to the UI's origin. User authentication happens at the UI via CAS; the API trusts the JWT presented on each REST call. The network scoping and JWT are complementary: the security group limits *who can reach* the ALB; JWT limits *who is authorized* once they do.
-
-### Container Security
-- **Non-root User:** Application runs as `appuser`
-- **Image Scanning:** ECR scans on push
-- **Minimal Image:** Multi-stage build (runtime only)
-
-### Compliance
-- **Logging:** All requests logged to CloudWatch
-- **Audit:** CloudTrail for AWS API calls
-- **Secrets Rotation:** Manual (recommend automation)
+**Compliance.** Container logs to CloudWatch; CloudTrail records AWS API calls including every `GetSecretValue`. Secret rotation is manual and deliberate (the JWT key is shared with UI consumers).
 
 ## Scalability & Resilience
 
-### Horizontal Scaling
-- **Auto Scaling:** CPU/Memory target tracking
-- **Manual Scaling:** Adjust desired count
-- **Min/Max:** 2-10 tasks (configurable)
+**Current test posture is deliberately minimal:** one subnet, one AZ, `DesiredCount: 1`, no autoscaling. Availability is not a test-tier goal, and the network reflects that honestly rather than pre-staging capacity that isn't used.
 
-### High Availability
-- **Multi-AZ:** Tasks distributed across 2+ AZs
-- **ALB:** Distributes traffic across healthy tasks
-- **Rolling Updates:** Zero-downtime deployments
+**For production, both repos would need:** a second subnet in another AZ (see [Networking](#8-networking)), `DesiredCount >= 2` spread across those AZs, CPU/memory target-tracking autoscaling, and a decision on whether Service Connect alone suffices or an internal load balancer is warranted. Note that raising `DesiredCount` alone does **not** produce multi-AZ — every task would land in the single existing subnet.
 
-### Disaster Recovery
-- **RTO:** < 15 minutes (manual recovery)
-- **RPO:** ~5 minutes (last committed code)
-- **Backup Strategy:**
-  - ECR images retained (lifecycle policy)
-  - Infrastructure as Code (CloudFormation)
-  - Database backups (external Grouper system)
+**Recovery.** Infrastructure is reproducible from CloudFormation; images are retained in ECR under a lifecycle policy; application data lives in the external Grouper system, so this service holds no durable state of its own.
 
-## Cost Optimization
+## Cost
 
-### Current Costs (Estimated - Sandbox)
-- **ECS Fargate:** ~$30-40/month
-- **ALB:** ~$20/month
-- **ECR:** ~$1-2/month
-- **CloudWatch Logs:** ~$1-5/month
-- **CodeBuild:** ~$0.005/minute (only during builds)
-- **Total:** ~$50-70/month
+Rough monthly estimate for the sandbox (test tier, single task):
 
-### Cost Reduction Strategies
-1. Use FARGATE_SPOT for non-production
-2. Implement VPC endpoints (reduce data transfer)
-3. Optimize log retention policies
-4. Right-size task CPU/memory
-5. Use Reserved Capacity for production
+| Resource | Approx. monthly |
+|---|---|
+| ECS Fargate — 1 task, 0.5 vCPU / 1 GB | $15–20 |
+| Interface VPC endpoints — 4 × 1 ENI | $30 |
+| ECR + CloudWatch Logs | $2–7 |
+| CodeBuild | ~$0.005/min, only while building |
+| **Total** | **~$50–60** |
+
+Two notes on the shape of this bill. Removing the ALB saved roughly $20/month, but the four interface endpoints cost about $30/month — cheaper than a NAT gateway (~$32 plus data processing) while keeping traffic off the internet, and they are what makes the no-NAT posture possible. Endpoints are billed per AZ per endpoint, which is why they are provisioned in one subnet rather than two.
+
+To reduce sandbox cost, scale the service to zero when idle:
+
+```bash
+source aws/.env
+aws ecs update-service \
+  --cluster "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster" \
+  --service "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service" \
+  --desired-count 0
+```
+
+Note that scaling to zero does not stop endpoint charges — those are hourly per ENI regardless of task count.
 
 ## Future Enhancements
 
-### Short Term
-- [ ] Add HTTPS/SSL certificate
-- [ ] Implement blue/green deployments
-- [ ] Add custom domain name
-- [ ] Automated security scanning in pipeline
-- [ ] Secrets rotation automation
+**Blocking / near term**
+- [ ] Confirm and provision the Grouper data-center path (the open questions above)
+- [ ] Re-enable the container health check once Grouper is reachable
+- [ ] Deploy the companion UI stack and verify the Service Connect + security-group path end to end
 
-### Medium Term
-- [ ] Multi-region deployment
-- [ ] CDN integration (CloudFront)
-- [ ] Enhanced monitoring dashboards
-- [ ] Automated performance testing
-- [ ] Container vulnerability scanning
+**Medium term**
+- [ ] Multi-AZ for prod — add a second subnet in `vpc.yml`, then raise `DesiredCount`
+- [ ] CloudWatch alarms and dashboards; route to SNS
+- [ ] Automated security scanning in the pipeline
+- [ ] Manual approval stage for the production pipeline
 
-### Long Term
-- [ ] Service mesh (AWS App Mesh)
-- [ ] Serverless migration considerations
-- [ ] Advanced autoscaling (predictive)
-- [ ] Cost anomaly detection
-- [ ] Chaos engineering implementation
+**Longer term / open questions**
+- [ ] Whether Service Connect TLS is required for UI→API traffic
+- [ ] Whether prod warrants an internal load balancer (and therefore CodeDeploy blue/green)
+- [ ] Secret rotation automation, coordinated across API and UI consumers
+- [ ] Dedicated private subnets with more address space for prod

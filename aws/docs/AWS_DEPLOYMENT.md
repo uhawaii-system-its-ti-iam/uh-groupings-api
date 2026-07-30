@@ -6,7 +6,9 @@
 
 **Need to create infrastructure first?** See [AWS_QUICKSTART.md](./AWS_QUICKSTART.md).
 
-**This guide assumes:** You have already deployed the AWS infrastructure (subnets, ECR, ECS, ALB, Pipeline) via `make aws-setup`.
+**This guide assumes:** You have already deployed the AWS infrastructure (subnets, VPC endpoints, ECR, ECS) via `make aws-setup`.
+
+**Note on posture:** the API is a private service with **no load balancer**. There is no ALB URL to curl, no target group to check, and no target-group health gate during deployment. Until the companion UI is deployed the API is not functionally exercised at all, so verification is limited to stack status, ECS service events, and CloudWatch Logs. See [`../AGENTS.md`](../AGENTS.md) → "Verification scope".
 
 ---
 
@@ -38,7 +40,7 @@ The examples below use the resource names produced by the project's naming conve
 
 ## CodePipeline Setup (Manual)
 
-`make aws-setup` creates the subnets, ECR, ECS, ALB, and Secrets Manager resources, but it does **not** create the CI/CD pipeline. The pipeline requires an AWS CodeConnections connection to GitHub that is authorized through the AWS Console via OAuth — that handshake cannot be automated. Once the connection exists, the pipeline stack itself can be created from the CLI.
+`make aws-setup` creates the subnets, VPC endpoints, ECR, ECS, and Secrets Manager resources, but it does **not** create the CI/CD pipeline. The pipeline requires an AWS CodeConnections connection to GitHub that is authorized through the AWS Console via OAuth — that handshake cannot be automated. Once the connection exists, the pipeline stack itself can be created from the CLI.
 
 This is a one-time setup per environment. After the pipeline exists, ongoing deploys are handled by the [Deployment Methods](#deployment-methods) section below.
 
@@ -123,7 +125,7 @@ aws cloudformation deploy \
   --region "${AWS_REGION}"
 ```
 
-**Important:** `buildspec.yml` lives in the `aws/` subdirectory. Ensure the CodeBuild project references `aws/buildspec.yml` as its buildspec path.
+**Note:** `buildspec.yml` lives in the `aws/` subdirectory, and `codepipeline.yml` sets the CodeBuild `BuildSpec` to `aws/buildspec.yml` accordingly. If you build the pipeline by hand, use that path — a root-relative `buildspec.yml` will not be found.
 
 ### Step 3: Verify the Pipeline
 
@@ -158,7 +160,10 @@ Push to GitHub → CodePipeline → CodeBuild → ECR → ECS Rolling Update
 **Deployment settings (from `ecs-service.yml`):**
 - `MaximumPercent`: 200% (can run 2× desired tasks during deployment)
 - `MinimumHealthyPercent`: 100% (maintains full capacity during deployment)
-- Health check grace period: 60 seconds
+
+There is no health check grace period and no container health check. Without a load balancer, ECS decides a replacement task is healthy once it reaches RUNNING — it does not verify the application responds. Watch the logs after a deploy rather than trusting task state alone.
+
+**Buildspec path:** the pipeline's CodeBuild project uses `aws/buildspec.yml`, not a root-level `buildspec.yml`.
 
 ### 2. Manual Deployment
 
@@ -188,22 +193,11 @@ aws ecs update-service \
   --task-definition "${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}:LATEST_REVISION"
 ```
 
-### 3. Blue/Green Deployment (advanced)
+### 3. Blue/Green Deployment — not currently available
 
-For zero-downtime deployments with instant rollback. Requires:
-- CodeDeploy application and deployment group
-- Two target groups (blue and green)
+CodeDeploy blue/green for ECS **requires a load balancer**: it shifts traffic between two target groups behind an ALB or NLB listener, and an appspec's `LoadBalancerInfo` block is mandatory. This project deploys the API with no load balancer, so blue/green cannot be enabled as a pipeline-only change. There is deliberately no `appspec.yml` in the repo.
 
-Steps to enable:
-1. Modify the ECS service to use the `CODE_DEPLOY` deployment controller
-2. Create a CodeDeploy application:
-   ```bash
-   aws deploy create-application \
-     --application-name "${AWS_PROJECT_ID}" \
-     --compute-platform ECS
-   ```
-3. Create a deployment group with blue/green configuration
-4. Add `appspec.yml` to the repository (already present in `aws/`)
+Enabling blue/green would require introducing a load balancer in front of the API tasks — most plausibly an **internal** ALB or NLB — which is a deliberate architecture decision, not a deployment-tooling change. See [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#future-enhancements).
 
 ---
 
@@ -258,10 +252,9 @@ Then re-push or re-tag the desired image and force a new deployment as in Option
 
 ### Pre-deployment checklist
 
-- [ ] All tests passing locally (`make test`)
+- [ ] All tests passing locally (`./mvnw clean test`)
 - [ ] Secrets present in Secrets Manager (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
 - [ ] Task-definition CPU/memory limits appropriate
-- [ ] Health check endpoint reachable
 - [ ] Stakeholders notified for production
 
 ### Post-deployment verification
@@ -276,18 +269,20 @@ aws ecs describe-services \
   --cluster "${CLUSTER}" --services "${SERVICE}" \
   --query 'services[0].{Status:status,Running:runningCount,Desired:desiredCount,Deployments:deployments}'
 
-# Tail logs
+# Confirm the new task definition revision is the one running
+aws ecs describe-services \
+  --cluster "${CLUSTER}" --services "${SERVICE}" \
+  --query 'services[0].taskDefinition'
+
+# Tail logs — with no load balancer health gate, this is the real verification
 make aws-logs
-
-# Test the load balancer
-ALB_URL=$(aws cloudformation describe-stacks \
-  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
-  --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
-  --output text \
-  --region "${AWS_REGION}")
-
-curl -f "${ALB_URL}/actuator/health"
 ```
+
+Look for `Started SpringBootWebApplication` in the logs. There is no ALB endpoint to curl, and `aws ecs execute-command` is intentionally not enabled — the API is not functionally exercised until the companion UI is deployed (see [`../AGENTS.md`](../AGENTS.md) → "Verification scope").
+
+Until the UI exists, a successful deploy means: stack updated, `runningCount` back to `desiredCount`, the new task definition revision in service, and Spring started in the logs. Grouper errors are expected.
+
+Once the UI is deployed, the end-to-end check is a request through the UI, which reaches the API over Service Connect.
 
 ---
 
@@ -472,11 +467,14 @@ Add `--alarm-actions <SNS_TOPIC_ARN>` to route alarm state changes to email, Sla
 make aws-service-events
 ```
 
-Common causes:
-1. Health checks failing
-2. Resource constraints (CPU/memory)
-3. Port conflicts
-4. Security group blocking traffic
+Common causes, in rough order of likelihood for this architecture:
+
+1. **`ResourceInitializationError` — VPC endpoint problem.** The most common failure here. With no NAT gateway there is no fallback path, so a task that cannot reach the `ecr.api`/`ecr.dkr`/`s3` endpoints cannot pull its image, and one that cannot reach the `secretsmanager` endpoint cannot start. Check that `sg-vpce` still admits 443 from both subnet CIDRs and that private DNS is enabled on the interface endpoints.
+2. **Secret resolution failure.** A renamed or deleted Secrets Manager entry, or an execution role that no longer covers its ARN.
+3. Resource constraints (CPU/memory).
+4. Image tag missing in ECR.
+
+Note that a *deployment* here is not gated on application health — there is no load balancer and no container health check — so a stuck deployment generally means the task never reached RUNNING, not that it failed a health probe.
 
 If everything is stuck, force-stop running tasks to trigger fresh placement:
 

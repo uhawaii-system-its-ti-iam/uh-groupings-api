@@ -1,10 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  Networking for the UH Groupings API. This stack assumes the VPC already
-  exists. It provisions two subnets in different Availability Zones for the
-  ALB and ECS Fargate tasks, plus VPC endpoints so the tasks can pull images
-  from ECR and read secrets from Secrets Manager without a public IP or NAT
-  gateway. Subnet and endpoint IDs are exported for the ecs-service stack.
+  Networking for the UH Groupings API. The VPC is assumed to already exist
+  (provided by the VPC team, never created here). Provisions ONE private-posture
+  subnet for the ECS Fargate API task, plus the AWS PrivateLink VPC endpoints
+  that let it reach AWS services with no public IP and no NAT gateway.
+  No load balancer and no public subnet: the API is a private service reached by
+  the companion UI over ECS Service Connect. SINGLE SUBNET / SINGLE AZ by design
+  (one task) — see the Subnet resource comment and aws/AGENTS.md before adding a
+  second. Exports the subnet id for the ecs-service and UI stacks.
 
 Parameters:
   Owner:
@@ -14,8 +17,9 @@ Parameters:
 
   Project:
     Type: String
-    Description: Project name
-    Default: groupings
+    Description: >-
+      Project identifier (<=13 chars). Must match AWS_PROJECT_ID in aws/.env.
+    Default: groupings-api
 
   Environment:
     Type: String
@@ -29,7 +33,7 @@ Parameters:
 
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: ID of the existing VPC the subnets are created in
+    Description: ID of the existing VPC the subnet is created in
 
   MainRouteTableId:
     Type: String
@@ -38,52 +42,49 @@ Parameters:
       Find it in the VPC console under Route Tables → filter by your VPC →
       the one marked "Yes" under Main.
 
-  SubnetACidr:
+  SubnetCidr:
     Type: String
     Default: 172.18.10.16/28
     Description: >-
-      CIDR block for subnet A. Must fall within the VPC's CIDR block and not
-      overlap an existing subnet. Default sized for sandbox-vpc-01
-      (172.18.0.128/25). Validate with 'make aws-check-vpc'.
-
-  SubnetBCidr:
-    Type: String
-    Default: 172.18.10.32/28
-    Description: >-
-      CIDR block for subnet B. Must fall within the VPC's CIDR block and not
-      overlap an existing subnet or subnet A. Default sized for sandbox-vpc-01
-      (172.18.0.128/25). Validate with 'make aws-check-vpc'.
+      CIDR block for the API subnet. Must fall within the VPC's CIDR block and
+      not overlap an existing subnet. Default sized for sandbox-vpc-01
+      (172.18.0.128/25). Must match SUBNET_CIDR in aws/.env — validate with
+      'make aws-check-vpc'. This subnet holds both the API task ENI and the
+      interface VPC endpoint ENIs.
 
 Resources:
-  SubnetA:
+  # -------------------------------------------------------------------
+  # The single API subnet. Placed in the region's first Availability Zone.
+  # Private by posture: no public IP on launch, and the ECS service sets
+  # AssignPublicIp DISABLED. There is no route to an Internet Gateway or NAT.
+  #
+  # SINGLE SUBNET / SINGLE AZ IS DELIBERATE. The API runs one task
+  # (DesiredCount 1), so a second subnet would sit empty and misrepresent the
+  # deployment as multi-AZ. It is not. Keeping the task and all four interface
+  # endpoint ENIs in one subnet also keeps every endpoint call inside one AZ,
+  # avoiding cross-AZ data transfer charges.
+  #
+  # Do NOT add a second subnet speculatively. Enabling real multi-AZ is a
+  # coordinated change:
+  #   1. add a second AWS::EC2::Subnet in a different AZ (!Select [1, !GetAZs ''])
+  #   2. change the SubnetId output to a comma-joined list of both ids
+  #   3. add its CIDR to EndpointSecurityGroup ingress
+  #   4. decide whether the interface endpoints need an ENI in both subnets
+  #      (an extra hourly charge each) or should stay in one
+  #   5. raise DesiredCount in the ecs stack
+  # Raising DesiredCount alone does NOT buy availability — every task would
+  # land in this one subnet and AZ.
+  # -------------------------------------------------------------------
+  Subnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VpcId
-      CidrBlock: !Ref SubnetACidr
+      CidrBlock: !Ref SubnetCidr
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-a'
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Project
-          Value: !Ref Project
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-
-  SubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VpcId
-      CidrBlock: !Ref SubnetBCidr
-      AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: !Sub '${Owner}-${Project}-${Environment}-subnet-b'
+          Value: !Sub '${Owner}-${Project}-${Environment}-subnet'
         - Key: Owner
           Value: !Ref Owner
         - Key: Project
@@ -94,8 +95,9 @@ Resources:
           Value: CloudFormation
 
   # -------------------------------------------------------------------
-  # VPC Endpoints — allow Fargate tasks (no public IP) to reach AWS
-  # services without a NAT gateway.
+  # VPC Endpoints (AWS PrivateLink) — allow the Fargate task (no public IP,
+  # no NAT gateway, no internet route) to reach AWS services over private
+  # IPv4 addresses. This is what makes the "no NAT" posture viable.
   #
   # ECR image pull requires three endpoints:
   #   - ecr.api       (ECR API calls: GetAuthorizationToken, etc.)
@@ -107,22 +109,29 @@ Resources:
   #
   # CloudWatch Logs requires:
   #   - logs           (awslogs driver sends container stdout/stderr)
+  #
+  # NOT required on Fargate: the ecs, ecs-agent, and ecs-telemetry endpoints.
+  # On the Fargate launch type the control-plane/agent traffic does not
+  # traverse the task ENI, so only the data-path services above need endpoints.
+  # ECS Service Connect likewise needs no additional endpoint — the Envoy
+  # sidecar is supplied and managed by the Fargate platform, not pulled
+  # through this VPC.
+  #
+  # All interface endpoints live in the single subnet alongside the task, so
+  # there is no cross-AZ endpoint traffic. The S3 gateway endpoint is a
+  # route-table entry and costs nothing.
   # -------------------------------------------------------------------
 
   EndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub '${Owner}-${Project}-${Environment} - VPC endpoint access from tasks'
+      GroupDescription: !Sub '${Owner}-${Project}-${Environment} - VPC endpoint access from the API task'
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: !Ref SubnetACidr
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref SubnetBCidr
+          CidrIp: !Ref SubnetCidr
       Tags:
         - Key: Name
           Value: !Sub '${Owner}-${Project}-${Environment}-sg-vpce'
@@ -143,7 +152,7 @@ Resources:
       VpcEndpointType: Interface
       PrivateDnsEnabled: true
       SubnetIds:
-        - !Ref SubnetA
+        - !Ref Subnet
       SecurityGroupIds:
         - !Ref EndpointSecurityGroup
 
@@ -155,7 +164,7 @@ Resources:
       VpcEndpointType: Interface
       PrivateDnsEnabled: true
       SubnetIds:
-        - !Ref SubnetA
+        - !Ref Subnet
       SecurityGroupIds:
         - !Ref EndpointSecurityGroup
 
@@ -176,7 +185,7 @@ Resources:
       VpcEndpointType: Interface
       PrivateDnsEnabled: true
       SubnetIds:
-        - !Ref SubnetA
+        - !Ref Subnet
       SecurityGroupIds:
         - !Ref EndpointSecurityGroup
 
@@ -188,25 +197,36 @@ Resources:
       VpcEndpointType: Interface
       PrivateDnsEnabled: true
       SubnetIds:
-        - !Ref SubnetA
+        - !Ref Subnet
       SecurityGroupIds:
         - !Ref EndpointSecurityGroup
 
 Outputs:
-  SubnetIds:
-    Description: Comma-separated subnet IDs for the ALB and ECS service
-    Value: !Join [',', [!Ref SubnetA, !Ref SubnetB]]
+  # One subnet, one output. setup.sh reads this and passes it to the ecs stack's
+  # SubnetIds parameter, which is a List<AWS::EC2::Subnet::Id> — a single id is a
+  # valid one-element list. If a second subnet is ever added, change this Value
+  # to !Join [',', [!Ref Subnet, !Ref SubnetB]] and nothing downstream needs to
+  # change.
+  SubnetId:
+    Description: >-
+      ID of the API subnet. Consumed by the ecs-service stack and available to
+      the companion UI stack.
+    Value: !Ref Subnet
     Export:
-      Name: !Sub '${AWS::StackName}-SubnetIds'
+      Name: !Sub '${AWS::StackName}-SubnetId'
 
-  SubnetAId:
-    Description: ID of subnet A
-    Value: !Ref SubnetA
+  SubnetAvailabilityZone:
+    Description: >-
+      Availability Zone of the API subnet. The deployment is single-AZ; this is
+      that AZ.
+    Value: !GetAtt Subnet.AvailabilityZone
     Export:
-      Name: !Sub '${AWS::StackName}-SubnetAId'
+      Name: !Sub '${AWS::StackName}-SubnetAvailabilityZone'
 
-  SubnetBId:
-    Description: ID of subnet B
-    Value: !Ref SubnetB
+  EndpointSecurityGroupId:
+    Description: >-
+      Security group id of the interface VPC endpoints (sg-vpce). API-owned;
+      exported for visibility and troubleshooting.
+    Value: !Ref EndpointSecurityGroup
     Export:
-      Name: !Sub '${AWS::StackName}-SubnetBId'
+      Name: !Sub '${AWS::StackName}-EndpointSecurityGroupId'

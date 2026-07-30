@@ -46,37 +46,42 @@ The three identifier components are read from `aws/.env` and passed to the Cloud
 
 ### Why `AWS_PROJECT_ID` is short
 
-AWS imposes a 32-character limit on Application Load Balancer and target group names. Keeping `AWS_PROJECT_ID` to ≤13 characters and `AWS_ENV` to ≤6 characters leaves enough room for owner and suffix:
+The binding limit today is the **64-character IAM role name**, which the longest generated name approaches:
 
 ```
-mhodges - groupings-api - sandbx - alb
-   7    +      13       +    6   +  3   = 32 chars  ✅ at the limit, fits
+mhodges - groupings-api - sandbx - role-ecs-execution
+   7    +      13       +    6   +        18          + 3 hyphens = 47 chars  ✅
 ```
 
-This is why the canonical sandbox environment uses **`sandbx`** rather than the more familiar `sandbox` — `sandbox` (7 chars) would push `mhodges-groupings-api-sandbox-alb` to 33 chars and AWS would reject the ALB. The other allowed environment values (`dev`, `test`, `prod`) are short enough not to hit the limit.
+Historically the constraint was tighter: AWS caps Application Load Balancer and target group names at **32 characters**, and the ≤13-character `AWS_PROJECT_ID` / ≤6-character `AWS_ENV` convention was chosen to fit `mhodges-groupings-api-sandbx-alb` exactly at 32. That is also why the sandbox environment is spelled **`sandbx`** rather than `sandbox` — the extra character would have pushed the ALB name to 33 and AWS would have rejected it.
+
+**The API no longer creates a load balancer or target group** (it is a private service reached over ECS Service Connect), so the 32-character limit no longer applies here. The convention is retained anyway for two reasons: the companion UI projects *do* create load balancers and share this naming scheme, and keeping the identifiers short leaves headroom if a length-constrained resource is introduced later. Do not lengthen `AWS_PROJECT_ID` on the assumption that the limit is gone.
 
 ### Examples
 
 #### Sandbox (PoC development)
 
 ```
-mhodges-groupings-api-sandbx            (ECR repository)
-mhodges-groupings-api-sandbx-cluster    (ECS cluster)
-mhodges-groupings-api-sandbx-service    (ECS service)
-mhodges-groupings-api-sandbx-tg         (target group)
-mhodges-groupings-api-sandbx-alb        (load balancer)
+mhodges-groupings-api-sandbx                     (ECR repository)
+mhodges-groupings-api-sandbx                     (Service Connect namespace)
+mhodges-groupings-api-sandbx-cluster             (ECS cluster)
+mhodges-groupings-api-sandbx-service             (ECS service)
+mhodges-groupings-api-sandbx-sg-api-backend      (API task security group)
+mhodges-groupings-api-sandbx-sg-vpce             (VPC endpoint security group)
+mhodges-groupings-api-sandbx-subnet              (private subnet, single AZ)
 mhodges-groupings-api-sandbx-role-ecs-execution
 mhodges-groupings-api-sandbx-role-ecs-task
-/ecs/mhodges-groupings-api-sandbx       (CloudWatch log group)
+/ecs/mhodges-groupings-api-sandbx                (CloudWatch log group)
 ```
+
+There is no `-alb` or `-tg` name: the API creates no load balancer or target group.
 
 #### Test (team)
 
 ```
 its-iam-groupings-api-test-cluster
 its-iam-groupings-api-test-service
-its-iam-groupings-api-test-tg
-its-iam-groupings-api-test-alb
+its-iam-groupings-api-test-sg-api-backend
 ```
 
 #### Production (team)
@@ -84,20 +89,20 @@ its-iam-groupings-api-test-alb
 ```
 its-iam-groupings-api-prod-cluster
 its-iam-groupings-api-prod-service
-its-iam-groupings-api-prod-tg
-its-iam-groupings-api-prod-alb
+its-iam-groupings-api-prod-sg-api-backend
 ```
 
 ---
 
 ## CloudFormation Stack Names
 
-`aws/setup.sh` creates three stacks per environment, named with `AWS_PROJECT_ID` and `AWS_ENV`:
+`aws/setup.sh` creates three stacks per environment, named with `AWS_PROJECT_ID` and `AWS_ENV`; the pipeline stack is deployed separately (see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)):
 
 ```
+groupings-api-vpc-sandbx        (subnet + VPC endpoints)
 groupings-api-ecr-sandbx
 groupings-api-ecs-sandbx
-groupings-api-pipeline-sandbx
+groupings-api-pipeline-sandbx   (deployed separately, not by setup.sh)
 ```
 
 Stack names always lead with `AWS_PROJECT_ID` so each project's stacks are listable as a group via `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE | grep '^groupings-api-'`.
@@ -147,7 +152,7 @@ sandbx  dev  test  prod
 
 ## CloudFormation Parameters
 
-Both `aws/cloudformation/ecr-repository.yml` and `aws/cloudformation/ecs-service.yml` accept three identifier parameters:
+All four templates in `aws/cloudformation/` (`vpc.yml`, `ecr-repository.yml`, `ecs-service.yml`, `codepipeline.yml`) accept the same three identifier parameters:
 
 ```yaml
 Parameters:
@@ -157,7 +162,7 @@ Parameters:
     Default: mhodges
   Project:
     Type: String
-    Description: Project identifier (≤13 chars; e.g., groupings-api, groupings-aui, groupings-ui)
+    Description: Project identifier (≤13 chars; must match AWS_PROJECT_ID in aws/.env)
     Default: groupings-api
   Environment:
     Type: String
@@ -197,19 +202,24 @@ To deploy under a different owner or to a different environment, edit `aws/.env`
 
 ## Resource Naming by Type
 
-| Resource                   | Final Name                                              |
-|----------------------------|---------------------------------------------------------|
-| ECR repository             | `${Owner}-${Project}-${Environment}`                    |
-| ECS cluster                | `${Owner}-${Project}-${Environment}-cluster`            |
-| ECS service                | `${Owner}-${Project}-${Environment}-service`            |
-| ECS task definition family | `${Owner}-${Project}-${Environment}`                    |
-| Container name             | `${Owner}-${Project}-${Environment}`                    |
-| Target group               | `${Owner}-${Project}-${Environment}-tg`                 |
-| Application Load Balancer  | `${Owner}-${Project}-${Environment}-alb`                |
-| IAM execution role         | `${Owner}-${Project}-${Environment}-role-ecs-execution` |
-| IAM task role              | `${Owner}-${Project}-${Environment}-role-ecs-task`      |
-| CloudWatch log group       | `/ecs/${Owner}-${Project}-${Environment}`               |
-| CloudFormation stacks      | `${Project}-{ecr\|ecs\|pipeline}-${Environment}`        |
+| Resource                    | Final Name                                              |
+|-----------------------------|---------------------------------------------------------|
+| ECR repository              | `${Owner}-${Project}-${Environment}`                    |
+| Service Connect namespace   | `${Owner}-${Project}-${Environment}`                    |
+| ECS cluster                 | `${Owner}-${Project}-${Environment}-cluster`            |
+| ECS service                 | `${Owner}-${Project}-${Environment}-service`            |
+| ECS task definition family  | `${Owner}-${Project}-${Environment}`                    |
+| Container name              | `${Owner}-${Project}-${Environment}`                    |
+| API task security group     | `${Owner}-${Project}-${Environment}-sg-api-backend`     |
+| VPC endpoint security group | `${Owner}-${Project}-${Environment}-sg-vpce`            |
+| Private subnet              | `${Owner}-${Project}-${Environment}-subnet`             |
+| IAM execution role          | `${Owner}-${Project}-${Environment}-role-ecs-execution` |
+| IAM task role               | `${Owner}-${Project}-${Environment}-role-ecs-task`      |
+| CloudWatch log group        | `/ecs/${Owner}-${Project}-${Environment}`               |
+| S3 artifact bucket          | `${Owner}-${Project}-${Environment}-s3-artifacts`       |
+| CloudFormation stacks       | `${Project}-{vpc\|ecr\|ecs\|pipeline}-${Environment}`   |
+
+Not created by this project: Application Load Balancer, target group, NAT gateway, Internet Gateway.
 
 ---
 
@@ -217,7 +227,7 @@ To deploy under a different owner or to a different environment, edit `aws/.env`
 
 Before deploying:
 
-- [ ] `AWS_PROJECT_ID` is ≤10 characters
+- [ ] `AWS_PROJECT_ID` is ≤13 characters and matches the `Project` parameter defaults in the CloudFormation templates
 - [ ] `AWS_OWNER` is set (defaults to `mhodges`)
 - [ ] `AWS_ENV` is one of the allowed values
 - [ ] No conflict with another developer's existing deployment in the same account

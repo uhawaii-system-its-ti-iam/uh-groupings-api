@@ -12,13 +12,16 @@
 
 ## What You'll Create
 
-- Two public subnets (in different AZs) inside your existing VPC
+- Two **private-posture** subnets (different AZs) inside your existing VPC
+- VPC endpoints (ECR api/dkr, S3 gateway, Secrets Manager, CloudWatch Logs) + `sg-vpce`
 - ECR repository for Docker images
-- ECS Fargate cluster + service
-- Application Load Balancer
+- ECS Fargate cluster, Service Connect namespace, and the API service
+- `sg-api-backend` — the API task security group, created with **no ingress rule**
 - Two AWS Secrets Manager entries (`groupings/api/grouper-password`, `groupings/api/jwt-secret`)
 - CloudWatch log group
 - Optionally, a CodePipeline that auto-deploys on `git push`
+
+**No load balancer and no public endpoint.** The API is deployed as a private service. The companion UI reaches it over ECS Service Connect, and the UI stack adds the one ingress rule that opens port 8080 to `sg-ui-apps`. Until the UI exists the API has no inbound client and is not functionally exercised — Step 4 verifies provisioning only.
 
 This is a one-time setup. After completion, all ongoing operations are documented in [AWS_DEPLOYMENT.md](./AWS_DEPLOYMENT.md).
 
@@ -31,7 +34,7 @@ You need:
 - **AWS CLI v2** installed on your host (macOS: `brew install awscli`; Linux: [AWS's instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)). All `make aws-*` targets call it directly.
 - **Docker Desktop** running locally — needed by `make aws-setup` to build and push the application image to ECR.
 - **Make** (standard on macOS and Linux)
-- An existing AWS VPC with public internet egress — its main route table routes `0.0.0.0/0` to an Internet Gateway (Step 2 helps you confirm this). `make aws-setup` creates the two subnets.
+- An existing AWS VPC in your target region with one free `/28` CIDR range. `make aws-setup` creates the subnet. **No Internet Gateway, default route, NAT gateway, or second Availability Zone is required** — the API needs no internet egress and is single-AZ.
 
 ## Step 1: Configure Credentials (5–10 min)
 
@@ -75,12 +78,14 @@ make aws-sso-login
 
 ### Prepare your VPC first
 
-`make aws-setup` creates the two public subnets (via `aws/cloudformation/vpc.yml`), only an existing VPC is required. Before editing `aws/.env`, you need:
+`make aws-setup` creates the subnet (via `aws/cloudformation/vpc.yml`), so only an existing VPC is required. You need:
 
-- A VPC in your target region.
-- That VPC to provide public internet egress: its main route table routes `0.0.0.0/0` to an Internet Gateway. Subnets created by the stack inherit this route table, which is what makes them public.
+- A VPC in your target region, with one free `/28` CIDR range that doesn't overlap an existing subnet.
+- The VPC's main route table ID (`MAIN_ROUTE_TABLE_ID`) — the S3 gateway endpoint attaches to it.
 
-The setup provisions two `/28` subnets in different Availability Zones. The 2-AZ minimum is an AWS-side constraint on Application Load Balancers.
+The deployment is **single-subnet, single-AZ**: one subnet holding the API task ENI and the four interface-endpoint ENIs. That matches the single task (`ECS_TASK_COUNT=1`) and keeps all endpoint traffic within one AZ. Multi-AZ is a deliberate later change — add a second subnet in `vpc.yml` first; raising the task count alone would just stack tasks in the same AZ.
+
+You do **not** need an Internet Gateway, a `0.0.0.0/0` route, or a NAT gateway. The API creates no load balancer and needs no internet egress: tasks run with `AssignPublicIp DISABLED` and reach AWS services through the VPC endpoints this setup creates.
 
 List the VPCs in the account and note the ID designated for this project:
 
@@ -90,19 +95,30 @@ make aws-list-vpcs
 
 > The ITS sandbox has no default VPC, so a `Default` column showing `False` is expected — use the VPC ID your team designates for this work.
 
-Confirm your VPC has a public default route before continuing:
+Validate the VPC before continuing:
 
 ```bash
 make aws-check-vpc
 ```
 
-In the output, a row with a `GatewayId` starting `igw-` means the VPC provides public egress. If it's missing, ask ITS to attach an Internet Gateway / add the `0.0.0.0/0` route. See the [AWS Internet Gateway guide](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) for background.
+This hard-fails only on things that would actually break the deploy: a missing VPC, an unusable subnet CIDR, or a missing main route table. Lines prefixed `·` are informational — including Internet Gateway presence, AZ count, and whether a data-center route exists. A missing IGW is fine and will not block setup.
+
+If you re-run this after the stack is already deployed, the CIDR check will report an overlap against this project's own subnet. That's expected; the script says so explicitly when it detects the existing vpc stack.
+
+One informational line worth reading: if no VGW or Transit Gateway route is reported, Grouper WS will be unreachable once the app starts. That path is pending infrastructure-team confirmation and does not block provisioning — see [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity-pending-infrastructure-confirmation).
 
 ### Edit `aws/.env`
 
 Edit `aws/.env` to set deployment parameters. The committed defaults already target the shared ITS sandbox; set `AWS_OWNER` to your own short identifier (e.g., your username, as in the default `mhodges`) so the resources you create are named and tagged distinctly — for example `mhodges-groupings-api-sandbx-cluster`.
 
 The script reads only from `aws/.env`.
+
+Two values control tiering, and they are deliberately separate:
+
+- `AWS_ENV` (e.g. `sandbx`) names and tags your resources.
+- `APP_TIER` (`test` | `prod`) selects the Spring profile `aws-${APP_TIER}`, which selects the Grouper backend. `setup.sh` rejects `APP_TIER=prod` unless `AWS_ENV=prod`.
+
+`API_HOSTNAME`, `API_CERTIFICATE_ARN`, and `API_HOSTED_ZONE_ID` are **deprecated and unused** — the API has no public endpoint, hostname, or certificate. Leave them blank.
 
 See [AWS_NAMING_CONVENTIONS.md](./AWS_NAMING_CONVENTIONS.md) for why `AWS_PROJECT_ID` must be short and how the values combine into resource names.
 
@@ -124,34 +140,62 @@ The script (`aws/setup.sh`) runs on your host and is **non-interactive end to en
 2. Validates that `AWS_PROJECT_ID` and `VPC_ID` are set to real values (placeholders like `vpc-xxxxx` are rejected). Setup exits before any AWS API call if either is missing.
 3. Validates the developer's overrides file (`~/.$(whoami)-conf/uh-groupings-api-overrides.properties`); exits if `grouperClient.webService.password` is missing or empty.
 4. Verifies prerequisites and your AWS account ID.
-5. **Step 1 — VPC:** creates two public subnets in your VPC via `aws/cloudformation/vpc.yml` and reads their IDs from the stack outputs.
+5. **Step 1 — VPC:** creates the subnet plus `sg-vpce` and the VPC endpoints via `aws/cloudformation/vpc.yml`, then reads the subnet id from the stack outputs.
 6. **Step 2 — ECR:** creates the repository via `aws/cloudformation/ecr-repository.yml`.
 7. **Step 3 — Image:** builds and pushes the initial Docker image to the new ECR repo.
 8. **Step 4 — Secrets:** writes `groupings/api/grouper-password` from your overrides file. Generates a fresh JWT signing key with `openssl rand -base64 32` and writes it to `groupings/api/jwt-secret`, *unless that secret already exists* — in which case the existing value is preserved so re-running setup does not invalidate UI tokens.
-9. **Step 5 — ECS:** creates the Fargate cluster, service, ALB, target group, and IAM roles via `aws/cloudformation/ecs-service.yml`, using the subnet IDs from Step 1.
-10. Prints the ECR URI, cluster/service names, and ALB URL.
+9. **Step 5 — ECS:** creates the Fargate cluster, the Service Connect namespace, the API service and task definition, `sg-api-backend`, and the IAM roles via `aws/cloudformation/ecs-service.yml`, using the subnet IDs from Step 1. It also ensures the account-wide ECS service-linked role exists.
+10. Prints the ECR URI, cluster/service names, and the exported `sg-api-backend` name.
 
-The Grouper URL and username are **not** read by `setup.sh` — they are non-secret values that belong in the ECS task definition `environment[]` array (currently in `aws/task-definition.json`).
+There is no ALB, target group, or URL in the output — the API is private.
+
+The Grouper URL and username are **not** read by `setup.sh`. They are non-secret values supplied by the `aws-test` / `aws-prod` Spring profile in the image (see `aws/task-definition.json` for the equivalent `environment[]` shape).
 
 The whole script is now idempotent. Secrets use create-or-update (and the JWT key is preserved if it already exists), and each CloudFormation stack is applied with `aws cloudformation deploy`, which creates the stack on first run and updates it (or no-ops) on subsequent runs. A stack left in `ROLLBACK_COMPLETE` by a failed first create is deleted automatically before redeploying. So you can safely re-run `make aws-setup` to resume after a partial failure or to pick up template changes. If a run fails, see "Recovery" below.
 
 ---
 
-## Step 4: Verify (2 min)
+## Step 4: Verify (5 min)
+
+The API has no public endpoint, so there is nothing to `curl` from your laptop. Verify in three steps instead.
+
+**1. Confirm the task reached RUNNING:**
 
 ```bash
-# Tail the application's CloudWatch logs
-make aws-logs
+source aws/.env
+CLUSTER="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
+SERVICE="${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
 
-# Test the load balancer
-curl "$(aws cloudformation describe-stacks \
-  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
-  --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerUrl`].OutputValue' \
-  --output text \
-  --region "${AWS_REGION}")/actuator/health"
+aws ecs describe-services --cluster "${CLUSTER}" --services "${SERVICE}" \
+  --query 'services[0].{Status:status,Running:runningCount,Desired:desiredCount}'
 ```
 
-Expected: `{"status":"UP"}` once the ECS task has finished its first health check (~1–2 minutes after the script completes).
+Expect `Running` to reach `1`. Because there is no load balancer, nothing gates the task on an HTTP check — a task that pulls its image and starts the JVM will report RUNNING.
+
+**2. Confirm Spring started, in the logs:**
+
+```bash
+make aws-logs
+```
+
+Look for `Started SpringBootWebApplication`. Grouper-related errors at this stage are **expected** — see the note below.
+
+**3. Confirm the connection values the UI project will need.** These are CloudFormation outputs the API publishes so the UI's stack can reference them instead of hardcoding ids:
+
+```bash
+aws cloudformation describe-stacks \
+  --stack-name "${AWS_PROJECT_ID}-ecs-${AWS_ENV}" \
+  --query 'Stacks[0].Outputs' --output table --region "${AWS_REGION}"
+```
+
+Expect `ApiTaskSecurityGroupId`, `ServiceConnectNamespaceArn`, `ServiceConnectDnsName`, `ClusterName`, and `ServiceName`. These form the interface the UI stack imports.
+
+**That is the whole verification.** The API is **not** functionally exercised until the companion UI is deployed — that is a deliberate project decision, not a gap. There is no ALB to curl, no inbound client until the UI adds its ingress rule, and `aws ecs execute-command` is intentionally not enabled (it would require widening the ECS task role for a shell we have decided we don't need). See [`../AGENTS.md`](../AGENTS.md) → "Verification scope".
+
+Two consequences worth internalizing:
+
+- **`runningCount: 1` is the meaningful signal.** It proves the image pulled through the ECR endpoints and both secrets resolved through the Secrets Manager endpoint — i.e. the no-NAT networking works. That is what this setup is actually proving.
+- **Grouper errors in the logs are expected.** The health endpoint depends on on-prem Grouper WS, whose connectivity mechanism is still pending infrastructure-team confirmation. This is also why the container health check is disabled: with it enabled, ECS would restart-loop the task. Do not expect `{"status":"UP"}`. See [AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md#grouper-ws-connectivity-pending-infrastructure-confirmation).
 
 If anything fails, troubleshoot with:
 
@@ -160,6 +204,8 @@ make aws-service-events
 make aws-task-status
 make aws-stack-events
 ```
+
+A task stuck in `PENDING` with `ResourceInitializationError` almost always means a VPC endpoint problem (image pull or secret fetch), since there is no NAT fallback path.
 
 ---
 
@@ -228,7 +274,18 @@ make aws-teardown
 make aws-teardown
 ```
 
-This deletes the ECR, ECS, VPC (subnets), and pipeline CloudFormation stacks but **not** the Secrets Manager entries. To remove the secrets too:
+On this sandbox branch, teardown and re-setup is a normal iteration loop rather than a last resort. The target deletes the stacks in dependency order — pipeline, then ecs, then ecr, then vpc — waiting for each to finish before starting the next, and skipping any that aren't deployed. Stacks that fail to delete stop the run and point you at `make aws-stack-events`.
+
+Two things are deliberately **not** deleted:
+
+- **The VPC**, which is owned by the VPC team and only referenced.
+- **The Secrets Manager entries.** Preserving `groupings/api/jwt-secret` means re-provisioning does not invalidate tokens held by UI consumers.
+
+The ECR repository is emptied automatically (`EmptyOnDelete: true` in `ecr-repository.yml`). Without that, CloudFormation would refuse to delete a repository still holding the pushed image, and teardown would fail at that stack.
+
+> If the companion UI stack has already been deployed, tear it down **first**. It adds an ingress rule to `sg-api-backend` and joins the API's Service Connect namespace; those dependencies will block deletion of the API's ECS stack.
+
+To remove the secrets too:
 
 ```bash
 aws secretsmanager delete-secret \
@@ -242,16 +299,19 @@ aws secretsmanager delete-secret \
 
 ## Cost Estimate
 
-Per environment (sandbox):
+Per environment (sandbox, single task):
 
-| Resource                                    | Approx. monthly cost  |
-|---------------------------------------------|-----------------------|
-| ECS Fargate (1–2 tasks, 0.5 vCPU, 1 GB RAM) | $30–40                |
-| Application Load Balancer                   | $20                   |
-| ECR + CloudWatch + CodeBuild                | $5                    |
-| **Total**                                   | **$50–70**            |
+| Resource                                  | Approx. monthly cost |
+|-------------------------------------------|----------------------|
+| ECS Fargate (1 task, 0.5 vCPU, 1 GB RAM)  | $15–20               |
+| Interface VPC endpoints (4 × 1 ENI)       | $30                  |
+| ECR + CloudWatch Logs                     | $2–7                 |
+| CodeBuild                                 | ~$0.005/min, only while building |
+| **Total**                                 | **~$50–60**          |
 
-To save money in a sandbox, scale the service to 0 when not in use:
+The four interface endpoints are the largest line item. They replace both an ALB (~$20) and a NAT gateway (~$32 plus data processing) while keeping all AWS traffic off the internet. The S3 gateway endpoint is free.
+
+To save money in a sandbox, scale the service to 0 when not in use. Note that endpoint charges are hourly per ENI and continue regardless of task count:
 
 ```bash
 source aws/.env

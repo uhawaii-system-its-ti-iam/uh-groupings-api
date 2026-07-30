@@ -1,40 +1,56 @@
 flowchart TB
 
-    Browser(["End-user browser"])
-    CF["Cloudflare\nDNS, TLS, WAF, Tunnel ingress\nUI config - external to AWS"]
-    Grouper(["Grouper WS\nUH data center\nHTTPS 443 - live dependency"])
+    Browser(["End-user browser<br/>(no AWS service)<br/>(Neither project)"])
+    DEV(["Developer laptop - local Swagger<br/>docker-compose API on localhost 8081<br/>calls Grouper directly, bypasses AWS<br/>(local Docker - not AWS)<br/>(Groupings API)"])
+    CF["Cloudflare edge - groupings-ui-dev<br/>DNS, TLS cert, WAF, tunnel ingress<br/>restricted to UH network ranges<br/>(external to AWS)<br/>(Groupings UI)"]
+    Grouper(["Grouper WS - grouper-test<br/>F5 public IP, HTTPS 443<br/>reached over the public internet<br/>(on-prem - not AWS)<br/>(Neither project)"])
 
-    subgraph VPC["AWS us-west-2 -- Provided VPC -- VPC team"]
+    subgraph VPC["Provided VPC in us-west-2 (Amazon VPC) (Neither project - VPC team)"]
       direction TB
 
-      DCGW["Data-center connectivity to Grouper\nPENDING INFRA CONFIRMATION\nVGW+VPN or TGW or Direct Connect"]
-
-      subgraph APIREPO["API repo -- uh-groupings-api -- private, no public ingress"]
-        direction TB
-        APITASK["ECS Fargate API task\nport 8080, sg-api-backend\nAssignPublicIp DISABLED"]
-        NET["Private subnets, 2 AZ /28\nDesiredCount 1, single-AZ runtime"]
-        VPCE["VPC Endpoints, sg-vpce, no NAT\nECR api/dkr, S3 gw, Secrets Mgr, CW Logs"]
-        CL["ECS cluster + Service Connect namespace\nexported to UI"]
-        SUP["ECR, Secrets Manager, IAM roles\nCloudWatch Logs, CI/CD pipeline"]
+      subgraph VPCTEAM["Referenced, not created by either repo"]
+        IGW["Internet Gateway - pre-existing<br/>egress only, no inbound use<br/>(Amazon VPC Internet Gateway)<br/>(Neither project - VPC team)"]
       end
 
-      subgraph UIREPO["UI repo -- uh-groupings-ui -- companion"]
+      subgraph APIREPO["API repo - uh-groupings-api - private, no public ingress"]
         direction TB
-        UITASK["ECS Fargate UI task, sg-ui-apps\nruns cloudflared, outbound tunnel"]
-        UINET["UI subnets + tunnel egress\nUI-owned"]
-        UIING["Adds ingress sg-ui-apps to sg-api-backend 8080\njoins API Service Connect namespace"]
+        PUBNET["Public subnet /28 - NAT only<br/>(Amazon VPC subnet)<br/>(Groupings API)"]
+        NATGW["NAT Gateway + persistent EIP<br/>outbound only; the EIP is the address<br/>the UH firewall allow-lists<br/>(Amazon VPC NAT Gateway + EIP)<br/>(Groupings API)"]
+        PRIVNET["Private subnet /28 - one AZ<br/>DesiredCount 1, no public IP<br/>(Amazon VPC subnet)<br/>(Groupings API)"]
+        APITASK["API task, port 8080<br/>AssignPublicIp DISABLED<br/>no listener, no cert, no hostname<br/>(Amazon ECS on AWS Fargate)<br/>(Groupings API)"]
+        SGAPI["sg-api-backend - no ingress rule<br/>(Amazon EC2 security group)<br/>(Groupings API)"]
+        CL["Cluster + Service Connect namespace<br/>exported to UI stack<br/>(Amazon ECS + AWS Cloud Map)<br/>(Groupings API)"]
+        S3EP["S3 gateway endpoint - free<br/>carries ECR image layers<br/>(AWS PrivateLink gateway endpoint)<br/>(Groupings API)"]
+        SUP["Image registry, secrets, roles,<br/>logs, CI/CD - via NAT, no<br/>interface endpoints<br/>(Amazon ECR, AWS Secrets Manager,<br/>AWS IAM, CW Logs, CodePipeline)<br/>(Groupings API)"]
+      end
+
+      subgraph UIREPO["UI repo - uh-groupings-ui - companion"]
+        direction TB
+        UITASK["UI task, sg-ui-apps<br/>runs cloudflared, outbound tunnel<br/>(Amazon ECS on AWS Fargate)<br/>(Groupings UI)"]
+        UINET["UI subnets + tunnel egress<br/>(Amazon VPC subnets)<br/>(Groupings UI)"]
+        UIING["Adds sg-ui-apps to sg-api-backend 8080<br/>joins API Service Connect namespace<br/>(AWS EC2 SecurityGroupIngress)<br/>(Groupings UI)"]
       end
     end
 
-    OPENQ["OPEN QUESTIONS -- infra team\n1 mechanism  2 route + owner\n3 endpoint host/IP  4 DNS from VPC\n5 firewall allow-list  6 client cert\n7 HA / redundant link"]
+    FWNOTE["UH PALO ALTO FIREWALL - allow-list<br/>1 NAT Gateway EIP - deployed task<br/>2 campus + UH VPN ranges - local dev<br/>already in place for developers"]
 
-    Browser -->|"HTTPS 443"| CF
-    CF -->|"Cloudflare Tunnel"| UITASK
+    Browser -->|"HTTPS 443 to groupings-ui-dev"| CF
+    CF -->|"Cloudflare Tunnel - UI dials out"| UITASK
     UITASK -->|"Service Connect 8080"| APITASK
     UIING -.->|"refs exported sg + namespace"| APITASK
 
-    APITASK -->|"publishes into"| CL
-    APITASK -->|"HTTPS AWS APIs"| VPCE
-    APITASK -->|"HTTPS 443, path pending"| DCGW
-    DCGW -.->|"pending infra"| Grouper
-    DCGW -.->|"see questions"| OPENQ
+    APITASK -->|"runs in"| PRIVNET
+    APITASK -->|"guarded by"| SGAPI
+    APITASK -->|"registers with"| CL
+    APITASK -->|"image layers via"| S3EP
+    APITASK -->|"AWS APIs via NAT"| SUP
+    PRIVNET -->|"0.0.0.0/0 route to NAT"| NATGW
+    NATGW -->|"lives in"| PUBNET
+    NATGW -->|"0.0.0.0/0 route to IGW"| IGW
+    IGW -->|"HTTPS 443 from the NAT EIP"| Grouper
+
+    UITASK -->|"runs in"| UINET
+    UINET -->|"tunnel egress 0.0.0.0/0"| NATGW
+
+    DEV -->|"HTTPS 443, campus or UH VPN"| Grouper
+    FWNOTE -.->|"governs both source paths"| Grouper

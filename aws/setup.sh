@@ -19,7 +19,7 @@
 #   projects reference the same Secrets Manager entry from their own task
 #   definitions. Re-running setup preserves the existing JWT secret to avoid
 #   silently invalidating UI tokens; rotate it explicitly via the CLI command
-#   documented in docs/SECRETS.md (Secrets Manager Integration → Rotate the
+#   documented in aws/docs/SECRETS.md (Secrets Manager Integration → Rotate the
 #   JWT key).
 
 set -euo pipefail
@@ -47,7 +47,7 @@ AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-}"
 ECR_REPOSITORY_URI=""
 GROUPER_PASSWORD=""
 # Populated from the vpc stack outputs by create_vpc_stack().
-SUBNET_IDS=""
+SUBNET_ID=""
 # Populated from Secrets Manager by configure_secrets(); passed to the ECS stack.
 GROUPER_PASSWORD_SECRET_ARN=""
 JWT_SECRET_ARN=""
@@ -82,12 +82,15 @@ apply_defaults() {
     AWS_PROJECT_ID="${AWS_PROJECT_ID:-}"
     PROJECT_NAME="${PROJECT_NAME:-${AWS_PROJECT_ID}}"
     AWS_OWNER="${AWS_OWNER:-mhodges}"
-    ECS_TASK_COUNT="${ECS_TASK_COUNT:-2}"
+    # Default 1, matching the single-AZ test posture and the DesiredCount
+    # default in ecs-service.yml. Multi-AZ / higher counts are a prod concern.
+    ECS_TASK_COUNT="${ECS_TASK_COUNT:-1}"
     VPC_ID="${VPC_ID:-}"
     APP_TIER="${APP_TIER:-test}"
-    API_HOSTNAME="${API_HOSTNAME:-}"
-    API_CERTIFICATE_ARN="${API_CERTIFICATE_ARN:-}"
-    API_HOSTED_ZONE_ID="${API_HOSTED_ZONE_ID:-}"
+    # NOTE: API_HOSTNAME / API_CERTIFICATE_ARN / API_HOSTED_ZONE_ID are
+    # deprecated and deliberately not read. The API is private (ECS Service
+    # Connect + sg-api-backend); public DNS, TLS, and the certificate belong to
+    # the companion UI stack. See aws/.env and aws/AGENTS.md.
 }
 
 validate_config() {
@@ -98,9 +101,10 @@ validate_config() {
 }
 
 # APP_TIER is the single source of truth for the deployment tier: it selects the
-# Spring profile (aws-<tier>) in the ECS stack and, with API_HOSTNAME, the public
-# hostname/cert. This guard keeps it valid and consistent with AWS_ENV and the
-# "test in non-prod hostname" convention — before any AWS API call.
+# Spring profile (aws-<tier>) in the ECS stack, which in turn selects the Grouper
+# backend and the app.environment label. This guard keeps it valid and consistent
+# with AWS_ENV — before any AWS API call. There is no hostname/certificate
+# invariant to enforce: the API has no public endpoint of its own.
 validate_tier() {
     log "Validating deployment tier..."
 
@@ -135,7 +139,7 @@ validate_network_configuration() {
     fi
 
     log "  VPC ID:     ${VPC_ID}"
-    log "  Subnets:    created by the vpc stack (aws/cloudformation/vpc.yml)"
+    log "  Subnet:     created by the vpc stack (aws/cloudformation/vpc.yml), single-AZ"
     log "✓ Network configuration validated"
     log ""
 }
@@ -224,7 +228,7 @@ load_overrides_file() {
         error "It lives in your home directory at:"
         error "  \$HOME/.\$(id -un)-conf/uh-groupings-api-overrides.properties"
         error ""
-        error "Create that file (see docs/DEV_QUICKSTART.md for the template) and re-run."
+        error "Create that file (see docs/DEV_QUICKSTART.md in the repo root for the template) and re-run."
         exit 1
     fi
 
@@ -284,12 +288,12 @@ report_stack_failure() {
     error ""
     error "The stack will roll back automatically. Fix the cause above, then"
     error "re-run 'make aws-setup' — a ROLLBACK_COMPLETE stack is deleted and"
-    error "recreated automatically. For subnet CIDR errors, adjust SubnetACidr/"
-    error "SubnetBCidr (or the VPC_ID) and validate first with 'make aws-check-vpc'."
+    error "recreated automatically. For subnet CIDR errors, adjust SubnetCidr"
+    error "(or the VPC_ID) and validate first with 'make aws-check-vpc'."
 }
 
 create_vpc_stack() {
-    log "Step 1: Creating VPC networking (subnets)..."
+    log "Step 1: Creating VPC networking (subnet + endpoints)..."
     delete_stack_if_rollback_complete "${AWS_PROJECT_ID}-vpc-${AWS_ENV}"
     if ! aws cloudformation deploy \
       --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
@@ -306,14 +310,14 @@ create_vpc_stack() {
         exit 1
     fi
 
-    SUBNET_IDS="$(aws cloudformation describe-stacks \
+    SUBNET_ID="$(aws cloudformation describe-stacks \
       --stack-name "${AWS_PROJECT_ID}-vpc-${AWS_ENV}" \
-      --query 'Stacks[0].Outputs[?OutputKey==`SubnetIds`].OutputValue' \
+      --query 'Stacks[0].Outputs[?OutputKey==`SubnetId`].OutputValue' \
       --output text \
       --region "${AWS_REGION}")"
 
     log "✓ VPC networking created"
-    log "  Subnet IDs: ${SUBNET_IDS}"
+    log "  Subnet ID:  ${SUBNET_ID}"
     log ""
 }
 
@@ -391,11 +395,11 @@ configure_secrets() {
     # owns this value; companion UI projects reference the same Secrets Manager
     # entry. Overwriting it on re-run would silently invalidate every active UI
     # token, so we only create it if it doesn't already exist. To rotate
-    # explicitly, use the manual CLI command in docs/SECRETS.md
+    # explicitly, use the manual CLI command in aws/docs/SECRETS.md
     # (Secrets Manager Integration → Rotate the JWT key).
     if jwt_secret_exists_in_aws; then
         log "✓ groupings/api/jwt-secret already exists; preserving existing value"
-        log "  (rotate explicitly via the CLI command in docs/SECRETS.md;"
+        log "  (rotate explicitly via the CLI command in aws/docs/SECRETS.md;"
         log "  rotation requires redeploying every UI consumer)"
     else
         local generated_jwt
@@ -450,7 +454,7 @@ deploy_ecs_infrastructure() {
         "Environment=${AWS_ENV}" \
         "Tier=${APP_TIER}" \
         "VpcId=${VPC_ID}" \
-        "SubnetIds=${SUBNET_IDS}" \
+        "SubnetIds=${SUBNET_ID}" \
         "ContainerImage=${ECR_REPOSITORY_URI}:latest" \
         "DesiredCount=${ECS_TASK_COUNT}" \
         "GrouperPasswordSecretArn=${GROUPER_PASSWORD_SECRET_ARN}" \
@@ -470,24 +474,33 @@ print_summary() {
     log "=== Setup Complete ==="
     log ""
     log "Resources created:"
-    log "  - VPC Subnets:    ${SUBNET_IDS} (in ${VPC_ID})"
+    log "  - VPC Subnet:     ${SUBNET_ID} (in ${VPC_ID}, single-AZ)"
     log "  - ECR Repository: ${ECR_REPOSITORY_URI}"
     log "  - ECS Cluster:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-cluster"
     log "  - ECS Service:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-service"
     log "  - API task SG:    ${AWS_OWNER}-${AWS_PROJECT_ID}-${AWS_ENV}-sg-api-backend (exported for the UI stack)"
     log ""
-    log "The API is private: no load balancer, no public endpoint. It is reached by"
-    log "the companion UI over ECS Service Connect, and can be exercised in-VPC via"
-    log "'aws ecs execute-command' against a running task."
+    log "The API is private: no load balancer, no public endpoint, no inbound client"
+    log "until the companion UI adds its ingress rule. By project decision the API is"
+    log "NOT functionally exercised until the UI is deployed, so there is nothing to"
+    log "curl and 'execute-command' is intentionally disabled."
     log ""
-    log "NOTE: the API health endpoint depends on Grouper, which is not yet wired"
-    log "(VPN deferred), so the task may report unhealthy — expected for now."
+    log "Provisioning is verified at the infrastructure level: the stacks completed,"
+    log "and a runningCount of ${ECS_TASK_COUNT} proves the image pulled through the ECR"
+    log "endpoints and both secrets resolved through the Secrets Manager endpoint."
+    log "Check with 'make aws-service-events' and 'make aws-logs'."
+    log ""
+    log "NOTE: the API health endpoint depends on on-prem Grouper WS. Grouper is a"
+    log "live, required dependency, but the data-center connectivity mechanism is"
+    log "still pending infra-team confirmation, so Grouper calls will fail for now."
+    log "The container health check is intentionally disabled so the task is not"
+    log "restart-looped. See aws/AGENTS.md, 'Grouper WS connectivity'."
     log ""
     log "Next steps:"
-    log "  1. Create a GitHub connection in the AWS Console (see docs/AWS_DEPLOYMENT.md)"
+    log "  1. Create a GitHub connection in the AWS Console (see aws/docs/AWS_DEPLOYMENT.md)"
     log "  2. Deploy the CodePipeline stack"
     log ""
-    log "For detailed instructions, see docs/AWS_QUICKSTART.md and docs/AWS_DEPLOYMENT.md"
+    log "For detailed instructions, see aws/docs/AWS_QUICKSTART.md and aws/docs/AWS_DEPLOYMENT.md"
 }
 
 #
