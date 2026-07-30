@@ -435,7 +435,7 @@ public class GroupingsRestControllerv2_1Test {
             given(groupingOwnerService.paginatedGrouping(TEST_USER, paths, 1, 700, sortBy.sortString(), true))
                 .willReturn(groupingGroupsMembers);
             MvcResult result = mockMvc.perform(
-                post(API_BASE + "/groupings/group?page=1&size=700&sortBy=" + sortBy.value() + "&isAscending=true")
+                post(API_BASE + "/groupings/group?pageNumber=1&pageSize=700&sortBy=" + sortBy.value() + "&isAscending=true")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(JsonUtil.asJson(paths)))
                     .andExpect(status().isOk())
@@ -460,7 +460,7 @@ public class GroupingsRestControllerv2_1Test {
             given(groupingOwnerService.getGroupingMembers(TEST_USER, path, 1, 700,
                     sortBy.sortString(), true, "test")).willReturn(groupingGroupMembers);
             MvcResult result = mockMvc.perform(
-                            get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortBy=" + sortBy.value()
+                            get(API_BASE + "/groupings/" + path + "?pageNumber=1&pageSize=700&sortBy=" + sortBy.value()
                                     + "&isAscending=true&searchString=test"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(JsonUtil.asJson(groupingGroupMembers)))
