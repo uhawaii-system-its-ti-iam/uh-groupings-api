@@ -278,8 +278,8 @@ public class GroupingsRestControllerv2_1 {
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestBody List<String> groupPaths,
-                                                               @RequestParam Integer pageNumber,
-                                                               @RequestParam Integer pageSize,
+                                                               @RequestParam Integer page,
+                                                               @RequestParam Integer size,
                                                                @RequestParam SortBy sortBy,
                                                                @RequestParam Boolean isAscending) {
         logger.info("Entered REST ownedGrouping...");
@@ -287,7 +287,7 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .paginatedGrouping(currentUser, groupPaths, pageNumber, pageSize, sortBy.sortString(), isAscending));
+                        .paginatedGrouping(currentUser, groupPaths, page, size, sortBy.sortString(), isAscending));
     }
 
     /**
@@ -296,8 +296,8 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/groupings/{groupingPath}")
     @ResponseBody
     public ResponseEntity<GroupingGroupMembers> getGroupingMembers(@PathVariable String groupingPath,
-                                                                   @RequestParam(required = false) Integer pageNumber,
-                                                                   @RequestParam(required = false) Integer pageSize,
+                                                                   @RequestParam(required = false) Integer page,
+                                                                   @RequestParam(required = false) Integer size,
                                                                    @RequestParam(required = true) SortBy sortBy,
                                                                    @RequestParam Boolean isAscending,
                                                                    @RequestParam(required = false) String searchString) {
@@ -306,7 +306,7 @@ public class GroupingsRestControllerv2_1 {
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .getGroupingMembers(currentUser, groupingPath, pageNumber, pageSize, sortBy.sortString(), isAscending, searchString));
+                        .getGroupingMembers(currentUser, groupingPath, page, size, sortBy.sortString(), isAscending, searchString));
     }
 
     /**
