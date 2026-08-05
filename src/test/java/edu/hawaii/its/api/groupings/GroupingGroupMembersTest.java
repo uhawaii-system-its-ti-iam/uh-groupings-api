@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -72,15 +73,15 @@ public class GroupingGroupMembersTest {
         GroupingGroupMember firstMember = members.get(0);
         GroupingGroupMember secondMember = members.get(1);
 
-        groupingGroupMembers = groupingGroupMembers.sort("name", false);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.NAME, false);
         assertEquals(firstMember.getName(), groupingGroupMembers.getMembers().get(1).getName());
         assertEquals(secondMember.getName(), groupingGroupMembers.getMembers().get(0).getName());
 
-        groupingGroupMembers = groupingGroupMembers.sort("search_string0", true);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.UID, true);
         assertEquals(firstMember.getUid(), groupingGroupMembers.getMembers().get(0).getUid());
         assertEquals(secondMember.getUid(), groupingGroupMembers.getMembers().get(1).getUid());
 
-        groupingGroupMembers = groupingGroupMembers.sort("subjectId", false);
+        groupingGroupMembers = groupingGroupMembers.sort(SortBy.UH_UUID, false);
         assertEquals(firstMember.getUhUuid(), groupingGroupMembers.getMembers().get(1).getUhUuid());
         assertEquals(secondMember.getUhUuid(), groupingGroupMembers.getMembers().get(0).getUhUuid());
     }
@@ -97,12 +98,37 @@ public class GroupingGroupMembersTest {
             subjects.addAll(duplicateSubjects);
         }
         groupingGroupMembers.setMembers(subjects);
+        assertEquals(subjects.size(), groupingGroupMembers.getSize());
 
         assertEquals(20, groupingGroupMembers.paginate(1, 20).getMembers().size());
         assertEquals(12, groupingGroupMembers.paginate(2, 20).getMembers().size());
         assertEquals(0, groupingGroupMembers.paginate(3, 20).getMembers().size());
         assertEquals(0, groupingGroupMembers.paginate(10, 20).getMembers().size());
-        assertThrows(IndexOutOfBoundsException.class, () -> groupingGroupMembers.paginate(-1, 20));
-        assertThrows(IndexOutOfBoundsException.class, () -> groupingGroupMembers.paginate(0, 20));
+    }
+
+    @Test
+    public void testPaginateValidatesPageArguments() {
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
+
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(0, 20));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(-1, 20));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(1, 0));
+        assertThrows(IllegalArgumentException.class, () -> groupingGroupMembers.paginate(1, -1));
+    }
+
+    @Test
+    public void testPaginateDoesNotShareListStateWithOriginal() {
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(subjectsResults);
+
+        GroupingGroupMembers paginated = groupingGroupMembers.paginate(1, 1);
+        List<GroupingGroupMember> expectedPage = new ArrayList<>(paginated.getMembers());
+
+        groupingGroupMembers.getMembers().clear();
+
+        assertEquals(expectedPage, paginated.getMembers());
     }
 }

@@ -16,7 +16,11 @@ import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.wrapper.GetMembersResults;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -145,6 +149,50 @@ public class GroupingGroupsMembersTest {
                 .anyMatch(member -> member.getUhUuid().equals("99999999")));
         assertTrue(allGroupingMembers.stream().filter(member -> member.getWhereListed().equals("Include"))
                 .allMatch(member -> member.getUhUuid().equals(onlyInclude)));
+    }
+
+    @Test
+    public void duplicateUhUuidInBasisIsNotDuplicatedInAllMembers() {
+        String duplicateUhUuid = "dup-uuid";
+
+        WsGroup basisGroup = new WsGroup();
+        basisGroup.setName("group-path:basis");
+        WsGetMembersResult basisResult = new WsGetMembersResult();
+        basisResult.setWsGroup(basisGroup);
+        basisResult.setWsSubjects(new WsSubject[] {
+                duplicateUhUuidSubject(duplicateUhUuid), duplicateUhUuidSubject(duplicateUhUuid) });
+
+        WsGroup includeGroup = new WsGroup();
+        includeGroup.setName("group-path:include");
+        WsGetMembersResult includeResult = new WsGetMembersResult();
+        includeResult.setWsGroup(includeGroup);
+        includeResult.setWsSubjects(new WsSubject[] { duplicateUhUuidSubject(duplicateUhUuid) });
+
+        WsResultMeta resultMeta = new WsResultMeta();
+        resultMeta.setResultCode("SUCCESS");
+
+        WsGetMembersResults wsGetMembersResults = new WsGetMembersResults();
+        wsGetMembersResults.setResultMetadata(resultMeta);
+        wsGetMembersResults.setResults(new WsGetMembersResult[] { basisResult, includeResult });
+
+        GroupingGroupsMembers groupingGroupsMembers =
+                new GroupingGroupsMembers(new GetMembersResults(wsGetMembersResults));
+
+        // The duplicate is preserved in the raw basis listing...
+        assertEquals(2, groupingGroupsMembers.getGroupingBasis().getMembers().size());
+        // ...but collapsed to a single "Basis & Include" entry in the merged view.
+        assertEquals(1, groupingGroupsMembers.getAllMembers().getMembers().size());
+        assertEquals("Basis & Include", groupingGroupsMembers.getAllMembers().getMembers().get(0).getWhereListed());
+    }
+
+    private static WsSubject duplicateUhUuidSubject(String uhUuid) {
+        WsSubject subject = new WsSubject();
+        subject.setId(uhUuid);
+        subject.setName("Dup Name");
+        subject.setResultCode("SUCCESS");
+        subject.setSourceId("UH core LDAP");
+        subject.setAttributeValues(new String[] { "dup-uid", "Dup Name", "Name", "Dup", "", "", "", "", "" });
+        return subject;
     }
 
     @Test
