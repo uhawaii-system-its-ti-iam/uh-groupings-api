@@ -12,6 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.util.PropertyLocator;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
@@ -67,6 +72,20 @@ public class SubjectsResultsTest {
         assertNotNull(subjectsResults);
         assertEquals("FAILURE", subjectsResults.getResultCode());
         assertNotNull(subjects);
+    }
+
+    @Test
+    public void isSuccessfulUsesRawResultMetadataTest() {
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode(SUCCESS);
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+
+        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        assertEquals(true, subjectsResults.isSuccessful());
+
+        resultMetadata.setResultCode("FAILURE");
+        assertEquals(false, subjectsResults.isSuccessful());
     }
 
     @Test

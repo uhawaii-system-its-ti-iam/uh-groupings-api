@@ -277,6 +277,10 @@ public class GroupingsRestControllerv2_1 {
                 .accepted()
                 .body(asyncJobsManager.putJob(memberAttributeService.getMemberAttributeResultsAsync(currentUser, uhIdentifiers)));
     }
+
+    /**
+     * Get a paginated list of groupings that the current user owns.
+     */
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestBody List<String> groupPaths,

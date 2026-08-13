@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -42,6 +44,7 @@ public class ApiError {
         return path;
     }
 
+    @JsonIgnore
     public String getStackTrace() {
         return stackTrace;
     }
@@ -83,7 +86,6 @@ public class ApiError {
             Objects.requireNonNull(this.status, "status cannot be null");
             Objects.requireNonNull(this.message, "message cannot be null");
             Objects.requireNonNull(this.path, "path cannot be null");
-            Objects.requireNonNull(this.stackTrace, "stackTrace cannot be null");
             return new ApiError(this);
         }
     }
