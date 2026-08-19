@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -70,6 +71,8 @@ public class RetireGroupingServiceTest {
         Subject ownerGrouping = subject("", "hawaii.edu:custom:test:owner-grouping", "", "");
         Subject indirectOwner = subject("ownertwo", "Owner Two", "44444444", "Owner Two");
         Subject indirectDuplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "Duplicated Owner");
+        Subject nestedOwnerGrouping = subject("nested-owner-grouping",
+                "hawaii.edu:custom:test:nested-owner-grouping", "55555555", "");
 
         given(memberService.isCurrentUserAdmin()).willReturn(false);
         given(memberService.isOwner(GROUPING_PATH, CURRENT_USER)).willReturn(true);
@@ -81,9 +84,10 @@ public class RetireGroupingServiceTest {
         given(grouperService.getImmediateMembers(CURRENT_USER, GROUPING_PATH + ":owners"))
                 .willReturn(directOwnersResult);
         given(directOwnersResult.getSubjects()).willReturn(List.of(directOwner, duplicateOwner, ownerGrouping));
-        given(grouperService.getImmediateMembers(CURRENT_USER, "hawaii.edu:custom:test:owner-grouping"))
+        given(grouperService.getAllMembers(CURRENT_USER, "hawaii.edu:custom:test:owner-grouping"))
                 .willReturn(ownerGroupingMembersResult);
-        given(ownerGroupingMembersResult.getSubjects()).willReturn(List.of(indirectOwner, indirectDuplicateOwner));
+        given(ownerGroupingMembersResult.getSubjects())
+                .willReturn(List.of(indirectOwner, indirectDuplicateOwner, nestedOwnerGrouping));
 
         RetireGroupingResult result = retireGroupingService.retireGrouping(CURRENT_USER, GROUPING_PATH);
 
@@ -105,6 +109,7 @@ public class RetireGroupingServiceTest {
         assertTrue(ownerEmails.contains("ownerone@hawaii.edu"));
         assertTrue(ownerEmails.contains("ownertwo@hawaii.edu"));
         assertTrue(ownerEmails.contains("duplicated@hawaii.edu"));
+        assertFalse(ownerEmails.contains("nested-owner-grouping@hawaii.edu"));
     }
 
     @Test

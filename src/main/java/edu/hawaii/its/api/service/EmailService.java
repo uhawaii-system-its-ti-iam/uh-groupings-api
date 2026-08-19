@@ -30,6 +30,12 @@ public class EmailService {
     @Value("${email.is.enabled}")
     private boolean isEnabled;
 
+    @Value("${email.send.default-recipient}")
+    private String defaultRecipient;
+
+    @Value("${email.retirement.iam-team-recipient}")
+    private String iamTeamRecipient;
+
     @Value("${app.environment}")
     private String environment;
 
@@ -38,10 +44,6 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
 
     private final SubjectService subjectService;
-
-    private static final String DEV_HELP_LIST_ADDRESS = "its-iam-web-app-dev-help-l@lists.hawaii.edu";
-
-    private static final String IAM_TEAM_EMAIL = "its-iam-help@lists.hawaii.edu";
 
     public EmailService(JavaMailSender javaMailSender, SubjectService subjectService) {
         this.javaMailSender = javaMailSender;
@@ -75,7 +77,7 @@ public class EmailService {
         String text = "";
         String header = "UH Groupings service feedback [" + feedback.getType() + "]";
         text += "Host Name: " + hostname + ".\n";
-        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
+        if (!recipient.equals(defaultRecipient)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
@@ -124,7 +126,7 @@ public class EmailService {
         String header =  "(" + environment + ") UH Groupings UI Error Response";
         text += "Cause of Response: The UI threw an exception while making a request to the API. \n\n";
         text += "Host Name: " + hostname + ".\n";
-        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
+        if (!recipient.equals(defaultRecipient)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
@@ -169,7 +171,7 @@ public class EmailService {
         text += "Exception Thrown: ErrorControllerAdvice threw the " + exceptionType + ".\n\n";
         text += "Host Name: " + hostname + ".\n";
         text += "Endpoint Path: " + path + "\n";
-        if (!recipient.equals(DEV_HELP_LIST_ADDRESS)) {
+        if (!recipient.equals(defaultRecipient)) {
             text += "Recipient overridden to: " + recipient + "\n";
         }
         text += "----------------------------------------------------" + "\n\n";
@@ -194,7 +196,7 @@ public class EmailService {
 
         String iamSubject = "[groupings] Owner request to retire " + groupingName;
         String iamBody = buildIamTeamEmailBody(groupingPath, requestorEmail);
-        sendEmail(IAM_TEAM_EMAIL, iamSubject, iamBody);
+        sendEmail(iamTeamRecipient, iamSubject, iamBody);
 
         if (ownerEmails.isEmpty()) {
             logger.warn("No owner emails found for grouping: " + groupingPath);

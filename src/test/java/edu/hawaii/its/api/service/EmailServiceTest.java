@@ -203,7 +203,7 @@ public class EmailServiceTest {
         assertEquals(2, messagesSent.size());
 
         SimpleMailMessage iamMessage = messagesSent.get(0);
-        assertTrue(Arrays.asList(iamMessage.getTo()).contains("its-iam-help@lists.hawaii.edu"));
+        assertTrue(Arrays.asList(iamMessage.getTo()).contains("iam-team-test@hawaii.edu"));
         assertEquals("[groupings] Owner request to retire JTTEST-L", iamMessage.getSubject());
         assertTrue(iamMessage.getText().contains("Grouping to retire: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
         assertTrue(iamMessage.getText().contains("Requesting by owner: requestor@hawaii.edu"));

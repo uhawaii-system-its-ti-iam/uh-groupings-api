@@ -85,9 +85,13 @@ public class RetireGroupingService {
 
     private Set<String> gatherOwnerGroupingMemberEmails(String currentUser, String ownerGroupingPath) {
         Set<String> emails = new HashSet<>();
-        GetMembersResult ownerGroupingMembers = grouperService.getImmediateMembers(currentUser, ownerGroupingPath);
+        GetMembersResult ownerGroupingMembers = grouperService.getAllMembers(currentUser, ownerGroupingPath);
 
         for (Subject member : ownerGroupingMembers.getSubjects()) {
+            if (isOwnerGrouping(member)) {
+                continue;
+            }
+
             String email = getEmailAddress(member.getUid());
             if (!email.isEmpty()) {
                 emails.add(email);
