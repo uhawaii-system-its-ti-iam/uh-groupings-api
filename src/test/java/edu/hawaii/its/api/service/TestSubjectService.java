@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import edu.hawaii.its.api.configuration.SpringBootWebApplication;;
+import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
 import edu.hawaii.its.api.util.JsonUtil;
 
