@@ -44,7 +44,7 @@ public class GroupingMoveMemberResult implements GroupingResult {
 
     public void setResultCode() {
         String resultCode = addResult.getResultCode();
-        this.resultCode = (resultCode.equals(SUCCESS)) ? resultCode : FAILURE;
+        this.resultCode = (resultCode.startsWith(SUCCESS)) ? resultCode : FAILURE;
     }
 
     @Override public String getGroupPath() {

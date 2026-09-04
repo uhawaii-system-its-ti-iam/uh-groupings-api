@@ -1,10 +1,13 @@
 package edu.hawaii.its.api.groupings;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -46,6 +49,23 @@ public class GroupingMoveMembersResultTest {
         GroupingMoveMembersResult groupingMoveMembersResult =
                 new GroupingMoveMembersResult(addMembersResults, removeMembersResults);
         assertNotNull(groupingMoveMembersResult);
+    }
+
+    @Test
+    public void invalidUhIdentifiersDefaultsToEmptyAndIsSettable() {
+        GroupingMoveMembersResult groupingMoveMembersResult = new GroupingMoveMembersResult();
+        assertNotNull(groupingMoveMembersResult.getInvalidUhIdentifiers());
+        assertTrue(groupingMoveMembersResult.getInvalidUhIdentifiers().isEmpty());
+
+        List<String> invalidUhIdentifiers = List.of("bogus1", "bogus2");
+        groupingMoveMembersResult.setInvalidUhIdentifiers(invalidUhIdentifiers);
+        assertEquals(invalidUhIdentifiers, groupingMoveMembersResult.getInvalidUhIdentifiers());
+    }
+
+    @Test
+    public void noArgConstructorSetsGroupPathToEmptyNotNull() {
+        GroupingMoveMembersResult groupingMoveMembersResult = new GroupingMoveMembersResult();
+        assertEquals("", groupingMoveMembersResult.getGroupPath());
     }
 
     private String propertyValue(String key) {
