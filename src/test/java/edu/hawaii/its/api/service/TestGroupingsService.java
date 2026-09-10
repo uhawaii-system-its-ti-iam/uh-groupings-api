@@ -121,15 +121,18 @@ public class TestGroupingsService extends ServiceTest {
         assertTrue(groupingsService.ownerGroupingPaths(Collections.emptyList()).isEmpty());
 
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        try {
+            Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
+            assertFalse(results.contains(OWNER_GROUPING));
+
+            updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+            results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
+            assertTrue(results.contains(OWNER_GROUPING));
+        } finally {
+            updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        }
+
         Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
-        assertFalse(results.contains(OWNER_GROUPING));
-
-        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
-        assertTrue(results.contains(OWNER_GROUPING));
-
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
         assertFalse(results.contains(OWNER_GROUPING));
     }
 

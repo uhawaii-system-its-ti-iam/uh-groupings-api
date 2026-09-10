@@ -170,7 +170,7 @@ public class MembershipService {
         try {
             return groupingsService.ownerGroupingPaths(groupings.stream().map(Group::getGroupPath).toList());
         } catch (Exception e) {
-            logger.warn("ownerGroupingPaths;" + e);
+            logger.warn("ownerGroupingPaths failed", e);
             return Collections.emptySet();
         }
     }

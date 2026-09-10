@@ -191,20 +191,21 @@ public class TestMembershipService {
     @Test
     public void manageSubjectResultsFlagsOwnerGroupingTest() {
         updateMemberService.addIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        try {
+            updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
 
-        ManageSubjectResult result = ownerGroupingResult();
-        assertNotNull(result);
-        assertFalse(result.isOwnerGrouping());
+            ManageSubjectResult result = ownerGroupingResult();
+            assertNotNull(result);
+            assertFalse(result.isOwnerGrouping());
 
-        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        result = ownerGroupingResult();
-        assertNotNull(result);
-        assertTrue(result.isOwnerGrouping());
-
-        // Clean up.
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        updateMemberService.removeIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+            updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+            result = ownerGroupingResult();
+            assertNotNull(result);
+            assertTrue(result.isOwnerGrouping());
+        } finally {
+            updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+            updateMemberService.removeIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+        }
     }
 
     /**
