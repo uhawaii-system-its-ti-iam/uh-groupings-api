@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import edu.hawaii.its.api.util.JsonUtil;
+
 public class ManageSubjectResultTest {
 
     private ManageSubjectResult manageSubjectResultEmptyOnConstruction;
@@ -68,6 +70,24 @@ public class ManageSubjectResultTest {
     }
 
     @Test
+    public void ownerGroupingTest() {
+        assertFalse(manageSubjectResultEmptyOnConstruction.isOwnerGrouping());
+        manageSubjectResultEmptyOnConstruction.setOwnerGrouping(true);
+        assertTrue(manageSubjectResultEmptyOnConstruction.isOwnerGrouping());
+    }
+
+    /**
+     * The Manage Person table reads these keys straight off the json, so renaming one breaks the UI silently.
+     */
+    @Test
+    public void jsonPropertyNamesTest() {
+        manageSubjectResultEmptyOnConstruction.setOwnerGrouping(true);
+        String json = JsonUtil.asJson(manageSubjectResultEmptyOnConstruction);
+        assertTrue(json.contains("\"ownerGrouping\":true"), json);
+        assertTrue(json.contains("\"inOwner\":false"), json);
+    }
+
+    @Test
     public void toStringTest() {
         ManageSubjectResult manageSubjectResult = new ManageSubjectResult();
         assertEquals("Membership{" +
@@ -77,6 +97,7 @@ public class ManageSubjectResultTest {
                         ", inExclude=false" +
                         ", inOwner=false" +
                         ", inBasisAndInclude=false" +
+                        ", ownerGrouping=false" +
                         '}'
                 , manageSubjectResult.toString());
     }

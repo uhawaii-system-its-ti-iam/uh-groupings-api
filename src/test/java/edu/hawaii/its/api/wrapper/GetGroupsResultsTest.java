@@ -2,6 +2,10 @@ package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +60,28 @@ public class GetGroupsResultsTest {
         assertNotNull(getGroupsResults.getGroups());
         assertNotNull(getGroupsResults.getSubject());
         assertEquals("FAILURE", getGroupsResults.getResultCode());
+    }
+
+    @Test
+    public void groupsBySubjectName() {
+        GetGroupsResults getGroupsResults =
+                groupingsTestConfiguration.getGroupsResultsGroupsOfGroupsTestData();
+        Map<String, List<Group>> groupsBySubjectName = getGroupsResults.getGroupsBySubjectName();
+
+        // The result without a subject is skipped.
+        assertEquals(3, groupsBySubjectName.size());
+
+        assertEquals(List.of("grouping-1:owners", "grouping-2:include"),
+                groupsBySubjectName.get("owner-grouping-path").stream().map(Group::getGroupPath).toList());
+        assertEquals(List.of("grouping-3:include"),
+                groupsBySubjectName.get("plain-grouping-path").stream().map(Group::getGroupPath).toList());
+        assertTrue(groupsBySubjectName.get("orphan-grouping-path").isEmpty());
+    }
+
+    @Test
+    public void groupsBySubjectNameWhenResultsAreEmpty() {
+        assertTrue(new GetGroupsResults(null).getGroupsBySubjectName().isEmpty());
+        assertTrue(groupingsTestConfiguration.getGroupsResultsEmptyResultsTestData()
+                .getGroupsBySubjectName().isEmpty());
     }
 }

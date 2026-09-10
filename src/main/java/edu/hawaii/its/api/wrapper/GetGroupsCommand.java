@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
+import java.util.List;
+
 import edu.internet2.middleware.grouperClient.api.GcGetGroups;
 import edu.internet2.middleware.grouperClient.ws.StemScope;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -44,6 +46,17 @@ public class GetGroupsCommand extends GrouperCommand<GetGroupsCommand> implement
 
     private GetGroupsCommand addUid(String uid) {
         gcGetGroups.addSubjectIdentifier(uid);
+        return this;
+    }
+
+    /**
+     * Look up groups by group rather than by person, so that the results contain the groups that each of the
+     * groupPaths is listed in.
+     */
+    public GetGroupsCommand addGroupPaths(List<String> groupPaths) {
+        for (String groupPath : groupPaths) {
+            gcGetGroups.addSubjectLookup(groupSubjectLookup(groupPath));
+        }
         return this;
     }
 

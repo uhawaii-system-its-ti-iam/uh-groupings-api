@@ -2,10 +2,8 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.List;
 
-import edu.hawaii.its.api.exception.GrouperException;
 import edu.internet2.middleware.grouperClient.api.GcDeleteMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
-import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public class RemoveMembersCommand extends GrouperCommand<RemoveMembersCommand> implements Command<RemoveMembersResults> {
     private final GcDeleteMember gcDeleteMember;
@@ -55,11 +53,7 @@ public class RemoveMembersCommand extends GrouperCommand<RemoveMembersCommand> i
     }
 
     public RemoveMembersCommand addOwnerGrouping(String groupPath) {
-        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
-        // we can check added member is a path owners when sourceId is g:gsa. That means it's a group
-        wsSubjectLookup.setSubjectSourceId("g:gsa");
-        wsSubjectLookup.setSubjectIdentifier(groupPath);
-        gcDeleteMember.addSubjectLookup(wsSubjectLookup);
+        gcDeleteMember.addSubjectLookup(groupSubjectLookup(groupPath));
         return this;
     }
 

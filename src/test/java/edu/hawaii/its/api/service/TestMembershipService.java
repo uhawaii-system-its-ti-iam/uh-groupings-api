@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -44,6 +45,9 @@ public class TestMembershipService {
 
     @Value("${groupings.api.test.grouping_many_owners}")
     private String GROUPING_OWNERS;
+
+    @Value("${groupings.api.test.owner_grouping}")
+    private String OWNER_GROUPING;
 
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
@@ -178,6 +182,37 @@ public class TestMembershipService {
         // Should return and empty list if uid passed is bogus.
         manageSubjectResults = membershipService.manageSubjectResults(ADMIN, "bogusUser");
         assertTrue(manageSubjectResults.getResults().isEmpty());
+    }
+
+    /**
+     * A person listed in an owner-grouping owns whatever that owner-grouping owns, which is not otherwise visible in
+     * Manage Person, so the grouping used as the owner-grouping is flagged.
+     */
+    @Test
+    public void manageSubjectResultsFlagsOwnerGroupingTest() {
+        updateMemberService.addIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+
+        ManageSubjectResult result = ownerGroupingResult();
+        assertNotNull(result);
+        assertFalse(result.isOwnerGrouping());
+
+        updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        result = ownerGroupingResult();
+        assertNotNull(result);
+        assertTrue(result.isOwnerGrouping());
+
+        // Clean up.
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        updateMemberService.removeIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+    }
+
+    /**
+     * Helper - manageSubjectResultsFlagsOwnerGroupingTest
+     */
+    private ManageSubjectResult ownerGroupingResult() {
+        return membershipService.manageSubjectResults(ADMIN, testUids.get(0)).getResults().stream()
+                .filter(result -> result.getPath().equals(OWNER_GROUPING)).findAny().orElse(null);
     }
 
     @Test

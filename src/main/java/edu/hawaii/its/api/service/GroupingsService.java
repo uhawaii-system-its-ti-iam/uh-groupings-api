@@ -5,8 +5,10 @@ import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import static edu.hawaii.its.api.service.PathFilter.removeDuplicates;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -177,5 +179,24 @@ public class GroupingsService {
     public List<String> allGroupPaths(String uhIdentifier) {
         List<Group> groups = grouperService.getGroupsResults(uhIdentifier).getGroups();
         return groups.stream().map(Group::getGroupPath).collect(Collectors.toList());
+    }
+
+    /**
+     * From a list of grouping paths, the subset that is used as an owner-grouping of some grouping. An owner-grouping
+     * is listed as a group member of another grouping's owners group, so a grouping is an owner-grouping when it is
+     * listed in a path ending in :owners.
+     *
+     * If a grouping is a member of any group whose path ends in :owners, then that grouping is an owner-grouping.
+     */
+    public Set<String> ownerGroupingPaths(List<String> groupingPaths) {
+        if (groupingPaths.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Map<String, List<Group>> groupsByGroupingPath =
+                grouperService.getGroupsOfGroups(groupingPaths).getGroupsBySubjectName();
+        return groupsByGroupingPath.entrySet().stream()
+                .filter(entry -> entry.getValue().stream().map(Group::getGroupPath).anyMatch(pathHasOwner()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 }
