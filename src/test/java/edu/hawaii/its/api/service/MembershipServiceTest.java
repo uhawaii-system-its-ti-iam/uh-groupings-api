@@ -28,7 +28,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
+import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.groupings.MembershipResults;
+import edu.hawaii.its.api.type.ManageSubjectResult;
 import edu.hawaii.its.api.type.MembershipResult;
 import edu.hawaii.its.api.wrapper.Group;
 
@@ -49,6 +51,8 @@ class MembershipServiceTest {
     private static final String INCLUDE_PATH = GROUPING_PATH + ":include";
     private static final String EXCLUDE_PATH = GROUPING_PATH + ":exclude";
 
+    private static final String OWNER_GROUPING_PATH = "tmp:testiwta:testiwta-owner-grouping";
+
     @Mock
     private SubjectService subjectService;
 
@@ -58,11 +62,17 @@ class MembershipServiceTest {
     @Mock
     private GroupPathService groupPathService;
 
+    @Mock
+    private MemberService memberService;
+
     @InjectMocks
     private MembershipService membershipService;
 
     @Mock
     private Group membershipGrouping;
+
+    @Mock
+    private Group ownerGrouping;
 
     @Captor
     private ArgumentCaptor<List<String>> pathsCaptor;
@@ -227,6 +237,56 @@ class MembershipServiceTest {
         MembershipResult curated = results.getResults().get(1);
         assertEquals(GROUPING_PATH, curated.getPath());
         assertEquals("", curated.getDescription());
+    }
+
+    @Test
+    void manageSubjectResultsFlagsOwnerGroupings() {
+        when(memberService.isCurrentUserAdmin()).thenReturn(true);
+        when(subjectService.getValidUhUuid(CURRENT_USER, CURRENT_USER)).thenReturn(UH_UUID);
+        when(groupingsService.allGroupPaths(CURRENT_USER))
+                .thenReturn(Arrays.asList(INCLUDE_PATH, OWNER_GROUPING_PATH + ":include"));
+        when(membershipGrouping.getGroupPath()).thenReturn(GROUPING_PATH);
+        when(ownerGrouping.getGroupPath()).thenReturn(OWNER_GROUPING_PATH);
+        when(groupPathService.getValidGroupings(anyList()))
+                .thenReturn(Arrays.asList(membershipGrouping, ownerGrouping));
+        when(groupingsService.ownerGroupingPaths(anyList()))
+                .thenReturn(Collections.singleton(OWNER_GROUPING_PATH));
+
+        ManageSubjectResults results = membershipService.manageSubjectResults(CURRENT_USER, CURRENT_USER);
+
+        assertEquals(2, results.getResults().size());
+        assertFalse(findByPath(results, GROUPING_PATH).isOwnerGrouping());
+        assertTrue(findByPath(results, OWNER_GROUPING_PATH).isOwnerGrouping());
+
+        // Only the parent grouping paths are sent to the reverse lookup.
+        verify(groupingsService).ownerGroupingPaths(pathsCaptor.capture());
+        assertEquals(Arrays.asList(GROUPING_PATH, OWNER_GROUPING_PATH), pathsCaptor.getValue());
+    }
+
+    @Test
+    void manageSubjectResultsLeavesGroupingsUnflaggedWhenOwnerGroupingLookupFails() {
+        when(memberService.isCurrentUserAdmin()).thenReturn(true);
+        when(subjectService.getValidUhUuid(CURRENT_USER, CURRENT_USER)).thenReturn(UH_UUID);
+        when(groupingsService.allGroupPaths(CURRENT_USER))
+                .thenReturn(Collections.singletonList(INCLUDE_PATH));
+        when(membershipGrouping.getGroupPath()).thenReturn(GROUPING_PATH);
+        when(groupPathService.getValidGroupings(anyList()))
+                .thenReturn(Collections.singletonList(membershipGrouping));
+        when(groupingsService.ownerGroupingPaths(anyList()))
+                .thenThrow(new RuntimeException("grouper is unhappy"));
+
+        ManageSubjectResults results = membershipService.manageSubjectResults(CURRENT_USER, CURRENT_USER);
+
+        assertEquals(1, results.getResults().size());
+        assertFalse(results.getResults().get(0).isOwnerGrouping());
+        assertTrue(results.getResults().get(0).isInInclude());
+    }
+
+    private ManageSubjectResult findByPath(ManageSubjectResults results, String path) {
+        return results.getResults().stream()
+                .filter(result -> path.equals(result.getPath()))
+                .findFirst()
+                .orElseThrow();
     }
 
     @Test

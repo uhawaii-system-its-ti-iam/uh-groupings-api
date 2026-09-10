@@ -272,6 +272,11 @@ public class GroupingsTestConfiguration {
                 getWsResultTestData("ws.get.groups.results.empty.groups", WsGetGroupsResults.class));
     }
 
+    public GetGroupsResults getGroupsResultsGroupsOfGroupsTestData() {
+        return new GetGroupsResults(
+                getWsResultTestData("ws.get.groups.results.groups.of.groups", WsGetGroupsResults.class));
+    }
+
     public GetGroupsResults getGroupsResultsEmptyResultsTestData() {
         WsGetGroupsResults wsGetGroupsResults =
                 getWsResultTestData("ws.empty.results", WsGetGroupsResults.class);

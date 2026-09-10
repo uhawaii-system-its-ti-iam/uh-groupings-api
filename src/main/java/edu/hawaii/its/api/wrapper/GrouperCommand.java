@@ -7,6 +7,8 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubjectLookup;
 
 public abstract class GrouperCommand<T> {
 
+    protected static final String GROUP_SUBJECT_SOURCE_ID = "g:gsa";
+
     private boolean retry = false;
 
     public boolean isRetry(){
@@ -28,6 +30,17 @@ public abstract class GrouperCommand<T> {
         } else {
             wsSubjectLookup.setSubjectIdentifier(uhIdentifier);
         }
+        return wsSubjectLookup;
+    }
+
+    /**
+     * A subject lookup for a group rather than a person. Grouper identifies a group used as a subject by the
+     * g:gsa source id.
+     */
+    protected WsSubjectLookup groupSubjectLookup(String groupPath) {
+        WsSubjectLookup wsSubjectLookup = new WsSubjectLookup();
+        wsSubjectLookup.setSubjectSourceId(GROUP_SUBJECT_SOURCE_ID);
+        wsSubjectLookup.setSubjectIdentifier(groupPath);
         return wsSubjectLookup;
     }
 

@@ -252,6 +252,16 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
+     * Get all groups that each of the groupPaths is listed in. The groupPaths are looked up as group subjects, so a
+     * single call to grouper answers this for every path passed.
+     */
+    public GetGroupsResults getGroupsOfGroups(List<String> groupPaths) {
+        return exec.execute(new GetGroupsCommand()
+                .addGroupPaths(groupPaths)
+                .query(""));
+    }
+
+    /**
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
