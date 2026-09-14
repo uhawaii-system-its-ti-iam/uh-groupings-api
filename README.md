@@ -1,4 +1,5 @@
-#### The web API for UH Groupings.
+## UH Groupings Project
+### The web API for UH Groupings.
 
 Manage your groupings in one place, use them in many.
 
