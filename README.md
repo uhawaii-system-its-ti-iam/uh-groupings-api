@@ -1,69 +1,59 @@
-#### The web API for UH Groupings.
+## OOTB (Out-of-the-box) UH Groupings API
 
-Manage your groupings in one place, use them in many.
+OOTB is a local, self-contained version of the UH Groupings API. It uses mock data in memory instead of Grouper, CAS, or LDAP, so you can run and develop Groupings without UH infrastructure or live services.
 
-A "grouping" is a collection of members. UH Groupings allows you to manage grouping memberships, control members' self-service options, designate grouping integrations, and more.
+Production UH Groupings lives on `main`. This `ootb` branch is only for that local environment. If you meant to run the production API, use the [main README](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/blob/main/README.md).
 
-Groupings can be integrated with one or more of the following: email LISTSERV lists, permissions and privilege assignments for access control via CAS, etc, and this list will continue to grow.  Additionally, UH Groupings allows you to leverage existing membership collections, which can substantially reduce the manual overhead of membership management.
+https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/tree/ootb
 
-UH Groupings utilizes the Internet2 Grouper project.  Grouper is an enterprise access management system designed for the highly distributed management environment and heterogeneous information technology environment common to universities.
+### Requirements
+You need Java 17, a checkout of both this API and [uh-groupings-ui](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-ui/tree/ootb) on the `ootb` branch, and a local overrides file that sets `jwt.secret.key` (see Getting started).
 
-[![Build and Test](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/build_badge.yml/badge.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/build_badge.yml)
-[![Coverage Status](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/blob/badges/jacoco.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/coverage.yml)
-[![Known Vulnerabilities](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api/badge.svg)](https://snyk.io/test/github/uhawaii-system-its-ti-iam/uh-groupings-api)
-[![CodeQL](https://github.com/yertsti/uh-groupings-api/actions/workflows/codeql.yml/badge.svg)](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api/actions/workflows/codeql.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/cd7ffbd709394483a61472a2c87b0aaf)](https://www.codacy.com/gh/uhawaii-system-its-ti-iam/uh-groupings-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uhawaii-system-its-ti-iam/uh-groupings-api&amp;utm_campaign=Badge_Grade)
+### Getting started
+1. Check out the `ootb` branch in **both** `uh-groupings-api` and `uh-groupings-ui`.
+2. Create a JWT secret used by both apps. `JwtService` injects `jwt.secret.key` on startup, and that property is not set in the `ootb` profile. Without it, the API fails during Spring context creation and never listens on `8081`.
+   - The `ootb` profile loads overrides from exactly `${user.home}/.${user.name}-conf/uh-groupings-api-overrides.properties` (`spring.config.import` in `application-ootb.properties`). The folder must be named `.{username}-conf` under your home directory (a leading-dot name is required, including on Windows).
+   - Examples: `C:\Users\jdoe\.jdoe-conf\uh-groupings-api-overrides.properties` or `~/.jdoe-conf/uh-groupings-api-overrides.properties`.
+   - Copy [`uh-groupings-api-overrides.skeleton.properties`](uh-groupings-api-overrides.skeleton.properties) to that folder as `uh-groupings-api-overrides.properties`.
+   - Set `jwt.secret.key` to a BASE64-encoded 32-byte value (HS256). Grouper fields in the skeleton can stay blank for OOTB. Generate a key with:
 
-##### Java
-You'll need a Java JDK to build and run the project (version 17).
+     ```
+     $ openssl rand -base64 32
+     ```
 
-The files for the project are kept in a code repository,
-available from here:
+     ```
+     PS> [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+     ```
+   - Copy [`uh-groupings-ui-overrides.skeleton.properties`](https://github.com/uhawaii-system-its-ti-iam/uh-groupings-ui/blob/ootb/uh-groupings-ui-overrides.skeleton.properties) to the same `.{username}-conf` folder as `uh-groupings-ui-overrides.properties` and use the **same** `jwt.secret.key`.
+3. In each project's IDE run configuration, set:
 
-https://github.com/uhawaii-system-its-ti-iam/uh-groupings-api
+```
+Active Profiles: ootb
+```
 
-##### Building
-To run the Application from the Command Line:
+4. Start the API first, then the UI. From the command line, pass the OOTB profile in each project (Maven otherwise starts the production Grouper integration):
 
-    $ ./mvnw clean spring-boot:run
+```
+$ ./mvnw clean spring-boot:run -Dspring-boot.run.profiles=ootb
+```
 
-To build a deployable war file for local development, if preferred:
+The API listens on `http://localhost:8081/uhgroupingsapi`. The UI listens on `http://localhost:8080/uhgroupings` and talks to that local API.
 
-    $ ./mvnw clean package
+Run OOTB with `spring-boot:run` from the source checkout. The data harness is loaded from `src/main/resources`, so a packaged WAR is not a supported OOTB deployment.
 
-You should have a deployable war file in the target directory.
-Deploy as usual in a servlet container, e.g. tomcat.
+### How it works
+On the `ootb` profile, Spring injects `OotbGrouperApiService` instead of the production Grouper client. Startup loads a static JSON data harness into memory. Common membership, group, subject, and attribute calls use the same response shapes as production, but some operations are unimplemented or return empty results.
 
-##### Running Unit Tests
-The project includes Unit Tests for various parts of the system.
-For this project, Unit Tests are defined as those tests that will
-rely on only the local development computer.
-A development build of the application will run the Unit Tests.
-A test and production build of the application will run both the
-Unit Tests and the System Tests (which may require network access).
-You can also run specific Unit Tests using the appropriate command
-line arguments.
+```
+UI → API → OotbGrouperApiService → In-Memory Data
+```
 
-To run the Unit Tests with a standard build:
+Restarting the API resets the in-memory dataset. Nothing is written to external systems.
 
-    $ ./mvnw clean test
+### Limitations
+- No real Grouper, CAS, or LDAP integration, so authentication and live API behavior cannot be tested here.
+- Data is mock JSON, not a live directory. Changes exist only in memory until the API is restarted.
+- Some production Grouper features are not implemented in OOTB and may return null or empty results.
+- Not suitable for performance or security testing.
 
-To run a test class:
-
-    $ ./mvnw clean test -Dtest=StringsTest
-
-To run a single method in a test class:
-
-    $ ./mvnw clean test -Dtest=StringsTest#trunctate
-
-##### Running System Tests
-The project files include a handful of System Tests.
-For this project, System Tests are defined as those tests that may
-call live remote systems, such as a search against the production
-LDAP server. A standard build of the application will exclude the
-System Tests, but you can explicitly run them by specifying the
-appropriate command line argument.
-
-To run the System Tests:
-
-    $ ./mvnw -Dtest=*SystemTest clean test
+Use `main` when you need real Grouper, CAS, or LDAP.
