@@ -1,10 +1,12 @@
 package edu.hawaii.its.api.filter;
 
 import edu.hawaii.its.api.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,9 +24,12 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
@@ -40,29 +46,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String username = jwtService.extractUsername(jwt);
 
-        // Authenticate and validate the token
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtService.isTokenValid(jwt)) {
-            // Extract roles to create authorities.
-            List<String> roles = jwtService.extractRoles(jwt);
-            List<SimpleGrantedAuthority> authorities = roles.stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .toList();
+        // JwtException (and its subtypes, e.g. SignatureException) are thrown here, in the security
+        // filter chain, so they never reach DispatcherServlet's controller invocation and would bypass
+        // ErrorControllerAdvice entirely. Routing them through HandlerExceptionResolver lets the same
+        // @ExceptionHandler methods (and their email alerts) handle them here too.
+        try {
+            final String username = jwtService.extractUsername(jwt);
 
-            UserDetails userDetails = new User(username, "", authorities);
+            // Authenticate and validate the token
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtService.isTokenValid(jwt)) {
+                // Extract roles to create authorities.
+                List<String> roles = jwtService.extractRoles(jwt);
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
 
-            // Create the authentication token.
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            // Set additional details like IP address.
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UserDetails userDetails = new User(username, "", authorities);
 
-            // Set the authentication object in the SecurityContext.
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Create the authentication token.
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                // Set additional details like IP address.
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Set the authentication object in the SecurityContext.
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (JwtException e) {
+            handlerExceptionResolver.resolveException(request, response, null, e);
+            return;
         }
         // Pass request to the next filter in the chain.
         filterChain.doFilter(request, response);
