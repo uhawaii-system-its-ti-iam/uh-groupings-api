@@ -216,6 +216,34 @@ public class GroupingOwnerServiceTest {
     }
 
     @Test
+    public void paginationValidationTest() {
+        List<String> groupPaths = Collections.singletonList(groupingPath);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.paginatedGrouping(TEST_UIDS.get(0), groupPaths, null, 10, "name", true));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.paginatedGrouping(TEST_UIDS.get(0), groupPaths, 1, null, "name", true));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.paginatedGrouping(TEST_UIDS.get(0), groupPaths, 0, 10, "name", true));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.paginatedGrouping(TEST_UIDS.get(0), groupPaths, 1, 0, "name", true));
+
+        doReturn(true).when(memberService).isCurrentUserAdmin();
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.getGroupingMembers(
+                        TEST_UIDS.get(0), groupingPath, null, 10, "name", true, "test"));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.getGroupingMembers(
+                        TEST_UIDS.get(0), groupingPath, 1, null, "name", true, "test"));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.getGroupingMembers(
+                        TEST_UIDS.get(0), groupingPath, 0, 10, "name", true, "test"));
+        assertThrows(IllegalArgumentException.class,
+                () -> groupingOwnerService.getGroupingMembers(
+                        TEST_UIDS.get(0), groupingPath, 1, 0, "name", true, "test"));
+    }
+
+    @Test
     public void getGroupingMembersWhereListedTest() {
         HasMembersResults basis = groupingsTestConfiguration.hasMemberResultsIsMembersBasisTestData();
         HasMembersResults include = groupingsTestConfiguration.hasMemberResultsIsMembersUidTestData();
