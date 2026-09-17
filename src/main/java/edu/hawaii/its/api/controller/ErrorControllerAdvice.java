@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -258,6 +260,44 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .message("Direct Owner Removed Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(dore))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<ApiError> handleJwtSignatureException(SignatureException se) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
+
+        logger.error("SECURITY ALERT: JWT Signature Mismatch for path: " + path, se);
+        emailService.sendWithStack(se, "SECURITY ALERT: JWT Signature Mismatch", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.FORBIDDEN)
+                .message("SECURITY ALERT: JWT Signature Mismatch")
+                .stackTrace(ExceptionUtils.getStackTrace(se))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiError> handleJwtException(JwtException je) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
+
+        logger.error("JWT Exception for path: " + path, je);
+        emailService.sendWithStack(je, "JWT Exception", path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.FORBIDDEN)
+                .message("JWT Exception")
+                .stackTrace(ExceptionUtils.getStackTrace(je))
                 .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 
