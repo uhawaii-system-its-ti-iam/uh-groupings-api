@@ -1,8 +1,10 @@
 package edu.hawaii.its.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -357,6 +359,48 @@ public class UpdateMemberServiceTest {
         assertNotNull(result);
         assertEquals(validationResult.getInvalidIdentifiers(), result.getInvalidUhIdentifiers());
         assertEquals(1, result.getInvalidUhIdentifiers().size());
+    }
+
+    /**
+     * When every submitted identifier is unknown to Grouper, the valid-identifiers list passed down to
+     * grouperService.addMembers/removeMembers ends up empty. Grouper's GcAddMember/GcDeleteMember clients
+     * reject an empty subject list outright, so this must be short-circuited before reaching them rather
+     * than surfacing as an unhandled exception.
+     */
+    @Test
+    public void addIncludeMembersAllInvalidIdentifiersTest() {
+        FindGroupsResults findGroupsResults = groupingsTestConfiguration.findGroupsResultsDescriptionTestData();
+        assertNotNull(findGroupsResults);
+        doReturn(findGroupsResults).when(grouperService).findGroupsResults(groupPath);
+
+        HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
+        assertNotNull(hasMembersResults);
+        doReturn(hasMembersResults).when(grouperService)
+                .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
+        doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
+
+        // getSubjectsResultsFailureTestData carries 4 subjects, all SUBJECT_NOT_FOUND, so every submitted
+        // identifier ends up invalid and the valid-identifiers list handed to grouperService is empty.
+        List<String> uhIdentifiersToAdd = TEST_UIDS.subList(0, 4);
+        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsFailureTestData();
+        doReturn(subjectsResults).when(grouperService).getSubjects(uhIdentifiersToAdd);
+
+        UhIdentifierValidationResult validationResult =
+                subjectService.validateUhIdentifiers(ADMIN, uhIdentifiersToAdd);
+        assertTrue(validationResult.getValidIdentifiers().isEmpty());
+        assertEquals(4, validationResult.getInvalidIdentifiers().size());
+
+        doReturn(null).when(updateTimestampService).update(any());
+
+        // grouperService.addMembers/removeMembers are intentionally left unstubbed here: the spy's real
+        // (fixed) implementation must run and short-circuit on the empty list instead of calling Grouper.
+        GroupingMoveMembersResult result = assertDoesNotThrow(() ->
+                updateMemberService.addIncludeMembers(TEST_UIDS.get(0), groupPath, uhIdentifiersToAdd));
+        assertNotNull(result);
+        assertEquals(validationResult.getInvalidIdentifiers(), result.getInvalidUhIdentifiers());
+        assertEquals(4, result.getInvalidUhIdentifiers().size());
+        assertTrue(result.getAddResults().getResults().isEmpty());
+        assertTrue(result.getRemoveResults().getResults().isEmpty());
     }
 
     @Test
