@@ -59,6 +59,7 @@ import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.service.SecurityContextTestHelper;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -109,6 +110,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @BeforeAll
     public void init() {
+        SecurityContextTestHelper.setAdminContext();
         assertTrue(memberService.isAdmin(ADMIN));
 
         testUids = uhIdentifierGenerator.getRandomMembers(4).getUids();

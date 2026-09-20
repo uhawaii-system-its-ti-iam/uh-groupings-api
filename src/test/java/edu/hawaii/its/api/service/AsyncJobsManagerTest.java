@@ -39,25 +39,25 @@ public class AsyncJobsManagerTest {
 
     @Test
     public void getJobResultNotFoundTest() {
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, 0);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(0);
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
 
         doReturn(false).when(memberService).isCurrentUserAdmin();
-        AsyncJobResult result = asyncJobsManager.getJobResult(CURRENT_USER, 0);
+        AsyncJobResult result = asyncJobsManager.getJobResult(0);
         assertEquals("NOT_FOUND", result.getStatus());
     }
 
     @Test
     public void getJobResultInProgressTest() {
         Integer jobId = asyncJobsManager.putJob(new CompletableFuture<>());
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals("IN_PROGRESS", asyncJobResult.getStatus());
     }
 
     @Test
     public void getJobResultCompletedTest() {
         Integer jobId = asyncJobsManager.putJob(CompletableFuture.completedFuture("completedJob"));
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals("COMPLETED", asyncJobResult.getStatus());
         assertEquals("completedJob", asyncJobResult.getResult());
     }
@@ -66,7 +66,7 @@ public class AsyncJobsManagerTest {
     public void getJobResultDeniedTest() {
         doReturn(false).when(memberService).isCurrentUserAdmin();
         doReturn(false).when(memberService).isCurrentUserOwner();
-        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, 0));
+        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(0));
     }
 
 }

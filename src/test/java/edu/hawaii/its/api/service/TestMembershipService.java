@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.hawaii.its.api.controller.WithMockUhAdmin;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
 import edu.hawaii.its.api.type.ManageSubjectResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,6 +110,7 @@ public class TestMembershipService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void manageSubjectResultsTest() {
         ManageSubjectResults manageSubjectResults;
 
@@ -137,29 +139,6 @@ public class TestMembershipService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUids.get(0));
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUids.get(0));
         grouperService.removeMember(ADMIN, GROUPING_BASIS, testUids.get(0));
-
-        // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
-        try {
-            membershipService.manageSubjectResults(testUids.get(0), testUids.get(1));
-            fail("Should throw an exception when a non-admin user attempts to fetch memberships of another member.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should throw an exception if bogus-admin is passed as owner.
-        try {
-            membershipService.manageSubjectResults("bogus-admin", testUids.get(0));
-            fail("Should throw exception if bogus-admin is passed as owner.");
-        } catch (AccessDeniedException e) {
-            assertEquals("Insufficient Privileges", e.getMessage());
-        }
-
-        // Should not throw an exception if current user matches uid and is not an admin.
-        try {
-            membershipService.manageSubjectResults(testUids.get(0), testUids.get(0));
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user matches uid and is not an admin.");
-        }
 
         // Should not throw an exception if current user is an admin and does not match uid.
         grouperService.addMember(ADMIN, GROUPING_ADMINS, testUids.get(0));
@@ -214,6 +193,32 @@ public class TestMembershipService {
     private ManageSubjectResult ownerGroupingResult() {
         return membershipService.manageSubjectResults(ADMIN, testUids.get(0)).getResults().stream()
                 .filter(result -> result.getPath().equals(OWNER_GROUPING)).findAny().orElse(null);
+    }
+
+    @Test
+    public void manageSubjectResultsNonAdminTest() {
+        // Should throw an exception if bogus-admin is passed as owner.
+        try {
+            membershipService.manageSubjectResults("bogus-admin", testUids.get(0));
+            fail("Should throw exception if bogus-admin is passed as owner.");
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
+        }
+
+        // Should not throw an exception if current user matches uid and is not an admin.
+        try {
+            membershipService.manageSubjectResults(testUids.get(0), testUids.get(0));
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user matches uid and is not an admin.");
+        }
+
+        // Should throw an exception when a non-admin user attempts to fetch memberships of another member.
+        try {
+            membershipService.manageSubjectResults(testUids.get(0), testUids.get(1));
+            fail("Should throw an exception when a non-admin user attempts to fetch memberships of another member.");
+        } catch (AccessDeniedException e) {
+            assertEquals("Insufficient Privileges", e.getMessage());
+        }
     }
 
     @Test

@@ -81,6 +81,7 @@ public class TestMemberAttributeService {
         GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(5);
         testUids = testGroupingMembers.getUids();
         testUhUuids = testGroupingMembers.getUhUuids();
+        SecurityContextTestHelper.clearContext();
 
         testUids.forEach(testUid -> {
             grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
@@ -97,6 +98,7 @@ public class TestMemberAttributeService {
 
     @Test
     public void memberAttributeResultsTest() {
+        SecurityContextTestHelper.setAdminContext();
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(ADMIN, testUids);
         assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
@@ -118,25 +120,29 @@ public class TestMemberAttributeService {
         assertEquals(Collections.emptyList(), results.getResults());
         assertEquals(uhIdentifiers, results.getInvalid());
 
-        // Should throw AccessDeniedException if current user is not an admin or owner.
-        assertThrows(AccessDeniedException.class,
-                () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
-
-        // Should not return an empty array of subjects if current user is an owner but not an admin.
-        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
-        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
-        assertNotEquals(0, results.getResults().size());
-        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-
         // Should not return an empty array if current user is an admin but not an owner.
         updateMemberService.addAdminMember(ADMIN, testUid);
         results = memberAttributeService.getMemberAttributeResults(testUid, testList);
         assertNotEquals(0, results.getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
+
+        SecurityContextTestHelper.clearContext();
+        // Should throw AccessDeniedException if current user is not an admin or owner.
+        assertThrows(AccessDeniedException.class,
+                () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
+
+        SecurityContextTestHelper.setOwnerContext();
+        // Should not return an empty array of subjects if current user is an owner but not an admin.
+        updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
+        results = memberAttributeService.getMemberAttributeResults(testUid, testList);
+        assertNotEquals(0, results.getResults().size());
+        updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        SecurityContextTestHelper.clearContext();
     }
 
     @Test
     public void memberAttributeResultsAsyncTest() {
+        SecurityContextTestHelper.setAdminContext();
         CompletableFuture<MemberAttributeResults> results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, testUids);
         assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
@@ -157,22 +163,27 @@ public class TestMemberAttributeService {
         results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, uhIdentifiers);
         assertNotNull(results.join().getResults());
         assertTrue(results.join().getResults().isEmpty());
+        SecurityContextTestHelper.clearContext();
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
                 () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
 
+        SecurityContextTestHelper.setOwnerContext();
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
         results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
         assertNotEquals(0, results.join().getResults().size());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
+        SecurityContextTestHelper.clearContext();
 
+        SecurityContextTestHelper.setAdminContext();
         // Should not return an empty array if current user is an admin but not an owner.
         updateMemberService.addAdminMember(ADMIN, testUid);
         results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
         assertNotEquals(0, results.join().getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
+        SecurityContextTestHelper.clearContext();
     }
 
     @Test
