@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public class SecurityContextTestHelper {
+public class MockSecurityContext {
 
     public static void setAdminContext() {
         SecurityContext context = SecurityContextHolder.createEmptyContext();

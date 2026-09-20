@@ -50,7 +50,7 @@ public class TestAsyncJobsManager {
         assertThrows(AccessDeniedException.class,
                 () -> asyncJobsManager.getJobResult(0));
 
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(0);
         assertEquals(0, asyncJobResult.getId());
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
@@ -62,7 +62,7 @@ public class TestAsyncJobsManager {
         assertEquals(jobId, asyncJobResult.getId());
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
         assertEquals("", asyncJobResult.getResult());
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
     }
 
     @Test

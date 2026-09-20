@@ -81,7 +81,7 @@ public class TestMemberAttributeService {
         GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(5);
         testUids = testGroupingMembers.getUids();
         testUhUuids = testGroupingMembers.getUhUuids();
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
 
         testUids.forEach(testUid -> {
             grouperService.removeMember(ADMIN, GROUPING_ADMINS, testUid);
@@ -98,7 +98,7 @@ public class TestMemberAttributeService {
 
     @Test
     public void memberAttributeResultsTest() {
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(ADMIN, testUids);
         assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
@@ -126,23 +126,23 @@ public class TestMemberAttributeService {
         assertNotEquals(0, results.getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
 
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
                 () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
 
-        SecurityContextTestHelper.setOwnerContext();
+        MockSecurityContext.setOwnerContext();
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
         results = memberAttributeService.getMemberAttributeResults(testUid, testList);
         assertNotEquals(0, results.getResults().size());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
     }
 
     @Test
     public void memberAttributeResultsAsyncTest() {
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         CompletableFuture<MemberAttributeResults> results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, testUids);
         assertNotNull(results);
         HashSet<String> testUidsSet = new HashSet(testUids);
@@ -163,27 +163,27 @@ public class TestMemberAttributeService {
         results = memberAttributeService.getMemberAttributeResultsAsync(ADMIN, uhIdentifiers);
         assertNotNull(results.join().getResults());
         assertTrue(results.join().getResults().isEmpty());
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
 
         // Should throw AccessDeniedException if current user is not an admin or owner.
         assertThrows(AccessDeniedException.class,
                 () -> memberAttributeService.getMemberAttributeResults("bogusOwnerAdmin", null));
 
-        SecurityContextTestHelper.setOwnerContext();
+        MockSecurityContext.setOwnerContext();
         // Should not return an empty array of subjects if current user is an owner but not an admin.
         updateMemberService.addOwnerships(ADMIN, GROUPING, testList);
         results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
         assertNotEquals(0, results.join().getResults().size());
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testList);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
 
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         // Should not return an empty array if current user is an admin but not an owner.
         updateMemberService.addAdminMember(ADMIN, testUid);
         results = memberAttributeService.getMemberAttributeResultsAsync(testUid, testList);
         assertNotEquals(0, results.join().getResults().size());
         updateMemberService.removeAdminMember(ADMIN, testUid);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
     }
 
     @Test

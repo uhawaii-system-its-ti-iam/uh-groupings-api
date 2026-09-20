@@ -435,7 +435,7 @@ public class TestUpdateMemberService {
 
     @Test
     public void checkIfOwnerOrAdminUserTest() {
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         // Should not throw an exception if current user is an admin and an owner.
         try {
             updateMemberService.checkIfOwnerOrAdminUser(ADMIN, GROUPING);
@@ -459,7 +459,7 @@ public class TestUpdateMemberService {
             fail("Should not throw an exception if current user is an admin but not an owner of grouping.");
         }
 
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
         // Should not throw an exception if current user is an owner of grouping.
         addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
         try {

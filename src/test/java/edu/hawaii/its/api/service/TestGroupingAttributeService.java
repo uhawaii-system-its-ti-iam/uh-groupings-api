@@ -105,7 +105,7 @@ public class TestGroupingAttributeService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
     }
 
     @AfterAll
@@ -162,7 +162,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.updateOptAttribute(optInRequest, optOutRequest);
@@ -327,7 +327,7 @@ public class TestGroupingAttributeService {
                 .withOptValue(false)
                 .build();
 
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.updateOptAttribute(optInRequest, optOutRequest);
@@ -460,7 +460,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAttributeService.changeGroupAttributeStatus(GROUPING, testUid, OptType.IN.value(), false);
@@ -468,7 +468,7 @@ public class TestGroupingAttributeService {
             fail("Should not throw an exception if current user is an admin but not an owner.");
         }
         updateMemberService.removeAdminMember(ADMIN, testUid);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
 
         // Should throw an exception if an invalid path is passed.
         assertThrows(GrouperException.class,
@@ -534,7 +534,7 @@ public class TestGroupingAttributeService {
         updateMemberService.removeOwnerships(ADMIN, GROUPING, testUidList);
 
         // Should not throw an exception if current user is an admin but not an owner.
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         try {
             groupingAttributeService.updateDescription(GROUPING, testUid, DEFAULT_DESCRIPTION);
         } catch (AccessDeniedException e) {

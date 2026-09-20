@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -143,7 +144,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         try {
             groupingAssignmentService.allGroupingPaths();
         } catch (AccessDeniedException e) {
@@ -154,6 +155,7 @@ public class TestGroupingAssignmentService {
         // Fields in groupingAll should not be null.
         GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths();
         assertNotNull(groupingAll.getGroupingPaths());
+        MockSecurityContext.clearContext();
     }
 
     @Test
@@ -270,7 +272,6 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfImmediateOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
-        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
