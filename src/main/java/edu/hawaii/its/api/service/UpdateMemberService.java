@@ -1,9 +1,13 @@
 package edu.hawaii.its.api.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
+import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,8 +19,10 @@ import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingAddResult;
 import edu.hawaii.its.api.groupings.GroupingAddResults;
+import edu.hawaii.its.api.groupings.GroupingGroupMember;
 import edu.hawaii.its.api.groupings.GroupingMoveMemberResult;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
+import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
@@ -135,8 +141,19 @@ public class UpdateMemberService {
         List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
 
         // Make sure that there would be at least one direct owner remaining after the operation.
-        Integer directOwners = groupingAssignmentService.numberOfDirectOwners(currentUser, groupingPath);
-        if ((directOwners - validIdentifiers.size()) <= 0) {
+        GroupingOwnerMembers groupingImmediateOwners =
+                groupingAssignmentService.groupingImmediateOwners(currentUser, groupingPath);
+        Set<String> currentOwnerSet = groupingImmediateOwners.getOwners().getMembers().stream()
+                .map(GroupingGroupMember::getUhUuid)
+                .filter(uid -> uid != null && !uid.isBlank())
+                .collect(Collectors.toSet());
+
+        // Count how many unique owners we are actually trying to remove
+        Set<String> ownersToRemove = new HashSet<>(validIdentifiers);
+        ownersToRemove.retainAll(currentOwnerSet);
+
+        // if the number of owners we are removing is no less than the number of direct owners
+        if (currentOwnerSet.size() <= ownersToRemove.size()) {
             throw new DirectOwnerRemovedException();
         }
         return removeOwners(currentUser, groupingPath, validIdentifiers);
