@@ -444,7 +444,7 @@ public class TestUpdateMemberService {
         }
 
         // Should not throw an exception if current user is an owner of grouping and an admin.
-        addGroupMember(GROUPING_ADMINS, testUhUuids.get(0));
+        addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
         try {
             updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
