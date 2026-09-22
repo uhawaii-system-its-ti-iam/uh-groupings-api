@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.groupings.GroupingGroupMember;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +64,12 @@ public class GroupingAssignmentService {
             throw new AccessDeniedException();
         }
         return new GroupingPaths(groupingsService.allGroupAttributeResults());
+    }
+
+    public GroupingPaths paginatedGroupingPaths(String adminUhIdentifier, int page, int pageSize, String search) {
+        if (!memberService.isCurrentUserAdmin())
+            throw new AccessDeniedException();
+        return groupingsService.paginatedAdminGroupingPaths(page, pageSize, search);
     }
 
     /**
@@ -249,7 +256,8 @@ public class GroupingAssignmentService {
      * Direct owners + owner-groupings.
      */
     public GroupingOwnerMembers groupingImmediateOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
+        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser,
+                groupingPath));
         return new GroupingOwnerMembers(
                 grouperService.getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
     }

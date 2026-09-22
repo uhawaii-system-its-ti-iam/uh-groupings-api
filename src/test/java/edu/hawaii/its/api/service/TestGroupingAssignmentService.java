@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,11 +17,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -97,6 +101,7 @@ public class TestGroupingAssignmentService {
 
     @BeforeEach
     public void init() {
+        setCurrentUserAdmin();
         assertTrue(memberService.isAdmin(ADMIN));
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
@@ -108,9 +113,15 @@ public class TestGroupingAssignmentService {
 
     }
 
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     public void groupingAdminsTest() {
         // Should throw an exception if current user is not an admin.
+        clearCurrentUserRoles();
         try {
             groupingAssignmentService.groupingAdmins(testUid);
             fail("Should throw an exception if current user is not an admin.");
@@ -119,6 +130,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
+        setCurrentUserAdmin();
         updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAssignmentService.groupingAdmins(testUid);
@@ -135,6 +147,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void allGroupingsTest() {
         // Should throw an exception if current user is not an admin.
+        clearCurrentUserRoles();
         try {
             groupingAssignmentService.allGroupingPaths(testUid);
             fail("Should throw an exception if current user is not an admin.");
@@ -143,6 +156,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
+        setCurrentUserAdmin();
         updateMemberService.addAdminMember(ADMIN, testUid);
         try {
             groupingAssignmentService.allGroupingPaths(testUid);
@@ -169,7 +183,8 @@ public class TestGroupingAssignmentService {
         // Test both getOptInGroups and getOptOutGroups()
         GroupingPaths optInGroupingsPaths =
                 groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
-        List<String> optInPaths = optInGroupingsPaths.getGroupingPaths().stream().map(GroupingPath::getPath).collect(Collectors.toList());
+        List<String> optInPaths =
+                optInGroupingsPaths.getGroupingPaths().stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, testUid);
         Set<String> intersection =
                 optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
@@ -226,7 +241,7 @@ public class TestGroupingAssignmentService {
         GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertTrue(ownersWithGroup.getOwners().getMembers().stream()
-                .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
+                .anyMatch(member -> OWNER_GROUPING.equals(member.getName())));
 
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
@@ -270,6 +285,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfImmediateOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
@@ -287,6 +303,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfAllOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialOwners = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         int basisMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":basis");
         int includeMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":include");
@@ -359,5 +376,18 @@ public class TestGroupingAssignmentService {
         assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths()
                 .stream()
                 .noneMatch(path -> path.contains("DIRECT")));
+    }
+
+    private void setCurrentUserAdmin() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(
+                ADMIN,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+        SecurityContextHolder.setContext(context);
+    }
+
+    private void clearCurrentUserRoles() {
+        SecurityContextHolder.clearContext();
     }
 }

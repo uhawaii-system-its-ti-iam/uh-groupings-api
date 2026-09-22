@@ -8,16 +8,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.exception.GrouperException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.groupings.GroupingPaths;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.wrapper.Group;
@@ -27,15 +35,24 @@ import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 @Service
 public class GroupingsService {
 
+    private static final Log logger = LogFactory.getLog(GroupingsService.class);
+
     @Value("${groupings.api.trio}")
     private String TRIO;
 
     @Value("${groupings.api.curated}")
     private String CURATED;
 
+    @Value("${groupings.catalog.preload:true}")
+    private boolean groupingCatalogPreload;
+
     private final GroupPathService groupPathService;
 
     private final GrouperService grouperService;
+    private volatile CatalogSnapshot groupingCatalogSnapshot;
+
+    @Value("${groupings.catalog.ttl-ms:60000}")
+    private long groupingCatalogTtlMillis;
 
     public GroupingsService(GroupPathService groupPathService, GrouperService grouperService) {
         this.groupPathService = groupPathService;
@@ -63,6 +80,99 @@ public class GroupingsService {
     public GroupAttributeResults allGroupAttributeResults() {
         GroupAttributeResults groupAttributeResults = grouperService.groupAttributeResults(TRIO);
         return groupAttributeResults;
+    }
+
+    public GroupingPaths paginatedAdminGroupingPaths(int page, int pageSize, String search) {
+        if (page < 1)
+            throw new IllegalArgumentException("page must be greater than zero");
+        if (pageSize < 1 || pageSize > 100) {
+            throw new IllegalArgumentException("pageSize must be between 1 and 100");
+        }
+        String term = search == null ? "" : search.trim().toLowerCase(Locale.ROOT);
+        List<GroupingPath> filtered = groupingCatalog().stream()
+                .filter(path -> term.isEmpty() || contains(path.getPath(), term) || contains(path.getDescription(),
+                        term))
+                .collect(Collectors.toList());
+        int offset = Math.min((page - 1) * pageSize, filtered.size());
+        int end = Math.min(offset + pageSize, filtered.size());
+        return new GroupingPaths(new ArrayList<>(filtered.subList(offset, end)), page, pageSize, filtered.size());
+    }
+
+    public synchronized void invalidateGroupingCatalog() {
+        groupingCatalogSnapshot = null;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void warmGroupingCatalog() {
+        if (!groupingCatalogPreload)
+            return;
+        refreshGroupingCatalog("startup");
+    }
+
+    @Scheduled(
+            fixedDelayString = "${groupings.catalog.refresh-ms:60000}",
+            initialDelayString = "${groupings.catalog.refresh-initial-delay-ms:60000}")
+    public void refreshGroupingCatalog() {
+        if (!groupingCatalogPreload)
+            return;
+        refreshGroupingCatalog("scheduled");
+    }
+
+    private void refreshGroupingCatalog(String source) {
+        long startedAt = System.currentTimeMillis();
+        try {
+            List<GroupingPath> paths = loadGroupingCatalog();
+            CatalogSnapshot refreshed = new CatalogSnapshot(paths, System.currentTimeMillis());
+            synchronized (this) {
+                groupingCatalogSnapshot = refreshed;
+            }
+            logger.info(String.format(
+                    "Grouping catalog %s refresh completed in %dms; entries=%d",
+                    source,
+                    System.currentTimeMillis() - startedAt,
+                    paths.size()));
+        } catch (RuntimeException exception) {
+            logger.error("Grouping catalog " + source + " refresh failed; retaining existing snapshot", exception);
+        }
+    }
+
+    private List<GroupingPath> groupingCatalog() {
+        CatalogSnapshot snapshot = groupingCatalogSnapshot;
+        long now = System.currentTimeMillis();
+        if (snapshot != null && now - snapshot.createdAt < groupingCatalogTtlMillis) {
+            return snapshot.paths;
+        }
+
+        synchronized (this) {
+            snapshot = groupingCatalogSnapshot;
+            long refreshedNow = System.currentTimeMillis();
+            if (snapshot == null || refreshedNow - snapshot.createdAt >= groupingCatalogTtlMillis) {
+                List<GroupingPath> paths = loadGroupingCatalog();
+                snapshot = new CatalogSnapshot(paths, refreshedNow);
+                groupingCatalogSnapshot = snapshot;
+            }
+            return snapshot.paths;
+        }
+    }
+
+    private List<GroupingPath> loadGroupingCatalog() {
+        return grouperService.groupAttributeResults(TRIO).getGroups().stream()
+                .map(group -> new GroupingPath(group.getGroupPath(), group.getDescription()))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    private boolean contains(String value, String term) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(term);
+    }
+
+    private static final class CatalogSnapshot {
+        private final List<GroupingPath> paths;
+        private final long createdAt;
+
+        private CatalogSnapshot(List<GroupingPath> paths, long createdAt) {
+            this.paths = paths;
+            this.createdAt = createdAt;
+        }
     }
 
     /**
@@ -169,8 +279,12 @@ public class GroupingsService {
 
     public GroupingUpdateDescriptionResult updateGroupingDescription(String path, String description) {
         String updatedDescription = getGroupingDescription(path);
-        return new GroupingUpdateDescriptionResult(grouperService.groupSaveResults(path, description),
-                updatedDescription);
+        GroupingUpdateDescriptionResult result = new GroupingUpdateDescriptionResult(
+                grouperService.groupSaveResults(path, description), updatedDescription);
+        if (result.getResultCode().startsWith("SUCCESS")) {
+            invalidateGroupingCatalog();
+        }
+        return result;
     }
 
     /**
@@ -185,7 +299,7 @@ public class GroupingsService {
      * From a list of grouping paths, the subset that is used as an owner-grouping of some grouping. An owner-grouping
      * is listed as a group member of another grouping's owners group, so a grouping is an owner-grouping when it is
      * listed in a path ending in :owners.
-     *
+     * <p>
      * If a grouping is a member of any group whose path ends in :owners, then that grouping is an owner-grouping.
      */
     public Set<String> ownerGroupingPaths(List<String> groupingPaths) {
