@@ -35,7 +35,7 @@ public class JwtServiceTest {
     @Value("${groupings.api.test.admin_user}")
     private String TEST_ADMIN;
 
-    private final List<String> TEST_ROLES = List.of("ROLE_UH", "ROLE_ADMIN");
+    private final List<String> TEST_ROLES = List.of("UH", "ADMIN");
     private final long TEST_EXPIRATION_TIME = 10000; // 10 sec
 
     private String validToken;
