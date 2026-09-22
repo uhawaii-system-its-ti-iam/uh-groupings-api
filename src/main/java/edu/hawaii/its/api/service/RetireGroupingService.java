@@ -1,7 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,59 +50,38 @@ public class RetireGroupingService {
         String requestorEmail = getEmailAddress(currentUser);
         List<String> ownerEmails = new ArrayList<>(gatherOwnerEmails(currentUser, groupingPath));
 
-        emailService.sendRetireGroupingEmails(
+        return emailService.sendRetireGroupingEmails(
                 groupingPath,
-                currentUser,
                 requestorEmail,
                 groupingName,
                 groupingDescription,
                 ownerEmails,
                 requestorName);
-
-        return new RetireGroupingResult("SUCCESS",
-                "Retire request processed successfully. Notifications sent to IAM team and grouping owners.");
     }
 
     private Set<String> gatherOwnerEmails(String currentUser, String groupingPath) {
-        Set<String> ownerEmails = new HashSet<>();
+        Set<String> ownerEmails = new LinkedHashSet<>();
         String ownersGroupPath = groupingPath + GroupType.OWNERS.value();
-        GetMembersResult ownersResult = grouperService.getImmediateMembers(currentUser, ownersGroupPath);
+        GetMembersResult ownersResult = grouperService.getAllMembers(currentUser, ownersGroupPath);
 
         for (Subject owner : ownersResult.getSubjects()) {
             if (isOwnerGrouping(owner)) {
-                ownerEmails.addAll(gatherOwnerGroupingMemberEmails(currentUser, owner.getName()));
                 continue;
             }
 
             String email = getEmailAddress(owner.getUid());
             if (!email.isEmpty()) {
                 ownerEmails.add(email);
+            } else {
+                logger.warn("Unable to determine email address for owner in grouping: " + groupingPath);
             }
         }
 
         return ownerEmails;
     }
 
-    private Set<String> gatherOwnerGroupingMemberEmails(String currentUser, String ownerGroupingPath) {
-        Set<String> emails = new HashSet<>();
-        GetMembersResult ownerGroupingMembers = grouperService.getAllMembers(currentUser, ownerGroupingPath);
-
-        for (Subject member : ownerGroupingMembers.getSubjects()) {
-            if (isOwnerGrouping(member)) {
-                continue;
-            }
-
-            String email = getEmailAddress(member.getUid());
-            if (!email.isEmpty()) {
-                emails.add(email);
-            }
-        }
-
-        return emails;
-    }
-
     private boolean isOwnerGrouping(Subject subject) {
-        return subject.getName().contains(":");
+        return "g:gsa".equals(subject.getSourceId()) || subject.getName().contains(":");
     }
 
     private String getEmailAddress(String uid) {

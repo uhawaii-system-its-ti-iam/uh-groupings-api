@@ -25,6 +25,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetMembersResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
+
 @ExtendWith(MockitoExtension.class)
 public class RetireGroupingServiceTest {
 
@@ -44,12 +48,6 @@ public class RetireGroupingServiceTest {
     private MemberService memberService;
 
     @Mock
-    private GetMembersResult directOwnersResult;
-
-    @Mock
-    private GetMembersResult ownerGroupingMembersResult;
-
-    @Mock
     private SubjectsResults requestorSubjectsResults;
 
     @Mock
@@ -66,13 +64,19 @@ public class RetireGroupingServiceTest {
     @Test
     public void retireGrouping() {
         Subject requestor = subject(CURRENT_USER, "Requestor Name", "11111111", "Requestor Name");
-        Subject directOwner = subject("ownerone", "Owner One", "22222222", "Owner One");
-        Subject duplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "Duplicated Owner");
-        Subject ownerGrouping = subject("", "hawaii.edu:custom:test:owner-grouping", "", "");
-        Subject indirectOwner = subject("ownertwo", "Owner Two", "44444444", "Owner Two");
-        Subject indirectDuplicateOwner = subject("duplicated", "Duplicated Owner", "33333333", "Duplicated Owner");
-        Subject nestedOwnerGrouping = subject("nested-owner-grouping",
-                "hawaii.edu:custom:test:nested-owner-grouping", "55555555", "");
+        WsGroup ownersGroup = new WsGroup();
+        ownersGroup.setName(GROUPING_PATH + ":owners");
+        WsGetMembersResult wsOwners = new WsGetMembersResult();
+        wsOwners.setWsGroup(ownersGroup);
+        wsOwners.setWsSubjects(new WsSubject[] {
+                wsSubject("ownerone", "Owner One", "22222222", "UH core LDAP"),
+                wsSubject("duplicated", "Duplicated Owner", "33333333", "UH core LDAP"),
+                wsSubject("", "hawaii.edu:custom:test:owner-grouping", "group-id", "g:gsa"),
+                wsSubject("ownertwo", "Owner Two", "44444444", "UH core LDAP"),
+                wsSubject("duplicated", "Duplicated Owner", "33333333", "UH core LDAP"),
+                wsSubject("nested-owner-grouping", "Nested owner grouping", "group-id-2", "g:gsa"),
+                wsSubject("", "Owner Missing UID", "66666666", "UH core LDAP")
+        });
 
         given(memberService.isCurrentUserAdmin()).willReturn(false);
         given(memberService.isOwner(GROUPING_PATH, CURRENT_USER)).willReturn(true);
@@ -81,23 +85,24 @@ public class RetireGroupingServiceTest {
         given(grouperService.findGroupsResults(CURRENT_USER, GROUPING_PATH)).willReturn(findGroupsResults);
         given(findGroupsResults.getGroup()).willReturn(group);
         given(group.getDescription()).willReturn("Changing description test");
-        given(grouperService.getImmediateMembers(CURRENT_USER, GROUPING_PATH + ":owners"))
-                .willReturn(directOwnersResult);
-        given(directOwnersResult.getSubjects()).willReturn(List.of(directOwner, duplicateOwner, ownerGrouping));
-        given(grouperService.getAllMembers(CURRENT_USER, "hawaii.edu:custom:test:owner-grouping"))
-                .willReturn(ownerGroupingMembersResult);
-        given(ownerGroupingMembersResult.getSubjects())
-                .willReturn(List.of(indirectOwner, indirectDuplicateOwner, nestedOwnerGrouping));
+        given(grouperService.getAllMembers(CURRENT_USER, GROUPING_PATH + ":owners"))
+                .willReturn(new GetMembersResult(wsOwners));
+
+        RetireGroupingResult emailResult = new RetireGroupingResult("SUCCESS",
+                "Retirement request emails were sent.",
+                List.of("ownerone@hawaii.edu", "duplicated@hawaii.edu", "ownertwo@hawaii.edu"));
+        given(emailService.sendRetireGroupingEmails(
+                eq(GROUPING_PATH), eq("rainem@hawaii.edu"), eq("JTTEST-L"),
+                eq("Changing description test"), org.mockito.ArgumentMatchers.anyList(), eq("Requestor Name")))
+                .willReturn(emailResult);
 
         RetireGroupingResult result = retireGroupingService.retireGrouping(CURRENT_USER, GROUPING_PATH);
 
         assertEquals("SUCCESS", result.getResultCode());
-        assertTrue(result.getResultMessage().contains("Notifications sent"));
 
         ArgumentCaptor<List<String>> ownerEmailsCaptor = ArgumentCaptor.forClass(List.class);
         verify(emailService).sendRetireGroupingEmails(
                 eq(GROUPING_PATH),
-                eq(CURRENT_USER),
                 eq("rainem@hawaii.edu"),
                 eq("JTTEST-L"),
                 eq("Changing description test"),
@@ -110,6 +115,7 @@ public class RetireGroupingServiceTest {
         assertTrue(ownerEmails.contains("ownertwo@hawaii.edu"));
         assertTrue(ownerEmails.contains("duplicated@hawaii.edu"));
         assertFalse(ownerEmails.contains("nested-owner-grouping@hawaii.edu"));
+        assertFalse(ownerEmails.contains("@hawaii.edu"));
     }
 
     @Test
@@ -126,6 +132,15 @@ public class RetireGroupingServiceTest {
     private Subject subject(String uid, String name, String uhUuid, String email) {
         Subject subject = new Subject(uid, name, uhUuid);
         subject.setAttributeValue(4, email);
+        return subject;
+    }
+
+    private WsSubject wsSubject(String uid, String name, String id, String sourceId) {
+        WsSubject subject = new WsSubject();
+        subject.setId(id);
+        subject.setName(name);
+        subject.setSourceId(sourceId);
+        subject.setAttributeValues(new String[] { uid });
         return subject;
     }
 }

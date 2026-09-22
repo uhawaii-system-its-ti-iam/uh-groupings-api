@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.Feedback;
+import edu.hawaii.its.api.type.RetireGroupingResult;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -106,9 +109,12 @@ public class EmailServiceTest {
         assertFalse(wasSent);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertFalse(wasSent);
-        emailService.sendRetireGroupingEmails("path:to:grouping", TEST_UIDS.get(0), "owner@hawaii.edu",
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails("path:to:grouping", "owner@hawaii.edu",
                 "grouping", "description", List.of("other-owner@hawaii.edu"), "Owner Name");
         assertFalse(wasSent);
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Email service is not enabled.", result.getResultMessage());
+        assertEquals(List.of("other-owner@hawaii.edu"), result.getOwnerRecipients());
     }
 
     @Test
@@ -191,9 +197,8 @@ public class EmailServiceTest {
 
     @Test
     public void sendRetireGroupingEmails() {
-        emailService.sendRetireGroupingEmails(
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
                 "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
-                TEST_UIDS.get(0),
                 "requestor@hawaii.edu",
                 "JTTEST-L",
                 "Changing description test",
@@ -201,6 +206,9 @@ public class EmailServiceTest {
                 "Requestor Name");
 
         assertEquals(2, messagesSent.size());
+        assertEquals("SUCCESS", result.getResultCode());
+        assertEquals("Retirement request emails were sent.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
 
         SimpleMailMessage iamMessage = messagesSent.get(0);
         assertTrue(Arrays.asList(iamMessage.getTo()).contains("iam-team-test@hawaii.edu"));
@@ -208,15 +216,59 @@ public class EmailServiceTest {
         assertTrue(iamMessage.getText().contains("Grouping to retire: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
         assertTrue(iamMessage.getText().contains("Requesting by owner: requestor@hawaii.edu"));
         assertTrue(iamMessage.getText().contains("LISTSERV lists or Google groups"));
-        assertTrue(iamMessage.getText().contains("grouping owners have received an email notification"));
+        assertTrue(iamMessage.getText().contains("An owners notification will be sent"));
 
         SimpleMailMessage ownersMessage = messagesSent.get(1);
-        assertTrue(Arrays.asList(ownersMessage.getTo()).contains("owner-one@hawaii.edu"));
-        assertTrue(Arrays.asList(ownersMessage.getTo()).contains("owner-two@hawaii.edu"));
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                Arrays.asList(ownersMessage.getTo()));
         assertEquals("Request sent to IAM to retire grouping JTTEST-L", ownersMessage.getSubject());
         assertTrue(ownersMessage.getText().contains("request from Requestor Name"));
         assertTrue(ownersMessage.getText().contains("  o Name: JTTEST-L - Changing description test"));
         assertTrue(ownersMessage.getText().contains("  o Path: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
         assertTrue(ownersMessage.getText().contains("<its-iam-help@lists.hawaii.edu>"));
+    }
+
+    @Test
+    public void sendRetireGroupingEmailsOwnerFailure() {
+        doAnswer(invocation -> {
+            SimpleMailMessage mailMessage = invocation.getArgument(0);
+            if (mailMessage.getTo().length > 1) {
+                throw new MailSendException("Owners notification rejected");
+            }
+            messagesSent.add(mailMessage);
+            return null;
+        }).when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Failed to send the grouping owners notification email.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
+        assertEquals(1, messagesSent.size());
+    }
+
+    @Test
+    public void sendRetireGroupingEmailsIamFailureDoesNotNotifyOwners() {
+        doThrow(new MailSendException("IAM recipient rejected"))
+                .when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Failed to send the IAM retirement request email.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
+        verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.EmailResult;
 import edu.hawaii.its.api.type.Feedback;
+import edu.hawaii.its.api.type.RetireGroupingResult;
 
 @Service
 public class EmailService {
@@ -185,34 +186,45 @@ public class EmailService {
         }
     }
 
-    public void sendRetireGroupingEmails(String groupingPath, String requestorUid, String requestorEmail,
+    public RetireGroupingResult sendRetireGroupingEmails(String groupingPath, String requestorEmail,
             String groupingName, String description, List<String> ownerEmails, String requestorName) {
         logger.info("Starting retire grouping email notifications for: " + groupingPath);
 
         if (!isEnabled) {
             logger.warn("Email service is not enabled. Skipping email notifications.");
-            return;
+            return retirementResult(false, "Email service is not enabled.", ownerEmails);
         }
 
         String iamSubject = "[groupings] Owner request to retire " + groupingName;
         String iamBody = buildIamTeamEmailBody(groupingPath, requestorEmail);
-        sendEmail(iamTeamRecipient, iamSubject, iamBody);
+        if (!sendEmail(iamTeamRecipient, iamSubject, iamBody)) {
+            return retirementResult(false, "Failed to send the IAM retirement request email.", ownerEmails);
+        }
 
         if (ownerEmails.isEmpty()) {
             logger.warn("No owner emails found for grouping: " + groupingPath);
-            return;
+            return retirementResult(true, "Retirement request email was sent to the IAM Team.", ownerEmails);
         }
 
         String ownersSubject = "Request sent to IAM to retire grouping " + groupingName;
         String ownersBody = buildOwnersEmailBody(groupingName, description, groupingPath, requestorName);
-        sendEmail(ownerEmails.toArray(new String[0]), ownersSubject, ownersBody);
+        if (!sendEmail(ownerEmails.toArray(new String[0]), ownersSubject, ownersBody)) {
+            return retirementResult(false, "Failed to send the grouping owners notification email.", ownerEmails);
+        }
+
+        return retirementResult(true, "Retirement request emails were sent.", ownerEmails);
     }
 
-    private void sendEmail(String recipient, String subject, String body) {
-        sendEmail(new String[] { recipient }, subject, body);
+    private RetireGroupingResult retirementResult(boolean successful, String resultMessage,
+            List<String> ownerRecipients) {
+        return new RetireGroupingResult(successful ? "SUCCESS" : "FAILURE", resultMessage, ownerRecipients);
     }
 
-    private void sendEmail(String[] recipients, String subject, String body) {
+    private boolean sendEmail(String recipient, String subject, String body) {
+        return sendEmail(new String[] { recipient }, subject, body);
+    }
+
+    private boolean sendEmail(String[] recipients, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(recipients);
         msg.setFrom(from);
@@ -222,8 +234,10 @@ public class EmailService {
         try {
             javaMailSender.send(msg);
             logger.info("Email sent successfully with subject: " + subject);
+            return true;
         } catch (MailException ex) {
             logger.error("Error sending email with subject: " + subject, ex);
+            return false;
         }
     }
 
@@ -234,8 +248,7 @@ public class EmailService {
         body.append("The IAM team will follow up with the requestor in order to determine the disposition ")
                 .append("of any sync destinations such as LISTSERV lists or Google groups before the grouping is ")
                 .append("retired.\n\n");
-        body.append("The requestor and the grouping owners have received an email notification that this request has ")
-                .append("been made.");
+        body.append("An owners notification will be sent after this request email is sent.");
         return body.toString();
     }
 

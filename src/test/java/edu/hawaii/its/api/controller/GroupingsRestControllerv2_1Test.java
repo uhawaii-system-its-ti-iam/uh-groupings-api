@@ -455,13 +455,14 @@ public class GroupingsRestControllerv2_1Test {
     @WithMockUhOwner
     public void requestGroupingRetirementTest() throws Exception {
         RetireGroupingResult retireGroupingResult = new RetireGroupingResult("SUCCESS",
-                "Retire request processed successfully. Notifications sent to IAM team and grouping owners.");
+                "Retirement request emails were sent.", List.of("owner@hawaii.edu"));
         given(retireGroupingService.retireGrouping(TEST_USER, GROUPING)).willReturn(retireGroupingResult);
 
         mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING + "/retirement-requests"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.resultMessage").value(retireGroupingResult.getResultMessage()));
+                .andExpect(jsonPath("$.resultMessage").value(retireGroupingResult.getResultMessage()))
+                .andExpect(jsonPath("$.ownerRecipients[0]").value("owner@hawaii.edu"));
 
         verify(retireGroupingService, times(1)).retireGrouping(TEST_USER, GROUPING);
     }
