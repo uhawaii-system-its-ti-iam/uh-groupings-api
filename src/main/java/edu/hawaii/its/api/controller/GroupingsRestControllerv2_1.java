@@ -52,12 +52,14 @@ import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.RetireGroupingService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.PrivilegeType;
+import edu.hawaii.its.api.type.RetireGroupingResult;
 import edu.hawaii.its.api.type.SortBy;
 
 @RestController
@@ -87,6 +89,8 @@ public class GroupingsRestControllerv2_1 {
 
     private final AnnouncementsService announcementsService;
 
+    private final RetireGroupingService retireGroupingService;
+
     public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
             GroupingAttributeService groupingAttributeService,
             GroupingAssignmentService groupingAssignmentService,
@@ -95,7 +99,8 @@ public class GroupingsRestControllerv2_1 {
             UpdateMemberService updateMemberService,
             MemberService memberService,
             GroupingOwnerService groupingOwnerService,
-            AnnouncementsService announcementsService) {
+            AnnouncementsService announcementsService,
+            RetireGroupingService retireGroupingService) {
         this.asyncJobsManager = asyncJobsManager;
         this.groupingAttributeService = groupingAttributeService;
         this.groupingAssignmentService = groupingAssignmentService;
@@ -105,6 +110,7 @@ public class GroupingsRestControllerv2_1 {
         this.memberService = memberService;
         this.groupingOwnerService = groupingOwnerService;
         this.announcementsService = announcementsService;
+        this.retireGroupingService = retireGroupingService;
     }
 
     @PostConstruct
@@ -295,6 +301,18 @@ public class GroupingsRestControllerv2_1 {
                 .body(groupingOwnerService
                         .paginatedGrouping(currentUser, groupPaths, pageNumber, pageSize, sortBy.sortString(),
                                 isAscending));
+    }
+
+    /**
+     * Request that IAM retire a grouping and notify the grouping owners.
+     */
+    @PostMapping(value = "/groupings/{path:[\\w-:.]+}/retirement-requests")
+    public ResponseEntity<RetireGroupingResult> requestGroupingRetirement(@PathVariable String path) {
+        logger.info("Entered REST requestGroupingRetirement...");
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity
+                .ok()
+                .body(retireGroupingService.retireGrouping(currentUser, path));
     }
 
     /**

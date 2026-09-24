@@ -71,12 +71,14 @@ import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
+import edu.hawaii.its.api.service.RetireGroupingService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
+import edu.hawaii.its.api.type.RetireGroupingResult;
 import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.util.PropertyLocator;
@@ -136,6 +138,9 @@ public class GroupingsRestControllerv2_1Test {
 
     @MockitoBean
     private GroupingsService groupingsService;
+
+    @MockitoBean
+    private RetireGroupingService retireGroupingService;
 
     @MockitoBean
     private MemberService memberService;
@@ -448,6 +453,22 @@ public class GroupingsRestControllerv2_1Test {
             assertNotNull(result);
             verify(groupingOwnerService).paginatedGrouping(TEST_USER, paths, 1, 700, sortBy.sortString(), true);
         }
+    }
+
+    @Test
+    @WithMockUhOwner
+    public void requestGroupingRetirementTest() throws Exception {
+        RetireGroupingResult retireGroupingResult = new RetireGroupingResult("SUCCESS",
+                "Retirement request emails were sent.", List.of("owner@hawaii.edu"));
+        given(retireGroupingService.retireGrouping(TEST_USER, GROUPING)).willReturn(retireGroupingResult);
+
+        mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING + "/retirement-requests"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.resultMessage").value(retireGroupingResult.getResultMessage()))
+                .andExpect(jsonPath("$.ownerRecipients[0]").value("owner@hawaii.edu"));
+
+        verify(retireGroupingService, times(1)).retireGrouping(TEST_USER, GROUPING);
     }
 
     @Test
