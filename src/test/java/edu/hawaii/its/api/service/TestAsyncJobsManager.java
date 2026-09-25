@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.controller.WithMockUhAdmin;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.AsyncJobResult;
 
@@ -48,37 +48,41 @@ public class TestAsyncJobsManager {
     @Test
     public void notFoundAsyncJobTest() {
         assertThrows(AccessDeniedException.class,
-                () -> asyncJobsManager.getJobResult("bogus-owner-admin", 0));
+                () -> asyncJobsManager.getJobResult(0));
 
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(ADMIN, 0);
+        MockSecurityContext.setAdminContext();
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(0);
         assertEquals(0, asyncJobResult.getId());
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
         assertEquals("", asyncJobResult.getResult());
 
         Integer jobId = asyncJobsManager.putJob(CompletableFuture.completedFuture("SUCCESS"));
-        asyncJobsManager.getJobResult(ADMIN, jobId);
-        asyncJobResult = asyncJobsManager.getJobResult(ADMIN, jobId);
+        asyncJobsManager.getJobResult(jobId);
+        asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals(jobId, asyncJobResult.getId());
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
         assertEquals("", asyncJobResult.getResult());
+        MockSecurityContext.clearContext();
     }
 
     @Test
+    @WithMockUhAdmin
     public void inProgressAsyncJobTest() {
         Integer jobId = asyncJobsManager.putJob(new CompletableFuture<>());
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(ADMIN, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals(jobId, asyncJobResult.getId());
         assertEquals("IN_PROGRESS", asyncJobResult.getStatus());
         assertEquals("", asyncJobResult.getResult());
     }
 
     @Test
+    @WithMockUhAdmin
     public void completedAsyncJobTest() {
         String testUid = TEST_UIDS.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
         CompletableFuture<String> completableFuture = CompletableFuture.completedFuture("SUCCESS");
         Integer jobId = asyncJobsManager.putJob(completableFuture);
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(testUid, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals(jobId, asyncJobResult.getId());
         assertEquals("COMPLETED", asyncJobResult.getStatus());
         assertEquals(completableFuture.join(), asyncJobResult.getResult());

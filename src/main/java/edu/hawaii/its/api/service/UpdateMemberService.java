@@ -71,7 +71,7 @@ public class UpdateMemberService {
 
     public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("addAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validUhUuid = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhIdentifierNotFoundException(validUhUuid);
@@ -81,7 +81,7 @@ public class UpdateMemberService {
 
     public GroupingRemoveResult removeAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("removeAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validUhUuid = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhIdentifierNotFoundException(validUhUuid);
@@ -275,7 +275,7 @@ public class UpdateMemberService {
     public GroupingRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {
         log.info(String.format("removeFromGroups; currentUser: %s; uhIdentifier: %s; groupPaths: %s",
                 currentUser, uhIdentifier, groupPaths));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validIdentifier = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         for (String groupPath : groupPaths) {
@@ -358,7 +358,7 @@ public class UpdateMemberService {
         }
     }
 
-    public void checkIfAdminUser(String currentUser) {
+    public void checkIfAdminUser() {
         // Use JWT for general admin check instead of querying Grouper
         if (!memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();

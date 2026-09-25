@@ -17,16 +17,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -101,7 +96,6 @@ public class TestGroupingAssignmentService {
 
     @BeforeEach
     public void init() {
-        setCurrentUserAdmin();
         assertTrue(memberService.isAdmin(ADMIN));
 
         testUid = uhIdentifierGenerator.getRandomMember().getUid();
@@ -110,34 +104,27 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        MockSecurityContext.clearContext();
 
-    }
-
-    @AfterEach
-    public void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
     }
 
     @Test
     public void groupingAdminsTest() {
         // Should throw an exception if current user is not an admin.
-        clearCurrentUserRoles();
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user is an admin.
-        setCurrentUserAdmin();
-        updateMemberService.addAdminMember(ADMIN, testUid);
+        MockSecurityContext.setAdminContext();
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in AdminListsHolder should not be null.
         GroupingGroupMembers groupingAdmins = groupingAssignmentService.groupingAdmins(ADMIN);
@@ -147,26 +134,23 @@ public class TestGroupingAssignmentService {
     @Test
     public void allGroupingsTest() {
         // Should throw an exception if current user is not an admin.
-        clearCurrentUserRoles();
         try {
-            groupingAssignmentService.allGroupingPaths(testUid);
+            groupingAssignmentService.allGroupingPaths();
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user is an admin.
-        setCurrentUserAdmin();
-        updateMemberService.addAdminMember(ADMIN, testUid);
+        MockSecurityContext.setAdminContext();
         try {
-            groupingAssignmentService.allGroupingPaths(testUid);
+            groupingAssignmentService.allGroupingPaths();
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in groupingAll should not be null.
-        GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths(ADMIN);
+        GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths();
         assertNotNull(groupingAll.getGroupingPaths());
     }
 
@@ -376,18 +360,5 @@ public class TestGroupingAssignmentService {
         assertTrue(duplicates.get(duplicateOwnerUhUuid).getPaths()
                 .stream()
                 .noneMatch(path -> path.contains("DIRECT")));
-    }
-
-    private void setCurrentUserAdmin() {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-                ADMIN,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
-        SecurityContextHolder.setContext(context);
-    }
-
-    private void clearCurrentUserRoles() {
-        SecurityContextHolder.clearContext();
     }
 }
