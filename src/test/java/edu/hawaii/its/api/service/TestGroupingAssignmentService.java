@@ -113,7 +113,7 @@ public class TestGroupingAssignmentService {
     public void groupingAdminsTest() {
         // Should throw an exception if current user is not an admin.
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
@@ -122,11 +122,10 @@ public class TestGroupingAssignmentService {
         // Should not throw an exception if current user is an admin.
         SecurityContextTestHelper.setAdminContext();
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in AdminListsHolder should not be null.
         GroupingGroupMembers groupingAdmins = groupingAssignmentService.groupingAdmins(ADMIN);
@@ -150,12 +149,11 @@ public class TestGroupingAssignmentService {
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
+        MockSecurityContext.clearContext();
 
         // Fields in groupingAll should not be null.
         GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths();
         assertNotNull(groupingAll.getGroupingPaths());
-        MockSecurityContext.clearContext();
     }
 
     @Test

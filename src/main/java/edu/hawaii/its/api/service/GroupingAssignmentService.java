@@ -57,7 +57,7 @@ public class GroupingAssignmentService {
      * A list of grouping paths for all groupings, restricted to admins' use only.
      */
     public GroupingPaths allGroupingPaths() {
-        logger.info("allGroupings;");
+        logger.info("allGroupings");
         // Use JWT for general admin check instead of querying Grouper
         // Note: adminUhIdentifier is the currentUser from the controller
         if (!memberService.isCurrentUserAdmin()) {
