@@ -153,12 +153,17 @@ public class GroupingsRestControllerv2_1 {
      */
     @GetMapping(value = "/groupings")
     @ResponseBody
-    public ResponseEntity<GroupingPaths> allGroupings() {
+    public ResponseEntity<GroupingPaths> allGroupings(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "25") Integer size,
+            @RequestParam(required = false) String search) {
         logger.info("Entered REST allGroupings...");
+        if (page < 1 || size < 1 || size > 100)
+            return ResponseEntity.badRequest().build();
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.allGroupingPaths(currentUser));
+                .body(groupingAssignmentService.paginatedGroupingPaths(currentUser, page, size, search));
     }
 
     /**
@@ -190,7 +195,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @DeleteMapping(value = "/admins/{paths}/{uhIdentifier}")
     public ResponseEntity<GroupingRemoveResults> removeFromGroups(@PathVariable List<String> paths,
-                                                                  @PathVariable String uhIdentifier) {
+            @PathVariable String uhIdentifier) {
         logger.info("Entered REST removeFromGroups...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -269,7 +274,8 @@ public class GroupingsRestControllerv2_1 {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .accepted()
-                .body(asyncJobsManager.putJob(memberAttributeService.getMemberAttributeResultsAsync(currentUser, uhIdentifiers)));
+                .body(asyncJobsManager.putJob(
+                        memberAttributeService.getMemberAttributeResultsAsync(currentUser, uhIdentifiers)));
     }
 
     /**
@@ -278,16 +284,17 @@ public class GroupingsRestControllerv2_1 {
     @PostMapping(value = "/groupings/group")
     @ResponseBody
     public ResponseEntity<GroupingGroupsMembers> ownedGrouping(@RequestBody List<String> groupPaths,
-                                                               @RequestParam Integer pageNumber,
-                                                               @RequestParam Integer pageSize,
-                                                               @RequestParam SortBy sortBy,
-                                                               @RequestParam Boolean isAscending) {
+            @RequestParam Integer pageNumber,
+            @RequestParam Integer pageSize,
+            @RequestParam SortBy sortBy,
+            @RequestParam Boolean isAscending) {
         logger.info("Entered REST ownedGrouping...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .paginatedGrouping(currentUser, groupPaths, pageNumber, pageSize, sortBy.sortString(), isAscending));
+                        .paginatedGrouping(currentUser, groupPaths, pageNumber, pageSize, sortBy.sortString(),
+                                isAscending));
     }
 
     /**
@@ -296,17 +303,18 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/groupings/{groupingPath}")
     @ResponseBody
     public ResponseEntity<GroupingGroupMembers> getGroupingMembers(@PathVariable String groupingPath,
-                                                                   @RequestParam(required = false) Integer pageNumber,
-                                                                   @RequestParam(required = false) Integer pageSize,
-                                                                   @RequestParam(required = true) SortBy sortBy,
-                                                                   @RequestParam Boolean isAscending,
-                                                                   @RequestParam(required = false) String searchString) {
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = true) SortBy sortBy,
+            @RequestParam Boolean isAscending,
+            @RequestParam(required = false) String searchString) {
         logger.info("Entered REST getGroupingMembers...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService
-                        .getGroupingMembers(currentUser, groupingPath, pageNumber, pageSize, sortBy.sortString(), isAscending, searchString));
+                        .getGroupingMembers(currentUser, groupingPath, pageNumber, pageSize, sortBy.sortString(),
+                                isAscending, searchString));
     }
 
     /**
@@ -315,7 +323,7 @@ public class GroupingsRestControllerv2_1 {
     @PostMapping(value = "/groupings/{groupingPath}/where-listed")
     @ResponseBody
     public ResponseEntity<GroupingMembers> getGroupingMembersWhereListed(@PathVariable String groupingPath,
-                                                                         @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST getGroupingMembersWhereListed...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -329,14 +337,14 @@ public class GroupingsRestControllerv2_1 {
     @PostMapping(value = "/groupings/{groupingPath}/is-basis")
     @ResponseBody
     public ResponseEntity<GroupingMembers> getGroupingMembersIsBasis(@PathVariable String groupingPath,
-                                                                     @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST getGroupingMembersIsBasis...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getGroupingMembersIsBasis(currentUser, groupingPath, uhIdentifiers));
     }
-    
+
     /**
      * Check which of the given uhIdentifiers are already members of a grouping's include group.
      */
@@ -346,7 +354,7 @@ public class GroupingsRestControllerv2_1 {
             @PathVariable String groupingPath,
             @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST getMembersExistInInclude...");
-	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getMembersExistInInclude(currentUser, groupingPath, uhIdentifiers));
@@ -360,7 +368,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<GroupingMembers> getMembersExistInExclude(@PathVariable String groupingPath,
             @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST getMembersExistInExclude...");
-	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getMembersExistInExclude(currentUser, groupingPath, uhIdentifiers));
@@ -374,7 +382,7 @@ public class GroupingsRestControllerv2_1 {
     public ResponseEntity<GroupingMembers> getMembersExistInOwners(@PathVariable String groupingPath,
             @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST getMembersExistInOwners...");
-	    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
                 .body(groupingOwnerService.getMembersExistInOwners(currentUser, groupingPath, uhIdentifiers));
@@ -424,7 +432,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/{uhIdentifier:[\\w-:.]+}/self")
     public ResponseEntity<GroupingMoveMemberResult> optIn(@PathVariable String path,
-                                                          @PathVariable String uhIdentifier) {
+            @PathVariable String uhIdentifier) {
         logger.info("Entered REST optIn...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -437,7 +445,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/{uhIdentifier:[\\w-:.]+}/self")
     public ResponseEntity<GroupingMoveMemberResult> optOut(@PathVariable String path,
-                                                           @PathVariable String uhIdentifier) {
+            @PathVariable String uhIdentifier) {
         logger.info("Entered REST optOut...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -450,7 +458,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
     public ResponseEntity<GroupingMoveMembersResult> addIncludeMembers(@PathVariable String path,
-                                                                       @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addIncludeMembers...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -463,12 +471,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/include-members/async")
     public ResponseEntity<Integer> addIncludeMembersAsync(@PathVariable String path,
-                                                          @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addIncludeMembersAsync...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .accepted()
-                .body(asyncJobsManager.putJob(updateMemberService.addIncludeMembersAsync(currentUser, path, uhIdentifiers)));
+                .body(asyncJobsManager.putJob(
+                        updateMemberService.addIncludeMembersAsync(currentUser, path, uhIdentifiers)));
     }
 
     /**
@@ -476,7 +485,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
     public ResponseEntity<GroupingMoveMembersResult> addExcludeMembers(@PathVariable String path,
-                                                                       @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addExcludeMembers...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -489,12 +498,13 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members/async")
     public ResponseEntity<Integer> addExcludeMembersAsync(@PathVariable String path,
-                                                          @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addExcludeMembersAsync...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .accepted()
-                .body(asyncJobsManager.putJob(updateMemberService.addExcludeMembersAsync(currentUser, path, uhIdentifiers)));
+                .body(asyncJobsManager.putJob(
+                        updateMemberService.addExcludeMembersAsync(currentUser, path, uhIdentifiers)));
     }
 
     /**
@@ -502,7 +512,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/include-members")
     public ResponseEntity<GroupingRemoveResults> removeIncludeMembers(@PathVariable String path,
-                                                                      @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST removeIncludeMembers...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -515,7 +525,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/exclude-members")
     public ResponseEntity<GroupingRemoveResults> removeExcludeMembers(@PathVariable String path,
-                                                                      @RequestBody List<String> uhIdentifiers) {
+            @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST removeExcludeMembers...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -540,7 +550,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     public ResponseEntity<GroupingAddResults> addOwners(@PathVariable String path,
-                                                        @PathVariable List<String> uhIdentifier) {
+            @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST addOwners...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -553,7 +563,7 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
     public ResponseEntity<GroupingAddResults> addOwnerGroupings(@PathVariable String path,
-                                                                @PathVariable List<String> ownerGroupings) {
+            @PathVariable List<String> ownerGroupings) {
         logger.info("Entered REST addOwnerGroupings...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -561,13 +571,12 @@ public class GroupingsRestControllerv2_1 {
                 .body(updateMemberService.addOwnerGroupingOwnerships(currentUser, path, ownerGroupings));
     }
 
-
     /**
      * Delete a grouping owner(s).
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/{uhIdentifier}")
     public ResponseEntity<GroupingRemoveResults> removeOwners(@PathVariable String path,
-                                                              @PathVariable List<String> uhIdentifier) {
+            @PathVariable List<String> uhIdentifier) {
         logger.info("Entered REST removeOwners");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -575,13 +584,12 @@ public class GroupingsRestControllerv2_1 {
                 .body(updateMemberService.removeOwnerships(currentUser, path, uhIdentifier));
     }
 
-
     /**
      * Delete grouping owner-groupings.
      */
     @DeleteMapping(value = "/groupings/{path:[\\w-:.]+}/owners/owner-groupings/{ownerGroupings}")
     public ResponseEntity<GroupingRemoveResults> removeOwnerGroupings(@PathVariable String path,
-                                                                      @PathVariable List<String> ownerGroupings) {
+            @PathVariable List<String> ownerGroupings) {
         logger.info("Entered REST removeOwnerGroupings");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -644,8 +652,8 @@ public class GroupingsRestControllerv2_1 {
      */
     @PutMapping(value = "/groupings/{path:[\\w-:.]+}/sync-destination/{id:[\\w-:.]+}/{status}")
     public ResponseEntity<GroupingUpdateSyncDestResult> updateSyncDest(@PathVariable String path,
-                                                                       @PathVariable String id,
-                                                                       @PathVariable boolean status) {
+            @PathVariable String id,
+            @PathVariable boolean status) {
         logger.info("Entered REST updateSyncDest");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
@@ -703,7 +711,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/members/{path:[\\w-:.]+}/{uhIdentifier}/is-owner")
     @ResponseBody
     public ResponseEntity<Boolean> hasGroupingOwnerPrivs(@PathVariable String path,
-                                                         @PathVariable String uhIdentifier) {
+            @PathVariable String uhIdentifier) {
         logger.info("Entered REST hasGroupingOwnerPrivs...");
         return ResponseEntity
                 .ok()
@@ -781,7 +789,7 @@ public class GroupingsRestControllerv2_1 {
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/count")
     @ResponseBody
     public ResponseEntity<Integer> getNumberOfAllOwners(@PathVariable String path) {
-        
+
         logger.info("Entered REST getNumberOfAllOwners...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
 

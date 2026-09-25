@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.groupings;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.type.GroupType;
@@ -14,7 +17,7 @@ import edu.hawaii.its.api.wrapper.GetMembersResults;
 public class GroupingGroupsMembers implements GroupingResult {
     private String resultCode;
     private String groupPath;
-    private List<GroupingGroupMembers> groupsMembersList;
+    private Map<String, GroupingGroupMembers> groupsMembersByExtension;
     private boolean isBasis;
     private boolean isInclude;
     private boolean isExclude;
@@ -26,7 +29,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     public GroupingGroupsMembers(GetMembersResults getMembersResults) {
         setGroupPath("");
         setResultCode(getMembersResults.getResultCode());
-        setGroupsMembersList(getMembersResults);
+        indexGroupsMembersByExtension(getMembersResults);
         setAllMembers();
         setBasis(hasMembers(GroupType.BASIS.value()));
         setInclude(hasMembers(GroupType.INCLUDE.value()));
@@ -39,7 +42,7 @@ public class GroupingGroupsMembers implements GroupingResult {
     public GroupingGroupsMembers() {
         setGroupPath("");
         setResultCode("");
-        this.groupsMembersList = new ArrayList<>();
+        this.groupsMembersByExtension = new HashMap<>();
         setAllMembers();
         setBasis(false);
         setInclude(false);
@@ -53,7 +56,7 @@ public class GroupingGroupsMembers implements GroupingResult {
         return resultCode;
     }
 
-    public void setResultCode(String resultCode) {
+    private void setResultCode(String resultCode) {
         this.resultCode = resultCode;
     }
 
@@ -65,10 +68,16 @@ public class GroupingGroupsMembers implements GroupingResult {
         this.groupPath = groupPath;
     }
 
-    private void setGroupsMembersList(GetMembersResults getMembersResults) {
-        this.groupsMembersList = new ArrayList<>();
+    private void indexGroupsMembersByExtension(GetMembersResults getMembersResults) {
+        this.groupsMembersByExtension = new HashMap<>();
         for (GetMembersResult getMembersResult : getMembersResults.getMembersResults()) {
-            groupsMembersList.add(new GroupingGroupMembers(getMembersResult));
+            GroupingGroupMembers groupingGroupMembers = new GroupingGroupMembers(getMembersResult);
+            for (GroupType groupType : GroupType.values()) {
+                if (groupingGroupMembers.getGroupPath().endsWith(groupType.value())) {
+                    groupsMembersByExtension.putIfAbsent(groupType.value(), groupingGroupMembers);
+                    break;
+                }
+            }
         }
     }
 
@@ -78,31 +87,28 @@ public class GroupingGroupsMembers implements GroupingResult {
         List<GroupingGroupMember> include = getGroupingInclude().getMembers();
         List<GroupingGroupMember> exclude = getGroupingExclude().getMembers();
 
-        List<GroupingGroupMember> intersectionBasisInclude = basis.stream()
-                .distinct().filter(groupingsGroupMember -> include.stream()
-                        .anyMatch(includeMember -> includeMember.getUhUuid().equals(groupingsGroupMember.getUhUuid())))
-                .collect(Collectors.toList());
+        Set<String> includeUuids = include.stream()
+                .map(GroupingGroupMember::getUhUuid).collect(Collectors.toSet());
+        Set<String> excludeUuids = exclude.stream()
+                .map(GroupingGroupMember::getUhUuid).collect(Collectors.toSet());
+        Set<String> addedUuids = new HashSet<>();
 
         // Basis plus Include.
-        for (GroupingGroupMember groupingGroupMember : intersectionBasisInclude) {
-            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis & Include"));
-        }
         for (GroupingGroupMember groupingGroupMember : basis) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Basis"));
+            String uhUuid = groupingGroupMember.getUhUuid();
+            if (excludeUuids.contains(uhUuid) || !addedUuids.add(uhUuid)) {
+                continue;
             }
+            String whereListed = includeUuids.contains(uhUuid) ? "Basis & Include" : "Basis";
+            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, whereListed));
         }
         for (GroupingGroupMember groupingGroupMember : include) {
-            if (this.allMembers.getMembers().stream()
-                    .noneMatch(groupingMember -> groupingMember.getUhUuid().equals(groupingGroupMember.getUhUuid()))) {
-                this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
+            String uhUuid = groupingGroupMember.getUhUuid();
+            if (excludeUuids.contains(uhUuid) || !addedUuids.add(uhUuid)) {
+                continue;
             }
+            this.allMembers.getMembers().add(new GroupingMember(groupingGroupMember, "Include"));
         }
-
-        // Minus Exclude
-        this.allMembers.getMembers().removeIf(groupingMember -> exclude.stream()
-                .anyMatch(excludeMember -> excludeMember.getUhUuid().equals(groupingMember.getUhUuid())));
     }
 
     public GroupingMembers getAllMembers() {
@@ -129,23 +135,23 @@ public class GroupingGroupsMembers implements GroupingResult {
         return paginationComplete;
     }
 
-    public void setPaginationComplete() {
+    private void setPaginationComplete() {
         paginationComplete = !isBasis && !isInclude && !isExclude && !isOwners;
     }
 
-    public void setBasis(boolean basis) {
+    private void setBasis(boolean basis) {
         isBasis = basis;
     }
 
-    public void setInclude(boolean include) {
+    private void setInclude(boolean include) {
         isInclude = include;
     }
 
-    public void setExclude(boolean exclude) {
+    private void setExclude(boolean exclude) {
         isExclude = exclude;
     }
 
-    public void setOwners(boolean owners) {
+    private void setOwners(boolean owners) {
         isOwners = owners;
     }
 
@@ -174,24 +180,10 @@ public class GroupingGroupsMembers implements GroupingResult {
     }
 
     private boolean hasMembers(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return !groupingGroupMembers.getMembers().isEmpty();
-            }
-        }
-        return false;
+        return !getMembersOf(groupExtension).getMembers().isEmpty();
     }
 
     private GroupingGroupMembers getMembersOf(String groupExtension) {
-        for (GroupingGroupMembers groupingGroupMembers : this.groupsMembersList) {
-            if (groupingGroupMembers.getGroupPath().endsWith(groupExtension)) {
-                return groupingGroupMembers;
-            }
-        }
-        return new GroupingGroupMembers();
-    }
-
-    public void setPaginationCompleteTrue() {
-        this.paginationComplete = true;
+        return groupsMembersByExtension.getOrDefault(groupExtension, new GroupingGroupMembers());
     }
 }

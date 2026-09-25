@@ -18,6 +18,7 @@ import edu.internet2.middleware.grouperClientExt.com.fasterxml.jackson.annotatio
  */
 public class SubjectsResults extends Results {
     private WsGetSubjectsResults wsGetSubjectsResults;
+    private List<Subject> subjects;
 
     public SubjectsResults(WsGetSubjectsResults wsGetSubjectsResults) {
         if (wsGetSubjectsResults == null) {
@@ -40,6 +41,13 @@ public class SubjectsResults extends Results {
     }
 
     public List<Subject> getSubjects() {
+        if (subjects == null) {
+            subjects = buildSubjects();
+        }
+        return new ArrayList<>(subjects);
+    }
+
+    private List<Subject> buildSubjects() {
         List<Subject> subjects = new ArrayList<>();
         WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
         if (isEmpty(wsSubjects)) {
@@ -55,7 +63,7 @@ public class SubjectsResults extends Results {
             if (subject.getResultCode().equals("SUCCESS") && !subject.hasUHAttributes()) {
                 continue;
             }
-            subjects.add(new Subject(wsSubject));
+            subjects.add(subject);
         }
         return subjects;
     }
