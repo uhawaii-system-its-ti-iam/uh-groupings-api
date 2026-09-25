@@ -105,7 +105,7 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
-        SecurityContextTestHelper.clearContext();
+        MockSecurityContext.clearContext();
 
     }
 
@@ -120,7 +120,7 @@ public class TestGroupingAssignmentService {
         }
 
         // Should not throw an exception if current user is an admin.
-        SecurityContextTestHelper.setAdminContext();
+        MockSecurityContext.setAdminContext();
         try {
             groupingAssignmentService.groupingAdmins(ADMIN);
         } catch (AccessDeniedException e) {
