@@ -149,7 +149,6 @@ public class TestGroupingAssignmentService {
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        MockSecurityContext.clearContext();
 
         // Fields in groupingAll should not be null.
         GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths();
