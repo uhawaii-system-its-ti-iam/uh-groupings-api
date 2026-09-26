@@ -68,6 +68,24 @@ public class SubjectsResults extends Results {
         return subjects;
     }
 
+    /**
+     * Returns one Subject per WsSubjectLookup submitted in the request, in request order, without the
+     * "successful but no UH attributes" filtering that getSubjects() applies. Needed when a caller must
+     * correlate each result back to the specific identifier that produced it (e.g. bulk identifier
+     * validation), since that filtering would otherwise silently drop entries and desync the correlation.
+     */
+    public List<Subject> getSubjectsInRequestOrder() {
+        List<Subject> subjects = new ArrayList<>();
+        WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
+        if (isEmpty(wsSubjects)) {
+            return subjects;
+        }
+        for (WsSubject wsSubject : wsSubjects) {
+            subjects.add(new Subject(wsSubject));
+        }
+        return subjects;
+    }
+
     @Override
     public String getResultCode() {
         String success = "SUCCESS";

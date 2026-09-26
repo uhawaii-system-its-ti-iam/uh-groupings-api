@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
+import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
@@ -84,6 +87,68 @@ public class SubjectService {
             results.add(subject.getUhUuid());
         }
         return results;
+    }
+
+    /**
+     * Partition uhIdentifiers, in a single bulk Grouper lookup, into those that resolve to a valid Grouper
+     * subject and those that don't (malformed, or unknown to Grouper). Unlike getValidUhUuids, no identifier
+     * is silently dropped: every invalid identifier is reported back, in full, for the caller to display.
+     * <p>
+     * Results are correlated back to the originally submitted identifier by request position rather than by
+     * any identifier Grouper echoes in the response, since a resolved subject is not guaranteed to carry a
+     * uhUuid (e.g. subjects sourced outside the standard UH identifier system).
+     */
+    public UhIdentifierValidationResult validateUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
+        List<String> uniqueIdentifiers = uhIdentifiers.stream().distinct().toList();
+
+        List<String> invalidIdentifiers = new ArrayList<>();
+        List<String> wellFormed = new ArrayList<>();
+
+        for (String uhIdentifier : uniqueIdentifiers) {
+            if (isWellFormedIdentifier(uhIdentifier)) {
+                wellFormed.add(uhIdentifier);
+            } else {
+                invalidIdentifiers.add(uhIdentifier);
+            }
+        }
+
+        if (!invalidIdentifiers.isEmpty()) {
+            logger.warn(String.format("Malformed path input rejected from currentUser: %s;", currentUser));
+        }
+
+        List<String> validIdentifiers = new ArrayList<>();
+
+        if (!wellFormed.isEmpty()) {
+            SubjectsResults subjectsResults = grouperService.getSubjects(wellFormed);
+            if (!subjectsResults.isSuccessful()) {
+                throw new GrouperException(
+                        "Grouper subject lookup failed (rawResultCode=" + subjectsResults.getRawResultCode() + ")");
+            }
+
+            List<Subject> subjects = subjectsResults.getSubjectsInRequestOrder();
+            if (subjects.size() != wellFormed.size()) {
+                throw new GrouperException("Grouper subject lookup returned an unexpected number of results");
+            }
+
+            for (int i = 0; i < wellFormed.size(); i++) {
+                String uhIdentifier = wellFormed.get(i);
+                Subject subject = subjects.get(i);
+
+                if (!subject.getResultCode().startsWith(SUCCESS)) {
+                    invalidIdentifiers.add(uhIdentifier);
+                    continue;
+                }
+                
+                String uhUuid = subject.getUhUuid();
+                validIdentifiers.add(uhUuid.isEmpty() ? uhIdentifier : uhUuid);
+            }
+        }
+
+        // Malformed and unknown identifiers were collected separately above; report them back in the order
+        // they were submitted (e.g. the row order of an imported file) rather than grouped by failure reason.
+        Set<String> invalidSet = new HashSet<>(invalidIdentifiers);
+        List<String> invalidInSubmittedOrder = uniqueIdentifiers.stream().filter(invalidSet::contains).toList();
+        return new UhIdentifierValidationResult(validIdentifiers, invalidInSubmittedOrder);
     }
 
     public String getValidUhUuid(String currentUser, String uhIdentifier) {

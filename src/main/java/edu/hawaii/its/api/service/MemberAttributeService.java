@@ -6,7 +6,6 @@ import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.groupings.GroupingPaths;
 import org.apache.commons.logging.Log;
@@ -48,8 +47,8 @@ public class MemberAttributeService {
 
     /**
      * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
-     * or uhUuid passed through uhIdentifiers. Passing a single invalid uhIdentifier or current user will return an
-     * empty array
+     * or uhUuid passed through uhIdentifiers. If any uhIdentifier is invalid (malformed, or unknown to Grouper),
+     * only the invalid uhIdentifiers are returned, in full, and no attributes are.
      */
     public MemberAttributeResults getMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
         logger.info(String.format("getMemberAttributeResults; currentUser: %s; uhIdentifiers: %s;", currentUser, uhIdentifiers));
@@ -57,20 +56,13 @@ public class MemberAttributeService {
         if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
             throw new AccessDeniedException();
         }
-        List<String> invalidUhIdentifiers = uhIdentifiers.parallelStream()
-                .filter(uhIdentifier -> !subjectService.isValidIdentifier(currentUser, uhIdentifier))
-                .collect(Collectors.toList());
-        if (!invalidUhIdentifiers.isEmpty()) {
-            return new MemberAttributeResults(invalidUhIdentifiers);
-        }
-        SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
-        return new MemberAttributeResults(results);
+        return resolveMemberAttributeResults(currentUser, uhIdentifiers);
     }
 
     /**
      * Get a mapping of user attributes (composite name, uid, uhUuid) pertaining to the list of uid
-     * or uhUuid passed through uhIdentifiers asynchronously. Passing a single invalid uhIdentifier or current user will return an
-     * empty array
+     * or uhUuid passed through uhIdentifiers asynchronously. If any uhIdentifier is invalid (malformed, or unknown
+     * to Grouper), only the invalid uhIdentifiers are returned, in full, and no attributes are.
      */
     @Async
     public CompletableFuture<MemberAttributeResults> getMemberAttributeResultsAsync(String currentUser, List<String> uhIdentifiers) {
@@ -80,14 +72,22 @@ public class MemberAttributeService {
         if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
             throw new AccessDeniedException();
         }
-        List<String> invalid = uhIdentifiers.parallelStream()
-                .filter(uhIdentifier -> !subjectService.isValidIdentifier(currentUser, uhIdentifier))
-                .collect(Collectors.toList());
-        if (!invalid.isEmpty()) {
-            return CompletableFuture.completedFuture(new MemberAttributeResults(invalid));
+        return CompletableFuture.completedFuture(resolveMemberAttributeResults(currentUser, uhIdentifiers));
+    }
+
+    /**
+     * Malformed identifiers are reported as invalid, like unknown ones, instead of failing the whole request:
+     * a bulk import can contain any number of them (e.g. "12-345-678") and needs the full list of invalid
+     * identifiers back to report. All identifiers are checked with a single bulk Grouper lookup.
+     */
+    private MemberAttributeResults resolveMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
+        List<String> invalidUhIdentifiers =
+                subjectService.validateUhIdentifiers(currentUser, uhIdentifiers).getInvalidIdentifiers();
+        if (!invalidUhIdentifiers.isEmpty()) {
+            return new MemberAttributeResults(invalidUhIdentifiers);
         }
         SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
-        return CompletableFuture.completedFuture(new MemberAttributeResults(results));
+        return new MemberAttributeResults(results);
     }
 
     /**

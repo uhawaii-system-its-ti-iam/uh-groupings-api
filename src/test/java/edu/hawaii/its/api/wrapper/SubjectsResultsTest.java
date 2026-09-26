@@ -17,6 +17,7 @@ import edu.hawaii.its.api.util.PropertyLocator;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 
@@ -96,6 +97,57 @@ public class SubjectsResultsTest {
         assertNotNull(subjectsResults);
         assertEquals("FAILURE", subjectsResults.getResultCode());
         assertNotNull(subjects);
+    }
+
+    @Test
+    public void getSubjectsInRequestOrderReturnsOneSubjectPerRequestUnfiltered() {
+        SubjectsResults subjectsResults =
+                groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        List<Subject> subjects = subjectsResults.getSubjectsInRequestOrder();
+        assertNotNull(subjects);
+        assertEquals(subjectsResults.getSubjects().size(), subjects.size());
+
+        String[] array = { SUBJECT_NOT_FOUND, SUCCESS, SUCCESS, SUCCESS };
+        List<String> expectedResultCodes = Arrays.asList(array);
+        Iterator<String> resultCodesIter = expectedResultCodes.iterator();
+        Iterator<Subject> subjectsIter = subjects.iterator();
+        while (resultCodesIter.hasNext() && subjectsIter.hasNext()) {
+            assertEquals(resultCodesIter.next(), subjectsIter.next().getResultCode());
+        }
+    }
+
+    @Test
+    public void getSubjectsInRequestOrderKeepsSuccessfulSubjectsThatGetSubjectsWouldFilterOut() {
+        // getSubjects() drops a successful-but-attribute-less ("orphan") subject entirely, which would
+        // desync a caller correlating each response back to the request identifier at that position.
+        // getSubjectsInRequestOrder() must keep it.
+        WsSubject orphan = new WsSubject();
+        orphan.setResultCode(SUCCESS);
+        orphan.setId("uhuuid-orphan");
+
+        WsSubject normal = new WsSubject();
+        normal.setResultCode(SUCCESS);
+        normal.setId("uhuuid-normal");
+        normal.setAttributeValues(new String[] { "uid", "name", "lastname", "firstname", "affiliation" });
+
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode(SUCCESS);
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+        wsGetSubjectsResults.setWsSubjects(new WsSubject[] { orphan, normal });
+
+        SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
+        assertEquals(1, subjectsResults.getSubjects().size());
+        assertEquals(2, subjectsResults.getSubjectsInRequestOrder().size());
+        assertEquals("uhuuid-orphan", subjectsResults.getSubjectsInRequestOrder().get(0).getUhUuid());
+        assertEquals("uhuuid-normal", subjectsResults.getSubjectsInRequestOrder().get(1).getUhUuid());
+    }
+
+    @Test
+    public void getSubjectsInRequestOrderReturnsEmptyListForNoSubjects() {
+        SubjectsResults subjectsResults = new SubjectsResults();
+        assertNotNull(subjectsResults.getSubjectsInRequestOrder());
+        assertEquals(0, subjectsResults.getSubjectsInRequestOrder().size());
     }
 
 }

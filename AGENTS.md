@@ -456,7 +456,8 @@ GET    /api/groupings/v2.1/members/{path}/{uhIdentifier}/is-owner
 
 POST   /api/groupings/v2.1/members
        Body: ["uid1", "uid2"]
-       → MemberAttributeResults (member attributes)
+       → MemberAttributeResults (member attributes; if any identifier is malformed or unknown to Grouper,
+         only the `invalid` list is returned, in submitted order, instead of failing the request)
 
 POST   /api/groupings/v2.1/members/async
        Body: ["uid1", "uid2"]

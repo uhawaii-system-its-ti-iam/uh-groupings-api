@@ -15,8 +15,10 @@ import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 
 public class GroupingMoveMemberResultTest {
     private static final String SUCCESS = "SUCCESS";
@@ -71,10 +73,19 @@ public class GroupingMoveMemberResultTest {
         assertEquals(SUCCESS, groupingMoveMemberResult.getResultCode());
         assertEquals("group-path", groupingMoveMemberResult.getGroupPath());
 
+        // An idempotent add (member was already present) is a success, not a failure.
         addMemberResult = new AddMemberResult(wsAddMemberResults.getResults()[0], "group-path");
+        assertEquals("SUCCESS_ALREADY_EXISTED", addMemberResult.getResultCode());
+        groupingMoveMemberResult = new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
+        assertEquals("SUCCESS_ALREADY_EXISTED", groupingMoveMemberResult.getResultCode());
+
+        WsResultMeta failureMetadata = new WsResultMeta();
+        failureMetadata.setResultCode("FAILURE");
+        WsAddMemberResult wsAddMemberResultFailure = new WsAddMemberResult();
+        wsAddMemberResultFailure.setResultMetadata(failureMetadata);
+        addMemberResult = new AddMemberResult(wsAddMemberResultFailure, "group-path");
         groupingMoveMemberResult = new GroupingMoveMemberResult(addMemberResult, removeMemberResult);
         assertEquals("FAILURE", groupingMoveMemberResult.getResultCode());
-
     }
 
     private String propertyValue(String key) {
